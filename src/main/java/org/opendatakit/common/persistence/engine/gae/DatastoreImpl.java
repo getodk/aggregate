@@ -81,6 +81,10 @@ public class DatastoreImpl implements Datastore {
   DatastoreService getDatastoreService() {
     return ds;
   }
+  
+  public DatastoreAccessMetrics getDam() {
+    return dam;
+  }
 
   void recordQueryUsage(CommonFieldsBase relation, int recCount) {
     dam.recordQueryUsage(relation, recCount);

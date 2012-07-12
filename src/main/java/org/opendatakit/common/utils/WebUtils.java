@@ -13,8 +13,7 @@
  */
 package org.opendatakit.common.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -28,16 +27,10 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.javarosa.core.model.utils.DateUtils;
-import org.javarosa.xform.parse.XFormParser;
-import org.kxml2.io.KXmlParser;
-import org.kxml2.io.KXmlSerializer;
-import org.kxml2.kdom.Document;
-import org.kxml2.kdom.Element;
-import org.kxml2.kdom.Node;
-import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.web.constants.HtmlConsts;
-import org.xmlpull.v1.XmlPullParser;
 
 /**
  * Useful methods for parsing boolean and date values and formatting dates.
@@ -47,12 +40,12 @@ import org.xmlpull.v1.XmlPullParser;
  */
 public class WebUtils {
 
-  private static final String IS_FORWARD_CURSOR_VALUE_TAG = "isForwardCursor";
-  private static final String URI_LAST_RETURNED_VALUE_TAG = "uriLastReturnedValue";
-  private static final String ATTRIBUTE_VALUE_TAG = "attributeValue";
-  private static final String ATTRIBUTE_NAME_TAG = "attributeName";
-  private static final String CURSOR_TAG = "cursor";
-  private static final Log logger = LogFactory.getLog(WebUtils.class);
+  static final String IS_FORWARD_CURSOR_VALUE_TAG = "isForwardCursor";
+  static final String URI_LAST_RETURNED_VALUE_TAG = "uriLastReturnedValue";
+  static final String ATTRIBUTE_VALUE_TAG = "attributeValue";
+  static final String ATTRIBUTE_NAME_TAG = "attributeName";
+  static final String CURSOR_TAG = "cursor";
+  static final Log logger = LogFactory.getLog(WebUtils.class);
   /**
    * Date format pattern used to parse HTTP date headers in RFC 1123 format.
    * copied from apache.commons.lang.DateUtils
@@ -328,6 +321,20 @@ public class WebUtils {
     asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTiso8601.format(d);
   }
+  
+  /**
+   * Return the RFC1123 string representation of a date.
+   * @param d
+   * @return
+   */
+  public static final String rfc1123Date(Date d) {
+    if (d == null)
+      return null;
+    // SDF is not thread-safe
+    SimpleDateFormat asGMTrfc1123 = new SimpleDateFormat(PATTERN_RFC1123); // with time zone
+    asGMTrfc1123.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return asGMTrfc1123.format(d);
+  }
 
   public static final String purgeDateString(Date d) {
     if (d == null)
@@ -370,161 +377,47 @@ public class WebUtils {
     return b.toString();
   }
 
-  private static final String XML_TAG_NAMESPACE = "http://www.opendatakit.org/cursor";
+  public static String readResponse( HttpResponse resp ) {
+    StringBuffer response = new StringBuffer();
 
-  public static final String formatCursorParameter(QueryResumePoint cursor) {
-    if (cursor == null)
-      return null;
-    Document d = new Document();
-    d.setStandalone(true);
-    d.setEncoding(HtmlConsts.UTF8_ENCODE);
-    Element e = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);
-    e.setPrefix(null, XML_TAG_NAMESPACE);
-    d.addChild(0, Node.ELEMENT, e);
-    int idx = 0;
-    Element c = d.createElement(XML_TAG_NAMESPACE, ATTRIBUTE_NAME_TAG);
-    c.addChild(0, Node.TEXT, cursor.getAttributeName());
-    e.addChild(idx++, Node.ELEMENT, c);
-    c = d.createElement(XML_TAG_NAMESPACE, ATTRIBUTE_VALUE_TAG);
-    c.addChild(0, Node.TEXT, cursor.getValue());
-    e.addChild(idx++, Node.ELEMENT, c);
-    c = d.createElement(XML_TAG_NAMESPACE, URI_LAST_RETURNED_VALUE_TAG);
-    if (cursor.getUriLastReturnedValue() != null) {
-      c.addChild(0, Node.TEXT, cursor.getUriLastReturnedValue());
-    }
-    e.addChild(idx++, Node.ELEMENT, c);
-    c = d.createElement(XML_TAG_NAMESPACE, IS_FORWARD_CURSOR_VALUE_TAG);
-    c.addChild(0, Node.TEXT, Boolean.toString(cursor.isForwardCursor()));
-    e.addChild(idx++, Node.ELEMENT, c);
-
-    ByteArrayOutputStream ba = new ByteArrayOutputStream();
-
-    KXmlSerializer serializer = new KXmlSerializer();
-    try {
-      serializer.setOutput(ba, HtmlConsts.UTF8_ENCODE);
-      // setting the response content type emits the xml header.
-      // just write the body here...
-      d.writeChildren(serializer);
-      serializer.flush();
-    } catch (IOException e1) {
-      e1.printStackTrace();
-      throw new IllegalStateException("unexpected failure");
-    }
-
-    try {
-      return ba.toString(HtmlConsts.UTF8_ENCODE);
-    } catch (UnsupportedEncodingException e1) {
-      e1.printStackTrace();
-      throw new IllegalStateException("unexpected failure");
-    }
-  }
-
-  public static final QueryResumePoint parseCursorParameter(String websafeCursorString) {
-    if (websafeCursorString == null || websafeCursorString.length() == 0) {
-      return null;
-    }
-    // parse the document
-    ByteArrayInputStream is;
-    try {
-      is = new ByteArrayInputStream(websafeCursorString.getBytes(HtmlConsts.UTF8_ENCODE));
-    } catch (UnsupportedEncodingException e1) {
-      e1.printStackTrace();
-      throw new IllegalStateException("Unexpected failure");
-    }
-    Document doc = null;
-    try {
+    HttpEntity e = resp.getEntity();
+    if ( e != null ) {
+      // TODO: this section of code is possibly causing 'WARNING: Going to buffer
+      // response body of large or unknown size. Using getResponseBodyAsStream
+      // instead is recommended.'
+      // The WARNING is most likely only happening when running appengine locally,
+      // but we should investigate to make sure
+      BufferedReader reader = null;
       InputStreamReader isr = null;
       try {
-        isr = new InputStreamReader(is, HtmlConsts.UTF8_ENCODE);
-        doc = new Document();
-        KXmlParser parser = new KXmlParser();
-        parser.setInput(isr);
-        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-        doc.parse(parser);
-        isr.close();
+        reader = new BufferedReader(isr = new InputStreamReader(e.getContent(), HtmlConsts.UTF8_ENCODE));
+        String responseLine;
+        while ((responseLine = reader.readLine()) != null) {
+          response.append(responseLine);
+        }
+      } catch (UnsupportedEncodingException ex) {
+        ex.printStackTrace();
+      } catch (IllegalStateException ex) {
+        ex.printStackTrace();
+      } catch (IOException ex) {
+        ex.printStackTrace();
       } finally {
-        if (isr != null) {
-          try {
+        try {
+          if ( reader != null ) {
+            reader.close();
+          }
+        } catch ( IOException ex ) {
+          // no-op
+        }
+        try {
+          if ( isr != null ) {
             isr.close();
-          } catch (Exception e) {
-            // no-op
           }
-        }
-        if (is != null) {
-          try {
-            is.close();
-          } catch (Exception e) {
-            // no-op
-          }
-        }
-      }
-    } catch (Exception e) {
-      logger.error("websafe cursor is not parseable as xml document");
-      e.printStackTrace();
-      throw new IllegalArgumentException("unable to parse websafeCursor");
-    }
-
-    Element manifestElement = doc.getRootElement();
-    if (!manifestElement.getName().equals(CURSOR_TAG)) {
-      logger.error("websafe cursor root element is not <cursor> -- was "
-          + manifestElement.getName());
-      throw new IllegalArgumentException("websafe cursor root element is not <cursor>");
-    }
-
-    String namespace = manifestElement.getNamespace();
-    if (!XML_TAG_NAMESPACE.equals(namespace)) {
-      logger.error("Root element Namespace is incorrect: " + namespace);
-      throw new IllegalArgumentException("websafe cursor root element namespace invalid");
-    }
-
-    String attributeName = null;
-    String attributeValue = null;
-    String uriLastReturnedValue = null;
-    boolean isForwardCursor = true;
-
-    int nElements = manifestElement.getChildCount();
-    for (int i = 0; i < nElements; ++i) {
-      if (manifestElement.getType(i) != Element.ELEMENT) {
-        // e.g., whitespace (text)
-        continue;
-      }
-
-      Element child = (Element) manifestElement.getElement(i);
-      if (!XML_TAG_NAMESPACE.equals(child.getNamespace())) {
-        // someone else's extension?
-        continue;
-      }
-
-      String name = child.getName();
-      if (name.equalsIgnoreCase(ATTRIBUTE_NAME_TAG)) {
-        attributeName = XFormParser.getXMLText(child, true);
-        if (attributeName != null && attributeName.length() == 0) {
-          attributeName = null;
-        }
-      } else if (name.equalsIgnoreCase(ATTRIBUTE_VALUE_TAG)) {
-        attributeValue = XFormParser.getXMLText(child, true);
-        if (attributeValue != null && attributeValue.length() == 0) {
-          attributeValue = null;
-        }
-      } else if (name.equalsIgnoreCase(URI_LAST_RETURNED_VALUE_TAG)) {
-        uriLastReturnedValue = XFormParser.getXMLText(child, true);
-        if (uriLastReturnedValue != null && uriLastReturnedValue.length() == 0) {
-          uriLastReturnedValue = null;
-        }
-      } else if (name.equalsIgnoreCase(IS_FORWARD_CURSOR_VALUE_TAG)) {
-        String flag = XFormParser.getXMLText(child, true);
-        if (flag != null && flag.length() == 0) {
-          isForwardCursor = WebUtils.parseBoolean(flag);
+        } catch ( IOException ex ) {
+          // no-op
         }
       }
     }
-
-    if (attributeName == null || attributeValue == null) {
-      throw new IllegalArgumentException("null value for websafeCursor element");
-    }
-
-    return new QueryResumePoint(attributeName, attributeValue, uriLastReturnedValue,
-        isForwardCursor);
+    return response.toString();
   }
-
 }

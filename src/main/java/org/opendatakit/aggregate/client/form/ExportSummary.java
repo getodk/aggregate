@@ -28,6 +28,7 @@ public final class ExportSummary implements Serializable {
    */
   private static final long serialVersionUID = -8309784116473729045L;
   
+  private String uri;
   private ExportType fileType;
   private Date timeRequested;
   private ExportStatus status;
@@ -35,6 +36,10 @@ public final class ExportSummary implements Serializable {
   private Date timeCompleted;
   private String resultFile;
 
+  public String getUri() {
+    return uri;
+  }
+  
   public ExportType getFileType() {
     return fileType;
   }
@@ -59,6 +64,10 @@ public final class ExportSummary implements Serializable {
     return resultFile;
   }
 
+  public void setUri(String uri) {
+    this.uri = uri;
+  }
+  
   public void setFileType(ExportType fileType) {
     this.fileType = fileType;
   }

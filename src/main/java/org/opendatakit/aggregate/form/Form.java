@@ -30,7 +30,6 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKConversionException;
-import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -74,8 +73,6 @@ class Form implements IForm {
    */
   private final FormDefinition formDefinition;
 
-  private final boolean newObject;
-
   /**
    * NOT persisted
    */
@@ -88,8 +85,6 @@ class Form implements IForm {
     
     this.infoRow = infoRow;
     String topLevelAuri = infoRow.getUri();
-    
-    newObject = false;
 
     Query q;
     List<? extends CommonFieldsBase> rows;
@@ -118,9 +113,7 @@ class Form implements IForm {
     this.manifest = FormInfoFilesetTable.assertManifestManipulator(topLevelAuri,
         filesetRow.getUri(), cc);
 
-    XFormParameters p = getRootElementDefn();
-
-    formDefinition = FormDefinition.getFormDefinition(p, cc);
+    formDefinition = FormDefinition.getFormDefinition(infoRow.getStringField(FormInfoTable.FORM_ID), cc);
     
     repeatElementMap = new HashMap<String, FormElementModel>();
 	if ( formDefinition != null ) {
@@ -129,7 +122,7 @@ class Form implements IForm {
   }
 
   Form(XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled,
-      byte[] xmlBytes, String title, CallingContext cc) throws ODKDatastoreException,
+      String title, CallingContext cc) throws ODKDatastoreException,
       ODKConversionException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -144,11 +137,9 @@ class Form implements IForm {
     infoRow.setSubmissionDate(now);
     infoRow.setMarkedAsCompleteDate(now);
     infoRow.setIsComplete(true);
-    infoRow.setModelVersion(1L);
-    infoRow.setUiVersion(0L);
+    infoRow.setModelVersion(1L); // rollback (v1.0.x) compatibility
+    infoRow.setUiVersion(0L);    // rollback (v1.0.x) compatibility
     infoRow.setStringField(FormInfoTable.FORM_ID, rootElementDefn.formId);
-
-    newObject = true;
 
     String topLevelAuri = infoRow.getUri();
 
@@ -161,29 +152,22 @@ class Form implements IForm {
       filesetRow.setOrdinalNumber(1L);
       filesetRow.setLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION,
           rootElementDefn.modelVersion);
-      filesetRow.setLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION,
-          rootElementDefn.uiVersion);
       filesetRow.setBooleanField(FormInfoFilesetTable.IS_ENCRYPTED_FORM, isEncryptedForm);
       filesetRow.setBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED, isDownloadEnabled);
       filesetRow.setStringField(FormInfoFilesetTable.FORM_NAME, title);
     }
 
     this.xform = FormInfoFilesetTable.assertXformManipulator(topLevelAuri, filesetRow.getUri(), cc);
-    xform.setValueFromByteArray(xmlBytes, "text/xml", title + ".xml", cc);
 
     this.manifest = FormInfoFilesetTable.assertManifestManipulator(topLevelAuri,
         filesetRow.getUri(), cc);
 
-    formDefinition = FormDefinition.getFormDefinition(rootElementDefn, cc);
+    formDefinition = FormDefinition.getFormDefinition(rootElementDefn.formId, cc);
 
     repeatElementMap = new HashMap<String, FormElementModel>();
-	if ( formDefinition != null ) {
+	 if ( formDefinition != null ) {
 		populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
-	}
-  }
-
-  public boolean isNewlyCreated() {
-    return newObject;
+	 }
   }
 
   public synchronized void persist(CallingContext cc) throws ODKDatastoreException {
@@ -213,10 +197,7 @@ class Form implements IForm {
       // delete the data model normally
       formDefinition.deleteDataModel(cc);
     } else {
-
-      XFormParameters p = getRootElementDefn();
-
-      FormDefinition.deleteAbnormalModel(p, cc);
+      FormDefinition.deleteAbnormalModel(infoRow.getStringField(FormInfoTable.FORM_ID), cc);
     }
 
     Datastore ds = cc.getDatastore();
@@ -301,17 +282,22 @@ class Form implements IForm {
     return filesetRow.getStringField(FormInfoFilesetTable.FORM_NAME);
   }
 
+  public void setViewableName(String title) {
+    if ( filesetRow.setStringField(FormInfoFilesetTable.FORM_NAME, title) ) {
+      String str = "Overflow on " + FormInfoFilesetTable.FORM_NAME;
+      throw new IllegalStateException(str);
+    }
+  }
+  
   public String getViewableFormNameSuitableAsFileName() {
     String name = getViewableName();
-    return name.replaceAll("[^\\p{L}0-9]", "_"); // any non-alphanumeric is
-    // replaced with
-    // underscore
+    // any non-alphanumeric is replaced with underscore
+    return name.replaceAll("[^\\p{L}0-9]", "_"); 
   }
 
   public XFormParameters getRootElementDefn() {
 	XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
-			filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION),
-			filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_UI_VERSION));
+			filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION));
 	return p;
   }
 
@@ -620,33 +606,42 @@ class Form implements IForm {
     return getViewableName();
   }
 
-  public BlobSubmissionOutcome isSameForm(XFormParameters rootElementDefn,
-      boolean isEncryptedFlag, String title, byte[] xmlBytes, CallingContext cc)
-      throws ODKDatastoreException, ODKFormAlreadyExistsException {
-	XFormParameters thisRootElementDefn = getRootElementDefn();
-    Boolean isEncrypted = isEncryptedForm();
-    String formName = getViewableName();
-
-    boolean same = rootElementDefn.equals(thisRootElementDefn)
-        && isEncryptedFlag == isEncrypted && title.equals(formName);
-
-    if (!same)
-      throw new ODKFormAlreadyExistsException();
-
+  public String getMd5HashFormXml(CallingContext cc) throws ODKDatastoreException {
     if (xform.getAttachmentCount(cc) == 1) {
       String contentHash = xform.getContentHash(1, cc);
       if (contentHash != null) {
-        String md5Hash = CommonFieldsBase.newMD5HashUri(xmlBytes);
-        if (!contentHash.equals(md5Hash)) {
-          throw new ODKFormAlreadyExistsException();
-        } else {
-          return BlobSubmissionOutcome.FILE_UNCHANGED;
-        }
-      } else {
-        return xform.setValueFromByteArray(xmlBytes, "text/xml", title + ".xml", cc);
+        return contentHash;
       }
+      return null;
     } else {
-      return xform.setValueFromByteArray(xmlBytes, "text/xml", title + ".xml", cc);
+      throw new IllegalStateException("Non-existent or multiple form XML files associated with: " + getFormId());
+    }
+  }
+  
+  public BlobSubmissionOutcome setFormXml( String formFilename, String xmlForm, Long modelVersion, CallingContext cc ) throws ODKDatastoreException {
+    byte[] bytes;
+    try {
+      bytes = xmlForm.getBytes("UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("unexpected", e);
+    }
+    filesetRow.setLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION, modelVersion);
+    if ( xform.getAttachmentCount(cc) == 0 ) {
+      return xform.setValueFromByteArray(bytes, "text/xml", formFilename, false, cc);
+    } else {
+      String curName = xform.getUnrootedFilename(1, cc);
+      String newName = formFilename;
+      if ( (newName == null) ? (curName == null) : newName.equals(curName) ) {
+        return xform.setValueFromByteArray(bytes, "text/xml", curName, true, cc);
+      } else {
+        BlobSubmissionOutcome outcome;
+        outcome = xform.setValueFromByteArray(bytes, "text/xml", curName, true, cc);
+        if ( !xform.renameFilePath(curName, newName, cc) ) {
+          throw new IllegalStateException("Unexpected failure persisting name change");
+        }
+        return outcome;
+      }
     }
   }
 
@@ -664,20 +659,20 @@ class Form implements IForm {
    * directory. Strip that off.
    * 
    * @param item
+   * @param overwriteOK
    * @param cc
-   * @return true if the files are completely new or are identical to the
-   *         currently-stored ones.
+   * @return true if a file should be overwritten (updated); false if the file is completely new or unchanged.
    * @throws ODKDatastoreException
    */
-  public boolean setXFormMediaFile(MultiPartFormItem item, CallingContext cc) throws ODKDatastoreException {
-
+  public boolean setXFormMediaFile(MultiPartFormItem item, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
     String filePath = item.getFilename();
     if (filePath.indexOf("/") != -1) {
       filePath = filePath.substring(filePath.indexOf("/") + 1);
     }
-    boolean matchingFiles = (BlobSubmissionOutcome.NEW_FILE_VERSION != manifest
-        .setValueFromByteArray(item.getStream().toByteArray(), item.getContentType(), filePath, cc));
-    return matchingFiles;
+    byte[] byteArray = item.getStream().toByteArray();
+    BlobSubmissionOutcome outcome = 
+        manifest.setValueFromByteArray(byteArray, item.getContentType(), filePath, overwriteOK, cc);
+    return (outcome == BlobSubmissionOutcome.NEW_FILE_VERSION);
   }
 
   public String getUri() {

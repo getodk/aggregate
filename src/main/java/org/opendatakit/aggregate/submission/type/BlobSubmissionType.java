@@ -17,6 +17,7 @@
 
 package org.opendatakit.aggregate.submission.type;
 
+import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -72,6 +73,10 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   public Long getContentLength(int ordinal, CallingContext cc) throws ODKDatastoreException {
     return bcm.getContentLength(ordinal, cc);
   }
+  
+  public Date getLastUpdateDate(int ordinal, CallingContext cc) throws ODKDatastoreException {
+    return bcm.getLastUpdateDate(ordinal, cc);
+  }
 
   public byte[] getBlob(int ordinal, CallingContext cc) throws ODKDatastoreException {
     return bcm.getBlob(ordinal, cc);
@@ -102,16 +107,18 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   /**
    * Convert value from byte array to data store blob type. Store blob in blob
    * storage and save the key of the blob storage into submission set. There can
-   * only be one un-named file.
+   * only be one un-named file. If a value for the unrootedFilePath already exists,
+   * and if it is different than the supplied byte array, the existing value will
+   * not be changed unless overwiteOK is true.
    * 
    * @param byteArray
    *          byte form of the value
-   * @param submissionSetKey
-   *          key of submission set that will reference the blob
    * @param contentType
    *          type of binary data (NOTE: only used for binary data)
    * @param unrootedFilePath
-   *          file path with anything before the first '/' stripped off.
+   *          the filename for this byte array
+   * @param overwriteOK
+   *          true if overwriting an existing value is OK.
    * @param cc
    *          calling context
    * @return the outcome of the storage attempt. md5 hashes are used to
@@ -121,10 +128,10 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    */
   @Override
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-      String contentType, String unrootedFilePath, CallingContext cc)
+      String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
       throws ODKDatastoreException {
 
-    return bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, cc);
+    return bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, overwriteOK, cc);
   }
 
   /**

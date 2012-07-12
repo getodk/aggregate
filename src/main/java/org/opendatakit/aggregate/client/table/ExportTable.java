@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.table;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.ExportSummary;
+import org.opendatakit.aggregate.client.widgets.DeleteExportButton;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 
 import com.google.gwt.user.client.ui.FlexTable;
@@ -33,6 +34,7 @@ public class ExportTable extends FlexTable {
   private final static int STATUS = 1;
   private final static int TIME_COMPLETED = 2;
   private final static int DOWNLOAD_FILE = 3;
+  private final static int DELETE = 4;
 
   private final static int HEADER_ROW = 1;
   private final static int STARTING_ROW = HEADER_ROW + 1;
@@ -44,6 +46,7 @@ public class ExportTable extends FlexTable {
     this.setText(HEADER_ROW, STATUS, "Status");
     this.setText(HEADER_ROW, TIME_COMPLETED, "Time Completed");
     this.setText(HEADER_ROW, DOWNLOAD_FILE, "Download File");
+    this.setText(HEADER_ROW, DELETE, "Delete");
     this.addStyleName("exportTable");
     this.getRowFormatter().addStyleName(1, "titleBar");
   }
@@ -68,6 +71,7 @@ public class ExportTable extends FlexTable {
           this.setWidget(i + STARTING_ROW, DOWNLOAD_FILE, new HTML(e.getResultFile()));
         }
       }
+      this.setWidget(i + STARTING_ROW, DELETE, new DeleteExportButton(e));
     }
   }
 

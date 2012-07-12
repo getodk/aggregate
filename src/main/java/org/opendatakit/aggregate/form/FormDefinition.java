@@ -40,7 +40,6 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
@@ -91,7 +90,7 @@ public class FormDefinition {
 	private FormElementModel topLevelGroupElement = null;
 	
 	private final String qualifiedTopLevelTable;
-	private final XFormParameters xformParameters;
+	private final String formId;
 	
 	public static final class OrdinalSequence {
 		Long ordinal;
@@ -100,23 +99,6 @@ public class FormDefinition {
 		OrdinalSequence() {
 			ordinal = 1L;
 			sequenceCounter = 1;
-		}
-	}
-	
-	static final void assertModel(XFormParameters p, List<FormDataModel> model, CallingContext cc) throws ODKDatastoreException {
-		FormDataModel fdm = FormDataModel.assertRelation(cc);
-		if ( model == null || model.size() == 0 ) {
-			throw new IllegalArgumentException("should never be null");
-		}
-		Datastore ds = cc.getDatastore();
-		User user = cc.getCurrentUser();
-		for ( FormDataModel m : model ) {
-			m.print(System.out);
-			try {
-				ds.getEntity(fdm, m.getUri(), user);
-			} catch ( ODKEntityNotFoundException e ) {
-				ds.putEntity(m, user);
-			}
 		}
 	}
 
@@ -128,13 +110,13 @@ public class FormDefinition {
 		return null;
 	}
 
-	private static final SubmissionAssociationTable getSubmissionAssociation(XFormParameters xformParameters, boolean canBeIncomplete, CallingContext cc ) {
+	private static final SubmissionAssociationTable getSubmissionAssociation(String formId, boolean canBeIncomplete, CallingContext cc ) {
 		SubmissionAssociationTable sa = null;
 		{
-		    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(xformParameters, cc);
+		    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(formId, cc);
 		    if ( saList.isEmpty() ) {
 		    	// may be in the process of being defined, or in a partially defined state.
-		    	logger.warn("No sa record matching this formId " + xformParameters.toString());
+		    	logger.warn("No sa record matching this formId " + formId);
 		    	return null;
 		    }
 		    for ( SubmissionAssociationTable st : saList ) {
@@ -143,7 +125,7 @@ public class FormDefinition {
 		    			// We have two or more identical entries.  Use the more recent one.
 		    			// Presently, can have a duplicate of our main tables because of timing windows.
 		    			// Eventually, can have two or more forms with the same submission structure.
-				    	logger.warn("Two or more sa records matching this formId " + xformParameters.toString());
+				    	logger.warn("Two or more sa records matching this formId " + formId);
 		    			if ( sa.getCreationDate().compareTo(st.getCreationDate()) == -1 ) {
 		    				// use the more recent data model...
 		    				sa = st;
@@ -189,10 +171,10 @@ public class FormDefinition {
 	 * 			currently valid definition of a form is being used (should the form be
 	 * 			deleted then reloaded).
 	 */
-	public static synchronized final FormDefinition getFormDefinition(XFormParameters xformParameters, CallingContext cc) {
+	public static synchronized final FormDefinition getFormDefinition(String formId, CallingContext cc) {
 
-		if ( xformParameters.formId.indexOf('/') != -1 ) {
-			throw new IllegalArgumentException("formId is not well formed: " + xformParameters.formId);
+		if ( formId.indexOf('/') != -1 ) {
+			throw new IllegalArgumentException("formId is not well formed: " + formId);
 		}
 
 		// always look at SubmissionAssociationTable to retrieve the proper variant
@@ -203,10 +185,10 @@ public class FormDefinition {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			try {
-				SubmissionAssociationTable sa = getSubmissionAssociation( xformParameters, false, cc );
+				SubmissionAssociationTable sa = getSubmissionAssociation( formId, false, cc );
 			    if ( sa == null ) {
 			    	// must be in a partially defined state.
-			    	logger.warn("No complete persistence model for sa record matching this formId " + xformParameters.toString());
+			    	logger.warn("No complete persistence model for sa record matching this formId " + formId);
 			    	return null;
 			    }
 			    String uriSubmissionDataModel = sa.getUriSubmissionDataModel();
@@ -224,16 +206,16 @@ public class FormDefinition {
 					fdmList = query.executeQuery();
 					
 					if ( fdmList == null || fdmList.size() == 0 ) {
-				    	logger.warn("No FDM records for formId " + xformParameters.toString());
+				    	logger.warn("No FDM records for formId " + formId);
 						return null;
 					}
 					
 					// try to construct the fd...
 					try {
-						fd = new FormDefinition(sa, xformParameters, fdmList, cc);
+						fd = new FormDefinition(sa, formId, fdmList, cc);
 					} catch ( IllegalStateException e) {
 						e.printStackTrace();
-						logger.error("Form definition is not interpretable for formId " + xformParameters.toString());
+						logger.error("Form definition is not interpretable for formId " + formId);
 						return null;
 					}
 
@@ -243,7 +225,7 @@ public class FormDefinition {
 					  assertBackingObjects(fd.getTopLevelGroup(), objs, cc);
 					} catch (ODKDatastoreException e1) {
 						e1.printStackTrace();
-				    	logger.error("Asserting relations failed for formId " + xformParameters.toString());
+				    	logger.error("Asserting relations failed for formId " + formId);
 						fd = null;
 					}
 
@@ -255,7 +237,7 @@ public class FormDefinition {
 					}
 				}
 			} catch (ODKDatastoreException e) {
-		    	logger.warn("Persistence Layer failure " + e.getMessage() + " for formId " + xformParameters.toString());
+		    	logger.warn("Persistence Layer failure " + e.getMessage() + " for formId " + formId);
 				return null;
 			}
 		} finally {
@@ -268,9 +250,9 @@ public class FormDefinition {
 		formDefinitions.remove(uriSubmissionDataModel);
 	}
 
-	public FormDefinition(SubmissionAssociationTable sa, XFormParameters xformParameters, List<?> formDataModelList, CallingContext cc) {
+	public FormDefinition(SubmissionAssociationTable sa, String formId, List<?> formDataModelList, CallingContext cc) {
 		this.submissionAssociation = sa;
-		this.xformParameters = xformParameters;
+		this.formId = formId;
 		
 		// map of tableName to map of columnName, FDM record
 		Map<String, Map<String, FormDataModel >> eeMap = new HashMap< String, Map<String, FormDataModel>>();
@@ -532,7 +514,7 @@ public class FormDefinition {
 		topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
 	}
 
-	public static void deleteAbnormalModel(XFormParameters xformParameters, CallingContext cc) {
+	public static void deleteAbnormalModel(String formId, CallingContext cc) {
 		boolean asDaemon = cc.getAsDeamon();
 		try {
 			cc.setAsDaemon(true);
@@ -540,7 +522,7 @@ public class FormDefinition {
 			Datastore ds = cc.getDatastore();
 			User user = cc.getCurrentUser();
 			try {
-				SubmissionAssociationTable sa = getSubmissionAssociation( xformParameters, true, cc );
+				SubmissionAssociationTable sa = getSubmissionAssociation( formId, true, cc );
 				while ( sa != null ) {
 					// prevent the form definition from being used...
 					sa.setIsPersistenceModelComplete(false);
@@ -574,13 +556,13 @@ public class FormDefinition {
 				    forget(uriSubmissionDataModel);
 				    
 				    // and see if we have anything more to clean up...
-				    sa = getSubmissionAssociation( xformParameters, true, cc );
+				    sa = getSubmissionAssociation( formId, true, cc );
 				}
 			    
 			    // we don't delete the data tables -- the user may want to manually recover the data
 			    
 			} catch (ODKDatastoreException e) {
-		    	logger.warn("Persistence Layer failure deleting abnormal form definition " + e.getMessage() + " for formId " + xformParameters.toString());
+		    	logger.warn("Persistence Layer failure deleting abnormal form definition " + e.getMessage() + " for formId " + formId);
 			}
 		} finally {
 			cc.setAsDaemon(asDaemon);
@@ -658,7 +640,7 @@ public class FormDefinition {
 			if ( first ) {
 				first = false;
 				// first entry can be form id...
-				if ( xformParameters.formId.equals(p) ) continue; 
+				if ( formId.equals(p) ) continue; 
 			}
 
 			m = getElementByNameHelper(m, p);
@@ -696,15 +678,7 @@ public class FormDefinition {
 	}
 	
 	public String getFormId() {
-		return xformParameters.formId;
-	}
-	
-	public Long getModelVersion() {
-		return xformParameters.modelVersion;
-	}
-	
-	public Long getUiVersion() {
-		return xformParameters.uiVersion;
+		return formId;
 	}
 
 	public String getElementKey(String keyString) {

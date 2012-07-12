@@ -21,7 +21,7 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
       + "Otherwise leave unchecked.";
 
   public EnableOdkTablesCheckbox(Boolean enabled) {
-    super(LABEL, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    super(LABEL, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
     setValue(enabled);
     boolean accessable = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);

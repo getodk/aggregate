@@ -22,52 +22,52 @@ import java.io.Serializable;
  * Information about the security configuration of the server.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class RealmSecurityInfo implements Serializable {
-  
-	/**
+
+  /**
    * 
    */
   private static final long serialVersionUID = -4307350533653978280L;
-  
+
   String basicAuthHashEncoding;
-	String realmString;
-	String superUserEmail;
-	String changeUserPasswordURL;
-	
-	public RealmSecurityInfo() {
-	}
+  String realmString;
+  String superUserEmail;
+  String changeUserPasswordURL;
 
-	public String getBasicAuthHashEncoding() {
-		return basicAuthHashEncoding;
-	}
+  public RealmSecurityInfo() {
+  }
 
-	public void setBasicAuthHashEncoding(String basicAuthHashEncoding) {
-		this.basicAuthHashEncoding = basicAuthHashEncoding;
-	}
-	
-	public String getSuperUserEmail() {
-		return superUserEmail;
-	}
-	
-	public void setSuperUserEmail(String superUserEmail) {
-		this.superUserEmail = superUserEmail;
-	}
+  public String getBasicAuthHashEncoding() {
+    return basicAuthHashEncoding;
+  }
 
-	public String getRealmString() {
-		return realmString;
-	}
+  public void setBasicAuthHashEncoding(String basicAuthHashEncoding) {
+    this.basicAuthHashEncoding = basicAuthHashEncoding;
+  }
 
-	public void setRealmString(String realmString) {
-		this.realmString = realmString;
-	}
-	
-	public void setChangeUserPasswordURL( String changeUserPasswordURL) {
-		this.changeUserPasswordURL = changeUserPasswordURL;
-	}
-	
-	public String getChangeUserPasswordURL() {
-		return changeUserPasswordURL;
-	}
+  public String getSuperUserEmail() {
+    return superUserEmail;
+  }
+
+  public void setSuperUserEmail(String superUserEmail) {
+    this.superUserEmail = superUserEmail;
+  }
+
+  public String getRealmString() {
+    return realmString;
+  }
+
+  public void setRealmString(String realmString) {
+    this.realmString = realmString;
+  }
+
+  public void setChangeUserPasswordURL(String changeUserPasswordURL) {
+    this.changeUserPasswordURL = changeUserPasswordURL;
+  }
+
+  public String getChangeUserPasswordURL() {
+    return changeUserPasswordURL;
+  }
 }

@@ -262,11 +262,11 @@ public class PersistentResults {
   }
 
   public void setResultFile(byte[] byteArray, String contentType,
-      String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
+      String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
     if (bcm.getAttachmentCount(cc) > 0) {
       throw new IllegalStateException("Results are already attached!");
     }
-    bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, cc);
+    bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, overwriteOK, cc);
   }
 
   public String getUri() {
@@ -329,6 +329,16 @@ public class PersistentResults {
   public SubmissionKey getSubmissionKey() {
     return new SubmissionKey(FORM_ID_PERSISTENT_RESULT + "[@version=null and @uiVersion=null]/"
         + PersistentResultsTable.TABLE_NAME + "[@key=" + row.getUri() + "]");
+  }
+
+  public static final PersistentResults getPersistentResult(String uri, CallingContext cc)
+      throws ODKEntityNotFoundException, ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
+    PersistentResultsTable p = ds.getEntity(relation, uri, user);
+    PersistentResults export = new PersistentResults(p, cc);
+    return export;
   }
 
   public static final List<PersistentResults> getAvailablePersistentResults(CallingContext cc)

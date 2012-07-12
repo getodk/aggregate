@@ -76,6 +76,7 @@ public class SubmissionTable extends FlexTable {
             setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
+            image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);
             image.addClickHandler(new BinaryPopupClickHandler(value, false));
             setWidget(rowPosition, columnPosition, image);
           }

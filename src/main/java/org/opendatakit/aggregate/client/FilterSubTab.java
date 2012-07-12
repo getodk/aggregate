@@ -36,7 +36,6 @@ public class FilterSubTab extends AggregateSubTabBase {
   private SubmissionPanel submissionPanel;
   
   private FilterGroup currentlyDisplayedFilterGroup;
-  private Boolean displayMetaData;
   private int queryFilterLimit;
 
   public FilterSubTab() {
@@ -44,7 +43,6 @@ public class FilterSubTab extends AggregateSubTabBase {
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
     
     queryFilterLimit = FilterGroup.DEFAULT_FETCH_LIMIT;
-    displayMetaData = false;
     getElement().setId("filter_sub_tab");
 
     // create Nav Panel
@@ -71,7 +69,6 @@ public class FilterSubTab extends AggregateSubTabBase {
 
   private void setCurrentlyDisplayedFilterGroup(FilterGroup newFilterGroup) {
     currentlyDisplayedFilterGroup = newFilterGroup;
-    currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
     currentlyDisplayedFilterGroup.setQueryFetchLimit(queryFilterLimit);
     navTable.updateNavTable(newFilterGroup);
   }
@@ -85,7 +82,6 @@ public class FilterSubTab extends AggregateSubTabBase {
   
   public void updateAfterSave(FilterGroup filterGroup) {
     currentlyDisplayedFilterGroup = filterGroup;
-    currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
     navTable.updateNavAfterSave(filterGroup);
     update();
   }
@@ -128,12 +124,7 @@ public class FilterSubTab extends AggregateSubTabBase {
     return submissionPanel.getSubmissionTable();
   }
 
-  public Boolean getDisplayMetaData() {
-    return displayMetaData;
-  }
-
   public void setDisplayMetaData(Boolean displayMetaData) {
-    this.displayMetaData = displayMetaData;
     this.currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
   }
   

@@ -26,24 +26,32 @@ package org.opendatakit.aggregate.form;
 public final class XFormParameters implements Comparable<Object> {
 
 	public final String formId;
+	public final String versionString;
 	public final Long modelVersion;
-	public Long uiVersion;
 
-	public XFormParameters(String formId, Long modelVersion, Long uiVersion) {
+	public XFormParameters(String formId, String versionString) {
 		if ( formId == null ) {
 			throw new IllegalArgumentException("formId cannot be null");
 		}
 		this.formId = formId;
-		this.modelVersion = modelVersion;
-		this.uiVersion = uiVersion;
+		this.versionString = (versionString == null || versionString.length() == 0) ? null : versionString;
+		this.modelVersion = (this.versionString == null) ? null : Long.valueOf(versionString);
 	}
+
+   public XFormParameters(String formId, Long modelVersion) {
+      if ( formId == null ) {
+         throw new IllegalArgumentException("formId cannot be null");
+      }
+      this.formId = formId;
+      this.versionString = null;
+      this.modelVersion = modelVersion;
+   }
 	
 	@Override
 	public String toString() {
 		return "XFormParameters[formId=" + formId + " and version=" +
 					(modelVersion == null ? "null" : Long.toString(modelVersion)) +
-					" and uiVersion=" +
-					(uiVersion == null ? "null" : Long.toString(uiVersion)) + "]";
+					" and uiVersion=null]";
 	}
 
 	@Override
