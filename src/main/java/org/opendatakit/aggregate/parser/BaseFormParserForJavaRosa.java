@@ -436,9 +436,13 @@ public class BaseFormParserForJavaRosa {
     xml = existingXml;
     
     XFormParserWithBindEnhancements xfp = parseFormDefinition(xml, this);
-    rootJavaRosaFormDef = xfp.parse();
-
-
+    try {
+      rootJavaRosaFormDef = xfp.parse();
+    } catch ( Exception e ) {
+      throw new ODKIncompleteSubmissionData(
+          "Javarosa failed to construct a FormDef. Is this an XForm definition?",
+          e, Reason.BAD_JR_PARSE);
+    }
 
     if (rootJavaRosaFormDef == null) {
       throw new ODKIncompleteSubmissionData(
