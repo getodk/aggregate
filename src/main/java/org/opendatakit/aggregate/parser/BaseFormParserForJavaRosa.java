@@ -62,6 +62,7 @@ public class BaseFormParserForJavaRosa {
   private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
   
   public static enum DifferenceResult { // result from comparing two XForms
+    XFORMS_IDENTICAL,      // instance and body are identical
     XFORMS_SHARE_INSTANCE, // instances (including binding) identical; body
                            // differs
     XFORMS_SHARE_SCHEMA, // instances differ, but share common database schema
@@ -647,6 +648,11 @@ public class BaseFormParserForJavaRosa {
       throw new ODKIncompleteSubmissionData(Reason.MISSING_XML);
     }
 
+    // generally only the case within Briefcase
+    if ( incomingParser.xml.equals(existingXml) ) {
+      return DifferenceResult.XFORMS_IDENTICAL;
+    }
+    
     // parse XML
     FormDef formDef1, formDef2;
     BaseFormParserForJavaRosa existingParser = new BaseFormParserForJavaRosa(existingXml, existingTitle, true);
