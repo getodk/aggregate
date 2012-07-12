@@ -31,6 +31,10 @@ public enum FilterOperation implements Serializable {
  
  private String displayText;
  
+ private FilterOperation() {
+   // GWT
+ }
+ 
  private FilterOperation(String display) {
    displayText = display;
  }

@@ -27,6 +27,10 @@ public enum ChartType implements Serializable {
   private String displayText;
   private String buttonText;
   
+  private ChartType() {
+    // GWT
+  }
+  
   private ChartType(String display, String buttonTxt) {
     displayText = display;
     buttonText = buttonTxt;

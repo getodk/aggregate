@@ -15,7 +15,7 @@
  */
 package org.opendatakit.common.security.common;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 
 /**
@@ -29,7 +29,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author mitchellsundt@gmail.com
  *
  */
-public enum GrantedAuthorityName implements IsSerializable {
+public enum GrantedAuthorityName implements Serializable {
 
 	AUTH_LOCAL("any users authenticated via the locally-held (<em>Aggregate password</em>) credential"),
    AUTH_OUT_OF_BAND("any users authenticated vio Out-of-band mechanisms"),
@@ -54,7 +54,11 @@ public enum GrantedAuthorityName implements IsSerializable {
 	GROUP_SITE_ADMINS("Site Administrator")
 	;
 	
-	private final String displayText;
+	private String displayText;
+	
+	private GrantedAuthorityName() {
+	  // GWT
+	}
 	
 	GrantedAuthorityName(String displayText) {
 		this.displayText = displayText;

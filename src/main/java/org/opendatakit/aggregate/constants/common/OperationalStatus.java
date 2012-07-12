@@ -24,5 +24,9 @@ public enum OperationalStatus implements Serializable {
   PAUSED, 
   COMPLETED, 
   ABANDONED,
-  BAD_CREDENTIALS
+  BAD_CREDENTIALS;
+  
+  private OperationalStatus() {
+    // GWT
+  }
 }

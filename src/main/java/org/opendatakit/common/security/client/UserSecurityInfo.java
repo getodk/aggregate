@@ -42,7 +42,11 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
   public enum UserType implements Serializable {
 		ANONYMOUS,     // not authenticated (anonymous)
 		REGISTERED,    // authenticated and registered
-		AUTHENTICATED  // openId authentication but not registered
+		AUTHENTICATED;  // openId authentication but not registered
+		
+		private UserType() {
+		  // GWT
+		}
 	};
 	String username; // null if email is non-null
 	String fullname; // tie-back to whatever the site admin wants to know.

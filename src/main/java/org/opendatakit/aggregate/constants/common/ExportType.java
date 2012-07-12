@@ -26,6 +26,10 @@ public enum ExportType implements Serializable {
  	
  	private String displayText;
  	
+ 	private ExportType() {
+ 	  // GWT
+ 	}
+ 	
  	private ExportType(String display) {
  	  displayText = display;
  	}
