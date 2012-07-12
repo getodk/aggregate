@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.client.widgets;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.HTML;
 
 public class AggregateCheckBox extends CheckBox implements ValueChangeHandler<Boolean> {
   
