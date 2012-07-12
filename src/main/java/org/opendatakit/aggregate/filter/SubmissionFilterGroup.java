@@ -55,7 +55,9 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
       DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   private static final DataField IS_PUBLIC = new DataField("IS_PUBLIC", DataField.DataType.BOOLEAN,
       true);
-
+  private static final DataField INCLUDE_METADATA = new DataField("INCLUDE_METADATA", DataField.DataType.BOOLEAN,
+      true);
+  
   private List<SubmissionFilter> filters;
 
   /**
@@ -70,6 +72,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     fieldList.add(NAME_PROPERTY);
     fieldList.add(URI_USER_PROPERTY);
     fieldList.add(IS_PUBLIC);
+    fieldList.add(INCLUDE_METADATA);
   }
 
   /**
@@ -118,13 +121,27 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   }
 
   public Boolean isPublic() {
-    return getBooleanField(IS_PUBLIC);
+    // treat null values as TRUE
+    Boolean fieldValue = getBooleanField(IS_PUBLIC);
+    if ( fieldValue == null ) return Boolean.TRUE;
+    return fieldValue;
   }
 
   public void setIsPublic(Boolean value) {
     setBooleanField(IS_PUBLIC, value);
   }
 
+  public Boolean includeMetadata() {
+    // treat null values as FALSE
+    Boolean fieldValue = getBooleanField(INCLUDE_METADATA);
+    if ( fieldValue == null ) return Boolean.FALSE;
+    return fieldValue;
+  }
+
+  public void setIncludeMetadata(Boolean value) {
+    setBooleanField(INCLUDE_METADATA, value);
+  }
+  
   List<SubmissionFilter> getFilters() {
     return filters;
   }
@@ -144,7 +161,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   }
 
   public FilterGroup transform() {
-    FilterGroup filterGroup = new FilterGroup(this.getUri());
+    FilterGroup filterGroup = new FilterGroup(this.getUri(), this.includeMetadata());
 
     filterGroup.setName(getName());
     filterGroup.setFormId(getFormId());
@@ -254,7 +271,9 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
     subFilterGroup.setName(filterGroup.getName());
     subFilterGroup.setFormId(filterGroup.getFormId());
-
+    subFilterGroup.setIncludeMetadata(filterGroup.getIncludeMetadata());
+    subFilterGroup.setIsPublic(true); // currently is always public if involved in ui, private filters are used for exporting 
+    
     for (Filter filter : filterGroup.getFilters()) {
       SubmissionFilter subFilter = SubmissionFilter.transform(filter, subFilterGroup, cc);
       subFilterGroup.addFilter(subFilter);

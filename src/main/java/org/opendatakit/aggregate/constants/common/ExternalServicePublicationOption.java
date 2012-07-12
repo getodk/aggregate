@@ -35,6 +35,10 @@ public enum ExternalServicePublicationOption implements Serializable {
   
   private String descriptionOfOption;
   
+  private ExternalServicePublicationOption() {
+    // GWT
+  }
+  
   private ExternalServicePublicationOption(String desc) {
     descriptionOfOption = desc;
   }

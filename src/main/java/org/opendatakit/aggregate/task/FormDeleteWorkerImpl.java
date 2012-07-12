@@ -388,8 +388,7 @@ public class FormDeleteWorkerImpl {
         String topLevelGroupName = form.getTopLevelGroupElement().getElementName();
         for (CommonFieldsBase en : result.getResultList()) {
           TopLevelDynamicBase tl = (TopLevelDynamicBase) en;
-          keys.add(new SubmissionKey(form.getFormId(), tl.getModelVersion(), tl.getUiVersion(),
-              topLevelGroupName, tl.getUri()));
+          keys.add(new SubmissionKey(form.getFormId(), topLevelGroupName, tl.getUri()));
         }
         DeleteSubmissions delete;
         delete = new DeleteSubmissions(keys);

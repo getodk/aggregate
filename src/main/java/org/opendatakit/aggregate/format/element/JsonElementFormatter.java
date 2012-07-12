@@ -16,13 +16,10 @@
 package org.opendatakit.aggregate.format.element;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.commons.codec.binary.Base64;
 import org.opendatakit.aggregate.constants.HtmlUtil;

@@ -54,7 +54,7 @@ public final class SaveAsFilterGroupButton extends AggregateButton implements Cl
     List<Filter> filters = filterGroup.getFilters();
    
     // if no filters no need to proceed
-    if (filters == null || filters.size() <= 0) {
+    if (filters == null || filters.size() <= 0 || !filterGroup.getIncludeMetadata()) {
       Window.alert(UIConsts.ERROR_NO_FILTERS);
       return;
     }

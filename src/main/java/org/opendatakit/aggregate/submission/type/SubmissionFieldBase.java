@@ -100,18 +100,31 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
   }
   
   /**
-   * Convert byte array to proper type for submission field
+   * Convert value from byte array to data store blob type. Store blob in blob
+   * storage and save the key of the blob storage into submission set. There can
+   * only be one un-named file. If a value for the unrootedFilePath already exists,
+   * and if it is different than the supplied byte array, the existing value will
+   * not be changed unless overwiteOK is true.
    * 
-   * @param byteArray byte form of the value
-   * @param submissionSetKey key of submission set that will reference the blob
-   * @param contentType type of binary data (NOTE: only used for binary data)
+   * @param byteArray
+   *          byte form of the value
+   * @param contentType
+   *          type of binary data (NOTE: only used for binary data)
    * @param unrootedFilePath
+   *          the filename for this byte array
+   * @param overwriteOK
+   *          true if overwriting an existing value is OK.
    * @param cc
-   * @return the outcome of the storage attempt.  md5 hashes are used to determine file equivalence. 
-   * @throws ODKDatastoreException 
-   */ 
+   *          calling context
+   * @return the outcome of the storage attempt. md5 hashes are used to
+   *         determine file equivalence.
+   * @throws ODKDatastoreException
+   * 
+   */
   @Override
-  public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte [] byteArray, String contentType, String unrootedFilePath, CallingContext cc) throws ODKDatastoreException {
+  public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
+      String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
+      throws ODKDatastoreException {
     if(isBinary()) {
       throw new IllegalStateException("Should be overridden in derived class");
     } else {

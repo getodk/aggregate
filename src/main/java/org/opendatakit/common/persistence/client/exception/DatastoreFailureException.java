@@ -18,16 +18,13 @@ package org.opendatakit.common.persistence.client.exception;
 
 import java.io.Serializable;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * Datastore failure exception that can be returned through GWT.
  * 
  * @author mitchellsundt@gmail.com
  * 
  */
-public class DatastoreFailureException extends Exception implements
-		Serializable, IsSerializable {
+public class DatastoreFailureException extends Exception implements Serializable {
 	private static final String DATASTORE_FAILURE_EXCEPTION = "Problem persisting data or accessing data";
 
   /**

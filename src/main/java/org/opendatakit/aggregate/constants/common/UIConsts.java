@@ -17,12 +17,13 @@
 package org.opendatakit.aggregate.constants.common;
 
 public class UIConsts { 
-  public static final String VERSION_STRING = "v1.0.8 Production";
+  public static final String VERSION_STRING = "v1.2.0 Production";
 
   public static final String URI_DEFAULT = "no uuid";
   public static final String FSC_URI_PARAM = "fsc";
   public static final String PREVIEW_PARAM = "previewImage";
   public static final String PREVIEW_SET = "&" + PREVIEW_PARAM + "=true";
+  public static final String PREVIEW_IMAGE_STYLENAME = "thumbnail";
   public static final String HOST_PAGE_BASE_ADDR = "Aggregate.html";
   public static final String VERTICAL_FLOW_PANEL_STYLENAME = "verticalFlowPanel";
 

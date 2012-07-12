@@ -44,8 +44,8 @@ public class FormInfoTable extends TopLevelDynamicBase {
 		super(databaseSchema, TABLE_NAME);
 		fieldList.add(FORM_ID);
 
-		fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FormInfo.formInfoXFormParameters.formId));
-		fieldValueMap.put(FORM_ID, FormInfo.formInfoXFormParameters.formId);
+		fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FormInfo.FORM_ID));
+		fieldValueMap.put(FORM_ID, FormInfo.FORM_ID);
 	}
 
 	/**

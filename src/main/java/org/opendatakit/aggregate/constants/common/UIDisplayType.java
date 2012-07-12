@@ -22,5 +22,9 @@ import java.io.Serializable;
 public enum UIDisplayType implements Serializable {
 	TEXT,
 	BINARY,
-	REPEAT
+	REPEAT;
+	
+	private UIDisplayType() {
+	  // GWT
+	}
 }

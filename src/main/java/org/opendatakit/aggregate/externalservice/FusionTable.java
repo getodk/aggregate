@@ -17,9 +17,7 @@
 
 package org.opendatakit.aggregate.externalservice;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,6 +70,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -265,24 +264,15 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     }
 
     HttpResponse resp = client.execute(post);
-    // TODO: this section of code is possibly causing 'WARNING: Going to buffer
-    // response body of large or unknown size. Using getResponseBodyAsStream
-    // instead is recommended.'
-    // The WARNING is most likely only happening when running appengine locally,
-    // but we should investigate to make sure
-    BufferedReader reader = new BufferedReader(new InputStreamReader(resp.getEntity().getContent()));
-    StringBuffer response = new StringBuffer();
-    String responseLine;
-    while ((responseLine = reader.readLine()) != null) {
-      response.append(responseLine);
-    }
+    String response = WebUtils.readResponse(resp);
+    
     int statusCode = resp.getStatusLine().getStatusCode();
     if ( statusCode == HttpServletResponse.SC_UNAUTHORIZED ) {
       throw new ODKExternalServiceCredentialsException(response.toString() + statement);
     } else if (statusCode != HttpServletResponse.SC_OK) {
       throw new ODKExternalServiceException(response.toString() + statement);
     }
-    return response.toString();
+    return response;
   }
 
   private String createCsvString(Iterator<String> itr) {

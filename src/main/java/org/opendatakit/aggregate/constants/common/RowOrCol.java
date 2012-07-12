@@ -26,6 +26,10 @@ public enum RowOrCol implements Serializable {
 	
 	private String displayText;
 	
+	private RowOrCol() {
+	  // GWT
+	}
+	
    private RowOrCol(String display) {
      displayText = display;
    }
