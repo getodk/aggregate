@@ -23,15 +23,15 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
  */
 public interface ServerDataService {
 
-	List<RowResourceClient> getRows(String tableId, String rowId, UriInfo info) throws AccessDeniedException, RequestFailureException, 
+	List<RowClient> getRows(String tableId, String rowId) throws AccessDeniedException, RequestFailureException, 
 	DatastoreFailureException, PermissionDeniedException;
 	
 	// RowResourceClient should be a similar thing to org.opendatakit.aggregate.odktables.entity.api.RowResource. 
 	// Calling it client to distinguish.
-	RowResourceClient getRow(String tableId, String rowId, UriInfo info) throws AccessDeniedException, RequestFailureException, 
+	RowClient getRow(String tableId, String rowId) throws AccessDeniedException, RequestFailureException, 
 		DatastoreFailureException, PermissionDeniedException;
 	
-	RowResourceClient createOrUpdateRow(String tableId, String rowId, RowClient row, UriInfo info) throws AccessDeniedException, RequestFailureException, 
+	RowClient createOrUpdateRow(String tableId, String rowId, RowClient row) throws AccessDeniedException, RequestFailureException, 
 		DatastoreFailureException, PermissionDeniedException, 
 		EtagMismatchException, BadColumnNameException;
 	

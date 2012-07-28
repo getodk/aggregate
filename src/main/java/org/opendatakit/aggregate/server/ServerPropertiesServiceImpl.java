@@ -37,7 +37,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 	private static final long serialVersionUID = -109897492777781438L;
 
 	@Override
-	public PropertiesResourceClient getProperties(String tableId, UriInfo info)
+	public TablePropertiesClient getProperties(String tableId)
 			throws AccessDeniedException, RequestFailureException,
 			DatastoreFailureException, PermissionDeniedException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -47,7 +47,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 			AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.READ_PROPERTIES);
 		    TableProperties properties = pm.getProperties();
-			return getResource(properties, pm, info);
+			return properties.transform(); 
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
@@ -55,8 +55,8 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public PropertiesResourceClient setProperties(TablePropertiesClient properties,
-			String tableId, UriInfo info) throws AccessDeniedException,
+	public TablePropertiesClient setProperties(TablePropertiesClient properties,
+			String tableId) throws AccessDeniedException,
 			RequestFailureException, DatastoreFailureException,
 			ODKTaskLockException, EtagMismatchException, PermissionDeniedException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -73,27 +73,11 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 		    TableProperties tableProperties = new TableProperties(properties.getPropertiesEtag(),
 		    		properties.getTableName(), properties.getMetadata());
 		    tableProperties = pm.setProperties(tableProperties);
-		    return getResource(tableProperties, pm, info);
+		    return tableProperties.transform();
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
 	    }
 	}
-	
-	private PropertiesResourceClient getResource(TableProperties properties, PropertiesManager pm, UriInfo info) {
-		PropertiesResource propertiesResource = new PropertiesResource(properties);
-		
-		String tableId = pm.getTableId();
-		UriBuilder ub = info.getBaseUriBuilder();
-		ub.path(TableService.class);
-		URI self = ub.clone().path(TableService.class, "getProperties")
-			        .path(PropertiesService.class, "getProperties").build(tableId);
-		URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
-		
-		propertiesResource.setSelfUri(self.toASCIIString());
-		propertiesResource.setTableUri(table.toASCIIString());
-		
-		return propertiesResource.transform();
-	}	
 
 }

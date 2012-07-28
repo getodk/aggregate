@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.odktables.entity;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
@@ -124,6 +125,21 @@ public class Row {
 
   public void setValues(final Map<String, String> values) {
     this.values = values;
+  }
+  
+  /**
+   * Transform the row into a client-side Row.
+   */
+  public RowClient transform() {
+	  RowClient row = new RowClient();
+	  row.setCreateUser(this.getCreateUser());
+	  row.setDeleted(this.isDeleted());
+	  row.setLastUpdateUser(this.getLastUpdateUser());
+	  row.setRowEtag(this.getRowEtag());
+	  row.setRowId(this.getRowId());
+	  row.setValues(this.getValues());
+	  row.setFilterScope(this.getFilterScope().transform());
+	  return row;
   }
 
   /*

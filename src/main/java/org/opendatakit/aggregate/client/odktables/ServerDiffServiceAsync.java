@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerDiffServiceAsync {
 
-	void getRowsSince(String dataEtag, String tableId, UriInfo info, AsyncCallback<List<RowResourceClient>> callback) 
+	void getRowsSince(String dataEtag, String tableId, AsyncCallback<List<RowClient>> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	

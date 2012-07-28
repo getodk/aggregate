@@ -22,14 +22,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface ServerDataServiceAsync {
 
 	
-	void getRows(String tableId, String rowId, UriInfo info, 
-			AsyncCallback<List<RowResourceClient>> callback) throws AccessDeniedException, RequestFailureException, 
+	void getRows(String tableId, String rowId, 
+			AsyncCallback<List<RowClient>> callback) throws AccessDeniedException, RequestFailureException, 
 	DatastoreFailureException, PermissionDeniedException;
 	
-	void getRow(String tableId, String rowId, UriInfo info, AsyncCallback<RowResourceClient> callback) throws AccessDeniedException, RequestFailureException, 
+	void getRow(String tableId, String rowId, AsyncCallback<RowClient> callback) throws AccessDeniedException, RequestFailureException, 
 	DatastoreFailureException, PermissionDeniedException;
 
-	void createOrUpdateRow(String tableId, String rowId, RowClient row, UriInfo info, AsyncCallback<RowResourceClient> callback) 
+	void createOrUpdateRow(String tableId, String rowId, RowClient row, AsyncCallback<RowClient> callback) 
 			throws AccessDeniedException, RequestFailureException, 
 			DatastoreFailureException, PermissionDeniedException, 
 			EtagMismatchException, BadColumnNameException;

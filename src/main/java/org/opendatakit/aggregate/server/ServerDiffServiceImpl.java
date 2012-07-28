@@ -10,6 +10,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.RowResourceClient;
 import org.opendatakit.aggregate.client.odktables.ServerDiffService;
 import org.opendatakit.aggregate.odktables.AuthFilter;
@@ -37,7 +38,7 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 	private static final long serialVersionUID = -5472352346806984818L;
 
 	@Override
-	public List<RowResourceClient> getRowsSince(String dataEtag, String tableId, UriInfo info)
+	public List<RowClient> getRowsSince(String dataEtag, String tableId)
 			throws AccessDeniedException, RequestFailureException,
 			DatastoreFailureException, PermissionDeniedException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -53,33 +54,20 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 		      List<Scope> scopes = AuthFilter.getScopes(cc);
 		      rows = dm.getRowsSince(dataEtag, scopes);
 		    }
-		    return getResources(rows, dm, info);
+		    return transformRows(rows);
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
 	    }
 	}
 	
-	private RowResourceClient getResource(Row row, DataManager dm, UriInfo info) {
-		String tableId = dm.getTableId();
-		String rowId = row.getRowId();
-		UriBuilder ub = info.getBaseUriBuilder();
-		ub.path(TableService.class);
-		URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-			.build(tableId, rowId);
-		URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
-		RowResource resource = new RowResource(row);
-		resource.setSelfUri(self.toASCIIString());
-		resource.setTableUri(table.toASCIIString());
-		return resource.transform();
-	}
-	
-	private List<RowResourceClient> getResources(List<Row> rows, DataManager dm, UriInfo info) {
-		ArrayList<RowResourceClient> resources = new ArrayList<RowResourceClient>();
+	// very basic transformation method
+	private List<RowClient> transformRows(List<Row> rows) {
+		List<RowClient> clientRows = new ArrayList<RowClient>();
 		for (Row row : rows) {
-			resources.add(getResource(row, dm, info));
+			clientRows.add(row.transform());
 		}
-		return resources;
-	}		
+		return clientRows;
+	}
 
 }

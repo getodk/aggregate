@@ -2,8 +2,6 @@ package org.opendatakit.aggregate.client.odktables;
 
 import java.util.List;
 
-import javax.ws.rs.core.UriInfo;
-
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -20,8 +18,8 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 public interface ServerDiffService {
 
 	
-	List<RowResourceClient> getRowsSince(String dataEtag, String tableId, UriInfo info) throws AccessDeniedException, RequestFailureException, 
-	DatastoreFailureException, PermissionDeniedException;
+	List<RowClient> getRowsSince(String dataEtag, String tableId) throws AccessDeniedException, 
+	RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 
 
 }

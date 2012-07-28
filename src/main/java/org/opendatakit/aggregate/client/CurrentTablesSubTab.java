@@ -2,10 +2,15 @@ package org.opendatakit.aggregate.client;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -42,22 +47,31 @@ public class CurrentTablesSubTab extends AggregateSubTabBase {
 	 */
 	@Override
 	public void update() {
-		
-		// Set up the callback object
-		AsyncCallback<List<TableResourceClient>> callback = 
-				new AsyncCallback<List<TableResourceClient>>() {
-			@Override
-			public void onFailure(Throwable caught) {
-				AggregateUI.getUI().reportError(caught);
-			}
-			
-			@Override
-			public void onSuccess(List<TableResourceClient> tableList) {
-				AggregateUI.getUI().clearError();
-				tableList.updateTableList(tableList);
-			}
-		};
-		// Make the call to the service
-		SecureGWT.getServerTableService().getTables(info, callback);
+		try {
+			SecureGWT.getServerTableService().getTables(new AsyncCallback<List<TableEntryClient>>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+					AggregateUI.getUI().reportError(caught);
+				}
+				
+				@Override
+				public void onSuccess(List<TableEntryClient> tables) {
+					AggregateUI.getUI().clearError();
+					// weird thing here with calling itself as a param...
+					tableList.updateTableList(tables);
+				}
+			});	
+		// is this the right way to handle these exceptions? unsure. isn't that what
+		// the onFailure should be doing?
+		} catch (PermissionDeniedException e) {
+			e.printStackTrace();
+		} catch (DatastoreFailureException e) {
+			e.printStackTrace();
+		} catch (RequestFailureException e) {
+			e.printStackTrace();
+		} catch (AccessDeniedException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -20,12 +20,11 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 public interface ServerPropertiesService {
 
 	
-	PropertiesResourceClient getProperties(String tableId, UriInfo info) throws AccessDeniedException, RequestFailureException, 
-	DatastoreFailureException, PermissionDeniedException;
+	TablePropertiesClient getProperties(String tableId) throws AccessDeniedException, 
+		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 
-	// maybe should also throw etag mismatch and ODKTaskLockException?
-	PropertiesResourceClient setProperties(TablePropertiesClient properties,
-			String tableId, UriInfo info) throws AccessDeniedException, 
+	TablePropertiesClient setProperties(TablePropertiesClient properties, String tableId) throws 
+		AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, ODKTaskLockException, EtagMismatchException,
 		PermissionDeniedException;
 	

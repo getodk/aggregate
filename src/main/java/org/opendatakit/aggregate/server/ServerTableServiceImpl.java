@@ -47,7 +47,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
 
 	@Override
-	public List<TableResourceClient> getTables(UriInfo info)
+	public List<TableEntryClient> getTables()
 			throws AccessDeniedException, RequestFailureException,
 			DatastoreFailureException, PermissionDeniedException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -56,11 +56,11 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    try {
 		    List<Scope> scopes = AuthFilter.getScopes(cc);
 		    List<TableEntry> entries = tm.getTables(scopes);
-		    ArrayList<TableResourceClient> resources = new ArrayList<TableResourceClient>();
+		    ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
 		    for (TableEntry entry : entries) {
-		      resources.add(getResource(entry, info));
+		      clientEntries.add(entry.transform());
 		    }
-		    return resources;
+		    return clientEntries;
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
@@ -68,7 +68,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public TableResourceClient getTable(String tableId, UriInfo info)
+	public TableEntryClient getTable(String tableId)
 			throws AccessDeniedException, RequestFailureException,
 			DatastoreFailureException, PermissionDeniedException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -77,7 +77,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    try {
 		    new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
 		    TableEntry entry = tm.getTableNullSafe(tableId);
-		    TableResourceClient resource = getResource(entry, info);
+		    TableEntryClient resource = entry.transform();
 		    return resource;
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
@@ -86,8 +86,8 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public TableResourceClient createTable(String tableId,
-			TableDefinitionClient definition, UriInfo info)
+	public TableEntryClient createTable(String tableId,
+			TableDefinitionClient definition)
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 			PermissionDeniedException, TableAlreadyExistsException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -108,9 +108,9 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 		    }
 		    String metadata = definition.getMetadata();
 		    TableEntry entry = tm.createTable(tableId, tableName, columnsServer, metadata);
-		    TableResourceClient resource = getResource(entry, info);
+		    TableEntryClient entryClient = entry.transform();
 		    logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
-		    return resource;
+		    return entryClient;
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
@@ -118,7 +118,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void deleteTable(String tableId, UriInfo info)
+	public void deleteTable(String tableId)
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 			PermissionDeniedException, ODKTaskLockException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -136,6 +136,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    }
 	}
 	
+	// not needed after all, as this is for RESTful only?
 	  private TableResourceClient getResource(TableEntry entry, UriInfo info) {
 		    String tableId = entry.getTableId();
 

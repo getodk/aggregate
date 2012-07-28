@@ -13,53 +13,53 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerTableACLServiceAsync {
 
-	void getAcls(String tableId, UriInfo info, AsyncCallback<List<TableAclResourceClient>> callback) 
+	void getAcls(String tableId, AsyncCallback<List<TableAclClient>> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void getUserAcls(String tableId, UriInfo info, AsyncCallback<List<TableAclResourceClient>> callback) 
+	void getUserAcls(String tableId, AsyncCallback<List<TableAclClient>> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void getGroupAcls(String tableId, UriInfo info, AsyncCallback<List<TableAclResourceClient>> callback) 
+	void getGroupAcls(String tableId, AsyncCallback<List<TableAclClient>> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void getDefaultAcl(String tableId, UriInfo info, AsyncCallback<TableAclResourceClient> callback) 
+	void getDefaultAcl(String tableId, AsyncCallback<TableAclClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void getUserAcl(String userId, String tableId, UriInfo info, AsyncCallback<TableAclResourceClient> callback) 
+	void getUserAcl(String userId, String tableId, AsyncCallback<TableAclClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void getGroupAcl(String groupId, String tableId, UriInfo info, AsyncCallback<TableAclResourceClient> callback) 
+	void getGroupAcl(String groupId, String tableId, AsyncCallback<TableAclClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void setDefaultAcl(TableAclClient acl, String tableId, UriInfo info, AsyncCallback<TableAclResourceClient> callback) 
+	void setDefaultAcl(TableAclClient acl, String tableId, AsyncCallback<TableAclClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
 	void setUserAcl(String userId, TableAclClient acl, 
-			String tableId, UriInfo info, AsyncCallback<TableAclResourceClient> callback) 
+			String tableId, AsyncCallback<TableAclClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
 	void setGroupAcl(String groupId, TableAclClient acl, 
-			String tableId, UriInfo info, AsyncCallback<TableAclResourceClient> callback) 
+			String tableId, AsyncCallback<TableAclClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void deleteDefaultAcl(String tableId, UriInfo info, AsyncCallback<Void> callback) 
+	void deleteDefaultAcl(String tableId, AsyncCallback<Void> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void deleteUserAcl(String userId, String tableId, UriInfo info, AsyncCallback<Void> callback) 
+	void deleteUserAcl(String userId, String tableId, AsyncCallback<Void> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void deleteGroupAcl(String groupId, String tableId, UriInfo info, AsyncCallback<Void> callback) 
+	void deleteGroupAcl(String groupId, String tableId, AsyncCallback<Void> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
