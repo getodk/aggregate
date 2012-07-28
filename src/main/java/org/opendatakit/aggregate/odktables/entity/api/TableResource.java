@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
+import org.opendatakit.aggregate.client.odktables.TableEntryClient;
+import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -60,6 +62,21 @@ public class TableResource extends TableEntry {
 
   public void setAclUri(final String aclUri) {
     this.aclUri = aclUri;
+  }
+  
+  /**
+   * This method transforms the TableResource into a client-side 
+   * TableResourceClient object.
+   */
+  public TableResourceClient transform() {
+	  TableResourceClient trc = new TableResourceClient(new TableEntryClient(this.getTableId(),
+			  this.getTableName(), this.getDataEtag(), this.getPropertiesEtag()));
+	  trc.setAclUri(this.getAclUri());
+	  trc.setDataUri(this.getDataUri());
+	  trc.setDiffUri(this.getDiffUri());
+	  trc.setPropertiesUri(this.getPropertiesUri());
+	  trc.setSelfUri(this.getSelfUri());
+	  return trc;
   }
 
   /*

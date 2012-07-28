@@ -1,5 +1,8 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
+import org.opendatakit.aggregate.client.odktables.TableAclClient;
+import org.opendatakit.aggregate.client.odktables.TableAclResourceClient;
+import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -66,6 +69,42 @@ public class TableAclResource extends TableAcl {
    */
   public void setTableUri(String tableUri) {
     this.tableUri = tableUri;
+  }
+  
+  /**
+   * Transform into the client-side TableAclResource.
+   */
+  public TableAclResourceClient transform() {
+	  TableAclClient tac = new TableAclClient();
+	  // now set the correct client side role
+	  switch (this.getRole()) {
+	  case NONE:
+		  tac.setRole(TableRoleClient.NONE);
+		  break;
+	  case FILTERED_WRITER:
+		  tac.setRole(TableRoleClient.FILTERED_WRITER);
+		  break;
+	  case UNFILTERED_READER_FILTERED_WRITER:
+		  tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
+		  break;
+	  case READER:
+		  tac.setRole(TableRoleClient.READER);
+		  break;
+	  case WRITER:
+		  tac.setRole(TableRoleClient.WRITER);
+		  break;
+	  case OWNER:
+		  tac.setRole(TableRoleClient.OWNER);
+		  break;
+	  default:
+		  throw new IllegalStateException("No assignable permissions in transforming table role."); 		
+	  }
+	  tac.setScope(this.getScope().transform());  
+	  TableAclResourceClient tarc = new TableAclResourceClient(tac);
+	  tarc.setAclUri(this.getAclUri());
+	  tarc.setSelfUri(this.getSelfUri());
+	  tarc.setTableUri(this.getTableUri());
+	  return tarc;
   }
 
   /*

@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.apache.commons.lang.Validate;
+import org.opendatakit.aggregate.client.odktables.ScopeClient;
 import org.simpleframework.xml.Element;
 
 public class Scope {
@@ -81,6 +82,26 @@ public class Scope {
    */
   public void setValue(String value) {
     this.value = value;
+  }
+  
+  // this is the transform to the clientside scope
+  public ScopeClient transform() {
+	  // First get the type of this scope
+	  ScopeClient sc = null;
+	  switch(this.getType()) {
+		  case DEFAULT:
+			  sc = new ScopeClient(ScopeClient.Type.DEFAULT, this.getValue());
+			  break;
+		  case USER:
+			  sc = new ScopeClient(ScopeClient.Type.USER, this.getValue());
+			  break;
+		  case GROUP:
+			  sc = new ScopeClient(ScopeClient.Type.GROUP, this.getValue());
+			  break;
+	  }
+	  if (sc == null) sc = ScopeClient.EMPTY_SCOPE;
+	  
+	  return sc;
   }
 
   /*

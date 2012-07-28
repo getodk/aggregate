@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;
@@ -54,6 +55,15 @@ public class TableEntry {
 
   public void setPropertiesEtag(String propertiesEtag) {
     this.propertiesEtag = propertiesEtag;
+  }
+  
+  /**
+   * Transforms the object into client-side TableEntryClient object.
+   */
+  public TableEntryClient transform() {
+	  TableEntryClient tec = new TableEntryClient(this.getTableId(), this.getTableName(),
+			  this.getDataEtag(), this.getPropertiesEtag());
+	  return tec;
   }
 
   @Override

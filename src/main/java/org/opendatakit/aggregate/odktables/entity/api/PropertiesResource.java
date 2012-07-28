@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
+import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
+import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -37,6 +39,15 @@ public class PropertiesResource extends TableProperties {
 
   public void setTableUri(final String tableUri) {
     this.tableUri = tableUri;
+  }
+  
+  public PropertiesResourceClient transform() {
+	  TablePropertiesClient tpc = new TablePropertiesClient(this.getPropertiesEtag(), 
+			  this.getTableName(), this.getMetadata());
+	  PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
+	  resourceClient.setSelfUri(this.getSelfUri());
+	  resourceClient.setTableUri(this.getTableUri());
+	  return resourceClient;
   }
   
   @Override
