@@ -1,24 +1,25 @@
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.client.odktables;
 
-import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
-import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
-import org.opendatakit.aggregate.odktables.entity.TableProperties;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Root;
-
-@Root
-@Default(DefaultType.FIELD)
-public class PropertiesResource extends TableProperties {
+/**
+ * This is the client-side version of 
+ * org.opendatakit.aggregate.odktables.entity.api.PropertiesResource.java.
+ * <br>
+ * The idea is that this will serve the same function as the server-side object,
+ * but for the client. It is possible that a similar object might have to be 
+ * created on the server-side to handle the non-phone requests, but this 
+ * will hopefully become apparent.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public class PropertiesResourceClient extends TablePropertiesClient {
 
   private String selfUri;
   private String tableUri;
 
-  @SuppressWarnings("unused")
-  private PropertiesResource() {
+  private PropertiesResourceClient() {
   }
 
-  public PropertiesResource(TableProperties tableProperties) {
+  public PropertiesResourceClient(TablePropertiesClient tableProperties) {
     super();
     setPropertiesEtag(tableProperties.getPropertiesEtag());
     setTableName(tableProperties.getTableName());
@@ -41,22 +42,13 @@ public class PropertiesResource extends TableProperties {
     this.tableUri = tableUri;
   }
   
-  public PropertiesResourceClient transform() {
-	  TablePropertiesClient tpc = new TablePropertiesClient(this.getPropertiesEtag(), 
-			  this.getTableName(), this.getMetadata());
-	  PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
-	  resourceClient.setSelfUri(this.getSelfUri());
-	  resourceClient.setTableUri(this.getTableUri());
-	  return resourceClient;
-  }
-  
   @Override
   public boolean equals(final Object o) {
     if (o == this)
       return true;
-    if (!(o instanceof PropertiesResource))
+    if (!(o instanceof PropertiesResourceClient))
       return false;
-    final PropertiesResource other = (PropertiesResource) o;
+    final PropertiesResourceClient other = (PropertiesResourceClient) o;
     if (!other.canEqual((java.lang.Object) this))
       return false;
     if (!super.equals(o))
@@ -71,7 +63,7 @@ public class PropertiesResource extends TableProperties {
   }
 
   public boolean canEqual(final Object other) {
-    return other instanceof PropertiesResource;
+    return other instanceof PropertiesResourceClient;
   }
 
   @Override
@@ -90,3 +82,4 @@ public class PropertiesResource extends TableProperties {
   }
 
 }
+

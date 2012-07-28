@@ -1,23 +1,32 @@
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.client.odktables;
 
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Root;
+/**
+ * This is the client-side version of 
+ * org.opendatakit.aggregate.odktables.entity.TableEntry.java.
+ * <br>
+ * The idea is that this is the client-side implementation of the same
+ * object. Usual caveat that it is unclear yet whether this all is 
+ * necessary and if similar non-phone objects will be needed on the 
+ * server side.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public class TableEntryClient {
 
-@Root
-@Default(value = DefaultType.FIELD, required = false)
-public class TableEntry {
-
+  /**
+	 * 
+	 */
+  
+  
   private String tableId;
   private String tableName;
   private String dataEtag;
   private String propertiesEtag;
 
-  protected TableEntry() {
+  protected TableEntryClient() {
   }
 
-  public TableEntry(final String tableId, String tableName, final String dataEtag,
+  public TableEntryClient(final String tableId, String tableName, final String dataEtag,
       final String propertiesEtag) {
     this.tableId = tableId;
     this.tableName = tableName;
@@ -56,15 +65,6 @@ public class TableEntry {
   public void setPropertiesEtag(String propertiesEtag) {
     this.propertiesEtag = propertiesEtag;
   }
-  
-  /**
-   * Transforms the object into client-side TableEntryClient object.
-   */
-  public TableEntryClient transform() {
-	  TableEntryClient tec = new TableEntryClient(this.getTableId(), this.getTableName(),
-			  this.getDataEtag(), this.getPropertiesEtag());
-	  return tec;
-  }
 
   @Override
   public boolean equals(Object obj) {
@@ -72,9 +72,9 @@ public class TableEntry {
       return true;
     if (obj == null)
       return false;
-    if (!(obj instanceof TableEntry))
+    if (!(obj instanceof TableEntryClient))
       return false;
-    TableEntry other = (TableEntry) obj;
+    TableEntryClient other = (TableEntryClient) obj;
     if (dataEtag == null) {
       if (other.dataEtag != null)
         return false;

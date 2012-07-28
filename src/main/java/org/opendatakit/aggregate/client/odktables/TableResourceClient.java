@@ -1,27 +1,27 @@
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.client.odktables;
 
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.odktables.TableResourceClient;
-import org.opendatakit.aggregate.odktables.entity.TableEntry;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Root;
-
-@Root
-@Default(value = DefaultType.FIELD, required = true)
-public class TableResource extends TableEntry {
+/**
+ * This is the client-side version of 
+ * org.opendatakit.aggregate.odktables.entity.api.
+ * <br>
+ * The idea is that this will perform the same function on the client.
+ * Usual caveat that it's not yet clear if this is necessary or if a 
+ * new non-phone class has to be created on the server.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public class TableResourceClient extends TableEntryClient {
   private String selfUri;
   private String propertiesUri;
   private String dataUri;
   private String diffUri;
   private String aclUri;
 
-  public TableResource(TableEntry entry) {
+  public TableResourceClient(TableEntryClient entry) {
     super(entry.getTableId(), entry.getTableName(), entry.getDataEtag(), entry.getPropertiesEtag());
   }
 
-  @SuppressWarnings("unused")
-  private TableResource() {
+  private TableResourceClient() {
   }
 
   public String getSelfUri() {
@@ -63,21 +63,6 @@ public class TableResource extends TableEntry {
   public void setAclUri(final String aclUri) {
     this.aclUri = aclUri;
   }
-  
-  /**
-   * This method transforms the TableResource into a client-side 
-   * TableResourceClient object.
-   */
-  public TableResourceClient transform() {
-	  TableResourceClient trc = new TableResourceClient(new TableEntryClient(this.getTableId(),
-			  this.getTableName(), this.getDataEtag(), this.getPropertiesEtag()));
-	  trc.setAclUri(this.getAclUri());
-	  trc.setDataUri(this.getDataUri());
-	  trc.setDiffUri(this.getDiffUri());
-	  trc.setPropertiesUri(this.getPropertiesUri());
-	  trc.setSelfUri(this.getSelfUri());
-	  return trc;
-  }
 
   /*
    * (non-Javadoc)
@@ -90,9 +75,9 @@ public class TableResource extends TableEntry {
       return true;
     if (!super.equals(obj))
       return false;
-    if (!(obj instanceof TableResource))
+    if (!(obj instanceof TableResourceClient))
       return false;
-    TableResource other = (TableResource) obj;
+    TableResourceClient other = (TableResourceClient) obj;
     if (aclUri == null) {
       if (other.aclUri != null)
         return false;
@@ -122,7 +107,7 @@ public class TableResource extends TableEntry {
   }
 
   public boolean canEqual(final Object other) {
-    return other instanceof TableResource;
+    return other instanceof TableResourceClient;
   }
 
   /*

@@ -1,16 +1,33 @@
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.client.odktables;
+
+import java.io.Serializable;
 
 import org.apache.commons.lang.Validate;
-import org.opendatakit.aggregate.client.odktables.ScopeClient;
+import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.simpleframework.xml.Element;
 
-public class Scope {
+/**
+ * This is the client-side version of org.opendatakit.aggregate.odktables.entity.Scope.java
+ * <br>
+ * It might be possible that this isn't necessary. At this point I am just copying exactly
+ * the entities that exist in that package, in the hopes of translating almost directly
+ * the code implemented in the services there.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public class ScopeClient implements Serializable {
 
-  public static final Scope EMPTY_SCOPE;
-  static {
-    EMPTY_SCOPE = new Scope();
-    EMPTY_SCOPE.initFields(null, null);
-  }
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7603521544860371942L;
+
+	public static final ScopeClient EMPTY_SCOPE;
+  
+	static {
+	  EMPTY_SCOPE = new ScopeClient();
+	  EMPTY_SCOPE.initFields(null, null);
+	}
 
   public enum Type {
     DEFAULT,
@@ -35,7 +52,7 @@ public class Scope {
    *          {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
    *          ignored (set to null).
    */
-  public Scope(Type type, String value) {
+  public ScopeClient(Type type, String value) {
     Validate.notNull(type);
     if (type.equals(Type.GROUP)) {
       Validate.notEmpty(value);
@@ -46,7 +63,7 @@ public class Scope {
     initFields(type, value);
   }
 
-  private Scope() {
+  private ScopeClient() {
   }
 
   private void initFields(Type type, String value) {
@@ -84,26 +101,28 @@ public class Scope {
     this.value = value;
   }
   
-  // this is the transform to the clientside scope
-  public ScopeClient transform() {
-	  // First get the type of this scope
-	  ScopeClient sc = null;
+  /**
+   * Transforms into the server-side Scope.
+   */
+  public Scope transform() {
+	  Scope serverScope = null;
 	  switch(this.getType()) {
 		  case DEFAULT:
-			  sc = new ScopeClient(ScopeClient.Type.DEFAULT, this.getValue());
+			  serverScope = new Scope(Scope.Type.DEFAULT, this.getValue());
 			  break;
 		  case USER:
-			  sc = new ScopeClient(ScopeClient.Type.USER, this.getValue());
+			  serverScope = new Scope(Scope.Type.USER, this.getValue());
 			  break;
 		  case GROUP:
-			  sc = new ScopeClient(ScopeClient.Type.GROUP, this.getValue());
+			  serverScope = new Scope(Scope.Type.GROUP, this.getValue());
 			  break;
 	  }
-	  if (sc == null) sc = ScopeClient.EMPTY_SCOPE;
+	  if (serverScope == null) serverScope = Scope.EMPTY_SCOPE;
 	  
-	  return sc;
+	  return serverScope;	  
   }
-
+  
+  
   /*
    * (non-Javadoc)
    * 
@@ -129,9 +148,9 @@ public class Scope {
       return true;
     if (obj == null)
       return false;
-    if (!(obj instanceof Scope))
+    if (!(obj instanceof ScopeClient))
       return false;
-    Scope other = (Scope) obj;
+    ScopeClient other = (ScopeClient) obj;
     if (type != other.type)
       return false;
     if (value == null) {

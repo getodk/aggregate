@@ -1,28 +1,32 @@
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.client.odktables;
 
-import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
-import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
-import org.opendatakit.aggregate.odktables.entity.TableProperties;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Root;
-
-@Root
-@Default(DefaultType.FIELD)
-public class PropertiesResource extends TableProperties {
+/**
+ * This is the client-side version of RowResource. It is based heavily on 
+ * org.opendatakit.aggregate.odktables.entity.api.RowResource.java.
+ * <br>
+ * The idea is that this will serve the same function as RowResource,
+ * but for the client. 
+ * @author sudars
+ *
+ */
+public class RowResourceClient extends RowClient {
 
   private String selfUri;
   private String tableUri;
 
   @SuppressWarnings("unused")
-  private PropertiesResource() {
+  private RowResourceClient() {
   }
 
-  public PropertiesResource(TableProperties tableProperties) {
+  public RowResourceClient(RowClient row) {
     super();
-    setPropertiesEtag(tableProperties.getPropertiesEtag());
-    setTableName(tableProperties.getTableName());
-    setMetadata(tableProperties.getMetadata());
+    setRowId(row.getRowId());
+    setRowEtag(row.getRowEtag());
+    setDeleted(row.isDeleted());
+    setCreateUser(row.getCreateUser());
+    setLastUpdateUser(row.getLastUpdateUser());
+    setFilterScope(row.getFilterScope());
+    setValues(row.getValues());
   }
 
   public String getSelfUri() {
@@ -40,23 +44,14 @@ public class PropertiesResource extends TableProperties {
   public void setTableUri(final String tableUri) {
     this.tableUri = tableUri;
   }
-  
-  public PropertiesResourceClient transform() {
-	  TablePropertiesClient tpc = new TablePropertiesClient(this.getPropertiesEtag(), 
-			  this.getTableName(), this.getMetadata());
-	  PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
-	  resourceClient.setSelfUri(this.getSelfUri());
-	  resourceClient.setTableUri(this.getTableUri());
-	  return resourceClient;
-  }
-  
+
   @Override
   public boolean equals(final Object o) {
     if (o == this)
       return true;
-    if (!(o instanceof PropertiesResource))
+    if (!(o instanceof RowResourceClient))
       return false;
-    final PropertiesResource other = (PropertiesResource) o;
+    final RowResourceClient other = (RowResourceClient) o;
     if (!other.canEqual((java.lang.Object) this))
       return false;
     if (!super.equals(o))
@@ -71,7 +66,7 @@ public class PropertiesResource extends TableProperties {
   }
 
   public boolean canEqual(final Object other) {
-    return other instanceof PropertiesResource;
+    return other instanceof RowResourceClient;
   }
 
   @Override
@@ -85,7 +80,7 @@ public class PropertiesResource extends TableProperties {
   }
 
   public String toString() {
-    return "PropertiesResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
+    return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
         + ", tableUri=" + this.getTableUri() + ")";
   }
 

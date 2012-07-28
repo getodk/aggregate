@@ -1,32 +1,38 @@
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.client.odktables;
 
-import org.opendatakit.aggregate.client.odktables.TableAclClient;
-import org.opendatakit.aggregate.client.odktables.TableRoleClient;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import org.opendatakit.aggregate.odktables.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.entity.TableRole;
 
-@Root
-public class TableAcl {
+/**
+ * This is the client-side version of
+ * org.opendatakit.aggregate.odktables.entity. 
+ * <br>
+ * The idea is that this will be the client-side object that will perform
+ * the same function. Now standard caveat applies that at this point it 
+ * is not yet clear if this will be necessary, or if a new non-phone
+ * object performing the same function needs to be created for the server.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public class TableAclClient {
 
-  @Element
-  private Scope scope;
+  private ScopeClient scope;
 
-  @Element
-  private TableRole role;
+  private TableRoleClient role;
 
-  public TableAcl(TableRole role) {
+  public TableAclClient(TableRoleClient role) {
     this();
     this.role = role;
   }
 
-  public TableAcl() {
-    this.scope = Scope.EMPTY_SCOPE;
+  public TableAclClient() {
+    this.scope = ScopeClient.EMPTY_SCOPE;
   }
 
   /**
    * @return the scope
    */
-  public Scope getScope() {
+  public ScopeClient getScope() {
     return scope;
   }
 
@@ -34,14 +40,14 @@ public class TableAcl {
    * @param scope
    *          the scope to set
    */
-  public void setScope(Scope scope) {
+  public void setScope(ScopeClient scope) {
     this.scope = scope;
   }
 
   /**
    * @return the role
    */
-  public TableRole getRole() {
+  public TableRoleClient getRole() {
     return role;
   }
 
@@ -49,39 +55,39 @@ public class TableAcl {
    * @param role
    *          the role to set
    */
-  public void setRole(TableRole role) {
+  public void setRole(TableRoleClient role) {
     this.role = role;
   }
   
   /**
-   * Transforms the TableAclObject into a TableAclClient object.
+   * Transforms the object into a TableAcl object.
    */
-  public TableAclClient transform() {
-	  TableAclClient tac = new TableAclClient();
+  public TableAcl transform() {
+	  TableAcl ta = new TableAcl();
 	  switch (this.getRole()) {
 	  case NONE:
-		  tac.setRole(TableRoleClient.NONE);
+		  ta.setRole(TableRole.NONE);
 		  break;
 	  case FILTERED_WRITER:
-		  tac.setRole(TableRoleClient.FILTERED_WRITER);
+		  ta.setRole(TableRole.FILTERED_WRITER);
 		  break;
 	  case UNFILTERED_READER_FILTERED_WRITER:
-		  tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
+		  ta.setRole(TableRole.UNFILTERED_READER_FILTERED_WRITER);
 		  break;
 	  case READER:
-		  tac.setRole(TableRoleClient.READER);
+		  ta.setRole(TableRole.READER);
 		  break;
 	  case WRITER:
-		  tac.setRole(TableRoleClient.WRITER);
+		  ta.setRole(TableRole.WRITER);
 		  break;
 	  case OWNER:
-		  tac.setRole(TableRoleClient.OWNER);
+		  ta.setRole(TableRole.OWNER);
 		  break;
 	  default:
 		  throw new IllegalStateException("No assignable permissions in transforming table role."); 		
 	  }
-	  tac.setScope(this.getScope().transform());
-	  return tac;
+	  ta.setScope(this.getScope().transform());
+	  return ta;	  
   }
 
   /*
@@ -109,9 +115,9 @@ public class TableAcl {
       return true;
     if (obj == null)
       return false;
-    if (!(obj instanceof TableAcl))
+    if (!(obj instanceof TableAclClient))
       return false;
-    TableAcl other = (TableAcl) obj;
+    TableAclClient other = (TableAclClient) obj;
     if (role != other.role)
       return false;
     if (scope == null) {

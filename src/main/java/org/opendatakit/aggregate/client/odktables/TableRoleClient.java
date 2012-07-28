@@ -1,13 +1,20 @@
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.client.odktables;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.opendatakit.aggregate.client.odktables.TableRoleClient;
-
 import com.google.common.collect.Lists;
 
-public enum TableRole {
+/**
+ * This is the client-side version of
+ * org.opendatakit.aggregate.odktables.entity.TableRole.java.
+ * <br>
+ * The idea is that it will serve the same function as the server-side
+ * code.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public enum TableRoleClient {
   NONE("No permissions. Can not see that the table exists."),
   
   FILTERED_READER("Can read properties and read filtered data .", 
@@ -52,7 +59,7 @@ public enum TableRole {
   private final String description;
   private final List<TablePermission> permissions;
 
-  TableRole(String description, TablePermission... permissions) {
+   TableRoleClient(String description, TablePermission... permissions) {
     this.description = description;
     this.permissions = Lists.newArrayList(permissions);
   }
@@ -95,5 +102,4 @@ public enum TableRole {
     WRITE_ACL,
     DELETE_ACL,
   }
-
 }

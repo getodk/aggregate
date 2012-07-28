@@ -1,26 +1,26 @@
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.client.odktables;
 
-import org.opendatakit.aggregate.client.odktables.TableAclClient;
-import org.opendatakit.aggregate.client.odktables.TableAclResourceClient;
-import org.opendatakit.aggregate.client.odktables.TableRoleClient;
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Root;
-
-@Root
-@Default(DefaultType.FIELD)
-public class TableAclResource extends TableAcl {
+/**
+ * This is the client-side version of 
+ * org.opendatakit.aggregate.odktables.entity.api.TableAclResource.java.
+ * <br>
+ * The idea is that this will perform the same function but on the client side.
+ * Usual caveat that it is currently unclear if this is necessary and if a 
+ * new non-phone object has to be created for the server.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public class TableAclResourceClient extends TableAclClient {
 
   private String selfUri;
   private String aclUri;
   private String tableUri;
 
   @SuppressWarnings("unused")
-  private TableAclResource() {
+  private TableAclResourceClient() {
   }
 
-  public TableAclResource(TableAcl tableAcl) {
+  public TableAclResourceClient(TableAclClient tableAcl) {
     super();
     setScope(tableAcl.getScope());
     setRole(tableAcl.getRole());
@@ -70,42 +70,6 @@ public class TableAclResource extends TableAcl {
   public void setTableUri(String tableUri) {
     this.tableUri = tableUri;
   }
-  
-  /**
-   * Transform into the client-side TableAclResource.
-   */
-  public TableAclResourceClient transform() {
-	  TableAclClient tac = new TableAclClient();
-	  // now set the correct client side role
-	  switch (this.getRole()) {
-	  case NONE:
-		  tac.setRole(TableRoleClient.NONE);
-		  break;
-	  case FILTERED_WRITER:
-		  tac.setRole(TableRoleClient.FILTERED_WRITER);
-		  break;
-	  case UNFILTERED_READER_FILTERED_WRITER:
-		  tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
-		  break;
-	  case READER:
-		  tac.setRole(TableRoleClient.READER);
-		  break;
-	  case WRITER:
-		  tac.setRole(TableRoleClient.WRITER);
-		  break;
-	  case OWNER:
-		  tac.setRole(TableRoleClient.OWNER);
-		  break;
-	  default:
-		  throw new IllegalStateException("No assignable permissions in transforming table role."); 		
-	  }
-	  tac.setScope(this.getScope().transform());  
-	  TableAclResourceClient tarc = new TableAclResourceClient(tac);
-	  tarc.setAclUri(this.getAclUri());
-	  tarc.setSelfUri(this.getSelfUri());
-	  tarc.setTableUri(this.getTableUri());
-	  return tarc;
-  }
 
   /*
    * (non-Javadoc)
@@ -133,9 +97,9 @@ public class TableAclResource extends TableAcl {
       return true;
     if (!super.equals(obj))
       return false;
-    if (!(obj instanceof TableAclResource))
+    if (!(obj instanceof TableAclResourceClient))
       return false;
-    TableAclResource other = (TableAclResource) obj;
+    TableAclResourceClient other = (TableAclResourceClient) obj;
     if (aclUri == null) {
       if (other.aclUri != null)
         return false;
@@ -173,3 +137,4 @@ public class TableAclResource extends TableAcl {
   }
 
 }
+

@@ -21,7 +21,8 @@ import java.io.Serializable;
 public enum Tabs implements Serializable {
    SUBMISSIONS("Submissions", "submissions"),
    MANAGEMENT("Form Management", "management"),
-   ADMIN("Site Admin", "admin");
+   ADMIN("Site Admin", "admin"),
+   ODKTABLES("ODK Tables", "odkTables");
    
    private String tabLabel;
    private String hashString;

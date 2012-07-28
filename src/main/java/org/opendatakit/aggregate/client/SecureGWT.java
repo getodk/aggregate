@@ -24,6 +24,16 @@ import org.opendatakit.aggregate.client.form.FormAdminService;
 import org.opendatakit.aggregate.client.form.FormAdminServiceAsync;
 import org.opendatakit.aggregate.client.form.FormService;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
+import org.opendatakit.aggregate.client.odktables.ServerDataService;
+import org.opendatakit.aggregate.client.odktables.ServerDataServiceAsync;
+import org.opendatakit.aggregate.client.odktables.ServerDiffService;
+import org.opendatakit.aggregate.client.odktables.ServerDiffServiceAsync;
+import org.opendatakit.aggregate.client.odktables.ServerPropertiesService;
+import org.opendatakit.aggregate.client.odktables.ServerPropertiesServiceAsync;
+import org.opendatakit.aggregate.client.odktables.ServerTableACLService;
+import org.opendatakit.aggregate.client.odktables.ServerTableACLServiceAsync;
+import org.opendatakit.aggregate.client.odktables.ServerTableService;
+import org.opendatakit.aggregate.client.odktables.ServerTableServiceAsync;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdminService;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdminServiceAsync;
 import org.opendatakit.aggregate.client.preferences.PreferenceService;
@@ -54,7 +64,9 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
  */
 public class SecureGWT {
   public enum ServiceType {
-    FILTER, FORM, FORM_ADMIN, PREFERENCE, SECURITY, SECURITY_ADMIN, SERVICES_ADMIN, SUBMISSION, ODK_TABLES_ADMIN
+    FILTER, FORM, FORM_ADMIN, PREFERENCE, SECURITY, SECURITY_ADMIN, SERVICES_ADMIN, SUBMISSION, 
+    ODK_TABLES_ADMIN, ODK_TABLES_DATA, ODK_TABLES_DIFF, ODK_TABLES_PROPERTIES,
+    ODK_TABLES_ACL, ODK_TABLES_TABLE;
   }
 
   private static SecureGWT singleton = null;
@@ -86,6 +98,13 @@ public class SecureGWT {
   /** site admin... */
   private SecurityAdminServiceAsync securityAdminServiceAsync = null;
   private OdkTablesAdminServiceAsync odkTablesAdminServiceAsync = null;
+  
+  /** odkTables... */
+  private ServerDataServiceAsync serverDataServiceAsync = null;
+  private ServerDiffServiceAsync serverDiffServiceAsync = null;
+  private ServerPropertiesServiceAsync serverPropertiesServiceAsync = null;
+  private ServerTableACLServiceAsync serverTableACLServiceAsync = null; 
+  private ServerTableServiceAsync serverTableServiceAsync = null;
 
   private SecureGWT() {
     preferenceServiceAsync = (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
@@ -97,6 +116,12 @@ public class SecureGWT {
     servicesAdminServiceAsync = (ServicesAdminServiceAsync) create(ServiceType.SERVICES_ADMIN);
     securityAdminServiceAsync = (SecurityAdminServiceAsync) create(ServiceType.SECURITY_ADMIN);
     odkTablesAdminServiceAsync = (OdkTablesAdminServiceAsync) create(ServiceType.ODK_TABLES_ADMIN);
+    //tables stuff: 
+    serverDataServiceAsync = (ServerDataServiceAsync) create(ServiceType.ODK_TABLES_DATA);
+    serverDiffServiceAsync = (ServerDiffServiceAsync) create(ServiceType.ODK_TABLES_DIFF);
+    serverPropertiesServiceAsync = (ServerPropertiesServiceAsync) create(ServiceType.ODK_TABLES_PROPERTIES);
+    serverTableACLServiceAsync = (ServerTableACLServiceAsync) create(ServiceType.ODK_TABLES_ACL);
+    serverTableServiceAsync = (ServerTableServiceAsync) create(ServiceType.ODK_TABLES_TABLE);
   };
 
   public PreferenceServiceAsync getPreferenceServiceAsync() {
@@ -133,6 +158,28 @@ public class SecureGWT {
 
   public OdkTablesAdminServiceAsync getOdkTablesAdminServiceAsync() {
     return odkTablesAdminServiceAsync;
+  }
+  
+  // odk tables stuff:
+  
+  public ServerDataServiceAsync getServerDataServiceAsync() {
+	  return serverDataServiceAsync;
+  }
+  
+  public ServerDiffServiceAsync getServerDiffServiceAsync() {
+	  return serverDiffServiceAsync;
+  }
+  
+  public ServerPropertiesServiceAsync getServerPropertiesServiceAsync() {
+	  return serverPropertiesServiceAsync;
+  }
+  
+  public ServerTableACLServiceAsync getTableACLServiceAsync() {
+	  return serverTableACLServiceAsync;
+  }
+  
+  public ServerTableServiceAsync getTableServiceAsync() {
+	  return serverTableServiceAsync;
   }
 
   public static synchronized final SecureGWT get() {
@@ -172,6 +219,21 @@ public class SecureGWT {
     case ODK_TABLES_ADMIN:
       obj = GWT.create(OdkTablesAdminService.class);
       break;
+    case ODK_TABLES_DATA:
+    	obj = GWT.create(ServerDataService.class);
+    	break;
+    case ODK_TABLES_DIFF:
+    	obj = GWT.create(ServerDiffService.class);
+    	break;
+    case ODK_TABLES_PROPERTIES:
+    	obj = GWT.create(ServerPropertiesService.class);
+    	break;
+    case ODK_TABLES_ACL:
+    	obj = GWT.create(ServerTableACLService.class);
+    	break;
+    case ODK_TABLES_TABLE:
+    	obj = GWT.create(ServerTableService.class);
+    	break;
     default:
       throw new IllegalStateException("Unrecognized type " + type.toString());
     }
@@ -223,5 +285,28 @@ public class SecureGWT {
   /** site admin... */
   public static OdkTablesAdminServiceAsync getOdkTablesAdminService() {
     return get().getOdkTablesAdminServiceAsync();
+  }
+  
+  /** odk tables: these should be any user, as the actual data and whatnot should be managed
+   * by the tables code itself.
+   */
+  public static ServerDataServiceAsync getServerDataService() {
+	  return get().serverDataServiceAsync;
+  }
+  
+  public static ServerDiffServiceAsync getServerDiffService() {
+	  return get().serverDiffServiceAsync;
+  }
+  
+  public static ServerPropertiesServiceAsync getServerPropertiesService() {
+	  return get().serverPropertiesServiceAsync;
+  }
+  
+  public static ServerTableACLServiceAsync getServerTableACLServiceAsync() {
+	  return get().serverTableACLServiceAsync;
+  }
+  
+  public static ServerTableServiceAsync getServerTableService() {
+	  return get().serverTableServiceAsync;
   }
 }
