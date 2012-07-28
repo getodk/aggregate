@@ -1,17 +1,13 @@
 package org.opendatakit.aggregate.server;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.RowClient;
-import org.opendatakit.aggregate.client.odktables.RowResourceClient;
 import org.opendatakit.aggregate.client.odktables.ServerDataService;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
@@ -20,7 +16,6 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
-import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -46,7 +41,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 	private static final long serialVersionUID = -5051558217315955180L;
 
 	@Override
-	public List<RowResourceClient> getRows(String tableId, String rowId, UriInfo info) 
+	public List<RowClient> getRows(String tableId, String rowId) 
 			throws AccessDeniedException,
 			RequestFailureException, DatastoreFailureException, PermissionDeniedException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -62,14 +57,15 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 		      List<Scope> scopes = AuthFilter.getScopes(cc);
 		      rows = dm.getRows(scopes);
 		    }
-		    return getResources(rows, dm, info);
+		    return transformRows(rows);
 	    } catch (ODKDatastoreException e) {
 			   e.printStackTrace();
 			   throw new DatastoreFailureException(e);
 	    }
 	}
 	
-	public RowResourceClient getRow(String tableId, String rowId, UriInfo info) throws
+	@Override
+	public RowClient getRow(String tableId, String rowId) throws
 			AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException {
 		try {
@@ -80,8 +76,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 			af.checkPermission(TablePermission.READ_ROW);
 			Row row = dm.getRowNullSafe(rowId);
 			af.checkFilter(TablePermission.UNFILTERED_READ, row);
-			RowResourceClient resource = getResource(row, dm, info);
-			return resource;
+			return row.transform();
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			throw new DatastoreFailureException(e);
@@ -89,7 +84,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public RowResourceClient createOrUpdateRow(String tableId, String rowId, RowClient row, UriInfo info)
+	public RowClient createOrUpdateRow(String tableId, String rowId, RowClient row)
 			throws AccessDeniedException, RequestFailureException,
 			DatastoreFailureException, EtagMismatchException, PermissionDeniedException,
 		      BadColumnNameException {
@@ -109,8 +104,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 		      af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
 		      serverRow = dm.updateRow(serverRow);
 		    }
-		    RowResourceClient resource = getResource(serverRow, dm, info);
-		    return resource;
+		    return serverRow.transform();
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			throw new DatastoreFailureException(e);
@@ -141,26 +135,12 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 
 	}
 	
-	private RowResourceClient getResource(Row row, DataManager dm, UriInfo info) {
-		String tableId = dm.getTableId();
-		String rowId = row.getRowId();
-		UriBuilder ub = info.getBaseUriBuilder();
-		ub.path(TableService.class);
-		URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-			.build(tableId, rowId);
-		URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
-		RowResource resource = new RowResource(row);
-		resource.setSelfUri(self.toASCIIString());
-		resource.setTableUri(table.toASCIIString());
-		return resource.transform();
-	}
-	
-	private List<RowResourceClient> getResources(List<Row> rows, DataManager dm, UriInfo info) {
-		ArrayList<RowResourceClient> resources = new ArrayList<RowResourceClient>();
+	private List<RowClient> transformRows(List<Row> rows) {
+		List<RowClient> clientRows = new ArrayList<RowClient>();
 		for (Row row : rows) {
-			resources.add(getResource(row, dm, info));
+			clientRows.add(row.transform());
 		}
-		return resources;
-	}	
+		return clientRows;
+	}
 
 }

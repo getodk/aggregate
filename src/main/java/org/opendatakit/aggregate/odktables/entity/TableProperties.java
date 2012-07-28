@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -46,6 +47,15 @@ public class TableProperties {
 
   public void setMetadata(String metadata) {
     this.metadata = metadata;
+  }
+  
+  /**
+   * Transform the object into the client-side object.
+   */
+  public TablePropertiesClient transform() {
+	  TablePropertiesClient tpClient = new TablePropertiesClient(this.getPropertiesEtag(),
+			  this.getTableName(), this.getMetadata());
+	  return tpClient;
   }
 
   @Override

@@ -288,7 +288,7 @@ public class SecureGWT {
   }
   
   /** odk tables: these should be any user, as the actual data and whatnot should be managed
-   * by the tables code itself.
+   * by the tables code itself, to account for the more refined control levels.
    */
   public static ServerDataServiceAsync getServerDataService() {
 	  return get().serverDataServiceAsync;

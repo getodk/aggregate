@@ -20,45 +20,45 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 public interface ServerTableACLService {
 
 	
-	List<TableAclResourceClient> getAcls(String tableId, UriInfo info) throws AccessDeniedException, 
+	List<TableAclClient> getAcls(String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	List<TableAclResourceClient> getUserAcls(String tableId, UriInfo info) throws AccessDeniedException, 
+	List<TableAclClient> getUserAcls(String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	List<TableAclResourceClient> getGroupAcls(String tableId, UriInfo info) throws AccessDeniedException, 
+	List<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	TableAclResourceClient getDefaultAcl(String tableId, UriInfo info) throws AccessDeniedException, 
+	TableAclClient getDefaultAcl(String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	TableAclResourceClient getUserAcl(String userId, String tableId, UriInfo info) throws 
+	TableAclClient getUserAcl(String userId, String tableId) throws 
 		AccessDeniedException, RequestFailureException, DatastoreFailureException,
 		PermissionDeniedException;
 	
-	TableAclResourceClient getGroupAcl(String groupId, String tableId, UriInfo info) throws 
+	TableAclClient getGroupAcl(String groupId, String tableId) throws 
 		AccessDeniedException, RequestFailureException, DatastoreFailureException,
 		PermissionDeniedException;
 	
-	TableAclResourceClient setDefaultAcl(TableAclClient acl, String tableId, UriInfo info) throws 
+	TableAclClient setDefaultAcl(TableAclClient acl, String tableId) throws 
 		AccessDeniedException, RequestFailureException, DatastoreFailureException,
 		PermissionDeniedException;
 	
-	TableAclResourceClient setUserAcl(String userId, TableAclClient acl, String tableId, UriInfo info) 
+	TableAclClient setUserAcl(String userId, TableAclClient acl, String tableId) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	TableAclResourceClient setGroupAcl(String groupId, TableAclClient acl, String tableId, UriInfo info) 
+	TableAclClient setGroupAcl(String groupId, TableAclClient acl, String tableId) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 	
-	void deleteDefaultAcl(String tableId, UriInfo info) throws AccessDeniedException, 
+	void deleteDefaultAcl(String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	void deleteUserAcl(String userId, String tableId, UriInfo info) throws AccessDeniedException, 
+	void deleteUserAcl(String userId, String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	void deleteGroupAcl(String groupId, String tableId, UriInfo info) throws AccessDeniedException, 
+	void deleteGroupAcl(String groupId, String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
 	

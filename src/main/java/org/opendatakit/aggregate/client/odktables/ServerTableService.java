@@ -23,18 +23,17 @@ public interface ServerTableService {
 
 	
 	
-	List<TableResourceClient> getTables(UriInfo info) throws AccessDeniedException, 
+	List<TableEntryClient> getTables() throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	TableResourceClient getTable(String tableId, UriInfo info) throws AccessDeniedException, 
+	TableEntryClient getTable(String tableId) throws AccessDeniedException, 
 		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
 	
-	TableResourceClient createTable(String tableId, TableDefinitionClient definition,
-			UriInfo info) throws 
+	TableEntryClient createTable(String tableId, TableDefinitionClient definition) throws 
 		AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 		PermissionDeniedException, TableAlreadyExistsException;
 	
-	void deleteTable(String tableId, UriInfo info) throws AccessDeniedException, RequestFailureException, 
+	void deleteTable(String tableId) throws AccessDeniedException, RequestFailureException, 
 		DatastoreFailureException, PermissionDeniedException, ODKTaskLockException;
 	
 	// Not sure if I still need these methods, which are present in Dylan's methods,

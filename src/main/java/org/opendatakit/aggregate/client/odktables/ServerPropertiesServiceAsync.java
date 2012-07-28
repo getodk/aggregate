@@ -13,13 +13,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerPropertiesServiceAsync {
 
-	void getProperties(String tableId, UriInfo info, AsyncCallback<PropertiesResourceClient> callback) 
+	void getProperties(String tableId, AsyncCallback<TablePropertiesClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedException;
 
-	// maybe should also throw etag mismatch and ODKTaskLockException?
 	void setProperties(TablePropertiesClient properties, 
-			String tableId, UriInfo info, AsyncCallback<PropertiesResourceClient> callback) 
+			String tableId, AsyncCallback<TablePropertiesClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			ODKTaskLockException, EtagMismatchException, PermissionDeniedException;
 	

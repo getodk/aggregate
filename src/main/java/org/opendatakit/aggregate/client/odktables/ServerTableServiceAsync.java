@@ -15,20 +15,20 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerTableServiceAsync {
 
-	void getTables(UriInfo info, AsyncCallback<List<TableResourceClient>> callback) 
+	void getTables(AsyncCallback<List<TableEntryClient>> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 			PermissionDeniedException;
 	
-	void getTable(String tableId, UriInfo info, AsyncCallback<TableResourceClient> callback) 
+	void getTable(String tableId, AsyncCallback<TableEntryClient> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 			PermissionDeniedException;
 	
-	void createTable(String tableId, TableDefinitionClient definition, UriInfo info,
-			AsyncCallback<TableResourceClient> callback) 
+	void createTable(String tableId, TableDefinitionClient definition,
+			AsyncCallback<TableEntryClient> callback) 
 					throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 					PermissionDeniedException, TableAlreadyExistsException;
 	
-	void deleteTable(String tableId, UriInfo info, AsyncCallback<Void> callback) 
+	void deleteTable(String tableId, AsyncCallback<Void> callback) 
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 			PermissionDeniedException, ODKTaskLockException;
 			
