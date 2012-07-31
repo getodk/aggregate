@@ -48,7 +48,7 @@ public class FormTable extends FlexTable {
   private static int DOWNLOADABLE_COLUMN = 4;
   private static String DOWNLOADABLE_HEADING = "Downloadable";
   private static int ACCEPT_SUBMISSIONS_COLUMN = 5;
-  private static String ACCEPT_SUBMISSIONS_HEADING = "Accept Submissons";
+  private static String ACCEPT_SUBMISSIONS_HEADING = "Accept Submissions";
   private static int PUBLISH_COLUMN = 6;
   private static String PUBLISH_HEADING = "Publish";
   private static int EXPORT_COLUMN = 7;
