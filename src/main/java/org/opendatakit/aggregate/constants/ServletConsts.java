@@ -92,7 +92,7 @@ public final class ServletConsts {
 
   // href link text
   public static final String BRIEFCASE_LINK_TEXT = "Download Entire Dataset (Briefcase)";
-  public static final String UPLOAD_SUBMISSIONS_LINK_TEXT = "Upload Submissons";
+  public static final String UPLOAD_SUBMISSIONS_LINK_TEXT = "Upload Submissions";
   public static final String UPLOAD_XFORM_LINK_TEXT = "Upload a Form Definition";
 
   public static final String BLOB_KEY = "blobKey";
