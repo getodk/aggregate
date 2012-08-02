@@ -24,10 +24,11 @@ import org.opendatakit.aggregate.odktables.entity.TableEntry;
 public class OdkTablesTableList extends FlexTable {
 
 	// This will be the column with the table name
-	private static int TABLE_NAME_COLUMN = 0;
+	private static int TABLE_NAME_COLUMN = 1;
 	private static String TABLE_NAME_HEADING = "Table Name";
 	
-	private static int DELETE_BUTTON_COLUMN = 1;
+	private static int DELETE_BUTTON_COLUMN = 0;
+	private static String DELETE_BUTTON_HEADING = "Delete";
 	
 	
 	public OdkTablesTableList() {
@@ -50,20 +51,28 @@ public class OdkTablesTableList extends FlexTable {
 		removeAllRows();
 		// now create the table headers
 		setText(0, TABLE_NAME_COLUMN, TABLE_NAME_HEADING);
+
 		getRowFormatter().addStyleName(0, "titleBar");
 		
-		for (int i = 0; i < tables.size(); i++) {
-			TableEntryClient table = tables.get(i);
-			// this will maintain the row you're adding to, always +1 
-			// because of the title row
-			int j = i + 1;
-			setWidget(j, TABLE_NAME_COLUMN, new HTML(table.getTableName()));
+		if (tables.size() == 0) {
+			setWidget(1, TABLE_NAME_COLUMN, new HTML("<i> There are no tables to display. </i>"));
+		} else {
 			
-			setWidget(j, DELETE_BUTTON_COLUMN, new OdkTablesDeleteTableButton(
-					table.getTableId()));
-			
-			if (j % 2 == 0) {
-				getRowFormatter().addStyleName(j, "evenTableRow");
+			setText(0, DELETE_BUTTON_COLUMN, DELETE_BUTTON_HEADING);
+		
+			for (int i = 0; i < tables.size(); i++) {
+				TableEntryClient table = tables.get(i);
+				// this will maintain the row you're adding to, always +1 
+				// because of the title row
+				int j = i + 1;
+				setWidget(j, TABLE_NAME_COLUMN, new HTML(table.getTableName()));
+				
+				setWidget(j, DELETE_BUTTON_COLUMN, new OdkTablesDeleteTableButton(
+						table.getTableId()));
+				
+				if (j % 2 == 0) {
+					getRowFormatter().addStyleName(j, "evenTableRow");
+				}
 			}
 		}
 	}
