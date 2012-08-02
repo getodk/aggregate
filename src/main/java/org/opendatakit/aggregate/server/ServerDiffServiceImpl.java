@@ -9,6 +9,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.RowResourceClient;
@@ -40,7 +41,7 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public List<RowClient> getRowsSince(String dataEtag, String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -58,6 +59,9 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 	

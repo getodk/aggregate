@@ -53,7 +53,7 @@ public class ColumnClient {
   
   /**
    * Transform the object into a server-side Column object.
-   */
+   *
   public Column transform() {
 	  // have to fix this to get the appropriate type out of the enum.
 	  Column column;
@@ -78,7 +78,7 @@ public class ColumnClient {
 	  }
 	  return column;
 			  
-  }
+  }*/
   
   @Override
   public int hashCode() {

@@ -80,6 +80,7 @@ public class AggregateUI implements EntryPoint {
   // session variables for tab visibility
   public static boolean manageVisible = false;
   public static boolean adminVisible = false;
+  public static boolean odkTablesVisible = false;
   
   // hack...
   public static final String QUOTA_EXCEEDED = "Quota exceeded";
@@ -280,7 +281,10 @@ public class AggregateUI implements EntryPoint {
 
     ManageTabUI management = new ManageTabUI(this);
     addTabToDatastructures(management, Tabs.MANAGEMENT);
-
+   
+    OdkTablesTabUI odkTables = new OdkTablesTabUI(this);
+    addTabToDatastructures(odkTables, Tabs.ODKTABLES);
+    
     AdminTabUI admin = new AdminTabUI(this);
     addTabToDatastructures(admin, Tabs.ADMIN);
 
@@ -294,6 +298,11 @@ public class AggregateUI implements EntryPoint {
       if (authorizedForTab(Tabs.MANAGEMENT)) {
         mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
         manageVisible = true;
+      }
+      
+      if (authorizedForTab(Tabs.ODKTABLES)) {
+    	  mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
+    	  odkTablesVisible = true;
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
@@ -465,6 +474,8 @@ public class AggregateUI implements EntryPoint {
       return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
     case ADMIN:
       return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
+    case ODKTABLES:
+    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
     default:
       return false;
     }

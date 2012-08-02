@@ -1,12 +1,19 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import java.io.Serializable;
+
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
 @Root
-public class Column {
+public class Column implements Serializable {
 
-  @Attribute(required = true)
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6624997293167731653L;
+
+@Attribute(required = true)
   private String name;
 
   @Attribute(required = true)

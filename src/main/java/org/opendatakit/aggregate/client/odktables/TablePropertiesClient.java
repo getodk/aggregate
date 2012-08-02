@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import java.io.Serializable;
+
 /**
  * This is the client-side version of 
  * org.opendatakit.aggregate.odktables.entity.TableProperties.java.
@@ -11,9 +13,14 @@ package org.opendatakit.aggregate.client.odktables;
  * @author sudar.sam@gmail.com
  *
  */
-public class TablePropertiesClient {
+public class TablePropertiesClient implements Serializable {
 
-  private String propertiesEtag;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 197746211663068997L;
+
+private String propertiesEtag;
 
   private String tableName;
 

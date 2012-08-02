@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.HTML;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.odktables.TableResourceClient;
+import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteTableButton;
 import org.opendatakit.aggregate.client.widgets.TablesAdminDeleteButton;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 
@@ -26,6 +27,9 @@ public class OdkTablesTableList extends FlexTable {
 	private static int TABLE_NAME_COLUMN = 0;
 	private static String TABLE_NAME_HEADING = "Table Name";
 	
+	private static int DELETE_BUTTON_COLUMN = 1;
+	
+	
 	public OdkTablesTableList() {
 		// add styling
 		addStyleName("dataTable");
@@ -41,8 +45,8 @@ public class OdkTablesTableList extends FlexTable {
 			return;
 		}
 		
-		// else we proceed to update.
-		// first clear the table
+		removeAllRows();
+		
 		removeAllRows();
 		// now create the table headers
 		setText(0, TABLE_NAME_COLUMN, TABLE_NAME_HEADING);
@@ -54,6 +58,9 @@ public class OdkTablesTableList extends FlexTable {
 			// because of the title row
 			int j = i + 1;
 			setWidget(j, TABLE_NAME_COLUMN, new HTML(table.getTableName()));
+			
+			setWidget(j, DELETE_BUTTON_COLUMN, new OdkTablesDeleteTableButton(
+					table.getTableId()));
 			
 			if (j % 2 == 0) {
 				getRowFormatter().addStyleName(j, "evenTableRow");

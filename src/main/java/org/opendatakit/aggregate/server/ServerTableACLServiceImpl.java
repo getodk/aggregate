@@ -9,6 +9,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.ServerTableACLService;
 import org.opendatakit.aggregate.client.odktables.TableAclClient;
@@ -43,7 +44,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public List<TableAclClient> getAcls(String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -56,13 +57,16 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public List<TableAclClient> getUserAcls(String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -74,12 +78,15 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public List<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException, 
-			RequestFailureException, PermissionDeniedException, DatastoreFailureException {
+			RequestFailureException, PermissionDeniedExceptionClient, DatastoreFailureException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -91,13 +98,16 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public TableAclClient getDefaultAcl(String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -109,12 +119,15 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public TableAclClient getUserAcl(String userId, String tableId) throws AccessDeniedException, 
-			RequestFailureException, DatastoreFailureException, PermissionDeniedException {
+			RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -128,12 +141,15 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public TableAclClient getGroupAcl(String groupId, String tableId) throws AccessDeniedException, 
-			RequestFailureException, DatastoreFailureException, PermissionDeniedException {
+			RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -145,6 +161,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
@@ -152,7 +171,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	public TableAclClient setDefaultAcl(TableAclClient acl,
 			String tableId) throws AccessDeniedException,
 			RequestFailureException, DatastoreFailureException,
-			PermissionDeniedException {
+			PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -169,13 +188,16 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public TableAclClient setUserAcl(String userId, TableAclClient acl,
 			String tableId) throws AccessDeniedException,
-			RequestFailureException, DatastoreFailureException, PermissionDeniedException {
+			RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -194,6 +216,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
@@ -201,7 +226,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	public TableAclClient setGroupAcl(String groupId,
 			TableAclClient acl, String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -218,13 +243,16 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public void deleteDefaultAcl(String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -235,13 +263,16 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public void deleteUserAcl(String userId, String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -252,13 +283,16 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public void deleteGroupAcl(String groupId, String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -269,6 +303,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 	

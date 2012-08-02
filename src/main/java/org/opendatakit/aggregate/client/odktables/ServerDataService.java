@@ -5,12 +5,15 @@ import java.util.List;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
-import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
+import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
+
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * This will be the DataService for the server. It will act the 
@@ -21,24 +24,25 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
  * @author sudar.sam@gmail.com
  *
  */
-public interface ServerDataService {
 
-	List<RowClient> getRows(String tableId, String rowId) throws AccessDeniedException, RequestFailureException, 
-	DatastoreFailureException, PermissionDeniedException;
+@RemoteServiceRelativePath("serverdataservice")
+public interface ServerDataService extends RemoteService {
+
+	List<RowClient> getRows(String tableId) throws AccessDeniedException, RequestFailureException, 
+	DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 	// RowResourceClient should be a similar thing to org.opendatakit.aggregate.odktables.entity.api.RowResource. 
 	// Calling it client to distinguish.
 	RowClient getRow(String tableId, String rowId) throws AccessDeniedException, RequestFailureException, 
-		DatastoreFailureException, PermissionDeniedException;
+		DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 	RowClient createOrUpdateRow(String tableId, String rowId, RowClient row) throws AccessDeniedException, RequestFailureException, 
-		DatastoreFailureException, PermissionDeniedException, 
-		EtagMismatchException, BadColumnNameException;
+		DatastoreFailureException, PermissionDeniedExceptionClient, 
+		EtagMismatchExceptionClient, BadColumnNameExceptionClient;
 	
 	void deleteRow(String tableId, String rowId) throws AccessDeniedException, 
-		RequestFailureException, DatastoreFailureException, PermissionDeniedException,
-		ODKTaskLockException;
+		RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 	
-		
+	List<String> getColumnNames(String tableId) throws DatastoreFailureException;
 	
 }

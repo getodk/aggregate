@@ -7,6 +7,8 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
 import org.opendatakit.aggregate.client.odktables.ServerPropertiesService;
@@ -39,7 +41,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public TablePropertiesClient getProperties(String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -51,14 +53,17 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public TablePropertiesClient setProperties(TablePropertiesClient properties,
 			String tableId) throws AccessDeniedException,
-			RequestFailureException, DatastoreFailureException,
-			ODKTaskLockException, EtagMismatchException, PermissionDeniedException {
+			RequestFailureException, DatastoreFailureException, EtagMismatchExceptionClient, 
+			PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
@@ -77,6 +82,15 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
+	    } catch (EtagMismatchException e) {
+	    	e.printStackTrace();
+	    	throw new EtagMismatchExceptionClient(e);
+	    } catch (ODKTaskLockException e) {
+	    	e.printStackTrace();
+	    	throw new RequestFailureException(e);
 	    }
 	}
 

@@ -53,9 +53,10 @@ public class ScopeClient implements Serializable {
    *          ignored (set to null).
    */
   public ScopeClient(Type type, String value) {
-    Validate.notNull(type);
+	// TODO make sure these validate things are compensated for somehow
+    //Validate.notNull(type);
     if (type.equals(Type.GROUP)) {
-      Validate.notEmpty(value);
+      //Validate.notEmpty(value);
     } else if (type.equals(Type.DEFAULT)) {
       value = null;
     }
@@ -100,28 +101,6 @@ public class ScopeClient implements Serializable {
   public void setValue(String value) {
     this.value = value;
   }
-  
-  /**
-   * Transforms into the server-side Scope.
-   */
-  public Scope transform() {
-	  Scope serverScope = null;
-	  switch(this.getType()) {
-		  case DEFAULT:
-			  serverScope = new Scope(Scope.Type.DEFAULT, this.getValue());
-			  break;
-		  case USER:
-			  serverScope = new Scope(Scope.Type.USER, this.getValue());
-			  break;
-		  case GROUP:
-			  serverScope = new Scope(Scope.Type.GROUP, this.getValue());
-			  break;
-	  }
-	  if (serverScope == null) serverScope = Scope.EMPTY_SCOPE;
-	  
-	  return serverScope;	  
-  }
-  
   
   /*
    * (non-Javadoc)

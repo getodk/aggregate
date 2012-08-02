@@ -28,7 +28,8 @@ public enum SubTabs implements Serializable {
 	SUBMISSION_ADMIN("Submission Admin", "subadmin"),
 	TABLES("ODK Tables Admin", "tablesadmin"), 
 	// These fall under the ODKTables Tab
-	CURRENTTABLES("Current Tables", "viewTables");
+	CURRENTTABLES("Current Tables", "viewCurrentTables"),
+	VIEWTABLE("View Table", "viewTable");
 	
    private String tabLabel;
    private String hashString;

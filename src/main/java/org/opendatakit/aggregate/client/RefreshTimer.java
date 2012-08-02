@@ -216,6 +216,18 @@ public class RefreshTimer extends Timer {
           tabPanel.update();
         }
         break;
+      case CURRENTTABLES:
+    	  if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
+    		  GWT.log("currentTables Refresh");
+    		  tabPanel.update();
+    	  }
+    	  break;
+      case VIEWTABLE:
+    	  if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
+    		  GWT.log("view table refresh");
+    		  tabPanel.update();
+    	  }
+    	  break;
       default:
         // should not happen
         GWT.log("currentSubTab (" + currentSubTab.getHashString()

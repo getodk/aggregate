@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,9 +13,14 @@ import java.util.List;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableDefinitionClient {
+public class TableDefinitionClient implements Serializable {
 
-  private String tableName;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1413634509888543150L;
+
+private String tableName;
 
   private List<ColumnClient> columns;
 
