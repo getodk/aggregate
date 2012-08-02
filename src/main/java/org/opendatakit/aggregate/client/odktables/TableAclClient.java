@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import java.io.Serializable;
+
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
 
@@ -14,9 +16,14 @@ import org.opendatakit.aggregate.odktables.entity.TableRole;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableAclClient {
+public class TableAclClient implements Serializable {
 
-  private ScopeClient scope;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3563986876354300986L;
+
+private ScopeClient scope;
 
   private TableRoleClient role;
 
@@ -59,36 +66,6 @@ public class TableAclClient {
     this.role = role;
   }
   
-  /**
-   * Transforms the object into a TableAcl object.
-   */
-  public TableAcl transform() {
-	  TableAcl ta = new TableAcl();
-	  switch (this.getRole()) {
-	  case NONE:
-		  ta.setRole(TableRole.NONE);
-		  break;
-	  case FILTERED_WRITER:
-		  ta.setRole(TableRole.FILTERED_WRITER);
-		  break;
-	  case UNFILTERED_READER_FILTERED_WRITER:
-		  ta.setRole(TableRole.UNFILTERED_READER_FILTERED_WRITER);
-		  break;
-	  case READER:
-		  ta.setRole(TableRole.READER);
-		  break;
-	  case WRITER:
-		  ta.setRole(TableRole.WRITER);
-		  break;
-	  case OWNER:
-		  ta.setRole(TableRole.OWNER);
-		  break;
-	  default:
-		  throw new IllegalStateException("No assignable permissions in transforming table role."); 		
-	  }
-	  ta.setScope(this.getScope().transform());
-	  return ta;	  
-  }
 
   /*
    * (non-Javadoc)

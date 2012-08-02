@@ -95,6 +95,7 @@
     <url-pattern>/aggregateui/preferenceservice</url-pattern>
   </servlet-mapping>
 
+  <!--  odk tables servlets -->
   <servlet>
     <servlet-name>odkTablesAdminServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.OdkTablesAdminServiceImpl</servlet-class>
@@ -104,7 +105,56 @@
     <servlet-name>odkTablesAdminServiceImpl</servlet-name>
     <url-pattern>/aggregateui/odktablesadmin</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverDataServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerDataServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    	<servlet-name>serverDataServiceImpl</servlet-name>
+    	<url-pattern>/aggregateui/serverdataservice</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverDiffServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerDiffServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverDiffServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/serverdiffservice</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverPropertiesServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerPropertiesServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverPropertiesServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/serverpropertiesservice</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverTableACLServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerTableACLServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverTableACLServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/servertableaclservice</url-pattern>
+  </servlet-mapping>  
 
+  <servlet>
+      <servlet-name>serverTableServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerTableServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverTableServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/servertableservice</url-pattern>
+  </servlet-mapping>  
  
   <servlet>
     <servlet-name>securityAdminServiceImpl</servlet-name>

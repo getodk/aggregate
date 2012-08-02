@@ -11,7 +11,9 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.client.exception.TableAlreadyExistsExceptionClient;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.ServerTableService;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
@@ -34,6 +36,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -49,7 +52,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public List<TableEntryClient> getTables()
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    TableManager tm = new TableManager(cc);
@@ -64,13 +67,13 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
-	    }
+	    } 
 	}
 
 	@Override
 	public TableEntryClient getTable(String tableId)
 			throws AccessDeniedException, RequestFailureException,
-			DatastoreFailureException, PermissionDeniedException {
+			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    TableManager tm = new TableManager(cc);
@@ -82,6 +85,9 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
@@ -89,14 +95,14 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	public TableEntryClient createTable(String tableId,
 			TableDefinitionClient definition)
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
-			PermissionDeniedException, TableAlreadyExistsException {
+			PermissionDeniedExceptionClient, TableAlreadyExistsExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    TableManager tm = new TableManager(cc);		
 	    // TODO: add access control stuff
 	    // Have to be careful of all the transforms going on here. 
 	    // Make sure they actually work as expected!
-	    // also have to be sure that I am passing in an actual colum and not a 
+	    // also have to be sure that I am passing in an actual column and not a 
 	    // column resource or something, in which case the transform() method is not
 	    // altering all of the requisite fields.
 	    try {
@@ -104,7 +110,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 		    List<ColumnClient> columns = definition.getColumns();
 		    List<Column> columnsServer = new ArrayList<Column>();
 		    for (ColumnClient column : columns) {
-		    	columnsServer.add(column.transform());
+		    	columnsServer.add(UtilTransforms.transform(column));
 		    }
 		    String metadata = definition.getMetadata();
 		    TableEntry entry = tm.createTable(tableId, tableName, columnsServer, metadata);
@@ -114,13 +120,16 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (TableAlreadyExistsException e) {
+	    	e.printStackTrace();
+	    	throw new TableAlreadyExistsExceptionClient(e);
 	    }
 	}
 
 	@Override
 	public void deleteTable(String tableId)
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
-			PermissionDeniedException, ODKTaskLockException {
+			PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    TableManager tm = new TableManager(cc);	
@@ -133,6 +142,12 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
+	    } catch (PermissionDeniedException e) {
+	    	e.printStackTrace();
+	    	throw new PermissionDeniedExceptionClient(e);
+	    } catch (ODKTaskLockException e) {
+	    	e.printStackTrace();
+	    	throw new RequestFailureException(e);
 	    }
 	}
 	

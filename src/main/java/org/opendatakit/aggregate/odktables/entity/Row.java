@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opendatakit.aggregate.client.odktables.RowClient;
+import org.opendatakit.aggregate.client.odktables.ScopeClient;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
@@ -138,7 +139,26 @@ public class Row {
 	  row.setRowEtag(this.getRowEtag());
 	  row.setRowId(this.getRowId());
 	  row.setValues(this.getValues());
-	  row.setFilterScope(this.getFilterScope().transform());
+	  if (this.getFilterScope().getType() == null) {
+		  row.setFilterScope(ScopeClient.EMPTY_SCOPE);
+	  } else {
+		  switch(this.getFilterScope().getType()) {
+		  case DEFAULT:
+			  row.setFilterScope(new ScopeClient(ScopeClient.Type.DEFAULT, 
+					  this.getFilterScope().getValue()));
+			  break;
+		  case USER:
+			  row.setFilterScope(new ScopeClient(ScopeClient.Type.USER, 
+					  this.getFilterScope().getValue()));		 
+			  break;
+		  case GROUP:
+			  row.setFilterScope(new ScopeClient(ScopeClient.Type.GROUP, 
+					  this.getFilterScope().getValue()));		  
+			  break;
+		  default:
+			  row.setFilterScope(ScopeClient.EMPTY_SCOPE);
+		  }
+	  }
 	  return row;
   }
 

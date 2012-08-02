@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import java.io.Serializable;
+
 /**
  * This is the client-side version of 
  * org.opendatakit.aggregate.odktables.entity.TableEntry.java.
@@ -11,12 +13,13 @@ package org.opendatakit.aggregate.client.odktables;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableEntryClient {
+public class TableEntryClient implements Serializable {
 
   /**
 	 * 
 	 */
-  
+	private static final long serialVersionUID = -7094543853434685403L;
+ 
   
   private String tableId;
   private String tableName;

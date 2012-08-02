@@ -13,14 +13,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerPropertiesServiceAsync {
 
-	void getProperties(String tableId, AsyncCallback<TablePropertiesClient> callback) 
-			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-			PermissionDeniedException;
+	void getProperties(String tableId, AsyncCallback<TablePropertiesClient> callback);
 
 	void setProperties(TablePropertiesClient properties, 
-			String tableId, AsyncCallback<TablePropertiesClient> callback) 
-			throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-			ODKTaskLockException, EtagMismatchException, PermissionDeniedException;
+			String tableId, AsyncCallback<TablePropertiesClient> callback);
 	
 	
 }

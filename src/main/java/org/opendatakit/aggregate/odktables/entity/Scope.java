@@ -84,7 +84,11 @@ public class Scope {
     this.value = value;
   }
   
+  
   // this is the transform to the clientside scope
+  // this might be defective, so i'm commenting it out for now
+  //--some issue about "this" being null sometimes? errors at the 
+  // switch statement.
   public ScopeClient transform() {
 	  // First get the type of this scope
 	  ScopeClient sc = null;

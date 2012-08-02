@@ -1,9 +1,8 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.opendatakit.aggregate.odktables.entity.Row;
 
 /**
  * This object represents a Row on the client side of the code. It is based almost
@@ -13,9 +12,14 @@ import org.opendatakit.aggregate.odktables.entity.Row;
  * @author sudar.sam@gmail.com
  *
  */
-public class RowClient {
+public class RowClient implements Serializable {
 
-  private String rowId;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3396839962551194663L;
+
+private String rowId;
 
   private String rowEtag;
 
@@ -122,21 +126,6 @@ public class RowClient {
 
   public void setValues(final Map<String, String> values) {
     this.values = values;
-  }
-  
-  /**
-   * Transform into the server-side Row.
-   */
-  public Row transform() {
-	  Row serverRow = new Row();
-	  serverRow.setCreateUser(this.getCreateUser());
-	  serverRow.setDeleted(this.isDeleted());
-	  serverRow.setFilterScope(this.getFilterScope().transform());
-	  serverRow.setLastUpdateUser(this.getLastUpdateUser());
-	  serverRow.setRowEtag(this.getRowEtag());
-	  serverRow.setRowId(this.getRowId());
-	  serverRow.setValues(this.getValues());
-	  return serverRow;
   }
 
   /*

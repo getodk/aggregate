@@ -4,12 +4,16 @@ import java.util.List;
 
 import javax.ws.rs.core.UriInfo;
 
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.client.exception.TableAlreadyExistsExceptionClient;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * This will be the TableService for the server. It will act the 
@@ -19,22 +23,24 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
  * 
  * @author sudar.sam
  */
-public interface ServerTableService {
+
+@RemoteServiceRelativePath("servertableservice")
+public interface ServerTableService extends RemoteService {
 
 	
 	
 	List<TableEntryClient> getTables() throws AccessDeniedException, 
-		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
+		RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 	TableEntryClient getTable(String tableId) throws AccessDeniedException, 
-		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
+		RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 	TableEntryClient createTable(String tableId, TableDefinitionClient definition) throws 
 		AccessDeniedException, RequestFailureException, DatastoreFailureException, 
-		PermissionDeniedException, TableAlreadyExistsException;
+		PermissionDeniedExceptionClient, TableAlreadyExistsExceptionClient;
 	
 	void deleteTable(String tableId) throws AccessDeniedException, RequestFailureException, 
-		DatastoreFailureException, PermissionDeniedException, ODKTaskLockException;
+		DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 	// Not sure if I still need these methods, which are present in Dylan's methods,
 	// but perhaps I don't need them because I can just create the other services directly?

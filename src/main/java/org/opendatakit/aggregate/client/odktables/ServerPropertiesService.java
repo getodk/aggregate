@@ -1,13 +1,13 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import javax.ws.rs.core.UriInfo;
-
+import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
-import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * This will be the PropertiesService for the server. It will act the 
@@ -17,16 +17,18 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
  * 
  * @author sudar.sam
  */
-public interface ServerPropertiesService {
+
+@RemoteServiceRelativePath("serverpropertiesservice")
+public interface ServerPropertiesService extends RemoteService {
 
 	
 	TablePropertiesClient getProperties(String tableId) throws AccessDeniedException, 
-		RequestFailureException, DatastoreFailureException, PermissionDeniedException;
+		RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 
 	TablePropertiesClient setProperties(TablePropertiesClient properties, String tableId) throws 
 		AccessDeniedException, 
-		RequestFailureException, DatastoreFailureException, ODKTaskLockException, EtagMismatchException,
-		PermissionDeniedException;
+		RequestFailureException, DatastoreFailureException, EtagMismatchExceptionClient,
+		PermissionDeniedExceptionClient;
 	
 
 }
