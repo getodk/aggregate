@@ -7,21 +7,25 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
-public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
-	  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete Table";
-	  private static final String TOOLTIP_TXT = "Delete This Table";
-	  private static final String HELP_BALLOON_TXT = "Completely delete this table.";
+public class OdkTablesConfirmDeleteRowPopup extends AbstractPopupBase {
 
+	  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete Row";
+	  private static final String TOOLTIP_TXT = "Delete this row";
+	  private static final String HELP_BALLOON_TXT = "Delete this row.";
+
+	  // the table to delete from
 	  private final String tableId;
+	  // the row you're deleting
+	  private final String rowId;
 
-	  public OdkTablesConfirmDeleteTablePopup(String tableId) {
+	  public OdkTablesConfirmDeleteRowPopup(String tableId, String rowId) {
 	    super();
 	    this.tableId = tableId;
+	    this.rowId = rowId;
 
 	    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT,
 	        HELP_BALLOON_TXT);
@@ -29,7 +33,7 @@ public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
 
 	    FlexTable layout = new FlexTable();
 
-	    HTML message = new HTML("Are you sure you want to delete this table?");
+	    HTML message = new HTML("Are you sure you want to delete this row?");
 	    layout.setWidget(0, 0, message);
 	    layout.setWidget(0, 1, deleteButton);
 	    layout.setWidget(0, 2, new ClosePopupButton(this));
@@ -56,7 +60,7 @@ public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
 	        }
 	      };
 	      // Make the call to the form service.
-	      SecureGWT.getServerTableService().deleteTable(tableId, callback);
+	      SecureGWT.getServerDataService().deleteRow(tableId, rowId, callback);
 	      hide();
 	    }
 	  }

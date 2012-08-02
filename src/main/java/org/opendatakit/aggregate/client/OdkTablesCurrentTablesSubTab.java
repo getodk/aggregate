@@ -58,6 +58,10 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
 				AggregateUI.getUI().clearError();
 				tableList.updateTableList(tables);
 				tableList.setVisible(true);
+				
+				// for some reason this line was making a crazy number of
+				// refreshes when you were just sitting on the page.
+				//AggregateUI.getUI().getTimer().refreshNow();
 			}
 		});	
 	}

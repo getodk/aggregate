@@ -7,7 +7,9 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
 import org.opendatakit.aggregate.client.widgets.AggregateListBox;
+import org.opendatakit.aggregate.client.widgets.OdkTablesDisplayDeletedRowsCheckBox;
 import org.opendatakit.aggregate.client.widgets.TableEntryClientListBox;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -16,6 +18,9 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 
 /**
@@ -27,6 +32,9 @@ import com.google.gwt.user.client.ui.ListBox;
  */
 public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
 
+	// this is the panel with the information and the dropdown box
+	// that tells you to select a table
+	private FlexTable selectTablePanel;
 	/**
 	 * This will be the box that lets you choose which of the tables you
 	 * are going to view.
@@ -34,15 +42,30 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
 	 */
 	private ListBox tableBox;
 	
+	private HorizontalPanel topPanel;
+	
 	// array list so that you can access with indices reliably
 	private final ArrayList<TableEntryClient> currentTables;
 	// the box that shows the data
 	private OdkTablesViewTable tableData;
 	
+	// whether or not to display the deleted rows
+	//private Boolean displayDeleted;
+	//private OdkTablesDisplayDeletedRowsCheckBox deletedRowsCheckBox;
+	
+	// the current table that is being displayed
+	private TableEntryClient currentTable;
+	
 	/**
 	 * Sets up the View Table subtab.
 	 */
 	public OdkTablesViewTableSubTab() {
+		
+		setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+		
+		//displayDeleted = false;
+		currentTable = null;
+		
 		// first construct a copy so you can build the list box before you
 		// update it. This seems like bad style.
 		currentTables = new ArrayList<TableEntryClient>();
@@ -65,9 +88,20 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
 		// now populate the list.
 		updateTableList();
 		
-		tableData = new OdkTablesViewTable();
+		tableData = new OdkTablesViewTable(this);
 		
-		add(tableBox);
+		selectTablePanel = new FlexTable();
+		selectTablePanel.getElement().setId("select_table_panel");
+		selectTablePanel.setHTML(0, 0, "<h2 id=\"table_name\"> Select a Table </h2>");
+		selectTablePanel.setWidget(0, 1, tableBox);
+		
+		//deletedRowsCheckBox = new OdkTablesDisplayDeletedRowsCheckBox(this, displayDeleted);
+		//selectTablePanel.setWidget(0, 2, deletedRowsCheckBox);
+		
+		topPanel = new HorizontalPanel();
+		topPanel.add(selectTablePanel);
+		topPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
+		add(topPanel);
 		add(tableData);
 		
 		
@@ -97,6 +131,15 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
 		return true;
 	}
 	
+	/* temporarily existed to display deleted rows
+	public Boolean getDisplayDeleted() {
+		return displayDeleted;
+	}
+	
+	public void setDisplayDeleted(Boolean display) {
+		this.displayDeleted = display;
+	}*/
+	
 	/** 
 	 * This should just update the table list. 
 	 */
@@ -104,6 +147,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
 	@Override
 	public void update() {
 		updateTableList();
+		
 	}
 	
 	public void update(List<TableEntryClient> tables) {
@@ -123,8 +167,22 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
 	public void updateTableData(int selectedIndex) {
 		// - 1 because you have an extra entry that is the "" holder so
 		// that the listbox starts empty. 
-		tableData.updateDisplay(currentTables.get(selectedIndex - 1));
-		add(tableData);
+		if (selectedIndex == 0) {
+			updateTableData();
+		} else {
+			currentTable = currentTables.get(selectedIndex - 1);
+			tableData.updateDisplay(currentTable);
+			
+			selectTablePanel.setHTML(1, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
+			selectTablePanel.setHTML(1, 1, "<h2 id=\table_name\"> " + currentTable.getTableName()
+					+ " </h2>");
+			add(tableData);
+		}
+	}
+	
+	
+	public void updateTableData() {
+		tableData.updateDisplay(null);
 	}
 	
 
