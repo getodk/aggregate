@@ -39,7 +39,7 @@ import org.opendatakit.common.web.CallingContext;
  * (including null) within a given blob set.
  * <p>
  * Blobs are inserted into a blob set with the {@link #setValueFromByteArray}
- * method. If an blob with a matching unrooted filepath is already present in
+ * method. If a blob with a matching unrooted filepath is already present in
  * the blob set, no update occurs and the method instead returns whether or not
  * the supplied byte array matches that of the stored blob. Thus, if you need to
  * replace a blob within a blob set, you must create a new blob set, copy the

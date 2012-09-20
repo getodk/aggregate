@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry excluding="org/opendatakit/common/testing/gae/" kind="src" path="test"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/apache-mime4j-core-0.7.1.jar"/>
@@ -37,7 +37,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpmime-4.1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.8.8.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.8.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.8.8.jar" sourcepath="/Users/sudars/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.8.8/jackson-mapper-asl-1.8.8-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-latest.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javassist-3.12.1.GA.jar"/>
@@ -55,12 +55,12 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/openxri-syntax-1.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/postgresql-9.0-801.jdbc4.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-2.3.3.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-2.3.3.Final.jar" sourcepath="/Users/sudars/.m2/repository/org/jboss/resteasy/resteasy-jaxrs/2.3.3.Final/resteasy-jaxrs-2.3.3.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/scannotation-1.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/selenium-java-2.16.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/signpost-commonshttp4-1.2.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/signpost-core-1.2.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar" sourcepath="/Users/sudars/.m2/repository/org/simpleframework/simple-xml/2.6.2/simple-xml-2.6.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-jcl-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-aop-3.1.0.RELEASE.jar"/>
@@ -97,5 +97,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="/usr/local/appengine-java-sdk-1.6.6/lib/testing/appengine-testing.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-gae-settings-latest.jar"/>
+	<classpathentry kind="lib" path="/usr/local/appengine-java-sdk-1.6.6/lib/impl/appengine-api-labs.jar"/>
+	<classpathentry kind="lib" path="/usr/local/appengine-java-sdk-1.6.6/lib/impl/appengine-api-stubs.jar"/>
+	<classpathentry kind="lib" path="/usr/local/appengine-java-sdk-1.6.6/lib/impl/appengine-api.jar"/>
+	<classpathentry kind="lib" path="/usr/local/appengine-java-sdk-1.6.6/lib/impl/appengine-local-runtime.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

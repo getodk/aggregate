@@ -11,6 +11,7 @@ public class OdkTablesTabUI extends AggregateTabBase {
 		    // add the subtabs
 		    addSubTab(new OdkTablesCurrentTablesSubTab(), SubTabs.CURRENTTABLES);
 		    addSubTab(new OdkTablesViewTableSubTab(), SubTabs.VIEWTABLE);
+		    addSubTab(new OdkTablesManageTableFilesSubTab(), SubTabs.MANAGEFILES);
 		   
 		    // register handler to manage tab selection change (and selecting our tab)
 		    registerClickHandlers(Tabs.ODKTABLES, baseUI);

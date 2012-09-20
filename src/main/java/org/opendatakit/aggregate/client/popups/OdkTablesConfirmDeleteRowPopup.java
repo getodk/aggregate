@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
@@ -21,9 +22,13 @@ public class OdkTablesConfirmDeleteRowPopup extends AbstractPopupBase {
 	  private final String tableId;
 	  // the row you're deleting
 	  private final String rowId;
+	  // the ViewTable view that you are interacting with
+	  private OdkTablesViewTable parentView;
 
-	  public OdkTablesConfirmDeleteRowPopup(String tableId, String rowId) {
+	  public OdkTablesConfirmDeleteRowPopup(OdkTablesViewTable parent,
+	      String tableId, String rowId) {
 	    super();
+	    this.parentView = parent;
 	    this.tableId = tableId;
 	    this.rowId = rowId;
 
@@ -56,7 +61,9 @@ public class OdkTablesConfirmDeleteRowPopup extends AbstractPopupBase {
 	        public void onSuccess(Void v) {
 	          AggregateUI.getUI().clearError();
 	          
-	          AggregateUI.getUI().getTimer().refreshNow();
+	          parentView.updateDisplay(parentView.getCurrentTable());
+	          
+	          //AggregateUI.getUI().getTimer().refreshNow();
 	        }
 	      };
 	      // Make the call to the form service.

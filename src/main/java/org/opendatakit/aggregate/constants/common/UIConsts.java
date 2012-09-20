@@ -30,6 +30,11 @@ public class UIConsts {
   public static final String FILTER_NONE = "none";
 
   public static final String FORM_UPLOAD_SERVLET_ADDR = "formUpload";
+  
+  // url pattern for uploading files associated with ODKTables tables
+  public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR = "tableFileUpload";
+  // url pattern for downloading files associated with odktables tables
+  public static final String TABLE_FILE_DOWNLOAD_SERVLET_ADDR = "tableFileDownload";
 
   public static final String SUBMISSION_SERVLET_ADDR = "submission";
   public static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";

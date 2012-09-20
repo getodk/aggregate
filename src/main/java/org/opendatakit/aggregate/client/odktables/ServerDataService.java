@@ -29,11 +29,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface ServerDataService extends RemoteService {
 
 	List<RowClient> getRows(String tableId) throws AccessDeniedException, RequestFailureException, 
-	DatastoreFailureException, PermissionDeniedExceptionClient;
+		DatastoreFailureException, PermissionDeniedExceptionClient;
 	
-	// RowResourceClient should be a similar thing to org.opendatakit.aggregate.odktables.entity.api.RowResource. 
-	// Calling it client to distinguish.
-	RowClient getRow(String tableId, String rowId) throws AccessDeniedException, RequestFailureException, 
+	TableContentsClient getRow(String tableId, String rowId) throws AccessDeniedException, RequestFailureException, 
 		DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 	RowClient createOrUpdateRow(String tableId, String rowId, RowClient row) throws AccessDeniedException, RequestFailureException, 
@@ -44,5 +42,19 @@ public interface ServerDataService extends RemoteService {
 		RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 	List<String> getColumnNames(String tableId) throws DatastoreFailureException;
+	
+	List<RowClient> getFileRows(String tableId) throws AccessDeniedException, RequestFailureException,
+		DatastoreFailureException, PermissionDeniedExceptionClient;
+	
+	List<String> getFileRowInfoColumnNames();
+	
+	TableContentsClient getTableContents(String tableId) throws AccessDeniedException, RequestFailureException,
+		DatastoreFailureException, PermissionDeniedExceptionClient;
+	
+	TableContentsClient getFileInfoContents(String tableId) throws AccessDeniedException, RequestFailureException,
+	DatastoreFailureException, PermissionDeniedExceptionClient;
+	
+	void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
+		RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 	
 }

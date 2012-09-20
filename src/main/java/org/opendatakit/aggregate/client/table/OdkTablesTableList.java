@@ -68,7 +68,7 @@ public class OdkTablesTableList extends FlexTable {
 				setWidget(j, TABLE_NAME_COLUMN, new HTML(table.getTableName()));
 				
 				setWidget(j, DELETE_BUTTON_COLUMN, new OdkTablesDeleteTableButton(
-						table.getTableId()));
+						this, table.getTableId()));
 				
 				if (j % 2 == 0) {
 					getRowFormatter().addStyleName(j, "evenTableRow");

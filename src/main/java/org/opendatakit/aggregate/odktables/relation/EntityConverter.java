@@ -174,6 +174,63 @@ public class EntityConverter {
     row.setValues(getRowValues(entity, columns));
     return row;
   }
+  
+  /**
+   * This method creates a row from an entity retrieved from the 
+   * DbTableFileInfo table. It makes use of the static List of 
+   * String column names in that class.
+   * @param entity
+   * @return
+   * @author sudar.sam@gmail.com
+   */
+  public static Row toRowFromFileInfo(Entity entity) {
+	  Row row = new Row();
+	  row.setRowId(entity.getId());
+	  row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
+	  row.setDeleted(entity.getBoolean(DbTable.DELETED));
+	  row.setCreateUser(entity.getString(DbTable.CREATE_USER));
+	  row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
+	  String filterType = entity.getString(DbTable.FILTER_TYPE);
+	  if (filterType != null) {
+	      Scope.Type type = Scope.Type.valueOf(filterType);
+	      if (filterType.equals(Scope.Type.DEFAULT)) {
+	      row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
+	        } else {
+	          String value = entity.getString(DbTable.FILTER_VALUE);
+	          row.setFilterScope(new Scope(type, value));
+	        }
+	      } else {
+	        row.setFilterScope(Scope.EMPTY_SCOPE);
+	      }
+	  // this will be the actual values of the row
+	  Map<String, String> values = new HashMap<String, String>();
+	  for (String columnName : DbTableFileInfo.columnNames) {
+	    String value = entity.getAsString(columnName);
+	    values.put(columnName, value);
+	  }
+	  row.setValues(values);
+	  return row;
+	  
+  }
+  
+  /**
+   * Return a list of rows from a list of entities queried from the
+   * DbTableFileInfo table. Just calls {@link toRowFromFileInfo()} 
+   * for every entity in the list. However, it does NOT include
+   * deleted rows.
+   * @param entities
+   * @return
+   */
+  public static List<Row> toRowsFromFileInfo(List<Entity> entities) {
+	  List<Row> rows = new ArrayList<Row>();
+	  for (Entity e : entities) {
+		  Row row = toRowFromFileInfo(e);
+		  if (!row.isDeleted()) {
+			  rows.add(row);
+		  }
+	  }
+	  return rows;
+  }
 
   /**
    * Convert a {@link DbLogTable} entity into a {@link Row}

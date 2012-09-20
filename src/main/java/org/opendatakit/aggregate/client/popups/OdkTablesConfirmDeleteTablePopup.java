@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
@@ -18,9 +19,13 @@ public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
 	  private static final String HELP_BALLOON_TXT = "Completely delete this table.";
 
 	  private final String tableId;
+	  
+	  private OdkTablesTableList parentTable;
 
-	  public OdkTablesConfirmDeleteTablePopup(String tableId) {
+	  public OdkTablesConfirmDeleteTablePopup(OdkTablesTableList parentTable,
+	      String tableId) {
 	    super();
+	    this.parentTable = parentTable;
 	    this.tableId = tableId;
 
 	    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT,
@@ -51,7 +56,6 @@ public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
 	        @Override
 	        public void onSuccess(Void v) {
 	          AggregateUI.getUI().clearError();
-	          
 	          AggregateUI.getUI().getTimer().refreshNow();
 	        }
 	      };
