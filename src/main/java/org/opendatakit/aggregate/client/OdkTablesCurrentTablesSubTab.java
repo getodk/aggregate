@@ -5,6 +5,8 @@ import java.util.List;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
+import org.opendatakit.aggregate.client.widgets.OdkTablesAddTableButton;
+import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -24,15 +26,35 @@ import com.google.gwt.user.client.ui.FlexTable;
  *
  */
 public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
+	
+	//private static final String ADD_FILE_TXT = "Add a table file";
+	//private static final String ADD_FILE_TOOLTIP_TXT = "Upload a file";
+	//private static final String ADD_FILE_BALLOON_TXT = "Upload a file to be associated with a specific table";
+	//private static final String ADD_FILE_BUTTON_TXT = "<img src=\"images/yellow_plus.png\" />" 
+	//		+ ADD_FILE_TXT;
 
 	private OdkTablesTableList tableList;
+	
+	private OdkTablesAddTableButton addButton;
+	
+	// this is a button for adding a file to be associated with a table.
+	//private ServletPopupButton addFileButton;
 	
 	public OdkTablesCurrentTablesSubTab() {
 		// vertical
 		setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 		
 		tableList = new OdkTablesTableList();
+		
+		addButton = new OdkTablesAddTableButton();
+		
+		//addFileButton = new ServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
+		//		UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT,
+		//		ADD_FILE_BALLOON_TXT);
+		
 		add(tableList);
+		add(addButton);
+		//add(addFileButton);
 	}
 	
 	@Override

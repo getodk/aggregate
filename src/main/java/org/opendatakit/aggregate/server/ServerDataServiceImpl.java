@@ -1,11 +1,16 @@
 package org.opendatakit.aggregate.server;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
@@ -13,27 +18,40 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ServerDataService;
+import org.opendatakit.aggregate.client.odktables.TableContentsClient;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
-import org.opendatakit.aggregate.odktables.api.DataService;
-import org.opendatakit.aggregate.odktables.api.TableService;
+import org.opendatakit.aggregate.odktables.TableManager;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesFileManifestEntry;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
+import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbColumn;
-import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.aggregate.odktables.relation.DbTable;
+import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
+import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
+import org.opendatakit.aggregate.odktables.relation.EntityConverter;
+import org.opendatakit.aggregate.servlet.OdkTablesTableFileDownloadServlet;
+import org.opendatakit.common.ermodel.simple.Entity;
+import org.opendatakit.common.ermodel.simple.Relation;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.utils.HtmlUtil;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -78,7 +96,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 	}
 	
 	@Override
-	public RowClient getRow(String tableId, String rowId) throws
+	public TableContentsClient getRow(String tableId, String rowId) throws
 			AccessDeniedException, RequestFailureException, DatastoreFailureException,
 			PermissionDeniedExceptionClient {
 		try {
@@ -89,7 +107,13 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 			af.checkPermission(TablePermission.READ_ROW);
 			Row row = dm.getRowNullSafe(rowId);
 			af.checkFilter(TablePermission.UNFILTERED_READ, row);
-			return row.transform();
+			
+			TableContentsClient tcc = new TableContentsClient();
+			tcc.columnNames = this.getColumnNames(tableId);
+			List<RowClient> rows = new ArrayList<RowClient>();
+			rows.add(row.transform());
+			tcc.rows = rows;
+			return tcc;
 		} catch (ODKDatastoreException e) {
 			e.printStackTrace();
 			throw new DatastoreFailureException(e);
@@ -229,6 +253,202 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements
 			clientRows.add(row.transform());
 		}
 		return clientRows;
+	}
+
+	/**
+	 * This returns the rows from the DbTableFileInfo table about the files for
+	 * a certain table. NB: this does NOT use the same {@link Datamanager} class as the 
+	 * rest of the DataService methods, as this is considered accessing a unique 
+	 * table that is part of the back-end, rather than one of the tables that is
+	 * created by the user.
+	 * @param tableId the string uid of the table whose files you want
+	 */
+	@Override
+	public List<RowClient> getFileRows(String tableId)
+			throws AccessDeniedException, RequestFailureException,
+			DatastoreFailureException, PermissionDeniedExceptionClient {
+	    HttpServletRequest req = this.getThreadLocalRequest();
+	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+	    try {
+		    List<Row> rows = EntityConverter.toRowsFromFileInfo(DbTableFileInfo.query(tableId, cc));
+		    return transformRows(rows);
+	    } catch(ODKDatastoreException e) {
+	    	e.printStackTrace();
+	    	throw new DatastoreFailureException(e);
+	    }    	
+	}
+	
+	//TODO make this work. atm isn't working.
+	public List<OdkTablesKeyValueStoreEntry> testFileGets(String tableId) throws 
+			PermissionDeniedExceptionClient, DatastoreFailureException, RequestFailureException,
+			AccessDeniedException, JsonGenerationException, IOException {
+	    HttpServletRequest req = this.getThreadLocalRequest();
+	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+	    try {
+			List<RowClient> infoRows = getFileRows(tableId);
+	    	TableManager tm = new TableManager(cc);
+	    	TableEntry table = tm.getTable(tableId);
+	    	String tableName = table.getTableName();
+			DbTableFiles blobSetRelation = new DbTableFiles(cc);
+			List<OdkTablesKeyValueStoreEntry> entries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+			for (RowClient row : infoRows) {
+				// we only want the non-deleted rows
+				if (!row.isDeleted()) {
+					// the KeyValueStoreEntry object is the same for every entry. However,
+					// for files you need to create a FileManifestEntry for the value.
+					OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
+					entry.tableId = tableId;
+					entry.tableName = tableName;
+					entry.key = row.getValues().get(DbTableFileInfo.KEY);
+					entry.type = row.getValues().get(DbTableFileInfo.VALUE_TYPE);
+					// if it's a file, make the file manifest entry.
+					if (entry.type.equalsIgnoreCase(DbTableFileInfo.Type.FILE.name)) {
+						OdkTablesFileManifestEntry fileEntry = new OdkTablesFileManifestEntry();
+						fileEntry.filename = blobSetRelation.getBlobEntitySet(row.getValues().get(DbTableFileInfo.VALUE), cc)
+								.getUnrootedFilename(1, cc);
+						fileEntry.md5hash = blobSetRelation.getBlobEntitySet(row.getValues().get(DbTableFileInfo.VALUE), cc)
+								.getContentHash(1, cc);
+						// now generate the download url. look at XFormsManifestXmlTable as an
+						// example of how Mitch did it.
+						Map<String, String> properties = new HashMap<String, String>();
+						properties.put(ServletConsts.BLOB_KEY, row.getValues().get(DbTableFileInfo.VALUE));
+						properties.put(ServletConsts.AS_ATTACHMENT, "true");
+						String url = cc.getServerURL() + BasicConsts.FORWARDSLASH + 
+								OdkTablesTableFileDownloadServlet.ADDR;
+						fileEntry.downloadUrl = HtmlUtil.createLinkWithProperties(url, properties);
+						// now convert this object to json and set it to the entry's value.
+						ObjectMapper mapper = new ObjectMapper();
+						entry.value = mapper.writeValueAsString(fileEntry);
+					} else { 
+						// if it's not a file, we just set the value. as input.
+						entry.value = row.getValues().get(DbTableFileInfo.VALUE);
+					}
+					// and now add the completed entry to the list of entries
+					entries.add(entry);
+						
+				}
+			}
+			return entries;
+	    } catch (ODKDatastoreException e) {
+	    	e.printStackTrace();
+	    	throw new DatastoreFailureException(e);
+	    }
+	}	    
+		
+
+	/**
+	 * Get the list of columns that are in the DbTableFileInfo table.
+	 * This is defined in server code and thus is never in danger of 
+	 * throwing DatastoreExceptions.
+	 */
+	@Override
+	public List<String> getFileRowInfoColumnNames() {
+		List<String> officialColumns = DbTableFileInfo.columnNames;
+		List<String> columnNames = new ArrayList<String>();
+		columnNames.addAll(officialColumns);
+		return columnNames;
+	}
+
+	@Override
+	public TableContentsClient getTableContents(String tableId)
+			throws AccessDeniedException, RequestFailureException,
+			DatastoreFailureException, PermissionDeniedExceptionClient {
+		TableContentsClient tcc = new TableContentsClient();
+		tcc.rows = getRows(tableId);
+		tcc.columnNames = getColumnNames(tableId);
+		return tcc;
+	}
+
+	/**
+	 * This method more or less gets the user-friendly data to be displayed.
+	 * It adds the correct filename and returns only
+	 * the non-deleted rows.
+	 */
+	@Override
+	public TableContentsClient getFileInfoContents(String tableId)
+			throws AccessDeniedException, RequestFailureException,
+			DatastoreFailureException, PermissionDeniedExceptionClient {
+		TableContentsClient tcc = new TableContentsClient();
+		tcc.columnNames = getFileRowInfoColumnNames();
+		tcc.columnNames.add(DbTableFileInfo.UI_ONLY_FILENAME_HEADING);
+		tcc.columnNames.add(DbTableFileInfo.UI_ONLY_TABLENAME_HEADING);
+		tcc.rows = getFileRows(tableId);
+		// add in the user friendly filename
+	    HttpServletRequest req = this.getThreadLocalRequest();
+	    CallingContext cc = ContextFactory.getCallingContext(this, req);	
+	    try {
+	    	TableManager tm = new TableManager(cc);
+	    	TableEntry table = tm.getTable(tableId);
+	    	String tableName = table.getTableName();
+			DbTableFiles blobSetRelation = new DbTableFiles(cc);
+			List<RowClient> newRows = new ArrayList<RowClient>();
+			for (RowClient row : tcc.rows) {
+				// we only want the non-deleted rows
+				if (!row.isDeleted()) {
+					String filename = blobSetRelation.getBlobEntitySet(
+					    row.getValues().get(DbTableFileInfo.VALUE), cc)
+					    .getUnrootedFilename(1, cc);
+					row.getValues().put(DbTableFileInfo.UI_ONLY_FILENAME_HEADING, filename);
+					row.getValues().put(DbTableFileInfo.UI_ONLY_TABLENAME_HEADING, tableName);
+					newRows.add(row);
+				}
+			}
+			tcc.rows = newRows;
+			return tcc;
+		} catch (ODKDatastoreException e) {
+			e.printStackTrace();
+			throw new DatastoreFailureException(e);
+		}
+	}
+
+	/**
+	 * Deletes the file from the datastore. Currently just marks
+	 * the row as deleted. It assumes that only one person will be
+	 * accessing these files at the same, and doesn't lock to try
+	 * and prevent concurrent access or anything along those lines.
+	 * <br>
+	 * This is largely based on the {@link DataManager} deleteRow
+	 * method.
+	 */
+	@Override
+	public void deleteTableFile(String tableId, String rowId)
+			throws AccessDeniedException, RequestFailureException,
+			DatastoreFailureException, PermissionDeniedExceptionClient {
+	    HttpServletRequest req = this.getThreadLocalRequest();
+	    CallingContext cc = ContextFactory.getCallingContext(this, req);		
+		try {
+			Relation tableInfo = DbTableFileInfo.getRelation(cc);
+			Entity entry = tableInfo.getEntity(rowId, cc);
+			// first we want to increment the modification number
+			int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
+			modificationNumber++;
+			entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
+			entry.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+			entry.set(DbTable.DELETED, true);
+			
+			/*
+			// get the row and mark it as deleted
+			List<String> rowIds = new ArrayList<String>();
+			rowIds.add(rowId);
+			List<Entity> rows = DbTable.query(tableInfo, rowIds, cc);
+			// there should only be on row as currently implemented
+			for (Entity row : rows) {
+				row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+				row.set(DbTable.DELETED, true);
+			}*/
+			
+			//TODO log rows for deleting files
+			
+			// update db
+			//Relation.putEntities(rows, cc);
+			entry.put(cc);
+			
+		} catch (ODKDatastoreException e) {
+			e.printStackTrace();
+			throw new DatastoreFailureException(e);
+		}
+		
 	}
 	
 

@@ -4,40 +4,41 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.OdkTablesViewTableSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteRowButton;
+import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
 /**
- * Displays the contents of a table.
+ * Displays the entries in the {@link DbTableFileInfo} table that pertain to a
+ * specific table.
  * 
  * @author sudar.sam@gmail.com
  * 
  */
-public class OdkTablesViewTable extends FlexTable {
+public class OdkTablesViewTableFileInfo extends FlexTable {
 
-  // the table that we are currently displaying.
+  // the table whose info we are currently displaying.
   private TableEntryClient currentTable;
 
-  // that table's rows
+  // that table's info rows
   private List<RowClient> rows;
 
-  // that table's column names
+  // columnnames.
   private List<String> columnNames;
 
   // this is the heading for the delete row button.
   private static final String DELETE_ROW_HEADING = "Delete";
 
-  private AggregateSubTabBase tableSubTab;
+  // this is just the tab that opened the table
+  private AggregateSubTabBase basePanel;
 
   // this is the number of columns that exist for a table as returned
   // by the server that are NOT user defined.
@@ -52,18 +53,20 @@ public class OdkTablesViewTable extends FlexTable {
    * This is the constructor to call when there has not been a table selected.
    * Should this even exist?
    */
-  public OdkTablesViewTable(AggregateSubTabBase tableSubTab) {
+  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab) {
+
     // add styling
     addStyleName("dataTable");
     getElement().setId("form_management_table");
 
-    this.tableSubTab = tableSubTab;
+    this.basePanel = tableSubTab;
 
     // no current table.
     this.currentTable = null;
   }
 
-  public OdkTablesViewTable(AggregateSubTabBase tableSubTab, TableEntryClient table) {
+  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab, 
+      TableEntryClient table) {
     this(tableSubTab);
 
     updateDisplay(table);
@@ -76,9 +79,6 @@ public class OdkTablesViewTable extends FlexTable {
    */
   public void updateDisplay(TableEntryClient table) {
     TableEntryClient oldTable = this.currentTable;
-    
-    //for testing timing
-    //Window.alert("in odktablesViewTable.updateDisplay()");
 
     this.currentTable = table;
 
@@ -108,59 +108,12 @@ public class OdkTablesViewTable extends FlexTable {
         rows = tcc.rows;
         setRows(rows);
 
+        //AggregateUI.getUI().getTimer().refreshNow();
       }
     };
 
-    SecureGWT.getServerDataService().getTableContents(table.getTableId(), getDataCallback);
+    SecureGWT.getServerDataService().getFileInfoContents(table.getTableId(), getDataCallback);
   }
-
-  /*
-   * public void updateRows(TableEntryClient table) { // set up the callback
-   * object AsyncCallback<List<RowClient>> getRowsCallback = new
-   * AsyncCallback<List<RowClient>>() {
-   * 
-   * @Override public void onFailure(Throwable caught) {
-   * AggregateUI.getUI().reportError(caught); }
-   * 
-   * @Override public void onSuccess(List<RowClient> rowList) { rows = rowList;
-   * setRows(rows);
-   * 
-   * AggregateUI.getUI().getTimer().refreshNow();
-   * 
-   * } };
-   * 
-   * // otherwise, we need to get the data.
-   * SecureGWT.getServerDataService().getRows(table.getTableId(),
-   * getRowsCallback); }
-   * 
-   * /** updates the column names.
-   * 
-   * @param table
-   * 
-   * public void updateColumns(TableEntryClient table) {
-   * 
-   * AsyncCallback<List<String>> columnNamesCallback = new
-   * AsyncCallback<List<String>>() {
-   * 
-   * @Override public void onFailure(Throwable caught) {
-   * AggregateUI.getUI().reportError(caught); }
-   * 
-   * @Override public void onSuccess(List<String> columns) { columnNames =
-   * columns; setColumnHeadings(columns);
-   * 
-   * AggregateUI.getUI().getTimer().refreshNow();
-   * 
-   * }
-   * 
-   * 
-   * };
-   * 
-   * 
-   * SecureGWT.getServerDataService().getColumnNames(table.getTableId(),
-   * columnNamesCallback);
-   * 
-   * }
-   */
 
   /*
    * This is the method that actually updates the column headings. It is its own
@@ -171,16 +124,20 @@ public class OdkTablesViewTable extends FlexTable {
   private void setColumnHeadings(List<String> columns) {
     this.removeAllRows();
 
+    //Window.alert(Integer.toString(columns.size()));
+
     // If there are no user-defined columns display the message.
     // Otherwise set the headings.
     if (columns.size() == NUMBER_ADMIN_COLUMNS) {
       setText(0, 0, NO_DATA_MESSAGE);
-    } else {   
+    } else {
       // set the delete column
       setText(0, 0, DELETE_ROW_HEADING);
-      int i = 1;
       // make the headings
+      int i = 1;
       for (String name : this.columnNames) {
+        // TODO work on ordering the names properly
+        //
         // the rows that come through beginning with "_" are user-defined.
         // we only want to display those (as long as you're not displaying
         // metadata), so select those, remove them, and add them.
@@ -189,6 +146,7 @@ public class OdkTablesViewTable extends FlexTable {
           i++;
         }
       }
+
 
       getRowFormatter().addStyleName(0, "titleBar");
     }
@@ -202,7 +160,7 @@ public class OdkTablesViewTable extends FlexTable {
     int start = 1; // b/c the 0 row is the headings.
 
     int currentRow = start;
-
+    //Window.alert(Integer.toString(rows.size()));
     // if there are no columns, then we only want to display the no data
     // message.
     if (columnNames.size() == NUMBER_ADMIN_COLUMNS) {
@@ -231,8 +189,9 @@ public class OdkTablesViewTable extends FlexTable {
         // this point)
         if (!row.isDeleted()) {
           // now set the delete button
-          setWidget(currentRow, 0, new OdkTablesDeleteRowButton(this, 
-              currentTable.getTableId(), row.getRowId()));
+          setWidget(currentRow, 0,
+              new OdkTablesDeleteFileButton(this.basePanel, 
+                  currentTable.getTableId(), row.getRowId()));
           int j = 1;
           for (String column : columnNames) {
             if (column.substring(0, 1).equalsIgnoreCase("_")) {
@@ -248,13 +207,6 @@ public class OdkTablesViewTable extends FlexTable {
         currentRow++;
       }
     }
-  }
-  
-  /**
-   * Returns the view this table is currently displaying.
-   */
-  public TableEntryClient getCurrentTable() {
-    return currentTable;
   }
 
 }

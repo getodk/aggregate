@@ -6,8 +6,10 @@ import java.util.List;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
+import org.opendatakit.aggregate.client.table.OdkTablesViewTableFileInfo;
 import org.opendatakit.aggregate.client.widgets.AggregateListBox;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDisplayDeletedRowsCheckBox;
+import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.TableEntryClientListBox;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -24,28 +26,41 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 
 /**
- * This class builds the subtab that allows for viewing the ODKTables tables
- * that are currently present in the datastore.
+ * This class builds the subtab that allows for viewing and managing the files
+ * that are associated with ODKTables tables. <br>
+ * The idea here is that you will have uploaded files to the table, like an html
+ * file with information about how to display a list view for the data in your
+ * table. And then you can come to this page to see which files are actually
+ * associated with the table, as well as set the keys which will say which file
+ * does what.
  * 
  * @author sudar.sam@gmail.com
  * 
  */
-public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
+public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
 
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
   private FlexTable selectTablePanel;
-  
+
+  // the string constants for adding a file
+  private static final String ADD_FILE_TXT = "Add a table file";
+  private static final String ADD_FILE_TOOLTIP_TXT = "Upload a file";
+  private static final String ADD_FILE_BALLOON_TXT = "Upload a file to be associated with a specific table";
+  private static final String ADD_FILE_BUTTON_TXT = "<img src=\"images/yellow_plus.png\" />"
+      + ADD_FILE_TXT;
+
+  // this is a button for adding a file to be associated with a table.
+  private ServletPopupButton addFileButton;
   /**
-   * This will be the box that lets you choose which of the tables you are 
-   * going to view.
+   * This will be the box that lets you choose which of the tables you are going
+   * to view.
    * 
    * @return
    */
   private ListBox tableBox;
   /**
-   * This is the int of the selected value in the listbox, so you know
-   * which one to display.
+   * This is the int in the list box that is selected.
    */
   private int selectedValue;
 
@@ -54,11 +69,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   // array list so that you can access with indices reliably
   private final ArrayList<TableEntryClient> currentTables;
   // the box that shows the data
-  private OdkTablesViewTable tableData;
-
-  // whether or not to display the deleted rows
-  // private Boolean displayDeleted;
-  // private OdkTablesDisplayDeletedRowsCheckBox deletedRowsCheckBox;
+  private OdkTablesViewTableFileInfo tableFileData;
 
   // the current table that is being displayed
   private TableEntryClient currentTable;
@@ -66,10 +77,13 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   /**
    * Sets up the View Table subtab.
    */
-  public OdkTablesViewTableSubTab() {
+  public OdkTablesManageTableFilesSubTab() {
+
+    addFileButton = new ServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
+        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
-    
+
     // displayDeleted = false;
     currentTable = null;
 
@@ -87,9 +101,9 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
       public void onChange(ChangeEvent event) {
         int selectedIndex = tableBox.getSelectedIndex();
         if (selectedIndex > 0) {
-          // Call this to clear contents while you are waiting on the 
-          // response from the server.
-          tableData.updateDisplay(null);
+          // Call this to clear the contents while you are waiting on
+          // the response from the server.
+          tableFileData.updateDisplay(null);
           selectedValue = selectedIndex;
           updateContentsForSelectedTable();
         }
@@ -99,12 +113,13 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
     // now populate the list.
     updateTableList();
 
-    tableData = new OdkTablesViewTable(this);
+    tableFileData = new OdkTablesViewTableFileInfo(this);
 
     selectTablePanel = new FlexTable();
     selectTablePanel.getElement().setId("select_table_panel");
     selectTablePanel.setHTML(0, 0, "<h2 id=\"table_name\"> Select a Table </h2>");
     selectTablePanel.setWidget(0, 1, tableBox);
+    selectTablePanel.setWidget(1, 0, addFileButton);
 
     // deletedRowsCheckBox = new OdkTablesDisplayDeletedRowsCheckBox(this,
     // displayDeleted);
@@ -114,7 +129,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
     topPanel.add(selectTablePanel);
     topPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
     add(topPanel);
-    add(tableData);
+    add(tableFileData);
 
   }
 
@@ -131,8 +146,11 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
       public void onSuccess(List<TableEntryClient> tables) {
         AggregateUI.getUI().clearError();
 
-        addTablesToListBox(tables); 
+        addTablesToListBox(tables);
         tableBox.setItemSelected(selectedValue, true);
+        
+        // This makes the server go crazy with requests.
+        //AggregateUI.getUI().getTimer().refreshNow();
 
       }
     });
@@ -159,8 +177,8 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   @Override
   public void update() {
     updateTableList();
+    // this causing trouble
     updateTableData();
-
   }
 
   public void addTablesToListBox(List<TableEntryClient> tables) {
@@ -181,21 +199,21 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
     // - 1 because you have an extra entry that is the "" holder so
     // that the listbox starts empty.
     if (this.selectedValue == 0) {
-      // set it to 0.
-      tableData.updateDisplay(null);
+      // if they select 0, clear the table
+      tableFileData.updateDisplay(null);
     } else {
       currentTable = currentTables.get(this.selectedValue - 1);
-      tableData.updateDisplay(currentTable);
+      tableFileData.updateDisplay(currentTable);
 
-      selectTablePanel.setHTML(1, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
-      selectTablePanel.setHTML(1, 1, "<h2 id=\table_name\"> " + currentTable.getTableName()
+      selectTablePanel.setHTML(2, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
+      selectTablePanel.setHTML(2, 1, "<h2 id=\table_name\"> " + currentTable.getTableName()
           + " </h2>");
-      add(tableData);
+      add(tableFileData);
     }
   }
 
   public void updateTableData() {
-    tableData.updateDisplay(currentTable);
+    tableFileData.updateDisplay(currentTable);
   }
 
 }

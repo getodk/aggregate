@@ -65,6 +65,12 @@ public final class ServletConsts {
    * The name of the property that includes the form id
    */
   public static final String FORM_ID = "formId";
+  
+  /**
+   * For OdkTables:
+   * The argument for a tableId.
+   */
+  public static final String TABLE_ID = "tableId";
 
   /**
    * For PersistentResults and MiscTasks generator gae servlets.

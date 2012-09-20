@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.server;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.UriBuilder;
@@ -30,6 +31,7 @@ import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.impl.api.TableServiceImpl;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -91,11 +93,19 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements
 	    }
 	}
 
+	/**
+	 * Create a table. If tableId is null, a random UUID is generated using
+	 * CommonfieldsBase.
+	 */
 	@Override
 	public TableEntryClient createTable(String tableId,
 			TableDefinitionClient definition)
 			throws AccessDeniedException, RequestFailureException, DatastoreFailureException, 
 			PermissionDeniedExceptionClient, TableAlreadyExistsExceptionClient {
+		// check for null UUID, assign random if true.
+		if (tableId == null) {
+			tableId = CommonFieldsBase.newUri();
+		}
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    TableManager tm = new TableManager(cc);		

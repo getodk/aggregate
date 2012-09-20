@@ -11,7 +11,24 @@ import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
+/**
+ * Comments by sudar.sam@gmail.com, so there may be discrepancies between
+ * the comments and what was actually intended.
+ * <br>
+ * This is the table ("relation") that appears in the datastore as the
+ * "_ODKTABLES_COLUMN" table. This is the table that stores the 
+ * information about the "columns" that are in the different odktables 
+ * tables. It has the type and name information. Therefore this is the 
+ * datastore table that you query to get all the column names for a certain
+ * table. Each entity (row in this "relation") has the table id that the
+ * column belongs to, along with the column type and name.
+ * 
+ * @author the.dylan.price@gmail.com
+ *
+ */
 public class DbColumn {
+	
+	// these are the column names in the COLUMN table
   public static final String TABLE_ID = "TABLE_ENTRY_ID";
   public static final String COLUMN_NAME = "COLUMN_NAME";
   public static final String COLUMN_TYPE = "COLUMN_TYPE";

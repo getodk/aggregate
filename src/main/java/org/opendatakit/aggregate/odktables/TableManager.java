@@ -17,9 +17,11 @@ import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
+import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableProperties;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -185,6 +187,12 @@ public class TableManager {
     Validate.notEmpty(tableId);
     Validate.notEmpty(tableName);
     Validate.noNullElements(columns);
+    
+    // the hope here is that it creates an empty table in the db after a single
+    // odktable table has been created.
+    DbTableFiles blobRelationSet = new DbTableFiles(cc);
+    BlobEntitySet blobEntitySet = blobRelationSet.newBlobEntitySet(cc);
+    blobRelationSet.putBlobEntitySet(blobEntitySet, cc);
 
     // check if table exists
     if (getTable(tableId) != null) {

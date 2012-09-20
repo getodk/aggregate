@@ -1,32 +1,43 @@
-package org.opendatakit.aggregate.client.popups;
+package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.table.OdkTablesTableList;
-import org.opendatakit.aggregate.client.widgets.AggregateButton;
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.client.popups.AbstractPopupBase;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
-public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
-	  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete Table";
-	  private static final String TOOLTIP_TXT = "Delete This Table";
-	  private static final String HELP_BALLOON_TXT = "Completely delete this table.";
+/**
+ * The popup that performs the deletion of a file from the datastore.
+ * NB: This differs from the {@link OdkTablesConfirmDeleteRowPopup} in 
+ * that it deletes a row in an actual datastore table, as opposed to
+ * a row in a user-defined OdkTables table.
+ * @author sudar.sam@gmail.com
+ *
+ */
+public class OdkTablesConfirmDeleteFilePopup extends AbstractPopupBase {
 
+	  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete File";
+	  private static final String TOOLTIP_TXT = "Delete this file";
+	  private static final String HELP_BALLOON_TXT = "Delete this file.";
+
+	  // the table to delete from
 	  private final String tableId;
+	  // the row you're deleting
+	  private final String rowId;
 	  
-	  private OdkTablesTableList parentTable;
+	  private AggregateSubTabBase basePanel;
 
-	  public OdkTablesConfirmDeleteTablePopup(OdkTablesTableList parentTable,
-	      String tableId) {
+	  public OdkTablesConfirmDeleteFilePopup(AggregateSubTabBase basePanel,
+	      String tableId, String rowId) {
 	    super();
-	    this.parentTable = parentTable;
+	    this.basePanel = basePanel;
 	    this.tableId = tableId;
+	    this.rowId = rowId;
 
 	    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT,
 	        HELP_BALLOON_TXT);
@@ -34,7 +45,7 @@ public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
 
 	    FlexTable layout = new FlexTable();
 
-	    HTML message = new HTML("Are you sure you want to delete this table?");
+	    HTML message = new HTML("Are you sure you want to delete this file?");
 	    layout.setWidget(0, 0, message);
 	    layout.setWidget(0, 1, deleteButton);
 	    layout.setWidget(0, 2, new ClosePopupButton(this));
@@ -56,11 +67,12 @@ public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
 	        @Override
 	        public void onSuccess(Void v) {
 	          AggregateUI.getUI().clearError();
+	          
 	          AggregateUI.getUI().getTimer().refreshNow();
 	        }
 	      };
 	      // Make the call to the form service.
-	      SecureGWT.getServerTableService().deleteTable(tableId, callback);
+	      SecureGWT.getServerDataService().deleteTableFile(tableId, rowId, callback);
 	      hide();
 	    }
 	  }

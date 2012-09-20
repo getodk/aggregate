@@ -228,6 +228,12 @@ public class RefreshTimer extends Timer {
     		  tabPanel.update();
     	  }
     	  break;
+      case MANAGEFILES:
+        if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
+          GWT.log("manage files refresh");
+          tabPanel.update();
+        }
+        break;
       default:
         // should not happen
         GWT.log("currentSubTab (" + currentSubTab.getHashString()

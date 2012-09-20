@@ -59,7 +59,11 @@ public class DbTable {
     return converter.toFields(entities);
   }
 
-  private static List<DataField> getStaticFields() {
+  /**
+   * This should only be called sparingly.
+   * @return
+   */
+  public static List<DataField> getStaticFields() {
     return Collections.unmodifiableList(dataFields);
   }
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.core.UriInfo;
 
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
@@ -24,12 +25,22 @@ public interface ServerDataServiceAsync {
 	
 	void getRows(String tableId, AsyncCallback<List<RowClient>> callback);
 	
-	void getRow(String tableId, String rowId, AsyncCallback<RowClient> callback);
+	void getRow(String tableId, String rowId, AsyncCallback<TableContentsClient> callback);
 
 	void createOrUpdateRow(String tableId, String rowId, RowClient row, AsyncCallback<RowClient> callback);
 	
 	void deleteRow(String tableId, String rowId, AsyncCallback<Void> callback);
 	
 	void getColumnNames(String tableId, AsyncCallback<List<String>> callback);
+	
+	void getFileRows(String tableId, AsyncCallback<List<RowClient>> callback);
+	
+	void getFileRowInfoColumnNames(AsyncCallback<List<String>> callback);
+	
+	void getTableContents(String tableId, AsyncCallback<TableContentsClient> callback);
+	
+	void getFileInfoContents(String tableId, AsyncCallback<TableContentsClient> callback);
+	
+	void deleteTableFile(String tableId, String rowId, AsyncCallback<Void> callback);
 		
 }

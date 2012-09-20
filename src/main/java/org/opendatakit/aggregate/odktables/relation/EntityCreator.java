@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
@@ -23,12 +24,21 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Creates and updates new Entity objects for relations.
+ * <br>
+ * sudar.sam@gmail.com: This is deserving of its own class because
+ * the entities (rows in the table) exist without any setters for their
+ * columns (DataField objects). To insert a row in a particular class you
+ * would therefore have to go look at the datafields contained in that entity
+ * and set them by hand. This class handles that for you and aggregates them
+ * all into one place.
  * 
  * @author the.dylan.price@gmail.com
  * 
  */
 
 public class EntityCreator {
+	
+  public static final int INITIAL_MODIFICATION_NUMBER = 1;
 
   /**
    * Create a new {@link DbTableEntry} entity.
@@ -74,6 +84,43 @@ public class EntityCreator {
     entity.set(DbColumn.COLUMN_TYPE, column.getType().name());
 
     return entity;
+  }
+  
+  /**
+   * Create a new {@link DbTableFileInfo} entity. This should be called
+   * whenever you are adding a file to the 
+   * @param tableId
+   * 			the id of the table the file is associated with
+   * @param type
+   * 			the type of the file
+   * @param URI
+   * 			the URI of the blobset of size one, of which the one entry is the file
+   * @return
+   */
+  public Entity newTableFileInfoEntity(String tableId, String type, String key, String uri, 
+		  CallingContext cc) throws ODKDatastoreException {
+	  // first do some preliminary checks
+	  Validate.notEmpty(tableId);
+	  Validate.notEmpty(uri);
+	  
+	  Entity entity = DbTableFileInfo.getRelation(cc).newEntity(cc);
+	  entity.set(DbTableFileInfo.TABLE_ID, tableId);
+	  entity.set(DbTableFileInfo.VALUE_TYPE, type);
+	  entity.set(DbTableFileInfo.KEY, key);
+	  entity.set(DbTableFileInfo.VALUE, uri);
+	  
+	  // now set the universal fields
+	  entity.set(DbTable.CREATE_USER, cc.getCurrentUser().getEmail());
+	  // TODO last update same as create? correct?
+	  entity.set(DbTable.LAST_UPDATE_USER, cc.getCurrentUser().getEmail());
+	  entity.set(DbTable.MODIFICATION_NUMBER, INITIAL_MODIFICATION_NUMBER);
+	  entity.set(DbTable.DELETED, false);
+	  entity.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+	  // TODO is this the right kind of scope to be setting? one wonders...
+	  entity.set(DbTable.FILTER_VALUE, (String) null);
+	  entity.set(DbTable.FILTER_TYPE, (String) null);	  
+	  
+	  return entity;
   }
 
   /**
@@ -426,4 +473,6 @@ public class EntityCreator {
     }
     return entities;
   }
+ 
+  
 }
