@@ -6,10 +6,14 @@ import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesViewTableSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteRowButton;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
@@ -94,10 +98,23 @@ public class OdkTablesViewTable extends FlexTable {
 
   public void updateData(TableEntryClient table) {
     // set up the callback object
-    AsyncCallback<TableContentsClient> getDataCallback = new AsyncCallback<TableContentsClient>() {
+    AsyncCallback<TableContentsClient> getDataCallback = 
+        new AsyncCallback<TableContentsClient>() {
       @Override
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
+        if (caught instanceof EntityNotFoundExceptionClient) {
+          // if this happens it is PROBABLY, but not necessarily, because
+          // we've deleted the table. 
+          // TODO ensure the correct exception makes it here
+          ((OdkTablesViewTableSubTab) AggregateUI.getUI()
+            .getSubTab(SubTabs.VIEWTABLE)).setTabToDislpayZero();
+        } else if (caught instanceof PermissionDeniedExceptionClient) {
+          // do nothing, b/c it's probably legitimate that you don't get an 
+          // error if there are rows you're not allowed to see.
+
+        } else {
+          AggregateUI.getUI().reportError(caught);
+        }
       }
 
       @Override
@@ -111,7 +128,8 @@ public class OdkTablesViewTable extends FlexTable {
       }
     };
 
-    SecureGWT.getServerDataService().getTableContents(table.getTableId(), getDataCallback);
+    SecureGWT.getServerDataService().getTableContents(table.getTableId(), 
+        getDataCallback);
   }
 
   /*

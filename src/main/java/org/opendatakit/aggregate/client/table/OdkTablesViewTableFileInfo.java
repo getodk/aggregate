@@ -4,11 +4,16 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.OdkTablesManageTableFilesSubTab;
+import org.opendatakit.aggregate.client.OdkTablesViewTableSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 
 import com.google.gwt.user.client.Window;
@@ -54,7 +59,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
    * Should this even exist?
    */
   public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab) {
-
+    
     // add styling
     addStyleName("dataTable");
     getElement().setId("form_management_table");
@@ -97,7 +102,15 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
     AsyncCallback<TableContentsClient> getDataCallback = new AsyncCallback<TableContentsClient>() {
       @Override
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
+        if (caught instanceof EntityNotFoundExceptionClient) {
+          // if this happens it is PROBABLY, but not necessarily, because
+          // we've deleted the table. 
+          // TODO ensure the correct exception makes it here
+          ((OdkTablesManageTableFilesSubTab) AggregateUI.getUI()
+              .getSubTab(SubTabs.MANAGEFILES)).setTabToDislpayZero();
+        } else {
+          AggregateUI.getUI().reportError(caught);
+        }
       }
 
       @Override

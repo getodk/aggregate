@@ -1,5 +1,13 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.opendatakit.aggregate.client.exception.ImportFromCSVExceptionClient;
 import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
@@ -44,7 +52,38 @@ public class TableProperties {
   public String getMetadata() {
     return metadata;
   }
+  
+  /**
+   * Return the metadata string as a map. The metada exists as a JSON object
+   * in the datastore, so this gives a better way to interact with it.
+   * See the warnings at {@link setMetadata} about setting the metadata from
+   * the server.
+   * @return
+   * @throws ImportFromCSVExceptionClient
+   */
+  public Map<String, Object> getMetadataAsMap() 
+      throws ImportFromCSVExceptionClient {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      HashMap<String, Object> metadataMap =
+          mapper.readValue(metadata, HashMap.class);
+      return metadataMap;
+    } catch (JsonMappingException e) {
+      throw new ImportFromCSVExceptionClient("json mapping exception", e);
+    } catch (JsonParseException e) {
+      throw new ImportFromCSVExceptionClient("json parse exception", e);
+    } catch (IOException e) {
+      throw new ImportFromCSVExceptionClient("IOException", e);
+    }
+  }
 
+  /**
+   * Set the metadata for the properties. This should be used very sparingly,
+   * if at all. This is configured by the phone, and changes made here might
+   * end up breaking the tables on the phone unless you are very, very careful
+   * about what you are doing.
+   * @param metadata
+   */
   public void setMetadata(String metadata) {
     this.metadata = metadata;
   }

@@ -51,7 +51,8 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 
 	private static final long serialVersionUID = -1173762226947584151L;
 	
-	private static final Log logger = LogFactory.getLog(OdkTablesTableFileUploadServlet.class);
+	private static final Log logger = 
+	    LogFactory.getLog(OdkTablesTableFileUploadServlet.class);
 	
 	// so this is the URI from the base, which Mitch said by convention they've been including.
 	// i'm not sure if this is the correct place/way to be adding mine.
@@ -466,7 +467,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
   
   /**
    * This method returns the duplicate filenames that would occur on the 
-   * curent upload.
+   * current upload.
    * @param newRows the new rows you are adding
    * @param oldRows the rows already in the database
    * @return the conflicting keys

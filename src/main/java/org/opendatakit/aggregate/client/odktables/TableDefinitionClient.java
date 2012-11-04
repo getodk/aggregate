@@ -29,7 +29,8 @@ private String tableName;
   private TableDefinitionClient() {
   }
 
-  public TableDefinitionClient(final String tableName, final List<ColumnClient> columns, final String metadata) {
+  public TableDefinitionClient(final String tableName, 
+      final List<ColumnClient> columns, final String metadata) {
     this.tableName = tableName;
     this.columns = columns;
     this.metadata = metadata;

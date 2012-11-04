@@ -276,6 +276,16 @@
 	    <url-pattern>/tableKeyValueManifest</url-pattern>
 	</servlet-mapping>
 	
+	<!--  servlet for uploading a table from a CSV -->
+	<servlet>
+	    <servlet-name>uploadTableFromCSV</servlet-name>
+	    <servlet-class>org.opendatakit.aggregate.servlet.OdkTablesUploadTableFromCSVServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>uploadTableFromCSV</servlet-name>
+	    <url-pattern> /uploadTableFromCSV</url-pattern>
+	</servlet-mapping>
+	
 	
 	<servlet>
 		<servlet-name>upload</servlet-name>

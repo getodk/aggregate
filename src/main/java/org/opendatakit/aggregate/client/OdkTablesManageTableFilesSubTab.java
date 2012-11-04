@@ -11,6 +11,8 @@ import org.opendatakit.aggregate.client.widgets.AggregateListBox;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDisplayDeletedRowsCheckBox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.TableEntryClientListBox;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -80,7 +82,8 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   public OdkTablesManageTableFilesSubTab() {
 
     addFileButton = new ServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
-        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT);
+        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT, 
+        ADD_FILE_BALLOON_TXT);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -100,13 +103,12 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
 
       public void onChange(ChangeEvent event) {
         int selectedIndex = tableBox.getSelectedIndex();
-        if (selectedIndex > 0) {
-          // Call this to clear the contents while you are waiting on
-          // the response from the server.
-          tableFileData.updateDisplay(null);
-          selectedValue = selectedIndex;
-          updateContentsForSelectedTable();
-        }
+        // Call this to clear the contents while you are waiting on
+        // the response from the server.
+        tableFileData.updateDisplay(null);
+        currentTable = null;
+        selectedValue = selectedIndex;
+        updateContentsForSelectedTable();
       }
     });
 
@@ -132,6 +134,16 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
     add(tableFileData);
 
   }
+  
+  /**
+   * Call this to remove any currently displayed data, set the selected table
+   * in the list box to zero, and generally reset this page.
+   */
+  public void setTabToDislpayZero() {
+    selectedValue = 0;
+    tableBox.setSelectedIndex(0);
+    updateContentsForSelectedTable();
+  }  
 
   private void updateTableList() {
     SecureGWT.getServerTableService()
@@ -201,6 +213,10 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
     if (this.selectedValue == 0) {
       // if they select 0, clear the table
       tableFileData.updateDisplay(null);
+      // we also want to have no curren table.
+      currentTable = null;
+      // clear the "displaying" thing
+      selectTablePanel.removeRow(2);
     } else {
       currentTable = currentTables.get(this.selectedValue - 1);
       tableFileData.updateDisplay(currentTable);
@@ -214,6 +230,30 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
 
   public void updateTableData() {
     tableFileData.updateDisplay(currentTable);
+  }
+  
+  /**
+   * Set the table to be displayed. You have to set the it in 
+   * the selectedValue and update it. O(n), could be improved.
+   * @param tableId
+   */
+  public void setCurrentTable(String tableId) {
+    boolean foundTable = false; 
+    // We want to traverse the list of tables and find the index.
+    for (int i = 0; i < currentTables.size(); i++) {
+      if (currentTables.get(i).getTableId().equals(tableId)) {
+        // +1 because the zeroth spot in the list box is the blank placeholder
+        selectedValue = i + 1;
+        currentTable = currentTables.get(i);
+        updateContentsForSelectedTable();
+        foundTable = true;
+        break;
+      }
+    }
+    if (!foundTable) {
+      selectedValue = 0;
+      tableFileData.removeAllRows();
+    }
   }
 
 }

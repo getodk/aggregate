@@ -28,7 +28,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class DatastoreFailureException extends Exception implements
 		Serializable, IsSerializable {
-	private static final String DATASTORE_FAILURE_EXCEPTION = "Problem persisting data or accessing data";
+	private static final String DATASTORE_FAILURE_EXCEPTION = 
+	    "Problem persisting data or accessing data";
 
   /**
 	 * 
