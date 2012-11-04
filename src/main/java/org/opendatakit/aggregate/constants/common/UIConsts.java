@@ -32,9 +32,14 @@ public class UIConsts {
   public static final String FORM_UPLOAD_SERVLET_ADDR = "formUpload";
   
   // url pattern for uploading files associated with ODKTables tables
-  public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR = "tableFileUpload";
+  public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR = 
+      "tableFileUpload";
   // url pattern for downloading files associated with odktables tables
-  public static final String TABLE_FILE_DOWNLOAD_SERVLET_ADDR = "tableFileDownload";
+  public static final String TABLE_FILE_DOWNLOAD_SERVLET_ADDR = 
+      "tableFileDownload";
+  // url pattern for uploading a table from a CSV file
+  public static final String UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR = 
+      "uploadTableFromCSV";
 
   public static final String SUBMISSION_SERVLET_ADDR = "submission";
   public static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";

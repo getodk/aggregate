@@ -107,6 +107,8 @@
 		<intercept-url pattern="/tableFileUpload/**" access="true" />
 		<intercept-url pattern="/tableFileDownload/**" access="true" />
 		<intercept-url pattern="/tableKeyValueManifest/**" access="true" />
+		<!-- odk tables upload file from CSV -->
+		<intercept-url pattern="/uploadTableFromCSV/**" access="true" />
 		
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />

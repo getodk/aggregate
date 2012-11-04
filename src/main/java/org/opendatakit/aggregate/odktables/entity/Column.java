@@ -13,7 +13,10 @@ public class Column implements Serializable {
 	 */
 	private static final long serialVersionUID = -6624997293167731653L;
 
-@Attribute(required = true)
+	/*
+	 * SS: I am taking this to mean the display name.
+	 */
+  @Attribute(required = true)
   private String name;
 
   @Attribute(required = true)
@@ -25,14 +28,25 @@ public class Column implements Serializable {
     DECIMAL,
     BOOLEAN,
     DATETIME;
-
+    
   }
 
   @SuppressWarnings("unused")
   private Column() {}
 
-  public Column(final String name, final ColumnType type) {
-    this.name = name;
+  /**
+   * Create a column. NB: It needs to be decided if 
+   * backing name and display name are different in the datastore on the server
+   * in the same way they are on the phone, and if they should both be stored
+   * in the COLUMN table as adjacent columns, or what exactly. Either way,
+   * its implementation should be brought into alignment with ColumnClient,
+   * which has both display and backing names when the answer to the above
+   * questions is decided. 
+   * @param displayName
+   * @param type
+   */
+  public Column(final String displayName, final ColumnType type) {
+    this.name = displayName;
     this.type = type;
   }
 

@@ -20,26 +20,28 @@ public class UtilTransforms {
 	  public static Column transform(ColumnClient client) {
 		  // have to fix this to get the appropriate type out of the enum.
 		  Column column;
+		  Column.ColumnType colType;
 		  switch (client.getType()) {
 		  case BOOLEAN:
-			  column = new Column(client.getName(), Column.ColumnType.BOOLEAN);
+		    colType = Column.ColumnType.BOOLEAN;
 			  break;
 		  case STRING:
-			  column = new Column(client.getName(), Column.ColumnType.STRING);
+		    colType = Column.ColumnType.STRING;
 			  break;
 		  case INTEGER:
-			  column = new Column(client.getName(), Column.ColumnType.INTEGER);
+		    colType = Column.ColumnType.INTEGER;
 			  break;
 		  case DECIMAL:
-			  column = new Column(client.getName(), Column.ColumnType.DECIMAL);
+		    colType = Column.ColumnType.DECIMAL;
 			  break;
 		  case DATETIME:
-			  column = new Column(client.getName(), Column.ColumnType.DATETIME);
+		    colType = Column.ColumnType.DATETIME;
 			  break;
 		  default:
 			  throw new IllegalStateException("cannot transform ColumnClient to Column, no type match.");
 		  }
-		  return column;	
+		  Column transformedColumn = new Column(client.getDbName(), colType);
+		  return transformedColumn;	
 	  }
 	  
 	  
@@ -64,6 +66,10 @@ public class UtilTransforms {
 	   */
 	  public static Scope transform(ScopeClient client) {
 		  Scope serverScope = null;
+		  if (client.getType() == null) {
+		    serverScope = Scope.EMPTY_SCOPE;
+		    return serverScope;
+		  }
 		  switch(client.getType()) {
 			  case DEFAULT:
 				  serverScope = new Scope(Scope.Type.DEFAULT, client.getValue());
@@ -74,9 +80,10 @@ public class UtilTransforms {
 			  case GROUP:
 				  serverScope = new Scope(Scope.Type.GROUP, client.getValue());
 				  break;
-		  }
-		  if (serverScope == null) serverScope = Scope.EMPTY_SCOPE;
-		  
+			default:
+			  serverScope = Scope.EMPTY_SCOPE;
+			  
+		  }		  
 		  return serverScope;	  
 	  }	 
 	  

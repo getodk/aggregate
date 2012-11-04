@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 
 /**
  * This is the client-side code of
@@ -17,6 +18,13 @@ public class ColumnClient {
   private String name;
 
   private ColumnType type;
+ 
+  /*
+   * SS: I am taking this to be the dbName--ie how it exists in the colProp
+   * on the phone, as the fixed one that does not change--they can alter the
+   * display name.
+   */
+  private String dbName;
 
   public enum ColumnType {
     STRING,
@@ -30,9 +38,18 @@ public class ColumnClient {
   @SuppressWarnings("unused")
   private ColumnClient() {}
 
-  public ColumnClient(final String name, final ColumnType type) {
-    this.name = name;
+  /**
+   * Create a column. Spaces will be replaced by underscores. The backing 
+   * dbName of the column will be the displayName changed to lower case and
+   * prepended with an underscore.
+   * @param displayName
+   * @param type
+   */
+  public ColumnClient(final String displayName, final ColumnType type) {
+    String nameToBeEntered = displayName.toLowerCase().replace(" ", "_");
+    this.name = nameToBeEntered;
     this.type = type;
+    this.dbName = "_" + nameToBeEntered;
   }
 
   public String getName() {
@@ -45,6 +62,15 @@ public class ColumnClient {
 
   public void setName(final String name) {
     this.name = name;
+  }
+  
+  /**
+   * Get the dbName for the column. This cannot be changed, so no setter is
+   * provided.
+   * @return
+   */
+  public String getDbName() {
+    return String.valueOf(this.dbName);
   }
 
   public void setType(final ColumnType type) {

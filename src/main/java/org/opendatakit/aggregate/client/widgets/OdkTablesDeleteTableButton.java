@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
+import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.NewTablesAdminPopup;
 import org.opendatakit.aggregate.client.popups.OdkTablesConfirmDeleteTablePopup;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
@@ -57,6 +58,10 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
 			e.printStackTrace();
 			errorRetreivingData(resp);
 			return;
+		} catch (PermissionDeniedExceptionClient e) {
+		  e.printStackTrace();
+		  errorRetreivingData(resp);
+		  return;
 		} catch (DatastoreFailureException e) {
 			e.printStackTrace();
 			datastoreError(resp);

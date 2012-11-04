@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This object represents a Row on the client side of the code. It is based almost
- * entirely from a copy/paste of org.opendatakit.aggregate.odktables.entity.Row.java
- * <br>
+ * This object represents a Row on the client side of the code. It is based 
+ * almost entirely from a copy/paste of 
+ * org.opendatakit.aggregate.odktables.entity.Row.java
+ * <p>
  * It is the client-side analogue of that Row object.
  * @author sudar.sam@gmail.com
  *

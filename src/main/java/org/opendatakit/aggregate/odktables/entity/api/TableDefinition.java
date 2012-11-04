@@ -23,7 +23,8 @@ public class TableDefinition {
   private TableDefinition() {
   }
 
-  public TableDefinition(final String tableName, final List<Column> columns, final String metadata) {
+  public TableDefinition(final String tableName, final List<Column> columns, 
+      final String metadata) {
     this.tableName = tableName;
     this.columns = columns;
     this.metadata = metadata;

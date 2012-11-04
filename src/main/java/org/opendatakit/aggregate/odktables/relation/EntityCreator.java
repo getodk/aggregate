@@ -24,7 +24,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Creates and updates new Entity objects for relations.
- * <br>
+ * <p>
  * sudar.sam@gmail.com: This is deserving of its own class because
  * the entities (rows in the table) exist without any setters for their
  * columns (DataField objects). To insert a row in a particular class you
@@ -49,7 +49,8 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newTableEntryEntity(String tableId, CallingContext cc) throws ODKDatastoreException {
+  public Entity newTableEntryEntity(String tableId, CallingContext cc) 
+      throws ODKDatastoreException {
     Validate.notNull(cc);
 
     if (tableId == null)
@@ -72,8 +73,8 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newColumnEntity(String tableId, Column column, CallingContext cc)
-      throws ODKDatastoreException {
+  public Entity newColumnEntity(String tableId, Column column, 
+      CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(column);
     Validate.notNull(cc);
@@ -97,8 +98,8 @@ public class EntityCreator {
    * 			the URI of the blobset of size one, of which the one entry is the file
    * @return
    */
-  public Entity newTableFileInfoEntity(String tableId, String type, String key, String uri, 
-		  CallingContext cc) throws ODKDatastoreException {
+  public Entity newTableFileInfoEntity(String tableId, String type, String key, 
+      String uri, CallingContext cc) throws ODKDatastoreException {
 	  // first do some preliminary checks
 	  Validate.notEmpty(tableId);
 	  Validate.notEmpty(uri);

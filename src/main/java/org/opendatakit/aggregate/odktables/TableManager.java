@@ -74,6 +74,11 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public List<TableEntry> getTables(List<Scope> scopes) throws ODKDatastoreException {
+    // Oct15--changing this just to point to get ALL the tables. This is to 
+    // avoid the permissions issue we have for now, as everything should be 
+    // getting tables through this class.
+    // TODO fix this to again get things to point at scopes.
+    /*
     // get table ids for entries that the given scopes can see
     List<Entity> aclEntities = DbTableAcl.queryNotEqual(TableRole.NONE, cc);
     List<String> tableIds = new ArrayList<String>();
@@ -88,8 +93,10 @@ public class TableManager {
     Query query = DbTableEntry.getRelation(cc).query("TableManager.getTables(List<Scope>)", cc);
     query.include(CommonFieldsBase.URI_COLUMN_NAME, tableIds);
     List<Entity> entries = query.execute();
-
     return getTableEntries(entries);
+
+  */
+    return getTables();
   }
 
   private List<TableEntry> getTableEntries(List<Entity> entries) throws ODKDatastoreException {
@@ -181,9 +188,9 @@ public class TableManager {
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    */
-  public TableEntry createTable(String tableId, String tableName, List<Column> columns,
-      String metadata) throws ODKEntityPersistException, ODKDatastoreException,
-      TableAlreadyExistsException {
+  public TableEntry createTable(String tableId, String tableName, 
+      List<Column> columns, String metadata) throws ODKEntityPersistException, 
+      ODKDatastoreException, TableAlreadyExistsException {
     Validate.notEmpty(tableId);
     Validate.notEmpty(tableName);
     Validate.noNullElements(columns);
@@ -199,6 +206,9 @@ public class TableManager {
       throw new TableAlreadyExistsException(String.format(
           "Table with tableId '%s' already exists.", tableId));
     }
+    
+    // TODO do appropriate checking for metadata issues. We need to worry about
+    // dbName and  the displayName.
 
     // create table
     List<Entity> entities = new ArrayList<Entity>();
@@ -209,7 +219,7 @@ public class TableManager {
     for (Column column : columns) {
       entities.add(creator.newColumnEntity(tableId, column, cc));
     }
-
+    
     Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
     entities.add(properties);
 
