@@ -2,6 +2,8 @@ package org.opendatakit.aggregate.server;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,6 +66,12 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       for (TableEntry entry : entries) {
         clientEntries.add(entry.transform());
       }
+      Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
+        @Override
+        public int compare(TableEntryClient o1, TableEntryClient o2) {
+          return o1.getTableName().compareToIgnoreCase(o2.getTableName());
+        }});
+      
       return clientEntries;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.entity.Row;
@@ -209,8 +210,7 @@ public class EntityConverter {
 	    values.put(columnName, value);
 	  }
 	  row.setValues(values);
-	  return row;
-	  
+	  return row;  
   }
   
   /**

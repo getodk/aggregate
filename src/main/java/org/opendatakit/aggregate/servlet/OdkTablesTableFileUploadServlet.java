@@ -254,7 +254,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 			  // why he didn't make this a util class I do not know.
 			  EntityCreator ec = new EntityCreator();
 			  Entity newRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.FILE.name, 
-					  fileKey, instance.getUri(), cc);
+					  fileKey, instance.getUri(), false, cc);
 			  newEntities.add(newRow);
 			  
 			  /*
@@ -294,7 +294,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	           String tempFileKey = fileKey + "_" + String.valueOf(i); 
 	           // why he didn't make this a util class I do not know.
 	           newRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.FILE.name, 
-	                 tempFileKey, instance.getUri(), cc);
+	                 tempFileKey, instance.getUri(), true, cc);
 	           newEntities.add(newRow);
 	           i++;
 			  }

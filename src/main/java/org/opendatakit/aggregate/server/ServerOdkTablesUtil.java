@@ -12,6 +12,7 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.exception.TableAlreadyExistsExceptionClient;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
+import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
@@ -27,6 +28,8 @@ import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
+import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -140,5 +143,34 @@ public class ServerOdkTablesUtil {
       e.printStackTrace();
       throw new EtagMismatchExceptionClient(e);
     }
+  }
+  
+  /**
+   * Create a FileSummaryClient object from a row that originated from 
+   * EntityConverter.
+   * @param row
+   * @param blobSetRelation
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static FileSummaryClient getFileSummaryClientFromRow(Row row,
+      DbTableFiles blobSetRelation, CallingContext cc) throws 
+      ODKDatastoreException {
+    String filename = blobSetRelation.getBlobEntitySet(
+        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        .getUnrootedFilename(1, cc);
+    Long contentLength = blobSetRelation.getBlobEntitySet(
+        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        .getContentLength(1, cc);
+    String contentType = blobSetRelation.getBlobEntitySet(
+        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        .getContentType(1, cc);
+    String key = row.getValues().get(DbTableFileInfo.KEY);
+    ArrayList<FileSummaryClient> empty = 
+        new ArrayList<FileSummaryClient>(0);
+    FileSummaryClient summary = new FileSummaryClient(
+        filename, contentType, contentLength, key, empty);
+    return summary;
   }
 }
