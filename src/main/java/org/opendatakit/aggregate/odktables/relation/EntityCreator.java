@@ -94,12 +94,17 @@ public class EntityCreator {
    * 			the id of the table the file is associated with
    * @param type
    * 			the type of the file
+   * @param key
+   *        the key associated with this file
    * @param URI
    * 			the URI of the blobset of size one, of which the one entry is the file
+   * @param isMedia
+   *        whether or not this is a media file.
    * @return
    */
   public Entity newTableFileInfoEntity(String tableId, String type, String key, 
-      String uri, CallingContext cc) throws ODKDatastoreException {
+      String uri, boolean isMedia, CallingContext cc) 
+      throws ODKDatastoreException {
 	  // first do some preliminary checks
 	  Validate.notEmpty(tableId);
 	  Validate.notEmpty(uri);
@@ -109,6 +114,7 @@ public class EntityCreator {
 	  entity.set(DbTableFileInfo.VALUE_TYPE, type);
 	  entity.set(DbTableFileInfo.KEY, key);
 	  entity.set(DbTableFileInfo.VALUE, uri);
+	  entity.set(DbTableFileInfo.IS_MEDIA, isMedia);
 	  
 	  // now set the universal fields
 	  entity.set(DbTable.CREATE_USER, cc.getCurrentUser().getEmail());

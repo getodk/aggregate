@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.opendatakit.common.ermodel.simple.Entity;
@@ -14,7 +15,8 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * This is the table in the database that holds information about the files that
- * have been uploaded to be associated with certain ODKTables tables. <br>
+ * have been uploaded to be associated with certain ODKTables tables.
+ * <p>
  * The files themselves will be stored in another collection of tables and
  * managed with the blob relation API provided by Mitch. This is the
  * user-friendly table that has information about how to get at the actual
@@ -25,7 +27,11 @@ import org.opendatakit.common.web.CallingContext;
  * --BLOB_TYPE (the type of what the value is pointing to. eg file, int, String)
  * --VALUE (the unique identifer to the set in the blob relation. So this is the
  * value that you would get and then use to query the blobset to get the actual
- * set of 1 file.) <br>
+ * set of 1 file.) 
+ * --IS_MEDIA: this tells you if the file is actually a media file that 
+ * should not be displayed with the regular files. Instead it should be 
+ * accessed as a link to a popup as in FormList.
+ * <p>
  * Each file is uploaded as an "EntitySet" of size 1. This set comes with a
  * unique key that allows access of all the files in the set, which in this case
  * will just have an "attachment count" of one, as the set is only of size one.
@@ -56,6 +62,7 @@ public class DbTableFileInfo {
   // comments.)
   public static final String VALUE_TYPE = "_TYPE";
   public static final String VALUE = "VALUE";
+  public static final String IS_MEDIA = "IS_MEDIA";
 
   public static final List<String> columnNames;
 
@@ -70,6 +77,7 @@ public class DbTableFileInfo {
     dataFields.add(new DataField(KEY, DataType.STRING, false));
     dataFields.add(new DataField(VALUE_TYPE, DataType.STRING, false));
     dataFields.add(new DataField(VALUE, DataType.STRING, false));
+    dataFields.add(new DataField(IS_MEDIA, DataType.BOOLEAN, false));
     // and add the things from DbTable
     dataFields.addAll(DbTable.getStaticFields());
     // populate the list with all the column names
@@ -98,8 +106,50 @@ public class DbTableFileInfo {
   /**
    * I'm pretty sure this returns the entries for the passed in table id.
    */
-  public static List<Entity> query(String tableId, CallingContext cc) throws ODKDatastoreException {
+  public static List<Entity> query(String tableId, CallingContext cc) 
+      throws ODKDatastoreException {
     return getRelation(cc).query("DbTableFileInfo.query()", cc).equal(TABLE_ID, tableId).execute();
+  }
+  
+  /**
+   * Get all the non-media files that have been uploaded for the given table
+   * id. This will be things that have been uploaded directly, not as media
+   * files.
+   * @param tableId
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static List<Entity> queryForNonMediaFiles(String tableId, 
+      CallingContext cc) throws ODKDatastoreException {
+    return getRelation(cc).query("DbTableFileInfo.queryForNonMediaFiles", cc)
+        .equal(TABLE_ID, tableId).equal(IS_MEDIA, false).execute();
+  }
+  
+  /**
+   * Return the media files for the given table that are associated with the
+   * given key. Being associated with the given key is checked by comparing
+   * the "key" entry for all the IS_MEDIA==true files whose keys begin with
+   * "key_". "key" in this case will be something like "box", "graph", etc.
+   * @param tableId
+   * @param key
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static List<Entity> queryForMediaFiles(String tableId, String key, 
+      CallingContext cc) throws ODKDatastoreException {
+    List<Entity> allFiles = query(tableId, cc);
+    List<Entity> mediaFiles = new ArrayList<Entity>();
+    for (Entity e : allFiles) {
+      String keyInDb = e.getAsString(KEY);
+      if (keyInDb.startsWith(key + "_")) {
+        mediaFiles.add(e);
+      }
+    }
+    // at this point mediaFiles.size == allFiles.size()-1. If not, something
+    // weird has been going on.
+    return mediaFiles;
   }
 
   /**

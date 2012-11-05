@@ -44,7 +44,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
   private FlexTable selectTablePanel;
-
+  
   // the string constants for adding a file
   private static final String ADD_FILE_TXT = "Add a table file";
   private static final String ADD_FILE_TOOLTIP_TXT = "Upload a file";

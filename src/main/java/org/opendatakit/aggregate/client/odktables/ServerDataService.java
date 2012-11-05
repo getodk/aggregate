@@ -51,9 +51,13 @@ public interface ServerDataService extends RemoteService {
   List<String> getColumnNames(String tableId) throws DatastoreFailureException,
     EntityNotFoundExceptionClient;
 
-  List<RowClient> getFileRows(String tableId) throws AccessDeniedException,
+  List<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, 
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+  
+  List<FileSummaryClient> getMedialFilesKey(String tableId, String key) throws
+    AccessDeniedException, RequestFailureException, DatastoreFailureException,
+    PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
 
   List<String> getFileRowInfoColumnNames();
 
@@ -61,9 +65,10 @@ public interface ServerDataService extends RemoteService {
       RequestFailureException, DatastoreFailureException, 
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
 
-  TableContentsClient getFileInfoContents(String tableId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, 
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+  TableContentsForFilesClient getFileInfoContents(String tableId) throws 
+      AccessDeniedException, RequestFailureException, 
+      DatastoreFailureException, PermissionDeniedExceptionClient, 
+      EntityNotFoundExceptionClient;
 
   void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, 

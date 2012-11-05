@@ -17,6 +17,17 @@ import java.util.List;
 public class TableContentsClient implements Serializable {
 	
 	/**
+   * 
+   */
+  private static final long serialVersionUID = -6147882937837108750L;
+  
+  /**
+   * Necessary for GWT serialization.
+   */
+  public TableContentsClient() {
+  }
+
+  /**
 	 * The tables rows.
 	 */
 	public List<RowClient> rows;
