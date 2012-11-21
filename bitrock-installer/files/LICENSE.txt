@@ -1,6 +1,7 @@
 Copyright (C) 2009 Google Inc.
 Copyright (C) 2010 University of Washington
 Copyright (C) 2011 University of Washington
+Copyright (C) 2012 University of Washington
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
 not use this software except in compliance with the License. You may
@@ -79,6 +80,8 @@ https://github.com/stain/jai-imageio-core   /Modified BSD/ /Apache 2.0/
 	Modifications (c) Stian Soiland-Reyes <stian@soiland-reyes.com> 2010-04-30
 https://bitbucket.org/javarosa/javarosa/wiki/Home		/Apache 2.0/
 	javarosa-libraries.jar
+	Modified from the core distribution.
+	see https://bitbucket.org/m.sundt/javarosa/src/
 http://www.javassist.org/						/Apache 2.0/
     javassist-3.12.1.GA.jar
 http://code.google.com/p/atinject/  /Apache 2.0/

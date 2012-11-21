@@ -34,8 +34,6 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
-  private static final String UPLOAD_SUBMISSION_QUEUE = "upload-submission-queue";
-
   @Override
   public void createFormUploadTask(FormServiceCursor fsc, CallingContext cc)
       throws ODKExternalServiceException {
@@ -48,7 +46,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       TaskOptionsBuilder b = new TaskOptionsBuilder(UploadSubmissionsTaskServlet.ADDR);
       b.countdownMillis(BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
       b.param(ExternalServiceConsts.FSC_URI_PARAM, fsc.getUri());
-      b.enqueue(UPLOAD_SUBMISSION_QUEUE);
+      b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }
