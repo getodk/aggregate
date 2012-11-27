@@ -373,7 +373,12 @@ public class FusionTable extends OAuthExternalService implements ExternalService
   @Override
   public String getDescriptiveTargetString() {
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("dsrcid", objectEntity.getFusionTableId());
+    String id = objectEntity.getFusionTableId();
+    if ( id.toLowerCase().equals(id.toUpperCase()) ) {
+      properties.put("dsrcid", id);
+    } else {
+      properties.put("docid", id);
+    }
     return HtmlUtil.createHrefWithProperties("http://www.google.com/fusiontables/DataSource",
         properties, "View Fusion Table");
   }
