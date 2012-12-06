@@ -739,6 +739,14 @@ If you are replacing an existing application already on appspot, the application
                     <allowEmptyValue>0</allowEmptyValue>
                     <width>30</width>
                 </stringParameter>
+                <booleanParameter>
+                    <name>is_migrated_app_id</name>
+                    <description>Yes, a Master/Slave application id is being (was) migrated to this application id</description>
+					<displayStyle>checkbox-left</displayStyle>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>0</default>
+                </booleanParameter>
             </parameterList>
             <ruleList>
                 <compareText>
@@ -748,6 +756,31 @@ If you are replacing an existing application already on appspot, the application
                 </compareText>
             </ruleList>
         </parameterGroup>
+        <stringParameter>
+			<name>master_slave_app_id</name>
+            <title>Old Master/Slave Google AppEngine application ID</title>
+			<description>Please enter the old Master/Slave application id:</description>
+			<explanation>Once a migration is complete, the appengine dashboard for the old application id should state that this application is hidden by an alias and identify the application id entered on the previous page as receiving all traffic for the application id entered here.</explanation>
+			<value></value>
+			<default></default>
+			<allowEmptyValue>0</allowEmptyValue>
+			<width>30</width>
+            <ruleList>
+                <ruleGroup>
+                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <isTrue>
+                            <value>${is_migrated_app_id}</value>
+                        </isTrue>
+                    </ruleList>
+                </ruleGroup>
+            </ruleList>
+        </stringParameter>
     </parameterList>
     <postInstallationActionList>
         <setInstallerVariable>
@@ -765,11 +798,38 @@ If you are replacing an existing application already on appspot, the application
             <name>hostname</name>
             <value>${app_id}.appspot.com</value>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <isFalse>
+                            <value>${is_migrated_app_id}</value>
+                        </isFalse>
+                    </ruleList>
+                </ruleGroup>
+            </ruleList>
+        </setInstallerVariable>
+        <setInstallerVariable>
+            <name>hostname</name>
+            <value>${master_slave_app_id}.appspot.com</value>
+            <ruleList>
+                <ruleGroup>
+                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <isTrue>
+                            <value>${is_migrated_app_id}</value>
+                        </isTrue>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </setInstallerVariable>
         <setInstallerVariable>
