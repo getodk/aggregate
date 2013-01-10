@@ -1,6 +1,6 @@
 package org.opendatakit.aggregate.odktables.entity;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.simpleframework.xml.Element;
 
 public class Scope {

@@ -92,7 +92,7 @@
 		<intercept-url pattern="/view/**" access="hasRole('ROLE_DATA_VIEWER')" />
 
         <intercept-url pattern="/auth/**" access="hasRole('ROLE_DATA_OWNER')" />
-
+        
         <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
 		<!--	GAE access is controlled in web.xml -->

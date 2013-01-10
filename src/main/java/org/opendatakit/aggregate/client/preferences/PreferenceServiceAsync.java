@@ -26,4 +26,6 @@ public interface PreferenceServiceAsync {
 
   void setOdkTablesEnabled(Boolean enabled, AsyncCallback<Void> callback);
 
+  void setGoogleApiClientCredentials(String googleApiClientId, String googleApiClientSecret, AsyncCallback<Void> asyncCallback);
+
 }

@@ -22,15 +22,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServicesAdminServiceAsync {
 
-	void createFusionTable(String formId,
-			ExternalServicePublicationOption esOption,
-			AsyncCallback<String> callback);
+	void createFusionTable(String formId, ExternalServicePublicationOption esOption,
+      String ownerEmail, AsyncCallback<String> callback);
 
 	void createGoogleSpreadsheet(String formId, String name,
 			ExternalServicePublicationOption esOption,
 			AsyncCallback<String> callback);
 
 	void generateOAuthUrl(String uri, AsyncCallback<String> callback);
+
+	void generateOAuth2Url(String uri, AsyncCallback<String> callback);
 
 	void getExternalServices(String formid,
 			AsyncCallback<ExternServSummary[]> callback);
@@ -41,5 +42,5 @@ public interface ServicesAdminServiceAsync {
 			ExternalServicePublicationOption es, AsyncCallback<String> callback);
 
   void refreshCredentials(String uri, AsyncCallback<String> callback);
-	
+
 }

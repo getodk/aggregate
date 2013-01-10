@@ -21,17 +21,17 @@ mvn install:install-file -Dfile=openid4java-parent-pom.xml -DgroupId=org.openid4
 
 mvn install:install-file -Dfile=openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar -DgroupId=org.openid4java -DartifactId=openid4java-nodeps -Dversion=0.9.6.662.odk-SNAPSHOT -Dpackaging=jar
 
-spring-security-openid-3.1.0.odk-SNAPSHOT:
+spring-security-openid-3.1.3.odk-SNAPSHOT:
 
-mvn install:install-file -Dfile=spring-security-crypto-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-crypto -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-crypto-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-crypto -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-config-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-config -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-config-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-config -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-core-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-core -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-core-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-core -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-web-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-web -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-web-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-web -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-openid-3.1.0.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-openid -Dversion=3.1.0.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-openid-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-openid -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
 
 odk-tomcatutil:
 
@@ -53,28 +53,28 @@ appengine-remote-api:
 mvn install:install-file -Dfile=appengine-remote-api.jar -DgroupId=com.google.appengine -DartifactId=appengine-remote-api -Dversion=1.5.4 -Dpackaging=jar
 
 And the gdata libraries need to be locally installed into Maven (the maven mandubian repository only has up through 1.41.5).  
-Download the 1.46.0 gdata libraries from http://code.google.com/p/gdata-java-client/downloads/list
-Unzip and in the java/libs directory, execute:
+Download the 1.47.1 gdata libraries from http://code.google.com/p/gdata-java-client/downloads/list
+Unzip and in the java/lib directory, execute:
 
-mvn install:install-file -Dfile=gdata-core-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-core-1.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-core-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-core-1.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-client-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-client-1.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-client-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-client-1.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-client-meta-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-client-meta-1.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-client-meta-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-client-meta-1.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-docs-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-docs-3.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-docs-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-docs-3.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-docs-meta-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-docs-meta-3.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-docs-meta-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-docs-meta-3.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-maps-2.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-maps-2.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-maps-2.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-maps-2.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-maps-meta-2.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-maps-meta-2.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-maps-meta-2.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-maps-meta-2.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-media-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-media-1.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-media-1.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-media-1.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-spreadsheet-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-spreadsheet-3.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-spreadsheet-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-spreadsheet-3.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
-mvn install:install-file -Dfile=gdata-spreadsheet-meta-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-spreadsheet-meta-3.0 -Dversion=1.46.0 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=gdata-spreadsheet-meta-3.0.jar -DgroupId=com.google.gdata -DartifactId=gdata-spreadsheet-meta-3.0 -Dversion=1.47.1 -Dpackaging=jar -DgeneratePom=true
 
 Download the "Xerces2 Java 2.11.0 - zip" from http://xerces.apache.org/mirrors.cgi
 Unzip and in the Xerces-J-bin.2.11.0/xerces-2_11_0 directory:

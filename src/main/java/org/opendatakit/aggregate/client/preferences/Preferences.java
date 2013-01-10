@@ -28,6 +28,8 @@ public class Preferences {
 
   private static String googleMapsApiKey;
   
+  private static String googleApiClientId;
+  
   private static Boolean odkTablesEnabled;
 
   public static void updatePreferences() {
@@ -43,6 +45,7 @@ public class Preferences {
         }
         
         googleMapsApiKey = summary.getGoogleMapsApiKey();
+        googleApiClientId = summary.getGoogleApiClientId();
         odkTablesEnabled = summary.getOdkTablesEnabled();
       }
     });
@@ -52,6 +55,13 @@ public class Preferences {
   public static String getGoogleMapsApiKey() {
     if(googleMapsApiKey != null) {
       return googleMapsApiKey;
+    }
+    return "";
+  }
+  
+  public static String getGoogleApiClientId() {
+    if(googleApiClientId != null) {
+      return googleApiClientId;
     }
     return "";
   }
@@ -87,6 +97,19 @@ public class Preferences {
       }
     });
     googleMapsApiKey = mapsApiKey;
+  }
+  
+  public static void setGoogleApiClientCredentials(String apiClientId, String apiClientSecret) {
+    SecureGWT.getPreferenceService().setGoogleApiClientCredentials(apiClientId, apiClientSecret, new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {
+          AggregateUI.getUI().reportError(caught);
+      }
+
+      public void onSuccess(Void void1) {
+        // do nothing
+      }
+    });
+    googleApiClientId = apiClientId;
   }
  
   

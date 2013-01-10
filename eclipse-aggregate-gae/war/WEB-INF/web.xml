@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	version="2.5"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
-	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd 
-	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
-	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.0.xsd">
+<?xml version="1.0" encoding="utf-8" standalone="no"?><web-app 
+xmlns="http://java.sun.com/xml/ns/javaee" 
+xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+version="2.5" 
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.0.xsd">
  
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -21,6 +18,7 @@
 
 	<security-constraint>
         <web-resource-collection>
+            <web-resource-name>TaskQueue Interfaces</web-resource-name>
             <url-pattern>/gae/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
@@ -30,9 +28,10 @@
 
    	<security-constraint>
         <web-resource-collection>
+            <web-resource-name>RemoteControl Interfaces</web-resource-name>
             <url-pattern>/remote_api</url-pattern>
         </web-resource-collection>
-        <auth-constraint>
+   	    <auth-constraint>
             <role-name>admin</role-name>
         </auth-constraint>
     </security-constraint>
@@ -41,7 +40,7 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
-	<filter>
+    <filter>
 		<filter-name>serverSpringSecurityFilterChain</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	</filter>
@@ -160,6 +159,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>oauth2Callback</servlet-name>
+		<servlet-class>org.opendatakit.aggregate.servlet.OAuth2Servlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>oauth2Callback</servlet-name>
+		<url-pattern>/auth/auth2</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>aggregate-html</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.AggregateHtmlServlet</servlet-class>
 	</servlet>
@@ -186,6 +194,15 @@
         <url-pattern>/ssl/user-manage-passwords</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>manage-oauth2-service-account</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.ServiceAccountPrivateKeyUploadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>manage-oauth2-service-account</servlet-name>
+        <url-pattern>/ssl/oauth2-service-account</url-pattern>
+    </servlet-mapping>
+    
 	<servlet>
 		<servlet-name>submission</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.servlet.SubmissionServlet</servlet-class>
@@ -428,8 +445,7 @@
 	    <servlet-name>RemoteApi</servlet-name>
 	    <url-pattern>/remote_api</url-pattern>
 	</servlet-mapping>
-    
-
+ 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
@@ -437,4 +453,5 @@
 	<session-config>
 		<session-timeout>30</session-timeout>
 	</session-config>
+
 </web-app>

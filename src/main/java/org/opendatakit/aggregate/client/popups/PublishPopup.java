@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
+import org.opendatakit.common.security.client.UserSecurityInfo;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -62,7 +63,7 @@ public final class PublishPopup extends AbstractPopupBase {
 	private String enteredName;
 	// saves whether or not anything has been input by the user in the name box
 	private boolean didInput;
-	
+
 	private final EnumListBox<ExternalServiceType> serviceType;
 	private final EnumListBox<ExternalServicePublicationOption> esOptions;
 
@@ -93,8 +94,8 @@ public final class PublishPopup extends AbstractPopupBase {
 				ES_SERVICEOPTIONS_TOOLTIP, ES_SERVICEOPTIONS_BALLOON);
 
 		// Set up the tables in the popup
-		layout = new FlexTable();	
-		
+		layout = new FlexTable();
+
 		topBar = new FlexTable();
 		topBar.addStyleName("stretch_header");
 		topBar.setWidget(0, 0, new HTML("<h2>Form: </h2>"));
@@ -103,12 +104,12 @@ public final class PublishPopup extends AbstractPopupBase {
 		topBar.setWidget(0, 3, serviceType);
 		topBar.setWidget(0, 4, deleteButton);
 		topBar.setWidget(0, 5, new ClosePopupButton(this));
-		
+
 		optionsBar = new FlexTable();
 		optionsBar.addStyleName("flexTableBorderTopStretchWidth");
 		optionsBar.setWidget(1, 0, new HTML("<h3>Data to Publish:</h3>"));
 		optionsBar.setWidget(1, 1, esOptions);
-		
+
 		// this is only for google spreadsheets
 		gsBar = new FlexTable();
 		gsBar.addStyleName("stretch_header");
@@ -116,23 +117,23 @@ public final class PublishPopup extends AbstractPopupBase {
 		// make the name textbox an appropriate size
 		name.setVisibleLength(35);
 		gsBar.setWidget(1, 1, name);
-		
+
 		optionsBar.setWidget(2, 0, gsBar);
 		optionsBar.getFlexCellFormatter().setColSpan(2, 0, 2);
-		
+
 		layout.setWidget(0, 0, topBar);
 		layout.setWidget(1, 0, optionsBar);
 		// set the options to fill the table as well
 		layout.getFlexCellFormatter().setColSpan(1, 0, 6);
 		setWidget(layout);
-		
+
 		updateUIOptions();
-		
+
 	}
 
 	public void updateUIOptions() {
 		ExternalServiceType type = serviceType.getSelectedValue();
-		
+
 		if (type == null) {
 			name.setEnabled(false);
 			name.setReadOnly(true);
@@ -172,7 +173,7 @@ public final class PublishPopup extends AbstractPopupBase {
 			name.setText("Spreadsheet Name");
 			name.setEnabled(false);
 			name.setReadOnly(true);
-			optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");			
+			optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
 			break;
 		}
 	}
@@ -205,16 +206,27 @@ public final class PublishPopup extends AbstractPopupBase {
 				});
 				break;
 			case GOOGLE_FUSIONTABLES:
-				SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp,
-						new OAuthCallback());
+			   UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
+			   SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, info.getEmail(),
+						new OAuth2Callback());
 				break;
 			default: // unknown type
 			break;
 			}
-			
+
 			hide();
 		}
 	}
+
+   private class OAuth2Callback implements AsyncCallback<String> {
+
+      public void onFailure(Throwable caught) {
+         AggregateUI.getUI().reportError(caught);
+      }
+
+      public void onSuccess(String result) {
+      }
+   }
 
 	private class OAuthCallback implements AsyncCallback<String> {
 

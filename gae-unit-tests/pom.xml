@@ -75,6 +75,7 @@
 		  <version>${maven.surefire.plugin.version}</version>
 		  <inherited>true</inherited>
 		  <configuration>
+			<argLine>${surefire.argLine} -Ddatastore.high_replication -Ddatastore.default_high_rep_job_policy_unapplied_job_pct=20 </argLine>
 			<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
 			<excludes>
 			  <exclude>**/integration/**</exclude>

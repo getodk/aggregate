@@ -8,14 +8,17 @@ public class PreferenceSummary implements Serializable{
 
   private String googleMapsApiKey;
   
+  private String googleApiClientId;
+  
   private Boolean odkTablesEnabled;
   
   public PreferenceSummary() {
     
   }
   
-  public PreferenceSummary(String googleMapsApiKey, Boolean odkTablesEnabled) {
+  public PreferenceSummary(String googleMapsApiKey, String googleApiClientId, Boolean odkTablesEnabled) {
     this.googleMapsApiKey = googleMapsApiKey;
+    this.googleApiClientId = googleApiClientId;
     this.odkTablesEnabled = odkTablesEnabled;
   }
 
@@ -23,6 +26,10 @@ public class PreferenceSummary implements Serializable{
     return googleMapsApiKey;
   }
 
+  public String getGoogleApiClientId() {
+    return googleApiClientId;
+  }
+  
   public Boolean getOdkTablesEnabled() {
     return odkTablesEnabled;
   }

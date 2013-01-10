@@ -45,11 +45,13 @@ import org.opendatakit.aggregate.externalservice.OhmageJsonServer;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.aggregate.servlet.OAuth2Servlet;
 import org.opendatakit.aggregate.servlet.OAuthServlet;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -64,7 +66,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.externalserv.ServicesAdminService {
 
   /**
-	 * 
+	 *
 	 */
   private static final long serialVersionUID = 51251316598366231L;
 
@@ -164,8 +166,65 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     return null;
   }
 
+
+  public String generateOAuth2Url(String uri) throws RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+
+      String scope = null;
+      FormServiceCursor fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
+      switch (fsc.getExternalServiceType()) {
+      case GOOGLE_FUSIONTABLES:
+        scope = FusionTableConsts.FUSION_SCOPE;
+        break;
+      case GOOGLE_SPREADSHEET:
+        scope = SpreadsheetConsts.DOCS_SCOPE + BasicConsts.SPACE
+            + SpreadsheetConsts.SPREADSHEETS_SCOPE;
+        break;
+      default:
+        break;
+      }
+
+      // make sure a scope was determined before proceeding
+      if (scope == null) {
+        return null;
+      }
+
+      GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+      oauthParameters.setOAuthConsumerKey(ServletConsts.OAUTH_CONSUMER_KEY);
+      oauthParameters.setOAuthConsumerSecret(ServletConsts.OAUTH_CONSUMER_SECRET);
+      oauthParameters.setScope(scope);
+
+      GoogleOAuthHelper oauthHelper = new GoogleOAuthHelper(new OAuthHmacSha1Signer());
+      oauthHelper.getUnauthorizedRequestToken(oauthParameters);
+      Map<String, String> params = new HashMap<String, String>();
+      params.put(UIConsts.FSC_URI_PARAM, uri);
+      params.put(ServletConsts.OAUTH_TOKEN_SECRET_PARAMETER, oauthParameters.getOAuthTokenSecret());
+
+      String addr = cc.getServerURL() + BasicConsts.FORWARDSLASH + OAuth2Servlet.ADDR;
+      String callbackUrl = HtmlUtil.createLinkWithProperties(addr, params);
+
+      oauthParameters.setOAuthCallback(callbackUrl);
+      return oauthHelper.createUserAuthorizationUrl(oauthParameters);
+
+    } catch (OAuthException e) {
+      e.printStackTrace();
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    }
+    return null;
+  }
+
   @Override
-  public String createFusionTable(String formId, ExternalServicePublicationOption esOption)
+  public String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail)
       throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
       DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -183,7 +242,12 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }
-      FusionTable fusion = new FusionTable(form, esOption, cc);
+      if ( ownerEmail == null || ownerEmail.length() == 0 ) {
+        throw new RequestFailureException(
+            "Owner email must be supplied.  Are you logged in through a gmail account?");
+      }
+      FusionTable fusion = new FusionTable(form, esOption, ownerEmail, cc);
+      fusion.initiate(cc);
       return fusion.getFormServiceCursor().getUri();
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
@@ -194,6 +258,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
   }
 
@@ -232,7 +299,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       throw new RequestFailureException(e);
     }
   }
-  
+
   @Override
   public String createOhmageJsonServer(String formId, String url,
         ExternalServicePublicationOption esOption)
