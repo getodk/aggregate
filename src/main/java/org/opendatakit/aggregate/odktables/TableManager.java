@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
@@ -119,6 +119,7 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public TableEntry getTable(String tableId) throws ODKDatastoreException {
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
     // get table entry
@@ -150,6 +151,7 @@ public class TableManager {
    */
   public TableEntry getTableNullSafe(String tableId) throws ODKEntityNotFoundException,
       ODKDatastoreException {
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
     // get table entry
@@ -182,7 +184,9 @@ public class TableManager {
   public TableEntry createTable(String tableId, String tableName, List<Column> columns,
       String metadata) throws ODKEntityPersistException, ODKDatastoreException,
       TableAlreadyExistsException {
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
+    Validate.notNull(tableName);
     Validate.notEmpty(tableName);
     Validate.noNullElements(columns);
 
@@ -226,6 +230,7 @@ public class TableManager {
    */
   public void deleteTable(String tableId) throws ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException {
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
     List<Entity> entities = new ArrayList<Entity>();

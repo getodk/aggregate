@@ -66,7 +66,7 @@ public abstract class AbstractExternalService implements ExternalService{
   
   protected abstract CommonFieldsBase retrieveObjectEntity(); 
   
-  protected abstract List<? extends CommonFieldsBase> retrieveRepateElementEntities();
+  protected abstract List<? extends CommonFieldsBase> retrieveRepeatElementEntities();
   
   protected abstract void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException;
   
@@ -104,7 +104,7 @@ public abstract class AbstractExternalService implements ExternalService{
   @Override
   public void delete(CallingContext cc) throws ODKDatastoreException {
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
-    List<? extends CommonFieldsBase> repeats = retrieveRepateElementEntities();
+    List<? extends CommonFieldsBase> repeats = retrieveRepeatElementEntities();
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -128,7 +128,7 @@ public abstract class AbstractExternalService implements ExternalService{
     User user = cc.getCurrentUser();
    
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
-    List<? extends CommonFieldsBase> repeats = retrieveRepateElementEntities();
+    List<? extends CommonFieldsBase> repeats = retrieveRepeatElementEntities();
     
     if(repeats != null) {
       ds.putEntities(repeats, user);

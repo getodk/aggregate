@@ -294,7 +294,7 @@ public class OhmageJsonServer extends AbstractExternalService implements
 	}
 
 	@Override
-	protected List<? extends CommonFieldsBase> retrieveRepateElementEntities() {
+	protected List<? extends CommonFieldsBase> retrieveRepeatElementEntities() {
 		return null;
 	}
 

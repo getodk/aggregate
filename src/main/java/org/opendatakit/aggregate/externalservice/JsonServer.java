@@ -243,7 +243,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   @Override
-  protected List<? extends CommonFieldsBase> retrieveRepateElementEntities() {
+  protected List<? extends CommonFieldsBase> retrieveRepeatElementEntities() {
     return null;
   }
   

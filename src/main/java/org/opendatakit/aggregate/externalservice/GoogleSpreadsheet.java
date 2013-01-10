@@ -166,6 +166,9 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
     objectEntity.setSpreadsheetName(name);
     persist(cc);
   }
+  public void authenticate2AndCreate(String code, CallingContext cc) {
+    // TODO: copy from FusionTables or push down to common layer?
+  }
 
   public void authenticateAndCreate(OAuthToken authToken, CallingContext cc)
       throws ODKExternalServiceException, ODKDatastoreException {
@@ -508,7 +511,7 @@ public class GoogleSpreadsheet extends OAuthExternalService implements ExternalS
   }
 
   @Override
-  protected List<? extends CommonFieldsBase> retrieveRepateElementEntities() {
+  protected List<? extends CommonFieldsBase> retrieveRepeatElementEntities() {
     return repeatElementEntities;
   }
 

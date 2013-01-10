@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -73,16 +72,16 @@ public class TaskLockImpl implements TaskLock {
     String tableName = K_BQ + datastore.getDefaultSchemaName() + K_BQ + "." + K_BQ
         + TaskLockTable.TABLE_NAME + K_BQ;
 
-    b.append("'").append(StringEscapeUtils.escapeSql(user.getUriUser())).append("'");
+    b.append("'").append(user.getUriUser().replaceAll("'", "''")).append("'");
     String uriUserInline = b.toString();
     b.setLength(0);
-    b.append("'").append(StringEscapeUtils.escapeSql(uri)).append("'");
+    b.append("'").append(uri.replaceAll("'", "''")).append("'");
     String uriLockInline = b.toString();
     b.setLength(0);
-    b.append("'").append(StringEscapeUtils.escapeSql(entity.getFormId())).append("'");
+    b.append("'").append(entity.getFormId().replaceAll("'", "''")).append("'");
     String formIdInline = b.toString();
     b.setLength(0);
-    b.append("'").append(StringEscapeUtils.escapeSql(entity.getTaskType())).append("'");
+    b.append("'").append(entity.getTaskType().replaceAll("'", "''")).append("'");
     String taskTypeInline = b.toString();
     b.setLength(0);
     b.append("interval '").append(l).append(" milliseconds'");

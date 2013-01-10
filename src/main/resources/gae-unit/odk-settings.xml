@@ -10,6 +10,7 @@
 		<property name="locations">
 			<list>
 				<value>classpath:security.properties</value>
+				<value>classpath:logging.properties</value>
 			</list>
 		</property>
 	</bean>

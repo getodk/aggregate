@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--  To set up validation in Eclipse, add appengine-java-sdk/docs/queue.xsd to 
+      XML Catalog with a schema location of http://localhost/queue.xsd -->
 <queue-entries
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="queue.xsd">
+         xsi:noNamespaceSchemaLocation="http://localhost/queue.xsd">
   <queue>
     <name>default</name>
     <rate>1/s</rate>

@@ -69,9 +69,9 @@ final class SimpleFilterTracker extends Tracker {
         BigDecimal bd = (BigDecimal) value;
         d = bd.doubleValue();
       }
-      q.addFilter(attribute.getName(), QueryImpl.operationMap.get(op), d);
+      q.addFilter( attribute.getName(), QueryImpl.operationMap.get(op), d);
     } else {
-      q.addFilter(attribute.getName(), QueryImpl.operationMap.get(op), value);
+      q.addFilter(  attribute.getName(), QueryImpl.operationMap.get(op), value);
     }
   }
 }

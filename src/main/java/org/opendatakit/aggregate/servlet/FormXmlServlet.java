@@ -25,7 +25,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -130,7 +130,7 @@ public class FormXmlServlet extends ServletUtilBase {
         }
         out.println(downloadXmlButton); // download button
         out.println("<PRE>");
-        StringEscapeUtils.escapeHtml(out, xmlString);// form xml
+        out.print(StringEscapeUtils.escapeHtml4(xmlString));// form xml
         out.println("</PRE>");
         finishBasicHtmlResponse(resp); // footer info
       } else {

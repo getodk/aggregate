@@ -76,6 +76,9 @@ public class DatastoreImpl implements Datastore {
   public DatastoreImpl() throws Exception {
     ds = DatastoreServiceFactory.getDatastoreService();
     schemaName = "opendatakit";
+    
+    LogFactory.getLog(DatastoreImpl.class).info("Running on " + 
+          ds.getDatastoreAttributes().getDatastoreType().toString() + " datastore");
   }
 
   DatastoreService getDatastoreService() {

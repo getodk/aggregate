@@ -38,6 +38,7 @@ import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -53,6 +54,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+
 
 public class AggregateUI implements EntryPoint {
 
@@ -540,8 +542,8 @@ public class AggregateUI implements EntryPoint {
       HelpSliderConsts[] helpVals = subTabObj.getHelpSliderContent();
       if (helpVals != null) {
         for (int i = 0; i < helpVals.length; i++) {
-          TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-          TreeItem content = new TreeItem(helpVals[i].getContent());
+          TreeItem helpItem = new TreeItem(SafeHtmlUtils.fromString(helpVals[i].getTitle()));
+          TreeItem content = new TreeItem(SafeHtmlUtils.fromString(helpVals[i].getContent()));
           helpItem.setState(false);
           helpItem.addItem(content);
           rootItem.addItem(helpItem);

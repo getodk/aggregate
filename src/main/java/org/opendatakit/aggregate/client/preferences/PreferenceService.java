@@ -36,5 +36,7 @@ public interface PreferenceService extends RemoteService {
   
   void setGoogleMapsKey(String key) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
   
+  void setGoogleApiClientCredentials(String clientId, String clientSecret) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  
   void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }

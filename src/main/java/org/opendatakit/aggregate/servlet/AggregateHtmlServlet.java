@@ -28,8 +28,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.security.spring.SecurityRevisionsTable;
@@ -55,7 +58,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 
   public static final String ADDR = UIConsts.HOST_PAGE_BASE_ADDR;
 
-  public static final String PAGE_CONTENTS = "<!doctype html>"
+  public static final String PAGE_CONTENTS_FIRST = "<!doctype html>"
       + "<!-- The DOCTYPE declaration above will set the    -->"
       + "<!-- browser's rendering engine into               -->"
       + "<!-- \"Standards Mode\". Replacing this declaration  -->"
@@ -71,6 +74,8 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "	<script type=\"text/javascript\" src=\"javascript/resize.js\"></script>"
       + "	<script type=\"text/javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
+      + "    <script src=\"https://maps.googleapis.com/maps/api/js?";
+  public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">"
@@ -145,7 +150,21 @@ public class AggregateHtmlServlet extends ServletUtilBase {
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     PrintWriter out = resp.getWriter();
-    out.print(PAGE_CONTENTS);
+    out.print(PAGE_CONTENTS_FIRST);
+    String mapApiKey;
+    try {
+      mapApiKey = ServerPreferencesProperties.getGoogleMapApiKey(cc);
+      if ( mapApiKey != null && mapApiKey.length() != 0 ) {
+        out.print("key=" + encodeParameter(mapApiKey) + "&amp;");
+      }
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      logger.info("Unable to access Map APIKey");
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      logger.info("Unable to access Map APIKey");
+    }
+    out.print(PAGE_CONTENTS_SECOND);
   }
 
 }

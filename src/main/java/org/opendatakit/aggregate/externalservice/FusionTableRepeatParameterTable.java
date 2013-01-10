@@ -30,25 +30,25 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 
 	  private static final String TABLE_NAME = "_fusion_table_repeat";
 
-	  private static final DataField URI_FUSION_TABLE_PROPERTY = new DataField(
+	  static final DataField URI_FUSION_TABLE_PROPERTY = new DataField(
 			  "URI_FUSION_TABLE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
 	  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField(
 			  "FUSION_TABLE_ID", DataField.DataType.STRING, true, 4096L);
-	  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField(
+	  static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField(
 			  "FORM_ELEMENT_KEY", DataField.DataType.STRING, true, 4096L);
 
 		/**
 		 * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-		 * 
+		 *
 		 * @param databaseSchema
 		 * @param tableName
 		 */
@@ -61,7 +61,7 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 
 	  /**
 	   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	   * 
+	   *
 	   * @param ref
 	   * @param user
 	   */
@@ -122,7 +122,7 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	    }
 	    return relation;
 	  }
-	  
+
 	  public static List<FusionTableRepeatParameterTable> getRepeatGroupAssociations(String uri,
 			  												CallingContext cc) throws ODKDatastoreException {
 		  List<FusionTableRepeatParameterTable> list = new ArrayList<FusionTableRepeatParameterTable> ();

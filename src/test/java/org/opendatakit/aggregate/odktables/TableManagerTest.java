@@ -79,19 +79,19 @@ public class TableManagerTest {
     tm.createTable(tableId, tableName, columns, tableProperties);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testCreateTableNullTableId() throws ODKEntityPersistException, ODKDatastoreException,
       TableAlreadyExistsException {
     tm.createTable(null, tableName, columns, tableProperties);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testCreateTableNullTableName() throws ODKEntityPersistException,
       ODKDatastoreException, TableAlreadyExistsException {
     tm.createTable(tableId, null, columns, tableProperties);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testCreateTableNullColumns() throws ODKEntityPersistException, ODKDatastoreException,
       TableAlreadyExistsException {
     tm.createTable(tableId, tableName, null, tableProperties);
@@ -109,7 +109,7 @@ public class TableManagerTest {
     tm.getTableNullSafe(tableId);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testGetTableNullTableId() throws ODKEntityNotFoundException, ODKDatastoreException {
     tm.getTableNullSafe(null);
   }
@@ -163,7 +163,7 @@ public class TableManagerTest {
     tm.deleteTable(tableId);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testDeleteTableNullTableId() throws ODKDatastoreException, ODKTaskLockException {
     tm.deleteTable(null);
   }
