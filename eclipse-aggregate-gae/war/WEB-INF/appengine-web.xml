@@ -2,7 +2,7 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
 	<application>msundt-test</application>
 	<version>1</version>
-		
+
 	<!--  use sessions and don't require that they commit to the backing store -->
 	<sessions-enabled>true</sessions-enabled>
 	<!--  Make GAE more like Tomcat w.r.t. threading... -->
@@ -14,7 +14,7 @@
     </static-error-handlers>
 	<!-- Configure java.util.logging -->
 	<system-properties>
-	<property name="java.util.logging.config.file" value="classpath:logging.properties"/>
+	<property name="java.util.logging.config.file" value="logging.properties"/>
     <property name="com.google.gdata.DisableCookieHandler" value="true"/>
   </system-properties>
 </appengine-web-app>
