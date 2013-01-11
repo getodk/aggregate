@@ -5,6 +5,7 @@ import org.opendatakit.aggregate.client.AggregateTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 import org.opendatakit.aggregate.constants.common.Tabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
@@ -38,7 +39,7 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
   @Override
   public void onValueChange(ValueChangeEvent<Boolean> event) {
     super.onValueChange(event);
-    
+
     final Boolean enabled = event.getValue();
     SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
       @Override
@@ -51,21 +52,22 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
       @Override
       public void onSuccess(Void result) {
         AggregateUI.getUI().clearError();
-        Preferences.updatePreferences();
+        Preferences.updatePreferences(new PreferencesCompletionCallback() {
+			@Override
+			public void refreshFromUpdatedPreferences() {
+		        AggregateTabBase possibleAdminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
 
-        AggregateTabBase possibleAdminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
-
-        if (possibleAdminTab instanceof AdminTabUI) {
-          AdminTabUI adminTab = (AdminTabUI) possibleAdminTab;
-          if (enabled) {
-            adminTab.displayOdkTablesSubTab();
-          } else {
-            adminTab.hideOdkTablesSubTab();
-          }
-        } else {
-          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
-        }
-
+		        if (possibleAdminTab instanceof AdminTabUI) {
+		          AdminTabUI adminTab = (AdminTabUI) possibleAdminTab;
+		          if (enabled) {
+		            adminTab.displayOdkTablesSubTab();
+		          } else {
+		            adminTab.hideOdkTablesSubTab();
+		          }
+		        } else {
+		          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
+		        }
+			}});
       }
     });
   }

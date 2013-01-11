@@ -44,15 +44,15 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * Stupid class to wrap the Aggregate.html page that GWT uses for all its UI
  * presentation. Needed so that access to the page can be managed by Spring
  * Security.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class AggregateHtmlServlet extends ServletUtilBase {
 
   private static final Log logger = LogFactory.getLog(AggregateHtmlServlet.class);
   /**
-	 * 
+	 *
 	 */
   private static final long serialVersionUID = 5811797423869654357L;
 
@@ -74,8 +74,6 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "	<script type=\"text/javascript\" src=\"javascript/resize.js\"></script>"
       + "	<script type=\"text/javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
-      + "    <script src=\"https://maps.googleapis.com/maps/api/js?";
-  public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">"
@@ -86,8 +84,13 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "    <noscript>"
       + "      <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif\">"
       + "        Your web browser must have JavaScript enabled"
-      + "        in order for this application to display correctly." + "      </div>"
-      + "    </noscript>" + "	<div id=\"error_content\"></div><div id=\"dynamic_content\"></div>" + "  </body>" + "</html>";
+      + "        in order for this application to display correctly."
+      + "      </div>"
+      + "    </noscript>" + "	<div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
+      + "    <script src=\"https://maps.googleapis.com/maps/api/js?";
+  public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
+	  + "  </body>"
+      + "</html>";
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
