@@ -46,20 +46,22 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static final String GOOGLE_API_SERVICE_ACCOUNT_EMAIL = "GOOGLE_SERVICE_ACCOUNT_EMAIL";
   public static final String PRIVATE_KEY_FILE_CONTENTS = "PRIVATE_KEY_FILE_CONTENTS";
 
+  private static final String GOOGLE_SIMPLE_API_KEY = "GOOG_SIMPLE_API_KEY"; // supplied to Google Maps only
+
   // other keys...
   private static final String SITE_KEY = "SITE_KEY";
-  private static final String GOOGLE_FUSION_TABLE_KEY = "GOOG_FUSION_TABLES_OAUTH2_KEY";
-  private static final String GOOGLE_SPREADSHEET_TABLE_KEY = "GOOG_SPREADSHEET_OAUTH2_KEY";
-  private static final String GOOGLE_MAP_KEY = "GOOG_MAPS_API_KEY";
-  private static final String GOOGLE_API_CLIENT_SECRET = "GOOGLE_CLIENT_SECRET";
-  public static final String GOOGLE_API_OAUTH2_CODE = "GOOGLE_OAUTH2_CODE";
-  public static final String GOOGLE_API_OAUTH2_ACCESS_TOKEN = "GOOGLE_OAUTH2_ACCESS_TOKEN";
-  public static final String GOOGLE_API_OAUTH2_REFRESH_TOKEN = "GOOGLE_OAUTH2_REFRESH_TOKEN";
+
+  public static final String GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN = "GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN";
+
+  public static final String GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN = "GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN";
+  public static final String GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN = "GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN";
+  public static final String GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME = "GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME";
+
   private static final String ODK_TABLES_ENABLED = "ODK_TABLES_ENABLED";
 
   /**
    * Construct a relation prototype.
-   * 
+   *
    * @param databaseSchema
    * @param tableName
    */
@@ -70,12 +72,12 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   }
 
   public static PreferenceSummary getPreferenceSummary(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    return new PreferenceSummary(getGoogleMapApiKey(cc), getGoogleApiClientId(cc), getOdkTablesEnabled(cc));
+    return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc), getOdkTablesEnabled(cc));
   }
 
   /**
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   * 
+   *
    * @param ref
    * @param user
    */
@@ -102,37 +104,18 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     setServerPreferencesProperty(cc, SITE_KEY, siteKey);
   }
 
-  public static String getGoogleMapApiKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, GOOGLE_MAP_KEY);
+  public static String getGoogleSimpleApiKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, GOOGLE_SIMPLE_API_KEY);
     return value;
   }
 
-  public static void setGoogleMapApiKey(CallingContext cc, String googleMapsApiKey) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, GOOGLE_MAP_KEY, googleMapsApiKey);
+  public static void setGoogleSimpleApiKey(CallingContext cc, String googleSimpleApiKey) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    setServerPreferencesProperty(cc, GOOGLE_SIMPLE_API_KEY, googleSimpleApiKey);
   }
 
   public static String getGoogleApiClientId(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, GOOGLE_API_CLIENT_ID);
     return value;
-  }
-
-  public static String getGoogleApiClientSecret(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, GOOGLE_API_CLIENT_SECRET);
-    return value;
-  }
-  
-  public static void setGoogleApiClientCredentials(CallingContext cc, String googleClientId, String googleClientSecret) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, GOOGLE_API_CLIENT_SECRET, googleClientSecret);
-    setServerPreferencesProperty(cc, GOOGLE_API_CLIENT_ID, googleClientId);
-  }
-  
-  public static String getGoogleFusionTableOauthKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, GOOGLE_FUSION_TABLE_KEY);
-    return value;
-  }
-
-  public static void setGoogleFusionTableOauthKey(CallingContext cc, String googleFusionTableOauthKey) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, GOOGLE_FUSION_TABLE_KEY, googleFusionTableOauthKey);
   }
 
   public static Boolean getOdkTablesEnabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {

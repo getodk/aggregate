@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -57,6 +57,8 @@ import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
 
@@ -64,10 +66,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class OhmageJsonServer extends AbstractExternalService implements
 		ExternalService {
@@ -124,6 +126,15 @@ public class OhmageJsonServer extends AbstractExternalService implements
 		objectEntity.setServerUrl(serverURL);
 		persist(cc);
 	}
+
+  @Override
+  public void initiate(CallingContext cc) throws ODKExternalServiceException,
+      ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
+  }
+
+  @Override
+  public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
+  }
 
 	public String getServerUrl() {
 		return objectEntity.getServerUrl();
@@ -187,7 +198,7 @@ public class OhmageJsonServer extends AbstractExternalService implements
 
 	/**
 	 * Uploads a set of submissions to the ohmage system.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 * @throws ODKExternalServiceException
@@ -238,7 +249,7 @@ public class OhmageJsonServer extends AbstractExternalService implements
 
 		HttpResponse response = client.execute(httppost);
 		HttpEntity resEntity = response.getEntity();
-		
+
 		OhmageJsonTypes.server_response serverResp = null;
 		if ( resEntity != null ) {
 		  Reader resReader = new InputStreamReader(resEntity.getContent());
@@ -251,9 +262,9 @@ public class OhmageJsonServer extends AbstractExternalService implements
 		    // ignore...
 		  }
 		}
-		
+
 		int statusCode = response.getStatusLine().getStatusCode();
-		
+
 		if ( statusCode == HttpServletResponse.SC_UNAUTHORIZED ) {
         throw new ODKExternalServiceCredentialsException("failure from server: " + statusCode);
 		} else if ( statusCode >= 300 || (serverResp != null &&

@@ -26,12 +26,8 @@ public interface ServicesAdminServiceAsync {
       String ownerEmail, AsyncCallback<String> callback);
 
 	void createGoogleSpreadsheet(String formId, String name,
-			ExternalServicePublicationOption esOption,
+			ExternalServicePublicationOption esOption, String ownerEmail,
 			AsyncCallback<String> callback);
-
-	void generateOAuthUrl(String uri, AsyncCallback<String> callback);
-
-	void generateOAuth2Url(String uri, AsyncCallback<String> callback);
 
 	void getExternalServices(String formid,
 			AsyncCallback<ExternServSummary[]> callback);
@@ -41,6 +37,7 @@ public interface ServicesAdminServiceAsync {
 	void createOhmageJsonServer(String formId, String url,
 			ExternalServicePublicationOption es, AsyncCallback<String> callback);
 
-  void refreshCredentials(String uri, AsyncCallback<String> callback);
+  void refreshCredentials(String uri, AsyncCallback<Void> callback);
 
+  void sharePublishedFiles(String uri, String ownerEmail, AsyncCallback<Void> callback);
 }

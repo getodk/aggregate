@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.popups;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.UrlHash;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
@@ -185,11 +184,12 @@ public final class PublishPopup extends AbstractPopupBase {
 
 			ExternalServiceType type = serviceType.getSelectedValue();
 			ExternalServicePublicationOption serviceOp = esOptions.getSelectedValue();
+			UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
 
 			switch (type) {
 			case GOOGLE_SPREADSHEET:
-				SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(),
-						serviceOp, new OAuthCallback());
+			  SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(),
+						serviceOp, info.getEmail(), new OAuth2Callback());
 				break;
 			case OHMAGE_JSON_SERVER:
 				SecureGWT.getServicesAdminService().createOhmageJsonServer(formId, name.getText(), serviceOp, new AsyncCallback<String>() {
@@ -206,7 +206,6 @@ public final class PublishPopup extends AbstractPopupBase {
 				});
 				break;
 			case GOOGLE_FUSIONTABLES:
-			   UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
 			   SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, info.getEmail(),
 						new OAuth2Callback());
 				break;
@@ -227,28 +226,6 @@ public final class PublishPopup extends AbstractPopupBase {
       public void onSuccess(String result) {
       }
    }
-
-	private class OAuthCallback implements AsyncCallback<String> {
-
-		public void onFailure(Throwable caught) {
-			AggregateUI.getUI().reportError(caught);
-		}
-
-		public void onSuccess(String result) {
-			SecureGWT.getServicesAdminService().generateOAuthUrl(result,
-					new AsyncCallback<String>() {
-						@Override
-						public void onFailure(Throwable caught) {
-							AggregateUI.getUI().reportError(caught);
-						}
-
-						@Override
-						public void onSuccess(String result) {
-							UrlHash.getHash().goTo(result);
-						}
-					});
-		}
-	}
 
 	private class ExternalServiceTypeChangeHandler implements ChangeHandler {
 		@Override

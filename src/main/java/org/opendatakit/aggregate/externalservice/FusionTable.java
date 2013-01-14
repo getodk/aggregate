@@ -17,12 +17,28 @@
 
 package org.opendatakit.aggregate.externalservice;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,10 +46,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
@@ -62,6 +80,8 @@ import org.apache.http.protocol.HttpContext;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -84,9 +104,11 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.SecurityUtils;
@@ -104,7 +126,7 @@ import com.google.gdata.util.ServiceException;
  * @author mitchellsundt@gmail.com
  *
  */
-public class FusionTable extends OAuthExternalService implements ExternalService {
+public class FusionTable extends OAuth2ExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
 
   private static final String FUSION_TABLE_OAUTH2_SCOPE = "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/fusiontables";
@@ -241,22 +263,18 @@ public class FusionTable extends OAuthExternalService implements ExternalService
   }
 
   public void initiate(CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException {
-    authenticate2AndCreate(FUSION_TABLE_OAUTH2_SCOPE, cc);
-  }
-
-  public void authenticate2AndCreate(String code, CallingContext cc)
-      throws ODKExternalServiceException, ODKDatastoreException {
+    //authenticate2AndCreate(FUSION_TABLE_OAUTH2_SCOPE, cc);
 
     // See if the access token we know actually works...
 
     accessToken = ServerPreferencesProperties.getServerPreferencesProperty(cc,
-        ServerPreferencesProperties.GOOGLE_API_OAUTH2_ACCESS_TOKEN);
+        ServerPreferencesProperties.GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN);
 
     if (accessToken == null) {
       try {
         accessToken = getOAuth2AccessToken(FUSION_TABLE_OAUTH2_SCOPE, cc);
         ServerPreferencesProperties.setServerPreferencesProperty(cc,
-            ServerPreferencesProperties.GOOGLE_API_OAUTH2_ACCESS_TOKEN, accessToken);
+            ServerPreferencesProperties.GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN, accessToken);
       } catch (Exception e) {
         throw new ODKExternalServiceCredentialsException(
             "Unable to obtain OAuth2 access token: " + e.toString());
@@ -301,11 +319,269 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     }
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     persist(cc);
+
+    // upload data to external service
+    if (!fsc.getExternalServicePublicationOption().equals(ExternalServicePublicationOption.STREAM_ONLY)) {
+
+      UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+      CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
+      ccDaemon.setAsDaemon(true);
+      uploadTask.createFormUploadTask(fsc, ccDaemon);
+
+    }
+
   }
 
-  public void authenticateAndCreate(OAuthToken authToken, CallingContext cc)
-      throws ODKExternalServiceException, ODKDatastoreException {
-    throw new ODKExternalServiceCredentialsException("Unexpected call into OAuth entrypoint");
+  public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
+
+  }
+
+  /**
+   * Requests an access token for the given scopes.
+   *
+   * Precondition: a service account and private key have been configured for the server.
+   *
+   * @param scopes
+   * @param cc
+   * @return access token (must be a Bearer token).
+   * @throws ODKEntityNotFoundException
+   * @throws ODKOverQuotaException
+   */
+  protected String getOAuth2AccessToken(String scopes, CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+
+    String serviceEmailAddress = ServerPreferencesProperties.getServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_SERVICE_ACCOUNT_EMAIL);
+    String privateKeyString = ServerPreferencesProperties.getServerPreferencesProperty(cc, ServerPreferencesProperties.PRIVATE_KEY_FILE_CONTENTS);
+
+    if ( serviceEmailAddress == null || privateKeyString == null || serviceEmailAddress.length() == 0 || privateKeyString.length() == 0 ) {
+      throw new IllegalArgumentException("No OAuth2 credentials. Have you supplied any OAuth2 credentials on the Site Admin / Preferences page?");
+    }
+    byte[] privateKeyBytes = Base64.decodeBase64(privateKeyString);
+
+    Map<String, String> jwtHeader = new HashMap<String, String>();
+    Map<String, Object> jwtBody = new HashMap<String, Object>();
+
+    jwtHeader.put("alg", "RS256");
+    jwtHeader.put("typ", "JWT");
+    String headerValueString = null;
+    try {
+       byte[] headerValue = mapper.writeValueAsBytes(jwtHeader);
+       headerValueString = Base64.encodeBase64URLSafeString(headerValue);
+    } catch (JsonGenerationException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected JsonGenerationException " + e.toString());
+    } catch (JsonMappingException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected JsonMappingException " + e.toString());
+    } catch (IOException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected IOException " + e.toString());
+    }
+
+    jwtBody.put("iss", serviceEmailAddress);
+    jwtBody.put("scope", scopes);
+    jwtBody.put("aud", "https://accounts.google.com/o/oauth2/token");
+    int now = ((int) (System.currentTimeMillis() / 1000L));
+    jwtBody.put("exp", now + 59 * 60);
+    jwtBody.put("iat", now);
+
+    String claimSetValueString = null;
+    try {
+       byte[] claimSetValue = mapper.writeValueAsBytes(jwtBody);
+       claimSetValueString = Base64
+             .encodeBase64URLSafeString(claimSetValue);
+    } catch (JsonGenerationException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected JsonGenerationException " + e.toString());
+    } catch (JsonMappingException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected JsonMappingException " + e.toString());
+    } catch (IOException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected IOException " + e.toString());
+    }
+
+    String fullValue = headerValueString + "." + claimSetValueString;
+
+    String signatureValueString = null;
+
+    {
+       KeyStore ks = null;
+       try {
+          ks = KeyStore.getInstance("PKCS12");
+       } catch (KeyStoreException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected KeyStoreException " + e.toString());
+       }
+       try {
+         ks.load(new ByteArrayInputStream(privateKeyBytes), "notasecret".toCharArray());
+       } catch (NoSuchAlgorithmException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected NoSuchAlgorithmException " + e.toString());
+       } catch (CertificateException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected CertificateException " + e.toString());
+       } catch (FileNotFoundException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected FileNotFoundException " + e.toString());
+       } catch (IOException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected IOException " + e.toString());
+       }
+
+       Enumeration aliasEnum = null;
+       try {
+          aliasEnum = ks.aliases();
+       } catch (KeyStoreException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected KeyStoreException " + e.toString());
+       }
+
+       Key key = null;
+
+       while (aliasEnum.hasMoreElements()) {
+          String keyName = (String) aliasEnum.nextElement();
+          try {
+             key = ks.getKey(keyName, "notasecret".toCharArray());
+          } catch (UnrecoverableKeyException e) {
+             e.printStackTrace();
+             throw new IllegalArgumentException("Unexpected UnrecoverableKeyException " + e.toString());
+          } catch (KeyStoreException e) {
+             e.printStackTrace();
+             throw new IllegalArgumentException("Unexpected KeyStoreException " + e.toString());
+          } catch (NoSuchAlgorithmException e) {
+             e.printStackTrace();
+             throw new IllegalArgumentException("Unexpected NoSuchAlgorithmException " + e.toString());
+          }
+          break;
+       }
+
+       Signature signer = null;
+       try {
+          signer = Signature.getInstance("SHA256withRSA");
+       } catch (NoSuchAlgorithmException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected NoSuchAlgorithmException " + e.toString());
+       }
+
+       try {
+          signer.initSign((PrivateKey) key);
+       } catch (InvalidKeyException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected InvalidKeyException " + e.toString());
+       }
+       try {
+          signer.update(fullValue.getBytes("UTF-8"));
+       } catch (SignatureException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected SignatureException " + e.toString());
+       } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected UnsupportedEncodingException " + e.toString());
+       }
+       try {
+          byte[] signature = signer.sign();
+          signatureValueString = Base64.encodeBase64URLSafeString(signature);
+       } catch (SignatureException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unexpected SignatureException " + e.toString());
+       }
+    }
+
+    String assertionString = fullValue + "." + signatureValueString;
+    String grantType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+
+    int SERVICE_TIMEOUT_MILLISECONDS = 60000;
+
+    int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 60000;
+
+    // DON'T NEED clientId on the toke request...
+    // addCredentials(clientId, clientSecret, nakedUri.getHost());
+    // setup request interceptor to do preemptive auth
+    // ((DefaultHttpClient)
+    // client).addRequestInterceptor(getPreemptiveAuth(), 0);
+
+    HttpParams httpParams = new BasicHttpParams();
+    HttpConnectionParams.setConnectionTimeout(httpParams,
+          SERVICE_TIMEOUT_MILLISECONDS);
+    HttpConnectionParams.setSoTimeout(httpParams,
+          SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
+    // support redirecting to handle http: => https: transition
+    HttpClientParams.setRedirecting(httpParams, true);
+    // support authenticating
+    HttpClientParams.setAuthenticating(httpParams, true);
+
+    httpParams.setParameter(ClientPNames.MAX_REDIRECTS, 1);
+    httpParams.setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
+    // setup client
+    HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
+    HttpClient client = factory.createHttpClient(httpParams);
+
+    URI nakedUri = null;
+    try {
+       nakedUri = new URI("https://accounts.google.com/o/oauth2/token");
+    } catch (URISyntaxException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected URISyntaxException " + e.toString());
+    }
+
+    HttpPost httppost = new HttpPost(nakedUri);
+
+    // THESE ARE POST BODY ARGS...
+    List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+    qparams.add(new BasicNameValuePair("grant_type", grantType));
+    qparams.add(new BasicNameValuePair("assertion", assertionString));
+    UrlEncodedFormEntity postentity = null;
+    try {
+       postentity = new UrlEncodedFormEntity(qparams, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+       e.printStackTrace();
+       throw new IllegalArgumentException("Unexpected UnsupportedEncodingException " + e.toString());
+    }
+
+    httppost.setEntity(postentity);
+
+    HttpContext localContext = new BasicHttpContext();
+
+    HttpResponse response = null;
+    try {
+       response = client.execute(httppost, localContext);
+       int statusCode = response.getStatusLine().getStatusCode();
+
+       if (statusCode != HttpStatus.SC_OK) {
+          throw new IllegalArgumentException(
+                "Error with Oauth2 token request - reason: "
+                      + response.getStatusLine().getReasonPhrase()
+                      + " status code: " + statusCode);
+       } else {
+          HttpEntity entity = response.getEntity();
+
+          if (entity != null
+                && entity.getContentType().getValue().toLowerCase()
+                      .contains("json")) {
+             ObjectMapper mapper = new ObjectMapper();
+             BufferedReader reader = new BufferedReader(
+                   new InputStreamReader(entity.getContent()));
+             Map<String, Object> userData = mapper.readValue(reader, Map.class);
+
+             String accessToken = (String) userData.get("access_token");
+             String tokenType = (String) userData.get("token_type");
+
+             if ( "Bearer".equals(tokenType)) {
+               return accessToken;
+             }
+             throw new IllegalArgumentException(
+                 "Error with Oauth2 token request - token_type is not Bearer: " +
+                     tokenType);
+          } else {
+             throw new IllegalArgumentException(
+                   "Error with Oauth2 token request - missing body");
+          }
+       }
+    } catch (IOException e) {
+      e.printStackTrace();
+       throw new IllegalArgumentException(e.toString());
+    }
+
   }
 
   @Override
@@ -377,7 +653,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
    * @param cc -- calling context
    * @return the HTTP response of the statement execution
    * @throws ServiceException
-   *           if there was a failure signing the request with OAuth credentials
+   *           if there was a failure signing the request with OAuth2 credentials
    * @throws IOException
    *           if there was a problem communicating over the network
    * @throws ODKExternalServiceException
@@ -393,7 +669,7 @@ public class FusionTable extends OAuthExternalService implements ExternalService
       try {
         accessToken = getOAuth2AccessToken(FUSION_TABLE_OAUTH2_SCOPE, cc);
         ServerPreferencesProperties.setServerPreferencesProperty(cc,
-            ServerPreferencesProperties.GOOGLE_API_OAUTH2_ACCESS_TOKEN, accessToken);
+            ServerPreferencesProperties.GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN, accessToken);
       } catch (Exception e1) {
         throw new ODKExternalServiceCredentialsException("Unable to obtain OAuth2 access token: "
             + e1.toString());
@@ -648,10 +924,6 @@ public class FusionTable extends OAuthExternalService implements ExternalService
     return (objectEntity == null ? (other.objectEntity == null)
         : (other.objectEntity != null && objectEntity.equals(other.objectEntity)))
         && (fsc == null ? (other.fsc == null) : (other.fsc != null && fsc.equals(other.fsc)));
-  }
-
-  protected OAuthToken getAuthToken() {
-    throw new IllegalStateException("Unexpected retrieval of OAuth token");
   }
 
   private String getAlternateLink(String id) {

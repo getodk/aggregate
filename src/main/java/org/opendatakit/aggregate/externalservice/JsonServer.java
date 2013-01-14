@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -48,6 +48,8 @@ import org.opendatakit.aggregate.format.structure.JsonFormatterWithFilters;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -56,13 +58,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class JsonServer extends AbstractExternalService implements ExternalService {
-  
+
   /**
    * Datastore entity specific to this type of external service
    */
@@ -72,7 +74,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false), new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
-  
+
   private JsonServer(JsonServerParameterTable entity, IForm form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
     this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.JSON_SERVER, cc), form, cc);
   }
@@ -92,7 +94,16 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     // createForm();
 
     objectEntity.setServerUrl(serverURL);
-    persist(cc); 
+    persist(cc);
+  }
+
+  @Override
+  public void initiate(CallingContext cc) throws ODKExternalServiceException,
+      ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
+  }
+
+  @Override
+  public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
   }
 
   public String getServerUrl() {
@@ -246,5 +257,5 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   protected List<? extends CommonFieldsBase> retrieveRepeatElementEntities() {
     return null;
   }
-  
+
 }

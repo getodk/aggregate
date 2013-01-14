@@ -200,7 +200,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       }
 
       try {
-        ServerPreferencesProperties.setGoogleMapApiKey(cc, simpleApiKey);
+        ServerPreferencesProperties.setGoogleSimpleApiKey(cc, simpleApiKey);
         ServerPreferencesProperties.setServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_CLIENT_ID, clientId);
         ServerPreferencesProperties.setServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_SERVICE_ACCOUNT_EMAIL, serviceAccountEmail);
         ServerPreferencesProperties.setServerPreferencesProperty(cc, ServerPreferencesProperties.PRIVATE_KEY_FILE_CONTENTS, Base64.encodeBase64String(p12FileContent));
