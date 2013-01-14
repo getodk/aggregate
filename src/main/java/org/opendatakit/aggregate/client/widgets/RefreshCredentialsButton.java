@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.UrlHash;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 
@@ -28,7 +27,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Delete the publishing of data to an external service.
- * 
+ *
  */
 public final class RefreshCredentialsButton extends AggregateButton implements ClickHandler {
 
@@ -44,14 +43,13 @@ public final class RefreshCredentialsButton extends AggregateButton implements C
     addStyleDependentName("negative");
   }
 
-  private class OAuthCallback implements AsyncCallback<String> {
+  private class OAuth2Callback implements AsyncCallback<Void> {
 
     public void onFailure(Throwable caught) {
       AggregateUI.getUI().reportError(caught);
     }
 
-    public void onSuccess(String result) {
-      UrlHash.getHash().goTo(result);
+    public void onSuccess(Void result) {
     }
   }
 
@@ -64,11 +62,11 @@ public final class RefreshCredentialsButton extends AggregateButton implements C
     switch (type) {
     case GOOGLE_SPREADSHEET:
       SecureGWT.getServicesAdminService().refreshCredentials(publisher.getUri(),
-          new OAuthCallback());
+          new OAuth2Callback());
       break;
     case OHMAGE_JSON_SERVER:
       SecureGWT.getServicesAdminService().refreshCredentials(publisher.getUri(),
-          new AsyncCallback<String>() {
+          new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -76,14 +74,14 @@ public final class RefreshCredentialsButton extends AggregateButton implements C
             }
 
             @Override
-            public void onSuccess(String result) {
+            public void onSuccess(Void result) {
               // no-op
             }
           });
       break;
     case GOOGLE_FUSIONTABLES:
       SecureGWT.getServicesAdminService().refreshCredentials(publisher.getUri(),
-          new OAuthCallback());
+          new OAuth2Callback());
       break;
     default: // unknown type
       break;

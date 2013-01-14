@@ -174,7 +174,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 //        }
 //      });
 //    }
-    if ( Preferences.getGoogleMapsApiKey() != null ) {
+    if ( Preferences.getGoogleSimpleApiKey() != null ) {
       mapsApiLoaded = true;
     }
     

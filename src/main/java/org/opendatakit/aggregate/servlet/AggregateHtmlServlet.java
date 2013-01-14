@@ -154,11 +154,11 @@ public class AggregateHtmlServlet extends ServletUtilBase {
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     PrintWriter out = resp.getWriter();
     out.print(PAGE_CONTENTS_FIRST);
-    String mapApiKey;
+    String simpleApiKey;
     try {
-      mapApiKey = ServerPreferencesProperties.getGoogleMapApiKey(cc);
-      if ( mapApiKey != null && mapApiKey.length() != 0 ) {
-        out.print("key=" + encodeParameter(mapApiKey) + "&amp;");
+      simpleApiKey = ServerPreferencesProperties.getGoogleSimpleApiKey(cc);
+      if ( simpleApiKey != null && simpleApiKey.length() != 0 ) {
+        out.print("key=" + encodeParameter(simpleApiKey) + "&amp;");
       }
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();

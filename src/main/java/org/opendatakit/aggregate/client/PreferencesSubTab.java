@@ -119,7 +119,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private void setCredentialValues() {
 	String value;
 
-	value = SafeHtmlUtils.fromString(Preferences.getGoogleMapsApiKey()).asString();
+	value = SafeHtmlUtils.fromString(Preferences.getGoogleSimpleApiKey()).asString();
 	if ( value.length() == 0 ) {
 		value = "undefined";
 		simpleApiKey.setStyleName(UNDEFINED_STYLE, true);
