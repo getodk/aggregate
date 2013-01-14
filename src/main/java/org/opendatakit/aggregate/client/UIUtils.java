@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.user.client.Window;
@@ -13,7 +14,7 @@ public class UIUtils {
   public static String promptForFilterName( ArrayList<FilterGroup> currentFilters) throws Exception{
     boolean match = false;
     String newFilterName = Window.prompt(UIConsts.PROMPT_FOR_NAME_TXT, BasicConsts.EMPTY_STRING);
-  
+
     while (true) {
       if (newFilterName != null) {
         for (FilterGroup filter : currentFilters) {
@@ -34,6 +35,25 @@ public class UIUtils {
       }
     }
     return newFilterName;
+  }
+
+  public static String promptForEmailAddress() throws Exception{
+    String newEmailName = Window.prompt(UIConsts.PROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
+
+    while (true) {
+      if (newEmailName == null) { // cancel was pressed
+        throw new Exception("User Cancelled"); // exit
+      } else if (newEmailName.equals(BasicConsts.EMPTY_STRING)) {
+        newEmailName = Window.prompt(UIConsts.REPROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
+      } else {
+        String email = EmailParser.parseEmail(newEmailName);
+        if ( email != null ) {
+          return email;
+        } else {
+          newEmailName = Window.prompt(UIConsts.REPROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
+        }
+      }
+    }
   }
 
 }

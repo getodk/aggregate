@@ -44,7 +44,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.utils.URIUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
@@ -65,15 +65,15 @@ import org.springframework.web.filter.GenericFilterBean;
  * to a user's Google E-mail address (i.e., has a userinfo.email scope).
  * This is considered sufficient to assume the user's identity provided
  * the 'Enable Tokens' checkbox is checked.
- * 
+ *
  * This e-mail needs to be in the registered
  * users table and assigned permissions.
- * 
+ *
  * Ideally, we would have a custom scope in the Google Oauth 2.0 grant
  * for this Aggregate instance.  That is not yet possible.
- * 
+ *
  * parseToken() is copied verbatim from Spring Security Oauth2 code.
- * 
+ *
  * @author mitchellsundt@gmail.com
  *
  */
@@ -89,8 +89,8 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
 
   private AuthenticationProvider authenticationProvider = null;
   private HttpClientFactory httpClientFactory = null;
-  
-  private static Map<String, Oauth2AuthenticationToken> authTokenMap 
+
+  private static Map<String, Oauth2AuthenticationToken> authTokenMap
       = new HashMap<String, Oauth2AuthenticationToken>();
 
   private static synchronized Oauth2AuthenticationToken lookupToken(String accessToken) {
@@ -101,10 +101,10 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
         authTokenMap.remove(ti);
         ti = null;
     }
-      
+
     return ti;
   }
-  
+
   private static synchronized void insertToken(Oauth2AuthenticationToken token) {
     authTokenMap.put(token.getAccessToken(), token);
   }
@@ -112,7 +112,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
   public Oauth2ResourceFilter() {
     super();
   }
-  
+
   public AuthenticationProvider getAuthenticationProvider() {
     return authenticationProvider;
   }
@@ -120,7 +120,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
   public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
     this.authenticationProvider = authenticationProvider;
   }
-  
+
   public HttpClientFactory getHttpClientFactory() {
     return httpClientFactory;
   }
@@ -139,7 +139,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
       throw new IllegalStateException("authenticationProvider must be defined");
    }
   }
-  
+
   protected String parseToken(HttpServletRequest request) {
     // first check the header...
     String token = parseHeaderToken(request);
@@ -158,7 +158,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
 
  /**
   * Parse the OAuth header parameters. The parameters will be oauth-decoded.
-  * 
+  *
   * @param request The request.
   * @return The parsed parameters, or null if no OAuth authorization header was supplied.
   */
@@ -196,8 +196,8 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
  private Map<String,Object> getJsonResponse(String url, String accessToken) {
 
    Map<String,Object> nullData = new HashMap<String,Object>();
-   
-   // OK if we got here, we have a valid token.  
+
+   // OK if we got here, we have a valid token.
    // Issue the request...
      URI nakedUri;
      try {
@@ -207,24 +207,26 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
        logger.error(e2.toString());
        return nullData;
      }
-     
+
      List<NameValuePair> qparams = new ArrayList<NameValuePair>();
      qparams.add(new BasicNameValuePair("access_token", accessToken));
      URI uri;
      try {
-       uri = URIUtils.createURI(nakedUri.getScheme(), nakedUri.getHost(), nakedUri.getPort(), nakedUri.getPath(), 
-           URLEncodedUtils.format(qparams, "UTF-8"), null);
+       URIBuilder b = new URIBuilder(nakedUri);
+       b.setQuery(URLEncodedUtils.format(qparams, "UTF-8"))
+        .setFragment(null);
+       uri = b.build();
      } catch (URISyntaxException e1) {
        e1.printStackTrace();
        logger.error(e1.toString());
        return nullData;
      }
-     
+
      // DON'T NEED clientId on the toke request...
      // addCredentials(clientId, clientSecret, nakedUri.getHost());
      // setup request interceptor to do preemptive auth
      // ((DefaultHttpClient) client).addRequestInterceptor(getPreemptiveAuth(), 0);
-     
+
      HttpParams httpParams = new BasicHttpParams();
      HttpConnectionParams.setConnectionTimeout(httpParams, SERVICE_TIMEOUT_MILLISECONDS);
      HttpConnectionParams.setSoTimeout(httpParams, SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
@@ -232,26 +234,26 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
      HttpClientParams.setRedirecting(httpParams, true);
      // support authenticating
      HttpClientParams.setAuthenticating(httpParams, true);
-     
+
      httpParams.setParameter(ClientPNames.MAX_REDIRECTS, 1);
      httpParams.setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
      // setup client
      HttpClient client = httpClientFactory.createHttpClient(httpParams);
- 
+
      HttpGet httpget = new HttpGet(uri);
      logger.info(httpget.getURI().toString());
- 
+
      HttpResponse response = null;
      try {
          response = client.execute(httpget, new BasicHttpContext());
          int statusCode = response.getStatusLine().getStatusCode();
- 
+
          if ( statusCode != HttpStatus.SC_OK ) {
            logger.error("not 200: " + statusCode);
            return nullData;
          } else {
            HttpEntity entity = response.getEntity();
-   
+
            if (entity != null && entity.getContentType().getValue().toLowerCase()
                            .contains("json")) {
              BufferedReader reader = null;
@@ -263,7 +265,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
                return userData;
              } finally {
                if ( reader != null ) {
-                 try { 
+                 try {
                    reader.close();
                  } catch ( IOException e ) {
                    // ignore
@@ -287,18 +289,18 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
        return nullData;
      }
  }
- 
+
  private Oauth2AuthenticationToken assertToken(String accessToken) {
 
    Oauth2AuthenticationToken ti = lookupToken(accessToken);
    if ( ti != null ) {
      return ti;
    }
-     
+
    Map<String,Object> responseData;
-   
+
    responseData = getJsonResponse("https://www.googleapis.com/oauth2/v1/tokeninfo", accessToken);
-   
+
    Integer expiresInSeconds = (Integer) responseData.get("expires_in");
    if ( expiresInSeconds == null || expiresInSeconds == 0 ) {
      return null;
@@ -309,13 +311,13 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
    String email = (String) responseData.get("email");
    if ( email == null ) {
      responseData = getJsonResponse("https://www.googleapis.com/oauth2/v1/userinfo", accessToken);
-   
+
      email = (String) responseData.get("email");
      if ( email == null ) {
        return null;
      }
    }
-   
+
    ti = new Oauth2AuthenticationToken( accessToken, email, deadline);
    insertToken(ti);
    return ti;
@@ -331,15 +333,15 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
     if ( SecurityContextHolder.getContext().getAuthentication() == null ) {
       try {
         String accessToken = parseToken(request);
-  
+
         if (accessToken != null) {
           Oauth2AuthenticationToken token = assertToken(accessToken);
-          
+
           if ( token != null ) {
             // In the common case, if token is non-null, the user should be known to the server.
-            Authentication auth = 
+            Authentication auth =
                 authenticationProvider.authenticate(token);
-    
+
             SecurityContextHolder.getContext().setAuthentication(auth);
           }
         }

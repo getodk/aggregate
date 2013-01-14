@@ -328,6 +328,14 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       throw new RequestFailureException(
           "Credentials have not failed for this publisher -- rejecting change request");
     }
-    es.sharePublishedFiles(ownerEmail,cc);
+    try {
+      es.sharePublishedFiles(ownerEmail,cc);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    }
   }
 }
