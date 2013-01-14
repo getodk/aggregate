@@ -35,9 +35,9 @@ import org.opendatakit.common.web.CallingContext;
  * @author mitchellsundt@gmail.com
  *
  */
-public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
+public final class FusionTable2RepeatParameterTable extends CommonFieldsBase {
 
-	  private static final String TABLE_NAME = "_fusion_table_repeat";
+	  private static final String TABLE_NAME = "_fusion_table_2_repeat";
 
 	  static final DataField URI_FUSION_TABLE_PROPERTY = new DataField(
 			  "URI_FUSION_TABLE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
@@ -52,7 +52,7 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 		 * @param databaseSchema
 		 * @param tableName
 		 */
-	  FusionTableRepeatParameterTable(String schemaName) {
+	  FusionTable2RepeatParameterTable(String schemaName) {
 	    super(schemaName, TABLE_NAME);
 	    fieldList.add(URI_FUSION_TABLE_PROPERTY);
 	    fieldList.add(FUSION_TABLE_ID_PROPERTY);
@@ -65,14 +65,14 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	   * @param ref
 	   * @param user
 	   */
-	  private FusionTableRepeatParameterTable(FusionTableRepeatParameterTable ref, User user) {
+	  private FusionTable2RepeatParameterTable(FusionTable2RepeatParameterTable ref, User user) {
 	    super(ref, user);
 	  }
 
 	  // Only called from within the persistence layer.
 	  @Override
-	  public FusionTableRepeatParameterTable getEmptyRow(User user) {
-		return new FusionTableRepeatParameterTable(this, user);
+	  public FusionTable2RepeatParameterTable getEmptyRow(User user) {
+		return new FusionTable2RepeatParameterTable(this, user);
 	  }
 
 	  public String getUriFusionTable() {
@@ -107,15 +107,15 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	    }
 	  }
 
-	  private static FusionTableRepeatParameterTable relation = null;
+	  private static FusionTable2RepeatParameterTable relation = null;
 
-	  public static synchronized final FusionTableRepeatParameterTable assertRelation(CallingContext cc)
+	  public static synchronized final FusionTable2RepeatParameterTable assertRelation(CallingContext cc)
 	      throws ODKDatastoreException {
 	    if (relation == null) {
-	    	FusionTableRepeatParameterTable relationPrototype;
+	    	FusionTable2RepeatParameterTable relationPrototype;
 	    	Datastore ds = cc.getDatastore();
 	    	User user = cc.getUserService().getDaemonAccountUser();
-	        relationPrototype = new FusionTableRepeatParameterTable(ds.getDefaultSchemaName());
+	        relationPrototype = new FusionTable2RepeatParameterTable(ds.getDefaultSchemaName());
 	        ds.assertRelation(relationPrototype, user); // may throw exception...
 	        // at this point, the prototype has become fully populated
 	        relation = relationPrototype; // set static variable only upon success...
@@ -123,17 +123,17 @@ public final class FusionTableRepeatParameterTable extends CommonFieldsBase {
 	    return relation;
 	  }
 
-	  public static List<FusionTableRepeatParameterTable> getRepeatGroupAssociations(String uri,
+	  public static List<FusionTable2RepeatParameterTable> getRepeatGroupAssociations(String uri,
 			  												CallingContext cc) throws ODKDatastoreException {
-		  List<FusionTableRepeatParameterTable> list = new ArrayList<FusionTableRepeatParameterTable> ();
-		  FusionTableRepeatParameterTable frpt = assertRelation(cc);
+		  List<FusionTable2RepeatParameterTable> list = new ArrayList<FusionTable2RepeatParameterTable> ();
+		  FusionTable2RepeatParameterTable frpt = assertRelation(cc);
 
 		  Query query = cc.getDatastore().createQuery(frpt, "FusionTableRepeatParameterTable.getRepeatGroupAssociations", cc.getCurrentUser());
 		  query.addFilter(URI_FUSION_TABLE_PROPERTY, FilterOperation.EQUAL, uri);
 
 		  List<? extends CommonFieldsBase> results = query.executeQuery();
 		  for ( CommonFieldsBase b : results ) {
-			  list.add((FusionTableRepeatParameterTable) b);
+			  list.add((FusionTable2RepeatParameterTable) b);
 		  }
 		  return list;
 	  }

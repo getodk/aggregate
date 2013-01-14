@@ -160,7 +160,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
   /**
    * Datastore entity specific to this type of external service for the repeats
    */
-  private final List<FusionTableRepeatParameterTable> repeatElementEntities = new ArrayList<FusionTableRepeatParameterTable>();
+  private final List<FusionTable2RepeatParameterTable> repeatElementEntities = new ArrayList<FusionTable2RepeatParameterTable>();
 
   /**
    * Common base initialization of a FusionTable (both new and existing).
@@ -198,10 +198,10 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     // and create records for all the repeat elements (but without any actual table ids)...
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    FusionTableRepeatParameterTable frpt = FusionTableRepeatParameterTable.assertRelation(cc);
+    FusionTable2RepeatParameterTable frpt = FusionTable2RepeatParameterTable.assertRelation(cc);
 
     for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
-      FusionTableRepeatParameterTable t = ds.createEntityUsingRelation(frpt, user);
+      FusionTable2RepeatParameterTable t = ds.createEntityUsingRelation(frpt, user);
       t.setUriFusionTable(objectEntity.getUri());
       t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
       repeatElementEntities.add(t);
@@ -223,7 +223,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     this(retrieveEntity(FusionTable2ParameterTable.assertRelation(cc), formServiceCursor, cc),
         formServiceCursor, form, cc);
 
-    repeatElementEntities.addAll(FusionTableRepeatParameterTable.getRepeatGroupAssociations(
+    repeatElementEntities.addAll(FusionTable2RepeatParameterTable.getRepeatGroupAssociations(
         objectEntity.getUri(), cc));
   }
 
@@ -294,7 +294,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
       // and define those...
       for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
         boolean found = false;
-        for ( FusionTableRepeatParameterTable t : repeatElementEntities ) {
+        for ( FusionTable2RepeatParameterTable t : repeatElementEntities ) {
           if ( objectEntity.getUri().equals(t.getUriFusionTable()) &&
                repeatGroupElement.constructFormElementKey(form).equals(t.getFormElementKey()) ) {
             // Found the match
@@ -593,7 +593,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     executeInsertData(objectEntity.getFusionTableId(), submission, headers, cc);
 
     // upload repeat value
-    for (FusionTableRepeatParameterTable tableId : repeatElementEntities) {
+    for (FusionTable2RepeatParameterTable tableId : repeatElementEntities) {
       FormElementKey elementKey = tableId.getFormElementKey();
       FormElementModel element = FormElementModel.retrieveFormElementModel(form, elementKey);
       headers = headerFormatter.generateHeaders(form, element, null);
