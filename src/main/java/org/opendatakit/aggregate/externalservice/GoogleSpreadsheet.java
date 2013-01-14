@@ -127,7 +127,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   /**
    * Datastore entity specific to this type of external service for the repeats
    */
-  private final List<GoogleSpreadsheetRepeatParameterTable> repeatElementEntities = new ArrayList<GoogleSpreadsheetRepeatParameterTable>();
+  private final List<GoogleSpreadsheet2RepeatParameterTable> repeatElementEntities = new ArrayList<GoogleSpreadsheet2RepeatParameterTable>();
 
   private final SpreadsheetService spreadsheetService;
 
@@ -177,7 +177,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException, ODKFormNotFoundException {
     this(form, retrieveEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), fsc, cc), fsc, cc);
 
-    repeatElementEntities.addAll(GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations(
+    repeatElementEntities.addAll(GoogleSpreadsheet2RepeatParameterTable.getRepeatGroupAssociations(
         objectEntity.getUri(), cc));
 
   }
@@ -409,7 +409,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     }
 
     // get relation prototype for creating repeat parameter table entries
-    GoogleSpreadsheetRepeatParameterTable repeatPrototype = GoogleSpreadsheetRepeatParameterTable
+    GoogleSpreadsheet2RepeatParameterTable repeatPrototype = GoogleSpreadsheet2RepeatParameterTable
         .assertRelation(cc);
 
     // create repeat worksheets
@@ -423,7 +423,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
       // add the worksheet id to the repeat element table -- NOTE: the added
       // entry is not actually persisted here
-      GoogleSpreadsheetRepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype, user);
+      GoogleSpreadsheet2RepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype, user);
       t.setUriGoogleSpreadsheet(objectEntity.getUri());
       t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
       t.setWorksheetId(extractWorksheetId(repeatWorksheet));
@@ -510,7 +510,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
         executeInsertData(submission, headers, topLevelWorksheet, cc);
 
         // upload repeat values
-        for (GoogleSpreadsheetRepeatParameterTable tableId : repeatElementEntities) {
+        for (GoogleSpreadsheet2RepeatParameterTable tableId : repeatElementEntities) {
           FormElementKey elementKey = tableId.getFormElementKey();
           FormElementModel element = FormElementModel.retrieveFormElementModel(form, elementKey);
           headers = headerFormatter.generateHeaders(form, element, null);
