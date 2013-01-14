@@ -42,22 +42,22 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class KmlElementFormatter implements ElementFormatter {
-   
+
   private String baseWebServerUrl;
-  
+
   /**
    * include GPS accuracy data
    */
   private boolean includeAccuracy;
-  
+
   private RepeatCallbackFormatter callbackFormatter;
-  
+
   /**
    * Construct a KML Element Formatter
    * @param webServerUrl base url for the web app (e.g., localhost:8080/ODKAggregatePlatform)
@@ -69,26 +69,26 @@ public class KmlElementFormatter implements ElementFormatter {
     includeAccuracy = includeGpsAccuracy;
     callbackFormatter = formatter;
   }
-  
+
   @Override
   public void formatUid(String uri, String propertyName, Row row) {
     // unneeded so unimplemented
   }
-  
+
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
-    if( blobSubmission == null || 
+    if( blobSubmission == null ||
     	(blobSubmission.getAttachmentCount(cc) == 0) ||
     	(blobSubmission.getContentHash(1, cc) == null) ) {
           row.addFormattedValue(null);
           return;
     }
-    
+
     SubmissionKey key = blobSubmission.getValue();
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
-    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
+    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT, false);
     generateDataElement(url, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
@@ -127,7 +127,7 @@ public class KmlElementFormatter implements ElementFormatter {
 	  GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
 	  g.setTime(date);
 	  generateDataElement(String.format(FormatConsts.TIME_FORMAT_STRING,
-			  				g.get(Calendar.HOUR_OF_DAY), 
+			  				g.get(Calendar.HOUR_OF_DAY),
 			  				g.get(Calendar.MINUTE),
 			  				g.get(Calendar.SECOND)), element.getGroupQualifiedElementName() + ordinalValue, row);
 	} else {
@@ -149,7 +149,7 @@ public class KmlElementFormatter implements ElementFormatter {
 
     if (includeAccuracy) {
       generateDataElement(coordinate.getAccuracy(), preName + GeoPoint.ACCURACY + ordinalValue, row);
-    }   
+    }
   }
 
   @Override
@@ -175,5 +175,5 @@ public class KmlElementFormatter implements ElementFormatter {
     }
     row.addFormattedValue(String.format(KmlConsts.KML_DATA_ITEM_TEMPLATE, name, valueAsString));
   }
-    
+
 }

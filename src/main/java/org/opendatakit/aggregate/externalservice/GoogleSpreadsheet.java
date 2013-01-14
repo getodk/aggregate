@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
@@ -215,7 +216,8 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
            privateKeyString.trim().length() == 0 ||
            serviceAccountId.trim().length() == 0 ||
            serviceAccountUser.trim().length() == 0 ) {
-        throw new ODKExternalServiceCredentialsException("Google API credentials have not be configured");
+        throw new ODKExternalServiceCredentialsException(
+            "No OAuth2 credentials. Have you supplied any OAuth2 credentials on the Site Admin / Preferences page?");
       }
 
       byte[] privateKeyBytes = Base64.decodeBase64(privateKeyString);
@@ -656,7 +658,14 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
   @Override
   public String getDescriptiveTargetString() {
-    return getSpreadsheetName();
+    Map<String, String> properties = new HashMap<String, String>();
+    String id = objectEntity.getSpreadsheetKey();
+    if (id == null) {
+      return "Not yet created";
+    }
+    properties.put("key", id);
+    return HtmlUtil.createHrefWithProperties("https://docs.google.com/spreadsheet/ccc",
+        properties, getSpreadsheetName(), true);
   }
 
   protected CommonFieldsBase retrieveObjectEntity() {

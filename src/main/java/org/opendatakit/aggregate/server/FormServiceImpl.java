@@ -157,7 +157,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
           if (linkText == null || linkText.length() == 0) {
             linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
           }
-          String url = HtmlUtil.createHref(info.downloadUrl, linkText);
+          String url = HtmlUtil.createHref(info.downloadUrl, linkText, false);
           summary.setResultFile(url);
         }
         exports.add(summary);
