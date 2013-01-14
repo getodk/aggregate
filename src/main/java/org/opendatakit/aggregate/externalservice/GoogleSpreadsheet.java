@@ -131,6 +131,17 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
   private final SpreadsheetService spreadsheetService;
 
+  // ccSaved Needed by CredentialStore interface -- ccSaved is only valid for a limited timeframe.
+  // DO NOT use this as a long-term value. It is present only to work around a bug in
+  // GoogleCredential
+  private CallingContext ccSaved;
+
+  /**
+   * Access token is used for granting access rights to the spreadsheet through
+   * the Google Drive API.
+   */
+  private String accessToken = null;
+
   /**
    * Common base constructor that initializes final values.
    *
@@ -232,7 +243,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
         throw new IllegalArgumentException("Unexpected IOException " + e.toString());
      }
 
-     Enumeration aliasEnum = null;
+     Enumeration<String> aliasEnum = null;
      try {
         aliasEnum = ks.aliases();
      } catch (KeyStoreException e) {
@@ -339,6 +350,8 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     persist(cc);
 
     if ( newlyCreated ) {
+      executeDrivePermission(objectEntity.getSpreadsheetKey(), objectEntity.getOwnerEmail(), logger, "google spreadsheet", cc);
+
       try {
         // create worksheet
         WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
@@ -370,8 +383,29 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     }
   }
 
-  public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
-    // authenticate2AndCreate(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, cc);
+  protected String getAccessToken(boolean forceRefresh, CallingContext cc) throws ODKExternalServiceCredentialsException {
+    try {
+      if (accessToken == null && !forceRefresh) {
+        accessToken = ServerPreferencesProperties.getServerPreferencesProperty(cc,
+          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN);
+      }
+
+      if (accessToken == null || forceRefresh) {
+        accessToken = getOAuth2AccessToken(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, cc);
+        ServerPreferencesProperties.setServerPreferencesProperty(cc,
+            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN, accessToken);
+      }
+      return accessToken;
+    } catch (Exception e) {
+      throw new ODKExternalServiceCredentialsException("Unable to obtain OAuth2 access token: "
+          + e.toString());
+    }
+  }
+
+  public void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException {
+    if (fsc.isExternalServicePrepared()) {
+      executeDrivePermission(objectEntity.getSpreadsheetKey(), ownerEmail, logger, "google spreadsheet", cc);
+    }
   }
 
   public Boolean getReady() {
@@ -631,10 +665,6 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     return repeatElementEntities;
   }
 
-  // CredentialStore interface
-
-  CallingContext ccSaved;
-
   @Override
   public boolean load(String userId, Credential credential) {
     try {
@@ -661,6 +691,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   @Override
   public void store(String userId, Credential credential) throws IOException {
     try {
+      accessToken = credential.getAccessToken();
       ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
           ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN,
           credential.getAccessToken());
@@ -681,6 +712,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   @Override
   public void delete(String userId, Credential credential) throws IOException {
     try {
+      accessToken = null;
       ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
           ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN,
           null);

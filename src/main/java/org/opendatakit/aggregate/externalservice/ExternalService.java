@@ -78,8 +78,10 @@ public interface ExternalService {
    *
    * @param ownerEmail
    * @param cc
+   * @throws ODKDatastoreException
+   * @throws ODKExternalServiceException
    */
-  public void sharePublishedFiles(String ownerEmail, CallingContext cc);
+  public void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException;
 
   /**
    * get the FormServiceCursor for this external service connection.
