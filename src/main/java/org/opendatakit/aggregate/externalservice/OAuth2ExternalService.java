@@ -46,9 +46,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -502,10 +500,8 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
     qparams.add(new BasicNameValuePair("access_token", accessToken));
     URI uri;
     try {
-      URIBuilder b = new URIBuilder(nakedUri);
-      b.setFragment(null)
-       .setQuery(URLEncodedUtils.format(qparams, "UTF-8"));
-      uri = b.build();
+      uri = new URI( nakedUri.getScheme(), nakedUri.getUserInfo(), nakedUri.getHost(),
+          nakedUri.getPort(), nakedUri.getPath(), URLEncodedUtils.format(qparams, "UTF-8"), null);
     } catch (URISyntaxException e1) {
       e1.printStackTrace();
       throw new ODKExternalServiceException(e1);
@@ -520,7 +516,8 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
         entity = new UrlEncodedFormEntity(formParams,
             FusionTableConsts.FUSTABLE_ENCODE);
       } else {
-        entity = new StringEntity(statement, ContentType.create("application/json", "UTF-8"));
+        // the alternative -- using ContentType.create(,) throws an exception???
+        entity = new StringEntity(statement, "application/json", "UTF-8");
       }
     }
 

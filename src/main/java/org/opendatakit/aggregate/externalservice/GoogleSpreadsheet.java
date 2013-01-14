@@ -161,7 +161,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     try {
       // TODO: REMOVE after bug is fixed
       // http://code.google.com/p/gdata-java-client/issues/detail?id=103
-      spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V1);
+      spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V3);
       spreadsheetService.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
       spreadsheetService.setOAuth2Credentials(getOAuth2Credential(cc));
     } catch (ODKExternalServiceCredentialsException e) {
@@ -344,14 +344,12 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
       String spreadKey = updatedEntry.getDocId();
 
       objectEntity.setSpreadsheetKey(spreadKey);
+      objectEntity.setReady(false);
     }
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
-    updateReadyValue();
     persist(cc);
 
-    if ( newlyCreated ) {
-      executeDrivePermission(objectEntity.getSpreadsheetKey(), objectEntity.getOwnerEmail(), logger, "google spreadsheet", cc);
-
+    if ( newlyCreated || !getReady()) {
       try {
         // create worksheet
         WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
@@ -379,7 +377,6 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
         ccDaemon.setAsDaemon(true);
         uploadTask.createFormUploadTask(fsc, ccDaemon);
       }
-
     }
   }
 
@@ -403,9 +400,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   }
 
   public void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException {
-    if (fsc.isExternalServicePrepared()) {
-      executeDrivePermission(objectEntity.getSpreadsheetKey(), ownerEmail, logger, "google spreadsheet", cc);
-    }
+    executeDrivePermission(objectEntity.getSpreadsheetKey(), ownerEmail, logger, "google spreadsheet", cc);
   }
 
   public Boolean getReady() {
@@ -423,7 +418,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   }
 
   public void generateWorksheets(CallingContext cc) throws ODKDatastoreException, IOException,
-      ServiceException {
+      ServiceException, ODKExternalServiceException {
 
     // retrieve pre-existing worksheets
     URL url = new URL(SpreadsheetConsts.SPREADSHEETS_FEED
@@ -464,9 +459,15 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
       repeatElementEntities.add(t);
     }
 
+    persist(cc);
+
+    // transfer ownership before marking service as prepared...
+    sharePublishedFiles(objectEntity.getOwnerEmail(), cc);
+
     // persist the changes we have made to the repeat element table (changes
     // from calling executeCreateWorksheet)
     fsc.setIsExternalServicePrepared(true); // we have completed worksheet
+    updateReadyValue();
     // creation...
     persist(cc);
   }
@@ -517,7 +518,9 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     Link batchLink = existingCellFeed.getLink(Link.Rel.FEED_BATCH, Link.Type.ATOM);
     URL batchLinkUrl = new URL(batchLink.getHref());
     logger.info("BatchLinkUrl: " + batchLinkUrl.toString());
+    spreadsheetService.setHeader("If-Match", "*");
     CellFeed batchResponse = spreadsheetService.batch(batchLinkUrl, batchRequest);
+    spreadsheetService.setHeader("If-Match", null);
 
     // Check the results
     for (CellEntry cellEntry : batchResponse.getEntries()) {

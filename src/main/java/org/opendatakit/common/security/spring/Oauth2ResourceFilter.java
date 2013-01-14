@@ -44,7 +44,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
@@ -212,10 +211,8 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
      qparams.add(new BasicNameValuePair("access_token", accessToken));
      URI uri;
      try {
-       URIBuilder b = new URIBuilder(nakedUri);
-       b.setQuery(URLEncodedUtils.format(qparams, "UTF-8"))
-        .setFragment(null);
-       uri = b.build();
+       uri = new URI( nakedUri.getScheme(), nakedUri.getUserInfo(), nakedUri.getHost(),
+           nakedUri.getPort(), nakedUri.getPath(), URLEncodedUtils.format(qparams, "UTF-8"), null);
      } catch (URISyntaxException e1) {
        e1.printStackTrace();
        logger.error(e1.toString());

@@ -47,6 +47,4 @@ public interface ServicesAdminService extends RemoteService {
   Boolean deletePublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   void refreshCredentials(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-
-  void sharePublishedFiles(String uri, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 }

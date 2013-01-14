@@ -294,48 +294,4 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     }
 
   }
-
-  public void sharePublishedFiles(String uri, String ownerEmail) throws AccessDeniedException,
-    FormNotAvailableException, RequestFailureException, DatastoreFailureException {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    FormServiceCursor fsc = null;
-    ExternalService es = null;
-    try {
-      fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
-      if (fsc != null) {
-        es = fsc.getExternalService(cc);
-      }
-    } catch (ODKFormNotFoundException e) {
-      e.printStackTrace();
-      throw new FormNotAvailableException(e);
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    } catch ( ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      throw new RequestFailureException("Publisher not found");
-    } catch ( ODKDatastoreException e) {
-      e.printStackTrace();
-      throw new DatastoreFailureException(e);
-    }
-
-    if (es == null) {
-      throw new RequestFailureException("Service description not found for this publisher");
-    }
-    if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
-      throw new RequestFailureException(
-          "Credentials have not failed for this publisher -- rejecting change request");
-    }
-    try {
-      es.sharePublishedFiles(ownerEmail,cc);
-    } catch (ODKExternalServiceException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(e);
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      throw new DatastoreFailureException(e);
-    }
-  }
 }
