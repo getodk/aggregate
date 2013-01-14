@@ -35,16 +35,16 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class HtmlLinkElementFormatter extends BasicElementFormatter{
-  
+
   private final String baseWebServerUrl;
   private final boolean binariesAsDownloadLink;
-  
+
   /**
    * Construct a Html Link Element Formatter
  * @param webServerUrl base url for the web app (e.g., localhost:8080/ODKAggregatePlatform)
@@ -67,16 +67,16 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
 	    baseWebServerUrl = webServerUrl;
 	    this.binariesAsDownloadLink = binariesAsDownloadLink;
 	  }
- 
+
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-    if( blobSubmission == null || 
+    if( blobSubmission == null ||
     	(blobSubmission.getAttachmentCount(cc) == 0) ||
     	(blobSubmission.getContentHash(1, cc) == null) ) {
       row.addFormattedValue(null);
       return;
     }
-    
+
     SubmissionKey key = blobSubmission.getValue();
     String linkText;
     Map<String, String> properties = new HashMap<String, String>();
@@ -91,10 +91,10 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
     		}
     	}
     } else {
-    	linkText = FormTableConsts.VIEW_LINK_TEXT; 
+    	linkText = FormTableConsts.VIEW_LINK_TEXT;
     }
-    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, linkText);
-    row.addFormattedValue(url);    
+    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, linkText, binariesAsDownloadLink);
+    row.addFormattedValue(url);
   }
 
 
@@ -104,7 +104,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
       row.addFormattedValue(null);
       return;
     }
-    
+
     List<SubmissionSet> sets = repeat.getSubmissionSets();
     if ( sets.size() == 0 ) {
     	row.addFormattedValue(null);
@@ -113,10 +113,10 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.FORM_ID, repeat.constructSubmissionKey().toString());
-    
-    String url = HtmlUtil.createHrefWithProperties( baseWebServerUrl + BasicConsts.FORWARDSLASH + FormMultipleValueServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT);
-    row.addFormattedValue(url);    
+
+    String url = HtmlUtil.createHrefWithProperties( baseWebServerUrl + BasicConsts.FORWARDSLASH + FormMultipleValueServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT, false);
+    row.addFormattedValue(url);
   }
 
-  
+
 }

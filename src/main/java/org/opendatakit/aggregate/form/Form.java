@@ -533,7 +533,7 @@ class Form implements IForm {
     xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
 
     String viewableURL = HtmlUtil.createHrefWithProperties(
-        cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, getViewableName());
+        cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, getViewableName(), false);
     int mediaFileCount = getManifestFileset().getAttachmentCount(cc);
     return new FormSummary(getViewableName(), getFormId(), getCreationDate(), getCreationUser(),
         downloadable, submit, viewableURL, mediaFileCount);

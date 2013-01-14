@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -64,10 +64,10 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet to process a submission from a form
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class SubmissionServlet extends ServletUtilBase {
 
@@ -143,7 +143,7 @@ public class SubmissionServlet extends ServletUtilBase {
 
   /**
    * Handler for HTTP Get request that processes a form submission
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -157,7 +157,7 @@ public class SubmissionServlet extends ServletUtilBase {
        * If we have an OpenRosa version header, assume that this is due to a
        * channel redirect (http: => https:) and that the request was originally
        * a HEAD request. Reply with a response appropriate for a HEAD request.
-       * 
+       *
        * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
        */
       logger.warn("Inside doGet -- replying as doHead");
@@ -207,7 +207,7 @@ public class SubmissionServlet extends ServletUtilBase {
   /**
    * Handler for HTTP post request that processes a form submission Currently
    * supports plain/xml and multipart
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -246,7 +246,7 @@ public class SubmissionServlet extends ServletUtilBase {
         // send information to remote servers that need to be notified
         List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
         UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-  
+
         // publication failures should not fail the submission...
         try {
           CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
@@ -278,7 +278,7 @@ public class SubmissionServlet extends ServletUtilBase {
         out.write(HtmlConsts.HTML_OPEN);
         out.write(HtmlConsts.BODY_OPEN);
         out.write("Successful submission upload.  Click ");
-        out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+        out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
         out.write(" to return to upload submissions page.");
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
@@ -306,7 +306,7 @@ public class SubmissionServlet extends ServletUtilBase {
           //
           // add what could be considered the form's metadata...
           //
-          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))              
+          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))
               + "\"");
           if (form.isEncryptedForm()) {
             attributeRow.addFormattedValue("encrypted=\"yes\"");

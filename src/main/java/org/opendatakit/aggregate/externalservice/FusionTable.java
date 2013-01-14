@@ -482,7 +482,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
       properties.put("docid", id);
     }
     return HtmlUtil.createHrefWithProperties("http://www.google.com/fusiontables/DataSource",
-        properties, "View Fusion Table");
+        properties, "View Fusion Table", true);
   }
 
   protected CommonFieldsBase retrieveObjectEntity() {
