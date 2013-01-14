@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.DeletePublishButton;
 import org.opendatakit.aggregate.client.widgets.PurgeButton;
 import org.opendatakit.aggregate.client.widgets.RefreshCredentialsButton;
-import org.opendatakit.aggregate.client.widgets.SharePublishedDocumentsButton;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
@@ -41,12 +40,11 @@ public class PublishTable extends FlexTable {
   private static int CREATED_BY = 1;
   private static int STATUS = 2;
   private static int LAST_PUBLISHED = 3;
-  private static int SHARE = 4;
-  private static int TIME_PUBLISH_START = 5;
-  private static int ACTION = 6;
-  private static int TYPE = 7;
-  private static int NAME = 8;
-  private static int DELETE = 9;
+  private static int TIME_PUBLISH_START = 4;
+  private static int ACTION = 5;
+  private static int TYPE = 6;
+  private static int NAME = 7;
+  private static int DELETE = 8;
 
   public PublishTable() {
     super();
@@ -54,7 +52,6 @@ public class PublishTable extends FlexTable {
     this.setText(HEADER_ROW, CREATED_BY, "Created By");
     this.setText(HEADER_ROW, STATUS, "Status");
     this.setText(HEADER_ROW, LAST_PUBLISHED, "Last Published");
-    this.setText(HEADER_ROW, SHARE, "Share");
     this.setText(HEADER_ROW, TIME_PUBLISH_START, "Start Date");
     this.setText(HEADER_ROW, ACTION, "Action");
     this.setText(HEADER_ROW, TYPE, "Type");
@@ -88,7 +85,6 @@ public class PublishTable extends FlexTable {
         d = e.getTimeLastUploadCursor();
       }
       this.setText(i + STARTING_ROW, LAST_PUBLISHED, (d == null) ? "" : d.toString());
-      this.setWidget(i + STARTING_ROW, SHARE, new SharePublishedDocumentsButton(e));
       this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());

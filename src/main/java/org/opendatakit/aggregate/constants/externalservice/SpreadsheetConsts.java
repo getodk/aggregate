@@ -28,7 +28,7 @@ public final class SpreadsheetConsts {
    * Visibility and http://code.google.com/apis/spreadsheets/data/3.0/reference
    * .html#Projection for more info.
    */
-  public static final String FEED_PERMISSIONS = "/private/full";
+  public static final String FEED_PERMISSIONS = "/private/full/";
   public static final String SPREADSHEETS_SCOPE = "https://spreadsheets.google.com/feeds/";
   /**
    * The spreadsheets feed prefix. <BR/>

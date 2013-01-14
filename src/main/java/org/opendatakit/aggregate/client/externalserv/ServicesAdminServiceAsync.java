@@ -38,6 +38,4 @@ public interface ServicesAdminServiceAsync {
 			ExternalServicePublicationOption es, AsyncCallback<String> callback);
 
   void refreshCredentials(String uri, AsyncCallback<Void> callback);
-
-  void sharePublishedFiles(String uri, String ownerEmail, AsyncCallback<Void> callback);
 }
