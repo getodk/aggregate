@@ -38,7 +38,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
       DataField.DataType.STRING, true, 128L);
 
   private static final DataField VALUE = new DataField("VALUE",
-      DataField.DataType.STRING, true, 40960L);
+      DataField.DataType.STRING, true, 20480L);
 
   // these values are set in the ServiceAccountPrivateKeyUploadServlet
   // and used everywhere else when requesting access
