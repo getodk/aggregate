@@ -51,7 +51,7 @@ public class PublishTable extends FlexTable {
     this.setText(HEADER_ROW, PURGE_DATA, " ");
     this.setText(HEADER_ROW, CREATED_BY, "Created By");
     this.setText(HEADER_ROW, STATUS, "Status");
-    this.setText(HEADER_ROW, LAST_PUBLISHED, "Last Published");
+    this.setText(HEADER_ROW, LAST_PUBLISHED, "Published Through");
     this.setText(HEADER_ROW, TIME_PUBLISH_START, "Start Date");
     this.setText(HEADER_ROW, ACTION, "Action");
     this.setText(HEADER_ROW, TYPE, "Type");
