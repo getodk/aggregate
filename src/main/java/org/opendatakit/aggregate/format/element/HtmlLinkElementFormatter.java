@@ -93,7 +93,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
     } else {
     	linkText = FormTableConsts.VIEW_LINK_TEXT;
     }
-    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, linkText, binariesAsDownloadLink);
+    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, linkText, !binariesAsDownloadLink);
     row.addFormattedValue(url);
   }
 

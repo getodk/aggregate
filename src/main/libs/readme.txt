@@ -40,9 +40,11 @@ and running 'mvn install' in the TomcatUtils project.  Or,
 
 mvn install:install-file -Dfile=odk-tomcatutil.jar -DgroupId=org.opendatakit -DartifactId=odk-tomcatutil -Dversion=1.0 -Dpackaging=jar
 
-gwt-maps-1.1.1-rc1:
+gwt-maps3-snapshot:
 
-mvn install:install-file -Dfile=gwt-maps-1.1.1-rc1.jar -DgroupId=com.google.gwt.google-apis -DartifactId=gwt-maps -Dversion=1.1.1-rc1 -Dpackaging=jar
+This is the gwt-maps3.jar from http://code.google.com/p/gwt-maps3/ with a release date of June 2011
+
+mvn install:install-file -Dfile=gwt-maps3-snapshot.jar -DgroupId=com.googlecode.gwt-maps3 -DartifactId=gwt-maps3 -Dversion=snapshot -Dpackaging=jar
 
 gwt-visualization-1.1.1:
 
