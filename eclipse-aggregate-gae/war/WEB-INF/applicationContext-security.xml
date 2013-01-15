@@ -272,7 +272,7 @@
 	<beans:bean id="anonymousFilter"
 		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
 		<beans:property name="key">
-		    <bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 		</beans:property>
 		<beans:property name="userAttribute" value="anonymousUser,USER_IS_ANONYMOUS" />
 	</beans:bean>
@@ -280,7 +280,7 @@
 	<beans:bean id="anonymousProvider"
 		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
 		<beans:property name="key">
-		    <bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 		</beans:property>
 	</beans:bean>
 
@@ -346,7 +346,7 @@
 		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
 		<beans:property name="realmName" value="${security.server.realm.realmString}" />
 		<beans:property name="key">
-		    <bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
 		</beans:property>
 		<beans:property name="nonceValiditySeconds" value="1800" />
 	</beans:bean>
