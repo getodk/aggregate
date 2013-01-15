@@ -114,8 +114,6 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private static final String VIZ_TYPE_TOOLTIP = "Type of Visualization";
   private static final String VIZ_TYPE_BALLOON = "Choose whether you would like a pie chart, bar graph, or map.";
 
-  private static boolean mapsApiLoaded = false;
-
   private final ArrayList<Column> headers;
   private final ArrayList<SubmissionUI> submissions;
 
@@ -164,19 +162,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     dataList.addChangeHandler(new ColumnChangeHandler());
     geoPoints = new KmlSettingListBox(GEOPOINT_TOOLTIP, GEOPOINT_BALLOON);
 
-    // test if the Maps API has ever been loaded. Use a class variable
-    // to load it just once (ideally -- this may be run multiple times 
-    // if the browser/network is slow and the user cancels out).
-//    if ( !mapsApiLoaded ) {
-//      Maps.loadMapsApi(Preferences.getGoogleMapsApiKey(), "2", false, new Runnable() {
-//        public void run() {
-//          mapsApiLoaded = true;
-//        }
-//      });
-//    }
-    if ( Preferences.getGoogleSimpleApiKey() != null ) {
-      mapsApiLoaded = true;
-    }
+    // The Maps API is always loaded.
     
     chartApiLoaded = false;
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -562,7 +548,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     public void onClick(ClickEvent event) {
 
       // verify modules are loaded
-      if (!mapsApiLoaded || !chartApiLoaded) {
+      if (!chartApiLoaded) {
         Window.alert("Modules are not loaded yet, please try again!");
         return;
       }
