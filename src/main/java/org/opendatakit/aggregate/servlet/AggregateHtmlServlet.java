@@ -70,10 +70,12 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "	<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">"
       + "  <link rel=\"icon\" href=\"favicon.ico\"/>"
       + "	<title>ODK Aggregate</title>"
-      + "	<script type=\"text/javascript\" src=\"javascript/jquery-1.5.1.min.js\"></script>"
-      + "	<script type=\"text/javascript\" src=\"javascript/resize.js\"></script>"
-      + "	<script type=\"text/javascript\" src=\"javascript/main.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.9.0.min.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/resize.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
+      + "    <script type=\"text/javascript\" language=\"javascript\" src=\"https://maps.googleapis.com/maps/api/js?";
+      public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">"
@@ -87,9 +89,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "        in order for this application to display correctly."
       + "      </div>"
       + "    </noscript>" + "	<div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
-      + "    <script src=\"https://maps.googleapis.com/maps/api/js?";
-  public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
-	  + "  </body>"
+ 	  + "  </body>"
       + "</html>";
 
   @Override
