@@ -219,22 +219,6 @@
             <progressText>Setting up security properties</progressText>
             <actionList>
                 <actionGroup>
-                    <explanation>Setting security keys</explanation>
-                    <progressText>Setting security keys</progressText>
-                    <actionList>
-                        <propertiesFileSet>
-                            <file>${temp_dir}/conf/common/security.properties</file>
-                            <key>security.server.siteKey</key>
-                            <value>${security_server_siteKey}</value>
-                        </propertiesFileSet>
-                        <propertiesFileSet>
-                            <file>${temp_dir}/conf/common/security.properties</file>
-                            <key>security.server.userServiceKey</key>
-                            <value>${security_server_userServiceKey}</value>
-                        </propertiesFileSet>
-                    </actionList>
-                </actionGroup>
-                <actionGroup>
 	<!-- Sets the Authentication properties
                          secureChannelType, deviceAuthentication, and
                          channelType 

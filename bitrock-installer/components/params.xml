@@ -36,28 +36,6 @@
             <cliOptionText>Output a .options file that contains the configuration from running the installer.</cliOptionText>
         </booleanParameter>
         <stringParameter>
-            <name>security_server_siteKey</name>
-            <description>Hidden value used to hold security_server_siteKey UUID.</description>
-            <explanation></explanation>
-            <value>${gen_security_server_siteKey}</value>
-            <default>${gen_security_server_siteKey}</default>
-            <allowEmptyValue>0</allowEmptyValue>
-            <ask>0</ask>
-            <insertBefore>${parent_installdir}</insertBefore>
-            <width>40</width>
-        </stringParameter>
-        <stringParameter>
-            <name>security_server_userServiceKey</name>
-            <description>Hidden value used to hold security_server_userServiceKey UUID.</description>
-            <explanation></explanation>
-            <value>${gen_security_server_userServiceKey}</value>
-            <default>${gen_security_server_userServiceKey}</default>
-            <allowEmptyValue>0</allowEmptyValue>
-            <ask>0</ask>
-            <insertBefore>${parent_installdir}</insertBefore>
-            <width>40</width>
-        </stringParameter>
-        <stringParameter>
             <name>hostname</name>
             <description>Hidden value used to hold resolved fully-qualfied hostname.</description>
             <explanation></explanation>
@@ -742,10 +720,10 @@ If you are replacing an existing application already on appspot, the application
                 <booleanParameter>
                     <name>is_migrated_app_id</name>
                     <description>Yes, a Master/Slave application id is being (was) migrated to this application id</description>
-					<displayStyle>checkbox-left</displayStyle>
                     <explanation></explanation>
                     <value></value>
                     <default>0</default>
+                    <displayStyle>checkbox-left</displayStyle>
                 </booleanParameter>
             </parameterList>
             <ruleList>
@@ -757,17 +735,16 @@ If you are replacing an existing application already on appspot, the application
             </ruleList>
         </parameterGroup>
         <stringParameter>
-			<name>master_slave_app_id</name>
+            <name>master_slave_app_id</name>
             <title>Old Master/Slave Google AppEngine application ID</title>
-			<description>Please enter the old Master/Slave application id:</description>
-			<explanation>Once a migration is complete, the appengine dashboard for the old application id should state that this application is hidden by an alias and identify the application id entered on the previous page as receiving all traffic for the application id entered here.</explanation>
-			<value></value>
-			<default></default>
-			<allowEmptyValue>0</allowEmptyValue>
-			<width>30</width>
+            <description>Please enter the old Master/Slave application id:</description>
+            <explanation>Once a migration is complete, the appengine dashboard for the old application id should state that this application is hidden by an alias and identify the application id entered on the previous page as receiving all traffic for the application id entered here.</explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <width>30</width>
             <ruleList>
                 <ruleGroup>
-                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
                     <ruleList>
                         <compareText>
                             <logic>equals</logic>
@@ -799,7 +776,6 @@ If you are replacing an existing application already on appspot, the application
             <value>${app_id}.appspot.com</value>
             <ruleList>
                 <ruleGroup>
-                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
                     <ruleList>
                         <compareText>
                             <logic>equals</logic>
@@ -818,7 +794,6 @@ If you are replacing an existing application already on appspot, the application
             <value>${master_slave_app_id}.appspot.com</value>
             <ruleList>
                 <ruleGroup>
-                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
                     <ruleList>
                         <compareText>
                             <logic>equals</logic>
@@ -940,16 +915,6 @@ If you are replacing an existing application already on appspot, the application
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
-                    <key>security_server_siteKey</key>
-                    <value>${security_server_siteKey}</value>
-                </propertiesFileSet>
-                <propertiesFileSet>
-                    <file>${installdir}/.options</file>
-                    <key>security_server_userServiceKey</key>
-                    <value>${security_server_userServiceKey}</value>
-                </propertiesFileSet>
-                <propertiesFileSet>
-                    <file>${installdir}/.options</file>
                     <key>hostname</key>
                     <value>${hostname}</value>
                 </propertiesFileSet>
@@ -990,6 +955,7 @@ If you are replacing an existing application already on appspot, the application
             <promptUser>0</promptUser>
             <validVersionList>
                 <validVersion>
+                    <bitness></bitness>
                     <maxVersion></maxVersion>
                     <minVersion>1.6</minVersion>
                     <requireJDK>0</requireJDK>
@@ -1022,17 +988,5 @@ If you are replacing an existing application already on appspot, the application
             <folder>temp_jars</folder>
             <origin>generate_uuid</origin>
         </unpackDirectory>
-        <setInstallerVariableFromScriptOutput>
-            <exec>${java_executable}</exec>
-            <execArgs>GenerateUUID</execArgs>
-            <name>gen_security_server_siteKey</name>
-            <workingDirectory>${temp_param_dir}/generate_uuid</workingDirectory>
-        </setInstallerVariableFromScriptOutput>
-        <setInstallerVariableFromScriptOutput>
-            <exec>${java_executable}</exec>
-            <execArgs>GenerateUUID</execArgs>
-            <name>gen_security_server_userServiceKey</name>
-            <workingDirectory>${temp_param_dir}/generate_uuid</workingDirectory>
-        </setInstallerVariableFromScriptOutput>
     </preInstallationActionList>
 </component>
