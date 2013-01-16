@@ -64,10 +64,11 @@ http://code.google.com/p/guava-libraries/		/Apache 2.0/
 http://code.google.com/p/google-guice/		/Apache 2.0/
 	guice-3.0.jar
 	guice-assistedinject-3.0-rc2.jar
-http://code.google.com/p/gwt-maps3/			/MIT License/
-	gwt-maps3-snapshot.jar
-	See readme.txt
-	Unversioned jar uploaded on June 2011
+http://code.google.com/p/gwt-google-maps-v3/			/Apache 2.0/
+	gwt-google-maps-v3-snapshot.jar
+	See the ODK Aggregate (Components) README.txt 
+	for how this is built; the jars available on
+	this google code site do not work.
 http://code.google.com/webtoolkit/			/Apache 2.0/
 	gwt-servlet-2.5.0.jar
 http://code.google.com/p/gwt-google-apis/   /Apache 2.0/

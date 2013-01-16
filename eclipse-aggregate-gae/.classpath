@@ -32,7 +32,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guava-jdk5-13.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-assistedinject-3.0-rc2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-maps3-snapshot.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-google-maps-v3-snapshot.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gwt-visualization-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpclient-4.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpcore-4.2.2.jar" sourcepath="C:/Users/Administrator/.m2/repository/org/apache/httpcomponents/httpcore/4.2.2/httpcore-4.2.2-sources.jar"/>

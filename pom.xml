@@ -441,8 +441,8 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
-		  <groupId>com.googlecode.gwt-maps3</groupId>
-		  <artifactId>gwt-maps3</artifactId> <!-- see src/main/libs/readme.txt -->
+		  <groupId>com.googlecode.gwt-google-maps-v3</groupId>
+		  <artifactId>gwt-google-maps-v3</artifactId> <!-- see src/main/libs/readme.txt -->
 		  <version>snapshot</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
