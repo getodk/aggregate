@@ -37,5 +37,5 @@ public interface ServicesAdminServiceAsync {
 	void createOhmageJsonServer(String formId, String url,
 			ExternalServicePublicationOption es, AsyncCallback<String> callback);
 
-  void refreshCredentials(String uri, AsyncCallback<Void> callback);
+  void restartPublisher(String uri, AsyncCallback<Void> callback);
 }

@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.form.KmlSettings;
-import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.table.BinaryPopupClickHandler;
@@ -135,7 +134,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private RadioButton sumColumnsRadio;
   private Label sumRadioTxt;
   private InfoWindow infoWindow = null;
-  
+
   // track whether the map marker was clicked or not.
   private boolean mapMarkerClicked;
 
@@ -163,7 +162,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     geoPoints = new KmlSettingListBox(GEOPOINT_TOOLTIP, GEOPOINT_BALLOON);
 
     // The Maps API is always loaded.
-    
+
     chartApiLoaded = false;
     VisualizationUtils.loadVisualizationApi(new Runnable() {
       public void run() {
@@ -341,7 +340,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   /**
    * Create pie chart
-   * 
+   *
    * @return
    */
   private PieChart createPieChart() {
@@ -355,7 +354,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   /**
    * Create bar chart
-   * 
+   *
    * @return
    */
   private BarChart createBarChart() {
@@ -436,7 +435,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     mapWidget.setSize("100%", "100%");
 
     final HasMap map = mapWidget.getMap();
-    
+
     // create the markers
     for (SubmissionUI sub : submissions) {
       LatLng gpsPoint = getLatLonFromSubmission(latIndex, lonIndex, sub);
@@ -462,7 +461,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
             infoWindow.setContent(container.getElement().getInnerHTML());
             infoWindow.open(map, marker);
           }});
-        
+
         Event.addListener(marker, "mouseout", new MouseEventCallback() {
 
           @Override
@@ -482,7 +481,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
           public void callback(HasMouseEvent event) {
             mapMarkerClicked = true;
           }
-          
+
         });
       }
     }
@@ -490,7 +489,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
   }
 
   public class InfoContentSubmission extends FlexTable {
-    
+
     public InfoContentSubmission(ArrayList<Column> tableHeaders, SubmissionUI row) {
 
       addStyleName("infoTable");
@@ -527,7 +526,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
             setWidget(headerIndex, 1, repeat);
           }
           break;
-        default: 
+        default:
           {
             Label val = new Label(value);
             setWidget(headerIndex, 1, val);

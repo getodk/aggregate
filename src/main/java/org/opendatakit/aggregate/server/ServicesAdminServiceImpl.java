@@ -254,7 +254,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void refreshCredentials(String uri) throws AccessDeniedException,
+  public void restartPublisher(String uri) throws AccessDeniedException,
       FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
