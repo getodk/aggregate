@@ -13,7 +13,7 @@ odk-httpclient-gae:
 This can be installed by pulling the Aggregate (Components) sources
 and running 'mvn install' in the GaeHttpClient project.  Or,
 
-mvn install:install-file -Dfile=odk-httpclient-gae-1.0.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.0 -Dpackaging=jar
+mvn install:install-file -Dfile=odk-httpclient-gae-1.1.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.1 -Dpackaging=jar
 
 openid4java-nodeps-0.9.6.662.odk-SNAPSHOT:
 
