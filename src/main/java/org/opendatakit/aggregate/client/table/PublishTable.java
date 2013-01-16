@@ -21,7 +21,7 @@ import java.util.Date;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.DeletePublishButton;
 import org.opendatakit.aggregate.client.widgets.PurgeButton;
-import org.opendatakit.aggregate.client.widgets.RefreshCredentialsButton;
+import org.opendatakit.aggregate.client.widgets.RestartButton;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
@@ -75,8 +75,8 @@ public class PublishTable extends FlexTable {
       String user = e.getUser();
       String displayName = UserSecurityInfo.getDisplayName(user);
       this.setText(i + STARTING_ROW, CREATED_BY, displayName);
-      if ( e.getStatus() == OperationalStatus.BAD_CREDENTIALS ) {
-        this.setWidget(i + STARTING_ROW, STATUS, new RefreshCredentialsButton(e));
+      if ( e.getStatus() == OperationalStatus.BAD_CREDENTIALS ||  e.getStatus() == OperationalStatus.ABANDONED ) {
+        this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e));
       } else {
         this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
       }
