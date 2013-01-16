@@ -14,7 +14,6 @@
 	<!-- as follows:
 			files/conf - configuration extracted from maven build tree.
 			files/mf - fake Manifest.mf directory structure
-			files/generate_uuid - GenerateUUID class for printing UUIDs to stdout
 			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
 			files/ODKAggregate.war - war file minus site-specific settings.
 			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
