@@ -14,9 +14,6 @@
                 <distributionDirectory>
                     <origin>files/qualified_hostname</origin>
                 </distributionDirectory>
-                <distributionDirectory>
-                    <origin>files/generate_uuid</origin>
-                </distributionDirectory>
             </distributionFileList>
         </folder>
     </folderList>
@@ -982,11 +979,5 @@ If you are replacing an existing application already on appspot, the application
             <name>default_hostname</name>
             <workingDirectory>${temp_param_dir}/qualified_hostname</workingDirectory>
         </setInstallerVariableFromScriptOutput>
-        <unpackDirectory>
-            <component>gather_params</component>
-            <destination>${temp_param_dir}</destination>
-            <folder>temp_jars</folder>
-            <origin>generate_uuid</origin>
-        </unpackDirectory>
     </preInstallationActionList>
 </component>
