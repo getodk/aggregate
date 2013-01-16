@@ -116,7 +116,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       }
       if ( ownerEmail == null || ownerEmail.length() == 0 ) {
         throw new RequestFailureException(
-            "Owner email must be supplied.  Are you logged in through a gmail account?");
+            "Owner email must be supplied.");
       }
       FusionTable fusion = new FusionTable(form, esOption, ownerEmail, cc);
       fusion.initiate(cc);
@@ -157,7 +157,11 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       }
       if ( ownerEmail == null || ownerEmail.length() == 0 ) {
         throw new RequestFailureException(
-            "Owner email must be supplied.  Are you logged in through a gmail account?");
+            "Owner email must be supplied.");
+      }
+      if ( name == null || name.length() == 0 ) {
+        throw new RequestFailureException(
+            "Spreadsheet name must be supplied.");
       }
       GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, name, esOption, ownerEmail, cc);
       spreadsheet.initiate(cc);
