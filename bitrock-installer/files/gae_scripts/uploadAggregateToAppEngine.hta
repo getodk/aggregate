@@ -115,7 +115,7 @@ function writeScriptingFiles(action) {
 	file.WriteLine('goto fail');
 	file.WriteLine(':outcome0');
 	file.WriteLine('find /C "Unable to update" "' + window.logfileName + '" >nul');
-	file.WriteLine('if ERRORLEVEL 0 goto outcome1');
+	file.WriteLine('if NOT ERRORLEVEL 0 goto outcome1');
 	file.WriteLine('echo ---END-SCRIPT-SUCCESS--- >> "' + window.logfileName + '"');
 	file.WriteLine('exit 0');
 	file.WriteLine(':fail');
