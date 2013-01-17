@@ -26,7 +26,7 @@
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.12.4</maven.surefire.report.plugin.version>
 		<maven.surefire.plugin.version>2.12.4</maven.surefire.plugin.version>
-		<surefire.argLine>-Xms300m -Xmx1536m</surefire.argLine> <!-- need a larger JVM size -->
+		<surefire.argLine>-Xms300m -Xmx3048m -XX:+UseParallelGC -XX:+UseParallelOldGC</surefire.argLine> <!-- need a huge JVM size for GAE datastore -->
 		<maven.failsafe.plugin.version>2.12.4</maven.failsafe.plugin.version>
 		<cargo.maven2.plugin.version>1.3.1</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.7</build.helper.maven.plugin.version>
