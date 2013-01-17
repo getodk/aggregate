@@ -136,6 +136,11 @@ public class OhmageJsonServer extends AbstractExternalService implements
   public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
   }
 
+  @Override
+  protected String getOwnership() {
+    return "username";
+  }
+
 	public String getServerUrl() {
 		return objectEntity.getServerUrl();
 	}

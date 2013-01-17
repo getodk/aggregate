@@ -106,6 +106,11 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
   }
 
+  @Override
+  protected String getOwnership() {
+    return "";
+  }
+
   public String getServerUrl() {
     return objectEntity.getServerUrl();
   }
