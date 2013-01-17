@@ -92,17 +92,34 @@ function writeScriptingFiles(action) {
 	file.Close();
 	// create command file
     file=fso.CreateTextFile(cd + "\\action.cmd",true);
+	file.WriteLine('echo Looking for java... >> "' + window.logfileName + '"');
+	file.WriteLine('set found=');
+	file.WriteLine('for %%i in (java.exe) do @set found=%%~$PATH:i');
+	file.WriteLine('if NOT "a%found%"=="a" goto foundpath');
+	file.WriteLine('if "a%JAVA_HOME%"=="a" goto nojavahome');
+ 	file.WriteLine('echo Using JAVA_HOME and updating PATH >> "' + window.logfileName + '"');
+ 	file.WriteLine('set PATH=%PATH%;%JAVA_HOME%\\bin');
+ 	file.WriteLine('goto doaction');
+ 	file.WriteLine(':nojavahome');
+ 	file.WriteLine('echo JAVA_HOME is not defined. Please verify that Java is installed. >> "' + window.logfileName + '"');
+ 	file.WriteLine('goto outcome1');
+ 	file.WriteLine(':foundpath');
+ 	file.WriteLine('echo found java in PATH... %found% >> "' + window.logfileName + '"');
+ 	file.WriteLine('goto doaction');
+ 	file.WriteLine(':doaction');
 	file.WriteLine('( "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ---- WEBSITE COMPLETE - BEGIN BACKEND ---- >> "' + window.logfileName +
     '" && "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin backends ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" )');
 	file.WriteLine('goto outcome%ERRORLEVEL%');
 	file.WriteLine(':outcome1');
 	file.WriteLine('echo ---END-SCRIPT-FAILURE--- >> "' + window.logfileName + '"');
-	file.WriteLine('exit 1');
+	file.WriteLine('goto fail');
 	file.WriteLine(':outcome0');
 	file.WriteLine('find /C "Unable to update" "' + window.logfileName + '" >nul');
 	file.WriteLine('if ERRORLEVEL 0 goto outcome1');
 	file.WriteLine('echo ---END-SCRIPT-SUCCESS--- >> "' + window.logfileName + '"');
 	file.WriteLine('exit 0');
+	file.WriteLine(':fail');
+	file.WriteLine('ver other >nul');
 	file.Close();
 	// create empty output file
 	file=fso.CreateTextFile(window.logfileName,true);
