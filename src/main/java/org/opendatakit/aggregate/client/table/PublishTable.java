@@ -21,7 +21,7 @@ import java.util.Date;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.DeletePublishButton;
 import org.opendatakit.aggregate.client.widgets.PurgeButton;
-import org.opendatakit.aggregate.client.widgets.RefreshCredentialsButton;
+import org.opendatakit.aggregate.client.widgets.RestartButton;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
@@ -43,8 +43,9 @@ public class PublishTable extends FlexTable {
   private static int TIME_PUBLISH_START = 4;
   private static int ACTION = 5;
   private static int TYPE = 6;
-  private static int NAME = 7;
-  private static int DELETE = 8;
+  private static int OWNERSHIP = 7;
+  private static int NAME = 8;
+  private static int DELETE = 9;
 
   public PublishTable() {
     super();
@@ -55,6 +56,7 @@ public class PublishTable extends FlexTable {
     this.setText(HEADER_ROW, TIME_PUBLISH_START, "Start Date");
     this.setText(HEADER_ROW, ACTION, "Action");
     this.setText(HEADER_ROW, TYPE, "Type");
+    this.setText(HEADER_ROW, OWNERSHIP, "Owner");
     this.setText(HEADER_ROW, NAME, "Name");
     this.setText(HEADER_ROW, DELETE, "Delete");
     this.addStyleName("exportTable");
@@ -75,8 +77,8 @@ public class PublishTable extends FlexTable {
       String user = e.getUser();
       String displayName = UserSecurityInfo.getDisplayName(user);
       this.setText(i + STARTING_ROW, CREATED_BY, displayName);
-      if ( e.getStatus() == OperationalStatus.BAD_CREDENTIALS ) {
-        this.setWidget(i + STARTING_ROW, STATUS, new RefreshCredentialsButton(e));
+      if ( e.getStatus() == OperationalStatus.BAD_CREDENTIALS ||  e.getStatus() == OperationalStatus.ABANDONED ) {
+        this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e));
       } else {
         this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
       }
@@ -88,6 +90,7 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());
+      this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(e.getOwnership()));
       this.setWidget(i + STARTING_ROW, NAME, new HTML(e.getName()));
       this.setWidget(i + STARTING_ROW, DELETE,  new DeletePublishButton(e));
     }

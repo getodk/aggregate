@@ -313,7 +313,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     service.setOAuth2Credentials(getOAuth2Credential(cc));
 
     boolean newlyCreated = false;
-    if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
+    if ( objectEntity.getSpreadsheetKey() == null ) {
       newlyCreated = true;
 
       // create spreadsheet
@@ -380,6 +380,11 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
         uploadTask.createFormUploadTask(fsc, ccDaemon);
       }
     }
+  }
+
+  @Override
+  protected String getOwnership() {
+    return objectEntity.getOwnerEmail();
   }
 
   protected String getAccessToken(boolean forceRefresh, CallingContext cc) throws ODKExternalServiceCredentialsException {

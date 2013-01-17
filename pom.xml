@@ -26,7 +26,7 @@
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.12.4</maven.surefire.report.plugin.version>
 		<maven.surefire.plugin.version>2.12.4</maven.surefire.plugin.version>
-		<surefire.argLine>-Xms100m -Xmx1536m</surefire.argLine> <!-- need a larger JVM size -->
+		<surefire.argLine>-Xms300m -Xmx1536m</surefire.argLine> <!-- need a larger JVM size -->
 		<maven.failsafe.plugin.version>2.12.4</maven.failsafe.plugin.version>
 		<cargo.maven2.plugin.version>1.3.1</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.7</build.helper.maven.plugin.version>
@@ -38,10 +38,9 @@
 		<junit.version>4.10</junit.version>
 		<org.codehaus.jackson.version>1.9.11</org.codehaus.jackson.version>
 		<org.springframework.version>3.1.3.RELEASE</org.springframework.version>
-		<oauth.signpost.version>1.2.1.2</oauth.signpost.version>
 		<org.slf4j.version>1.6.6</org.slf4j.version>
 		<!-- log4j is not used -->
-		<org.springframework.security.version>3.1.3.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.0.RELEASE -->
+		<org.springframework.security.version>3.1.3.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.3.RELEASE -->
 		<openid4java.version>0.9.6.662.odk-SNAPSHOT</openid4java.version>
 		<org.springframework.security.openid.version>3.1.3.odk-SNAPSHOT</org.springframework.security.openid.version>
 		<org.seleniumhq.version>2.28.0</org.seleniumhq.version>
@@ -188,17 +187,6 @@
 		  <version>1.0</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.james</groupId>
-			<artifactId>apache-mime4j-core</artifactId>
-			<version>0.7.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>com.google.appengine</groupId>
@@ -453,8 +441,8 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
-		  <groupId>com.googlecode.gwt-maps3</groupId>
-		  <artifactId>gwt-maps3</artifactId> <!-- see src/main/libs/readme.txt -->
+		  <groupId>com.googlecode.gwt-google-maps-v3</groupId>
+		  <artifactId>gwt-google-maps-v3</artifactId> <!-- see src/main/libs/readme.txt -->
 		  <version>snapshot</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
@@ -557,7 +545,7 @@
 		<dependency>
 		  <groupId>org.opendatakit</groupId>
 		  <artifactId>odk-httpclient-gae</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>1.0</version>
+		  <version>1.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -587,25 +575,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
-			<groupId>org.openxri</groupId>
-			<artifactId>openxri-client</artifactId>
-			<version>1.2.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-security</groupId>
-					<artifactId>xmlsec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-				<exclusion>
-				  <groupId>log4j</groupId>
-				  <artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<dependency>
 		  <groupId>postgresql</groupId>
 		  <artifactId>postgresql</artifactId>
@@ -619,20 +588,6 @@
 		  <version>2.5</version>
 		  <type>jar</type>
 		  <scope>provided</scope>
-		</dependency>
-		<dependency>
-		  <groupId>oauth.signpost</groupId>
-		  <artifactId>signpost-commonshttp4</artifactId>
-		  <version>${oauth.signpost.version}</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-		  <groupId>oauth.signpost</groupId>
-		  <artifactId>signpost-core</artifactId>
-		  <version>${oauth.signpost.version}</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -809,11 +764,6 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 			<version>${org.springframework.security.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>stax</groupId>
-			<artifactId>stax</artifactId>
-			<version>1.2.0</version>
 		</dependency>
 		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
 			<groupId>xalan</groupId>

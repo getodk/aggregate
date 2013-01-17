@@ -29,15 +29,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * Delete the publishing of data to an external service.
  *
  */
-public final class RefreshCredentialsButton extends AggregateButton implements ClickHandler {
+public final class RestartButton extends AggregateButton implements ClickHandler {
 
-  private static final String BUTTON_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Refresh Credentials";
-  private static final String TOOLTIP_TEXT = "Credentials were rejected by service - click to Refresh Credentials";
-  private static final String HELP_BALLOON_TXT = "Refresh the credentials used ot publish data to this service.";
+  private static final String BUTTON_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher";
+  private static final String TOOLTIP_TEXT = "There were publishing failures - click to Restart the Publisher";
+  private static final String HELP_BALLOON_TXT = "The external service was failing or the credentials were bad. Click to restart the publisher.";
 
   private final ExternServSummary publisher;
 
-  public RefreshCredentialsButton(ExternServSummary publisher) {
+  public RestartButton(ExternServSummary publisher) {
     super(BUTTON_TXT, TOOLTIP_TEXT, HELP_BALLOON_TXT);
     this.publisher = publisher;
     addStyleDependentName("negative");
@@ -61,11 +61,11 @@ public final class RefreshCredentialsButton extends AggregateButton implements C
 
     switch (type) {
     case GOOGLE_SPREADSHEET:
-      SecureGWT.getServicesAdminService().refreshCredentials(publisher.getUri(),
+      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
           new OAuth2Callback());
       break;
     case OHMAGE_JSON_SERVER:
-      SecureGWT.getServicesAdminService().refreshCredentials(publisher.getUri(),
+      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
           new AsyncCallback<Void>() {
 
             @Override
@@ -80,7 +80,7 @@ public final class RefreshCredentialsButton extends AggregateButton implements C
           });
       break;
     case GOOGLE_FUSIONTABLES:
-      SecureGWT.getServicesAdminService().refreshCredentials(publisher.getUri(),
+      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
           new OAuth2Callback());
       break;
     default: // unknown type

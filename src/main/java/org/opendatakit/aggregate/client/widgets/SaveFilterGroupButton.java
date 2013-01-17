@@ -52,7 +52,7 @@ public final class SaveFilterGroupButton extends AggregateButton implements Clic
     final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
     List<Filter> filters = filterGroup.getFilters();
 
-    if (filters == null || filters.size() <= 0 || !filterGroup.getIncludeMetadata()) {
+    if (filters == null || (filters.size() <= 0 && !filterGroup.getIncludeMetadata())) {
       Window.alert(UIConsts.ERROR_NO_FILTERS);
       return;
     }

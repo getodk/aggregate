@@ -50,15 +50,15 @@ public final class SaveAsFilterGroupButton extends AggregateButton implements Cl
   public void onClick(ClickEvent event) {
     super.onClick(event);
 
-    FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();   
+    FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
     List<Filter> filters = filterGroup.getFilters();
-   
+
     // if no filters no need to proceed
-    if (filters == null || filters.size() <= 0 || !filterGroup.getIncludeMetadata()) {
+    if (filters == null || (filters.size() <= 0 && !filterGroup.getIncludeMetadata())) {
       Window.alert(UIConsts.ERROR_NO_FILTERS);
       return;
     }
-    
+
     // prompt for name
     String newFilterName;
     try {
@@ -66,7 +66,7 @@ public final class SaveAsFilterGroupButton extends AggregateButton implements Cl
     } catch (Exception e) {
       return; // user pressed cancel
     }
-    
+
     // make a copy of the filter
     ArrayList<Filter> newFilterGroupfilters = new ArrayList<Filter>();
     newFilterGroupfilters.addAll(filters);
@@ -93,13 +93,13 @@ public final class SaveAsFilterGroupButton extends AggregateButton implements Cl
 
     // Save the filter on the server
     SecureGWT.getFilterService().updateFilterGroup(newGroup, callback);
-    
+
 
     // set the displaying filters to the newly saved filter group
     parentSubTab.switchFilterGroup(newGroup);
     AggregateUI.getUI().getTimer().refreshNow();
   }
-  
+
 
 
 }
