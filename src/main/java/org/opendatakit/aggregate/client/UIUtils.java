@@ -37,6 +37,10 @@ public class UIUtils {
     return newFilterName;
   }
 
+  public static final String CONFIRM_OWNER_EMAIL_TXT = "Please confirm that this e-mail address: ";
+  public static final String CONFIRM_OWNER_EMAIL_TXT2 = " is accurate and contains no mispellings. " +
+  		"This account will become the owner of the published tables.";
+
   public static String promptForEmailAddress() throws Exception{
     String newEmailName = Window.prompt(UIConsts.PROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
 
@@ -48,10 +52,11 @@ public class UIUtils {
       } else {
         String email = EmailParser.parseEmail(newEmailName);
         if ( email != null ) {
-          return email;
-        } else {
-          newEmailName = Window.prompt(UIConsts.REPROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
+          if ( Window.confirm(CONFIRM_OWNER_EMAIL_TXT + email.substring(EmailParser.K_MAILTO.length()) + CONFIRM_OWNER_EMAIL_TXT2) ) {
+            return email;
+          }
         }
+        newEmailName = Window.prompt(UIConsts.REPROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
       }
     }
   }
