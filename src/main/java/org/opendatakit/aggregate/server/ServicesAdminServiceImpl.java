@@ -38,6 +38,7 @@ import org.opendatakit.aggregate.externalservice.OhmageJsonServer;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -244,6 +245,11 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     if (es != null) {
       try {
         es.delete(cc);
+        // and insert a sleep to let this settle before returning
+        try {
+          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+        } catch (InterruptedException e) {
+        }
         // success!
         return true;
       } catch (ODKOverQuotaException e) {
