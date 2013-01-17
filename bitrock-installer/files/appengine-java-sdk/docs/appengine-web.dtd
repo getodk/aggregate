@@ -1,8 +1,10 @@
 <!ELEMENT appengine-web-app (application, version?, source-language?, server?,
-                             server-settings?, static-files?, resource-files?,
-                             system-properties?, env-variables?, ssl-enabled?,
-                             sessions-enabled?, async-session-persistence?,
-                             user-permissions?, public-root?, inbound-services?,
+                             instance-class?, automatic-scaling?,
+                             manual-scaling?, basic-scaling?, static-files?,
+                             resource-files?, system-properties?,
+                             env-variables?, ssl-enabled?, sessions-enabled?,
+                             async-session-persistence?, user-permissions?,
+                             public-root?, inbound-services?,
                              precompilation-enabled?, admin-console?,
                              static-error-handlers?, warmup-requests-enabled?,
                              threadsafe?, servers?, code-lock?, pagespeed?,
@@ -13,15 +15,18 @@
 <!ELEMENT version (#PCDATA)>
 <!ELEMENT source-language (#PCDATA)>
 <!ELEMENT server (#PCDATA)>
-<!ELEMENT server-settings (instances?, class?,
-                           min-pending-latency?, max-pending-latency?,
-                           min-idle-instances?, max-idle-instances?)>
-<!ELEMENT instances (#PCDATA)>
-<!ELEMENT class (#PCDATA)>
+<!ELEMENT instance-class (#PCDATA)>
+<!ELEMENT automatic-scaling (min-pending-latency?, max-pending-latency?,
+                              min-idle-instances?, max-idle-instances?)>
 <!ELEMENT min-pending-latency (#PCDATA)>
 <!ELEMENT max-pending-latency (#PCDATA)>
 <!ELEMENT min-idle-instances (#PCDATA)>
 <!ELEMENT max-idle-instances (#PCDATA)>
+<!ELEMENT manual-scaling (instances)>
+<!ELEMENT instances (#PCDATA)>
+<!ELEMENT basic-scaling (max-instances, idle-timeout?)>
+<!ELEMENT max-instances (#PCDATA)>
+<!ELEMENT idle-timeout (#PCDATA)>
 <!ELEMENT static-files (include|exclude)*>
 <!ELEMENT include (http-header)*>
 <!ATTLIST include

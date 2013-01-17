@@ -6,5 +6,5 @@ rem to test a Google App Engine application on their local workstation.
 
 java -cp "%~dp0\..\lib\appengine-tools-api.jar" ^
     com.google.appengine.tools.KickStart ^
-       com.google.appengine.tools.development.DevAppServerMain --high-replication %*
+       com.google.appengine.tools.development.DevAppServerMain %*
 
