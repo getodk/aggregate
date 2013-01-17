@@ -60,6 +60,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -198,7 +199,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
 
   @Override
   protected String getOwnership() {
-    return objectEntity.getOwnerEmail();
+    return objectEntity.getOwnerEmail().substring(EmailParser.K_MAILTO.length());
   }
 
   protected String getAccessToken(boolean forceRefresh, CallingContext cc) throws ODKExternalServiceCredentialsException {
