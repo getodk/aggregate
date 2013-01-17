@@ -37,10 +37,10 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class TaskLockImpl implements TaskLock {
 
@@ -163,6 +163,10 @@ public class TaskLockImpl implements TaskLock {
     } catch (DatastoreFailureException e) {
       e.printStackTrace();
       return false;
+    } catch (Exception e) { // might be a ConcurrentModificationException ...
+      System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+      e.printStackTrace();
+      return false;
     }
 
     // and outside the transaction, double-check that we hold the lock
@@ -209,12 +213,12 @@ public class TaskLockImpl implements TaskLock {
       String retrievedId =  (String) value;
       return retrievedId;
     }
-    
+
     return "";
   }
-  
+
   /**
-   * 
+   *
    * @param entity
    * @return true if expired
    */
@@ -259,6 +263,10 @@ public class TaskLockImpl implements TaskLock {
         }
       }
     } catch (DatastoreFailureException e) {
+      e.printStackTrace();
+      return false;
+    } catch (Exception e) { // might be a ConcurrentModificationException ...
+      System.out.println("UNEXPECTED EXCEPTION " + e.toString());
       e.printStackTrace();
       return false;
     }
@@ -313,6 +321,10 @@ public class TaskLockImpl implements TaskLock {
           transaction.commit();
         } catch (DatastoreFailureException e) {
           throw new ODKTaskLockException(OTHER_ERROR, e);
+        } catch (Exception e) { // might be a ConcurrentModificationException ...
+          System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+          e.printStackTrace();
+          throw new ODKTaskLockException(OTHER_ERROR, e);
         }
       } else {
         try {
@@ -320,12 +332,16 @@ public class TaskLockImpl implements TaskLock {
           System.out.println("Rollback releaseLock : " + lockId + " " + formId + " " + taskType.getName());
         } catch (DatastoreFailureException e) {
           throw new ODKTaskLockException(OTHER_ERROR, e);
+        } catch (Exception e) { // might be a ConcurrentModificationException ...
+          System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+          e.printStackTrace();
+          throw new ODKTaskLockException(OTHER_ERROR, e);
         }
       }
     }
     if ( !result ) {
-      // if there was contention and the other party hasn't removed its lock 
-      // yet, then our queryForLock() will fail.  Call delete, which has 
+      // if there was contention and the other party hasn't removed its lock
+      // yet, then our queryForLock() will fail.  Call delete, which has
       // less restrictive logic than queryForLock().
       deleteLock(lockId, formId, taskType);
       System.out.println("releaseLock -- FALLBACK: deleteLock : " + lockId + " " + formId + " " + taskType.getName());
@@ -413,7 +429,7 @@ public class TaskLockImpl implements TaskLock {
     } finally {
       dam.recordQueryUsage(KIND, readCount);
     }
-    
+
   }
 
 }
