@@ -382,6 +382,11 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     }
   }
 
+  @Override
+  protected String getOwnership() {
+    return objectEntity.getOwnerEmail();
+  }
+
   protected String getAccessToken(boolean forceRefresh, CallingContext cc) throws ODKExternalServiceCredentialsException {
     try {
       if (accessToken == null && !forceRefresh) {

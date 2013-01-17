@@ -43,8 +43,9 @@ public class PublishTable extends FlexTable {
   private static int TIME_PUBLISH_START = 4;
   private static int ACTION = 5;
   private static int TYPE = 6;
-  private static int NAME = 7;
-  private static int DELETE = 8;
+  private static int OWNERSHIP = 7;
+  private static int NAME = 8;
+  private static int DELETE = 9;
 
   public PublishTable() {
     super();
@@ -55,6 +56,7 @@ public class PublishTable extends FlexTable {
     this.setText(HEADER_ROW, TIME_PUBLISH_START, "Start Date");
     this.setText(HEADER_ROW, ACTION, "Action");
     this.setText(HEADER_ROW, TYPE, "Type");
+    this.setText(HEADER_ROW, OWNERSHIP, "Owner");
     this.setText(HEADER_ROW, NAME, "Name");
     this.setText(HEADER_ROW, DELETE, "Delete");
     this.addStyleName("exportTable");
@@ -88,6 +90,7 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());
+      this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(e.getOwnership()));
       this.setWidget(i + STARTING_ROW, NAME, new HTML(e.getName()));
       this.setWidget(i + STARTING_ROW, DELETE,  new DeletePublishButton(e));
     }
