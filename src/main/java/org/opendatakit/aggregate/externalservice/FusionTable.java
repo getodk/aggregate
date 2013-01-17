@@ -196,6 +196,11 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     return t;
   }
 
+  @Override
+  protected String getOwnership() {
+    return objectEntity.getOwnerEmail();
+  }
+
   protected String getAccessToken(boolean forceRefresh, CallingContext cc) throws ODKExternalServiceCredentialsException {
     try {
       if (accessToken == null && !forceRefresh) {

@@ -13,7 +13,7 @@ odk-httpclient-gae:
 This can be installed by pulling the Aggregate (Components) sources
 and running 'mvn install' in the GaeHttpClient project.  Or,
 
-mvn install:install-file -Dfile=odk-httpclient-gae-1.0.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.0 -Dpackaging=jar
+mvn install:install-file -Dfile=odk-httpclient-gae-1.1.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.1 -Dpackaging=jar
 
 openid4java-nodeps-0.9.6.662.odk-SNAPSHOT:
 
@@ -40,11 +40,12 @@ and running 'mvn install' in the TomcatUtils project.  Or,
 
 mvn install:install-file -Dfile=odk-tomcatutil.jar -DgroupId=org.opendatakit -DartifactId=odk-tomcatutil -Dversion=1.0 -Dpackaging=jar
 
-gwt-maps3-snapshot:
+gwt-google-maps-v3-snapshot:
 
-This is the gwt-maps3.jar from http://code.google.com/p/gwt-maps3/ with a release date of June 2011
+See the Aggregate (Components) README.txt file for how this was built. It
+uses the sources from http://code.google.com/p/gwt-google-maps-v3/
 
-mvn install:install-file -Dfile=gwt-maps3-snapshot.jar -DgroupId=com.googlecode.gwt-maps3 -DartifactId=gwt-maps3 -Dversion=snapshot -Dpackaging=jar
+mvn install:install-file -Dfile=gwt-google-maps-v3-snapshot.jar -DgroupId=com.googlecode.gwt-google-maps-v3 -DartifactId=gwt-google-maps-v3 -Dversion=snapshot -Dpackaging=jar
 
 gwt-visualization-1.1.1:
 
