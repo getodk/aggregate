@@ -75,6 +75,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -142,6 +143,8 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
    * the Google Drive API.
    */
   private String accessToken = null;
+  private String refreshToken = null;
+  private Long expirationTime = null;
 
   /**
    * Common base constructor that initializes final values.
@@ -384,7 +387,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
   @Override
   protected String getOwnership() {
-    return objectEntity.getOwnerEmail();
+    return objectEntity.getOwnerEmail().substring(EmailParser.K_MAILTO.length());
   }
 
   protected String getAccessToken(boolean forceRefresh, CallingContext cc) throws ODKExternalServiceCredentialsException {
@@ -665,7 +668,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   public String getDescriptiveTargetString() {
     Map<String, String> properties = new HashMap<String, String>();
     String id = objectEntity.getSpreadsheetKey();
-    if (id == null) {
+    if (id == null || objectEntity.getReady() != true) {
       return "Not yet created";
     }
     properties.put("key", id);
@@ -684,45 +687,61 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
   @Override
   public boolean load(String userId, Credential credential) {
-    try {
-      String tokenString = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
-          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN);
-      if ( tokenString != null ) {
-        credential.setAccessToken(tokenString);
-        String refreshString = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN);
-        credential.setRefreshToken(refreshString);
-        String expirationTimestamp = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME);
-        credential.setExpirationTimeMilliseconds(expirationTimestamp == null ? null : Long.valueOf(expirationTimestamp));
-        return true;
+    if ( accessToken != null ) {
+      // use cached values...
+      credential.setAccessToken(accessToken);
+      credential.setRefreshToken(refreshToken);
+      credential.setExpirationTimeMilliseconds(expirationTime);
+      return true;
+    } else {
+      // try to fetch values from server properties
+      try {
+        accessToken = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
+            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN);
+        if ( accessToken != null ) {
+          // OK -- use the values we find...
+          credential.setAccessToken(accessToken);
+          refreshToken = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
+              ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN);
+          credential.setRefreshToken(refreshToken);
+          String expirationTimestamp = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
+              ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME);
+          expirationTime = (expirationTimestamp == null) ? null : Long.valueOf(expirationTimestamp);
+          credential.setExpirationTimeMilliseconds(expirationTime);
+          return true;
+        }
+      } catch (ODKEntityNotFoundException e) {
+        e.printStackTrace();
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
       }
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
     }
+    // did not find values...
     return false;
   }
 
   @Override
   public void store(String userId, Credential credential) throws IOException {
-    try {
-      accessToken = credential.getAccessToken();
-      ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
-          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN,
-          credential.getAccessToken());
-      ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
-          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN,
-          credential.getRefreshToken());
-      Long expirationTime = credential.getExpirationTimeMilliseconds();
-      ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
-          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME,
-          (expirationTime == null) ? null : Long.toString(expirationTime));
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
+    if ( accessToken == null || !accessToken.equals(credential.getAccessToken()) ) {
+      // values have changed -- update the cached values and flush changes to database
+      try {
+        accessToken = credential.getAccessToken();
+        ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
+            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN,
+            accessToken);
+        refreshToken = credential.getRefreshToken();
+        ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
+            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN,
+            refreshToken);
+        expirationTime = credential.getExpirationTimeMilliseconds();
+        ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
+            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME,
+            (expirationTime == null) ? null : Long.toString(expirationTime));
+      } catch (ODKEntityNotFoundException e) {
+        e.printStackTrace();
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
+      }
     }
   }
 
