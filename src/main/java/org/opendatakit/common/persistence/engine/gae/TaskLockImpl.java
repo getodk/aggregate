@@ -24,27 +24,31 @@ import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
+import com.google.appengine.api.datastore.DatastoreAttributes.DatastoreType;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class TaskLockImpl implements TaskLock {
 
   private static final String NO_TRANSACTION_ACTIVE = "Transaction was no longer active";
   private static final String MULTIPLE_RESULTS_ERROR = "SOMETHING HORRIBLE!! - Some how a second lock was created";
   private static final String OTHER_ERROR = "Datastore or other failure";
+  private static final String ENTITY_GROUP_KIND = "TASK_LOCK_GROUP";
+  private static final String ENTITY_GROUP_KEY = "TASK_LOCKS";
   private static final String KIND = "TASK_LOCK";
   private static final String LOCK_ID_PROPERTY = "LOCK_ID";
   private static final String FORM_ID_PROPERTY = "FORM_ID";
@@ -61,9 +65,11 @@ public class TaskLockImpl implements TaskLock {
 
   private void deleteLock(String lockId, String formId, ITaskLockType taskType) {
     try {
-      Query query = new Query(KIND);
-      query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
-      query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
+      Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
+      Query query = new Query(KIND, entityGroupKey);
+      query.setAncestor(entityGroupKey);
+      query.addFilter( FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
+      query.addFilter( TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
       PreparedQuery pquery = ds.prepare(query);
 
       Iterable<Entity> entities = pquery.asIterable();
@@ -131,7 +137,8 @@ public class TaskLockImpl implements TaskLock {
         System.out.println("Trying to get lock : " + lockId + " " + formId + " "
             + taskType.getName());
         if (gaeEntity == null) {
-          gaeEntity = new Entity(KIND);
+          Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
+          gaeEntity = new Entity(KIND, entityGroupKey);
           updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
           result = true;
         } else {
@@ -156,15 +163,23 @@ public class TaskLockImpl implements TaskLock {
     } catch (DatastoreFailureException e) {
       e.printStackTrace();
       return false;
+    } catch (Exception e) { // might be a ConcurrentModificationException ...
+      System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+      e.printStackTrace();
+      return false;
     }
 
     // and outside the transaction, double-check that we hold the lock
     try {
-      // sleep a little to let GAE datastore stabilize
-      try {
-        Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+      // rely on strong consistency guarantee on a High Replication datastore.
+      // For Master-Slave, we cannot do that. Must wait for data to settle.
+      if ( ds.getDatastoreAttributes().getDatastoreType() != DatastoreType.HIGH_REPLICATION ) {
+        // sleep a little to let GAE datastore stabilize
+        try {
+          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
       // verify no one else made a lock
       lockVerification(lockId, formId, taskType);
@@ -198,12 +213,12 @@ public class TaskLockImpl implements TaskLock {
       String retrievedId =  (String) value;
       return retrievedId;
     }
-    
+
     return "";
   }
-  
+
   /**
-   * 
+   *
    * @param entity
    * @return true if expired
    */
@@ -250,15 +265,23 @@ public class TaskLockImpl implements TaskLock {
     } catch (DatastoreFailureException e) {
       e.printStackTrace();
       return false;
+    } catch (Exception e) { // might be a ConcurrentModificationException ...
+      System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+      e.printStackTrace();
+      return false;
     }
 
     // and outside the transaction, double-check that we hold the lock
     try {
-      // sleep a little to let GAE datastore stabilize
-      try {
-        Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+      // rely on strong consistency guarantee on a High Replication datastore.
+      // For Master-Slave, we cannot do that. Must wait for data to settle.
+      if ( ds.getDatastoreAttributes().getDatastoreType() != DatastoreType.HIGH_REPLICATION ) {
+        // sleep a little to let GAE datastore stabilize
+        try {
+          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
       // verify no one else made a lock
       lockVerification(lockId, formId, taskType);
@@ -298,6 +321,10 @@ public class TaskLockImpl implements TaskLock {
           transaction.commit();
         } catch (DatastoreFailureException e) {
           throw new ODKTaskLockException(OTHER_ERROR, e);
+        } catch (Exception e) { // might be a ConcurrentModificationException ...
+          System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+          e.printStackTrace();
+          throw new ODKTaskLockException(OTHER_ERROR, e);
         }
       } else {
         try {
@@ -305,12 +332,16 @@ public class TaskLockImpl implements TaskLock {
           System.out.println("Rollback releaseLock : " + lockId + " " + formId + " " + taskType.getName());
         } catch (DatastoreFailureException e) {
           throw new ODKTaskLockException(OTHER_ERROR, e);
+        } catch (Exception e) { // might be a ConcurrentModificationException ...
+          System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+          e.printStackTrace();
+          throw new ODKTaskLockException(OTHER_ERROR, e);
         }
       }
     }
     if ( !result ) {
-      // if there was contention and the other party hasn't removed its lock 
-      // yet, then our queryForLock() will fail.  Call delete, which has 
+      // if there was contention and the other party hasn't removed its lock
+      // yet, then our queryForLock() will fail.  Call delete, which has
       // less restrictive logic than queryForLock().
       deleteLock(lockId, formId, taskType);
       System.out.println("releaseLock -- FALLBACK: deleteLock : " + lockId + " " + formId + " " + taskType.getName());
@@ -355,9 +386,11 @@ public class TaskLockImpl implements TaskLock {
   private Entity queryForLock(String formId, ITaskLockType taskType) throws ODKTaskLockException {
     int readCount = 0;
     try {
-      Query query = new Query(KIND);
-      query.addFilter(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
-      query.addFilter(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
+      Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
+      Query query = new Query(KIND, entityGroupKey);
+      query.setAncestor(entityGroupKey);
+      query.addFilter( FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
+      query.addFilter( TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
       PreparedQuery pquery = ds.prepare(query);
       Iterable<Entity> entities = pquery.asIterable();
       // There may be expired locks in the database.
@@ -396,7 +429,7 @@ public class TaskLockImpl implements TaskLock {
     } finally {
       dam.recordQueryUsage(KIND, readCount);
     }
-    
+
   }
 
 }

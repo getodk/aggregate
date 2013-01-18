@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -25,58 +25,81 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public interface ExternalService {
-  
+
   public void sendSubmission(Submission submission, CallingContext cc) throws ODKExternalServiceException;
-  
+
   public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException;
-  
+
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
-    
+
   /**
-   * Abandon the action.  
-   * 
+   * Abandon the action.
+   *
    * @throws ODKDatastoreException
    */
   public void abandon(CallingContext cc) throws ODKDatastoreException;
-  
+
   /**
    * Delete the external service connection record.
-   * 
+   *
    * @throws ODKDatastoreException
    */
   public void delete(CallingContext cc) throws ODKDatastoreException;
-  
+
   /**
    * Persist status changes to the persistence layer.
-   * 
+   *
    * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException 
+   * @throws ODKOverQuotaException
    */
   public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 
   /**
+   * Initiate or restart (e.g., with updated credentials) the publishing attempt.
+   *
+   * @param cc
+   * @throws ODKExternalServiceException
+   * @throws ODKEntityPersistException
+   * @throws ODKOverQuotaException
+   * @throws ODKDatastoreException
+   */
+  public void initiate(CallingContext cc) throws ODKExternalServiceException, ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException;
+
+  /**
+   * (re-)share the published files with the specified ownerEmail. The publisher
+   * may or may not support management of who has access to the published files.
+   * If it does, this API can be used to allow other parties to see the data.
+   *
+   * @param ownerEmail
+   * @param cc
+   * @throws ODKDatastoreException
+   * @throws ODKExternalServiceException
+   */
+  public void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException;
+
+  /**
    * get the FormServiceCursor for this external service connection.
-   * 
+   *
    * @return
    */
   public FormServiceCursor getFormServiceCursor();
-  
+
   /**
    * get the descriptive string for the target service (e.g., spreadsheet name)
-   * 
+   *
    * @return
    */
   public String getDescriptiveTargetString();
-  
+
   /**
    * Transform to external service summary for the gwt interface
-   * 
+   *
    * @return
    */
   public ExternServSummary transform();

@@ -243,19 +243,19 @@ public class BackendActionsTable extends CommonFieldsBase {
   private static final void logValues( String tag, long now, long futureMilliseconds, long requestedTime ) {
     String msg;
     if ( requestedTime == -1L ) {
-      msg = String.format("%7$s last Fetch: %1$8d [S: %2$8d Eq: %3$8d Fs: %4$8d] futureMillis: %5$8d",
-          (lastFetchTime-now), 
-          (lastWatchdogStartTime-now), 
-          (lastWatchdogEnqueueTime-now), 
-          (lastWatchdogSchedulingTime-now),
-          futureMilliseconds, (requestedTime-now), tag );
+      msg = String.format("%7$s last Fetch: %1$18s [S: %2$18s Eq: %3$18s Fs: %4$18s] futureMillis: %5$18s",
+          Long.toString(lastFetchTime-now), 
+          Long.toString(lastWatchdogStartTime-now), 
+          Long.toString(lastWatchdogEnqueueTime-now), 
+          Long.toString(lastWatchdogSchedulingTime-now),
+          Long.toString(futureMilliseconds), Long.toString(requestedTime-now), tag );
     } else {
-      msg = String.format("%7$s last Fetch: %1$8d [S: %2$8d Eq: %3$8d Fs: %4$8d] futureMillis: %5$8d requested: %6$8d",
-          (lastFetchTime-now), 
-          (lastWatchdogStartTime-now), 
-          (lastWatchdogEnqueueTime-now), 
-          (lastWatchdogSchedulingTime-now),
-          futureMilliseconds, (requestedTime-now), tag );
+      msg = String.format("%7$s last Fetch: %1$18s [S: %2$18s Eq: %3$18s Fs: %4$18s] futureMillis: %5$18s requested: %6$18s",
+          Long.toString(lastFetchTime-now), 
+          Long.toString(lastWatchdogStartTime-now), 
+          Long.toString(lastWatchdogEnqueueTime-now), 
+          Long.toString(lastWatchdogSchedulingTime-now),
+          Long.toString(futureMilliseconds), Long.toString(requestedTime-now), tag );
     }
     logger.info(msg);
   }
@@ -299,7 +299,7 @@ public class BackendActionsTable extends CommonFieldsBase {
 
       lastFetchTime = now;
 
-      logValues( FETCHED, now, -1, -1 );
+      logValues( FETCHED, now, -1L, -1L );
     }
     
   }
@@ -381,7 +381,7 @@ public class BackendActionsTable extends CommonFieldsBase {
                requestedWatchdogSchedulingTime == now ) {
             // fire the Watchdog...
             Watchdog dog = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-            dog.onUsage(0, cc);
+            dog.onUsage(0L, cc);
   
             // update enqueue value...
             records.enqueueTime.setLastRevisionDate(new Date(now));

@@ -35,6 +35,28 @@ p {
 	margin-top: 10px;
 }
 
+.indentedRegion p {
+	padding-left: 20px;
+}
+
+.indentedRegion h3 {
+	padding-left: 10px;
+}
+
+.undefinedValue {
+	color: red;
+}
+
+.definedValue {
+	color: #0044A7;
+}
+
+.indentedEntryRegion {
+	padding-left: 20px;
+	font-family: "Lucida Grande", Tahoma, Arial, Verdana, sans-serif;
+	font-size: 80%;
+	font-weight: bold;
+}
 
 .embedded_iframe {
 	margin: 2px;

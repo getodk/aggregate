@@ -1,6 +1,6 @@
 package org.opendatakit.aggregate.odktables;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;

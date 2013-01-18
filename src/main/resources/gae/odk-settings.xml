@@ -10,7 +10,7 @@
 		<property name="locations">
 			<list>
 				<value>classpath:security.properties</value>
-				<value>WEB-INF/logging.properties</value>
+				<value>classpath:logging.properties</value>
 			</list>
 		</property>
 	</bean>
@@ -33,7 +33,12 @@
 		<property name="realm" ref="realm" />
         <property name="superUserEmail" value="${security.server.superUser}" />
 		<property name="superUserUsername" value="${security.server.superUserUsername}" />
-        <property name="userServiceKey" value="${security.server.userServiceKey}" />
+	</bean>
+
+	<!--  bean to get the siteKey value (which is defined the first time the app starts up) -->
+	<bean id="sitePreferencesBean" class="org.opendatakit.aggregate.server.SitePreferencesBean" >
+		<property name="datastore" ref="datastore"/>
+		<property name="userService" ref="user_service"/>
 	</bean>
 
 <!--	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">-->

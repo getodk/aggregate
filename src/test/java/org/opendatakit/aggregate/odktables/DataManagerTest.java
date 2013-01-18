@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.odktables.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -231,6 +232,14 @@ public class DataManagerTest {
       ODKTaskLockException, BadColumnNameException {
     dm.insertRows(rows);
     dm.deleteRows(Util.list(T.Data.DYLAN.getId(), T.Data.JOHN.getId()));
+    // this may actually require accessing the task lock to force a flush of the delete
+    // under the new GAE development environment datastore.  Try sleeping for now...
+    try {
+      Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     List<Row> rows = dm.getRows();
     assertTrue(rows.isEmpty());
   }

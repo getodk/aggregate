@@ -21,10 +21,10 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCallbackFormatter {
 
@@ -79,18 +79,19 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
   @Override
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
       FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
-    
+
     StringBuilder jsonString = new StringBuilder();
     jsonString.append(BasicConsts.QUOTE);
     jsonString.append(repeatElement.getElementName());
     jsonString.append(BasicConsts.QUOTE + BasicConsts.COLON);
     jsonString.append(BasicConsts.LEFT_BRACKET);
     // format row elements
-    for (SubmissionSet repeat : repeats) {
+    for (int i = 0 ; i < repeats.size() ; ++i ) {
+      SubmissionSet repeat = repeats.get(i);
       Row repeatRow = repeat.getFormattedValuesAsRow(null, elemFormatter, false, cc);
       Iterator<String> itr = repeatRow.getFormattedValues().iterator();
       jsonString.append(BasicConsts.LEFT_BRACE);
-      while (itr.hasNext()) {        
+      while (itr.hasNext()) {
         jsonString.append(itr.next());
         if (itr.hasNext()) {
           jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
@@ -98,7 +99,10 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
           jsonString.append(BasicConsts.RIGHT_BRACE);
         }
       }
-      jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
+      if ( i != repeats.size()-1 ) {
+        // we aren't the last entry, so emit a comma...
+        jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
+      }
     }
     jsonString.append(BasicConsts.RIGHT_BRACKET);
     row.addFormattedValue(jsonString.toString());
@@ -107,7 +111,7 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
   /**
    * Helper function used to convert row to a JSON object and append to the
    * stream
-   * 
+   *
    * @param itr
    *          string values to be separated by commas
    */

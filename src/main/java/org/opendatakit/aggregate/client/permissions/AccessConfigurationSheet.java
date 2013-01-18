@@ -66,8 +66,6 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class AccessConfigurationSheet extends Composite {
 
-  private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
-
   private static final String NOT_VALID_EMAIL = "Username is not a valid Email address.\n\n"
       + "Usernames for Google accounts must be\n" + "Email addresses that Google OpenID can\n"
       + "authenticate.";
@@ -229,7 +227,7 @@ public class AccessConfigurationSheet extends Composite {
       return 1;
     }
   }
-  
+
   private class GroupMembershipColumn extends UIEnabledValidatingCheckboxColumn<UserSecurityInfo> {
     final GrantedAuthorityName auth;
 
@@ -284,16 +282,6 @@ public class AccessConfigurationSheet extends Composite {
         return false;
       }
     }
-  }
-
-  private static boolean hasInvalidEmailCharacters(String email) {
-    for (int i = 0; i < K_INVALID_EMAIL_CHARACTERS.length(); ++i) {
-      char ch = K_INVALID_EMAIL_CHARACTERS.charAt(i);
-      if (email.indexOf(ch) != -1) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private class UpdateUserDisplay implements AsyncCallback<ArrayList<UserSecurityInfo>> {
@@ -440,7 +428,7 @@ public class AccessConfigurationSheet extends Composite {
         }
         if (key.getUsername() == null) {
           // we are setting an e-mail address... verify it...
-          if (hasInvalidEmailCharacters(prospectiveValue)) {
+          if (EmailParser.hasInvalidEmailCharacters(prospectiveValue)) {
             Window.alert("Invalid characters in Email address.\n"
                 + "Email address cannot contain whitespace, quotes,\n"
                 + "commas, semicolons or other punctuation");
@@ -558,7 +546,7 @@ public class AccessConfigurationSheet extends Composite {
         if (username == null || username.length() == 0) {
           return false;
         }
-        if (hasInvalidEmailCharacters(username) || username.indexOf(EmailParser.K_AT) == -1) {
+        if (EmailParser.hasInvalidEmailCharacters(username) || username.indexOf(EmailParser.K_AT) == -1) {
           Window.alert(NOT_VALID_EMAIL);
           return false;
         }
@@ -685,7 +673,7 @@ public class AccessConfigurationSheet extends Composite {
     UIEnabledActionColumn<UserSecurityInfo> changePassword = new UIEnabledActionColumn<UserSecurityInfo>(
         "Change Password", new EnableLocalAccountPredicate(), new ChangePasswordActionCallback());
     userTable.addColumn(changePassword, "");
-    
+
     // Type of User
     AccountTypeSelectionColumn type = new AccountTypeSelectionColumn();
     userTable.addColumn(type, "Account Type");
@@ -754,14 +742,11 @@ public class AccessConfigurationSheet extends Composite {
       }
     }
     int nAdded = 0;
-    int nUnchanged = 0;
     for (Email email : emails) {
       boolean localUser = (email.getUsername() != null);
       UserSecurityInfo u = localUser ? localUsers.get(email.getUsername()) : googleUsers.get(email
           .getEmail());
-      if (u != null) {
-        ++nUnchanged;
-      } else {
+      if (u == null) {
         u = new UserSecurityInfo(email.getUsername(), email.getFullName(), email.getEmail(),
                                  UserType.REGISTERED);
         list.add(u);

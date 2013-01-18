@@ -83,6 +83,7 @@
 		  <version>${maven.surefire.plugin.version}</version>
 		  <inherited>true</inherited>
 		  <configuration>
+			<argLine>${surefire.argLine}</argLine>
 			<systemPropertyVariables>
 			  <project.artifactId>${project.artifactId}</project.artifactId>
 			  <test.forms.dir>${itFormsDirectory}</test.forms.dir>

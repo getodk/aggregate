@@ -17,9 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 
-import com.google.appengine.api.quota.QuotaService;
-import com.google.appengine.api.quota.QuotaServiceFactory;
-
 /**
  * Utility class that tracks the time it takes to execute a query in AppEngine.
  * Logs that time if the execution exceeds the cost logging threshold.
@@ -44,8 +41,7 @@ final class ExecutionTimeLogger {
     this.queryStringLogger = LogFactory.getLog("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
     QueryImpl.updateCostLoggingThreshold(datastore);
 
-    QuotaService svc = QuotaServiceFactory.getQuotaService();
-    istartApiTime = startApiTime = svc.getApiTimeInMegaCycles();
+    istartApiTime = startApiTime = System.currentTimeMillis();
   }
 
   void declareQuery(com.google.appengine.api.datastore.Query hack) {
@@ -57,13 +53,11 @@ final class ExecutionTimeLogger {
 
     // report intermediate results from when query is declared (i.e.,
     // execution steps only).
-    QuotaService svc = QuotaServiceFactory.getQuotaService();
-    istartApiTime = svc.getApiTimeInMegaCycles();
+    istartApiTime = System.currentTimeMillis();
   }
 
   private void intermediateLogging() {
-    QuotaService svc = QuotaServiceFactory.getQuotaService();
-    long endApiTime = svc.getApiTimeInMegaCycles();
+    long endApiTime = System.currentTimeMillis();
     long elapsed = endApiTime - istartApiTime;
     if (elapsed >= QueryImpl.costLoggingMinimumMegacyclesThreshold) {
       logger.warn(String.format("%1$06d **intermediate** %2$s[%3$s] %4$s", elapsed,
@@ -72,8 +66,7 @@ final class ExecutionTimeLogger {
   }
 
   void wrapUp() {
-    QuotaService svc = QuotaServiceFactory.getQuotaService();
-    long endApiTime = svc.getApiTimeInMegaCycles();
+    long endApiTime = System.currentTimeMillis();
     long elapsed = endApiTime - startApiTime;
     if (queryString != null) {
       intermediateLogging();

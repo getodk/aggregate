@@ -28,8 +28,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.security.spring.SecurityRevisionsTable;
@@ -41,21 +44,21 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * Stupid class to wrap the Aggregate.html page that GWT uses for all its UI
  * presentation. Needed so that access to the page can be managed by Spring
  * Security.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class AggregateHtmlServlet extends ServletUtilBase {
 
   private static final Log logger = LogFactory.getLog(AggregateHtmlServlet.class);
   /**
-	 * 
+	 *
 	 */
   private static final long serialVersionUID = 5811797423869654357L;
 
   public static final String ADDR = UIConsts.HOST_PAGE_BASE_ADDR;
 
-  public static final String PAGE_CONTENTS = "<!doctype html>"
+  public static final String PAGE_CONTENTS_FIRST = "<!doctype html>"
       + "<!-- The DOCTYPE declaration above will set the    -->"
       + "<!-- browser's rendering engine into               -->"
       + "<!-- \"Standards Mode\". Replacing this declaration  -->"
@@ -67,10 +70,12 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "	<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">"
       + "  <link rel=\"icon\" href=\"favicon.ico\"/>"
       + "	<title>ODK Aggregate</title>"
-      + "	<script type=\"text/javascript\" src=\"javascript/jquery-1.5.1.min.js\"></script>"
-      + "	<script type=\"text/javascript\" src=\"javascript/resize.js\"></script>"
-      + "	<script type=\"text/javascript\" src=\"javascript/main.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.9.0.min.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/resize.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
+      + "    <script type=\"text/javascript\" language=\"javascript\" src=\"https://maps.googleapis.com/maps/api/js?";
+      public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">"
@@ -81,8 +86,11 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "    <noscript>"
       + "      <div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif\">"
       + "        Your web browser must have JavaScript enabled"
-      + "        in order for this application to display correctly." + "      </div>"
-      + "    </noscript>" + "	<div id=\"error_content\"></div><div id=\"dynamic_content\"></div>" + "  </body>" + "</html>";
+      + "        in order for this application to display correctly."
+      + "      </div>"
+      + "    </noscript>" + "	<div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
+ 	  + "  </body>"
+      + "</html>";
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
@@ -145,7 +153,21 @@ public class AggregateHtmlServlet extends ServletUtilBase {
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     PrintWriter out = resp.getWriter();
-    out.print(PAGE_CONTENTS);
+    out.print(PAGE_CONTENTS_FIRST);
+    String simpleApiKey;
+    try {
+      simpleApiKey = ServerPreferencesProperties.getGoogleSimpleApiKey(cc);
+      if ( simpleApiKey != null && simpleApiKey.length() != 0 ) {
+        out.print("key=" + encodeParameter(simpleApiKey) + "&amp;");
+      }
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      logger.info("Unable to access Map APIKey");
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      logger.info("Unable to access Map APIKey");
+    }
+    out.print(PAGE_CONTENTS_SECOND);
   }
 
 }

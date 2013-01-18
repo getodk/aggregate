@@ -29,7 +29,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * These are the actions requiring the ROLE_DATA_OWNER privilege.  They
  * pertain to setting up and canceling the publication of data to external
  * servers (e.g., Google Fusion Tables or Google Spreadsheets).
- * 
+ *
  * @author mitchellsundt@gmail.com
  *
  */
@@ -37,16 +37,14 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface ServicesAdminService extends RemoteService {
 
   ExternServSummary [] getExternalServices(String formid) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
-  String generateOAuthUrl(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-  
-  String createFusionTable(String formId, ExternalServicePublicationOption esOption) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
-  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
-  String createOhmageJsonServer(String formId, String url, ExternalServicePublicationOption es) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  Boolean deletePublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
-  String refreshCredentials(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
+  String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+
+  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+
+  String createOhmageJsonServer(String formId, String url, ExternalServicePublicationOption es) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+
+  Boolean deletePublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+
+  void restartPublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 }

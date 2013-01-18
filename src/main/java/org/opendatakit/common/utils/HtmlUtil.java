@@ -6,21 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.constants.HtmlStrUtil;
 
 public class HtmlUtil extends HtmlStrUtil{
-  
+
   public static final String createHrefWithProperties(String urlBase, Map<String, String> properties,
-      String displayText) {
-    return createHref(HtmlUtil.createLinkWithProperties(urlBase, properties), displayText);
+      String displayText, boolean openInNewWindow) {
+    return createHref(HtmlUtil.createLinkWithProperties(urlBase, properties), displayText, openInNewWindow);
   }
-  
-  
+
+
   /**
-   * 
+   *
    * @param name
    *          The select name.
    * @param values
@@ -33,12 +33,12 @@ public class HtmlUtil extends HtmlStrUtil{
       return null;
     }
     StringBuilder html = new StringBuilder();
-    html.append("<select name='" + StringEscapeUtils.escapeHtml(name) + "'>");
+    html.append("<select name='" + StringEscapeUtils.escapeHtml4(name) + "'>");
 
     if (values != null) {
       for (String v : values) {
-        html.append("<option value='" + StringEscapeUtils.escapeHtml(v) + "'>");
-        html.append(StringEscapeUtils.escapeHtml(v));
+        html.append("<option value='" + StringEscapeUtils.escapeHtml4(v) + "'>");
+        html.append(StringEscapeUtils.escapeHtml4(v));
         html.append("</option>");
       }
     }
@@ -48,7 +48,7 @@ public class HtmlUtil extends HtmlStrUtil{
 
   /**
    * Helper function that creates an html button with the following parameters
-   * 
+   *
    * @param httpMethod
    *          one of GET, POST
    * @param servletAddr
@@ -59,15 +59,15 @@ public class HtmlUtil extends HtmlStrUtil{
    *          key/value pairs to be encoded as hidden input types to be used as
    *          parameters
    * @return html to generate specified button
-   * 
+   *
    * @throws UnsupportedEncodingException
    */
-  public static final String createHtmlButtonToHttpMethodServlet(String httpMethod, 
+  public static final String createHtmlButtonToHttpMethodServlet(String httpMethod,
    	  String servletAddr, String label,
          Map<String, String> properties) throws UnsupportedEncodingException {
     StringBuilder html = new StringBuilder();
     html.append(HtmlStrUtil.createFormBeginTag(servletAddr, null, httpMethod));
-  
+
     if (properties != null) {
       Set<Map.Entry<String, String>> propSet = properties.entrySet();
       for (Map.Entry<String, String> property : propSet) {
@@ -94,12 +94,12 @@ public class HtmlUtil extends HtmlStrUtil{
           } else {
             urlBuilder.append(HtmlConsts.PARAM_DELIMITER);
           }
-  
+
           String value = property.getValue();
           if (value == null) {
             value = BasicConsts.NULL;
           }
-  
+
           String valueEncoded;
           try {
             valueEncoded = URLEncoder.encode(value, HtmlConsts.UTF8_ENCODE);
@@ -115,7 +115,7 @@ public class HtmlUtil extends HtmlStrUtil{
 
   /**
    * Helper function that creates an html button with the following parameters
-   * 
+   *
    * @param servletAddr
    *          http action
    * @param label
@@ -124,18 +124,18 @@ public class HtmlUtil extends HtmlStrUtil{
    *          key/value pairs to be encoded as hidden input types to be used as
    *          parameters
    * @return html to generate specified button
-   * 
+   *
    * @throws UnsupportedEncodingException
    */
   public static final String createHtmlButtonToGetServlet(String servletAddr, String label,
       Map<String, String> properties) throws UnsupportedEncodingException {
-   return createHtmlButtonToHttpMethodServlet(HtmlConsts.GET, 
+   return createHtmlButtonToHttpMethodServlet(HtmlConsts.GET,
    		  servletAddr, label, properties);
   }
 
   public static final String createHtmlButtonToPostServlet(String servletAddr, String label,
          Map<String, String> properties) throws UnsupportedEncodingException {
-   	return createHtmlButtonToHttpMethodServlet(HtmlConsts.POST, 
+   	return createHtmlButtonToHttpMethodServlet(HtmlConsts.POST,
    			  servletAddr, label, properties);
   }
 

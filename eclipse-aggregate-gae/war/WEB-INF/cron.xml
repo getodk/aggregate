@@ -1,3 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--  To set up validation in Eclipse, add appengine-java-sdk/docs/cron.xsd to 
+      XML Catalog with a schema location of http://localhost/cron.xsd -->
 <cronentries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="crons.xsd"/>
+         xsi:noNamespaceSchemaLocation="http://localhost/cron.xsd"/>

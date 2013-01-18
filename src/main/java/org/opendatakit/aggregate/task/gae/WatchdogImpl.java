@@ -49,6 +49,7 @@ import org.springframework.beans.factory.InitializingBean;
  * 
  */
 public class WatchdogImpl implements Watchdog, InitializingBean {
+
   Datastore datastore = null;
   UserService userService = null;
   UploadSubmissions uploadSubmissions = null;
@@ -237,7 +238,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
       b.countdownMillis(delayMilliseconds);
     }
     b.param(ServletConsts.CHECK_INTERVAL_PARAM, Long.toString(WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS));
-    b.enqueue();
+    b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
   }
 
   public WatchdogImpl() {

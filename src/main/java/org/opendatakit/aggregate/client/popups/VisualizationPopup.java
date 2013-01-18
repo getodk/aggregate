@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.form.KmlSettings;
-import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.table.BinaryPopupClickHandler;
@@ -44,20 +43,21 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.maps.client.InfoWindow;
-import com.google.gwt.maps.client.InfoWindowContent;
+import com.google.gwt.maps.client.HasMap;
+import com.google.gwt.maps.client.MapOptions;
+import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.Maps;
-import com.google.gwt.maps.client.control.LargeMapControl;
-import com.google.gwt.maps.client.event.MarkerClickHandler;
-import com.google.gwt.maps.client.event.MarkerMouseOutHandler;
-import com.google.gwt.maps.client.event.MarkerMouseOverHandler;
-import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.base.InfoWindow;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.event.Event;
+import com.google.gwt.maps.client.event.HasMouseEvent;
+import com.google.gwt.maps.client.event.MouseEventCallback;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
@@ -113,8 +113,6 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private static final String VIZ_TYPE_TOOLTIP = "Type of Visualization";
   private static final String VIZ_TYPE_BALLOON = "Choose whether you would like a pie chart, bar graph, or map.";
 
-  private static boolean mapsApiLoaded = false;
-
   private final ArrayList<Column> headers;
   private final ArrayList<SubmissionUI> submissions;
 
@@ -135,7 +133,8 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private RadioButton tallyOccurRadio;
   private RadioButton sumColumnsRadio;
   private Label sumRadioTxt;
-  
+  private InfoWindow infoWindow = null;
+
   // track whether the map marker was clicked or not.
   private boolean mapMarkerClicked;
 
@@ -162,16 +161,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     dataList.addChangeHandler(new ColumnChangeHandler());
     geoPoints = new KmlSettingListBox(GEOPOINT_TOOLTIP, GEOPOINT_BALLOON);
 
-    // test if the Maps API has ever been loaded. Use a class variable
-    // to load it just once (ideally -- this may be run multiple times 
-    // if the browser/network is slow and the user cancels out).
-    if ( !mapsApiLoaded ) {
-      Maps.loadMapsApi(Preferences.getGoogleMapsApiKey(), "2", false, new Runnable() {
-        public void run() {
-          mapsApiLoaded = true;
-        }
-      });
-    }
+    // The Maps API is always loaded.
 
     chartApiLoaded = false;
     VisualizationUtils.loadVisualizationApi(new Runnable() {
@@ -350,7 +340,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   /**
    * Create pie chart
-   * 
+   *
    * @return
    */
   private PieChart createPieChart() {
@@ -364,7 +354,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   /**
    * Create bar chart
-   * 
+   *
    * @return
    */
   private BarChart createBarChart() {
@@ -394,7 +384,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     try {
       Double lat = Double.parseDouble(values.get(latIndex));
       Double lon = Double.parseDouble(values.get(lonIndex));
-      gpsPoint = LatLng.newInstance(lat, lon);
+      gpsPoint = new LatLng(lat, lon);
     } catch (Exception e) {
       // just set the gps point to null, no need to figure out problem
       gpsPoint = null;
@@ -423,7 +413,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     }
 
     // create a center point, stop at the first gps point found
-    LatLng center = LatLng.newInstance(0.0, 0.0);
+    LatLng center = new LatLng(0.0, 0.0);
     for (SubmissionUI sub : submissions) {
       LatLng gpsPoint = getLatLonFromSubmission(latIndex, lonIndex, sub);
       if (gpsPoint != null) {
@@ -433,49 +423,73 @@ public final class VisualizationPopup extends AbstractPopupBase {
     }
 
     // create mapping area
-    final MapWidget map = new MapWidget(center, 6);
-    map.setSize("100%", "100%");
-    map.addControl(new LargeMapControl());
+    final MapOptions options = new MapOptions();
+    options.setCenter(center);
+    MapTypeId id = new MapTypeId();
+    options.setMapTypeId(id.getRoadmap());
+    options.setZoom(6);
+    options.setMapTypeControl(true);
+    options.setNavigationControl(true);
+    options.setScaleControl(true);
+    final MapWidget mapWidget = new MapWidget(options);
+    mapWidget.setSize("100%", "100%");
+
+    final HasMap map = mapWidget.getMap();
 
     // create the markers
     for (SubmissionUI sub : submissions) {
       LatLng gpsPoint = getLatLonFromSubmission(latIndex, lonIndex, sub);
       if (gpsPoint != null) {
-        Marker marker = new Marker(gpsPoint);
-        map.addOverlay(marker);
+        final Marker marker = new Marker();
+        marker.setPosition(gpsPoint);
+        marker.setMap(map);
 
         // marker needs to be added to the map before calling
         // InfoWindow.open(marker, ...)
         final SubmissionUI tmpSub = sub;
-        marker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
+        Event.addListener(marker, "mouseover", new MouseEventCallback() {
+
           @Override
-          public void onMouseOver(MarkerMouseOverEvent event) {
-            InfoWindow info = map.getInfoWindow();
-            info.open(event.getSender(), new InfoWindowContent(createInfoWindowWidget(tmpSub)));
-          }
-        });
-        marker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
+          public void callback(HasMouseEvent event) {
+            if ( infoWindow != null ) {
+              infoWindow.close();
+            }
+            infoWindow = new InfoWindow();
+            InfoContentSubmission w = createInfoWindowWidget(tmpSub);
+            HTMLPanel container = new HTMLPanel("<div></div>");
+            container.add(w);
+            infoWindow.setContent(container.getElement().getInnerHTML());
+            infoWindow.open(map, marker);
+          }});
+
+        Event.addListener(marker, "mouseout", new MouseEventCallback() {
+
           @Override
-          public void onMouseOut(MarkerMouseOutEvent event) {
+          public void callback(HasMouseEvent event) {
             if ( !mapMarkerClicked ) {
-              InfoWindow info = map.getInfoWindow();
-              info.close();
+              if ( infoWindow != null ) {
+                infoWindow.close();
+                infoWindow = null;
+              }
             }
             mapMarkerClicked = false;
-          }
-        });
-        marker.addMarkerClickHandler(new MarkerClickHandler() {
+          }});
+
+        Event.addListener(marker, "click", new MouseEventCallback() {
+
           @Override
-          public void onClick(MarkerClickEvent event) {
+          public void callback(HasMouseEvent event) {
             mapMarkerClicked = true;
           }
+
         });
       }
     }
-    return map;
+    return mapWidget;
   }
 
   public class InfoContentSubmission extends FlexTable {
+
     public InfoContentSubmission(ArrayList<Column> tableHeaders, SubmissionUI row) {
 
       addStyleName("infoTable");
@@ -512,7 +526,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
             setWidget(headerIndex, 1, repeat);
           }
           break;
-        default: 
+        default:
           {
             Label val = new Label(value);
             setWidget(headerIndex, 1, val);
@@ -523,7 +537,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     }
   }
 
-  private Widget createInfoWindowWidget(SubmissionUI submission) {
+  private InfoContentSubmission createInfoWindowWidget(SubmissionUI submission) {
     return new InfoContentSubmission(headers, submission);
   }
 
@@ -533,7 +547,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     public void onClick(ClickEvent event) {
 
       // verify modules are loaded
-      if (!mapsApiLoaded || !chartApiLoaded) {
+      if (!chartApiLoaded) {
         Window.alert("Modules are not loaded yet, please try again!");
         return;
       }
