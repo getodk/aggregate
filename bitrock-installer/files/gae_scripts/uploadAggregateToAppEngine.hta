@@ -38,6 +38,7 @@ var fso = new ActiveXObject("Scripting.FileSystemObject");
 var shell = new ActiveXObject("WScript.Shell");
 var cmd = null;
 var logfileName = null;
+var scratchfileName = null;
 var logfileStream = null;
 var terminalGood = '---END-SCRIPT-SUCCESS--- ';
 var terminalBad = '---END-SCRIPT-FAILURE--- ';
@@ -76,11 +77,15 @@ function clearScriptingFiles() {
 	if ( fso.FileExists(cd + "\\action.cmd") ) {
 		fso.DeleteFile(cd + "\\action.cmd");
 	}
+	if ( fso.FileExists(cd + "\\scratch.log") ) {
+		fso.DeleteFile(cd + "\\scratch.log");
+	}
 }
 
 function writeScriptingFiles(action) {
 	var cd=fso.GetAbsolutePathName(".");
 	window.logfileName = cd + '\\output.log';
+	window.scratchfileName = cd + '\\scratch.log';
     var file;
 	// create file holding the password (ugh)
 	file=fso.CreateTextFile(cd + "\\userpass.txt",true);
@@ -114,8 +119,9 @@ function writeScriptingFiles(action) {
 	file.WriteLine('echo ---END-SCRIPT-FAILURE--- >> "' + window.logfileName + '"');
 	file.WriteLine('goto fail');
 	file.WriteLine(':outcome0');
-	file.WriteLine('find /C "Unable to update" "' + window.logfileName + '" >nul');
-	file.WriteLine('if NOT ERRORLEVEL 0 goto outcome1');
+	file.WriteLine('findstr /M "/C:Unable to update" "' + window.logfileName + '" > "' + window.scratchfileName + '"');
+	file.WriteLine('set /p matches= < "' + window.scratchfileName + '"');
+	file.WriteLine('if "a%matches%"=="a' + window.logfileName + '" goto outcome1');
 	file.WriteLine('echo ---END-SCRIPT-SUCCESS--- >> "' + window.logfileName + '"');
 	file.WriteLine('exit 0');
 	file.WriteLine(':fail');
@@ -214,6 +220,7 @@ function continueWaitingForCompletion() {
 	var output = preElement.innerHTML;
 	output = output + newOutput;
 	logContainsError = logContainsError + newOutput.indexOf('rror:',0) + 1;
+	logContainsError = logContainsError + newOutput.indexOf('Unable to update app',0) + 1;
 	preElement.innerHTML = output;
 	// adjust scrolling to show last line of output...
 	var sh = preElement.scrollHeight;
