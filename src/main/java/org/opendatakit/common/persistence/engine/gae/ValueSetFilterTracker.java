@@ -60,9 +60,9 @@ final class ValueSetFilterTracker extends Tracker {
         }
         dvSet.add(d);
       }
-      q.addFilter(attribute.getName(), FilterOperator.IN, dvSet);
+      q.addFilter( attribute.getName(), FilterOperator.IN, dvSet);
     } else {
-      q.addFilter(attribute.getName(), FilterOperator.IN, valueSet);
+      q.addFilter( attribute.getName(), FilterOperator.IN, valueSet);
     }
   }
 }

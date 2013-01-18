@@ -17,6 +17,8 @@
 package org.opendatakit.aggregate.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -107,6 +109,17 @@ public class FormServiceImpl extends RemoteServiceServlet implements
           summary.setMostRecentPurgeSubmissionsRequestStatus(t);
         }
       }
+      Collections.sort(formSummaries, new Comparator<FormSummary>(){
+
+        @Override
+        public int compare(FormSummary arg0, FormSummary arg1) {
+          int cmp;
+          cmp = arg0.getTitle().compareTo(arg1.getTitle());
+          if ( cmp != 0 ) return cmp;
+          cmp = arg0.getId().compareTo(arg1.getId());
+          return cmp;
+        }});
+
       return formSummaries;
 
     } catch (ODKOverQuotaException e) {
@@ -144,7 +157,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
           if (linkText == null || linkText.length() == 0) {
             linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
           }
-          String url = HtmlUtil.createHref(info.downloadUrl, linkText);
+          String url = HtmlUtil.createHref(info.downloadUrl, linkText, false);
           summary.setResultFile(url);
         }
         exports.add(summary);
@@ -312,7 +325,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       throw new DatastoreFailureException();
     }
   }
-  
+
   @Override
   public Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -363,7 +376,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
       // Apply rendering constraints
       FormElementModel topElement = form.getTopLevelGroupElement();
-      
+
       FormElementModel titleParent = titleField.getParent();
       // ignore semantically meaningless nesting groups
       while ( titleParent.getParent() != null && titleParent.getElementType().equals(ElementType.GROUP) ) {
@@ -374,7 +387,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       while ( gpsParent.getParent() != null && gpsParent.getElementType().equals(ElementType.GROUP) ) {
         gpsParent = gpsParent.getParent();
       }
-      
+
       if (!titleParent.equals(topElement) && !titleParent.equals(gpsParent)) {
         throw new RequestFailureException(LIMITATION_MSG);
       }
@@ -388,7 +401,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         if (!imgParent.equals(topElement) && !imgParent.equals(gpsParent)) {
           throw new RequestFailureException(LIMITATION_MSG);
         }
-      } 
+      }
 
       Map<String, String> params = new HashMap<String, String>();
       params.put(KmlGenerator.TITLE_FIELD, (titleField == null) ? null : titleField

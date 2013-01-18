@@ -44,19 +44,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class UserServiceImpl implements org.opendatakit.common.security.UserService, InitializingBean {
 
 	private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
-	
+
 	// configured by bean definition...
 	Datastore datastore;
 	Realm realm;
 	String superUserEmail;
 	String superUserUsername;
-	String userServiceKey;
-	
+
 	final Map<String, User> activeUsers = new HashMap<String, User>();
-	
+
 	public UserServiceImpl() {
 	}
-	
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if ( realm == null ) {
@@ -71,9 +70,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		if ( !superUserEmail.startsWith(SecurityUtils.MAILTO_COLON) || !superUserEmail.contains(SecurityUtils.AT_SIGN)) {
 			throw new IllegalStateException("superUserEmail is malformed. " +
 					"Must be of the form 'mailto:user@gmail.com' or other supported OpenID provider.");
-		}
-		if ( userServiceKey == null ) {
-			throw new IllegalStateException("userServiceKey must be configured");
 		}
 		Log log = LogFactory.getLog(UserServiceImpl.class);
 		log.info("superUserEmail: " + superUserEmail);
@@ -101,7 +97,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	public String getSuperUserEmail() {
 		return superUserEmail;
 	}
-	
+
 	public void setSuperUserEmail(String superUserEmail) {
 		this.superUserEmail = superUserEmail;
 	}
@@ -113,7 +109,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	public void setSuperUserUsername(String superUserUsername) {
 		this.superUserUsername = superUserUsername;
 	}
-	
+
 	@Override
 	public synchronized boolean isSuperUser(CallingContext cc) throws ODKDatastoreException {
 		MessageDigestPasswordEncoder mde = null;
@@ -126,23 +122,14 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 			mde = null;
 		}
 		List<RegisteredUsersTable> tList = RegisteredUsersTable.assertSuperUsers(this, mde, datastore);
-		
+
 		String uriUser = cc.getCurrentUser().getUriUser();
 		for ( RegisteredUsersTable t : tList ) {
 			if ( t.getUri().equals(uriUser) ) return true;
 		}
 		return false;
 	}
-	
-	@Override
-	public String getUserServiceKey() {
-		return userServiceKey;
-	}
-	
-	public void setUserServiceKey(String userServiceKey) {
-		this.userServiceKey = userServiceKey;
-	}
-	
+
 	@Override
   public String createLoginURL() {
     return "login.html";
@@ -152,7 +139,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   public String createLogoutURL() {
     return "j_spring_security_logout";
   }
-  
+
   @Override
   public Realm getCurrentRealm() {
     return realm;
@@ -163,12 +150,12 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	logger.info("Executing: reloadPermissions");
 	activeUsers.clear();
   }
-  
+
   @Override
   public boolean isAccessManagementConfigured() {
 	  try {
 		  /**
-		   * Any configuration in the GrantedAuthorityHierarchy table indicates that 
+		   * Any configuration in the GrantedAuthorityHierarchy table indicates that
 		   * we have configured access management with at least a default configuration.
 		   */
 	      GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(datastore, getDaemonAccountUser());
@@ -177,7 +164,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 	      return !values.isEmpty();
 	  } catch ( ODKDatastoreException e ) {
 		  e.printStackTrace();
-		  // The persistence layer is having problems.  
+		  // The persistence layer is having problems.
 		  // Allow the 'normal control path' to deal with it.
 		  return true;
 	  }
@@ -198,12 +185,12 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   private synchronized User internalGetUser(String uriUser, Collection<? extends GrantedAuthority> authorities) {
 	User match = activeUsers.get(uriUser);
 	if ( match != null ) {
-		return match; 
+		return match;
 	} else if ( User.ANONYMOUS_USER.equals(uriUser) ) {
 		// ignored passed-in authorities
 		Set<GrantedAuthority> anonGroups = new HashSet<GrantedAuthority>();
 		anonGroups.add(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_ANONYMOUS.name()));
-		match = new UserImpl(User.ANONYMOUS_USER, null, 
+		match = new UserImpl(User.ANONYMOUS_USER, null,
 				User.ANONYMOUS_USER_NICKNAME, anonGroups, datastore );
 		activeUsers.put(uriUser, match);
 		return match;
@@ -231,7 +218,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 		return match;
 	}
   }
-  
+
   @Override
   public User getCurrentUser() {
 	Authentication auth = SecurityContextHolder.getContext().getAuthentication();

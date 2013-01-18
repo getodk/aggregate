@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans:beans xmlns="http://www.springframework.org/schema/security"
-	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 	 http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
 	<beans:import resource="classpath:odk-security-settings.xml"/>
-	
+
 	<!--	The Basic Authentication passwords are sha1-encoded with a salt -->
 	<beans:bean id="basicAuthenticationMessageDigestPasswordEncoder"
 			class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"/>
 
 	<!--	The group and role hierarchy is maintained in the granted authority hierarchy table.  -->
 	<!--	Unauthenticated accesses possess the USER_IS_ANONYMOUS group -->
-	<!--    If the user is registered (present in the registered users table), the user will also --> 
+	<!--    If the user is registered (present in the registered users table), the user will also -->
 	<!--  	possess the USER_IS_REGISTERED group.  -->
 	<!--    An authenticated users will also possess an AUTH_ group defining the mechanism by which -->
 	<!--    they were authenticated.  i.e., either AUTH_OPENID or AUTH_LOCAL -->
 	<!--  -->
 	<!-- 	The granted authority hierarchy table defines the mapping of these groups, and -->
-	<!-- 	other site-specific administrator-defined groups to the roles needed to access --> 
+	<!-- 	other site-specific administrator-defined groups to the roles needed to access -->
 	<!--	web pages on the site. -->
-	
+
 	<beans:bean id="hierarchicalRoleRelationships" class="org.opendatakit.common.security.spring.RoleHierarchyImpl">
 		<beans:property name="datastore" ref="datastore"/>
 		<beans:property name="userService" ref="user_service"/>
 		<beans:property name="passwordEncoder" ref="basicAuthenticationMessageDigestPasswordEncoder"/>
 		<beans:property name="startupAction" ref="startup" />
 	</beans:bean>
-	
+
 	<!--	Configure the access policy to the pages here	-->
 	<!--	You can do things like this: and hasRole('AUTH_LOCAL') -->
-	
+
 <!--	NOTE: for debugging applets, it is useful to allow anonymous access to the pages-->
 <!--	they utilize.  This means that the isFullyAuthenticated() criteria cannot be used-->
 <!--	for those pages.  -->
 	<filter-security-metadata-source id="securityPolicy" use-expressions="true">
         <intercept-url pattern="/_ah/**" access="true" /> <!-- local GAE admin console -->
-        
+
         <intercept-url pattern="/Aggregate.html" access="hasRole('ROLE_USER') or hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
 		<!--  secure the GWT client interfaces -->
@@ -96,14 +96,14 @@
         <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
 		<!--	GAE access is controlled in web.xml -->
-		<intercept-url pattern="/gae/**" access="true" /> 
+		<intercept-url pattern="/gae/**" access="true" />
 		<!--	RemoteAPI access is controlled in web.xml -->
-		<intercept-url pattern="/remote_api" access="true" /> 
-		
+		<intercept-url pattern="/remote_api" access="true" />
+
 		<!-- ODK Tables API -->
 		<intercept-url pattern="/odktables/**" access="true" />
 		<intercept-url pattern="/odktablesui*" access="true" />
-		
+
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />
 	</filter-security-metadata-source>
@@ -121,7 +121,7 @@
 				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,openIdFilter,requestCacheAwareFilter,anonymousFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
 		</filter-chain-map>
 	</beans:bean>
-    
+
     <!-- Secure channel processing -->
 
 	<beans:bean id="channelProcessingFilter" class="org.springframework.security.web.access.channel.ChannelProcessingFilter">
@@ -145,7 +145,7 @@
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
             <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
-	    </filter-invocation-definition-source>                
+	    </filter-invocation-definition-source>
 	  </beans:property>
 	</beans:bean>
 
@@ -166,12 +166,12 @@
 	  	</beans:map>
 	  </beans:property>
 	</beans:bean>
-	
+
 	<beans:bean id="portResolver" class="org.opendatakit.common.security.spring.PortResolverBySchemeImpl">
 		<beans:property name="port" value="${security.server.port}"/>
 		<beans:property name="securePort" value="${security.server.securePort}"/>
 	</beans:bean>
-	
+
 	<beans:bean id="secureChannelProcessor" class="org.springframework.security.web.access.channel.SecureChannelProcessor">
 	  <beans:property name="entryPoint">
 		<beans:bean class="org.opendatakit.common.security.spring.RetryWithDefinedEntryPoint">
@@ -192,7 +192,7 @@
 		</beans:bean>
 	  </beans:property>
 	</beans:bean>
-	    
+
 	<beans:bean id="securityContextPersistenceFilter"
 		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
 		<beans:constructor-arg name="repo" ref="securityContextRepository" />
@@ -226,7 +226,7 @@
 		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" /> -->
 	<beans:bean id="securityContextHolderAwareFilter"
 		class="org.opendatakit.common.security.spring.SecurityContextHolderAwareAuthPreservingRequestFilter" />
-	
+
 	<beans:bean id="sessionManagerFilter"
 		class="org.springframework.security.web.session.SessionManagementFilter">
 		<beans:constructor-arg name="securityContextRepository" ref="securityContextRepository" />
@@ -271,17 +271,21 @@
 
 	<beans:bean id="anonymousFilter"
 		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
-		<beans:property name="key" value="${security.server.siteKey}" />
+		<beans:property name="key">
+		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</beans:property>
 		<beans:property name="userAttribute" value="anonymousUser,USER_IS_ANONYMOUS" />
 	</beans:bean>
-	
+
 	<beans:bean id="anonymousProvider"
 		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
-		<beans:property name="key" value="${security.server.siteKey}" />
+		<beans:property name="key">
+		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</beans:property>
 	</beans:bean>
 
 	<!--			Basic Authentication -->
-	
+
 	<beans:bean id="basicAuthFilter"
 		class="org.opendatakit.common.security.spring.BasicAuthenticationFilter">
 		<beans:property name="authenticationManager">
@@ -341,7 +345,9 @@
 	<beans:bean id="digestEntryPoint"
 		class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
 		<beans:property name="realmName" value="${security.server.realm.realmString}" />
-		<beans:property name="key" value="${security.server.siteKey}" />
+		<beans:property name="key">
+		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</beans:property>
 		<beans:property name="nonceValiditySeconds" value="1800" />
 	</beans:bean>
 
@@ -369,7 +375,7 @@
 	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
 	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
 	<!--		Gmail OpenID authentication mechanism	(copy for Yahoo, others) -->
-	
+
 	<!--	There are additional settings for this to work on GoogleAppEngine. -->
 	<!--    See odk-security-settings.xml -->
 
@@ -395,7 +401,7 @@
 				</beans:property>
 			</beans:bean>
 		</beans:property>
-		
+
 		<beans:property name="consumer">
 			<beans:bean class="org.springframework.security.openid.OpenID4JavaConsumer">
 			    <!-- consumerManager is customized for GAE; standard for Tomcat -->
@@ -466,16 +472,16 @@
 		<beans:property name="credentialType" value="Token"/>
 	</beans:bean>
 
-	<!-- Out-of-band authentication relies on an out-of-band mechanism to obtain 
-		a user's mailto:username@domain.org string (via the oob_user_fetcher). This 
-		is then used to look up the OpenId user configured with that email address. 
-		If successful, that user's credentials are used when accessing the server. 
-		This can be used for portal-fronted access to the server (you still need 
-		to populate the ODK Aggregate registered users table and granted authorities 
-		table with the users and granted privileges for those users). The only provided 
-		implementation is for Google AppEngine's OAuthService-mediated access to 
+	<!-- Out-of-band authentication relies on an out-of-band mechanism to obtain
+		a user's mailto:username@domain.org string (via the oob_user_fetcher). This
+		is then used to look up the OpenId user configured with that email address.
+		If successful, that user's credentials are used when accessing the server.
+		This can be used for portal-fronted access to the server (you still need
+		to populate the ODK Aggregate registered users table and granted authorities
+		table with the users and granted privileges for those users). The only provided
+		implementation is for Google AppEngine's OAuthService-mediated access to
 		AppEngine instances. -->
-		 
+
 	<beans:bean id="oobAuthFilter"
 		class="org.opendatakit.common.security.spring.OutOfBandUserFilter">
 		<beans:property name="outOfBandUserFetcher" ref="oob_user_fetcher" />
@@ -492,7 +498,7 @@
 		<!--	Stub userDetailsService that accepts any authenticated party-->
 		<beans:property name="wrappingUserDetailsService" ref="tokenUserDetailsService"/>
 	</beans:bean>
-  
+
   <!--  OAuth2 support -->
   <!--  OAuth2 support -->
   <!--  OAuth2 support -->
@@ -504,7 +510,7 @@
 		<beans:property name="httpClientFactory" ref="http_client_factory" />
 		<beans:property name="authenticationProvider" ref="oauth2AuthenticationProvider" />
 	</beans:bean>
-	
+
 	<!--	This Oauth2 authentication implementation. It relies upon the Oauth2ResourceFilter -->
 	<!--    to produce an Oauth2AuthenticationToken containing the "mailto:username@foo" (OpenId) -->
 	<!--    identity. This provider then determines whether the user is a registered user, using -->

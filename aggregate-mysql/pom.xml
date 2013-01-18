@@ -110,7 +110,8 @@
 		  <version>${maven.surefire.plugin.version}</version>
 		  <inherited>true</inherited>
 		  <configuration>
-		    <skipTests>true</skipTests>
+			<argLine>${surefire.argLine}</argLine>
+			<skipTests>true</skipTests>
 			<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
 			<excludes>
 			  <exclude>**/integration/**</exclude>

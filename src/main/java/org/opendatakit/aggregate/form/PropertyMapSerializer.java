@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.form;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * Static methods to serialize and deserialize a Map<String,String> to an 

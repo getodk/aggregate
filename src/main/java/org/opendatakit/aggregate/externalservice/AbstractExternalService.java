@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -36,52 +36,53 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public abstract class AbstractExternalService implements ExternalService{
-  
+
   /**
    * Datastore entity holding registration of an external service for a specific
    * form and the cursor position within that form that was last processed by
    * this service.
    */
   protected final FormServiceCursor fsc;
-  
+
   protected final IForm form;
-  
+
   protected final ElementFormatter formatter;
-  
+
   protected final HeaderFormatter headerFormatter;
-  
+
   protected AbstractExternalService(IForm form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc) {
     this.form = form;
     this.formatter = formatter;
     this.headerFormatter = headerFormatter;
     this.fsc = formServiceCursor;
   }
-  
-  
-  protected abstract CommonFieldsBase retrieveObjectEntity(); 
-  
-  protected abstract List<? extends CommonFieldsBase> retrieveRepateElementEntities();
-  
+
+  protected abstract String getOwnership();
+
+  protected abstract CommonFieldsBase retrieveObjectEntity();
+
+  protected abstract List<? extends CommonFieldsBase> retrieveRepeatElementEntities();
+
   protected abstract void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException;
-  
+
   @Override
   public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException {
     for(Submission submission : submissions)  {
       insertData(submission, cc);
     }
   }
-  
+
   @Override
   public void sendSubmission(Submission submission, CallingContext cc) throws ODKExternalServiceException {
-    insertData(submission, cc);    
+    insertData(submission, cc);
   }
-    
+
   @Override
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     fsc.setUploadCompleted(true);
@@ -92,7 +93,7 @@ public abstract class AbstractExternalService implements ExternalService{
     User user = cc.getCurrentUser();
     ds.putEntity(fsc, user);
   }
-  
+
   @Override
   public void abandon(CallingContext cc) throws ODKDatastoreException {
     if (fsc.getOperationalStatus() != OperationalStatus.COMPLETED) {
@@ -100,11 +101,11 @@ public abstract class AbstractExternalService implements ExternalService{
       persist(cc);
     }
   }
-  
+
   @Override
   public void delete(CallingContext cc) throws ODKDatastoreException {
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
-    List<? extends CommonFieldsBase> repeats = retrieveRepateElementEntities();
+    List<? extends CommonFieldsBase> repeats = retrieveRepeatElementEntities();
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -121,41 +122,42 @@ public abstract class AbstractExternalService implements ExternalService{
     ds.deleteEntity(serviceEntity.getEntityKey(), user);
     ds.deleteEntity(fsc.getEntityKey(), user);
   }
-  
+
   @Override
   public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-   
+
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
-    List<? extends CommonFieldsBase> repeats = retrieveRepateElementEntities();
-    
+    List<? extends CommonFieldsBase> repeats = retrieveRepeatElementEntities();
+
     if(repeats != null) {
       ds.putEntities(repeats, user);
     }
     ds.putEntity(serviceEntity, user);
     ds.putEntity(fsc, user);
   }
-  
+
   @Override
   public FormServiceCursor getFormServiceCursor() {
     return fsc;
   }
-  
+
   @Override
   public ExternServSummary transform() {
-    return new ExternServSummary(fsc.getUri(), 
-        fsc.getCreatorUriUser(), 
+    return new ExternServSummary(fsc.getUri(),
+        fsc.getCreatorUriUser(),
         fsc.getOperationalStatus(),
-        fsc.getEstablishmentDateTime(), 
+        fsc.getEstablishmentDateTime(),
         fsc.getExternalServicePublicationOption(),
-        fsc.getUploadCompleted(), 
-        fsc.getLastUploadCursorDate(), 
+        fsc.getUploadCompleted(),
+        fsc.getLastUploadCursorDate(),
         fsc.getLastStreamingCursorDate(),
-        fsc.getExternalServiceType(), 
+        fsc.getExternalServiceType(),
+        getOwnership(),
         getDescriptiveTargetString());
   }
-  
+
   /**
    * @see java.lang.Object#hashCode()
    */
@@ -168,24 +170,24 @@ public abstract class AbstractExternalService implements ExternalService{
       hashCode += fsc.hashCode();
     return hashCode;
   }
-  
+
   /**
    * Helper function for constructors.
-   * 
+   *
    */
   protected static FormServiceCursor createFormServiceCursor(IForm form, CommonFieldsBase entity, ExternalServicePublicationOption externalServiceOption, ExternalServiceType type, CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor formServiceCursor = FormServiceCursor.createFormServiceCursor(form, type, entity, cc);
     formServiceCursor.setExternalServiceOption(externalServiceOption);
-    formServiceCursor.setIsExternalServicePrepared(false); 
+    formServiceCursor.setIsExternalServicePrepared(false);
     formServiceCursor.setOperationalStatus(OperationalStatus.ESTABLISHED);
     formServiceCursor.setEstablishmentDateTime(new Date());
     formServiceCursor.setUploadCompleted(false);
     return formServiceCursor;
   }
-  
+
   /**
    * Helper function for constructors.
-   * 
+   *
    * @param parameterTableRelation
    * @param cc
    * @return
@@ -196,10 +198,10 @@ public abstract class AbstractExternalService implements ExternalService{
     User user = cc.getCurrentUser();
     return ds.createEntityUsingRelation(parameterTableRelation, user);
   }
-  
+
   /**
    * Helper function for constructors.
-   * 
+   *
    * @param parameterTableRelation
    * @param fsc
    * @param cc
@@ -211,5 +213,5 @@ public abstract class AbstractExternalService implements ExternalService{
     User user = cc.getCurrentUser();
     return ds.getEntity(parameterTableRelation, fsc.getAuriService(), user);
   }
-  
+
 }

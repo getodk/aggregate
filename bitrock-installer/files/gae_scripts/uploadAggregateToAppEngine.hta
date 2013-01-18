@@ -1,14 +1,14 @@
 <html>
 <head>
 <title>Upload ODK Aggregate to Google AppEngine</title>
-<HTA:APPLICATION 
-	 ID="uploadApp"
-     APPLICATIONNAME="Upload ODK Aggregate to Google AppEngine"
-     SCROLL="no"
-     SINGLEINSTANCE="yes"
-     WINDOWSTATE="normal"
+<hta:application
+	 id="uploadApp"
+     applicationname="Upload ODK Aggregate to Google AppEngine"
+     scroll="no"
+     singleinstance="yes"
+     windowstate="normal"
 >
-<STYLE>
+<style>
 body {
 	font-family:Verdana;
 	font-size:10pt;
@@ -31,13 +31,14 @@ body {
 #id {
 	font-family:"Courier New";
 }
-</STYLE>
-<SCRIPT LANGUAGE="JavaScript">
+</style>
+<script language="JavaScript">
 <!-- 
 var fso = new ActiveXObject("Scripting.FileSystemObject");
 var shell = new ActiveXObject("WScript.Shell");
 var cmd = null;
 var logfileName = null;
+var scratchfileName = null;
 var logfileStream = null;
 var terminalGood = '---END-SCRIPT-SUCCESS--- ';
 var terminalBad = '---END-SCRIPT-FAILURE--- ';
@@ -76,11 +77,15 @@ function clearScriptingFiles() {
 	if ( fso.FileExists(cd + "\\action.cmd") ) {
 		fso.DeleteFile(cd + "\\action.cmd");
 	}
+	if ( fso.FileExists(cd + "\\scratch.log") ) {
+		fso.DeleteFile(cd + "\\scratch.log");
+	}
 }
 
 function writeScriptingFiles(action) {
 	var cd=fso.GetAbsolutePathName(".");
 	window.logfileName = cd + '\\output.log';
+	window.scratchfileName = cd + '\\scratch.log';
     var file;
 	// create file holding the password (ugh)
 	file=fso.CreateTextFile(cd + "\\userpass.txt",true);
@@ -92,8 +97,35 @@ function writeScriptingFiles(action) {
 	file.Close();
 	// create command file
     file=fso.CreateTextFile(cd + "\\action.cmd",true);
-	file.WriteLine('@(("' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" --email=' + txtName.value + ' --passin ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ---- WEBSITE COMPLETE - BEGIN BACKEND ---- >> "' + window.logfileName +
-    '" && "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" --email=' + txtName.value + ' --passin backends ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ' + terminalGood + '>> "' + window.logfileName + '") || echo ' + terminalBad + '>> "' + window.logfileName + '")');
+	file.WriteLine('echo Looking for java... >> "' + window.logfileName + '"');
+	file.WriteLine('set found=');
+	file.WriteLine('for %%i in (java.exe) do @set found=%%~$PATH:i');
+	file.WriteLine('if NOT "a%found%"=="a" goto foundpath');
+	file.WriteLine('if "a%JAVA_HOME%"=="a" goto nojavahome');
+ 	file.WriteLine('echo Using JAVA_HOME and updating PATH >> "' + window.logfileName + '"');
+ 	file.WriteLine('set PATH=%PATH%;%JAVA_HOME%\\bin');
+ 	file.WriteLine('goto doaction');
+ 	file.WriteLine(':nojavahome');
+ 	file.WriteLine('echo JAVA_HOME is not defined. Please verify that Java is installed. >> "' + window.logfileName + '"');
+ 	file.WriteLine('goto outcome1');
+ 	file.WriteLine(':foundpath');
+ 	file.WriteLine('echo found java in PATH... %found% >> "' + window.logfileName + '"');
+ 	file.WriteLine('goto doaction');
+ 	file.WriteLine(':doaction');
+	file.WriteLine('( "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ---- WEBSITE COMPLETE - BEGIN BACKEND ---- >> "' + window.logfileName +
+    '" && "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin backends ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" )');
+	file.WriteLine('goto outcome%ERRORLEVEL%');
+	file.WriteLine(':outcome1');
+	file.WriteLine('echo ---END-SCRIPT-FAILURE--- >> "' + window.logfileName + '"');
+	file.WriteLine('goto fail');
+	file.WriteLine(':outcome0');
+	file.WriteLine('findstr /M "/C:Unable to update" "' + window.logfileName + '" > "' + window.scratchfileName + '"');
+	file.WriteLine('set /p matches= < "' + window.scratchfileName + '"');
+	file.WriteLine('if "a%matches%"=="a' + window.logfileName + '" goto outcome1');
+	file.WriteLine('echo ---END-SCRIPT-SUCCESS--- >> "' + window.logfileName + '"');
+	file.WriteLine('exit 0');
+	file.WriteLine(':fail');
+	file.WriteLine('ver other >nul');
 	file.Close();
 	// create empty output file
 	file=fso.CreateTextFile(window.logfileName,true);
@@ -188,6 +220,7 @@ function continueWaitingForCompletion() {
 	var output = preElement.innerHTML;
 	output = output + newOutput;
 	logContainsError = logContainsError + newOutput.indexOf('rror:',0) + 1;
+	logContainsError = logContainsError + newOutput.indexOf('Unable to update app',0) + 1;
 	preElement.innerHTML = output;
 	// adjust scrolling to show last line of output...
 	var sh = preElement.scrollHeight;
@@ -220,7 +253,7 @@ function continueExec() {
 	continueWaitingForCompletion();
 }
 -->
-</SCRIPT>
+</script>
 </head>
 <body>
 <div id="hideable">
@@ -241,7 +274,7 @@ function continueExec() {
 <div id="output">
 </div>
 </div>
-<div align="RIGHT">
+<div align="right">
 <table id="buttonTable" cellspacing="20pt" cellpadding="0pt" width="50%"><tr>
 <td width="50%" id="leftButton"><input type="button" value="Upload" onclick="upload()" /></td>
 <td width="50%" id="rightButton"><input type="button" value="Cancel" onclick="window.close()" /></td></tr>

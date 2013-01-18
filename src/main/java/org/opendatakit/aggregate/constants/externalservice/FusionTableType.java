@@ -23,10 +23,10 @@ package org.opendatakit.aggregate.constants.externalservice;
  * 
  */
 public enum FusionTableType {
-  DATE("datetime"),
-  GPS("location"),
-  NUMBER("number"),
-  STRING("string");
+  DATE("DATETIME"),
+  GPS("LOCATION"),
+  NUMBER("NUMBER"),
+  STRING("STRING");
  
   private String fusionType;
  

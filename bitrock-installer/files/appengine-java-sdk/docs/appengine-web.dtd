@@ -1,21 +1,42 @@
-<!ELEMENT appengine-web-app (application, version?, static-files?, resource-files?,
-                             system-properties?, env-variables?, ssl-enabled?,
-                             sessions-enabled?, async-session-persistence?,
-                             user-permissions?, public-root?,
-                             inbound-services?, precompilation-enabled?,
-                             admin-console?, static-error-handlers?,
-                             warmup-requests-enabled?, threadsafe?, servers?,
-                             code-lock?)>
+<!ELEMENT appengine-web-app (application, version?, source-language?, server?,
+                             instance-class?, automatic-scaling?,
+                             manual-scaling?, basic-scaling?, static-files?,
+                             resource-files?, system-properties?,
+                             env-variables?, ssl-enabled?, sessions-enabled?,
+                             async-session-persistence?, user-permissions?,
+                             public-root?, inbound-services?,
+                             precompilation-enabled?, admin-console?,
+                             static-error-handlers?, warmup-requests-enabled?,
+                             threadsafe?, servers?, code-lock?, pagespeed?,
+                             class-loader-config?)>
 <!ATTLIST appengine-web-app
           xmlns CDATA #REQUIRED>
 <!ELEMENT application (#PCDATA)>
 <!ELEMENT version (#PCDATA)>
+<!ELEMENT source-language (#PCDATA)>
+<!ELEMENT server (#PCDATA)>
+<!ELEMENT instance-class (#PCDATA)>
+<!ELEMENT automatic-scaling (min-pending-latency?, max-pending-latency?,
+                              min-idle-instances?, max-idle-instances?)>
+<!ELEMENT min-pending-latency (#PCDATA)>
+<!ELEMENT max-pending-latency (#PCDATA)>
+<!ELEMENT min-idle-instances (#PCDATA)>
+<!ELEMENT max-idle-instances (#PCDATA)>
+<!ELEMENT manual-scaling (instances)>
+<!ELEMENT instances (#PCDATA)>
+<!ELEMENT basic-scaling (max-instances, idle-timeout?)>
+<!ELEMENT max-instances (#PCDATA)>
+<!ELEMENT idle-timeout (#PCDATA)>
 <!ELEMENT static-files (include|exclude)*>
-<!ELEMENT include (#PCDATA)>
+<!ELEMENT include (http-header)*>
 <!ATTLIST include
           path CDATA #REQUIRED
           expiration CDATA #OPTIONAL>
-<!ELEMENT exclude (#PCDATA)>
+<!ELEMENT http-header (#PCDATA)>
+<!ATTLIST http-header
+          name CDATA #REQUIRED
+          value CDATA #REQUIRED>
+<!ELEMENT exclude EMPTY>
 <!ATTLIST exclude
           path CDATA #REQUIRED>
 <!ELEMENT resource-files (include|exclude)*>
@@ -74,8 +95,17 @@
 <!ELEMENT worker (instances|memory|resident|access|threads)*>
 <!ATTLIST worker
           name CDATA #REQUIRED>
-<!ELEMENT instances (#PCDATA)>
 <!ELEMENT memory (#PCDATA)>
 <!ELEMENT resident (#PCDATA)>
 <!ELEMENT access (#PCDATA)>
 <!ELEMENT threads (#PCDATA)>
+<!ELEMENT pagespeed (url-blacklist|domain-to-rewrite|enabled-rewriter|disabled-rewriter)*>
+<!ELEMENT url-blacklist (#PCDATA)>
+<!ELEMENT domain-to-rewrite (#PCDATA)>
+<!ELEMENT enabled-rewriter (#PCDATA)>
+<!ELEMENT disabled-rewriter (#PCDATA)>
+<!ELEMENT class-loader-config (priority-specifier)*>
+<!ELEMENT priority-specifier (EMPTY)*>
+<!ATTLIST priority-specifier
+          filename CDATA #REQUIRED
+          priority CDATA #OPTIONAL>

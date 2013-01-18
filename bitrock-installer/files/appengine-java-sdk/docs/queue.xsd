@@ -37,6 +37,7 @@
   <xs:complexType name="acl-Type">
     <xs:sequence>
       <xs:element type="xs:string" name="user-email" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element type="xs:string" name="writer-email" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 

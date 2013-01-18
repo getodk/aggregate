@@ -24,17 +24,15 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
- * These actions require the ROLE_USER privilege, which is the least capable 
- * privilege (granted to all authorized users of the system).  
- * 
+ * These actions require the ROLE_USER privilege, which is the least capable
+ * privilege (granted to all authorized users of the system).
+ *
  * @author wbrunette@gmail.com
  *
  */
 @RemoteServiceRelativePath("preferenceservice")
 public interface PreferenceService extends RemoteService {
   PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-  
-  void setGoogleMapsKey(String key) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-  
+
   void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }

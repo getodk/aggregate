@@ -47,34 +47,34 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Common worker implementation for restarting stalled tasks.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WatchdogWorkerImpl {
 
   private Log logger = LogFactory.getLog(WatchdogWorkerImpl.class);
-  
+
   private static class SubmissionMetadata {
     public final String uri;
     public final Date markedAsCompleteDate;
-    
+
     SubmissionMetadata( String uri, Date markedAsCompleteDate ) {
       this.uri = uri;
       this.markedAsCompleteDate = markedAsCompleteDate;
     }
   }
-  
+
   // accessed only by getLastSubmissionMetadata
   private Map<String, SubmissionMetadata> formSubmissionsMap =
       new HashMap<String, SubmissionMetadata>();
-  
+
   /**
-   * Determine and return the metadata for the last submission against this 
+   * Determine and return the metadata for the last submission against this
    * form.  That metadata consists of the marked-as-complete date and uri
    * of the submission.  Used to determine whether to launch an upload task.
-   * 
+   *
    * @param form
    * @param cc
    * @return
@@ -82,45 +82,45 @@ public class WatchdogWorkerImpl {
    */
   private synchronized SubmissionMetadata getLastSubmissionMetadata( IForm form, CallingContext cc )
       throws ODKDatastoreException {
-    
+
     // use cached value -- prevents excessive queries against the form tables
     // during Watchdog verification of streaming publishers.
     SubmissionMetadata metadata = formSubmissionsMap.get(form.getUri());
     if ( metadata != null ) return metadata;
-    
+
     // compute the upper limit for data we want to process
     // limitDate is the datastore's settle time into the past.
     Date limitDate = new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS);
     QueryResumePoint qrp = new QueryResumePoint(
         TopLevelDynamicBase.FIELD_NAME_MARKED_AS_COMPLETE_DATE,
                           WebUtils.iso8601Date(limitDate), null, false);
-    
+
     FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
     filterGroup.setCursor(qrp.transform());
     filterGroup.setQueryFetchLimit(1);
-    
+
     // query for the most recent submission that was marked-as-complete for this form
     QueryByUIFilterGroup query =
-        new QueryByUIFilterGroup(form, filterGroup, 
+        new QueryByUIFilterGroup(form, filterGroup,
               CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-    
+
     List<Submission> submissions = query.getResultSubmissions(cc);
     if (submissions != null && submissions.size() >= 1) {
       Submission lastSubmission = submissions.get(0);
-      metadata = new SubmissionMetadata( lastSubmission.getKey().getKey(), 
+      metadata = new SubmissionMetadata( lastSubmission.getKey().getKey(),
                                       lastSubmission.getMarkedAsCompleteDate());
       formSubmissionsMap.put(form.getUri(), metadata);
       return metadata;
     }
     return null;
   }
-  
+
   public void checkTasks(long checkIntervalMilliseconds, CallingContext cc)
       throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException,
       ODKIncompleteSubmissionData {
     BackendActionsTable.updateWatchdogStart(cc);
     formSubmissionsMap.clear();
-    
+
     logger.info("Beginning Watchdog");
 
     UploadSubmissions uploadSubmissions = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
@@ -148,10 +148,14 @@ public class WatchdogWorkerImpl {
         olderThanDate, cc);
     boolean activeTasks = false;
     for (FormServiceCursor fsc : fscList) {
-      if (!fsc.isExternalServicePrepared())
+      if (!fsc.isExternalServicePrepared()) {
+        // TODO: should handle resume-initiate somehow?
         continue;
-      if (fsc.getOperationalStatus() != OperationalStatus.ACTIVE)
+      }
+      if (fsc.getOperationalStatus() != OperationalStatus.ACTIVE) {
+        // TODO: should handle resume-initiate somehow?
         continue;
+      }
 
       switch (fsc.getExternalServicePublicationOption()) {
       case UPLOAD_ONLY:
@@ -195,7 +199,7 @@ public class WatchdogWorkerImpl {
    * yet been published.  Use a cache of SubmissionMetadata to minimize queries
    * against the database in the case where there are many publishers for a given
    * table.
-   * 
+   *
    * @param fsc
    * @param uploadSubmissions
    * @param cc
@@ -216,12 +220,12 @@ public class WatchdogWorkerImpl {
           + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
       return false;
     }
-    
+
     SubmissionMetadata metadata = getLastSubmissionMetadata(form, cc);
-    
+
     // determine whether we should make this publisher active
     boolean makeActive = false;
-    if ( metadata != null && 
+    if ( metadata != null &&
          metadata.markedAsCompleteDate.compareTo(fsc.getEstablishmentDateTime()) >= 0 ) {
       // submissions have occurred after the establishment time
       Date limit = fsc.getLastStreamingCursorDate();
@@ -244,7 +248,7 @@ public class WatchdogWorkerImpl {
         }
       }
     }
-    
+
     if ( makeActive ) {
       // there is work to do
       uploadSubmissions.createFormUploadTask(fsc, cc);

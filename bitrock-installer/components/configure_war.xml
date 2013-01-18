@@ -14,7 +14,6 @@
 	<!-- as follows:
 			files/conf - configuration extracted from maven build tree.
 			files/mf - fake Manifest.mf directory structure
-			files/generate_uuid - GenerateUUID class for printing UUIDs to stdout
 			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
 			files/ODKAggregate.war - war file minus site-specific settings.
 			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
@@ -218,22 +217,6 @@
 	<explanation>Set security properties</explanation>
             <progressText>Setting up security properties</progressText>
             <actionList>
-                <actionGroup>
-                    <explanation>Setting security keys</explanation>
-                    <progressText>Setting security keys</progressText>
-                    <actionList>
-                        <propertiesFileSet>
-                            <file>${temp_dir}/conf/common/security.properties</file>
-                            <key>security.server.siteKey</key>
-                            <value>${security_server_siteKey}</value>
-                        </propertiesFileSet>
-                        <propertiesFileSet>
-                            <file>${temp_dir}/conf/common/security.properties</file>
-                            <key>security.server.userServiceKey</key>
-                            <value>${security_server_userServiceKey}</value>
-                        </propertiesFileSet>
-                    </actionList>
-                </actionGroup>
                 <actionGroup>
 	<!-- Sets the Authentication properties
                          secureChannelType, deviceAuthentication, and

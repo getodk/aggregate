@@ -1,6 +1,102 @@
 Release Notes for the Google App Engine ORM, a DataNucleus plugin that provides
 access to the Google App Engine Datastore via JDO and JPA.
 
+VERSION 2.1.1
+
+- Entity relationship, owned or unowned, is always dependent
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=290
+
+- Allow use of simple SCO wrappers for non-relation fields
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=291
+
+- Support full range of input value conversions for use in queries
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=292
+
+- If using "NATIVE"/"AUTO" value strategy for identity, doesn't put id back on managed object at persist
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=293
+
+- Enable use of int/Integer for PK fields
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=294
+
+- BigDecimal fields are restored from database as float value
+http://code.google.com/p/googleappengine/issues/detail?id=1748
+
+- Null checks on persist of unowned List relations
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=299
+
+
+VERSION 2.1.0
+
+- JDO Keys-only query counts toward Datastore Read instead of Datastore Small.
+http://code.google.com/p/googleappengine/issues/detail?id=7712
+
+- Expose rpc stats per txn and per PersistenceManager/EntityManager
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=133
+
+- Support embedded Collections
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=258
+
+- Migrate to DataNucleus 3.1
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=276
+
+- DatastorePersistenceHandler has unsafe threading behaviour on DevServer resulting in infinite
+  loops in HashMap.get()
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=279
+
+- Fetch groups ignored when querying via JDOQL
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=280
+
+- 1-N relation to abstract class using subclass-table inheritance causes exception
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=283
+
+- Provide persistence property that sets default mode to "unowned"
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=284
+
+- Support inheritance in elements in embedded Collections
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=285
+
+- http://code.google.com/p/datanucleus-appengine/issues/detail?id=284
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=286
+
+
+VERSION 2.0.1
+-  Support JDOQL/JPQL "unsupported native operations" via DataNucleus in-memory evaluator
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=45
+
+- Support JPQL Creator expression, and JDOQL new expression
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=177
+
+- Support JPA SUBSTRING function in SELECT clause
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=181
+
+- pm.getObjectsById(objectIds) doesn't perform batch get
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=197
+
+- Support aggregate queries with result class
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=256
+
+- Support fields of arrays of persistable types
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=263
+
+- Support for persisting Map fields
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=264
+
+- Support DN3.x TypeConverter interface and JPA2.1 AttributeConverter
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=265
+
+- Support JDO3.2/JPA2.1 multitenancy
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=267
+
+- Fetch Groups not being applied for 1:M relationships when using JDOQL Query API
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=268
+
+- Unowned list throws exception when both parent and children are detached (JDO)
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=269
+
+- Fetch groups ignored when querying via JDOQL
+http://code.google.com/p/datanucleus-appengine/issues/detail?id=280
+
+
 VERSION 2.0.0
 
 - Reenable compiled query cache

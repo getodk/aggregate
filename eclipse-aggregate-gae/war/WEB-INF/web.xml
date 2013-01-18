@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	version="2.5"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
-	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd 
-	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
-	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.0.xsd">
- 
+<?xml version="1.0" encoding="utf-8" standalone="no"?><web-app
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+version="2.5"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.0.xsd">
+
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:odk-settings.xml,/WEB-INF/applicationContext-security.xml</param-value>
@@ -21,6 +18,7 @@
 
 	<security-constraint>
         <web-resource-collection>
+            <web-resource-name>TaskQueue Interfaces</web-resource-name>
             <url-pattern>/gae/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
@@ -30,9 +28,10 @@
 
    	<security-constraint>
         <web-resource-collection>
+            <web-resource-name>RemoteControl Interfaces</web-resource-name>
             <url-pattern>/remote_api</url-pattern>
         </web-resource-collection>
-        <auth-constraint>
+   	    <auth-constraint>
             <role-name>admin</role-name>
         </auth-constraint>
     </security-constraint>
@@ -41,7 +40,7 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
-	<filter>
+    <filter>
 		<filter-name>serverSpringSecurityFilterChain</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	</filter>
@@ -62,7 +61,7 @@
     <url-pattern>/aggregateui/filterservice</url-pattern>
   </servlet-mapping>
 
- 
+
   <servlet>
     <servlet-name>formAdminServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.FormAdminServiceImpl</servlet-class>
@@ -73,7 +72,7 @@
     <url-pattern>/aggregateui/formadminservice</url-pattern>
   </servlet-mapping>
 
- 
+
   <servlet>
     <servlet-name>formServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.FormServiceImpl</servlet-class>
@@ -84,7 +83,7 @@
     <url-pattern>/aggregateui/formservice</url-pattern>
   </servlet-mapping>
 
- 
+
   <servlet>
     <servlet-name>preferenceServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.PreferenceServiceImpl</servlet-class>
@@ -105,7 +104,7 @@
     <url-pattern>/aggregateui/odktablesadmin</url-pattern>
   </servlet-mapping>
 
- 
+
   <servlet>
     <servlet-name>securityAdminServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.common.security.server.SecurityAdminServiceImpl</servlet-class>
@@ -116,7 +115,7 @@
     <url-pattern>/aggregateui/securityadminservice</url-pattern>
   </servlet-mapping>
 
- 
+
   <servlet>
     <servlet-name>securityServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.common.security.server.SecurityServiceImpl</servlet-class>
@@ -127,7 +126,7 @@
     <url-pattern>/aggregateui/securityservice</url-pattern>
   </servlet-mapping>
 
- 
+
   <servlet>
     <servlet-name>servicesAdminServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.ServicesAdminServiceImpl</servlet-class>
@@ -138,7 +137,7 @@
     <url-pattern>/aggregateui/servicesadminservice</url-pattern>
   </servlet-mapping>
 
- 
+
   <servlet>
     <servlet-name>submissionServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.SubmissionServiceImpl</servlet-class>
@@ -149,15 +148,6 @@
     <url-pattern>/aggregateui/submissionservice</url-pattern>
   </servlet-mapping>
 
-
-	<servlet>
-		<servlet-name>oauthCallback</servlet-name>
-		<servlet-class>org.opendatakit.aggregate.servlet.OAuthServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>oauthCallback</servlet-name>
-		<url-pattern>/auth/auth</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>aggregate-html</servlet-name>
@@ -184,6 +174,15 @@
     <servlet-mapping>
         <servlet-name>manage-passwords</servlet-name>
         <url-pattern>/ssl/user-manage-passwords</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>manage-oauth2-service-account</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.ServiceAccountPrivateKeyUploadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>manage-oauth2-service-account</servlet-name>
+        <url-pattern>/ssl/oauth2-service-account</url-pattern>
     </servlet-mapping>
 
 	<servlet>
@@ -216,7 +215,7 @@
 		<servlet-name>formXml</servlet-name>
 		<url-pattern>/formXml</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet-mapping>
 		<servlet-name>formXml</servlet-name>
 		<url-pattern>/www/formXml</url-pattern>
@@ -340,7 +339,7 @@
 		<servlet-name>JsonFileGeneratorTask</servlet-name>
 		<url-pattern>/gae/jsonFileGeneratorTask</url-pattern>
 	</servlet-mapping>
-	
+
 	<servlet>
 		<servlet-name>uploadSubmissionsTask</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet</servlet-class>
@@ -367,7 +366,7 @@
         <servlet-name>purgeOlderSubmissionsTask</servlet-name>
         <url-pattern>/gae/purgeOlderSubmissionsTask</url-pattern>
     </servlet-mapping>
-	
+
 	<servlet>
 		<servlet-name>watchdog</servlet-name>
 		<servlet-class>org.opendatakit.aggregate.task.gae.servlet.WatchdogServlet</servlet-class>
@@ -418,17 +417,16 @@
         <servlet-name>ODKTables</servlet-name>
         <url-pattern>/odktables/*</url-pattern>
     </servlet-mapping>
-    
+
     <servlet>
     	<servlet-name>RemoteApi</servlet-name>
 	    <servlet-class>com.google.apphosting.utils.remoteapi.RemoteApiServlet</servlet-class>
 	</servlet>
-	
+
 	<servlet-mapping>
 	    <servlet-name>RemoteApi</servlet-name>
 	    <url-pattern>/remote_api</url-pattern>
 	</servlet-mapping>
-    
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
@@ -437,4 +435,5 @@
 	<session-config>
 		<session-timeout>30</session-timeout>
 	</session-config>
+
 </web-app>

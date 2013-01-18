@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -21,10 +21,10 @@ package org.opendatakit.common.web.constants;
 /**
  * Static HTML utility functions used to generate proper HTML for ODK Aggregate
  * visual outputs
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class HtmlStrUtil {
 
@@ -64,8 +64,9 @@ public class HtmlStrUtil {
     return createBeginTag(htmlTag) + text + createEndTag(htmlTag);
   }
 
-  public static final String createHref(String url, String displayText) {
+  public static final String createHref(String url, String displayText, boolean inNewWindow) {
     return HtmlConsts.BEGIN_OPEN_TAG + A + BasicConsts.SPACE + createAttribute(HREF, url)
+        + (inNewWindow ? "target=\"_blank\"" : "")
         + HtmlConsts.END_TAG + displayText + createEndTag(A);
   }
 
@@ -86,12 +87,12 @@ public class HtmlStrUtil {
     }
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_SIZE, Integer.toString(size)));
-    
+
     if ( extras != null) {
     	html.append(BasicConsts.SPACE);
     	html.append(extras);
     }
-    
+
     if ( isChecked ) {
     	html.append(BasicConsts.SPACE);
     	html.append(ATTR_CHECKED);
@@ -107,16 +108,16 @@ public class HtmlStrUtil {
   public static final String createInput(String type, String name, String value) {
 	  return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT, null);
   }
-  
+
   public static final String createNonSavingPasswordInput(String name) {
-	  return createInput(HtmlConsts.INPUT_TYPE_PASSWORD, name, "", 
+	  return createInput(HtmlConsts.INPUT_TYPE_PASSWORD, name, "",
 			  				false, INPUT_WIDGET_SIZE_LIMIT, "autocomplete=\"off\"");
   }
-  
+
   public static final String createInput(String type, String name, String value, boolean checked) {
     return createInput(type, name, value, checked, INPUT_WIDGET_SIZE_LIMIT, null);
   }
-  
+
   public static final String createFormBeginTag(String action, String encodingType, String method) {
     StringBuilder html = new StringBuilder();
     html.append(HtmlConsts.BEGIN_OPEN_TAG + HtmlConsts.FORM);

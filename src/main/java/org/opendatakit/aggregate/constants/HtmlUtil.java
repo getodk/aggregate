@@ -20,7 +20,7 @@ package org.opendatakit.aggregate.constants;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -54,7 +54,7 @@ public final class HtmlUtil extends org.opendatakit.common.utils.HtmlUtil {
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_NAME, ServletConsts.FORM_DEF_PRAM));
     html.append(BasicConsts.SPACE);
-    html.append(createAttribute(ATTR_VALUE, StringEscapeUtils.escapeHtml(formXml)));
+    html.append(createAttribute(ATTR_VALUE, StringEscapeUtils.escapeHtml4(formXml)));
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_SRC, xmlFileName));
     html.append(BasicConsts.SPACE);

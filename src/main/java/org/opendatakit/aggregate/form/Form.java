@@ -48,10 +48,10 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Implementation of the IForm interface.
- * Form objects can be shared across multiple threads.  
- * 
+ * Form objects can be shared across multiple threads.
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 class Form implements IForm {
 
@@ -82,7 +82,7 @@ class Form implements IForm {
   Form(FormInfoTable infoRow, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    
+
     this.infoRow = infoRow;
     String topLevelAuri = infoRow.getUri();
 
@@ -114,7 +114,7 @@ class Form implements IForm {
         filesetRow.getUri(), cc);
 
     formDefinition = FormDefinition.getFormDefinition(infoRow.getStringField(FormInfoTable.FORM_ID), cc);
-    
+
     repeatElementMap = new HashMap<String, FormElementModel>();
 	if ( formDefinition != null ) {
 		populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
@@ -186,7 +186,7 @@ class Form implements IForm {
 
   /**
    * Deletes the Form including FormElements and Remote Services
-   * 
+   *
    * @param ds
    *          Datastore
    * @throws ODKDatastoreException
@@ -212,7 +212,7 @@ class Form implements IForm {
 
   /**
    * Get the datastore key that uniquely identifies the form entity
-   * 
+   *
    * @return datastore key
    */
   public EntityKey getEntityKey() {
@@ -246,7 +246,7 @@ class Form implements IForm {
     }
     return b.toString();
   }
-  
+
   @Override
   public String getXFormFileHash(CallingContext cc) throws ODKDatastoreException {
     return xform.getContentHash(1, cc);
@@ -258,7 +258,7 @@ class Form implements IForm {
 
   /**
    * Get the ODK identifier that identifies the form
-   * 
+   *
    * @return odk identifier
    */
   public String getFormId() {
@@ -275,7 +275,7 @@ class Form implements IForm {
 
   /**
    * Get the name that is viewable on ODK Aggregate
-   * 
+   *
    * @return viewable name
    */
   public String getViewableName() {
@@ -283,16 +283,16 @@ class Form implements IForm {
   }
 
   public void setViewableName(String title) {
-    if ( filesetRow.setStringField(FormInfoFilesetTable.FORM_NAME, title) ) {
+    if ( !filesetRow.setStringField(FormInfoFilesetTable.FORM_NAME, title) ) {
       String str = "Overflow on " + FormInfoFilesetTable.FORM_NAME;
       throw new IllegalStateException(str);
     }
   }
-  
+
   public String getViewableFormNameSuitableAsFileName() {
     String name = getViewableName();
     // any non-alphanumeric is replaced with underscore
-    return name.replaceAll("[^\\p{L}0-9]", "_"); 
+    return name.replaceAll("[^\\p{L}0-9]", "_");
   }
 
   public XFormParameters getRootElementDefn() {
@@ -311,7 +311,7 @@ class Form implements IForm {
 
   /**
    * Get the date the form was created
-   * 
+   *
    * @return creation date
    */
   public Date getCreationDate() {
@@ -320,7 +320,7 @@ class Form implements IForm {
 
   /**
    * Get the last date the form was updated
-   * 
+   *
    * @return last date form was updated
    */
   public Date getLastUpdateDate() {
@@ -329,7 +329,7 @@ class Form implements IForm {
 
   /**
    * Get the user who uploaded/created the form
-   * 
+   *
    * @return user name
    */
   public String getCreationUser() {
@@ -342,7 +342,7 @@ class Form implements IForm {
 
   /**
    * Get the file name to be used when generating the XML file describing from
-   * 
+   *
    * @return xml file name
    */
   public String getFormFilename(CallingContext cc) throws ODKDatastoreException {
@@ -356,7 +356,7 @@ class Form implements IForm {
 
   /**
    * Get the original XML that specified the form
-   * 
+   *
    * @return get XML definition of XForm
    */
   public String getFormXml(CallingContext cc) throws ODKDatastoreException {
@@ -379,7 +379,7 @@ class Form implements IForm {
 
   /**
    * Gets whether the form is encrypted
-   * 
+   *
    * @return true if form is encrypted, false otherwise
    */
   public Boolean isEncryptedForm() {
@@ -388,7 +388,7 @@ class Form implements IForm {
 
   /**
    * Gets whether the form can be downloaded
-   * 
+   *
    * @return true if form can be downloaded, false otherwise
    */
   public Boolean getDownloadEnabled() {
@@ -397,10 +397,10 @@ class Form implements IForm {
 
   /**
    * Sets a boolean value of whether the form can be downloaded
-   * 
+   *
    * @param downloadEnabled
    *          set to true if form can be downloaded, false otherwise
-   * 
+   *
    */
   public void setDownloadEnabled(Boolean downloadEnabled) {
     filesetRow.setBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED, downloadEnabled);
@@ -408,7 +408,7 @@ class Form implements IForm {
 
   /**
    * Gets whether a new submission can be received
-   * 
+   *
    * @return true if a new submission can be received, false otherwise
    */
   public Boolean getSubmissionEnabled() {
@@ -423,10 +423,10 @@ class Form implements IForm {
 
   /**
    * Sets a boolean value of whether a new submission can be received
-   * 
+   *
    * @param submissionEnabled
    *          set to true if a new submission can be received, false otherwise
-   * 
+   *
    */
   public void setSubmissionEnabled(Boolean submissionEnabled) {
     formDefinition.setIsSubmissionAllowed(submissionEnabled);
@@ -447,7 +447,7 @@ class Form implements IForm {
   /**
    * Relies on getElementName() to determine the match of the FormElementModel.
    * Does a depth-first traversal of the list.
-   * 
+   *
    * @param name
    * @return the found element or null if not found.
    */
@@ -533,7 +533,7 @@ class Form implements IForm {
     xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
 
     String viewableURL = HtmlUtil.createHrefWithProperties(
-        cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, getViewableName());
+        cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, getViewableName(), false);
     int mediaFileCount = getManifestFileset().getAttachmentCount(cc);
     return new FormSummary(getViewableName(), getFormId(), getCreationDate(), getCreationUser(),
         downloadable, submit, viewableURL, mediaFileCount);
@@ -541,7 +541,7 @@ class Form implements IForm {
 
   /**
    * Prints the data element definitions to the print stream specified
-   * 
+   *
    * @param out
    *          Print stream to send the output to
    */
@@ -552,7 +552,7 @@ class Form implements IForm {
   /**
    * Recursive helper function that prints the data elements definitions to the
    * print stream specified
-   * 
+   *
    * @param node
    *          node to be processed
    * @param out
@@ -617,7 +617,7 @@ class Form implements IForm {
       throw new IllegalStateException("Non-existent or multiple form XML files associated with: " + getFormId());
     }
   }
-  
+
   public BlobSubmissionOutcome setFormXml( String formFilename, String xmlForm, Long modelVersion, CallingContext cc ) throws ODKDatastoreException {
     byte[] bytes;
     try {
@@ -657,7 +657,7 @@ class Form implements IForm {
    * Media files are assumed to be in a directory one level deeper than the xml
    * definition. So the filename reported on the mime item has an extra leading
    * directory. Strip that off.
-   * 
+   *
    * @param item
    * @param overwriteOK
    * @param cc
@@ -670,7 +670,7 @@ class Form implements IForm {
       filePath = filePath.substring(filePath.indexOf("/") + 1);
     }
     byte[] byteArray = item.getStream().toByteArray();
-    BlobSubmissionOutcome outcome = 
+    BlobSubmissionOutcome outcome =
         manifest.setValueFromByteArray(byteArray, item.getContentType(), filePath, overwriteOK, cc);
     return (outcome == BlobSubmissionOutcome.NEW_FILE_VERSION);
   }
