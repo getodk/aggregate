@@ -878,52 +878,57 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     }
 
     // OK. We have the parent table.
-    // The children array is ordered by ordinal number,
-    // so we just need to get that, and update the entries
-    // in the last half of the array.
-    String phantomURI = generatePhantomKey(fdmSubmissionUri);
-    int desiredOriginalTableColCount = (nCol / 2);
-
-    // First, try to find a split point (idxStart) that
-    // is halfway through the table.
-    List<FormDataModel> children = parentTable.getChildren();
-    int eligibleCount = 0;
-    int skipCleaveCount = 0;
+    //
+    // The children array is ordered by ordinal number.
+    // Find the longest contiguous span to cleave off
+    // or partially cleave off.
+    //
+    // This improves the split outcomes for forms with
+    // many multiple choice elements, repeat groups or
+    // media attachments.
     int idxStart;
+    List<FormDataModel> children = parentTable.getChildren();
+    // spanCount tracks, for a given key=firstIndexOfSpan,
+    // the count of contiguous values.
+    Map<Integer,Integer> spanCount = new HashMap<Integer,Integer>();
+    int firstIndexOfSpan = 0;
     for (idxStart = 0; idxStart < children.size(); ++idxStart) {
       FormDataModel m = children.get(idxStart);
       if (!tbl.equals(m.getBackingObjectPrototype())) {
+        // the contiguous span is broken...
+        firstIndexOfSpan =  idxStart+1; // the next element...
         continue;
       }
       int elements = recursivelyCountChildrenInSameTable(m);
-      if ( elements != 0 ) {
-        eligibleCount++;
+      if ( elements == 0 ) {
+        // the contiguous span is broken...
+        firstIndexOfSpan =  idxStart+1; // the next element...
+      } else {
+        Integer v = spanCount.get(firstIndexOfSpan);
+        if ( v == null ) {
+          spanCount.put(firstIndexOfSpan, 1);
+        } else {
+          spanCount.put(firstIndexOfSpan, v + elements);
+        }
       }
-      skipCleaveCount += elements;
-      if (skipCleaveCount >= desiredOriginalTableColCount)
-        break;
+    }
+    // find the longest span
+    int maxSpanCount = 0;
+    idxStart = -1;
+    for ( Map.Entry<Integer,Integer> spanEntry : spanCount.entrySet()) {
+      if ( spanEntry.getValue() > maxSpanCount ) {
+        idxStart = spanEntry.getKey();
+        maxSpanCount = spanEntry.getValue();
+      }
     }
 
-    // if we didn't find an even split, split at half the eligible parts...
-    if ( idxStart >= children.size()) {
-      if ( eligibleCount == 0 ) {
-        log.error("Unable to find any eligible records to move to phantom table " + tbl.getTableName());
-        throw new IllegalStateException("Unable to find any eligible records to move to phantom table!");
-      }
-      log.info("Failed to find equitable split for phantom table; splitting at half the eligible parts " + tbl.getTableName());
-      eligibleCount = (eligibleCount / 2) + 1;
-      for ( idxStart = children.size()-1 ; idxStart >= 0 ; --idxStart ) {
-        FormDataModel m = children.get(idxStart);
-        if (!tbl.equals(m.getBackingObjectPrototype())) {
-          continue;
-        }
-        int elements = recursivelyCountChildrenInSameTable(m);
-        if ( elements != 0 ) {
-          --eligibleCount;
-        }
-        if ( eligibleCount <= 0 ) break;
-      }
-    }
+    // now move up to half the desired original table columns of
+    // this span into the phantom table.  Typically, we will just
+    // move all of this span into the phantom table because of
+    // question groups, multiple choice or media questions breaking
+    // up the continuity before the 50% mark.
+    String phantomURI = generatePhantomKey(fdmSubmissionUri);
+    int desiredOriginalTableColCount = (nCol / 2);
 
     if ( idxStart == -1 ) {
       log.error("Failed to split at half the eligible records to move to phantom table " + tbl.getTableName());
@@ -953,11 +958,22 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       long ordinalNumber = 0L;
       int records = 0;
       for (; idxStart < children.size(); ++idxStart) {
+        if ( records >= desiredOriginalTableColCount ) {
+          // we have moved the desired number of columns to
+          // the new table -- stop!
+          break;
+        }
         FormDataModel m = children.get(idxStart);
         if (!tbl.equals(m.getBackingObjectPrototype())) {
           // we need to stop because this item is
           // already moved out elsewhere and
           // phantom tables are always contiguous...
+          break;
+        }
+        int elements = recursivelyCountChildrenInSameTable(m);
+        if ( elements == 0 ) {
+          // stop also if this element is already
+          // elsewhere.
           break;
         }
         m.setParentUriFormDataModel(phantomURI);
@@ -972,6 +988,13 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       }
       log.info("Created phantom for " + tbl.getTableName() + " beginning at " +
           Long.toString(startingOrdinal) + " with a total of " + records + " cleaved");
+
+      if ( log.isDebugEnabled() ) {
+        log.debug("Dump after phantom-split of form list");
+        for ( FormDataModel m : fdmList ) {
+          m.print(System.err);
+        }
+      }
     }
   }
 
