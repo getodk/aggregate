@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -44,10 +44,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
@@ -188,7 +188,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         List<?> columns;
         columns = db.query(b.toString(), showDef);
         dam.recordQueryUsage("SHOW COLUMNS", columns.size());
-        
+
         for (Object o : columns) {
           ShowDefinition sd = (ShowDefinition) o;
           defs.put(sd.getColumnName(), sd);
@@ -332,7 +332,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       throw new IllegalStateException("Unexpected data type");
     }
   }
-  
+
   void recordQueryUsage(CommonFieldsBase relation, int recCount) {
     dam.recordQueryUsage(relation, recCount);
   }
@@ -425,6 +425,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   @Override
   public void assertRelation(CommonFieldsBase relation, User user) throws ODKDatastoreException {
     try {
+      LogFactory.getLog(DatastoreImpl.class).info("before updateRelation: " + relation.getTableName());
       // see if relation already is defined and update it with dimensions...
       if (updateRelation(relation)) {
         // it exists -- we're done!
@@ -544,12 +545,15 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         }
         b.append(K_CLOSE_PAREN);
 
+        LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + b.toString());
         getJdbcConnection().execute(b.toString());
+        LogFactory.getLog(DatastoreImpl.class).info("create table success (before updateRelation): " + relation.getTableName());
 
         // and update the relation with actual dimensions...
         updateRelation(relation);
       }
     } catch (Exception e) {
+      LogFactory.getLog(DatastoreImpl.class).warn("Failure: " + relation.getTableName() + " exception: " + e.toString());
       throw new ODKDatastoreException(e);
     }
   }
@@ -575,8 +579,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     } catch (BadSqlGrammarException e) {
       dam.recordQueryUsage("SHOW CREATE TABLE", 0);
       // we expect this if the table does not exist...
+      LogFactory.getLog(DatastoreImpl.class).info(tableName + " does not exist!");
       return false;
     }
+    LogFactory.getLog(DatastoreImpl.class).info(tableName + " exists!");
     return true;
   }
 
@@ -597,15 +603,16 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           "Executing " + b.toString() + " by user " + user.getUriUser());
       getJdbcConnection().execute(b.toString());
     } catch (Exception e) {
+      LogFactory.getLog(DatastoreImpl.class).warn(relation.getTableName() + " exception: " + e.toString());
       throw new ODKDatastoreException(e);
     }
   }
 
   /***************************************************************************
    * Entity manipulation APIs
-   * 
+   *
    */
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public <T extends CommonFieldsBase> T createEntityUsingRelation(T relation, User user) {
