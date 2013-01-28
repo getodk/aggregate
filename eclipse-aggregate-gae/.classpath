@@ -79,7 +79,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-web-3.1.3.odk-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/stax-1.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/stax-api-1.0-2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xalan-2.7.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xalan-2.7.0.jar" sourcepath="C:/Users/Administrator/.m2/repository/xalan/xalan/2.7.0/xalan-2.7.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xercesImpl-2.11.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xmlsec-1.4.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xml-apis-1.4.01.jar"/>
