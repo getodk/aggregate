@@ -21,23 +21,24 @@ import java.io.Serializable;
 /**
  * Enum of all the available external services. Provides UI and type mapping
  * information
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public enum ExternalServiceType implements Serializable {
   GOOGLE_SPREADSHEET("Google Spreadsheet"),
   JSON_SERVER("JSON Server"),
-  OHMAGE_JSON_SERVER("Ohmage JSON Server"), 
-  GOOGLE_FUSIONTABLES( "Google FusionTables");
+  OHMAGE_JSON_SERVER("Ohmage JSON Server"),
+  GOOGLE_FUSIONTABLES( "Google FusionTables"),
+  REDCAP_SERVER("REDCap Server");
 
   private String serviceName;
 
   private ExternalServiceType() {
     // GWT
   }
-  
+
   private ExternalServiceType(String name) {
     serviceName = name;
   }
@@ -48,5 +49,5 @@ public enum ExternalServiceType implements Serializable {
   public String toString() {
     return serviceName;
   }
-  
+
 }

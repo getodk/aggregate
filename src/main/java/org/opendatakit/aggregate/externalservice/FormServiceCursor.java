@@ -357,6 +357,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
          return new GoogleSpreadsheet(fsc, form, cc);
        case OHMAGE_JSON_SERVER:
          return new OhmageJsonServer(fsc, form, cc);
+       case REDCAP_SERVER:
+         return new REDCapServer(fsc, form, cc);
        default:
          return null;
        }

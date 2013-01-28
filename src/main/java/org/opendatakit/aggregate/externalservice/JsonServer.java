@@ -19,26 +19,20 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.opendatakit.aggregate.constants.BeanDefs;
+import org.apache.http.entity.mime.FormBodyPart;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.StringBody;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
-import org.opendatakit.aggregate.constants.externalservice.JsonServerType;
-import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
@@ -50,12 +44,9 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.utils.HttpClientFactory;
+import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 /**
  *
@@ -68,38 +59,38 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   /**
    * Datastore entity specific to this type of external service
    */
-  private final JsonServerParameterTable objectEntity;
+  private final JsonServer2ParameterTable objectEntity;
 
-  private JsonServer(JsonServerParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
+  private JsonServer(JsonServer2ParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
     super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false), new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
 
-  private JsonServer(JsonServerParameterTable entity, IForm form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException {
+  private JsonServer(JsonServer2ParameterTable entity, IForm form, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException {
     this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.JSON_SERVER, cc), form, cc);
+    objectEntity.setOwnerEmail(ownerEmail);
   }
 
   public JsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKDatastoreException {
-    this(retrieveEntity(JsonServerParameterTable.assertRelation(cc), formServiceCursor, cc), formServiceCursor, form, cc);
+    this(retrieveEntity(JsonServer2ParameterTable.assertRelation(cc), formServiceCursor, cc), formServiceCursor, form, cc);
   }
 
-  public JsonServer(IForm form,  String serverURL, ExternalServicePublicationOption externalServiceOption, CallingContext cc)
+  public JsonServer(IForm form,  String authKey, String serverURL, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
-    this(newEntity(JsonServerParameterTable.assertRelation(cc), cc), form, externalServiceOption, cc);
-
-    // set stuff to ready for now
-    fsc.setIsExternalServicePrepared(true);
-    fsc.setOperationalStatus(OperationalStatus.ACTIVE);
-
-    // createForm();
+    this(newEntity(JsonServer2ParameterTable.assertRelation(cc), cc), form, externalServiceOption, ownerEmail, cc);
 
     objectEntity.setServerUrl(serverURL);
+    objectEntity.setAuthKey(authKey);
     persist(cc);
   }
 
   @Override
   public void initiate(CallingContext cc) throws ODKExternalServiceException,
       ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
+    // set stuff to ready for now
+    fsc.setIsExternalServicePrepared(true);
+    fsc.setOperationalStatus(OperationalStatus.ACTIVE);
+    persist(cc);
   }
 
   @Override
@@ -108,30 +99,22 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
   @Override
   protected String getOwnership() {
-    return "";
+    return objectEntity.getOwnerEmail().substring(EmailParser.K_MAILTO.length());
   }
 
   public String getServerUrl() {
     return objectEntity.getServerUrl();
   }
 
-  private void sendRequest(String uriString, byte[] postBody, CallingContext cc)
+  public String getAuthKey() {
+    return objectEntity.getAuthKey();
+  }
+
+  private void sendRequest(String url, HttpEntity postBody, CallingContext cc)
       throws ODKExternalServiceException {
     try {
-      // TODO: change so not hard coded
-      URI uri = new URI(uriString);
 
-      System.out.println(uri.toString());
-      HttpParams httpParams = new BasicHttpParams();
-      HttpConnectionParams.setConnectionTimeout(httpParams, JsonServerConsts.CONNECTION_TIMEOUT);
-      HttpConnectionParams.setSoTimeout(httpParams, JsonServerConsts.CONNECTION_TIMEOUT);
-
-      HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
-      HttpClient client = factory.createHttpClient(httpParams);
-      HttpPost post = new HttpPost(uri);
-      post.setEntity(new ByteArrayEntity(postBody));
-
-      HttpResponse resp = client.execute(post);
+      HttpResponse resp = super.sendHttpRequest(POST, url, postBody, null, cc);
       WebUtils.readResponse(resp);
 
       int statusCode = resp.getStatusLine().getStatusCode();
@@ -147,86 +130,6 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);// wrap...
     }
-  }
-
-  private void createForm(CallingContext cc) throws ODKExternalServiceException {
-    System.out.println("BEGINNING INSERTION");
-
-    JsonArray def = new JsonArray();
-
-    JsonObject jsonFormBase = new JsonObject();
-    jsonFormBase.addProperty("ODKID", form.getFormId());
-    def.add(jsonFormBase);
-
-    // TODO: Waylon -- I need to understand this to recommend an alternative
-    // mechanism...
-    List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(),
-        null);
-    List<ElementType> types = headerFormatter.getHeaderTypes();
-    for (int i = 0; i < headers.size(); ++i) {
-      String name = headers.get(i);
-      ElementType type = types.get(i);
-      JsonObject element = new JsonObject();
-      JsonServerType jt = JsonServerConsts.typeMap.get(type);
-      if (jt == JsonServerType.CONTENT_TYPE) {
-        // TODO: need to handle the case where element is
-        // a binary -- we don't know whether it is really
-        // a picture or not, but should we claim it to be?
-        element.addProperty("TYPE", "picture");
-      } else {
-        element.addProperty("TYPE", jt.getJsonServerTypeValue());
-      }
-      element.addProperty("LABEL", name);
-      def.add(element);
-    }
-
-    String postBody = def.toString();
-    System.out.println(postBody);
-
-    sendRequest("http://floresta.rhizalabs.com/cbi/upload/createDataset", postBody.getBytes(), cc);
-  }
-
-  @Override
-  public void sendSubmission(Submission submission, CallingContext cc)
-      throws ODKExternalServiceException {
-    // TODO: think of more appropriate method
-    List<Submission> list = new ArrayList<Submission>();
-    list.add(submission);
-    sendSubmissions(list, cc);
-  }
-
-  @Override
-  public void sendSubmissions(List<Submission> submissions, CallingContext cc)
-      throws ODKExternalServiceException {
-    try {
-
-      ByteArrayOutputStream baStream = new ByteArrayOutputStream();
-      PrintWriter pWriter = new PrintWriter(baStream);
-
-      System.out.println("Sending JSON Submissions");
-
-      JsonFormatterWithFilters formatter = new JsonFormatterWithFilters(pWriter, form, null, true, null);
-      formatter.processSubmissions(submissions, cc);
-
-      pWriter.flush();
-
-      // TODO: PROBLEM - NOT good for only one response code check at the end
-      this.sendRequest(getServerUrl(), baStream.toByteArray(), cc);
-    } catch (ODKExternalServiceCredentialsException e) {
-      fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
-      try {
-        persist(cc);
-      } catch ( Exception e1) {
-        e1.printStackTrace();
-        throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
-      }
-      throw e; // don't wrap
-    } catch (ODKExternalServiceException e) {
-      throw e; // don't wrap
-    } catch (Exception e) {
-      throw new ODKExternalServiceException(e);
-    }
-
   }
 
   /**
@@ -246,12 +149,52 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   @Override
   protected void insertData(Submission submission, CallingContext cc)
       throws ODKExternalServiceException {
-    sendSubmission(submission, cc);
+    try {
+
+      ByteArrayOutputStream baStream = new ByteArrayOutputStream();
+      PrintWriter pWriter = new PrintWriter(baStream);
+
+      System.out.println("Sending one JSON Submission");
+
+      JsonFormatterWithFilters formatter = new JsonFormatterWithFilters(pWriter, form, null, true, null);
+      formatter.processSubmissions(Collections.singletonList(submission), cc);
+
+      pWriter.flush();
+
+      MultipartEntity postentity = new MultipartEntity(HttpMultipartMode.STRICT, null, utf8);
+      FormBodyPart fb;
+      fb = new FormBodyPart("token", new StringBody(getAuthKey(), utf8));
+      postentity.addPart(fb);
+      fb = new FormBodyPart("content", new StringBody("record", utf8));
+      postentity.addPart(fb);
+      fb = new FormBodyPart("format", new StringBody("json", utf8));
+      postentity.addPart(fb);
+      fb = new FormBodyPart("data", new StringBody(baStream.toString(UTF_8), utf8));
+
+      this.sendRequest(getServerUrl(), postentity, cc);
+    } catch (ODKExternalServiceCredentialsException e) {
+      fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
+      try {
+        persist(cc);
+      } catch ( Exception e1) {
+        e1.printStackTrace();
+        throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
+      }
+      throw e; // don't wrap
+    } catch (ODKExternalServiceException e) {
+      throw e; // don't wrap
+    } catch (Exception e) {
+      throw new ODKExternalServiceException(e);
+    }
   }
 
   @Override
   public String getDescriptiveTargetString() {
-    return getServerUrl();
+    String auth = getAuthKey();
+    if ( auth != null && auth.length() != 0 ) {
+      auth = " token: " + auth.substring(0,4) + "...";
+    }
+     return getServerUrl() + auth;
   }
 
   protected CommonFieldsBase retrieveObjectEntity() {

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.externalservice.OhmageJsonTypes;
 import org.opendatakit.aggregate.format.Row;
@@ -35,17 +36,17 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * TODO: comment
- * 
+ *
  * @author the.dylan.price@gmail.com
  */
 public class OhmageJsonElementFormatter implements ElementFormatter {
 
 	private List<OhmageJsonTypes.Response> responses;
-	private Map<UUID, byte[]> photos;
+	private Map<UUID, ByteArrayBody> photos;
 
 	public OhmageJsonElementFormatter() {
 		this.responses = new ArrayList<OhmageJsonTypes.Response>();
-		this.photos = new HashMap<UUID, byte[]>();
+		this.photos = new HashMap<UUID, ByteArrayBody>();
 	}
 
 	@Override
@@ -69,7 +70,8 @@ public class OhmageJsonElementFormatter implements ElementFormatter {
 				OhmageJsonTypes.photo photo = new OhmageJsonTypes.photo(
 						element.getElementName(), photoUUID);
 				responses.add(photo);
-				photos.put(photoUUID, imageBlob);
+				photos.put(photoUUID,
+	new ByteArrayBody(imageBlob, blobSubmission.getContentType(1, cc), photoUUID.toString()));
 			}
 		}
 	}
@@ -174,7 +176,7 @@ public class OhmageJsonElementFormatter implements ElementFormatter {
 	/**
 	 * @return the photos
 	 */
-	public Map<UUID, byte[]> getPhotos() {
+	public Map<UUID, ByteArrayBody> getPhotos() {
 		return photos;
 	}
 
