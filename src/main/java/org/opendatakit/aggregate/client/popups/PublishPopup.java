@@ -32,15 +32,18 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 
 public final class PublishPopup extends AbstractPopupBase {
 
+  private static final String EMPTY_STRING = "";
+  private static final String HTTP_LOCALHOST = "http://localhost";
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
   private static final String TOOLTIP_TXT = "Publish the data";
-  private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables "
-      + "or Google Spreadsheets.";
+  private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables, "
+      + " Google Spreadsheets, a REDCap server, or a server accepting JSON content.";
 
   private static final String ES_SERVICEOPTIONS_TOOLTIP = "Method data should be published";
   private static final String ES_SERVICEOPTIONS_BALLOON = "Choose whether you would like only old data, only new data, or all data to be published.";
@@ -53,16 +56,30 @@ public final class PublishPopup extends AbstractPopupBase {
   private final FlexTable topBar;
   // to hold the options
   private final FlexTable optionsBar;
+
   // to hold the google spreadsheet only options
   private final FlexTable gsBar;
+  private final TextBox gsName;
+
+  // to hold the jsonServer only options
+  private final FlexTable jsBar;
+  private final TextBox jsAuthKey;
+  private final TextBox jsUrl;
+
+  // to hold the jsonServer only options
+  private final FlexTable ohmageBar;
+  private final TextBox ohmageCampaignUrn;
+  private final TextBox ohmageCampaignTimestamp;
+  private final TextBox ohmageUsername;
+  private final TextBox ohmageHashedPassword;
+  private final TextBox ohmageUrl;
+
+  // to hold the redcap only options
+  private final FlexTable rcBar;
+  private final TextBox rcApiKey;
+  private final TextBox rcUrl;
+
   private final String formId;
-  private final TextBox name;
-  // this is the default text in the blankNameText when it is not form id
-  private final String blankNameText;
-  // this will hold the last entered tablename
-  private String enteredName;
-  // saves whether or not anything has been input by the user in the name box
-  private boolean didInput;
 
   private final EnumListBox<ExternalServiceType> serviceType;
   private final EnumListBox<ExternalServicePublicationOption> esOptions;
@@ -71,18 +88,14 @@ public final class PublishPopup extends AbstractPopupBase {
     super();
 
     this.formId = formId;
-    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
-    deleteButton.addClickHandler(new CreateExernalServiceHandler());
-
-    name = new TextBox();
-    enteredName = formId;
-    blankNameText = "";
-    name.setText(blankNameText);
-    didInput = false;
+    AggregateButton publishButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    publishButton.addClickHandler(new CreateExernalServiceHandler());
 
     ExternalServiceType[] valuesToShow = { ExternalServiceType.GOOGLE_FUSIONTABLES,
-        ExternalServiceType.GOOGLE_SPREADSHEET };
-    // ExternalServiceType.OHMAGE_JSON_SERVER };
+        ExternalServiceType.GOOGLE_SPREADSHEET,
+        ExternalServiceType.REDCAP_SERVER,
+        ExternalServiceType.JSON_SERVER,
+        ExternalServiceType.OHMAGE_JSON_SERVER };
     serviceType = new EnumListBox<ExternalServiceType>(valuesToShow, ES_TYPE_TOOLTIP,
         ES_TYPE_BALLOON);
     serviceType.addChangeHandler(new ExternalServiceTypeChangeHandler());
@@ -100,7 +113,7 @@ public final class PublishPopup extends AbstractPopupBase {
     topBar.setWidget(0, 1, new HTML(formId));
     topBar.setWidget(0, 2, new HTML("<h2>Publish to: </h2>"));
     topBar.setWidget(0, 3, serviceType);
-    topBar.setWidget(0, 4, deleteButton);
+    topBar.setWidget(0, 4, publishButton);
     topBar.setWidget(0, 5, new ClosePopupButton(this));
 
     optionsBar = new FlexTable();
@@ -111,12 +124,89 @@ public final class PublishPopup extends AbstractPopupBase {
     // this is only for google spreadsheets
     gsBar = new FlexTable();
     gsBar.addStyleName("stretch_header");
-    gsBar.setWidget(1, 0, new HTML("<h3>Workbook Name (Spreadsheet Only):</h3>"));
+    gsBar.setWidget(1, 0, new HTML("<h3>Workbook Name:</h3>"));
     // make the name textbox an appropriate size
-    name.setVisibleLength(35);
-    gsBar.setWidget(1, 1, name);
+    gsName = new TextBox();
+    gsName.setText(EMPTY_STRING);
+    gsName.setVisibleLength(35);
+    gsBar.setWidget(1, 1, gsName);
 
-    optionsBar.setWidget(2, 0, gsBar);
+    // this is only for simple json server
+    jsBar = new FlexTable();
+    jsBar.addStyleName("stretch_header");
+    jsBar.setWidget(1, 0, new HTML("<h3>Url to publish to:</h3>"));
+    // make the name textbox an appropriate size
+    jsUrl = new TextBox();
+    jsUrl.setText(HTTP_LOCALHOST);
+    jsUrl.setVisibleLength(60);
+    jsBar.setWidget(1, 1, jsUrl);
+    jsBar.setWidget(2, 0, new HTML("<h3>Authorization token:</h3>"));
+    // make the name textbox an appropriate size
+    jsAuthKey = new TextBox();
+    jsAuthKey.setText(EMPTY_STRING);
+    jsAuthKey.setVisibleLength(45);
+    jsBar.setWidget(2, 1, jsAuthKey);
+
+    // this is only for simple json server
+    ohmageBar = new FlexTable();
+    ohmageBar.addStyleName("stretch_header");
+    ohmageBar.setWidget(1, 0, new HTML("<h3>Url to publish to:</h3>"));
+    // make the name textbox an appropriate size
+    ohmageUrl = new TextBox();
+    ohmageUrl.setText(HTTP_LOCALHOST);
+    ohmageUrl.setVisibleLength(60);
+    ohmageBar.setWidget(1, 1, ohmageUrl);
+    ohmageBar.setWidget(2, 0, new HTML("<h3>Campaign URN:</h3>"));
+    // make the name textbox an appropriate size
+    ohmageCampaignUrn = new TextBox();
+    ohmageCampaignUrn.setText(EMPTY_STRING);
+    ohmageCampaignUrn.setVisibleLength(60);
+    ohmageBar.setWidget(2, 1, ohmageCampaignUrn);
+    ohmageBar.setWidget(3, 0, new HTML("<h3>Campaign Creation Timestamp:</h3>"));
+    // make the name textbox an appropriate size
+    ohmageCampaignTimestamp = new TextBox();
+    ohmageCampaignTimestamp.setText(EMPTY_STRING);
+    ohmageCampaignTimestamp.setVisibleLength(45);
+    ohmageBar.setWidget(3, 1, ohmageCampaignTimestamp);
+    ohmageBar.setWidget(4, 0, new HTML("<h3>Ohmage Username:</h3>"));
+    // make the name textbox an appropriate size
+    ohmageUsername = new TextBox();
+    ohmageUsername.setText(EMPTY_STRING);
+    ohmageUsername.setVisibleLength(60);
+    ohmageBar.setWidget(4, 1, ohmageUsername);
+    ohmageBar.setWidget(5, 0, new HTML("<h3>Ohmage hashed Password:</h3>"));
+    // make the name textbox an appropriate size
+    ohmageHashedPassword = new TextBox();
+    ohmageHashedPassword.setText(EMPTY_STRING);
+    ohmageHashedPassword.setVisibleLength(60);
+    ohmageBar.setWidget(5, 1, ohmageHashedPassword);
+
+    // this is only for REDCap server
+    rcBar = new FlexTable();
+    rcBar.addStyleName("stretch_header");
+    rcBar.setWidget(1, 0, new HTML("<h3>REDCap Url to publish to:</h3>"));
+    // make the name textbox an appropriate size
+    rcUrl = new TextBox();
+    rcUrl.setText(HTTP_LOCALHOST);
+    rcUrl.setVisibleLength(60);
+    rcBar.setWidget(1, 1, rcUrl);
+    rcBar.setWidget(2, 0, new HTML("<h3>REDCap API Key:</h3>"));
+    // make the name textbox an appropriate size
+    rcApiKey = new TextBox();
+    rcApiKey.setText(EMPTY_STRING);
+    rcApiKey.setVisibleLength(45);
+    rcBar.setWidget(2, 1, rcApiKey);
+
+    FlowPanel grouping = new FlowPanel();
+    grouping.add(gsBar);
+    grouping.add(jsBar);
+    grouping.add(rcBar);
+    grouping.add(ohmageBar);
+    gsBar.setVisible(false);
+    jsBar.setVisible(false);
+    rcBar.setVisible(false);
+    ohmageBar.setVisible(false);
+    optionsBar.setWidget(2, 0, grouping);
     optionsBar.getFlexCellFormatter().setColSpan(2, 0, 2);
 
     layout.setWidget(0, 0, topBar);
@@ -133,45 +223,54 @@ public final class PublishPopup extends AbstractPopupBase {
     ExternalServiceType type = serviceType.getSelectedValue();
 
     if (type == null) {
-      name.setEnabled(false);
-      name.setReadOnly(true);
+      gsBar.setVisible(false);
+      jsBar.setVisible(false);
+      rcBar.setVisible(false);
+      ohmageBar.setVisible(false);
       return;
-    }
-
-    // This checks to see if the input has been changed while on spreadsheet,
-    // and if it has then it saves the information so you can switch back
-    // easily without losing what was entered.
-    if (!name.getText().equals(formId) && !name.getText().equals(blankNameText)) {
-      didInput = true;
-      enteredName = name.getText();
     }
 
     switch (type) {
     case GOOGLE_SPREADSHEET:
-      // this complicated looking thing just sets the previously entered table
-      // name
-      // if it's already been set.
-      name.setText((didInput) ? enteredName : formId);
-      name.setEnabled(true);
-      name.setReadOnly(false);
+      gsBar.setVisible(true);
+      jsBar.setVisible(false);
+      rcBar.setVisible(false);
+      ohmageBar.setVisible(false);
+      optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
+      break;
+    case JSON_SERVER:
+      gsBar.setVisible(false);
+      jsBar.setVisible(true);
+      rcBar.setVisible(false);
+      ohmageBar.setVisible(false);
       optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
       break;
     case OHMAGE_JSON_SERVER:
-      name.setText("http://localhost");
-      name.setEnabled(true);
-      name.setReadOnly(false);
+      gsBar.setVisible(false);
+      jsBar.setVisible(false);
+      rcBar.setVisible(false);
+      ohmageBar.setVisible(true);
+      optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
+      break;
+    case REDCAP_SERVER:
+      gsBar.setVisible(false);
+      jsBar.setVisible(false);
+      rcBar.setVisible(true);
+      ohmageBar.setVisible(false);
       optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
       break;
     case GOOGLE_FUSIONTABLES:
-      name.setText("");
-      name.setEnabled(false);
-      name.setReadOnly(true);
+      gsBar.setVisible(false);
+      jsBar.setVisible(false);
+      rcBar.setVisible(false);
+      ohmageBar.setVisible(false);
       optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
       break;
     default: // unknown type
-      name.setText("Spreadsheet Name");
-      name.setEnabled(false);
-      name.setReadOnly(true);
+      gsBar.setVisible(false);
+      jsBar.setVisible(false);
+      rcBar.setVisible(false);
+      ohmageBar.setVisible(false);
       optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
       break;
     }
@@ -186,44 +285,35 @@ public final class PublishPopup extends AbstractPopupBase {
       ExternalServicePublicationOption serviceOp = esOptions.getSelectedValue();
       UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
       String ownerEmail = info.getEmail();
+      if (ownerEmail == null || ownerEmail.length() == 0) {
+        try {
+          ownerEmail = UIUtils.promptForEmailAddress();
+        } catch (Exception e) {
+          return; // user pressed cancel
+        }
+      }
 
       switch (type) {
       case GOOGLE_SPREADSHEET:
-        if (ownerEmail == null || ownerEmail.length() == 0) {
-          try {
-            ownerEmail = UIUtils.promptForEmailAddress();
-          } catch (Exception e) {
-            return; // user pressed cancel
-          }
-        }
-        SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, name.getText(),
-            serviceOp, ownerEmail, new OAuth2Callback());
+        SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, gsName.getText(),
+            serviceOp, ownerEmail, new ReportFailureCallback());
+        break;
+      case REDCAP_SERVER:
+        SecureGWT.getServicesAdminService().createRedCapServer(formId, rcApiKey.getText(),
+            rcUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
+        break;
+      case JSON_SERVER:
+        SecureGWT.getServicesAdminService().createSimpleJsonServer(formId, jsAuthKey.getText(),
+            jsUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
         break;
       case OHMAGE_JSON_SERVER:
-        SecureGWT.getServicesAdminService().createOhmageJsonServer(formId, name.getText(),
-            serviceOp, new AsyncCallback<String>() {
-
-              @Override
-              public void onFailure(Throwable caught) {
-                // no-op
-              }
-
-              @Override
-              public void onSuccess(String result) {
-                // no-op
-              }
-            });
+        SecureGWT.getServicesAdminService().createOhmageJsonServer(formId, ohmageCampaignUrn.getText(),
+            ohmageCampaignTimestamp.getText(), ohmageUsername.getText(), ohmageHashedPassword.getText(),
+            jsUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
         break;
       case GOOGLE_FUSIONTABLES:
-        if (ownerEmail == null || ownerEmail.length() == 0) {
-          try {
-            ownerEmail = UIUtils.promptForEmailAddress();
-          } catch (Exception e) {
-            return; // user pressed cancel
-          }
-        }
         SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, ownerEmail,
-            new OAuth2Callback());
+            new ReportFailureCallback());
         break;
       default: // unknown type
         break;
@@ -233,7 +323,7 @@ public final class PublishPopup extends AbstractPopupBase {
     }
   }
 
-  private class OAuth2Callback implements AsyncCallback<String> {
+  private class ReportFailureCallback implements AsyncCallback<String> {
 
     public void onFailure(Throwable caught) {
       AggregateUI.getUI().reportError(caught);

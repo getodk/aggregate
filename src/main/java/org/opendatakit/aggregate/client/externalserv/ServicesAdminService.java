@@ -42,9 +42,15 @@ public interface ServicesAdminService extends RemoteService {
 
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
-  String createOhmageJsonServer(String formId, String url, ExternalServicePublicationOption es) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+
+  String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+
+  String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   Boolean deletePublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   void restartPublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+
+  void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 }

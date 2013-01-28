@@ -33,8 +33,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
@@ -48,8 +46,6 @@ import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -93,10 +89,6 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
   protected static final String PUT = "PUT";
   protected static final String PATCH = "PATCH";
 
-  // and also share all session cookies and credentials across all sessions...
-  // these are thread-safe, so this is OK.
-  private static final CookieStore cookieStore = new BasicCookieStore();
-  private static final CredentialsProvider credsProvider = new BasicCredentialsProvider();
 
   protected OAuth2ExternalService(IForm form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc){
     super(form, formServiceCursor, formatter, headerFormatter, cc);
@@ -273,10 +265,6 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
 
     String assertionString = fullValue + "." + signatureValueString;
     String grantType = "urn:ietf:params:oauth:grant-type:jwt-bearer";
-
-    int SERVICE_TIMEOUT_MILLISECONDS = 60000;
-
-    int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 60000;
 
     // DON'T NEED clientId on the toke request...
     // addCredentials(clientId, clientSecret, nakedUri.getHost());
@@ -516,7 +504,7 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
             FusionTableConsts.FUSTABLE_ENCODE);
       } else {
         // the alternative -- using ContentType.create(,) throws an exception???
-        entity = new StringEntity(statement, "application/json", "UTF-8");
+        entity = new StringEntity(statement, "application/json", UTF_8);
       }
     }
 
