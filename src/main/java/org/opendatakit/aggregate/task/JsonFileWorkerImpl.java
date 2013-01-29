@@ -41,10 +41,10 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Common worker implementation for the generation of json files.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class JsonFileWorkerImpl {
 
@@ -78,12 +78,12 @@ public class JsonFileWorkerImpl {
 
       // placeholder for clean-up...
       SubmissionFilterGroup subFilterGroup = null;
-      
+
       // create CSV
       QueryBase query;
       SubmissionFormatter formatter;
       FilterGroup filterGroup;
-      
+
       // figure out the filterGroup...
       if (filterGroupUri == null) {
         filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
@@ -94,8 +94,8 @@ public class JsonFileWorkerImpl {
       filterGroup.setQueryFetchLimit(ServletConsts.EXPORT_CURSOR_CHUNK_SIZE);
 
       query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-      formatter = new JsonFormatterWithFilters(pw, form, filterGroup, false, cc.getServerURL());
-      
+      formatter = new JsonFormatterWithFilters(pw, form, filterGroup, false, true, cc.getServerURL());
+
       logger.info("after setup of JSON file generation for " + form.getFormId());
       formatter.beforeProcessSubmissions(cc);
       List<Submission> submissions;
@@ -119,7 +119,7 @@ public class JsonFileWorkerImpl {
       r = new PersistentResults(persistentResultsKey, cc);
       if (attemptCount.equals(r.getAttemptCount())) {
         logger.info("saving JSON into PersistentResults table for " + form.getFormId());
-        r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_JSON, 
+        r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_JSON,
             form.getViewableFormNameSuitableAsFileName() + ServletConsts.JSON_FILENAME_APPEND, false, cc);
         r.setStatus(ExportStatus.AVAILABLE);
         r.setCompletionDate(new Date());
@@ -157,5 +157,5 @@ public class JsonFileWorkerImpl {
       logger.error("Exception during exception recovery: " + ex.toString() + " for " + form.getFormId());
     }
   }
-  
+
 }

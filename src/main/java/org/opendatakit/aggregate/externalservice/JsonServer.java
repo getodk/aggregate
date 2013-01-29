@@ -156,7 +156,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
       System.out.println("Sending one JSON Submission");
 
-      JsonFormatterWithFilters formatter = new JsonFormatterWithFilters(pWriter, form, null, true, null);
+      JsonFormatterWithFilters formatter =
+          new JsonFormatterWithFilters(pWriter, form, null, false, true, cc.getServerURL());
       formatter.processSubmissions(Collections.singletonList(submission), cc);
 
       pWriter.flush();
