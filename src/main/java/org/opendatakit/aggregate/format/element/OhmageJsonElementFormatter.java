@@ -89,13 +89,8 @@ public class OhmageJsonElementFormatter implements ElementFormatter {
 			String ordinalValue, Row row) {
 		OhmageJsonTypes.Response choice;
 		// TODO: how to retrieve all possible choices?
-		if (choices.size() == 1) {
-			choice = new OhmageJsonTypes.single_choice_custom(
-					element.getElementName(), choices.get(0), null);
-		} else {
-			choice = new OhmageJsonTypes.multi_choice_custom(
-					element.getElementName(), choices, null);
-		}
+		choice = new OhmageJsonTypes.multi_choice_custom(
+				element.getElementName(), choices, null);
 		responses.add(choice);
 	}
 
