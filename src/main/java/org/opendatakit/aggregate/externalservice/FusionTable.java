@@ -453,6 +453,12 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     return createStmt;
   }
 
+  private String createFusionTableViewStatement(String parentTableId, String childTableId, IForm form, FormElementModel repeatNode) {
+    String createViewStmt = "CREATE VIEW '" + form.getViewableName() + "View' AS ";
+    createViewStmt += "(SELECT * FROM " + parentTableId + " AS T1 LEFT OUTER JOIN " + childTableId + " AS T2 ON T1.'" + repeatNode.getElementName() + "' = T2.'" + FormatConsts.HEADER_PARENT_UID + "')";
+    return createViewStmt;
+  }
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
