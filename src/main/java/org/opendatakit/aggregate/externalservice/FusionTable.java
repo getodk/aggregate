@@ -228,32 +228,35 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
       if (objectEntity.getFusionTableId() == null) {
         String tableId = executeFusionTableCreation(form.getTopLevelGroupElement(), cc);
         objectEntity.setFusionTableId(tableId);
+        persist(cc);
       }
 
       // See which of the repeat groups still need to have their tableId created
       // and define those...
       for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
         boolean found = false;
+        FormElementKey elementKey = repeatGroupElement.constructFormElementKey(form);
         for (FusionTable2RepeatParameterTable t : repeatElementEntities) {
-          if (objectEntity.getUri().equals(t.getUriFusionTable())
-              && repeatGroupElement.constructFormElementKey(form).equals(t.getFormElementKey())) {
+          if (elementKey.equals(t.getFormElementKey())) {
             // Found the match
             if (found) {
+              // already found one match -- it is an error to have 2...
               throw new ODKExternalServiceException(
-                  "duplicate row in FusionTableRepeatParameterTable");
+                  "duplicate row in FusionTable2RepeatParameterTable");
             }
             found = true;
-            if (t.getFusionTableId() != null) {
+            if (t.getFusionTableId() == null) {
+              // create it and persist to remember it...
               String id = executeFusionTableCreation(repeatGroupElement, cc);
               t.setFusionTableId(id);
+              persist(cc);
             }
           }
         }
         if (!found) {
-          throw new ODKExternalServiceException("missing row in FusionTableRepeatParameterTable");
+          throw new ODKExternalServiceException("missing row in FusionTable2RepeatParameterTable");
         }
       }
-      persist(cc);
 
       // transfer ownership before marking service as prepared...
       sharePublishedFiles(objectEntity.getOwnerEmail(), cc);
@@ -279,26 +282,15 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
       throws ODKExternalServiceException, ODKDatastoreException {
 
     executeDrivePermission(objectEntity.getFusionTableId(), objectEntity.getOwnerEmail(), logger, "fusion table", cc);
+    if ( objectEntity.getFusionTableViewId() != null ) {
+      executeDrivePermission(objectEntity.getFusionTableViewId(), objectEntity.getOwnerEmail(), logger, "fusion table", cc);
+    }
 
-    // See which of the repeat groups still need to have their tableId created
-    // and define those...
-    for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
-      boolean found = false;
-      for (FusionTable2RepeatParameterTable t : repeatElementEntities) {
-        if (objectEntity.getUri().equals(t.getUriFusionTable())
-            && repeatGroupElement.constructFormElementKey(form).equals(t.getFormElementKey())) {
-          // Found the match
-          if (found) {
-            throw new ODKExternalServiceException(
-                "duplicate row in FusionTableRepeatParameterTable");
-          }
-          found = true;
-          String id = t.getFusionTableId();
-          executeDrivePermission(id, objectEntity.getOwnerEmail(), logger, "fusion table", cc);
-        }
-      }
-      if (!found) {
-        throw new ODKExternalServiceException("missing row in FusionTableRepeatParameterTable");
+    // and share all the nested element keys...
+    for (FusionTable2RepeatParameterTable t : repeatElementEntities) {
+      String id = t.getFusionTableId();
+      if ( id != null ) {
+        executeDrivePermission(id, objectEntity.getOwnerEmail(), logger, "fusion table", cc);
       }
     }
   }
