@@ -257,7 +257,27 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
           throw new ODKExternalServiceException("missing row in FusionTable2RepeatParameterTable");
         }
       }
-
+     
+      // create a view
+      for(FusionTable2RepeatParameterTable ftRepeat : repeatElementEntities)  {
+        FormElementModel femRepeat = null;
+        for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
+          FormElementKey elementKey = repeatGroupElement.constructFormElementKey(form);
+          if(elementKey.equals(ftRepeat.getFormElementKey()) &&
+              repeatGroupElement.getParent().equals(form.getTopLevelGroupElement())) {
+            femRepeat = repeatGroupElement;
+            break;
+          }
+        }
+        
+        if(femRepeat != null) {
+          String viewId = executeFusionTableViewCreation(objectEntity.getFusionTableId(), ftRepeat.getFusionTableId(), form, femRepeat, cc);
+          objectEntity.setFusionTableViewId(viewId);
+          persist(cc);
+          break;
+        }
+      }
+      
       // transfer ownership before marking service as prepared...
       sharePublishedFiles(objectEntity.getOwnerEmail(), cc);
 
@@ -453,10 +473,58 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     return createStmt;
   }
 
-  private String createFusionTableViewStatement(String parentTableId, String childTableId, IForm form, FormElementModel repeatNode) {
-    String createViewStmt = "CREATE VIEW '" + form.getViewableName() + "View' AS ";
-    createViewStmt += "(SELECT * FROM " + parentTableId + " AS T1 LEFT OUTER JOIN " + childTableId + " AS T2 ON T1.'" + repeatNode.getElementName() + "' = T2.'" + FormatConsts.HEADER_PARENT_UID + "')";
-    return createViewStmt;
+  
+  private String executeFusionTableViewCreation(String parentTableId, String childTableId, IForm form, FormElementModel repeatNode, CallingContext cc)
+      throws ODKExternalServiceException {
+
+    String resultRequest;
+    try {
+      String createViewStmt = "CREATE VIEW '" + form.getViewableName() + "View' AS ";
+      createViewStmt += "(SELECT * FROM " + parentTableId + " AS T1 LEFT OUTER JOIN " + childTableId + " AS T2 ON T1.'" + repeatNode.getElementName() + "' = T2.'" + FormatConsts.HEADER_PARENT_UID + "')";
+      resultRequest = executeStmt(POST, FUSION_TABLE_QUERY_API, createViewStmt, null, cc);
+    } catch (ODKExternalServiceException e) {
+      logger.error("Failed to create fusion table VIEW: " + e.getMessage());
+      e.printStackTrace();
+      throw e;
+    } catch (Exception e) {
+      logger.error("Failed to create fusion table VIEW: " + e.getMessage());
+      e.printStackTrace();
+      throw new ODKExternalServiceException(e);
+    }
+
+    try {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> result = mapper.readValue(resultRequest, Map.class);
+      String kind = (String) result.get("kind");
+      if(kind.equals("fusiontables#sqlresponse")) {
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> columns = (ArrayList<Object>) result.get("columns");
+        if(!columns.isEmpty() &&
+            columns.get(0).equals("tableid")) {
+          @SuppressWarnings("unchecked")
+          ArrayList<Object> rows = (ArrayList<Object>) result.get("rows");
+          if(!rows.isEmpty()) {
+            @SuppressWarnings("unchecked")
+            ArrayList<Object> row =  (ArrayList<Object>) rows.get(0);
+            return (String) row.get(0);
+          }
+        }
+      }      
+      throw new ODKExternalServiceException("PROBLEM GETTING FT VIEW ID");
+      
+    } catch (JsonParseException e) {
+      logger.error("Failed to create fusion table VIEW: " + e.getMessage());
+      e.printStackTrace();
+      throw new ODKExternalServiceException(e);
+    } catch (JsonMappingException e) {
+      logger.error("Failed to create fusion table VIEW: " + e.getMessage());
+      e.printStackTrace();
+      throw new ODKExternalServiceException(e);
+    } catch (IOException e) {
+      logger.error("Failed to create fusion table VIEW: " + e.getMessage());
+      e.printStackTrace();
+      throw new ODKExternalServiceException(e);
+    }
   }
 
   /**
