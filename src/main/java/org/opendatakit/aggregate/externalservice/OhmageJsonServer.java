@@ -166,22 +166,38 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
       CallingContext cc) throws ClientProtocolException, IOException, ODKExternalServiceException,
       URISyntaxException {
 
-    // TODO: figure out campaign parameters
-    StringBody campaignUrn = new StringBody(getOhmageCampaignUrn(), utf8);
-    StringBody campaignCreationTimestamp = new StringBody(getOhmageCampaignCreationTimestamp(),
-        utf8);
-    StringBody user = new StringBody(getOhmageUsername(), utf8);
-    StringBody hashedPassword = new StringBody(getOhmageHashedPassword(), utf8);
-    StringBody clientParam = new StringBody(cc.getServerURL());
-    StringBody surveyData = new StringBody(gson.toJson(surveys));
 
     MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT, null, utf8);
-    reqEntity.addPart("campaign_urn", campaignUrn);
-    reqEntity.addPart("campaign_creation_timestamp", campaignCreationTimestamp);
-    reqEntity.addPart("user", user);
-    reqEntity.addPart("passowrd", hashedPassword);
+    // emit the configured publisher parameters if the values are non-empty...
+    String value;
+    value = getOhmageCampaignUrn();
+    if ( value != null && value.length() != 0 ) {
+      StringBody campaignUrn = new StringBody(getOhmageCampaignUrn(), utf8);
+      reqEntity.addPart("campaign_urn", campaignUrn);
+    }
+    value = getOhmageCampaignCreationTimestamp();
+    if ( value != null && value.length() != 0 ) {
+      StringBody campaignCreationTimestamp = new StringBody(getOhmageCampaignCreationTimestamp(),
+          utf8);
+      reqEntity.addPart("campaign_creation_timestamp", campaignCreationTimestamp);
+    }
+    value = getOhmageUsername();
+    if ( value != null && value.length() != 0 ) {
+      StringBody user = new StringBody(getOhmageUsername(), utf8);
+      reqEntity.addPart("user", user);
+    }
+    value = getOhmageHashedPassword();
+    if ( value != null && value.length() != 0 ) {
+      StringBody hashedPassword = new StringBody(getOhmageHashedPassword(), utf8);
+      reqEntity.addPart("passowrd", hashedPassword);
+    }
+    // emit the client identity and the json representation of the survey...
+    StringBody clientParam = new StringBody(cc.getServerURL());
     reqEntity.addPart("client", clientParam);
+    StringBody surveyData = new StringBody(gson.toJson(surveys));
     reqEntity.addPart("survey", surveyData);
+
+    // emit the file streams for all the media attachments
     for (Entry<UUID, ByteArrayBody> entry : photos.entrySet()) {
       reqEntity.addPart(entry.getKey().toString(), entry.getValue());
     }
