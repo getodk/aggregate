@@ -35,13 +35,13 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
   private PrintWriter output;
 
   public JsonFormatterWithFilters(PrintWriter printWriter, IForm form, FilterGroup filterGroup,
-      boolean includeBinary, String webServerUrl) {
+      boolean includeBinary, boolean expandMultipleChoiceAsArray, String webServerUrl) {
     output = printWriter;
 
     if (includeBinary) {
-      elemFormatter = new JsonElementFormatter(true, true, true, this);
+      elemFormatter = new JsonElementFormatter(true, true, true, expandMultipleChoiceAsArray, this);
     } else {
-      elemFormatter = new JsonElementFormatter(webServerUrl,true, true, true, this);
+      elemFormatter = new JsonElementFormatter(webServerUrl,true, true, true, expandMultipleChoiceAsArray, this);
     }
 
     SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
