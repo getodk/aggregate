@@ -257,7 +257,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
           throw new ODKExternalServiceException("missing row in FusionTable2RepeatParameterTable");
         }
       }
-     
+
       // create a view
       for(FusionTable2RepeatParameterTable ftRepeat : repeatElementEntities)  {
         FormElementModel femRepeat = null;
@@ -269,7 +269,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
             break;
           }
         }
-        
+
         if(femRepeat != null) {
           String viewId = executeFusionTableViewCreation(objectEntity.getFusionTableId(), ftRepeat.getFusionTableId(), form, femRepeat, cc);
           objectEntity.setFusionTableViewId(viewId);
@@ -277,7 +277,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
           break;
         }
       }
-      
+
       // transfer ownership before marking service as prepared...
       sharePublishedFiles(objectEntity.getOwnerEmail(), cc);
 
@@ -473,7 +473,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     return createStmt;
   }
 
-  
+
   private String executeFusionTableViewCreation(String parentTableId, String childTableId, IForm form, FormElementModel repeatNode, CallingContext cc)
       throws ODKExternalServiceException {
 
@@ -509,9 +509,9 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
             return (String) row.get(0);
           }
         }
-      }      
+      }
       throw new ODKExternalServiceException("PROBLEM GETTING FT VIEW ID");
-      
+
     } catch (JsonParseException e) {
       logger.error("Failed to create fusion table VIEW: " + e.getMessage());
       e.printStackTrace();
@@ -541,20 +541,45 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
         && (fsc == null ? (other.fsc == null) : (other.fsc != null && fsc.equals(other.fsc)));
   }
 
-  @Override
-  public String getDescriptiveTargetString() {
+  private String buildHref(String fusionTableId, String linkText) {
     Map<String, String> properties = new HashMap<String, String>();
-    String id = objectEntity.getFusionTableId();
-    if (id == null) {
-      return "Not yet created";
+    if (fusionTableId == null) {
+      return linkText + " not yet created";
     }
-    if (id.toLowerCase().equals(id.toUpperCase())) {
-      properties.put("dsrcid", id);
+    if (fusionTableId.toLowerCase().equals(fusionTableId.toUpperCase())) {
+      properties.put("dsrcid", fusionTableId);
     } else {
-      properties.put("docid", id);
+      properties.put("docid", fusionTableId);
     }
     return HtmlUtil.createHrefWithProperties("http://www.google.com/fusiontables/DataSource",
-        properties, "View Fusion Table", true);
+              properties, "View " + linkText, true);
+  }
+
+  @Override
+  public String getDescriptiveTargetString() {
+    List<String> hrefs = new ArrayList<String>();
+
+    hrefs.add(buildHref(objectEntity.getFusionTableId(), "Main Fusion Table"));
+    // and share all the nested element keys...
+    for (FusionTable2RepeatParameterTable t : repeatElementEntities) {
+      String id = t.getFusionTableId();
+      if ( id != null ) {
+        String repeatKey = t.getFormElementKey().toString();
+        repeatKey = repeatKey.substring(repeatKey.indexOf('/',repeatKey.indexOf('/',1)+1)+1);
+        hrefs.add(buildHref(id, "Repeat Group " +repeatKey));
+      }
+    }
+    if (objectEntity.getFusionTableViewId() != null ) {
+      hrefs.add(buildHref(objectEntity.getFusionTableViewId(), "Outer Join (first repeat only)"));
+    }
+
+    StringBuilder b = new StringBuilder();
+    b.append("<table>");
+    for ( String href : hrefs ) {
+      b.append("<tr><td>").append(href).append("</td></tr>");
+    }
+    b.append("</table>");
+    return b.toString();
   }
 
   protected CommonFieldsBase retrieveObjectEntity() {
