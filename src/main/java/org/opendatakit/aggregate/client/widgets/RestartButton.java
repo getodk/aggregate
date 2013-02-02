@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.UIUtils;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 
@@ -43,7 +44,7 @@ public final class RestartButton extends AggregateButton implements ClickHandler
     addStyleDependentName("negative");
   }
 
-  private class OAuth2Callback implements AsyncCallback<Void> {
+  private class ReportErrorsCallback implements AsyncCallback<Void> {
 
     public void onFailure(Throwable caught) {
       AggregateUI.getUI().reportError(caught);
@@ -62,26 +63,25 @@ public final class RestartButton extends AggregateButton implements ClickHandler
     switch (type) {
     case GOOGLE_SPREADSHEET:
       SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new OAuth2Callback());
+          new ReportErrorsCallback());
       break;
     case OHMAGE_JSON_SERVER:
       SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new AsyncCallback<Void>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-              // no-op
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-              // no-op
-            }
-          });
+          new ReportErrorsCallback());
       break;
     case GOOGLE_FUSIONTABLES:
       SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new OAuth2Callback());
+          new ReportErrorsCallback());
+      break;
+    case REDCAP_SERVER:
+      String apiKey;
+      try {
+        apiKey = UIUtils.promptForREDCapApiKey();
+      } catch (Exception e) {
+        return; // user pressed cancel
+      }
+      SecureGWT.getServicesAdminService().updateApiKeyAndRestartPublisher(publisher.getUri(),
+          apiKey, new ReportErrorsCallback());
       break;
     default: // unknown type
       break;

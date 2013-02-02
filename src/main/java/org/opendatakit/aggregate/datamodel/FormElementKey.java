@@ -21,10 +21,10 @@ import org.opendatakit.common.web.constants.BasicConsts;
 /**
  * Simple wrapper class analogous to SubmissionKey that can be manipulated to
  * obtain the FormElementModel to which it refers.
- * 
+ *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- * 
+ *
  */
 public class FormElementKey {
 
@@ -51,5 +51,12 @@ public class FormElementKey {
     }
 
     return tmp;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if ( ! (obj instanceof FormElementKey) ) return false;
+    FormElementKey other = (FormElementKey) obj;
+    return (formElementKey == null) ? (other.formElementKey == null) : formElementKey.equals(other.formElementKey);
   }
 }

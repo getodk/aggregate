@@ -37,6 +37,21 @@ public class UIUtils {
     return newFilterName;
   }
 
+  public static String promptForREDCapApiKey() throws Exception{
+    String newApiKey = Window.prompt(UIConsts.PROMPT_FOR_REDCAP_APIKEY_TXT, BasicConsts.EMPTY_STRING);
+
+    while (true) {
+      if (newApiKey == null) { // cancel was pressed
+        throw new Exception("User Cancelled"); // exit
+      } else if (newApiKey.equals(BasicConsts.EMPTY_STRING)) {
+        newApiKey = Window.prompt(UIConsts.REPROMPT_FOR_REDCAP_APIKEY_TXT, BasicConsts.EMPTY_STRING);
+      } else {
+        return newApiKey;
+      }
+    }
+  }
+
+
   public static final String CONFIRM_OWNER_EMAIL_TXT = "Please confirm that this e-mail address: ";
   public static final String CONFIRM_OWNER_EMAIL_TXT2 = " is accurate and contains no mispellings. " +
   		"This account will become the owner of the published tables.";
