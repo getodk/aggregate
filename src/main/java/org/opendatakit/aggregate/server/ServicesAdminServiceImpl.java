@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -34,7 +35,9 @@ import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
+import org.opendatakit.aggregate.externalservice.JsonServer;
 import org.opendatakit.aggregate.externalservice.OhmageJsonServer;
+import org.opendatakit.aggregate.externalservice.REDCapServer;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
@@ -183,8 +186,78 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String createOhmageJsonServer(String formId, String url,
-        ExternalServicePublicationOption esOption)
+  public String createRedCapServer(String formId, String apiKey, String url,
+      ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
+      if ( deletionTimestamp != null ) return null;
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
+      REDCapServer redcap = new REDCapServer(form, apiKey, url, esOption, ownerEmail, cc);
+      redcap.initiate(cc);
+      return redcap.getFormServiceCursor().getUri();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    }
+  }
+
+  @Override
+  public String createSimpleJsonServer(String formId, String authKey, String url,
+        ExternalServicePublicationOption esOption, String ownerEmail)
+            throws AccessDeniedException,
+            FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+     HttpServletRequest req = this.getThreadLocalRequest();
+     CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+     try {
+        FormActionStatusTimestamp deletionTimestamp = MiscTasks
+              .getFormDeletionStatusTimestampOfFormId(formId, cc);
+        if (deletionTimestamp != null) {
+          throw new RequestFailureException(
+              "Form is marked for deletion - publishing request for Simple JSON server aborted.");
+        }
+        IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+        if (!form.hasValidFormDefinition()) {
+          throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+        }
+        JsonServer server = new JsonServer(form, authKey, url, esOption, ownerEmail, cc);
+        server.initiate(cc);
+        return server.getFormServiceCursor().getUri();
+     } catch (ODKOverQuotaException e) {
+       e.printStackTrace();
+       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+     } catch (ODKFormNotFoundException e) {
+       e.printStackTrace();
+       throw new FormNotAvailableException(e);
+     } catch (ODKDatastoreException e) {
+       e.printStackTrace();
+       throw new DatastoreFailureException(e);
+     } catch (ODKExternalServiceException e) {
+       e.printStackTrace();
+       throw new RequestFailureException(e);
+    }
+  }
+
+  @Override
+  public String createOhmageJsonServer(String formId, String campaignUrn,
+        String campaignTimestamp, String user, String hashedPassword, String url,
+        ExternalServicePublicationOption esOption, String ownerEmail)
             throws AccessDeniedException,
             FormNotAvailableException, RequestFailureException, DatastoreFailureException {
      HttpServletRequest req = this.getThreadLocalRequest();
@@ -201,7 +274,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         if (!form.hasValidFormDefinition()) {
           throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
         }
-        OhmageJsonServer server = new OhmageJsonServer(form, url, esOption, cc);
+        OhmageJsonServer server = new OhmageJsonServer(form, campaignUrn, campaignTimestamp,
+                                          user, hashedPassword, url, esOption, ownerEmail, cc);
+        server.initiate(cc);
         return server.getFormServiceCursor().getUri();
      } catch (ODKOverQuotaException e) {
        e.printStackTrace();
@@ -212,7 +287,10 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
      } catch (ODKDatastoreException e) {
        e.printStackTrace();
        throw new DatastoreFailureException(e);
-     }
+     } catch (ODKExternalServiceException e) {
+       e.printStackTrace();
+       throw new RequestFailureException(e);
+    }
   }
 
   @Override
@@ -283,6 +361,55 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException(
             "Credentials have not failed for this publisher -- rejecting change request");
       }
+      es.initiate(cc);
+    } catch (RequestFailureException e) {
+      throw e;
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch ( ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Publisher not found");
+    } catch ( ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Internal error");
+    }
+
+  }
+
+  @Override
+  public void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws AccessDeniedException,
+      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    FormServiceCursor fsc = null;
+    ExternalService es = null;
+    try {
+      fsc = FormServiceCursor.getFormServiceCursor(uri, cc);
+      if (fsc != null) {
+        es = fsc.getExternalService(cc);
+      }
+      if (es == null) {
+        throw new RequestFailureException("Service description not found for this publisher");
+      }
+      if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
+        throw new RequestFailureException(
+            "Credentials have not failed for this publisher -- rejecting change request");
+      }
+      if ( fsc.getExternalServiceType() != ExternalServiceType.REDCAP_SERVER ) {
+        throw new RequestFailureException(
+            "This publisher is not a REDCap publisher");
+      }
+      REDCapServer rc = (REDCapServer) es;
+      rc.setApiKey(apiKey);
+      rc.persist(cc);
       es.initiate(cc);
     } catch (RequestFailureException e) {
       throw e;

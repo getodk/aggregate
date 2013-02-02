@@ -17,13 +17,9 @@
 
 package org.opendatakit.aggregate.externalservice;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,23 +27,15 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
-import org.opendatakit.aggregate.constants.externalservice.OhmageJsonServerConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
@@ -59,7 +47,8 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.utils.HttpClientFactory;
+import org.opendatakit.common.security.common.EmailParser;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 import com.google.gson.Gson;
@@ -71,65 +60,69 @@ import com.google.gson.GsonBuilder;
  * @author mitchellsundt@gmail.com
  *
  */
-public class OhmageJsonServer extends AbstractExternalService implements
-		ExternalService {
+public class OhmageJsonServer extends AbstractExternalService implements ExternalService {
 
-	private static final Gson gson;
-	static {
-		GsonBuilder builder = new GsonBuilder();
-		builder.registerTypeAdapter(OhmageJsonTypes.Survey.class,
-				new OhmageJsonTypes.Survey());
-		builder.registerTypeAdapter(OhmageJsonTypes.RepeatableSet.class,
-				new OhmageJsonTypes.RepeatableSet());
-		builder.serializeNulls();
-		builder.setPrettyPrinting();
-		gson = builder.create();
-	}
+  private static final Gson gson;
+  static {
+    GsonBuilder builder = new GsonBuilder();
+    builder.registerTypeAdapter(OhmageJsonTypes.Survey.class, new OhmageJsonTypes.Survey());
+    builder.registerTypeAdapter(OhmageJsonTypes.RepeatableSet.class,
+        new OhmageJsonTypes.RepeatableSet());
+    builder.serializeNulls();
+    builder.setPrettyPrinting();
+    gson = builder.create();
+  }
 
-	/**
-	 * Datastore entity specific to this type of external service
-	 */
-	private final OhmageJsonServerParameterTable objectEntity;
+  /**
+   * Datastore entity specific to this type of external service
+   */
+  private final OhmageJsonServer2ParameterTable objectEntity;
 
-	private OhmageJsonServer(OhmageJsonServerParameterTable entity,
-			FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
-		super(form, formServiceCursor, new BasicElementFormatter(true, true,
-				true, false), new BasicHeaderFormatter(true, true, true), cc);
-		objectEntity = entity;
-	}
+  private OhmageJsonServer(OhmageJsonServer2ParameterTable entity,
+      FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
+    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
+        new BasicHeaderFormatter(true, true, true), cc);
+    objectEntity = entity;
+  }
 
-	private OhmageJsonServer(OhmageJsonServerParameterTable entity, IForm form,
-			ExternalServicePublicationOption externalServiceOption,
-			CallingContext cc) throws ODKDatastoreException {
-		this(entity, createFormServiceCursor(form, entity,
-				externalServiceOption, ExternalServiceType.OHMAGE_JSON_SERVER,
-				cc), form, cc);
-	}
+  private OhmageJsonServer(OhmageJsonServer2ParameterTable entity, IForm form,
+      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+      throws ODKDatastoreException {
+    this(entity, createFormServiceCursor(form, entity, externalServiceOption,
+        ExternalServiceType.OHMAGE_JSON_SERVER, cc), form, cc);
+    objectEntity.setOwnerEmail(ownerEmail);
+  }
 
-	public OhmageJsonServer(FormServiceCursor formServiceCursor, IForm form,
-			CallingContext cc) throws ODKDatastoreException {
-		this(retrieveEntity(OhmageJsonServerParameterTable.assertRelation(cc),
-				formServiceCursor, cc), formServiceCursor, form, cc);
-	}
+  public OhmageJsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
+      throws ODKDatastoreException {
+    this(retrieveEntity(OhmageJsonServer2ParameterTable.assertRelation(cc), formServiceCursor, cc),
+        formServiceCursor, form, cc);
+  }
 
-	public OhmageJsonServer(IForm form, String serverURL,
-			ExternalServicePublicationOption externalServiceOption,
-			CallingContext cc) throws ODKDatastoreException {
-		this(newEntity(OhmageJsonServerParameterTable.assertRelation(cc), cc),
-				form, externalServiceOption, cc);
+  public OhmageJsonServer(IForm form, String campaignUrn, String campaignTimestamp, String user,
+      String hashedPassword, String serverURL,
+      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+      throws ODKDatastoreException {
+    this(newEntity(OhmageJsonServer2ParameterTable.assertRelation(cc), cc), form,
+        externalServiceOption, ownerEmail, cc);
 
-		// set stuff to ready for now
-		// TODO: check for valid URL
-		fsc.setIsExternalServicePrepared(true);
-		fsc.setOperationalStatus(OperationalStatus.ACTIVE);
-
-		objectEntity.setServerUrl(serverURL);
-		persist(cc);
-	}
+    // set stuff to ready for now
+    // TODO: check for valid URL
+    objectEntity.setOhmageCampaignCreationTimestamp(campaignTimestamp);
+    objectEntity.setOhmageCampaignUrn(campaignUrn);
+    objectEntity.setOhmageUsername(user);
+    objectEntity.setOhmageHashedPassword(hashedPassword);
+    objectEntity.setServerUrl(serverURL);
+    persist(cc);
+  }
 
   @Override
   public void initiate(CallingContext cc) throws ODKExternalServiceException,
       ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
+    fsc.setIsExternalServicePrepared(true);
+    fsc.setOperationalStatus(OperationalStatus.ACTIVE);
+
+    persist(cc);
   }
 
   @Override
@@ -138,180 +131,153 @@ public class OhmageJsonServer extends AbstractExternalService implements
 
   @Override
   protected String getOwnership() {
-    return "username";
+    return objectEntity.getOwnerEmail().substring(EmailParser.K_MAILTO.length());
   }
 
-	public String getServerUrl() {
-		return objectEntity.getServerUrl();
-	}
+  public String getServerUrl() {
+    return objectEntity.getServerUrl();
+  }
 
-	@Override
-	public void sendSubmission(Submission submission, CallingContext cc)
-			throws ODKExternalServiceException {
-		// TODO: think of more appropriate method
-		List<Submission> list = new ArrayList<Submission>();
-		list.add(submission);
-		sendSubmissions(list, cc);
-	}
+  public String getOhmageUsername() {
+    return objectEntity.getOhmageUsername();
+  }
 
-	@Override
-	public void sendSubmissions(List<Submission> submissions, CallingContext cc)
-			throws ODKExternalServiceException {
-		try {
-			Map<UUID, byte[]> photos = new HashMap<UUID, byte[]>();
-			List<OhmageJsonTypes.Survey> surveys = new ArrayList<OhmageJsonTypes.Survey>();
+  public String getOhmageCampaignUrn() {
+    return objectEntity.getOhmageCampaignUrn();
+  }
 
-			for (Submission submission : submissions) {
-				OhmageJsonTypes.Survey survey = new OhmageJsonTypes.Survey();
-				// TODO: figure out these values
-				survey.setDate(null);
-				survey.setLocation(null);
-				survey.setLocation_status(null);
-				survey.setSurvey_id(null);
-				survey.setSurvey_lauch_context(null);
-				survey.setTime(System.currentTimeMillis());
-				survey.setTimezone(null);
+  public String getOhmageCampaignCreationTimestamp() {
+    return objectEntity.getOhmageCampaignCreationTimestamp();
+  }
 
-				OhmageJsonElementFormatter formatter = new OhmageJsonElementFormatter();
-				// called purely for side effects
-				submission.getFormattedValuesAsRow(null, formatter, false, cc);
-				survey.setResponses(formatter.getResponses());
+  public String getOhmageHashedPassword() {
+    return objectEntity.getOhmageHashedPassword();
+  }
 
-				photos.putAll(formatter.getPhotos());
-				surveys.add(survey);
-			}
+  /**
+   * Uploads a set of submissions to the ohmage system.
+   *
+   * @throws IOException
+   * @throws ClientProtocolException
+   * @throws ODKExternalServiceException
+   * @throws URISyntaxException
+   */
+  public void uploadSurveys(List<OhmageJsonTypes.Survey> surveys, Map<UUID, ByteArrayBody> photos,
+      CallingContext cc) throws ClientProtocolException, IOException, ODKExternalServiceException,
+      URISyntaxException {
 
-			uploadSurveys(surveys, photos, cc);
 
-		} catch (ODKExternalServiceCredentialsException e) {
-		  fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
-		  try {
-		    persist(cc);
-		  } catch ( Exception ex) {
-		    ex.printStackTrace();
-		    throw new ODKExternalServiceException(
-		          "unable to persist bad credentials state", ex);
-		  }
-		  throw e;
-		} catch (ODKExternalServiceException e) {
-		  throw e;// don't wrap these
-		} catch (Exception e) {
-			throw new ODKExternalServiceException(e);
-		}
+    MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT, null, utf8);
+    // emit the configured publisher parameters if the values are non-empty...
+    String value;
+    value = getOhmageCampaignUrn();
+    if ( value != null && value.length() != 0 ) {
+      StringBody campaignUrn = new StringBody(getOhmageCampaignUrn(), utf8);
+      reqEntity.addPart("campaign_urn", campaignUrn);
+    }
+    value = getOhmageCampaignCreationTimestamp();
+    if ( value != null && value.length() != 0 ) {
+      StringBody campaignCreationTimestamp = new StringBody(getOhmageCampaignCreationTimestamp(),
+          utf8);
+      reqEntity.addPart("campaign_creation_timestamp", campaignCreationTimestamp);
+    }
+    value = getOhmageUsername();
+    if ( value != null && value.length() != 0 ) {
+      StringBody user = new StringBody(getOhmageUsername(), utf8);
+      reqEntity.addPart("user", user);
+    }
+    value = getOhmageHashedPassword();
+    if ( value != null && value.length() != 0 ) {
+      StringBody hashedPassword = new StringBody(getOhmageHashedPassword(), utf8);
+      reqEntity.addPart("passowrd", hashedPassword);
+    }
+    // emit the client identity and the json representation of the survey...
+    StringBody clientParam = new StringBody(cc.getServerURL());
+    reqEntity.addPart("client", clientParam);
+    StringBody surveyData = new StringBody(gson.toJson(surveys));
+    reqEntity.addPart("survey", surveyData);
 
-	}
+    // emit the file streams for all the media attachments
+    for (Entry<UUID, ByteArrayBody> entry : photos.entrySet()) {
+      reqEntity.addPart(entry.getKey().toString(), entry.getValue());
+    }
 
-	/**
-	 * Uploads a set of submissions to the ohmage system.
-	 *
-	 * @throws IOException
-	 * @throws ClientProtocolException
-	 * @throws ODKExternalServiceException
-	 * @throws URISyntaxException
-	 */
-	public void uploadSurveys(List<OhmageJsonTypes.Survey> surveys,
-			Map<UUID, byte[]> photos, CallingContext cc)
-			throws ClientProtocolException, IOException,
-			ODKExternalServiceException, URISyntaxException {
+    HttpResponse response = super.sendHttpRequest(POST, getServerUrl(), reqEntity, null, cc);
+    String responseString = WebUtils.readResponse(response);
+    int statusCode = response.getStatusLine().getStatusCode();
 
-		HttpParams httpParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(httpParams,
-				JsonServerConsts.CONNECTION_TIMEOUT);
-		HttpConnectionParams.setSoTimeout(httpParams,
-				JsonServerConsts.CONNECTION_TIMEOUT);
+    if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
+      throw new ODKExternalServiceCredentialsException("failure from server: " + statusCode
+          + " response: " + responseString);
+    } else if (statusCode >= 300) {
+      throw new ODKExternalServiceException("failure from server: " + statusCode + " response: "
+          + responseString);
+    }
+  }
 
-		HttpClientFactory factory = (HttpClientFactory) cc
-				.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
-		HttpClient client = factory.createHttpClient(httpParams);
-		HttpPost httppost = new HttpPost(getServerUrl()
-				+ OhmageJsonServerConsts.OHMAGE_SURVEY_UPLOAD_PATH);
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof OhmageJsonServer)) {
+      return false;
+    }
+    OhmageJsonServer other = (OhmageJsonServer) obj;
+    return (objectEntity == null ? (other.objectEntity == null)
+        : (other.objectEntity != null && objectEntity.equals(other.objectEntity)))
+        && (fsc == null ? (other.fsc == null) : (other.fsc != null && fsc.equals(other.fsc)));
+  }
 
-		// TODO: figure out campaign parameters
-		StringBody campaignUrn = new StringBody("some campaign urn");
-		StringBody campaignCreationTimestamp = new StringBody(
-				"the creation timestamp");
-		StringBody user = new StringBody("username");
-		StringBody hashedPassword = new StringBody("the hashed password");
-		StringBody clientParam = new StringBody("aggregate");
-		StringBody surveyData = new StringBody(gson.toJson(surveys));
+  @Override
+  protected void insertData(Submission submission, CallingContext cc)
+      throws ODKExternalServiceException {
+    try {
+      OhmageJsonTypes.Survey survey = new OhmageJsonTypes.Survey();
+      // TODO: figure out these values
+      survey.setDate(null);
+      survey.setLocation(null);
+      survey.setLocation_status(null);
+      survey.setSurvey_id(null);
+      survey.setSurvey_lauch_context(null);
+      survey.setTime(System.currentTimeMillis());
+      survey.setTimezone(null);
 
-		MultipartEntity reqEntity = new MultipartEntity();
-		reqEntity.addPart("campaign_urn", campaignUrn);
-		reqEntity.addPart("campaign_creation_timestamp",
-				campaignCreationTimestamp);
-		reqEntity.addPart("user", user);
-		reqEntity.addPart("passowrd", hashedPassword);
-		reqEntity.addPart("client", clientParam);
-		reqEntity.addPart("survey", surveyData);
-		for (Entry<UUID, byte[]> entry : photos.entrySet()) {
-			InputStreamBody imageAttachment = new InputStreamBody(
-					new ByteArrayInputStream(entry.getValue()), "image/jpeg",
-					entry.getKey().toString());
-			reqEntity.addPart(entry.getKey().toString(), imageAttachment);
-		}
+      OhmageJsonElementFormatter formatter = new OhmageJsonElementFormatter();
+      // called purely for side effects
+      submission.getFormattedValuesAsRow(null, formatter, false, cc);
+      survey.setResponses(formatter.getResponses());
 
-		httppost.setEntity(reqEntity);
+      uploadSurveys(Collections.singletonList(survey), formatter.getPhotos(), cc);
 
-		HttpResponse response = client.execute(httppost);
-		HttpEntity resEntity = response.getEntity();
+    } catch (ODKExternalServiceCredentialsException e) {
+      fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
+      try {
+        persist(cc);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        throw new ODKExternalServiceException("unable to persist bad credentials state", ex);
+      }
+      throw e;
+    } catch (ODKExternalServiceException e) {
+      throw e;// don't wrap these
+    } catch (Exception e) {
+      throw new ODKExternalServiceException(e);
+    }
+  }
 
-		OhmageJsonTypes.server_response serverResp = null;
-		if ( resEntity != null ) {
-		  Reader resReader = new InputStreamReader(resEntity.getContent());
-		  serverResp = gson.fromJson(resReader,
-				OhmageJsonTypes.server_response.class);
-		  // flush any remaining
-		  try {
-		    while (resReader.read() != -1);
-		  } catch ( IOException e) {
-		    // ignore...
-		  }
-		}
+  @Override
+  public String getDescriptiveTargetString() {
+    return getServerUrl() + " campaign: " + getOhmageCampaignUrn();
+  }
 
-		int statusCode = response.getStatusLine().getStatusCode();
+  protected CommonFieldsBase retrieveObjectEntity() {
+    return objectEntity;
+  }
 
-		if ( statusCode == HttpServletResponse.SC_UNAUTHORIZED ) {
-        throw new ODKExternalServiceCredentialsException("failure from server: " + statusCode);
-		} else if ( statusCode >= 300 || (serverResp != null &&
-		            serverResp.getResult().equals("failure"))) {
-        throw new ODKExternalServiceException("failure from server: " + statusCode);
-  	   }
-	}
-
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof OhmageJsonServer)) {
-			return false;
-		}
-		OhmageJsonServer other = (OhmageJsonServer) obj;
-		return (objectEntity == null ? (other.objectEntity == null)
-				: (other.objectEntity != null && objectEntity
-						.equals(other.objectEntity)))
-				&& (fsc == null ? (other.fsc == null)
-						: (other.fsc != null && fsc.equals(other.fsc)));
-	}
-
-	@Override
-	protected void insertData(Submission submission, CallingContext cc)
-			throws ODKExternalServiceException {
-		sendSubmission(submission, cc);
-	}
-
-	@Override
-	public String getDescriptiveTargetString() {
-		return getServerUrl();
-	}
-
-	protected CommonFieldsBase retrieveObjectEntity() {
-		return objectEntity;
-	}
-
-	@Override
-	protected List<? extends CommonFieldsBase> retrieveRepeatElementEntities() {
-		return null;
-	}
+  @Override
+  protected List<? extends CommonFieldsBase> retrieveRepeatElementEntities() {
+    return null;
+  }
 
 }
