@@ -20,6 +20,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
@@ -36,16 +38,18 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class KmlGeneratorTaskServlet extends ServletUtilBase {
   /**
    * Serial number for serialization
    */
   private static final long serialVersionUID = 8647919526257827291L;
+
+  private static final Log logger = LogFactory.getLog(KmlGeneratorTaskServlet.class);
 
   /**
    * URI from base
@@ -54,7 +58,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
 
   /**
    * Handler for HTTP Get request to create xform upload page
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -64,23 +68,38 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
     cc.setAsDaemon(true);
 
     // get parameter
-    String formId = getParameter(req, ServletConsts.FORM_ID);
-
-    String geopointFieldName = getParameter(req, KmlGenerator.GEOPOINT_FIELD);
-    String titleFieldName = getParameter(req, KmlGenerator.TITLE_FIELD);
-    String imageFieldName = getParameter(req, KmlGenerator.IMAGE_FIELD);
-    String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
+    final String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
+      logger.error("Missing " + ServletConsts.FORM_ID + " key");
+      errorMissingKeyParam(resp);
+      return;
+    }
+    final String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
     if (persistentResultsString == null) {
+      logger.error("Missing " + ServletConsts.PERSISTENT_RESULTS_KEY + " key");
       errorBadParam(resp);
       return;
     }
     SubmissionKey persistentResultsKey = new SubmissionKey(persistentResultsString);
-    String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
+    final String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
     if (attemptCountString == null) {
+      logger.error("Missing " + ServletConsts.ATTEMPT_COUNT + " key");
       errorBadParam(resp);
       return;
     }
-    Long attemptCount = Long.valueOf(attemptCountString);
+    Long attemptCount = 1L;
+    try {
+      attemptCount = Long.valueOf(attemptCountString);
+    } catch (Exception e) {
+      logger.error("Invalid " + ServletConsts.ATTEMPT_COUNT + " value: " + attemptCountString
+          + " exception: " + e.toString());
+      errorBadParam(resp);
+      return;
+    }
+    // optional fields
+    String geopointFieldName = getParameter(req, KmlGenerator.GEOPOINT_FIELD);
+    String titleFieldName = getParameter(req, KmlGenerator.TITLE_FIELD);
+    String imageFieldName = getParameter(req, KmlGenerator.IMAGE_FIELD);
 
     IForm form = null;
     FormElementModel titleField = null;
@@ -90,6 +109,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
       form = FormFactory.retrieveFormByFormId(formId, cc);
 
       if (!form.hasValidFormDefinition()) {
+        logger.error("Unable to retrieve formId: " + formId + " invalid form definition");
         errorRetreivingData(resp);
         return; // ill-formed definition
       }
@@ -109,16 +129,23 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
         }
       }
     } catch (ODKFormNotFoundException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       odkIdNotFoundError(resp);
       return;
     } catch (ODKOverQuotaException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       quotaExceededError(resp);
       return;
     } catch (ODKDatastoreException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       datastoreError(resp);
+      return;
+    } catch (Exception e) {
+      logger.error("Unable to prepare formId: " + formId + " exception: " + e.toString());
+      errorRetreivingData(resp);
       return;
     }
 

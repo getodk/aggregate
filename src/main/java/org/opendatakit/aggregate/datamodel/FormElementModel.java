@@ -20,16 +20,15 @@ import java.util.Collection;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * Wrapper class that presents the submission-level view of a form.
- * 
+ *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- * 
+ *
  */
 public final class FormElementModel {
 
@@ -152,7 +151,7 @@ public final class FormElementModel {
   /**
    * Returns the list of children that are in the specified form element
    * namespaces.
-   * 
+   *
    * @param namespaces
    *          -- collection of form element namespaces to filter against.
    * @return list of children contained in the collection of namespaces.
@@ -323,7 +322,7 @@ public final class FormElementModel {
       }
 
     } else {
-      
+
       // simple type -- traverse and apply short-circuit logic...
       if (visitor.traverse(this, cc))
         return true;
@@ -346,7 +345,7 @@ public final class FormElementModel {
    * the collapsed entity sets of the SubmissionSet for its construction (i.e.,
    * they are different construction methodologies, so there is a risk of
    * divergence).
-   * 
+   *
    * @param form
    * @return string representation of this FormElementModel
    */
@@ -374,7 +373,7 @@ public final class FormElementModel {
   /**
    * Construct the FormElementKey that holds the abstract XPath expression
    * defining this FormElementModel.
-   * 
+   *
    * @param form
    *          the form containing this FormElementModel
    * @return the FormElementKey describing the FormElementModel
@@ -386,7 +385,7 @@ public final class FormElementModel {
   /**
    * Search the children of this element and return the one that has the name
    * that matches.
-   * 
+   *
    * @param elementName
    *          - name to match
    * @return the element or null if not found.
@@ -411,11 +410,11 @@ public final class FormElementModel {
   /**
    * Given a form definition and a FormElementKey, retrieves the
    * FormElementModel corresponding to the key.
-   * 
+   *
    * @param form
    * @param key
    * @return the form element model corresponding to the key.
-   * @throws ODKFormNotFoundException
+   * @throws IllegalArgumentException
    */
   public static final FormElementModel retrieveFormElementModel(IForm form, FormElementKey key) {
     String[] slashParts = key.toString().split(K_SL);
