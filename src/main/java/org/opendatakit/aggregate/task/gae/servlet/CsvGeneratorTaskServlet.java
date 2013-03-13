@@ -20,6 +20,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -33,16 +35,18 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class CsvGeneratorTaskServlet extends ServletUtilBase {
   /**
    * Serial number for serialization
    */
   private static final long serialVersionUID = 5552217246831515463L;
+
+  private static final Log logger = LogFactory.getLog(CsvGeneratorTaskServlet.class);
 
   /**
    * URI from base
@@ -51,7 +55,7 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
 
   /**
    * Handler for HTTP Get request to create xform upload page
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -60,23 +64,35 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	cc.setAsDaemon(true);
 
+	logger.info("GAE servlet for CSV generation begins");
+
     // get parameter
-    String formId = getParameter(req, ServletConsts.FORM_ID);
-    String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
+    final String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
+      logger.error("Missing " + ServletConsts.FORM_ID + " key");
+      errorMissingKeyParam(resp);
+      return;
+    }
+    final String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
     if ( persistentResultsString == null ) {
+      logger.error("Missing " + ServletConsts.PERSISTENT_RESULTS_KEY + " key");
     	errorBadParam(resp);
     	return;
     }
     SubmissionKey persistentResultsKey = new SubmissionKey(persistentResultsString);
-    String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
+    final String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
     if ( attemptCountString == null ) {
+      logger.error("Missing " + ServletConsts.ATTEMPT_COUNT + " key");
     	errorBadParam(resp);
     	return;
     }
-    Long attemptCount = Long.valueOf(attemptCountString);
-
-    if (formId == null) {
-      errorMissingKeyParam(resp);
+    Long attemptCount = 1L;
+    try {
+      attemptCount = Long.valueOf(attemptCountString);
+    } catch ( Exception e) {
+      logger.error("Invalid " + ServletConsts.ATTEMPT_COUNT +
+          " value: " + attemptCountString + " exception: " + e.toString());
+      errorBadParam(resp);
       return;
     }
 
@@ -84,26 +100,30 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
     try {
       form = FormFactory.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       odkIdNotFoundError(resp);
       return;
     } catch (ODKOverQuotaException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       quotaExceededError(resp);
       return;
     } catch (ODKDatastoreException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       datastoreError(resp);
       return;
     }
-    
+
     if ( !form.hasValidFormDefinition() ) {
+      logger.error("Unable to retrieve formId: " + formId + " invalid form definition");
 	  errorRetreivingData(resp);
 	  return; // ill-formed definition
     }
 
     CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc);
-    
+
     impl.generateCsv();
   }
 }

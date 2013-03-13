@@ -5,6 +5,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -24,40 +26,51 @@ public class JsonGeneratorTaskServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = -2571463127331034693L;
 
+  private static final Log logger = LogFactory.getLog(JsonGeneratorTaskServlet.class);
+
   /**
    * URI from base
    */
   public static final String ADDR = "gae/jsonFileGeneratorTask";
-  
-  
+
   /**
    * Handler for HTTP Get request to create the JSON file
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-   CallingContext cc = ContextFactory.getCallingContext(this, req);
-   cc.setAsDaemon(true);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    cc.setAsDaemon(true);
 
     // get parameter
-    String formId = getParameter(req, ServletConsts.FORM_ID);
-    String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
-    if ( persistentResultsString == null ) {
+    final String formId = getParameter(req, ServletConsts.FORM_ID);
+    if (formId == null) {
+      logger.error("Missing " + ServletConsts.FORM_ID + " key");
+      errorMissingKeyParam(resp);
+      return;
+    }
+    final String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
+    if (persistentResultsString == null) {
+      logger.error("Missing " + ServletConsts.PERSISTENT_RESULTS_KEY + " key");
       errorBadParam(resp);
       return;
     }
     SubmissionKey persistentResultsKey = new SubmissionKey(persistentResultsString);
-    String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
-    if ( attemptCountString == null ) {
+    final String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
+    if (attemptCountString == null) {
+      logger.error("Missing " + ServletConsts.ATTEMPT_COUNT + " key");
       errorBadParam(resp);
       return;
     }
-    Long attemptCount = Long.valueOf(attemptCountString);
-
-    if (formId == null) {
-      errorMissingKeyParam(resp);
+    Long attemptCount = 1L;
+    try {
+      attemptCount = Long.valueOf(attemptCountString);
+    } catch (Exception e) {
+      logger.error("Invalid " + ServletConsts.ATTEMPT_COUNT + " value: " + attemptCountString
+          + " exception: " + e.toString());
+      errorBadParam(resp);
       return;
     }
 
@@ -65,25 +78,29 @@ public class JsonGeneratorTaskServlet extends ServletUtilBase {
     try {
       form = FormFactory.retrieveFormByFormId(formId, cc);
     } catch (ODKFormNotFoundException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       odkIdNotFoundError(resp);
       return;
     } catch (ODKOverQuotaException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       quotaExceededError(resp);
       return;
     } catch (ODKDatastoreException e) {
+      logger.error("Unable to retrieve formId: " + formId + " exception: " + e.toString());
       e.printStackTrace();
       datastoreError(resp);
       return;
     }
-    
-    if ( !form.hasValidFormDefinition() ) {
-     errorRetreivingData(resp);
-     return; // ill-formed definition
+
+    if (!form.hasValidFormDefinition()) {
+      logger.error("Unable to retrieve formId: " + formId + " invalid form definition");
+      errorRetreivingData(resp);
+      return; // ill-formed definition
     }
 
-    JsonFileWorkerImpl impl = new JsonFileWorkerImpl(form, persistentResultsKey, attemptCount, cc);   
+    JsonFileWorkerImpl impl = new JsonFileWorkerImpl(form, persistentResultsKey, attemptCount, cc);
     impl.generateJsonFile();
   }
 }
