@@ -35,16 +35,18 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
-public class UploadSubmissionsTaskServlet extends ServletUtilBase{
+public class UploadSubmissionsTaskServlet extends ServletUtilBase {
   /**
    * Serial number for serialization
    */
   private static final long serialVersionUID = 4295412985320942608L;
+
+  private static final Log logger = LogFactory.getLog(UploadSubmissionsTaskServlet.class);
 
   /**
    * URI from base
@@ -53,32 +55,33 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
 
   /**
    * Handler for HTTP Get request to create xform upload page
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
-	cc.setAsDaemon(true);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    cc.setAsDaemon(true);
 
-	Log logger = LogFactory.getLog(UploadSubmissionsTaskServlet.class);
-	
     // get parameter
     String fscUri = getParameter(req, ExternalServiceConsts.FSC_URI_PARAM);
     if (fscUri == null) {
+      logger.error("Missing " + ExternalServiceConsts.FSC_URI_PARAM + " key");
       errorMissingParam(resp);
       return;
     }
-    
+
     logger.info("Beginning servlet processing");
     FormServiceCursor fsc;
     try {
       fsc = FormServiceCursor.getFormServiceCursor(fscUri, cc);
     } catch (ODKEntityNotFoundException e) {
-      // TODO: fix bug we should not be generating tasks for fsc that don't exist
+      // TODO: fix bug we should not be generating tasks for fsc that don't
+      // exist
       // however not critical bug as execution path dies with this try/catch
-      logger.error("BUG: we generated an task for a form service cursor that didn't exist" + e.toString());
+      logger.error("BUG: we generated an task for a form service cursor that didn't exist"
+          + e.toString());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     } catch (ODKOverQuotaException e) {
@@ -91,27 +94,26 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase{
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     }
-    
+
     try {
-    	UploadSubmissionsWorkerImpl worker = 
-    		new UploadSubmissionsWorkerImpl(fsc, cc);
+      UploadSubmissionsWorkerImpl worker = new UploadSubmissionsWorkerImpl(fsc, cc);
       worker.uploadAllSubmissions();
       logger.info("ending successful servlet processing");
       resp.setStatus(HttpServletResponse.SC_ACCEPTED);
     } catch (ODKEntityNotFoundException e) {
-	  e.printStackTrace();
-	  logger.error(e.toString());
-	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-	  return;
-	} catch (ODKExternalServiceException e) {
-	  e.printStackTrace();
-	  logger.error(e.toString());
-	  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-	  return;
-	} catch (ODKFormNotFoundException e) {
-	  logger.error(e.toString());
-	  odkIdNotFoundError(resp);
-	  return;
-	}
+      e.printStackTrace();
+      logger.error(e.toString());
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      return;
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      logger.error(e.toString());
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+      return;
+    } catch (ODKFormNotFoundException e) {
+      logger.error(e.toString());
+      odkIdNotFoundError(resp);
+      return;
+    }
   }
 }
