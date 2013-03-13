@@ -61,23 +61,32 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
    */
   private final JsonServer2ParameterTable objectEntity;
 
-  private JsonServer(JsonServer2ParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
-    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false), new BasicHeaderFormatter(true, true, true), cc);
+  private JsonServer(JsonServer2ParameterTable entity, FormServiceCursor formServiceCursor,
+      IForm form, CallingContext cc) {
+    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
+        new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
 
-  private JsonServer(JsonServer2ParameterTable entity, IForm form, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException {
-    this (entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.JSON_SERVER, cc), form, cc);
+  private JsonServer(JsonServer2ParameterTable entity, IForm form,
+      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+      throws ODKDatastoreException {
+    this(entity, createFormServiceCursor(form, entity, externalServiceOption,
+        ExternalServiceType.JSON_SERVER, cc), form, cc);
     objectEntity.setOwnerEmail(ownerEmail);
   }
 
-  public JsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKDatastoreException {
-    this(retrieveEntity(JsonServer2ParameterTable.assertRelation(cc), formServiceCursor, cc), formServiceCursor, form, cc);
+  public JsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
+      throws ODKDatastoreException {
+    this(retrieveEntity(JsonServer2ParameterTable.assertRelation(cc), formServiceCursor, cc),
+        formServiceCursor, form, cc);
   }
 
-  public JsonServer(IForm form,  String authKey, String serverURL, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+  public JsonServer(IForm form, String authKey, String serverURL,
+      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
-    this(newEntity(JsonServer2ParameterTable.assertRelation(cc), cc), form, externalServiceOption, ownerEmail, cc);
+    this(newEntity(JsonServer2ParameterTable.assertRelation(cc), cc), form, externalServiceOption,
+        ownerEmail, cc);
 
     objectEntity.setServerUrl(serverURL);
     objectEntity.setAuthKey(authKey);
@@ -119,8 +128,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
       int statusCode = resp.getStatusLine().getStatusCode();
       if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
-        throw new ODKExternalServiceCredentialsException(resp.getStatusLine().getReasonPhrase() + " ("
-            + statusCode + ")");
+        throw new ODKExternalServiceCredentialsException(resp.getStatusLine().getReasonPhrase()
+            + " (" + statusCode + ")");
       } else if (statusCode != HttpServletResponse.SC_OK) {
         throw new ODKExternalServiceException(resp.getStatusLine().getReasonPhrase() + " ("
             + statusCode + ")");
@@ -156,8 +165,8 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
       System.out.println("Sending one JSON Submission");
 
-      JsonFormatterWithFilters formatter =
-          new JsonFormatterWithFilters(pWriter, form, null, false, true, cc.getServerURL());
+      JsonFormatterWithFilters formatter = new JsonFormatterWithFilters(pWriter, form, null, false,
+          true, cc.getServerURL());
       formatter.processSubmissions(Collections.singletonList(submission), cc);
 
       pWriter.flush();
@@ -177,7 +186,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
       try {
         persist(cc);
-      } catch ( Exception e1) {
+      } catch (Exception e1) {
         e1.printStackTrace();
         throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
       }
@@ -191,11 +200,14 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
   @Override
   public String getDescriptiveTargetString() {
+    // the token, if supplied, is a secret.
+    // Show only the first 4 characters, or,
+    // if the string is less than 8 characters long, show less.
     String auth = getAuthKey();
-    if ( auth != null && auth.length() != 0 ) {
-      auth = " token: " + auth.substring(0,4) + "...";
+    if (auth != null && auth.length() != 0) {
+      auth = " token: " + auth.substring(0, Math.min(4, auth.length() / 3)) + "...";
     }
-     return getServerUrl() + auth;
+    return getServerUrl() + auth;
   }
 
   protected CommonFieldsBase retrieveObjectEntity() {
