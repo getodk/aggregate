@@ -33,10 +33,10 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WatchdogServlet extends ServletUtilBase{
   /**
@@ -44,14 +44,16 @@ public class WatchdogServlet extends ServletUtilBase{
    */
   private static final long serialVersionUID = 4295412985320942609L;
 
+  private static final Log logger = LogFactory.getLog(WatchdogServlet.class);
+
   /**
    * URI from base
    */
   public static final String ADDR = "gae/watchdog";
-  
+
   /**
    * Handler for HTTP Get request to run watchdog task
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -60,16 +62,23 @@ public class WatchdogServlet extends ServletUtilBase{
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	cc.setAsDaemon(true);
 
-	Log logger = LogFactory.getLog(WatchdogServlet.class);
-	
     // get parameter
     String checkIntervalString = getParameter(req, ServletConsts.CHECK_INTERVAL_PARAM);
     if (checkIntervalString == null) {
+      logger.error("Missing " + ServletConsts.CHECK_INTERVAL_PARAM + " key");
       errorMissingParam(resp);
       return;
     }
-    long checkIntervalMilliseconds = Long.parseLong(checkIntervalString);
-    
+    Long checkIntervalMilliseconds = 1L;
+    try {
+      checkIntervalMilliseconds = Long.valueOf(checkIntervalString);
+    } catch (Exception e) {
+      logger.error("Invalid " + ServletConsts.CHECK_INTERVAL_PARAM + " value: " + checkIntervalString
+          + " exception: " + e.toString());
+      errorBadParam(resp);
+      return;
+    }
+
     logger.info("Beginning servlet processing");
     WatchdogWorkerImpl worker = new WatchdogWorkerImpl();
     try {
