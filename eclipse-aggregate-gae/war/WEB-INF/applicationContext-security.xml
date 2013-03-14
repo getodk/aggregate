@@ -144,7 +144,9 @@
 	        <intercept-url pattern="/relogin.html" access="${security.server.channelType}" />
 		    <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
             <intercept-url pattern="/local_login.html" access="${security.server.channelType}" />
-		    <intercept-url pattern="/**" access="${security.server.channelType}"/>
+	        <intercept-url pattern="/gae/**" access="ANY_CHANNEL" /> <!-- GAE picks the scheme -->
+	        <intercept-url pattern="/remote_api/**" access="ANY_CHANNEL" /> <!-- GAE picks the scheme -->
+	        <intercept-url pattern="/**" access="${security.server.channelType}"/>
 	    </filter-invocation-definition-source>
 	  </beans:property>
 	</beans:bean>
