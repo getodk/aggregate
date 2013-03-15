@@ -309,7 +309,7 @@ public final class PublishPopup extends AbstractPopupBase {
       case OHMAGE_JSON_SERVER:
         SecureGWT.getServicesAdminService().createOhmageJsonServer(formId, ohmageCampaignUrn.getText(),
             ohmageCampaignTimestamp.getText(), ohmageUsername.getText(), ohmageHashedPassword.getText(),
-            jsUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
+            ohmageUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
         break;
       case GOOGLE_FUSIONTABLES:
         SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, ownerEmail,
