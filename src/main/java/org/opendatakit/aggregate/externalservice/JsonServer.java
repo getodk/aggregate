@@ -180,6 +180,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       fb = new FormBodyPart("format", new StringBody("json", utf8));
       postentity.addPart(fb);
       fb = new FormBodyPart("data", new StringBody(baStream.toString(UTF_8), utf8));
+      postentity.addPart(fb);
 
       this.sendRequest(getServerUrl(), postentity, cc);
     } catch (ODKExternalServiceCredentialsException e) {
