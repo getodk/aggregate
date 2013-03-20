@@ -19,6 +19,7 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
@@ -49,13 +50,13 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       b.countdownMillis(BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
       b.param(ExternalServiceConsts.FSC_URI_PARAM, fsc.getUri());
 
-      // if we requested a background thread and are enabling faster publishing,
+      // if we requested a background thread and have not disabled faster publishing,
       // throw the publisher onto the background thread where it can process
       // bigger batches of records.
       //
       // Otherwise, use the frontend thread.
-      Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-      if ( onBackground && wd.getFasterWatchdogCycleEnabled() ) {
+      boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+      if ( onBackground && !disabled ) {
         b.enqueue();
       } else {
         b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);

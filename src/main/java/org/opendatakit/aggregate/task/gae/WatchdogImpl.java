@@ -20,6 +20,8 @@ import java.net.UnknownHostException;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.CsvGenerator;
@@ -53,6 +55,8 @@ import org.springframework.beans.factory.InitializingBean;
  *
  */
 public class WatchdogImpl implements Watchdog, InitializingBean {
+
+  private Log logger = LogFactory.getLog(WatchdogImpl.class);
 
   /** cached value of the faster-watchdog-cycle flag */
   private boolean lastFasterWatchdogCycleEnabledFlag = false;
@@ -234,6 +238,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
 
   @Override
   public void onUsage(long delayMilliseconds, CallingContext cc) {
+    logger.info("Enqueuing WatchdogWorker Task for " + Long.toString(delayMilliseconds) + "ms into the future.");
     // fire off a watchdog background task...
     TaskOptionsBuilder b = new TaskOptionsBuilder(WatchdogServlet.ADDR);
     if ( delayMilliseconds != 0L ) {
@@ -357,6 +362,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   @Override
   public void setFasterWatchdogCycleEnabled(boolean value) {
     if ( lastFasterWatchdogCycleEnabledFlag != value ) {
+      logger.info("setFasterWatchdogCycleEnabled: CHANGING to: " + value );
       lastFasterWatchdogCycleEnabledFlag = value;
       if ( lastFasterWatchdogCycleEnabledFlag ) {
         // fire off a Watchdog.
