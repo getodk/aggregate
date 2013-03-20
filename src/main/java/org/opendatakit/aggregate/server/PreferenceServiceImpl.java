@@ -74,15 +74,19 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
   }
 
   @Override
-  public void setFasterPublishingEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      ServerPreferencesProperties.setFasterPublishingEnabled(cc,enabled);
+      ServerPreferencesProperties.setFasterBackgroundActionsDisabled(cc, disabled);
 
       Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-      wd.setFasterPublishingEnabled(enabled);
+      // NOTE: this will fire off a watchdog worker
+      // if we are re-enabling faster publishing
+      //
+      // No-op if not changed.
+      wd.setFasterWatchdogCycleEnabled(!disabled);
 
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();

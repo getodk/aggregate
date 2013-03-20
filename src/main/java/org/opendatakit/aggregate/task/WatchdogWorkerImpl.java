@@ -196,7 +196,7 @@ public class WatchdogWorkerImpl {
           || lastUploadDate.compareTo(establishmentDate) < 0) {
         // there is still work to do
         activeTask = true;
-        uploadSubmissions.createFormUploadTask(fsc, cc);
+        uploadSubmissions.createFormUploadTask(fsc, true, cc);
       }
     }
     return activeTask;
@@ -259,7 +259,7 @@ public class WatchdogWorkerImpl {
 
     if ( makeActive ) {
       // there is work to do
-      uploadSubmissions.createFormUploadTask(fsc, cc);
+      uploadSubmissions.createFormUploadTask(fsc, false, cc);
     }
     return makeActive;
   }

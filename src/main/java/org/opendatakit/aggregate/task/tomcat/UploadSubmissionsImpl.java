@@ -52,11 +52,11 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
 	}
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, CallingContext cc)
+  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
       throws ODKExternalServiceException {
 	WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
 	// use watchdog's calling context in runner...
-	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getFasterPublishingEnabled(), wd.getCallingContext());
+	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getFasterWatchdogCycleEnabled(), wd.getCallingContext());
     System.out.println("UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(ur);

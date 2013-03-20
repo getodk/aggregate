@@ -36,7 +36,7 @@ public class Preferences {
 
   private static Boolean odkTablesEnabled;
 
-  private static Boolean fasterPublishingEnabled;
+  private static Boolean fasterBackgroundActionsDisabled;
 
   public static void updatePreferences(final PreferencesCompletionCallback callback) {
     SecureGWT.getPreferenceService().getPreferences(new AsyncCallback<PreferenceSummary>() {
@@ -53,7 +53,7 @@ public class Preferences {
         googleSimpleApiKey = summary.getGoogleSimpleApiKey();
         googleApiClientId = summary.getGoogleApiClientId();
         odkTablesEnabled = summary.getOdkTablesEnabled();
-        fasterPublishingEnabled = summary.getFasterPublishingEnabled();
+        fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
 
         if (callback != null) {
         	callback.refreshFromUpdatedPreferences();
@@ -97,15 +97,15 @@ public class Preferences {
     odkTablesEnabled = enabled;
   }
 
-  public static Boolean getFasterPublishingEnabled() {
-    if(fasterPublishingEnabled != null) {
-      return fasterPublishingEnabled;
+  public static Boolean getFasterBackgroundActionsDisabled() {
+    if(fasterBackgroundActionsDisabled != null) {
+      return fasterBackgroundActionsDisabled;
     }
     return Boolean.FALSE;
   }
 
-  public static void setFasterPublishingBoolean(Boolean enabled) {
-    SecureGWT.getPreferenceService().setFasterPublishingEnabled(enabled, new AsyncCallback<Void>() {
+  public static void setFasterBackgroundActionsDisabledBoolean(Boolean disabled) {
+    SecureGWT.getPreferenceService().setFasterBackgroundActionsDisabled(disabled, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
       }
@@ -114,7 +114,7 @@ public class Preferences {
         // do nothing
       }
     });
-    fasterPublishingEnabled = enabled;
+    fasterBackgroundActionsDisabled = disabled;
   }
 
 

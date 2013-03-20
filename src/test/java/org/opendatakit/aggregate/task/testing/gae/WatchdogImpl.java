@@ -320,12 +320,12 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   }
 
   @Override
-  public void setFasterPublishingEnabled(boolean value) {
+  public void setFasterWatchdogCycleEnabled(boolean value) {
     lastFastPublishingEnabledFlag = value;
   }
 
   @Override
-  public boolean getFasterPublishingEnabled() {
+  public boolean getFasterWatchdogCycleEnabled() {
     return lastFastPublishingEnabledFlag;
   }
 }

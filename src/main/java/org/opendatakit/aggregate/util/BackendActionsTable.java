@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -29,6 +30,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -65,10 +67,10 @@ public class BackendActionsTable extends CommonFieldsBase {
   public static final long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
   public static Map<String, Long> lastPublisherRevision = new HashMap<String, Long>();
   public static final long PUBLISHING_DELAY_MILLISECONDS = 500L + PersistConsts.MAX_SETTLE_MILLISECONDS;
-  /** delay between watchdog sweeps to nudge publishers onward. */
+  /** delay between watchdog sweeps to nudge failed publishers onward. */
   public static final long FAST_PUBLISHING_RETRY_MILLISECONDS = 60L*1000L; // 1 minute...
   /** delay between watchdog sweeps when there are no active tasks */
-  public static final long IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 6L * 60000L; // 6 minutes
+  public static final long IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 15L * 60000L; // 15 minutes
   // field used to record when watchdogs actually start
   private static long lastWatchdogStartTime = 0L;
 
@@ -242,7 +244,7 @@ public class BackendActionsTable extends CommonFieldsBase {
     } finally {
       // if faster publishing is enabled, then
       // schedule the next watchdog in the future.
-      if ( wd.getFasterPublishingEnabled() ) {
+      if ( wd.getFasterWatchdogCycleEnabled() ) {
         wd.onUsage(FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
       }
       cc.setAsDaemon(wasDaemon);
@@ -392,8 +394,8 @@ public class BackendActionsTable extends CommonFieldsBase {
             // fire the Watchdog ONLY if we are not
             // doing fast publishing. During fast publishing,
             // the watchdog is fired during updateStart()...
-            if ( !wd.getFasterPublishingEnabled() ) {
-              wd.onUsage(0L, cc);
+            if ( !wd.getFasterWatchdogCycleEnabled() ) {
+              wd.onUsage(0L, cc); // no wait, as we are well past due...
             }
 
             // update enqueue value...
@@ -456,7 +458,7 @@ public class BackendActionsTable extends CommonFieldsBase {
     // don't schedule any timer before the next idling retry time
     long nextIdlingRetryTime;
 
-    if ( wd.getFasterPublishingEnabled() ) {
+    if ( wd.getFasterWatchdogCycleEnabled() ) {
       nextIdlingRetryTime = lastWatchdogEnqueueTime +
           FAST_PUBLISHING_RETRY_MILLISECONDS;
     } else {
@@ -489,10 +491,27 @@ public class BackendActionsTable extends CommonFieldsBase {
 
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
 
-    long futureMilliseconds = FAST_PUBLISHING_RETRY_MILLISECONDS;
+    try {
+      boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+      boolean wasFastPublishing = ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc);
 
-    if ( hasActiveTasks || wd.getFasterPublishingEnabled() ) {
-      scheduleFutureWatchdog(wd, futureMilliseconds, cc);
+      if ( !hasActiveTasks && wasFastPublishing ) {
+        // we should switch to the slower watchdog cycle
+        ServerPreferencesProperties.setFasterWatchdogCycleEnabled(cc, false);
+        wd.setFasterWatchdogCycleEnabled(false);
+      }
+
+      if ( hasActiveTasks ) {
+        if (!wasFastPublishing && !disabled ) {
+          // switch to the faster watchdog cycle
+          ServerPreferencesProperties.setFasterWatchdogCycleEnabled(cc, true);
+          wd.setFasterWatchdogCycleEnabled(true);
+        }
+      }
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
     }
   }
 }

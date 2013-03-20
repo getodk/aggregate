@@ -254,7 +254,7 @@ public class SubmissionServlet extends ServletUtilBase {
           for (ExternalService rs : tmp) {
             // only create upload tasks for active publishers
             if ( rs.getFormServiceCursor().getOperationalStatus() == OperationalStatus.ACTIVE ) {
-              uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
+              uploadTask.createFormUploadTask(rs.getFormServiceCursor(), false, ccDaemon);
             }
           }
         } catch (ODKExternalServiceException e) {

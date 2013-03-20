@@ -26,16 +26,15 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public final class EnableFasterPublishingCheckbox extends AggregateCheckBox implements
+public final class DisableFasterBackgroundActionsCheckbox extends AggregateCheckBox implements
     ValueChangeHandler<Boolean> {
 
-  private static final String LABEL = "Enable faster publishing (can increase quota usage on Google AppEngine)";
-  private static final String TOOLTIP_TXT = "Enable/Disable Faster Publishing";
-  private static final String HELP_BALLOON_TXT = "Check this box if you want to speed the publishing of data.  "
-      + "Otherwise leave unchecked. Speeding the publishing of data will prevent the application from sleeping "
-      + "and may increase quota usage on Google AppEngine.";
+  private static final String LABEL = "Disable faster background actions (exports, publishing, form deletion) (slows quota usage on Google AppEngine)";
+  private static final String TOOLTIP_TXT = "Enable/Disable Faster Background Actions";
+  private static final String HELP_BALLOON_TXT = "Check this box if you need to preserve Google AppEngine quota for submissions and website activities. "
+      + "Otherwise leave unchecked. If checked, exports, publishing and form deletion requests will take longer to complete.";
 
-  public EnableFasterPublishingCheckbox(Boolean enabled) {
+  public DisableFasterBackgroundActionsCheckbox(Boolean enabled) {
     super(LABEL, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
     setValue(enabled);
     boolean accessable = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
@@ -55,11 +54,11 @@ public final class EnableFasterPublishingCheckbox extends AggregateCheckBox impl
     super.onValueChange(event);
 
     final Boolean enabled = event.getValue();
-    SecureGWT.getPreferenceService().setFasterPublishingEnabled(enabled, new AsyncCallback<Void>() {
+    SecureGWT.getPreferenceService().setFasterBackgroundActionsDisabled(enabled, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         // restore old value
-        setValue(Preferences.getFasterPublishingEnabled());
+        setValue(Preferences.getFasterBackgroundActionsDisabled());
         AggregateUI.getUI().reportError(caught);
       }
 

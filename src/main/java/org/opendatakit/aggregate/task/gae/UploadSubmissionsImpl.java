@@ -37,7 +37,7 @@ import org.opendatakit.common.web.CallingContext;
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, CallingContext cc)
+  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
       throws ODKExternalServiceException {
 
     try {
@@ -49,12 +49,13 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       b.countdownMillis(BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
       b.param(ExternalServiceConsts.FSC_URI_PARAM, fsc.getUri());
 
-      // if we are enabling faster publishing, throw the publisher onto the
-      // background thread where it can process bigger batches of records.
+      // if we requested a background thread and are enabling faster publishing,
+      // throw the publisher onto the background thread where it can process
+      // bigger batches of records.
       //
       // Otherwise, use the frontend thread.
       Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-      if ( wd.getFasterPublishingEnabled() ) {
+      if ( onBackground && wd.getFasterWatchdogCycleEnabled() ) {
         b.enqueue();
       } else {
         b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);

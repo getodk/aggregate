@@ -59,10 +59,10 @@ import org.springframework.web.context.ServletContextAware;
 public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     ServletContextAware {
 
-  /** cached value of the fast-publishing flag */
-  private boolean lastFastPublishingEnabledFlag = false;
-  /** timestamp of the last fetch of the fast-publishing flag */
-  private long lastFastPublishingEnabledFlagFetch = -1L;
+  /** cached value of the faster-watchdog-cycle flag */
+  private boolean lastFasterWatchdogCycleEnabledFlag = false;
+  /** timestamp of the last fetch (re-calculation) of the faster-watchdog-cycle flag */
+  private long lastFasterWatchdogCycleEnabledFlagFetch = -1L;
 
   /** object used to cancel the fixed-rate scheduled WatchdogImpl task */
   private ScheduledFuture<?> watchdogFuture = null;
@@ -314,19 +314,19 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   @Override
   public void start() {
     System.out.println("start WATCHDOG TASK IN TOMCAT");
-    // initialize the cached value of the fast publishing flag
+    // initialize the cached value of the fast cycling flag
     CallingContext cc = getCallingContext();
-    lastFastPublishingEnabledFlag = false;
+    lastFasterWatchdogCycleEnabledFlag = false;
     try {
-      lastFastPublishingEnabledFlag = ServerPreferencesProperties.getFasterPublishingEnabled(cc);
+      lastFasterWatchdogCycleEnabledFlag = ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
     }
-    lastFastPublishingEnabledFlagFetch = System.currentTimeMillis();
+    lastFasterWatchdogCycleEnabledFlagFetch = System.currentTimeMillis();
     // start the publisher...
-    establishWatchdog(lastFastPublishingEnabledFlag);
+    establishWatchdog(lastFasterWatchdogCycleEnabledFlag);
     isStarted = true;
   }
 
@@ -479,8 +479,8 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     return new CallingContextImpl();
   }
 
-  private void establishWatchdog(boolean fastPublishingEnabled) {
-    if ( fastPublishingEnabled ) {
+  private void establishWatchdog(boolean fasterWatchdogCycleEnabled) {
+    if ( fasterWatchdogCycleEnabled ) {
       createWatchdogTask(BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS);
     } else {
       createWatchdogTask(BackendActionsTable.IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS);
@@ -488,29 +488,30 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   }
 
   @Override
-  public void setFasterPublishingEnabled(boolean value) {
-    if ( lastFastPublishingEnabledFlag != value ) {
-      lastFastPublishingEnabledFlag = value;
+  public void setFasterWatchdogCycleEnabled(boolean value) {
+    if ( lastFasterWatchdogCycleEnabledFlag != value ) {
+      lastFasterWatchdogCycleEnabledFlag = value;
       // kill and restart the publisher...
-      establishWatchdog(lastFastPublishingEnabledFlag);
+      establishWatchdog(lastFasterWatchdogCycleEnabledFlag);
     }
-    lastFastPublishingEnabledFlagFetch = System.currentTimeMillis();
+    lastFasterWatchdogCycleEnabledFlagFetch = System.currentTimeMillis();
   }
 
   @Override
-  public boolean getFasterPublishingEnabled() {
+  public boolean getFasterWatchdogCycleEnabled() {
     CallingContext cc = getCallingContext();
     if ( System.currentTimeMillis() >
         BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS +
-        lastFastPublishingEnabledFlagFetch ) {
+        lastFasterWatchdogCycleEnabledFlagFetch ) {
       try {
-        setFasterPublishingEnabled(ServerPreferencesProperties.getFasterPublishingEnabled(cc));
+        boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+        setFasterWatchdogCycleEnabled(!disabled && ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc));
       } catch (ODKEntityNotFoundException e) {
         e.printStackTrace();
       } catch (ODKOverQuotaException e) {
         e.printStackTrace();
       }
     }
-    return lastFastPublishingEnabledFlag;
+    return lastFasterWatchdogCycleEnabledFlag;
   }
 }

@@ -34,6 +34,7 @@ import org.opendatakit.aggregate.task.gae.servlet.WatchdogServlet;
 import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.Realm;
@@ -52,10 +53,11 @@ import org.springframework.beans.factory.InitializingBean;
  *
  */
 public class WatchdogImpl implements Watchdog, InitializingBean {
-  /** cached value of the fast-publishing flag */
-  private boolean lastFastPublishingEnabledFlag = false;
-  /** timestamp of the last fetch of the fast-publishing flag */
-  private long lastFastPublishingEnabledFlagFetch = -1L;
+
+  /** cached value of the faster-watchdog-cycle flag */
+  private boolean lastFasterWatchdogCycleEnabledFlag = false;
+  /** timestamp of the last fetch (re-calculation) of the faster-watchdog-cycle flag */
+  private long lastFasterWatchdogCycleEnabledFlagFetch = -1L;
 
   Datastore datastore = null;
   UserService userService = null;
@@ -353,32 +355,34 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   }
 
   @Override
-  public void setFasterPublishingEnabled(boolean value) {
-    if ( lastFastPublishingEnabledFlag != value ) {
-      lastFastPublishingEnabledFlag = value;
-      if ( lastFastPublishingEnabledFlag ) {
-        // fire off a watchdog immediately.
+  public void setFasterWatchdogCycleEnabled(boolean value) {
+    if ( lastFasterWatchdogCycleEnabledFlag != value ) {
+      lastFasterWatchdogCycleEnabledFlag = value;
+      if ( lastFasterWatchdogCycleEnabledFlag ) {
+        // fire off a Watchdog.
+        // Delay it slightly to allow database updates to propagate.
         CallingContext cc = getCallingContext();
-        this.onUsage(0L, cc);
+        onUsage(PersistConsts.MAX_SETTLE_MILLISECONDS, cc);
       }
     }
-    lastFastPublishingEnabledFlagFetch = System.currentTimeMillis();
+    lastFasterWatchdogCycleEnabledFlagFetch = System.currentTimeMillis();
   }
 
   @Override
-  public boolean getFasterPublishingEnabled() {
+  public boolean getFasterWatchdogCycleEnabled() {
     CallingContext cc = getCallingContext();
     if ( System.currentTimeMillis() >
         BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS +
-        lastFastPublishingEnabledFlagFetch ) {
+        lastFasterWatchdogCycleEnabledFlagFetch ) {
       try {
-        setFasterPublishingEnabled(ServerPreferencesProperties.getFasterPublishingEnabled(cc));
+        boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+        setFasterWatchdogCycleEnabled(!disabled && ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc));
       } catch (ODKEntityNotFoundException e) {
         e.printStackTrace();
       } catch (ODKOverQuotaException e) {
         e.printStackTrace();
       }
     }
-    return lastFastPublishingEnabledFlag;
+    return lastFasterWatchdogCycleEnabledFlag;
   }
 }

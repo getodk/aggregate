@@ -18,13 +18,20 @@ package org.opendatakit.aggregate.task;
 import org.opendatakit.common.web.CallingContext;
 
 /**
+ * Watchdog is the coordinating object for the firing of a WatchdogWorkerImpl
+ * action, which performs the actual supervisory tests and restarts stalled
+ * tasks.
+ *
  * Watchdog has two radically divergent implementations.
- * <ul><li>On Tomcat, Watchdog is executed using the spring task framework.</li><li>
- * On GAE, Watchdog is fired every WATCHDOG_RETRY_INTERVAL_MILLISECONDS
- * when the website is active or, if, Watchdog itself determines
- * that there is work, then Watchdog is re-fired every
- * WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS until there is no
- * pending work.</li></ul>
+ * <ul><li>On Tomcat, WatchdogWorkerImpl is executed using the spring task framework.
+ * The Watchdog implementation manipulates the Executor from that framework.</li>
+ * <li>On GAE, the WatchdogWorkerImpl is fired by either a cron, or through website
+ * activity, or via deferred task executions.</li></ul>
+ * If there is no pending work, the Watchdog is re-fired every
+ * BackendActionsTable.IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS.
+ * If there is work, then Watchdog is re-fired every
+ * BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS
+ * until there is no pending work.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -32,12 +39,33 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface Watchdog {
 
-  public void setFasterPublishingEnabled(boolean value);
-
-  public boolean getFasterPublishingEnabled();
+  /**
+   * Triggers the change in behavior between the slow and fast cycles.
+   * Note: this does not alter the ServerPreferencesProperties
+   * values.  When the next getFasterWatchdogCycleEnabled() is called,
+   * the Watchdog may therefore reset itself to the opposite cycle.
+   *
+   * @param value
+   */
+  public void setFasterWatchdogCycleEnabled(boolean value);
 
   /**
-   * Invoked when the website is accessed after a period of inactivity.
+   * Get whether or not the watchdog is currently on a fast or slow cycle.
+   * This triggers a periodic interrogation of the datastore and will
+   * automatically transition the watchdog into the appropriate cycle
+   * should the datastore indicate that such a change is necessary.
+   *
+   * The determination of the Watchdog state honors both:
+   * ServerPreferencesProperties.getFasterBackgroundActionsDisabled() and
+   * ServerPreferencesProperties.getFasterWatchdogCycleEnabled() settings.
+   *
+   * @return
+   */
+  public boolean getFasterWatchdogCycleEnabled();
+
+  /**
+   * Invoked to schedule a Watchdog.  This is a no-op on Tomcat, but is
+   * the primary means by which GAE schedules watchdog workers.
    *
    * @param cc
    */
