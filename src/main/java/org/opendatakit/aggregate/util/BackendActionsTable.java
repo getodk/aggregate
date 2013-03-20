@@ -242,11 +242,6 @@ public class BackendActionsTable extends CommonFieldsBase {
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
     } finally {
-      // if faster publishing is enabled, then
-      // schedule the next watchdog in the future.
-      if ( wd.getFasterWatchdogCycleEnabled() ) {
-        wd.onUsage(FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
-      }
       cc.setAsDaemon(wasDaemon);
     }
   }
@@ -502,10 +497,15 @@ public class BackendActionsTable extends CommonFieldsBase {
       }
 
       if ( hasActiveTasks ) {
-        if (!wasFastPublishing && !disabled ) {
-          // switch to the faster watchdog cycle
-          ServerPreferencesProperties.setFasterWatchdogCycleEnabled(cc, true);
-          wd.setFasterWatchdogCycleEnabled(true);
+        if ( !disabled ) {
+          if ( !wasFastPublishing ) {
+            // switch to the faster watchdog cycle
+            ServerPreferencesProperties.setFasterWatchdogCycleEnabled(cc, true);
+            wd.setFasterWatchdogCycleEnabled(true);
+          } else {
+            // schedule the next watchdog in the future.
+            wd.onUsage(FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
+          }
         }
       }
     } catch (ODKEntityNotFoundException e) {

@@ -167,16 +167,20 @@ public class WatchdogWorkerImpl {
 
       switch (fsc.getExternalServicePublicationOption()) {
       case UPLOAD_ONLY:
-        activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
+        if (!fsc.getUploadCompleted()) {
+          activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
+        }
         break;
       case STREAM_ONLY:
         activeTasks = activeTasks | checkStreaming(fsc, uploadSubmissions, cc);
         break;
       case UPLOAD_N_STREAM:
-        if (!fsc.getUploadCompleted())
+        if (!fsc.getUploadCompleted()) {
           activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
-        if (fsc.getUploadCompleted())
+        }
+        if (fsc.getUploadCompleted()) {
           activeTasks = activeTasks | checkStreaming(fsc, uploadSubmissions, cc);
+        }
         break;
       default:
         break;

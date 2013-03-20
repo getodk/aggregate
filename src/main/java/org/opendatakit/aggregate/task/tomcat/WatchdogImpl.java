@@ -21,6 +21,8 @@ import java.util.concurrent.ScheduledFuture;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.CsvGenerator;
@@ -58,6 +60,8 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     ServletContextAware {
+
+  private Log logger = LogFactory.getLog(WatchdogImpl.class);
 
   /** cached value of the faster-watchdog-cycle flag */
   private boolean lastFasterWatchdogCycleEnabledFlag = false;
@@ -267,6 +271,8 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
    */
   public synchronized void createWatchdogTask(long newWatchdogPeriodInMilliseconds) {
     CallingContext cc = new CallingContextImpl();
+
+    logger.info("Changing WatchdogWorker Executor to " + Long.toString(newWatchdogPeriodInMilliseconds) + "ms intervals.");
 
     try {
       if ( (watchdogFuture != null) &&
@@ -490,6 +496,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   @Override
   public void setFasterWatchdogCycleEnabled(boolean value) {
     if ( lastFasterWatchdogCycleEnabledFlag != value ) {
+      logger.info("setFasterWatchdogCycleEnabled: CHANGING to: " + value );
       lastFasterWatchdogCycleEnabledFlag = value;
       // kill and restart the publisher...
       establishWatchdog(lastFasterWatchdogCycleEnabledFlag);
