@@ -26,18 +26,18 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean.  It cannot have any per-request state.
  * It uses a static inner class to encapsulate the per-request state
  * of a running background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
 	static class UploadSubmissionsRunner implements Runnable {
 		final UploadSubmissionsWorkerImpl impl;
 
-		public UploadSubmissionsRunner(FormServiceCursor fsc, CallingContext cc) {
-			impl = new UploadSubmissionsWorkerImpl(fsc, cc);
+		public UploadSubmissionsRunner(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
+			impl = new UploadSubmissionsWorkerImpl(fsc, useLargerBatchSize, cc);
 		}
 
 		@Override
@@ -56,7 +56,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       throws ODKExternalServiceException {
 	WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
 	// use watchdog's calling context in runner...
-	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getCallingContext());
+	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getFasterPublishingEnabled(), wd.getCallingContext());
     System.out.println("UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(ur);

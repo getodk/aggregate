@@ -34,6 +34,9 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
+import com.google.appengine.api.backends.BackendService;
+import com.google.appengine.api.backends.BackendServiceFactory;
+
 /**
  *
  * @author wbrunette@gmail.com
@@ -95,8 +98,13 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
       return;
     }
 
+    // determine whether we are running on a backend or not...
+    BackendService bes = BackendServiceFactory.getBackendService();
+    boolean isBackend = (bes.getCurrentBackend() != null);
+    logger.info("Request is running on " + (isBackend ? "backend" : "frontend"));
+
     try {
-      UploadSubmissionsWorkerImpl worker = new UploadSubmissionsWorkerImpl(fsc, cc);
+      UploadSubmissionsWorkerImpl worker = new UploadSubmissionsWorkerImpl(fsc, isBackend, cc);
       worker.uploadAllSubmissions();
       logger.info("ending successful servlet processing");
       resp.setStatus(HttpServletResponse.SC_ACCEPTED);

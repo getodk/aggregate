@@ -15,10 +15,12 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
+import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.web.CallingContext;
@@ -27,10 +29,10 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean. It cannot have any per-request state. It uses a
  * static inner class to encapsulate the per-request state of a running
  * background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
@@ -42,11 +44,21 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       System.out.println("Creating "
           + fsc.getExternalServicePublicationOption().toString().toLowerCase() + " upload task: "
           + fsc.getExternalServiceType());
-      
+
       TaskOptionsBuilder b = new TaskOptionsBuilder(UploadSubmissionsTaskServlet.ADDR);
       b.countdownMillis(BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
       b.param(ExternalServiceConsts.FSC_URI_PARAM, fsc.getUri());
-      b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
+
+      // if we are enabling faster publishing, throw the publisher onto the
+      // background thread where it can process bigger batches of records.
+      //
+      // Otherwise, use the frontend thread.
+      Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+      if ( wd.getFasterPublishingEnabled() ) {
+        b.enqueue();
+      } else {
+        b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
+      }
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }
