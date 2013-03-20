@@ -24,6 +24,6 @@ public interface PreferenceServiceAsync {
 
   void setOdkTablesEnabled(Boolean enabled, AsyncCallback<Void> callback);
 
-  void setFasterPublishingEnabled(Boolean enabled, AsyncCallback<Void> callback);
+  void setFasterBackgroundActionsDisabled(Boolean disabled, AsyncCallback<Void> callback);
 
 }

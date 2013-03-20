@@ -58,7 +58,8 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static final String GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME = "GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME";
 
   private static final String ODK_TABLES_ENABLED = "ODK_TABLES_ENABLED";
-  private static final String FASTER_PUBLISHING_ENABLED = "FASTER_PUBLISHING_ENABLED";
+  private static final String FASTER_WATCHDOG_CYCLE_ENABLED = "FASTER_WATCHDOG_CYCLE_ENABLED";
+  private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
 
   /**
    * Construct a relation prototype.
@@ -73,7 +74,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   }
 
   public static PreferenceSummary getPreferenceSummary(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc), getOdkTablesEnabled(cc), getFasterPublishingEnabled(cc));
+    return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc), getOdkTablesEnabled(cc), getFasterBackgroundActionsDisabled(cc));
   }
 
   /**
@@ -132,8 +133,8 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     setServerPreferencesProperty(cc, ODK_TABLES_ENABLED, enabled.toString());
   }
 
-  public static Boolean getFasterPublishingEnabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, FASTER_PUBLISHING_ENABLED);
+  public static Boolean getFasterWatchdogCycleEnabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED);
     if ( value != null ) {
       return Boolean.valueOf(value);
     }
@@ -141,8 +142,21 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     return false;
   }
 
-  public static void setFasterPublishingEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, FASTER_PUBLISHING_ENABLED, enabled.toString());
+  public static void setFasterWatchdogCycleEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    setServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED, enabled.toString());
+  }
+
+  public static Boolean getFasterBackgroundActionsDisabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED);
+    if ( value != null ) {
+      return Boolean.valueOf(value);
+    }
+    // null value should be treated as false
+    return false;
+  }
+
+  public static void setFasterBackgroundActionsDisabled(CallingContext cc, Boolean disabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    setServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED, disabled.toString());
   }
 
   public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {

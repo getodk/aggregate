@@ -293,7 +293,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
       CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
       ccDaemon.setAsDaemon(true);
-      uploadTask.createFormUploadTask(fsc, ccDaemon);
+      uploadTask.createFormUploadTask(fsc, true, ccDaemon);
 
     }
   }
