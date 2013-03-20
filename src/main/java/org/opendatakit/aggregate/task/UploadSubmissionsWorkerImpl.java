@@ -47,36 +47,51 @@ import org.opendatakit.common.web.constants.BasicConsts;
 /**
  * Common worker implementation for the publishing of data to an external
  * service.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class UploadSubmissionsWorkerImpl {
 
-  // Backend tasks are still limited to a 10-minute request time-out.
+  // UploadSubmissions are run in the frontend (website) thread on GAE
+  // unless fast publishing is enabled, in which case they are thrown
+  // onto the background process where there is 10-minute processing limit.
+  //
+  // Frontend tasks are still limited to a 1-minute request time-out.
   // Timing against Fusion Tables indicates that on a good day, it takes
   // about 900 ms per published submission (no repeats).  This means that
   // in 10 minutes (600,000 ms), you should be able to submit 666
-  // records into fusion tables.  If we give a 6-fold factor for a 
+  // records into fusion tables.  If we give a 6-fold factor for a
   // combination of multiple repeat groups within a submission and
   // the slowness of submissions on a bad day, this brings the fetch
-  // limit down to about 100 records.
-  private static final int MAX_QUERY_LIMIT = 100;
+  // limit down to about 10 records (for a 60-second request time-out).
+  private static final int MAX_FOREGROUND_QUERY_LIMIT = 10;
   private static final int DELAY_BETWEEN_RELEASE_RETRIES = 1000;
   private static final int MAX_NUMBER_OF_RELEASE_RETRIES = 10;
 
   private final Log logger = LogFactory.getLog(UploadSubmissionsWorkerImpl.class);
   private final String lockId;
   private final CallingContext cc;
+  private final boolean useLargerBatchSize;
   private final FormServiceCursor pFsc;
   private final ExternalServicePublicationOption pEsOption;
   private ExternalService pExtService;
   private IForm form;
   private long lastUpdateTimestamp = System.currentTimeMillis();
-  
-  public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, CallingContext cc) {
+
+  private int getQueryLimit() {
+    if ( useLargerBatchSize ) {
+      // we are running in the background...
+      return MAX_FOREGROUND_QUERY_LIMIT * 10;
+    } else {
+      return MAX_FOREGROUND_QUERY_LIMIT;
+    }
+  }
+
+  public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
     pFsc = fsc;
+    this.useLargerBatchSize = useLargerBatchSize;
     this.cc = cc;
     pEsOption = fsc.getExternalServicePublicationOption();
     lockId = UUID.randomUUID().toString();
@@ -93,7 +108,7 @@ public class UploadSubmissionsWorkerImpl {
     // the remedy will likely take longer than the requeue delay.
     boolean reQueue = false;
     logger.info("Beginning UPLOAD service: " + pFsc.getAuriService() + " form " + pFsc.getFormId());
-    
+
     try {
       pExtService = pFsc.getExternalService(cc);
       form = FormFactory.retrieveFormByFormId(pFsc.getFormId(), cc);
@@ -137,7 +152,7 @@ public class UploadSubmissionsWorkerImpl {
         logger.warn("Upload invoked before external service is prepared");
         return;
       }
-      
+
       if (pFsc.getOperationalStatus() != OperationalStatus.ACTIVE) {
         logger.warn("Upload invoked when operational status is not ACTIVE");
         return;
@@ -192,7 +207,7 @@ public class UploadSubmissionsWorkerImpl {
         e.printStackTrace();
       }
     }
-    
+
     if ( reQueue ) {
       // create another task to continue upload
       UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc
@@ -211,13 +226,13 @@ public class UploadSubmissionsWorkerImpl {
     Date endDate = pFsc.getEstablishmentDateTime();
     // submissions are queried by the markedAsCompleteDate, since the submissionDate
     // marks the initiation of the upload, but it may not have completed and
-    // been marked as completely uploaded until later. This is particularly 
+    // been marked as completely uploaded until later. This is particularly
     // significant for briefcase-uploaded data, which preserves the submissionDate,
-    // but would have a much-later markedAsCompleteDate, creationDate and 
+    // but would have a much-later markedAsCompleteDate, creationDate and
     // lastUpdatedDate.
     String lastUploadKey = pFsc.getLastUploadKey();
     List<Submission> submissions = querySubmissionsDateRange(startDate, endDate, lastUploadKey);
-    
+
     if (submissions.isEmpty()) {
       logger.info("There are no submissions available for upload");
       // there are no submissions so uploading is complete
@@ -229,7 +244,7 @@ public class UploadSubmissionsWorkerImpl {
       // this persists pFsc
       sendSubmissions(submissions, false);
     }
-    
+
     return true;
   }
 
@@ -278,12 +293,12 @@ public class UploadSubmissionsWorkerImpl {
           pFsc.setLastUploadKey(lastKeySent);
         }
         ds.putEntity(pFsc, user);
-        
+
         // renew the lock whenever we've consumed more than 33% of the time
         // budget for the lock.  This adjusts for very slow external service
         // response times, though if the response time is more than the lock
         // expiration timeout, we can still get into trouble.
-        if ( (System.currentTimeMillis() - lastUpdateTimestamp + 1) 
+        if ( (System.currentTimeMillis() - lastUpdateTimestamp + 1)
             > (TaskLockType.UPLOAD_SUBMISSION.getLockExpirationTimeout() / 3)) {
           // renew lock
           TaskLock taskLock = ds.createTaskLock(user);
@@ -311,7 +326,7 @@ public class UploadSubmissionsWorkerImpl {
   private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate, String uriLast)
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
-    QueryByDateRange query = new QueryByDateRange(form, MAX_QUERY_LIMIT, startDate, endDate, uriLast, cc);
+    QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, endDate, uriLast, cc);
     List<Submission> submissions = query.getResultSubmissions(cc);
     return submissions;
   }
@@ -320,7 +335,7 @@ public class UploadSubmissionsWorkerImpl {
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
     // (excluding the very recent submissions that haven't settled yet).
-    QueryByDateRange query = new QueryByDateRange(form, MAX_QUERY_LIMIT, startDate, uriLast, cc);
+    QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, uriLast, cc);
     List<Submission> submissions = query.getResultSubmissions(cc);
     return submissions;
   }
