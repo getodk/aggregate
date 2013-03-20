@@ -16,14 +16,15 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.Date;
+import java.util.concurrent.ScheduledFuture;
 
 import org.springframework.scheduling.TaskScheduler;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class AggregrateThreadExecutor {
 
@@ -31,13 +32,13 @@ public class AggregrateThreadExecutor {
 
   public synchronized static void initialize( TaskScheduler taskScheduler ) {
 	  if ( classInstance != null ) throw new IllegalStateException("called after having set the task scheduler");
-	  
+
 	  classInstance = new AggregrateThreadExecutor(taskScheduler);
   }
-  
+
   public synchronized static AggregrateThreadExecutor getAggregateThreadExecutor() {
     if ( classInstance == null ) throw new IllegalStateException("called before having initialized the task scheduler");
-    
+
     return classInstance;
   }
 
@@ -50,20 +51,22 @@ public class AggregrateThreadExecutor {
   public void execute(Runnable task) {
 	  exec.schedule(task, new Date(System.currentTimeMillis() + 100));
   }
-  
+
   /**
    * Creates and executes a periodic action whose executions will commence every
-   * period milliseconds.  I.e., at t, t+period, t+2*period, and so on. If any 
-   * execution of the task encounters an exception, subsequent executions are 
-   * suppressed. Otherwise, the task will only terminate via cancellation or 
+   * period milliseconds.  I.e., at t, t+period, t+2*period, and so on. If any
+   * execution of the task encounters an exception, subsequent executions are
+   * suppressed. Otherwise, the task will only terminate via cancellation or
    * termination of the executor.
-   * 
+   *
    * @param command
    *          - the task to execute.
    * @param periodInMilliseconds
    *          - the period between successive executions.
+   *
+   * @return object that can be used to cancel the fixed-rate task in the executor
    */
-  public void scheduleAtFixedRate( Runnable command, long periodInMilliseconds ) {
-	  exec.scheduleAtFixedRate(command, periodInMilliseconds);
+  public ScheduledFuture<?> scheduleAtFixedRate( Runnable command, long periodInMilliseconds ) {
+    return exec.scheduleAtFixedRate(command, periodInMilliseconds);
   }
 }

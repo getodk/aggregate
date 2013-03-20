@@ -12,14 +12,17 @@ public class PreferenceSummary implements Serializable{
 
   private Boolean odkTablesEnabled;
 
+  private Boolean fasterPublishingEnabled;
+
   public PreferenceSummary() {
 
   }
 
-  public PreferenceSummary(String googleSimpleApiKey, String googleApiClientId, Boolean odkTablesEnabled) {
+  public PreferenceSummary(String googleSimpleApiKey, String googleApiClientId, Boolean odkTablesEnabled, Boolean fasterPublishingEnabled) {
     this.googleSimpleApiKey = googleSimpleApiKey;
     this.googleApiClientId = googleApiClientId;
     this.odkTablesEnabled = odkTablesEnabled;
+    this.fasterPublishingEnabled = fasterPublishingEnabled;
   }
 
   public String getGoogleSimpleApiKey() {
@@ -32,6 +35,10 @@ public class PreferenceSummary implements Serializable{
 
   public Boolean getOdkTablesEnabled() {
     return odkTablesEnabled;
+  }
+
+  public Boolean getFasterPublishingEnabled() {
+    return fasterPublishingEnabled;
   }
 
 }
