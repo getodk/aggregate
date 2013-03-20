@@ -34,5 +34,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface PreferenceService extends RemoteService {
   PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  void setFasterPublishingEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+
   void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }

@@ -36,6 +36,8 @@ public class Preferences {
 
   private static Boolean odkTablesEnabled;
 
+  private static Boolean fasterPublishingEnabled;
+
   public static void updatePreferences(final PreferencesCompletionCallback callback) {
     SecureGWT.getPreferenceService().getPreferences(new AsyncCallback<PreferenceSummary>() {
       public void onFailure(Throwable caught) {
@@ -51,6 +53,7 @@ public class Preferences {
         googleSimpleApiKey = summary.getGoogleSimpleApiKey();
         googleApiClientId = summary.getGoogleApiClientId();
         odkTablesEnabled = summary.getOdkTablesEnabled();
+        fasterPublishingEnabled = summary.getFasterPublishingEnabled();
 
         if (callback != null) {
         	callback.refreshFromUpdatedPreferences();
@@ -93,5 +96,26 @@ public class Preferences {
     });
     odkTablesEnabled = enabled;
   }
+
+  public static Boolean getFasterPublishingEnabled() {
+    if(fasterPublishingEnabled != null) {
+      return fasterPublishingEnabled;
+    }
+    return Boolean.FALSE;
+  }
+
+  public static void setFasterPublishingBoolean(Boolean enabled) {
+    SecureGWT.getPreferenceService().setFasterPublishingEnabled(enabled, new AsyncCallback<Void>() {
+      public void onFailure(Throwable caught) {
+          AggregateUI.getUI().reportError(caught);
+      }
+
+      public void onSuccess(Void void1) {
+        // do nothing
+      }
+    });
+    fasterPublishingEnabled = enabled;
+  }
+
 
 }

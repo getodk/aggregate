@@ -58,6 +58,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static final String GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME = "GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME";
 
   private static final String ODK_TABLES_ENABLED = "ODK_TABLES_ENABLED";
+  private static final String FASTER_PUBLISHING_ENABLED = "FASTER_PUBLISHING_ENABLED";
 
   /**
    * Construct a relation prototype.
@@ -72,7 +73,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   }
 
   public static PreferenceSummary getPreferenceSummary(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc), getOdkTablesEnabled(cc));
+    return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc), getOdkTablesEnabled(cc), getFasterPublishingEnabled(cc));
   }
 
   /**
@@ -129,6 +130,19 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   public static void setOdkTablesEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, ODK_TABLES_ENABLED, enabled.toString());
+  }
+
+  public static Boolean getFasterPublishingEnabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, FASTER_PUBLISHING_ENABLED);
+    if ( value != null ) {
+      return Boolean.valueOf(value);
+    }
+    // null value should be treated as false
+    return false;
+  }
+
+  public static void setFasterPublishingEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    setServerPreferencesProperty(cc, FASTER_PUBLISHING_ENABLED, enabled.toString());
   }
 
   public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {

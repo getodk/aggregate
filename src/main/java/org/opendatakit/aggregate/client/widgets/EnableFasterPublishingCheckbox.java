@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 University of Washington
+ * Copyright (C) 2013 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,28 +16,26 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AdminTabUI;
-import org.opendatakit.aggregate.client.AggregateTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
-import org.opendatakit.aggregate.constants.common.Tabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
+public final class EnableFasterPublishingCheckbox extends AggregateCheckBox implements
     ValueChangeHandler<Boolean> {
 
-  private static final String LABEL = "ODK Tables Syncronization Functionality";
-  private static final String TOOLTIP_TXT = "Enable/Disable ODK Tables Sync Functionality";
-  private static final String HELP_BALLOON_TXT = "Check this box if you want to manage ODK Tables.  "
-      + "Otherwise leave unchecked.";
+  private static final String LABEL = "Enable faster publishing (can increase quota usage on Google AppEngine)";
+  private static final String TOOLTIP_TXT = "Enable/Disable Faster Publishing";
+  private static final String HELP_BALLOON_TXT = "Check this box if you want to speed the publishing of data.  "
+      + "Otherwise leave unchecked. Speeding the publishing of data will prevent the application from sleeping "
+      + "and may increase quota usage on Google AppEngine.";
 
-  public EnableOdkTablesCheckbox(Boolean enabled) {
+  public EnableFasterPublishingCheckbox(Boolean enabled) {
     super(LABEL, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
     setValue(enabled);
     boolean accessable = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
@@ -57,11 +55,11 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
     super.onValueChange(event);
 
     final Boolean enabled = event.getValue();
-    SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
+    SecureGWT.getPreferenceService().setFasterPublishingEnabled(enabled, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         // restore old value
-        setValue(Preferences.getOdkTablesEnabled());
+        setValue(Preferences.getFasterPublishingEnabled());
         AggregateUI.getUI().reportError(caught);
       }
 
@@ -71,18 +69,6 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
         Preferences.updatePreferences(new PreferencesCompletionCallback() {
 			@Override
 			public void refreshFromUpdatedPreferences() {
-		        AggregateTabBase possibleAdminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
-
-		        if (possibleAdminTab instanceof AdminTabUI) {
-		          AdminTabUI adminTab = (AdminTabUI) possibleAdminTab;
-		          if (enabled) {
-		            adminTab.displayOdkTablesSubTab();
-		          } else {
-		            adminTab.hideOdkTablesSubTab();
-		          }
-		        } else {
-		          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
-		        }
 			}});
       }
     });

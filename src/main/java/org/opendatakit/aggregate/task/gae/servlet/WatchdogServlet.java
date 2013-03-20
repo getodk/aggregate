@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -62,27 +61,10 @@ public class WatchdogServlet extends ServletUtilBase{
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	cc.setAsDaemon(true);
 
-    // get parameter
-    String checkIntervalString = getParameter(req, ServletConsts.CHECK_INTERVAL_PARAM);
-    if (checkIntervalString == null) {
-      logger.error("Missing " + ServletConsts.CHECK_INTERVAL_PARAM + " key");
-      errorMissingParam(resp);
-      return;
-    }
-    Long checkIntervalMilliseconds = 1L;
-    try {
-      checkIntervalMilliseconds = Long.valueOf(checkIntervalString);
-    } catch (Exception e) {
-      logger.error("Invalid " + ServletConsts.CHECK_INTERVAL_PARAM + " value: " + checkIntervalString
-          + " exception: " + e.toString());
-      errorBadParam(resp);
-      return;
-    }
-
     logger.info("Beginning servlet processing");
     WatchdogWorkerImpl worker = new WatchdogWorkerImpl();
     try {
-      worker.checkTasks(checkIntervalMilliseconds, cc);
+      worker.checkTasks(cc);
       logger.info("ending successful servlet processing");
       resp.setStatus(HttpServletResponse.SC_ACCEPTED);
     } catch (ODKExternalServiceException e) {

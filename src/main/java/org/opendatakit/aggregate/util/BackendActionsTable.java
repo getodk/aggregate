@@ -62,9 +62,13 @@ public class BackendActionsTable extends CommonFieldsBase {
   // fields used to determine triggering of UploadSubmissions task creation.
 
   public static long lastHashmapCleanTimestamp = 0L; // time of last clear of hashmap
-  public static long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
+  public static final long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
   public static Map<String, Long> lastPublisherRevision = new HashMap<String, Long>();
-  public static long PUBLISHING_DELAY_MILLISECONDS = 500L + PersistConsts.MAX_SETTLE_MILLISECONDS;
+  public static final long PUBLISHING_DELAY_MILLISECONDS = 500L + PersistConsts.MAX_SETTLE_MILLISECONDS;
+  /** delay between watchdog sweeps to nudge publishers onward. */
+  public static final long FAST_PUBLISHING_RETRY_MILLISECONDS = 60L*1000L; // 1 minute...
+  /** delay between watchdog sweeps when there are no active tasks */
+  public static final long IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 6L * 60000L; // 6 minutes
   // field used to record when watchdogs actually start
   private static long lastWatchdogStartTime = 0L;
 
@@ -209,7 +213,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    *
    * @param cc
    */
-  public static final synchronized void updateWatchdogStart(CallingContext cc) {
+  public static final synchronized void updateWatchdogStart(Watchdog wd, CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
 
     try {
@@ -225,7 +229,7 @@ public class BackendActionsTable extends CommonFieldsBase {
       ds.putEntity(t, user);
 
       long expectedNextStart =
-          oldStartTime + Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS;
+          oldStartTime + FAST_PUBLISHING_RETRY_MILLISECONDS;
 
       if ( expectedNextStart > lastWatchdogStartTime ) {
         logger.warn("watchdog started early: " +
@@ -236,6 +240,11 @@ public class BackendActionsTable extends CommonFieldsBase {
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
     } finally {
+      // if faster publishing is enabled, then
+      // schedule the next watchdog in the future.
+      if ( wd.getFasterPublishingEnabled() ) {
+        wd.onUsage(FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
+      }
       cc.setAsDaemon(wasDaemon);
     }
   }
@@ -307,18 +316,19 @@ public class BackendActionsTable extends CommonFieldsBase {
   /**
    * This is effectively GAE-specific: Tomcat installations use a
    * scheduled executor to periodically fire the watchdog (and do
-   * not use this mechanism).
+   * not use this mechanism). i.e., on Tomcat, the calls to:
+   *     Watchdog.onUsage(delay, cc);
+   * are no-ops.
    *
    * Schedule a watchdog to run the specified number of milliseconds
    * into the future (zero is OK).
    *
-   * Schedule to ensure that Watchdogs are run at with at least
-   * WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS between invocations.
-   *
+   * @param watchdog
    * @param futureMilliseconds
    * @param cc
    */
-  public static final synchronized void scheduleFutureWatchdog(long futureMilliseconds,
+  private static final synchronized void scheduleFutureWatchdog(Watchdog wd,
+      long futureMilliseconds,
       CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
 
@@ -334,7 +344,7 @@ public class BackendActionsTable extends CommonFieldsBase {
 
       // don't schedule any timer before the blackoutTime
       long blackoutTime = Math.max(lastWatchdogEnqueueTime +
-          Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS, now);
+          FAST_PUBLISHING_RETRY_MILLISECONDS, now);
 
       // Revise the request to start at the end of the blackout period.
       // Two cases: (1) immediate request (2) future request
@@ -346,7 +356,6 @@ public class BackendActionsTable extends CommonFieldsBase {
       // (2) the adjusted request time is now
       // or
       // (3) there is no active scheduling time (and this request is in the future)
-      //    (the scheduling time is at or before the enqueue time)
       // or
       // (4) the active scheduling time should be lowered due to this request.
       if ( (lastWatchdogSchedulingTime < now &&
@@ -360,7 +369,7 @@ public class BackendActionsTable extends CommonFieldsBase {
 
         // and recompute things...
         blackoutTime = Math.max(lastWatchdogEnqueueTime +
-            Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS, now);
+            FAST_PUBLISHING_RETRY_MILLISECONDS, now);
 
         requestedWatchdogSchedulingTime = Math.max(blackoutTime, now + futureMilliseconds);
 
@@ -379,9 +388,13 @@ public class BackendActionsTable extends CommonFieldsBase {
           // enqueue any request first...
           if ( activeSchedulingTimeInThePast ||
                requestedWatchdogSchedulingTime == now ) {
-            // fire the Watchdog...
-            Watchdog dog = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-            dog.onUsage(0L, cc);
+
+            // fire the Watchdog ONLY if we are not
+            // doing fast publishing. During fast publishing,
+            // the watchdog is fired during updateStart()...
+            if ( !wd.getFasterPublishingEnabled() ) {
+              wd.onUsage(0L, cc);
+            }
 
             // update enqueue value...
             records.enqueueTime.setLastRevisionDate(new Date(now));
@@ -429,20 +442,57 @@ public class BackendActionsTable extends CommonFieldsBase {
    * scheduled executor to periodically fire the watchdog (and do
    * not use this mechanism).
    *
-   * Check whether a watchdog should be spun up (immediately). Spin one up
-   * every Watchdog.WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS. Note that if the
-   * watchdog determines that there is work pending, it will schedule itself.
+   * Check whether a watchdog should be spun up. Spin one up
+   * every IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS. Note that
+   * if the Watchdog determines that there is work pending, it will
+   * schedule a watchdog every FAST_PUBLISHING_RETRY_MILLISECONDS.
    *
    * @param cc
    */
   public static final synchronized void triggerWatchdog(CallingContext cc) {
+
+    Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+
     // don't schedule any timer before the next idling retry time
-    long nextIdlingRetryTime = lastWatchdogEnqueueTime +
-                        Watchdog.WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS;
+    long nextIdlingRetryTime;
+
+    if ( wd.getFasterPublishingEnabled() ) {
+      nextIdlingRetryTime = lastWatchdogEnqueueTime +
+          FAST_PUBLISHING_RETRY_MILLISECONDS;
+    } else {
+      nextIdlingRetryTime = lastWatchdogEnqueueTime +
+          IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS;
+    }
 
     long futureMilliseconds = Math.max(0L,
         nextIdlingRetryTime - System.currentTimeMillis());
 
-    scheduleFutureWatchdog(futureMilliseconds, cc);
+    scheduleFutureWatchdog(wd, futureMilliseconds, cc);
+  }
+
+  /**
+   * This is effectively GAE-specific: Tomcat installations use a
+   * scheduled executor to periodically fire the watchdog (and do
+   * not use this mechanism).
+   *
+   * At the completion of the current watchdog, if we have active
+   * tasks or have fast publishing enabled, schedule a new watchdon
+   * FAST_PUBLISHING_RETRY_MILLISECONDS into the future. Note that
+   * if we do not have fast publishing enabled, the publishing
+   * does not take immediate effect, but is a suggested next start
+   * time, and only if the website is active will it be honored.
+   *
+   * @param hasActiveTasks
+   * @param cc
+   */
+  public static final synchronized void rescheduleWatchdog(boolean hasActiveTasks, CallingContext cc) {
+
+    Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+
+    long futureMilliseconds = FAST_PUBLISHING_RETRY_MILLISECONDS;
+
+    if ( hasActiveTasks || wd.getFasterPublishingEnabled() ) {
+      scheduleFutureWatchdog(wd, futureMilliseconds, cc);
+    }
   }
 }
