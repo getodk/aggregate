@@ -119,11 +119,12 @@ public class WatchdogWorkerImpl {
       throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException,
       ODKIncompleteSubmissionData {
     logger.info("---------------------BEGIN Watchdog");
+    boolean cullThisWatchdog = false;
     boolean activeTasks = true;
     Watchdog wd = null;
     try {
       wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-      BackendActionsTable.updateWatchdogStart(wd, cc);
+      cullThisWatchdog = BackendActionsTable.updateWatchdogStart(wd, cc);
       formSubmissionsMap.clear();
 
       UploadSubmissions uploadSubmissions = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
@@ -142,7 +143,7 @@ public class WatchdogWorkerImpl {
     } finally {
       // NOTE: if the above threw an exception, we re-start the watchdog.
       // otherwise, we restart it only if there is work to be done.
-      BackendActionsTable.rescheduleWatchdog(activeTasks, cc);
+      BackendActionsTable.rescheduleWatchdog(activeTasks, cullThisWatchdog, cc);
       logger.info("---------------------END Watchdog");
     }
   }
