@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
@@ -356,11 +355,6 @@ public class FormUploadServlet extends ServletUtilBase {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
-      } catch (ODKConversionException e) {
-        logger.error("Form upload persistence error: " + e.getMessage());
-        e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
-            + "\n" + e.getMessage());
       } catch (ODKParseException e) {
         // unfortunately, the underlying javarosa utility swallows the parsing
         // error.
