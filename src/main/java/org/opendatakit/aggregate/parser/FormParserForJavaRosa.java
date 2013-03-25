@@ -682,7 +682,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
          * tables.
          */
         try {
-          log.warn("Datastore exceptions are expected in the following stack trace; other exceptions may indicate a problem:");
+          log.warn("Aborting form-creation do to exception: " + e.toString() +
+              ". Datastore exceptions are expected in the following stack trace; other exceptions may indicate a problem:");
           e.printStackTrace();
 
           // scorched earth -- get all the tables and try to drop them all...
@@ -728,7 +729,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
           log.error("dropping of relations unexpectedly failed with exception: " + e4.toString());
           e4.printStackTrace();
         }
-        throw new ODKParseException("Unable to fully roll back form creation");
+        throw new ODKParseException("Error processing new form: " + e.toString());
       }
       // TODO: if the above gets killed, how do we clean up?
     } catch (ODKParseException e) {
@@ -999,9 +1000,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         parentTable = e.getKey();
       }
     }
-
-    // TODO: &&
-    // FormDataModel.isFieldStoredWithinDataTable(child.getElementType())
 
     // OK. We have the parent table.
     //
