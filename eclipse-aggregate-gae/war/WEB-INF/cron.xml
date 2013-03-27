@@ -6,6 +6,6 @@
   <cron>
     <url>/gae/watchdog</url>
     <description>Start a watchdog periodically to nudge things along in cases where quota is exceeded.</description>
-    <schedule>every 90 minutes from 00:01</schedule>
+    <schedule>every 45 minutes</schedule>
   </cron>
 </cronentries>
