@@ -21,7 +21,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
@@ -71,4 +73,28 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
 
   }
 
+  @Override
+  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      ServerPreferencesProperties.setFasterBackgroundActionsDisabled(cc, disabled);
+
+      Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+      // NOTE: this will fire off a watchdog worker
+      // if we are re-enabling faster publishing
+      //
+      // No-op if not changed.
+      wd.setFasterWatchdogCycleEnabled(!disabled);
+
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    }
+
+  }
 }
