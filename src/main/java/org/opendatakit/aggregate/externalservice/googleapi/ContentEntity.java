@@ -15,13 +15,13 @@
 
 package org.opendatakit.aggregate.externalservice.googleapi;
 
-import com.google.api.client.http.HttpContent;
-
-import org.apache.http.entity.AbstractHttpEntity;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.apache.http.entity.AbstractHttpEntity;
+
+import com.google.api.client.http.HttpContent;
 
 /**
  * Copied due to package scoping of original Google impl. mitchellsundt@gmail.com

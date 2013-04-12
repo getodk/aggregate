@@ -15,13 +15,11 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.UploadSubmissions;
-import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.web.CallingContext;
