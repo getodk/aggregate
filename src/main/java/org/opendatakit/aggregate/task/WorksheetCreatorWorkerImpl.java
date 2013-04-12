@@ -99,7 +99,7 @@ public class WorksheetCreatorWorkerImpl {
 
 	public final void worksheetCreator() {
 
-     Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+     Log logger = LogFactory.getLog(WorksheetCreatorWorkerImpl.class);
      logger.info("Beginning Worksheet Creator: " + miscTasksKey.toString() +
                    " form " + form.getFormId());
 
@@ -107,6 +107,8 @@ public class WorksheetCreatorWorkerImpl {
 		try {
 		    t = new MiscTasks(miscTasksKey, cc);
 		} catch (Exception e) {
+        logger.error("worksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " MiscTasks retrieval exception: " + e.toString());
 			return;
 		}
 		// gain lock on the formId itself...
@@ -140,10 +142,12 @@ public class WorksheetCreatorWorkerImpl {
 			  doMarkAsComplete(t);
 		  } else {
 			  // worksheet creation request should have been created after the form...
-			  doWorksheetCreator();
+			  doWorksheetCreator(logger);
 		  }
 		} catch (Exception e2) {
 		  // some other unexpected exception...
+        logger.error("worksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " Unexpected exception from work body: " + e2.toString());
 		  e2.printStackTrace();
 		} finally {
 			formIdTaskLock = ds.createTaskLock(user);
@@ -172,7 +176,7 @@ public class WorksheetCreatorWorkerImpl {
 		t.persist(cc);
 	}
 
-	public final void doWorksheetCreator() {
+	public final void doWorksheetCreator(Log logger) {
 	  try {
 		// get spreadsheet
 		GoogleSpreadsheet spreadsheet = getGoogleSpreadsheetWithName();
@@ -185,27 +189,37 @@ public class WorksheetCreatorWorkerImpl {
 		// generate worksheets
 		try {
 			spreadsheet.generateWorksheets(cc);
+         logger.info("doWorksheetCreator: " + miscTasksKey.toString() +
+               " form " + form.getFormId() + " Successful worksheet creation!");
 		} catch ( AuthenticationException e ) {
+        logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " Exception: " + e.toString());
 		  throw new ODKExternalServiceCredentialsException(e);
 		} catch (ODKExternalServiceException e ) {
+        logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " Exception: " + e.toString());
 		  throw e;
 		} catch (Exception e) {
+	     logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+	                   " form " + form.getFormId() + " Exception: " + e.toString());
 			throw new ODKExternalServiceException(e);
 		}
 
 		// the above may have taken a while -- re-fetch the data to see if it has changed...
 	    MiscTasks r = new MiscTasks(miscTasksKey, cc);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
-
+	      // still the same attempt...
 			// if we need to upload submissions, start a task to do so
 	    	UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 			if (!esType.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
-				us.createFormUploadTask(spreadsheet.getFormServiceCursor(), cc);
+				us.createFormUploadTask(spreadsheet.getFormServiceCursor(), true, cc);
 			}
 
 			doMarkAsComplete(r);
 	    }
 	  } catch (Exception e ) {
+       logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+           " form " + form.getFormId() + " Initiating failure recovery: " + e.toString());
 		  failureRecovery(e);
 	  }
 	}
@@ -222,6 +236,9 @@ public class WorksheetCreatorWorkerImpl {
 	    	r.persist(cc);
 	    }
 	} catch (Exception ex) {
+     Log logger = LogFactory.getLog(WorksheetCreatorWorkerImpl.class);
+     logger.error("failureRecovery: " + miscTasksKey.toString() +
+         " form " + form.getFormId() + " Exception during failure recovery: " + ex.toString());
 		// something is hosed -- don't attempt to continue.
 		// TODO: watchdog: find this once lastRetryDate is way late?
 	}

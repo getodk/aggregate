@@ -436,8 +436,9 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
+	<!-- keep session for 4 hours -->
 	<session-config>
-		<session-timeout>30</session-timeout>
+		<session-timeout>240</session-timeout>
 	</session-config>
 
 </web-app>

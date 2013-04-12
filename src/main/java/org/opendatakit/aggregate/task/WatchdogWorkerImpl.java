@@ -115,35 +115,44 @@ public class WatchdogWorkerImpl {
     return null;
   }
 
-  public void checkTasks(long checkIntervalMilliseconds, CallingContext cc)
+  public void checkTasks(CallingContext cc)
       throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException,
       ODKIncompleteSubmissionData {
-    BackendActionsTable.updateWatchdogStart(cc);
-    formSubmissionsMap.clear();
+    logger.info("---------------------BEGIN Watchdog");
+    boolean cullThisWatchdog = false;
+    boolean activeTasks = true;
+    Watchdog wd = null;
+    try {
+      wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+      cullThisWatchdog = BackendActionsTable.updateWatchdogStart(wd, cc);
+      formSubmissionsMap.clear();
 
-    logger.info("Beginning Watchdog");
-
-    UploadSubmissions uploadSubmissions = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-    CsvGenerator csvGenerator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
-    KmlGenerator kmlGenerator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
-    WorksheetCreator worksheetCreator = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
-    FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
-    PurgeOlderSubmissions purgeSubmissions = (PurgeOlderSubmissions) cc
-        .getBean(BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN);
-    boolean activeTasks = false;
-    // NOTE: do not short-circuit these check actions...
-    activeTasks = activeTasks | checkFormServiceCursors(checkIntervalMilliseconds, uploadSubmissions, cc);
-    activeTasks = activeTasks | checkPersistentResults(csvGenerator, kmlGenerator, cc);
-    activeTasks = activeTasks | checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
-    if ( activeTasks ) {
-      BackendActionsTable.scheduleFutureWatchdog(Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS, cc);
+      UploadSubmissions uploadSubmissions = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+      CsvGenerator csvGenerator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
+      KmlGenerator kmlGenerator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
+      WorksheetCreator worksheetCreator = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
+      FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
+      PurgeOlderSubmissions purgeSubmissions = (PurgeOlderSubmissions) cc
+          .getBean(BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN);
+      boolean foundActiveTasks = false;
+      // NOTE: do not short-circuit these check actions...
+      foundActiveTasks = foundActiveTasks | checkFormServiceCursors(uploadSubmissions, cc);
+      foundActiveTasks = foundActiveTasks | checkPersistentResults(csvGenerator, kmlGenerator, cc);
+      foundActiveTasks = foundActiveTasks | checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
+      activeTasks = foundActiveTasks;
+    } finally {
+      // NOTE: if the above threw an exception, we re-start the watchdog.
+      // otherwise, we restart it only if there is work to be done.
+      BackendActionsTable.rescheduleWatchdog(activeTasks, cullThisWatchdog, cc);
+      logger.info("---------------------END Watchdog");
     }
   }
 
-  private boolean checkFormServiceCursors(long checkIntervalMilliseconds,
+  private boolean checkFormServiceCursors(
       UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKExternalServiceException,
       ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData {
-    Date olderThanDate = new Date(System.currentTimeMillis() - checkIntervalMilliseconds);
+
+    Date olderThanDate = new Date(System.currentTimeMillis() - BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
     List<FormServiceCursor> fscList = FormServiceCursor.queryFormServiceCursorRelation(
         olderThanDate, cc);
     boolean activeTasks = false;
@@ -159,16 +168,20 @@ public class WatchdogWorkerImpl {
 
       switch (fsc.getExternalServicePublicationOption()) {
       case UPLOAD_ONLY:
-        activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
+        if (!fsc.getUploadCompleted()) {
+          activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
+        }
         break;
       case STREAM_ONLY:
         activeTasks = activeTasks | checkStreaming(fsc, uploadSubmissions, cc);
         break;
       case UPLOAD_N_STREAM:
-        if (!fsc.getUploadCompleted())
+        if (!fsc.getUploadCompleted()) {
           activeTasks = activeTasks | checkUpload(fsc, uploadSubmissions, cc);
-        if (fsc.getUploadCompleted())
+        }
+        if (fsc.getUploadCompleted()) {
           activeTasks = activeTasks | checkStreaming(fsc, uploadSubmissions, cc);
+        }
         break;
       default:
         break;
@@ -188,7 +201,7 @@ public class WatchdogWorkerImpl {
           || lastUploadDate.compareTo(establishmentDate) < 0) {
         // there is still work to do
         activeTask = true;
-        uploadSubmissions.createFormUploadTask(fsc, cc);
+        uploadSubmissions.createFormUploadTask(fsc, true, cc);
       }
     }
     return activeTask;
@@ -251,7 +264,7 @@ public class WatchdogWorkerImpl {
 
     if ( makeActive ) {
       // there is work to do
-      uploadSubmissions.createFormUploadTask(fsc, cc);
+      uploadSubmissions.createFormUploadTask(fsc, false, cc);
     }
     return makeActive;
   }

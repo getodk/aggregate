@@ -23,8 +23,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,7 +41,6 @@ import org.opendatakit.aggregate.constants.common.GeoPointConsts;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -76,12 +77,15 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
 
   private static final Log log = LogFactory.getLog(FormParserForJavaRosa.class.getName());
 
-  private static final long FIFTEEN_MINUTES_IN_MILLISECONDS = 15*60*1000L;
+  private static final long FIFTEEN_MINUTES_IN_MILLISECONDS = 15 * 60 * 1000L;
+
+  // arbitrary limit on the table-creation process, to prevent infinite loops
+  // that exhaust memory
+  private static final int MAX_FORM_CREATION_ATTEMPTS = 100;
 
   private String fdmSubmissionUri;
   private int elementCount = 0;
   private int phantomCount = 0;
-
 
   private final Map<FormDataModel, Integer> fieldLengths = new HashMap<FormDataModel, Integer>();
 
@@ -100,20 +104,18 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
    * @param cc
    * @throws ODKFormAlreadyExistsException
    * @throws ODKIncompleteSubmissionData
-   * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKParseException
    */
   public FormParserForJavaRosa(String formName, MultiPartFormItem formXmlData, String inputXml,
       String fileName, MultiPartFormData uploadedFormItems, StringBuilder warnings,
       CallingContext cc) throws ODKFormAlreadyExistsException, ODKIncompleteSubmissionData,
-      ODKConversionException, ODKDatastoreException, ODKParseException {
+      ODKDatastoreException, ODKParseException {
     super(inputXml, formName, false);
 
     if (formXmlData == null) {
       throw new ODKIncompleteSubmissionData(Reason.MISSING_XML);
     }
-
 
     // Construct the base table prefix candidate from the
     // submissionElementDefn.formId.
@@ -143,8 +145,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         "[^\\p{Digit}\\p{Lu}\\p{Ll}\\p{Lo}]", "_");
     persistenceStoreFormId = persistenceStoreFormId.replaceAll("^_*", "");
 
-    initHelper(uploadedFormItems, formXmlData, inputXml, persistenceStoreFormId,
-        warnings, cc);
+    initHelper(uploadedFormItems, formXmlData, inputXml, persistenceStoreFormId, warnings, cc);
   }
 
   enum AuxType {
@@ -169,9 +170,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   }
 
   private void initHelper(MultiPartFormData uploadedFormItems, MultiPartFormItem xformXmlData,
-      String inputXml, String persistenceStoreFormId,
-      StringBuilder warnings, CallingContext cc) throws ODKDatastoreException,
-      ODKFormAlreadyExistsException, ODKParseException, ODKConversionException,
+      String inputXml, String persistenceStoreFormId, StringBuilder warnings, CallingContext cc)
+      throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException,
       ODKIncompleteSubmissionData {
 
     // ///////////////////
@@ -258,17 +258,31 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     }
   }
 
-  public static void updateFormXmlVersion( IForm thisForm, String incomingFormXml, Long modelVersion, CallingContext cc ) throws ODKDatastoreException {
-    String revisedXml = xmlWithTimestampComment(xmlWithoutTimestampComment(incomingFormXml), cc.getServerURL());
+  public static void updateFormXmlVersion(IForm thisForm, String incomingFormXml,
+      Long modelVersion, CallingContext cc) throws ODKDatastoreException {
+    String revisedXml = xmlWithTimestampComment(xmlWithoutTimestampComment(incomingFormXml),
+        cc.getServerURL());
     // update the uiVersion and the form definition file...
     thisForm.setFormXml(thisForm.getFormFilename(cc), revisedXml, modelVersion, cc);
   }
 
+  /**
+   * Return the string by which we uniquely identify a table in the datastore.
+   * This is the schema name concatenated with the table name. Used during table
+   * creation to track the mapping from datastore tables to CommonFieldsBase
+   * objects.
+   *
+   * @param tbl
+   * @return
+   */
+  private String tableKey(CommonFieldsBase tbl) {
+    return tbl.getSchemaName() + "." + tbl.getTableName();
+  }
+
   private void guardedInitHelper(MultiPartFormData uploadedFormItems,
       MultiPartFormItem xformXmlData, String incomingFormXml, String persistenceStoreFormId,
-      StringBuilder warnings, CallingContext cc)
-      throws ODKDatastoreException, ODKFormAlreadyExistsException, ODKParseException,
-      ODKConversionException, ODKIncompleteSubmissionData {
+      StringBuilder warnings, CallingContext cc) throws ODKDatastoreException,
+      ODKFormAlreadyExistsException, ODKParseException, ODKIncompleteSubmissionData {
     // ///////////////
     // Step 1: create or fetch the Form (FormInfo) submission
     //
@@ -279,24 +293,38 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         .getSimpleFormField(ServletConsts.TRANSFER_IS_INCOMPLETE);
     boolean isDownloadEnabled = (isIncompleteFlag == null || isIncompleteFlag.trim().length() == 0);
 
-    boolean newlyCreatedXForm = false; // true if newly created.
-    boolean updateForm; // true if we are modifying this form definition.
-    boolean differentForm = false; // true if the form definition changes, but is compatible.
+    /* true if newly created */
+    boolean newlyCreatedXForm = false;
+    /* true if we are modifying this form definition. */
+    boolean updateForm;
+    /* true if the form definition changes, but is compatible */
+    boolean differentForm = false;
     IForm formInfo = null;
-    // originationTime -- time at which the form was first uploaded into the system
+    /*
+     * originationGraceTime: if a previously loaded form was last updated prior
+     * to the originationGraceTime, then require a version change if the new
+     * form is not identical (is changed).
+     */
+    Date originationGraceTime = new Date(System.currentTimeMillis()
+        - FIFTEEN_MINUTES_IN_MILLISECONDS);
+    /*
+     * originationTime: the time of the form's first upload to the system
+     */
     Date originationTime;
-    // originationGraceTime -- time before which a form is considered to require a version change if changed.
-    Date originationGraceTime = new Date(System.currentTimeMillis()-FIFTEEN_MINUTES_IN_MILLISECONDS);
     try {
       formInfo = FormFactory.retrieveFormByFormId(rootElementDefn.formId, cc);
 
       // formId matches...
       Boolean thisIsEncryptedForm = formInfo.isEncryptedForm();
-      if ( thisIsEncryptedForm == null ) thisIsEncryptedForm = false;
+      if (thisIsEncryptedForm == null) {
+        thisIsEncryptedForm = false;
+      }
 
-      if ( isFileEncryptedForm != thisIsEncryptedForm ) {
-        // they either both need to be encrypted, or both need to not be encrypted...
-        throw new ODKFormAlreadyExistsException("Form encryption status cannot be altered. Form Id must be changed.");
+      if (isFileEncryptedForm != thisIsEncryptedForm) {
+        // they either both need to be encrypted, or both need to not be
+        // encrypted...
+        throw new ODKFormAlreadyExistsException(
+            "Form encryption status cannot be altered. Form Id must be changed.");
       }
       // isEncryptedForm matches...
 
@@ -305,12 +333,12 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       String thisMd5Hash = formInfo.getMd5HashFormXml(cc);
       String md5Hash = CommonFieldsBase.newMD5HashUri(incomingFormXml);
 
-      boolean same = thisRootElementDefn.equals(rootElementDefn) &&
-          (thisMd5Hash == null || md5Hash.equals(thisMd5Hash));
+      boolean same = thisRootElementDefn.equals(rootElementDefn)
+          && (thisMd5Hash == null || md5Hash.equals(thisMd5Hash));
 
-      if ( same ) {
+      if (same) {
         // version matches
-        if ( thisMd5Hash == null ) {
+        if (thisMd5Hash == null) {
           // IForm record does not have any attached form definition XML
           // attach it, set the title, and flag the form as updating
           // NOTE: this is an error path and not a normal flow
@@ -322,8 +350,9 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
           // The md5Hash of the form file being uploaded matches that
           // of a fully populated IForm record.
           // Do not allow changing the title...
-          if ( !title.equals(thisTitle) ) {
-            throw new ODKFormAlreadyExistsException("Form title cannot be changed without updating the form version");
+          if (!title.equals(thisTitle)) {
+            throw new ODKFormAlreadyExistsException(
+                "Form title cannot be changed without updating the form version");
           }
           updateForm = false;
           String existingFormXml = formInfo.getFormXml(cc);
@@ -335,25 +364,27 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         // get the upload time of the existing form definition
         originationTime = FormParserForJavaRosa.xmlTimestamp(existingFormXml);
 
-        if ( FormParserForJavaRosa.xmlWithoutTimestampComment(incomingFormXml)
-            .equals(FormParserForJavaRosa.xmlWithoutTimestampComment(existingFormXml))) {
+        if (FormParserForJavaRosa.xmlWithoutTimestampComment(incomingFormXml).equals(
+            FormParserForJavaRosa.xmlWithoutTimestampComment(existingFormXml))) {
           // (version and file match).
           // The text of the form file being uploaded matches that of a
-          // fully-populated IForm record once the ODK Aggregate TimestampComment
-          // is removed.
+          // fully-populated IForm record once the ODK Aggregate
+          // TimestampComment is removed.
 
           // Do not allow changing the title...
-          if ( !title.equals(thisTitle) ) {
-            throw new ODKFormAlreadyExistsException("Form title cannot be changed without updating the form version.");
+          if (!title.equals(thisTitle)) {
+            throw new ODKFormAlreadyExistsException(
+                "Form title cannot be changed without updating the form version.");
           }
           updateForm = false;
 
         } else {
           // file is different...
 
-          // determine if the form is storage-equivalent and if version is increasing...
-          DifferenceResult diffresult = FormParserForJavaRosa.compareXml(this, existingFormXml, formInfo.getViewableName(),
-                                                                          originationTime.after(originationGraceTime));
+          // determine if the form is storage-equivalent and if version is
+          // increasing...
+          DifferenceResult diffresult = FormParserForJavaRosa.compareXml(this, existingFormXml,
+              formInfo.getViewableName(), originationTime.after(originationGraceTime));
           if (diffresult == DifferenceResult.XFORMS_DIFFERENT) {
             // form is not storage-compatible
             throw new ODKFormAlreadyExistsException();
@@ -368,7 +399,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
           }
 
           // update the title and form definition file as needed...
-          if (!thisTitle.equals(title) ) {
+          if (!thisTitle.equals(title)) {
             formInfo.setViewableName(title);
           }
 
@@ -382,7 +413,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       }
     } catch (ODKFormNotFoundException e) {
       // form is not found -- create it
-      formInfo = FormFactory.createFormId(incomingFormXml, rootElementDefn, isFileEncryptedForm, isDownloadEnabled, title, cc);
+      formInfo = FormFactory.createFormId(incomingFormXml, rootElementDefn, isFileEncryptedForm,
+          isDownloadEnabled, title, cc);
       updateForm = false;
       newlyCreatedXForm = true;
       originationTime = new Date();
@@ -391,7 +423,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     // and upload all the media files associated with the form.
     // Allow updates if the form version has changed (updateForm is true)
     // or if the originationTime is after the originationGraceTime
-    // e.g., the form version was changed within the last 15  minutes.
+    // e.g., the form version was changed within the last 15 minutes.
 
     boolean allowUpdates = updateForm || originationTime.after(originationGraceTime);
 
@@ -406,17 +438,19 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       if (itm.getValue() == xformXmlData)
         continue;// ignore the xform -- stored above.
 
-      // update the images if the form version changed, otherwise throw an error.
-      if ( formInfo.setXFormMediaFile(itm.getValue(), allowUpdates, cc) ) {
+      // update the images if the form version changed, otherwise throw an
+      // error.
+      if (formInfo.setXFormMediaFile(itm.getValue(), allowUpdates, cc)) {
         // needed update
-        if ( !allowUpdates ) {
+        if (!allowUpdates) {
           // but we didn't update the form...
-          throw new ODKFormAlreadyExistsException("Form media file(s) have changed.  Please update the form version and resubmit.");
+          throw new ODKFormAlreadyExistsException(
+              "Form media file(s) have changed.  Please update the form version and resubmit.");
         }
       }
     }
     // NOTE: because of caching, we only update the form definition file at
-    // intervals of no more than every 3 seconds.  So if you upload a
+    // intervals of no more than every 3 seconds. So if you upload a
     // media file, then immediately upload an altered version, we don't
     // necessarily increment the uiVersion.
 
@@ -441,7 +475,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         throw new ODKFormAlreadyExistsException(
             "Internal error: Completely new file has pre-existing form definition");
       }
-      // we're done -- updated the file and media; form definition doesn't need updating.
+      // we're done -- updated the file and media; form definition doesn't need
+      // updating.
       return;
     }
 
@@ -460,7 +495,13 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
 
     final List<FormDataModel> fdmList = new ArrayList<FormDataModel>();
 
-    final Set<CommonFieldsBase> createdRelations = new HashSet<CommonFieldsBase>();
+    // List of successfully asserted relations.
+    // Use a HashMap<String,CommonFieldsBase>(). This allows us to
+    // use the tableKey(CommonFieldsBase) (schema name + table name)
+    // to identify the successfully asserted relations, rather than
+    // the object identity of the CommonFieldsBase objects, which is
+    // inappropriate for our use.
+    final HashMap<String, CommonFieldsBase> assertedRelations = new HashMap<String, CommonFieldsBase>();
 
     try {
       // ////////////////////////////////////////////////
@@ -525,14 +566,21 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       // Very error prone!!!
       //
       try {
+        int nAttempts = 0;
         for (;;) {
+          // place a limit on this process
+          if (++nAttempts > MAX_FORM_CREATION_ATTEMPTS) {
+            log.error("Aborting form-creation due to fail-safe limit ("
+                + MAX_FORM_CREATION_ATTEMPTS + " attempts)!");
+            throw new ODKParseException("Unable to create form data tables after "
+                + MAX_FORM_CREATION_ATTEMPTS + " attempts.");
+          }
 
           FormDefinition fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
 
           List<CommonFieldsBase> badTables = new ArrayList<CommonFieldsBase>();
 
           for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
-
             try {
               // patch up tbl with desired lengths of string
               // fields...
@@ -545,23 +593,51 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
                   }
                 }
               }
-              ds.assertRelation(tbl, user);
-              createdRelations.add(tbl);
+
+              // CommonFieldsBase objects are re-constructed with each
+              // call to new FormDefinition(...). We need to ensure the
+              // datastore contains the table that each of these objects
+              // refers to.
+              //
+              // Optimization:
+              //
+              // If assertedRelations contains a hit for tableKey(tbl),
+              // then we can assume that the table exists in the datastore
+              // and just update the CommonFieldsBase object in the
+              // assertedRelations map.
+              //
+              // Otherwise, we need to see if we can create it.
+              //
+              // Later on, before we do any more work, we need to
+              // sweep through and call ds.assertRelation() to ensure
+              // that all the CommonFieldsBase objects are fully
+              // initialized (because we don't really know what is
+              // done in the persistence layers during the
+              // ds.assertRelation() call).
+              //
+              if (assertedRelations.containsKey(tableKey(tbl))) {
+                assertedRelations.put(tableKey(tbl), tbl);
+              } else {
+                ds.assertRelation(tbl, user);
+                assertedRelations.put(tableKey(tbl), tbl);
+              }
             } catch (Exception e1) {
               // assume it is because the table is too wide...
-              log.warn("Create failed -- assuming phantom table required " + tbl.getSchemaName()
-                  + "." + tbl.getTableName());
+              log.warn("Create failed -- assuming phantom table required " + tableKey(tbl));
+              // we expect the following dropRelation to fail,
+              // as the most likely state of the system is
+              // that the table was unable to be created.
               try {
                 ds.dropRelation(tbl, user);
               } catch (Exception e2) {
                 // no-op
               }
               if ((tbl instanceof DynamicBase) || (tbl instanceof TopLevelDynamicBase)) {
-                badTables.add(tbl); // we know how to subdivide
-                // these
+                /* we know how to subdivide these -- we can recover from this */
+                badTables.add(tbl);
               } else {
-                throw e1; // must be something amiss with
-                // database...
+                /* there must be something amiss with the database... */
+                throw e1;
               }
             }
           }
@@ -571,47 +647,90 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
             orderlyDivideTable(fdmList, FormDataModel.assertRelation(cc), tbl, opaque, cc);
           }
 
-          if (badTables.isEmpty())
+          if (badTables.isEmpty()) {
+            // OK. We created everything and have no re-work.
+            //
+            // Since this might be the N'th time through this
+            // loop, we may have incompletely initialized the
+            // CommonFieldsBase entries in the assertedRelations map.
+            //
+            // Go through that now, asserting each relation.
+            // This ensures that all those entries are
+            // properly initialized.
+            //
+            // Since this was once successful, it should still be.
+            // If it isn't then any database error thrown is
+            // not recoverable.
+            for (CommonFieldsBase tbl : assertedRelations.values()) {
+              ds.assertRelation(tbl, user);
+            }
             break;
+          }
 
-          // reset the derived fields so that the FormDefinition
-          // construction
-          // will work.
+          /*
+           * reset the derived fields so that the FormDefinition construction
+           * will work.
+           */
           for (FormDataModel m : fdmList) {
             m.resetDerivedFields();
           }
         }
       } catch (Exception e) {
-        log.warn("Datastore exceptions are expected in the following stack trace; other exceptions may indicate a problem:");
-        e.printStackTrace();
+        /*
+         * either something is amiss in the database or there was some sort of
+         * internal error. Try to drop all the successfully created database
+         * tables.
+         */
+        try {
+          log.warn("Aborting form-creation do to exception: " + e.toString() +
+              ". Datastore exceptions are expected in the following stack trace; other exceptions may indicate a problem:");
+          e.printStackTrace();
 
-        FormDefinition fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
-
-        for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
-          try {
-            ds.dropRelation(tbl, user);
-            createdRelations.remove(tbl);
-          } catch (Exception e3) {
-            // do nothing...
-            e3.printStackTrace();
-          }
-        }
-        if (!createdRelations.isEmpty()) {
-          log.error("createdRelations not fully unwound!");
-          for (CommonFieldsBase tbl : createdRelations) {
+          // scorched earth -- get all the tables and try to drop them all...
+          FormDefinition fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
+          for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
             try {
-              log.error("--dropping " + tbl.getSchemaName() + "." + tbl.getTableName());
               ds.dropRelation(tbl, user);
-              createdRelations.remove(tbl);
+              assertedRelations.remove(tableKey(tbl));
             } catch (Exception e3) {
+              // the above may fail because the table was never created...
               // do nothing...
+              log.warn("If the following stack trace is not a complaint about a table not existing, it is likely a problem!");
               e3.printStackTrace();
             }
           }
-          createdRelations.clear();
-        }
-      }
 
+          /* if everything were OK, assertedRelations should be empty... */
+          if (!assertedRelations.isEmpty()) {
+            log.error("assertedRelations not fully unwound!");
+            Iterator<Entry<String, CommonFieldsBase>> iter = assertedRelations.entrySet()
+                .iterator();
+            while (iter.hasNext()) {
+              Entry<String, CommonFieldsBase> entry = iter.next();
+              CommonFieldsBase tbl = entry.getValue();
+              try {
+                log.error("--dropping " + entry.getKey());
+                ds.dropRelation(tbl, user);
+              } catch (Exception e3) {
+                log.error("--Exception while dropping " + entry.getKey() + " exception: "
+                    + e3.toString());
+                // do nothing...
+                e3.printStackTrace();
+              }
+              // we tried our best... twice.
+              // Remove the definition whether
+              // or not we were successful.
+              // No point in ever trying again.
+              iter.remove();
+            }
+          }
+        } catch (Exception e4) {
+          // just log error... popping out to original exception
+          log.error("dropping of relations unexpectedly failed with exception: " + e4.toString());
+          e4.printStackTrace();
+        }
+        throw new ODKParseException("Error processing new form: " + e.toString());
+      }
       // TODO: if the above gets killed, how do we clean up?
     } catch (ODKParseException e) {
       formInfo.deleteForm(cc);
@@ -679,18 +798,21 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
 
     if (nCol < 2) {
       log.error("Too few columns to subdivide! " + tbl.getTableName());
-      throw new IllegalStateException("Too few columns to subdivide instance table! " + tbl.getSchemaName()
-          + "." + tbl.getTableName());
+      throw new IllegalStateException("Too few columns to subdivide instance table! "
+          + tbl.getSchemaName() + "." + tbl.getTableName());
     }
 
-    // because of how groups are assigned arbitrarily to tables, we can have a table
+    // because of how groups are assigned arbitrarily to tables, we can have a
+    // table
     // that contains N groups but not the parent of those groups. So in order to
-    // re-subdivide such a table, we need to scan the entire fdmList and build a set of
-    // parents of the elements contained in the table, provided those parents are
+    // re-subdivide such a table, we need to scan the entire fdmList and build a
+    // set of
+    // parents of the elements contained in the table, provided those parents
+    // are
     // each fully resident within the table.
     Set<FormDataModel> tblContentParents = new HashSet<FormDataModel>();
-    for ( FormDataModel m : fdmList ) {
-      if ( !tbl.equals(m.getBackingObjectPrototype())) {
+    for (FormDataModel m : fdmList) {
+      if (!tbl.equals(m.getBackingObjectPrototype())) {
         // this isn't in the table being split.
         continue;
       }
@@ -706,9 +828,9 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         // spread across multiple data tables already.
         // If it has, we want to keep the previous parent.
         boolean fragmented = false;
-        for ( FormDataModel child : parent.getChildren() ) {
-          if ( !tbl.equals(child.getBackingObjectPrototype()) &&
-              FormDataModel.isFieldStoredWithinDataTable(child.getElementType()) ) {
+        for (FormDataModel child : parent.getChildren()) {
+          if (!tbl.equals(child.getBackingObjectPrototype())
+              && FormDataModel.isFieldStoredWithinDataTable(child.getElementType())) {
             // the child isn't in the table being split
             // and the child is one that should be stored
             // in a data table, so this parent is already
@@ -717,7 +839,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
             break;
           }
         }
-        if ( fragmented ) {
+        if (fragmented) {
           // stick with the current parentTable
           break;
         }
@@ -763,18 +885,17 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         }
       });
 
-      int firstGroupSize = (groups.size() == 0) ?
-          0 : recursivelyCountChildrenInSameTable(groups.get(0));
-      if (groups.size() != 0 &&
-           ((groups.size() + topElementChange.size() == 1) ||
-            firstGroupSize > (3 * nCol) / 4 )) {
+      int firstGroupSize = (groups.size() == 0) ? 0 : recursivelyCountChildrenInSameTable(groups
+          .get(0));
+      if (groups.size() != 0
+          && ((groups.size() + topElementChange.size() == 1) || firstGroupSize > (3 * nCol) / 4)) {
         // the parent group is dominated by a very large subgroup
         // switch to split that subgroup.
         FormDataModel parentTable = groups.get(0);
         groups.clear();
         topElementChange.clear();
         tblContentParents.clear();
-        for ( FormDataModel m : parentTable.getChildren() ) {
+        for (FormDataModel m : parentTable.getChildren()) {
           if (!tbl.equals(m.getBackingObjectPrototype())) {
             // this isn't in the table...
             continue;
@@ -801,11 +922,11 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     // Table in which to move fields...
     String newTable;
     try {
-      newTable = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(),
-          cc);
+      newTable = opaque.generateUniqueTableName(tbl.getSchemaName(), tbl.getTableName(), cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
-      log.error("Unable to interrogate database for new table to split backing table! " + tbl.getTableName());
+      log.error("Unable to interrogate database for new table to split backing table! "
+          + tbl.getTableName());
       throw new IllegalStateException("unable to interrogate database");
     }
 
@@ -819,7 +940,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       int cleaveCount = 0;
       for (FormDataModel m : groups) {
         int groupSize = recursivelyCountChildrenInSameTable(m);
-        if (cleaveCount + groupSize > (3 * nCol) / 4 ) {
+        if (cleaveCount + groupSize > (3 * nCol) / 4) {
           // this group is too big to add into this particular split
           // see if there is a smaller group...
           continue;
@@ -839,7 +960,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       // now...
       if (cleaveCount > 0)
         log.info("Cleaved along groups. New table: " + newTable + " columnCount: " + cleaveCount);
-        return;
+      return;
     }
 
     log.info("Unable to cleave along groups; attempting phantom table! " + tbl.getTableName());
@@ -849,21 +970,24 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     // relationship and the ordinal ordering even for the
     // external tables like choices and binary objects.
     //
-    // To do that, we want to move contiguous child elements into a phantom table.
+    // To do that, we want to move contiguous child elements into a phantom
+    // table.
     // To do that, we need to identify the parents of the elements in the table,
-    // even if those parents are already split across tables. Then, we assume that the
-    // parent with the greatest number of elements also has the greatest number of
+    // even if those parents are already split across tables. Then, we assume
+    // that the
+    // parent with the greatest number of elements also has the greatest number
+    // of
     // contiguous elements.
 
     // for each topElementChange, tally its presence under its parent.
     Map<FormDataModel, Integer> distinctParents = new HashMap<FormDataModel, Integer>();
-    for ( FormDataModel m : topElementChange ) {
+    for (FormDataModel m : topElementChange) {
       FormDataModel parent = m.getParent();
       Integer a = distinctParents.get(parent);
-      if ( a == null ) {
+      if (a == null) {
         distinctParents.put(parent, 1);
       } else {
-        distinctParents.put(parent, a+1);
+        distinctParents.put(parent, a + 1);
       }
     }
     // scan the set of tallies to find the maximum tally.
@@ -871,8 +995,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     // with a phantom table.
     int max = 0;
     FormDataModel parentTable = null;
-    for ( Map.Entry<FormDataModel, Integer> e : distinctParents.entrySet() ) {
-      if ( e.getValue() > max ) {
+    for (Map.Entry<FormDataModel, Integer> e : distinctParents.entrySet()) {
+      if (e.getValue() > max) {
         parentTable = e.getKey();
       }
     }
@@ -890,22 +1014,25 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     List<FormDataModel> children = parentTable.getChildren();
     // spanCount tracks, for a given key=firstIndexOfSpan,
     // the count of contiguous values.
-    Map<Integer,Integer> spanCount = new HashMap<Integer,Integer>();
+    Map<Integer, Integer> spanCount = new HashMap<Integer, Integer>();
     int firstIndexOfSpan = 0;
     for (idxStart = 0; idxStart < children.size(); ++idxStart) {
       FormDataModel m = children.get(idxStart);
+      if (!FormDataModel.isFieldStoredWithinDataTable(m.getElementType())) {
+        continue;
+      }
       if (!tbl.equals(m.getBackingObjectPrototype())) {
         // the contiguous span is broken...
-        firstIndexOfSpan =  idxStart+1; // the next element...
+        firstIndexOfSpan = idxStart + 1; // the next element...
         continue;
       }
       int elements = recursivelyCountChildrenInSameTable(m);
-      if ( elements == 0 ) {
+      if (elements == 0) {
         // the contiguous span is broken...
-        firstIndexOfSpan =  idxStart+1; // the next element...
+        firstIndexOfSpan = idxStart + 1; // the next element...
       } else {
         Integer v = spanCount.get(firstIndexOfSpan);
-        if ( v == null ) {
+        if (v == null) {
           spanCount.put(firstIndexOfSpan, 1);
         } else {
           spanCount.put(firstIndexOfSpan, v + elements);
@@ -915,24 +1042,26 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     // find the longest span
     int maxSpanCount = 0;
     idxStart = -1;
-    for ( Map.Entry<Integer,Integer> spanEntry : spanCount.entrySet()) {
-      if ( spanEntry.getValue() > maxSpanCount ) {
+    for (Map.Entry<Integer, Integer> spanEntry : spanCount.entrySet()) {
+      if (spanEntry.getValue() > maxSpanCount) {
         idxStart = spanEntry.getKey();
         maxSpanCount = spanEntry.getValue();
       }
     }
 
     // now move up to half the desired original table columns of
-    // this span into the phantom table.  Typically, we will just
+    // this span into the phantom table. Typically, we will just
     // move all of this span into the phantom table because of
     // question groups, multiple choice or media questions breaking
     // up the continuity before the 50% mark.
     String phantomURI = generatePhantomKey(fdmSubmissionUri);
     int desiredOriginalTableColCount = (nCol / 2);
 
-    if ( idxStart == -1 ) {
-      log.error("Failed to split at half the eligible records to move to phantom table " + tbl.getTableName());
-      throw new IllegalStateException("Failed to split at half the eligible records to move to phantom table!");
+    if (idxStart == -1) {
+      log.error("Failed to split at half the eligible records to move to phantom table "
+          + tbl.getTableName());
+      throw new IllegalStateException(
+          "Failed to split at half the eligible records to move to phantom table!");
     }
 
     {
@@ -942,7 +1071,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       long remainingOrdinalNumber = firstToMove.getOrdinalNumber();
       final long startingOrdinal = remainingOrdinalNumber;
       // data record...
-      FormDataModel d = cc.getDatastore().createEntityUsingRelation(fdmRelation, cc.getCurrentUser());
+      FormDataModel d = cc.getDatastore().createEntityUsingRelation(fdmRelation,
+          cc.getCurrentUser());
       fdmList.add(d);
       d.setStringField(fdmRelation.primaryKey, phantomURI);
       d.setOrdinalNumber(remainingOrdinalNumber);
@@ -958,12 +1088,17 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       long ordinalNumber = 0L;
       int records = 0;
       for (; idxStart < children.size(); ++idxStart) {
-        if ( records >= desiredOriginalTableColCount ) {
+        if (records >= desiredOriginalTableColCount) {
           // we have moved the desired number of columns to
           // the new table -- stop!
           break;
         }
         FormDataModel m = children.get(idxStart);
+        if (!FormDataModel.isFieldStoredWithinDataTable(m.getElementType())) {
+          m.setParentUriFormDataModel(phantomURI);
+          m.setOrdinalNumber(++ordinalNumber);
+          continue;
+        }
         if (!tbl.equals(m.getBackingObjectPrototype())) {
           // we need to stop because this item is
           // already moved out elsewhere and
@@ -971,7 +1106,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
           break;
         }
         int elements = recursivelyCountChildrenInSameTable(m);
-        if ( elements == 0 ) {
+        if (elements == 0) {
           // stop also if this element is already
           // elsewhere.
           break;
@@ -986,12 +1121,12 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         FormDataModel m = children.get(idxStart);
         m.setOrdinalNumber(++remainingOrdinalNumber);
       }
-      log.info("Created phantom for " + tbl.getTableName() + " beginning at " +
-          Long.toString(startingOrdinal) + " with a total of " + records + " cleaved");
+      log.info("Created phantom for " + tbl.getTableName() + " beginning at "
+          + Long.toString(startingOrdinal) + " with a total of " + records + " cleaved");
 
-      if ( log.isDebugEnabled() ) {
+      if (log.isDebugEnabled()) {
         log.debug("Dump after phantom-split of form list");
-        for ( FormDataModel m : fdmList ) {
+        for (FormDataModel m : fdmList) {
           m.print(System.err);
         }
       }

@@ -493,7 +493,6 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
       e1.printStackTrace();
       throw new ODKExternalServiceException(e1);
     }
-    System.out.println(uri.toString());
 
     HttpEntity entity = null;
     if ( statement != null ) {
