@@ -20,8 +20,10 @@ import java.net.UnknownHostException;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.JsonFileGenerator;
@@ -31,8 +33,12 @@ import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.aggregate.task.gae.servlet.WatchdogServlet;
+import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -43,12 +49,19 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WatchdogImpl implements Watchdog, InitializingBean {
+
+  private Log logger = LogFactory.getLog(WatchdogImpl.class);
+
+  /** cached value of the faster-watchdog-cycle flag */
+  private boolean lastFasterWatchdogCycleEnabledFlag = false;
+  /** timestamp of the last fetch (re-calculation) of the faster-watchdog-cycle flag */
+  private long lastFasterWatchdogCycleEnabledFlagFetch = -1L;
 
   Datastore datastore = null;
   UserService userService = null;
@@ -65,7 +78,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
 
   /**
    * Implementation of CallingContext.
-   * 
+   *
    * @author mitchellsundt@gmail.com
    *
    */
@@ -74,14 +87,14 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      boolean asDaemon = true;
      String serverUrl;
      String secureServerUrl;
-     
+
      CallingContextImpl() {
 
         Realm realm = userService.getCurrentRealm();
         Integer identifiedPort = realm.getPort();
         Integer identifiedSecurePort = realm.getSecurePort();
         String identifiedHostname = realm.getHostname();
-        
+
         if ( identifiedHostname == null || identifiedHostname.length() == 0 ) {
            try {
               identifiedHostname = InetAddress.getLocalHost().getCanonicalHostName();
@@ -103,21 +116,21 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
               identifiedPort = HtmlConsts.WEB_PORT;
            }
         }
-        
-        
-        boolean expectedPort = 
+
+
+        boolean expectedPort =
            (identifiedScheme.equalsIgnoreCase("http") &&
                  identifiedPort == HtmlConsts.WEB_PORT) ||
            (identifiedScheme.equalsIgnoreCase("https") &&
                  identifiedPort == HtmlConsts.SECURE_WEB_PORT);
-        
+
         String path = "";
         if ( ctxt != null ) {
            path = ctxt.getContextPath();
         }
-        
+
         if (!expectedPort) {
-           serverUrl = identifiedScheme + "://" + identifiedHostname + BasicConsts.COLON + 
+           serverUrl = identifiedScheme + "://" + identifiedHostname + BasicConsts.COLON +
               Integer.toString(identifiedPort) + path;
          } else {
            serverUrl = identifiedScheme + "://" + identifiedHostname + path;
@@ -129,15 +142,15 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
            if ( identifiedSecurePort != null && identifiedSecurePort != 0 &&
                  identifiedSecurePort != HtmlConsts.SECURE_WEB_PORT ) {
               // explicitly name the port
-              secureServerUrl = "https://" + identifiedHostname + BasicConsts.COLON + 
-              Integer.toString(identifiedSecurePort) + path; 
+              secureServerUrl = "https://" + identifiedHostname + BasicConsts.COLON +
+              Integer.toString(identifiedSecurePort) + path;
            } else {
               // assume it is the default https port...
-              secureServerUrl = "https://" + identifiedHostname + path; 
+              secureServerUrl = "https://" + identifiedHostname + path;
            }
         }
      }
-     
+
      @Override
      public boolean getAsDeamon() {
         return asDaemon;
@@ -169,7 +182,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
            return httpClientFactory;
         } else if ( BeanDefs.IMAGE_UTIL.equals(beanName)) {
            return imageUtil;
-        } 
+        }
         throw new IllegalStateException("unable to locate bean");
      }
 
@@ -197,12 +210,12 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      public String getServerURL() {
         return serverUrl;
      }
-     
+
      @Override
      public String getSecureServerURL() {
         return secureServerUrl;
      }
-     
+
      @Override
      public ServletContext getServletContext() {
         return ctxt;
@@ -222,22 +235,15 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
         return getWebApplicationURL() + BasicConsts.FORWARDSLASH + servletAddr;
      }
   }
-  
-  @Override
-  public void createWatchdogTask(long checkIntervalMilliseconds) {
-    // No op because appengine cron.xml automatically schedules and calls the
-    // task
-    throw new IllegalStateException("this should not be called!");
-  }
 
   @Override
   public void onUsage(long delayMilliseconds, CallingContext cc) {
+    logger.info("Enqueuing WatchdogWorker Task for " + Long.toString(delayMilliseconds) + "ms into the future.");
     // fire off a watchdog background task...
     TaskOptionsBuilder b = new TaskOptionsBuilder(WatchdogServlet.ADDR);
     if ( delayMilliseconds != 0L ) {
       b.countdownMillis(delayMilliseconds);
     }
-    b.param(ServletConsts.CHECK_INTERVAL_PARAM, Long.toString(WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS));
     b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
   }
 
@@ -334,7 +340,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
 
   @Override
   public void afterPropertiesSet() throws Exception {
-     System.out.println("afterPropertiesSet WATCHDOG TASK IN TOMCAT");
+     System.out.println("afterPropertiesSet WATCHDOG TASK IN GAE");
      if ( datastore == null ) throw new IllegalStateException("no datastore specified");
      if ( userService == null ) throw new IllegalStateException("no user service specified");
      if ( uploadSubmissions == null ) throw new IllegalStateException("no uploadSubmissions specified");
@@ -351,5 +357,38 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   @Override
   public CallingContext getCallingContext() {
      return new CallingContextImpl();
+  }
+
+  @Override
+  public void setFasterWatchdogCycleEnabled(boolean value) {
+    if ( lastFasterWatchdogCycleEnabledFlag != value ) {
+      logger.info("setFasterWatchdogCycleEnabled: CHANGING to: " + value );
+      lastFasterWatchdogCycleEnabledFlag = value;
+      if ( lastFasterWatchdogCycleEnabledFlag ) {
+        // fire off a Watchdog.
+        // Delay it slightly to allow database updates to propagate.
+        CallingContext cc = getCallingContext();
+        onUsage(PersistConsts.MAX_SETTLE_MILLISECONDS, cc);
+      }
+    }
+    lastFasterWatchdogCycleEnabledFlagFetch = System.currentTimeMillis();
+  }
+
+  @Override
+  public boolean getFasterWatchdogCycleEnabled() {
+    CallingContext cc = getCallingContext();
+    if ( System.currentTimeMillis() >
+        BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS +
+        lastFasterWatchdogCycleEnabledFlagFetch ) {
+      try {
+        boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+        setFasterWatchdogCycleEnabled(!disabled && ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc));
+      } catch (ODKEntityNotFoundException e) {
+        e.printStackTrace();
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
+      }
+    }
+    return lastFasterWatchdogCycleEnabledFlag;
   }
 }

@@ -17,10 +17,14 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.ScheduledFuture;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.FormDelete;
 import org.opendatakit.aggregate.task.JsonFileGenerator;
@@ -30,8 +34,11 @@ import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.aggregate.task.WorksheetCreator;
+import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -45,13 +52,26 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * 
+ * Tomcat implementation of the watchdog -- as an executor
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     ServletContextAware {
+
+  private Log logger = LogFactory.getLog(WatchdogImpl.class);
+
+  /** cached value of the faster-watchdog-cycle flag */
+  private boolean lastFasterWatchdogCycleEnabledFlag = false;
+  /** timestamp of the last fetch (re-calculation) of the faster-watchdog-cycle flag */
+  private long lastFasterWatchdogCycleEnabledFlagFetch = -1L;
+
+  /** object used to cancel the fixed-rate scheduled WatchdogImpl task */
+  private ScheduledFuture<?> watchdogFuture = null;
+  /** the scheduling interval of the fixed-rate scheduled WatchdogImpl task */
+  private long watchdogPeriodInMilliseconds = -1L;
 
   boolean isStarted = false;
   TaskScheduler taskScheduler = null;
@@ -70,9 +90,9 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
   /**
    * Implementation of CallingContext for use by watchdog-launched tasks.
-   * 
+   *
    * @author mitchellsundt@gmail.com
-   * 
+   *
    */
   public class CallingContextImpl implements CallingContext {
 
@@ -223,36 +243,54 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   static class WatchdogRunner implements Runnable {
     final WatchdogWorkerImpl impl;
 
-    final long checkIntervalMilliseconds;
     final CallingContext cc;
 
-    public WatchdogRunner(long checkIntervalMilliseconds, CallingContext cc) {
+    public WatchdogRunner(CallingContext cc) {
       impl = new WatchdogWorkerImpl();
-      this.checkIntervalMilliseconds = checkIntervalMilliseconds;
       this.cc = cc;
     }
 
     @Override
     public void run() {
       try {
-        System.out.println("RUNNING WATCHDOG TASK IN TOMCAT");
-        impl.checkTasks(checkIntervalMilliseconds, cc);
+        System.out.println("RUNNING WATCHDOG TASK IN TOMCAT") ;
+        impl.checkTasks(cc);
       } catch (Exception e) {
         e.printStackTrace();
         // TODO: Problem - decide what to do if an exception occurs
       }
+      System.out.println("EXITING WATCHDOG TASK IN TOMCAT") ;
     }
   }
 
-  @Override
-  public void createWatchdogTask(long checkIntervalMilliseconds) {
+  /**
+   * Ensure that a fixed-rate executor is running with the given
+   * repeat interval.
+   *
+   * @param newWatchdogPeriodInMilliseconds -- repeat interval
+   */
+  public synchronized void createWatchdogTask(long newWatchdogPeriodInMilliseconds) {
     CallingContext cc = new CallingContextImpl();
 
-    WatchdogRunner wr = new WatchdogRunner(checkIntervalMilliseconds, cc);
+    logger.info("Changing WatchdogWorker Executor to " + Long.toString(newWatchdogPeriodInMilliseconds) + "ms intervals.");
 
-    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
-    System.out.println("CREATE WATCHDOG TASK IN TOMCAT");
-    exec.scheduleAtFixedRate(wr, checkIntervalMilliseconds);
+    try {
+      if ( (watchdogFuture != null) &&
+           ((newWatchdogPeriodInMilliseconds != watchdogPeriodInMilliseconds ) ||
+            watchdogFuture.isCancelled()) ) {
+        System.out.println("KILL EXISTING WATCHDOG TASK IN TOMCAT");
+        watchdogFuture.cancel(false);
+        watchdogFuture = null;
+      }
+    } finally {
+      if ( watchdogFuture == null ) {
+        System.out.println("SCHEDULE NEW WATCHDOG TASK IN TOMCAT");
+        AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+        WatchdogRunner wr = new WatchdogRunner(cc);
+        watchdogFuture = exec.scheduleAtFixedRate(wr, newWatchdogPeriodInMilliseconds);
+        watchdogPeriodInMilliseconds = newWatchdogPeriodInMilliseconds;
+      }
+    }
   }
 
   @Override
@@ -282,7 +320,19 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   @Override
   public void start() {
     System.out.println("start WATCHDOG TASK IN TOMCAT");
-    createWatchdogTask(WATCHDOG_TOMCAT_RETRY_INTERVAL_MILLISECONDS);
+    // initialize the cached value of the fast cycling flag
+    CallingContext cc = getCallingContext();
+    lastFasterWatchdogCycleEnabledFlag = false;
+    try {
+      lastFasterWatchdogCycleEnabledFlag = ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc);
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+    }
+    lastFasterWatchdogCycleEnabledFlagFetch = System.currentTimeMillis();
+    // start the publisher...
+    establishWatchdog(lastFasterWatchdogCycleEnabledFlag);
     isStarted = true;
   }
 
@@ -409,7 +459,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
       throw new IllegalStateException("no csvGenerator specified");
     if (kmlGenerator == null)
       throw new IllegalStateException("no kmlGenerator specified");
-    if ( jsonFileGenerator == null ) 
+    if ( jsonFileGenerator == null )
       throw new IllegalStateException("no jsonFileGenerator specified");
     if (formDelete == null)
       throw new IllegalStateException("no formDelete specified");
@@ -433,5 +483,42 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   @Override
   public CallingContext getCallingContext() {
     return new CallingContextImpl();
+  }
+
+  private void establishWatchdog(boolean fasterWatchdogCycleEnabled) {
+    if ( fasterWatchdogCycleEnabled ) {
+      createWatchdogTask(BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS);
+    } else {
+      createWatchdogTask(BackendActionsTable.IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS);
+    }
+  }
+
+  @Override
+  public void setFasterWatchdogCycleEnabled(boolean value) {
+    if ( lastFasterWatchdogCycleEnabledFlag != value ) {
+      logger.info("setFasterWatchdogCycleEnabled: CHANGING to: " + value );
+      lastFasterWatchdogCycleEnabledFlag = value;
+      // kill and restart the publisher...
+      establishWatchdog(lastFasterWatchdogCycleEnabledFlag);
+    }
+    lastFasterWatchdogCycleEnabledFlagFetch = System.currentTimeMillis();
+  }
+
+  @Override
+  public boolean getFasterWatchdogCycleEnabled() {
+    CallingContext cc = getCallingContext();
+    if ( System.currentTimeMillis() >
+        BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS +
+        lastFasterWatchdogCycleEnabledFlagFetch ) {
+      try {
+        boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+        setFasterWatchdogCycleEnabled(!disabled && ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc));
+      } catch (ODKEntityNotFoundException e) {
+        e.printStackTrace();
+      } catch (ODKOverQuotaException e) {
+        e.printStackTrace();
+      }
+    }
+    return lastFasterWatchdogCycleEnabledFlag;
   }
 }

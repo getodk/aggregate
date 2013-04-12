@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
+import org.opendatakit.aggregate.client.widgets.DisableFasterBackgroundActionsCheckbox;
 import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -52,6 +53,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private Label simpleApiKey;
   private Label googleApiClientId;
   private EnableOdkTablesCheckbox odkTablesEnable;
+  private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
 
   public PreferencesSubTab() {
     // vertical
@@ -107,6 +109,12 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     HTML features = new HTML(FEATURES_LABEL);
     add(features);
 
+    disableFasterBackgroundActions = new DisableFasterBackgroundActionsCheckbox(Preferences.getFasterBackgroundActionsDisabled());
+    add(disableFasterBackgroundActions);
+
+    HTML br = new HTML("<br>");
+    add(br);
+
     odkTablesEnable = new EnableOdkTablesCheckbox(Preferences.getOdkTablesEnabled());
     add(odkTablesEnable);
   }
@@ -148,6 +156,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 		@Override
 		public void refreshFromUpdatedPreferences() {
 		    setCredentialValues();
+		    disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
 		    odkTablesEnable.updateValue(Preferences.getOdkTablesEnabled());
 		}
     });

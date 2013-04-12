@@ -65,6 +65,10 @@ public final class RestartButton extends AggregateButton implements ClickHandler
       SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
           new ReportErrorsCallback());
       break;
+    case JSON_SERVER:
+      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
+          new ReportErrorsCallback());
+      break;
     case OHMAGE_JSON_SERVER:
       SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
           new ReportErrorsCallback());

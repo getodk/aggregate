@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.task.gae;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.gae.servlet.UploadSubmissionsTaskServlet;
 import org.opendatakit.aggregate.util.BackendActionsTable;
@@ -27,26 +28,37 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean. It cannot have any per-request state. It uses a
  * static inner class to encapsulate the per-request state of a running
  * background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, CallingContext cc)
+  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
       throws ODKExternalServiceException {
 
     try {
       System.out.println("Creating "
           + fsc.getExternalServicePublicationOption().toString().toLowerCase() + " upload task: "
           + fsc.getExternalServiceType());
-      
+
       TaskOptionsBuilder b = new TaskOptionsBuilder(UploadSubmissionsTaskServlet.ADDR);
       b.countdownMillis(BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
       b.param(ExternalServiceConsts.FSC_URI_PARAM, fsc.getUri());
-      b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
+
+      // if we requested a background thread and have not disabled faster publishing,
+      // throw the publisher onto the background thread where it can process
+      // bigger batches of records.
+      //
+      // Otherwise, use the frontend thread.
+      boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+      if ( onBackground && !disabled ) {
+        b.enqueue();
+      } else {
+        b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
+      }
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }

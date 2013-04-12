@@ -62,7 +62,7 @@
 		<property name="userService" ref="user_service"/>
 	</bean>
 
-	<task:scheduler id="task_scheduler" pool-size="100" />
+	<task:scheduler id="task_scheduler" pool-size="3" />
 
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.tomcat.WorksheetCreatorImpl" />
