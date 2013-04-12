@@ -117,6 +117,8 @@ public class TaskLockImpl implements TaskLock {
             deleteTransaction.rollback();
             System.out.println("Rollback deleteLock : " + lockId + " " + formId + " "
                 + taskType.getName());
+            // if we fail, sleep, since there must be another server in contention
+            Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
           }
         }
       }
@@ -157,6 +159,8 @@ public class TaskLockImpl implements TaskLock {
           transaction.rollback();
           System.out.println("Rollback obtainLock : " + lockId + " " + formId + " "
               + taskType.getName());
+          // if we fail, sleep, since there must be another server in contention
+          Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
           return result;
         }
       }
@@ -259,6 +263,8 @@ public class TaskLockImpl implements TaskLock {
           transaction.rollback();
           System.out.println("Rollback renewLock : " + lockId + " " + formId + " "
               + taskType.getName());
+          // if we fail, sleep, since there must be another server in contention
+          Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
           return result;
         }
       }

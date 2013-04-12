@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -29,18 +30,22 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * Implements the mechanisms used in GAE to launch Watchdog during periods of
  * website activity ( triggerWatchdog ) and from within the Watchdog
- * implementation when there are background tasks requiring supervision
- * ( scheduleFutureWatchdog ).
+ * implementation when there are background tasks requiring supervision (
+ * scheduleFutureWatchdog ).
  *
  * To do that, it tracks:
+ *
  * - the start time of each Watchdog iteration ( updateWatchdogStart ),
+ *
  * - the time-at-enqueuing of a Watchdog Task on the AppEngine queue,
+ *
  * - the time-to-fire of the earliest future Watchdog activity.
  *
  * @author mitchellsundt@gmail.com
@@ -51,6 +56,7 @@ public class BackendActionsTable extends CommonFieldsBase {
   private static final String WATCHDOG_SCHEDULING_ROW_ID = "rid:watchdog_scheduling";
   private static final String WATCHDOG_ENQUEUE_ROW_ID = "rid:watchdog_enqueue";
   private static final String WATCHDOG_START_ROW_ID = "rid:watchdog_start";
+  private static final String WATCHDOG_DEATH_TOGGLE_ROW_ID = "rid:watchdog_death_toggle";
 
   private static final String TABLE_NAME = "_backend_actions";
 
@@ -59,19 +65,37 @@ public class BackendActionsTable extends CommonFieldsBase {
 
   private static final Log logger = LogFactory.getLog(BackendActionsTable.class);
 
-  // fields used to determine triggering of UploadSubmissions task creation.
+  /** delay between re-loads of the lastPublisherRevision HashMap. 30 seconds. */
+  public static final long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
+  /**
+   * delay between re-issuing uploadSubmissions tasks for a given uriFsc. 3.5
+   * seconds
+   */
+  public static final long PUBLISHING_DELAY_MILLISECONDS = 500L + PersistConsts.MAX_SETTLE_MILLISECONDS;
+  /**
+   * delay between watchdog sweeps (primarily to nudge failed publishers
+   * onward). 1 minute.
+   */
+  public static final long FAST_PUBLISHING_RETRY_MILLISECONDS = 60L * 1000L;
+  /** delay between watchdog sweeps when there are no active tasks. 15 minutes. */
+  public static final long IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 15L * 60000L;
 
-  public static long lastHashmapCleanTimestamp = 0L; // time of last clear of hashmap
-  public static long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
+  // fields used to determine triggering of UploadSubmissions task creation.
+  /** last time we reloaded the publisher hashMap from the datastore */
+  public static long lastHashmapCleanTimestamp = 0L;
+  /** the publisher hashMap<uriFsc, lastUploadSubmissionTaskEnqueueTime> */
   public static Map<String, Long> lastPublisherRevision = new HashMap<String, Long>();
-  public static long PUBLISHING_DELAY_MILLISECONDS = 500L + PersistConsts.MAX_SETTLE_MILLISECONDS;
-  // field used to record when watchdogs actually start
-  private static long lastWatchdogStartTime = 0L;
+
+  /** last time we reloaded the lastWatchdog... values from the datastore */
+  private static long lastFetchTime = 0L;
 
   // fields used to determine when to fire a watchdog based upon usage.
 
-  private static long lastFetchTime = 0L; // time of last (complete) fetch of these values.
+  /** last time a Watchdog was started (directly fetched) */
+  private static long lastWatchdogStartTime = 0L;
+  /** the last time we enqueued a Watchdog to start */
   private static long lastWatchdogEnqueueTime = 0L;
+  /** the time when we should next enqueue a Watchdog */
   private static long lastWatchdogSchedulingTime = 0L;
 
   /**
@@ -120,8 +144,8 @@ public class BackendActionsTable extends CommonFieldsBase {
    * @return
    * @throws ODKDatastoreException
    */
-  private static synchronized final BackendActionsTable assertRelation(Datastore datastore, User user)
-      throws ODKDatastoreException {
+  private static synchronized final BackendActionsTable assertRelation(Datastore datastore,
+      User user) throws ODKDatastoreException {
     if (relation == null) {
       BackendActionsTable relationPrototype;
       relationPrototype = new BackendActionsTable(datastore.getDefaultSchemaName());
@@ -163,14 +187,14 @@ public class BackendActionsTable extends CommonFieldsBase {
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
       long now = System.currentTimeMillis();
-      if ( lastHashmapCleanTimestamp + HASHMAP_LIFETIME_MILLISECONDS < now ) {
+      if (lastHashmapCleanTimestamp + HASHMAP_LIFETIME_MILLISECONDS < now) {
         lastPublisherRevision.clear();
         lastHashmapCleanTimestamp = now;
       }
 
       BackendActionsTable t = null;
       Long oldTime = lastPublisherRevision.get(uriFsc);
-      if ( oldTime == null ) {
+      if (oldTime == null) {
         // see if we have anything in the table (created if missing).
         t = BackendActionsTable.getSingletonRecord(uriFsc, ds, user);
         oldTime = t.getLastRevisionDate().getTime();
@@ -178,16 +202,16 @@ public class BackendActionsTable extends CommonFieldsBase {
       }
 
       boolean publish = false;
-      if ( oldTime + PUBLISHING_DELAY_MILLISECONDS < now ) {
+      if (oldTime + PUBLISHING_DELAY_MILLISECONDS < now) {
         // fetch actual record if not yet fetched
-        if ( t == null ) {
+        if (t == null) {
           t = BackendActionsTable.getSingletonRecord(uriFsc, ds, user);
           oldTime = t.getLastRevisionDate().getTime();
           lastPublisherRevision.put(uriFsc, oldTime);
         }
 
         // and double-check that we still meet the condition...
-        if ( oldTime + PUBLISHING_DELAY_MILLISECONDS < now ) {
+        if (oldTime + PUBLISHING_DELAY_MILLISECONDS < now) {
           t.setLastRevisionDate(new Date(now));
           ds.putEntity(t, user);
           lastPublisherRevision.put(uriFsc, now);
@@ -204,12 +228,13 @@ public class BackendActionsTable extends CommonFieldsBase {
   }
 
   /**
-   * Updates the time the watchdog last ran.
-   * Called only from within the WatchdogWorkerImpl class.
+   * Updates the time the watchdog last ran. Called only from within the
+   * WatchdogWorkerImpl class.
    *
    * @param cc
+   * @return true if the watchdog should be culled (not rescheduled)
    */
-  public static final synchronized void updateWatchdogStart(CallingContext cc) {
+  public static final synchronized boolean updateWatchdogStart(Watchdog wd, CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
 
     try {
@@ -224,66 +249,87 @@ public class BackendActionsTable extends CommonFieldsBase {
       t.setLastRevisionDate(new Date(lastWatchdogStartTime));
       ds.putEntity(t, user);
 
-      long expectedNextStart =
-          oldStartTime + Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS;
+      long expectedNextStart = oldStartTime + FAST_PUBLISHING_RETRY_MILLISECONDS;
 
-      if ( expectedNextStart > lastWatchdogStartTime ) {
-        logger.warn("watchdog started early: " +
-            Long.toString(lastWatchdogStartTime) +
-            " vs " +  Long.toString(expectedNextStart) );
+      if (expectedNextStart > lastWatchdogStartTime) {
+        logger.warn("watchdog started early: " + Long.toString(lastWatchdogStartTime) + " vs "
+            + Long.toString(expectedNextStart));
+        if (expectedNextStart > lastWatchdogStartTime + PersistConsts.MAX_SETTLE_MILLISECONDS) {
+          // we likely have 2 or more Watchdog timers running.
+          // use the DEATH_TOGGLE datetime as a boolean flag
+          // that we alternately toggle. Whenever it is `true`
+          // we should not requeue this Watchdog. Over time,
+          // this will cause the extra Watchdog threads to
+          // die out. Similar to the way detecting cycles
+          // works in a linked list.
+          t = getSingletonRecord(WATCHDOG_DEATH_TOGGLE_ROW_ID, ds, user);
+          long sense = t.getLastRevisionDate().getTime();
+          t.setLastRevisionDate(new Date(sense + 1));
+          ds.putEntity(t, user);
+
+          boolean culled = (sense & 1L) == 1L;
+          if (culled) {
+            // culling only occurs on GAE
+            logger.warn("---------------WATCHDOG SHOULD BE CULLED!");
+          }
+          return culled;
+        }
       }
-
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
     } finally {
       cc.setAsDaemon(wasDaemon);
     }
+    return false;
   }
 
-  private static final void logValues( String tag, long now, long futureMilliseconds, long requestedTime ) {
+  private static final void logValues(String tag, long now, long futureMilliseconds,
+      long requestedTime) {
     String msg;
-    if ( requestedTime == -1L ) {
-      msg = String.format("%7$s last Fetch: %1$18s [S: %2$18s Eq: %3$18s Fs: %4$18s] futureMillis: %5$18s",
-          Long.toString(lastFetchTime-now),
-          Long.toString(lastWatchdogStartTime-now),
-          Long.toString(lastWatchdogEnqueueTime-now),
-          Long.toString(lastWatchdogSchedulingTime-now),
-          Long.toString(futureMilliseconds), Long.toString(requestedTime-now), tag );
+    if (requestedTime == -1L) {
+      msg = String.format(
+          "%7$s last Fetch: %1$18s [S: %2$18s Eq: %3$18s Fs: %4$18s] futureMillis: %5$18s",
+          Long.toString(lastFetchTime - now), Long.toString(lastWatchdogStartTime - now),
+          Long.toString(lastWatchdogEnqueueTime - now),
+          Long.toString(lastWatchdogSchedulingTime - now), Long.toString(futureMilliseconds),
+          Long.toString(requestedTime - now), tag);
     } else {
-      msg = String.format("%7$s last Fetch: %1$18s [S: %2$18s Eq: %3$18s Fs: %4$18s] futureMillis: %5$18s requested: %6$18s",
-          Long.toString(lastFetchTime-now),
-          Long.toString(lastWatchdogStartTime-now),
-          Long.toString(lastWatchdogEnqueueTime-now),
-          Long.toString(lastWatchdogSchedulingTime-now),
-          Long.toString(futureMilliseconds), Long.toString(requestedTime-now), tag );
+      msg = String
+          .format(
+              "%7$s last Fetch: %1$18s [S: %2$18s Eq: %3$18s Fs: %4$18s] futureMillis: %5$18s requested: %6$18s",
+              Long.toString(lastFetchTime - now), Long.toString(lastWatchdogStartTime - now),
+              Long.toString(lastWatchdogEnqueueTime - now),
+              Long.toString(lastWatchdogSchedulingTime - now), Long.toString(futureMilliseconds),
+              Long.toString(requestedTime - now), tag);
     }
     logger.info(msg);
   }
 
-  private static final String INCOMING  = "incoming-";
-  private static final String FETCHED   = "-fetched-";
+  private static final String INCOMING = "incoming-";
+  private static final String FETCHED = "-fetched-";
   private static final String SCHEDULED = "Fs-update";
-  private static final String CLEARED   = "Fs-clear-";
-  private static final String ENQUEUED  = "Eq-update";
+  private static final String CLEARED = "Fs-clear-";
+  private static final String ENQUEUED = "Eq-update";
 
   private static class WatchdogRecords {
     private BackendActionsTable startTime = null;
     private BackendActionsTable enqueueTime = null;
     private BackendActionsTable schedulingTime = null;
 
-    WatchdogRecords( long now, CallingContext cc ) throws ODKDatastoreException {
+    WatchdogRecords(long now, CallingContext cc) throws ODKDatastoreException {
 
       // refetch all the data if it is more than the settle period old...
-      if ( lastFetchTime + PersistConsts.MAX_SETTLE_MILLISECONDS < now ) {
-        fetchAll( now, cc);
+      if (lastFetchTime + PersistConsts.MAX_SETTLE_MILLISECONDS < now) {
+        fetchAll(now, cc);
       }
     }
 
-    void fetchAll( long now, CallingContext cc ) throws ODKDatastoreException {
+    void fetchAll(long now, CallingContext cc) throws ODKDatastoreException {
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
 
-      if ( lastFetchTime == now ) return;
+      if (lastFetchTime == now)
+        return;
 
       // this is gratuitous, but it puts the queue activities in context
       // it would only be updated on the background process if we didn't
@@ -299,31 +345,29 @@ public class BackendActionsTable extends CommonFieldsBase {
 
       lastFetchTime = now;
 
-      logValues( FETCHED, now, -1L, -1L );
+      logValues(FETCHED, now, -1L, -1L);
     }
 
   }
 
   /**
-   * This is effectively GAE-specific: Tomcat installations use a
-   * scheduled executor to periodically fire the watchdog (and do
-   * not use this mechanism).
+   * This is effectively GAE-specific: Tomcat installations use a scheduled
+   * executor to periodically fire the watchdog (and do not use this mechanism).
+   * i.e., on Tomcat, the calls to: Watchdog.onUsage(delay, cc); are no-ops.
    *
-   * Schedule a watchdog to run the specified number of milliseconds
-   * into the future (zero is OK).
+   * Schedule a watchdog to run the specified number of milliseconds into the
+   * future (zero is OK).
    *
-   * Schedule to ensure that Watchdogs are run at with at least
-   * WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS between invocations.
-   *
+   * @param watchdog
    * @param futureMilliseconds
    * @param cc
    */
-  public static final synchronized void scheduleFutureWatchdog(long futureMilliseconds,
-      CallingContext cc) {
+  private static final synchronized void scheduleFutureWatchdog(Watchdog wd,
+      long futureMilliseconds, CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
 
     long now = System.currentTimeMillis();
-    logValues( INCOMING, now, futureMilliseconds, -1L );
+    logValues(INCOMING, now, futureMilliseconds, -1L);
 
     try {
       cc.setAsDaemon(true);
@@ -333,8 +377,8 @@ public class BackendActionsTable extends CommonFieldsBase {
       WatchdogRecords records = new WatchdogRecords(now, cc);
 
       // don't schedule any timer before the blackoutTime
-      long blackoutTime = Math.max(lastWatchdogEnqueueTime +
-          Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS, now);
+      long blackoutTime = Math.max(lastWatchdogEnqueueTime + FAST_PUBLISHING_RETRY_MILLISECONDS,
+          now);
 
       // Revise the request to start at the end of the blackout period.
       // Two cases: (1) immediate request (2) future request
@@ -345,54 +389,53 @@ public class BackendActionsTable extends CommonFieldsBase {
       // or
       // (2) the adjusted request time is now
       // or
-      // (3) there is no active scheduling time (and this request is in the future)
-      //    (the scheduling time is at or before the enqueue time)
+      // (3) there is no active scheduling time (and this request is in the
+      // future)
       // or
       // (4) the active scheduling time should be lowered due to this request.
-      if ( (lastWatchdogSchedulingTime < now &&
-            lastWatchdogSchedulingTime > lastWatchdogEnqueueTime) ||
-           (requestedWatchdogSchedulingTime == now) ||
-           (lastWatchdogSchedulingTime <= lastWatchdogEnqueueTime) ||
-           (requestedWatchdogSchedulingTime < lastWatchdogSchedulingTime) ) {
+      if ((lastWatchdogSchedulingTime < now && lastWatchdogSchedulingTime > lastWatchdogEnqueueTime)
+          || (requestedWatchdogSchedulingTime == now)
+          || (lastWatchdogSchedulingTime <= lastWatchdogEnqueueTime)
+          || (requestedWatchdogSchedulingTime < lastWatchdogSchedulingTime)) {
 
         // refetch and update our values...
         records.fetchAll(now, cc);
 
         // and recompute things...
-        blackoutTime = Math.max(lastWatchdogEnqueueTime +
-            Watchdog.WATCHDOG_BUSY_RETRY_INTERVAL_MILLISECONDS, now);
+        blackoutTime = Math.max(lastWatchdogEnqueueTime + FAST_PUBLISHING_RETRY_MILLISECONDS, now);
 
         requestedWatchdogSchedulingTime = Math.max(blackoutTime, now + futureMilliseconds);
 
         // OK -- see if the conditions for update still apply...
-        boolean activeSchedulingTimeInThePast =
-            (lastWatchdogSchedulingTime < now &&
-                lastWatchdogSchedulingTime > lastWatchdogEnqueueTime);
+        boolean activeSchedulingTimeInThePast = (lastWatchdogSchedulingTime < now && lastWatchdogSchedulingTime > lastWatchdogEnqueueTime);
 
-        if ( activeSchedulingTimeInThePast ||
-             (requestedWatchdogSchedulingTime == now) ||
-             (lastWatchdogSchedulingTime <= lastWatchdogEnqueueTime) ||
-             (requestedWatchdogSchedulingTime < lastWatchdogSchedulingTime) ) {
+        if (activeSchedulingTimeInThePast || (requestedWatchdogSchedulingTime == now)
+            || (lastWatchdogSchedulingTime <= lastWatchdogEnqueueTime)
+            || (requestedWatchdogSchedulingTime < lastWatchdogSchedulingTime)) {
           // YES... update everything
 
           // Case (1) and/or (2)
           // enqueue any request first...
-          if ( activeSchedulingTimeInThePast ||
-               requestedWatchdogSchedulingTime == now ) {
-            // fire the Watchdog...
-            Watchdog dog = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-            dog.onUsage(0L, cc);
+          if (activeSchedulingTimeInThePast || requestedWatchdogSchedulingTime == now) {
+
+            // fire the Watchdog ONLY if we are not
+            // doing fast publishing. During fast publishing,
+            // the watchdog is fired during rescheduleWatchdog()...
+            if (!wd.getFasterWatchdogCycleEnabled()) {
+              wd.onUsage(0L, cc); // no wait, as we are well past due...
+            }
 
             // update enqueue value...
             records.enqueueTime.setLastRevisionDate(new Date(now));
             lastWatchdogEnqueueTime = now;
             ds.putEntity(records.enqueueTime, user);
-            logValues( ENQUEUED, now, futureMilliseconds, requestedWatchdogSchedulingTime );
+            logValues(ENQUEUED, now, futureMilliseconds, requestedWatchdogSchedulingTime);
           }
 
-          // If we fired a stale request (case (1)) then don't schedule anything.
+          // If we fired a stale request (case (1)) then don't schedule
+          // anything.
           // The Watchdog itself will handle queuing its next runtime.
-          if ( !activeSchedulingTimeInThePast ) {
+          if (!activeSchedulingTimeInThePast) {
             // EXCLUDING Case (1)...
 
             // if we fired an immediate request, we should
@@ -405,14 +448,14 @@ public class BackendActionsTable extends CommonFieldsBase {
                 records.schedulingTime.setLastRevisionDate(new Date(now));
                 lastWatchdogSchedulingTime = now;
                 ds.putEntity(records.schedulingTime, user);
-                logValues( CLEARED, now, futureMilliseconds, requestedWatchdogSchedulingTime );
+                logValues(CLEARED, now, futureMilliseconds, requestedWatchdogSchedulingTime);
               }
             } else {
               // Case (3) or (4) - schedule a future event
               records.schedulingTime.setLastRevisionDate(new Date(requestedWatchdogSchedulingTime));
               lastWatchdogSchedulingTime = requestedWatchdogSchedulingTime;
               ds.putEntity(records.schedulingTime, user);
-              logValues( SCHEDULED, now, futureMilliseconds, requestedWatchdogSchedulingTime );
+              logValues(SCHEDULED, now, futureMilliseconds, requestedWatchdogSchedulingTime);
             }
           }
         }
@@ -425,24 +468,88 @@ public class BackendActionsTable extends CommonFieldsBase {
   }
 
   /**
-   * This is effectively GAE-specific: Tomcat installations use a
-   * scheduled executor to periodically fire the watchdog (and do
-   * not use this mechanism).
+   * This is effectively GAE-specific: Tomcat installations use a scheduled
+   * executor to periodically fire the watchdog (and do not use this mechanism).
    *
-   * Check whether a watchdog should be spun up (immediately). Spin one up
-   * every Watchdog.WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS. Note that if the
-   * watchdog determines that there is work pending, it will schedule itself.
+   * Check whether a watchdog should be spun up. Spin one up every
+   * IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS. Note that if the Watchdog
+   * determines that there is work pending, it will schedule a watchdog every
+   * FAST_PUBLISHING_RETRY_MILLISECONDS.
    *
    * @param cc
    */
   public static final synchronized void triggerWatchdog(CallingContext cc) {
+
+    Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+
     // don't schedule any timer before the next idling retry time
-    long nextIdlingRetryTime = lastWatchdogEnqueueTime +
-                        Watchdog.WATCHDOG_IDLING_RETRY_INTERVAL_MILLISECONDS;
+    long nextIdlingRetryTime;
 
-    long futureMilliseconds = Math.max(0L,
-        nextIdlingRetryTime - System.currentTimeMillis());
+    if (wd.getFasterWatchdogCycleEnabled()) {
+      nextIdlingRetryTime = lastWatchdogEnqueueTime + FAST_PUBLISHING_RETRY_MILLISECONDS;
+    } else {
+      nextIdlingRetryTime = lastWatchdogEnqueueTime + IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS;
+    }
 
-    scheduleFutureWatchdog(futureMilliseconds, cc);
+    long futureMilliseconds = Math.max(0L, nextIdlingRetryTime - System.currentTimeMillis());
+
+    scheduleFutureWatchdog(wd, futureMilliseconds, cc);
+  }
+
+  /**
+   * This is effectively GAE-specific: Tomcat installations use a scheduled
+   * executor to periodically fire the watchdog (and do not use this mechanism).
+   *
+   * At the completion of the current watchdog, if we have active tasks or have
+   * fast publishing enabled, schedule a new watchdon
+   * FAST_PUBLISHING_RETRY_MILLISECONDS into the future. Note that if we do not
+   * have fast publishing enabled, the publishing does not take immediate
+   * effect, but is a suggested next start time, and only if the website is
+   * active will it be honored.
+   *
+   * @param hasActiveTasks
+   *          -- whether active tasks were detected
+   * @param cullThisWatchdog
+   *          -- whether this watchdog should be rescheduled
+   * @param cc
+   */
+  public static final synchronized void rescheduleWatchdog(boolean hasActiveTasks,
+      boolean cullThisWatchdog, CallingContext cc) {
+
+    Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+
+    try {
+      boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+      boolean wasFastPublishing = ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc);
+
+      if (!hasActiveTasks && wasFastPublishing) {
+        // we should switch to the slower watchdog cycle
+        ServerPreferencesProperties.setFasterWatchdogCycleEnabled(cc, false);
+        wd.setFasterWatchdogCycleEnabled(false);
+      }
+
+      if (hasActiveTasks) {
+        if (!disabled) {
+          if (!wasFastPublishing) {
+            // switch to the faster watchdog cycle
+            ServerPreferencesProperties.setFasterWatchdogCycleEnabled(cc, true);
+            wd.setFasterWatchdogCycleEnabled(true);
+          } else {
+            // schedule the next watchdog in the future.
+            // if we are culling the watchdog, then do not enqueue it.
+            if (!cullThisWatchdog) {
+              wd.onUsage(FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
+            }
+          }
+        }
+        // and regardless, update the next-eligible-requeue time
+        // this is only used if fast publishing is disabled.
+        scheduleFutureWatchdog(wd, FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
+      }
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+    }
   }
 }

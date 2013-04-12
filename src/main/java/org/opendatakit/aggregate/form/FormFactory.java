@@ -45,7 +45,7 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * Factory class for managing Form objects.
  * Does caching of the forms so as to minimize the number of database accesses.
- * 
+ *
  * @author mitchellsundt@gmail.com
  *
  */
@@ -57,13 +57,13 @@ public class FormFactory {
   private static final List<IForm> cache = new LinkedList<IForm>();
 
   private FormFactory() {};
-  
+
   /**
-   * Return the list of forms in the database.  
+   * Return the list of forms in the database.
    * If topLevelAuri is null, return all forms. Otherwise, return the form with the matching URI.
    * This is the main interface to the cache of form objects.  The cache is refreshed as a whole
    * every PersistConsts.MAX_SETTLE_MILLISECONDS.
-   * 
+   *
    * @param topLevelAuri
    * @param cc
    * @return
@@ -82,7 +82,7 @@ public class FormFactory {
       // we should rely on the cache for that time interval.  Without MemCache-style
       // support, this is somewhat problematic since different server instances might
       // see different versions of the same Form.
-      // 
+      //
       logger.info("FormCache: using cached list of Forms");
     } else {
       // we have a fairly stale list of forms -- interrogate the database
@@ -93,15 +93,15 @@ public class FormFactory {
       }
       cache.clear();
       logger.info("FormCache: fetching new list of Forms");
-  
+
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
-  
+
       FormInfoTable relation = FormInfoTable.assertRelation(cc);
       // ensure that Form table exists...
       Query formQuery = ds.createQuery(relation, "Form.getForms", user);
       List<? extends CommonFieldsBase> infoRows = formQuery.executeQuery();
-  
+
       for (CommonFieldsBase cb : infoRows) {
         FormInfoTable infoRow = (FormInfoTable) cb;
         IForm f = oldForms.get(infoRow.getUri());
@@ -131,16 +131,16 @@ public class FormFactory {
           if ( ref != 0 ) return ref;
           return o1.getFormId().compareToIgnoreCase(o2.getFormId());
         }});
-      
+
       // update cacheTimestamp -- note that if the datastore is very slow, this will
       // space out the updates because the cacheTimestamp is established after all
       // the datastore accesses.
       cacheTimestamp = System.currentTimeMillis();
-      
+
       // test to see if we need to trigger the watchdog
       BackendActionsTable.triggerWatchdog(cc);
     }
-    
+
     for (IForm v : cache) {
       if ( topLevelAuri == null || v.getUri().equals(topLevelAuri) ) {
         forms.add(v);
@@ -160,7 +160,7 @@ public class FormFactory {
    * This provides a cache of the form data.  If known, the top-level object's
    * row object is passed in.  This is a database access optimization (minimize
    * GAE billing).
-   *  
+   *
    * @param topLevelAuri
    * @param cc
    * @return
@@ -171,7 +171,7 @@ public class FormFactory {
   private static IForm getForm(String topLevelAuri, CallingContext cc)
       throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
     List<IForm> forms = internalGetForms(topLevelAuri, cc);
-    
+
     if ( forms.isEmpty() ) throw new ODKEntityNotFoundException("Could not retrieve form uri: " + topLevelAuri);
     IForm f = forms.get(0);
     // TODO: check authorization?
@@ -188,7 +188,7 @@ public class FormFactory {
   /**
    * Called during the startup action to load the Form table and eventually
    * handle migrations of forms from older table formats to newer ones.
-   * 
+   *
    * @param cc
    * @throws ODKDatastoreException
    */
@@ -198,7 +198,7 @@ public class FormFactory {
 
   /**
    * Clean up the incoming string to extract just the formId from it.
-   * 
+   *
    * @param submissionKey
    * @return
    */
@@ -215,12 +215,12 @@ public class FormFactory {
   /**
    * Static function to retrieve a form with the specified ODK id from the
    * datastore
-   * 
+   *
    * @param formId
    *          The ODK identifier that identifies the form
-   * 
+   *
    * @return The ODK aggregate form definition/conversion object
-   * 
+   *
    * @throws ODKOverQuotaException
    * @throws ODKDatastoreException
    * @throws ODKFormNotFoundException
@@ -255,12 +255,12 @@ public class FormFactory {
   /**
    * Static function to retrieve a form with the specified ODK id from the
    * datastore
-   * 
+   *
    * @param formId
    *          The ODK identifier that identifies the form
-   * 
+   *
    * @return The ODK aggregate form definition/conversion object
-   * 
+   *
    * @throws ODKOverQuotaException
    * @throws ODKDatastoreException
    * @throws ODKFormNotFoundException
@@ -292,7 +292,7 @@ public class FormFactory {
   /**
    * Called only from FormParserForJavaRosa.  The form should not already exist.
    * Returns the new form.
-   * 
+   *
    * @param incomingFormXml
    * @param rootElementDefn
    * @param isEncryptedForm
@@ -303,9 +303,9 @@ public class FormFactory {
    * @throws ODKDatastoreException
    * @throws ODKConversionException
    */
-  public static IForm createFormId(String incomingFormXml, XFormParameters rootElementDefn, 
-        boolean isEncryptedForm, boolean isDownloadEnabled, String title, CallingContext cc) 
-            throws ODKDatastoreException, ODKConversionException {
+  public static IForm createFormId(String incomingFormXml, XFormParameters rootElementDefn,
+        boolean isEncryptedForm, boolean isDownloadEnabled, String title, CallingContext cc)
+            throws ODKDatastoreException {
     IForm thisForm = null;
 
     String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);
