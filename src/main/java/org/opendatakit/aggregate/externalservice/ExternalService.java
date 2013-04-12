@@ -32,9 +32,11 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface ExternalService {
 
+  public boolean canBatchSubmissions();
+  
   public void sendSubmission(Submission submission, CallingContext cc) throws ODKExternalServiceException;
 
-  public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException;
+  public void sendSubmissions(List<Submission> submissions, boolean streaming, CallingContext cc) throws ODKExternalServiceException;
 
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 

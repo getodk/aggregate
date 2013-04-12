@@ -22,7 +22,6 @@ import java.nio.charset.Charset;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
-
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;

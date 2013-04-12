@@ -286,51 +286,67 @@ public class UploadSubmissionsWorkerImpl {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     try {
-      int counter = 0;
-      for (Submission submission : submissionsToSend) {
-        pExtService.sendSubmission(submission, cc);
-        ++counter;
-        // See QueryByDateRange
-        // -- we are querying by the markedAsCompleteDate
-        lastDateSent = submission.getMarkedAsCompleteDate();
-        lastKeySent = submission.getKey().getKey();
-        if (streaming) {
-          pFsc.setLastStreamingCursorDate(lastDateSent);
-          pFsc.setLastStreamingKey(lastKeySent);
-        } else {
-          pFsc.setLastUploadCursorDate(lastDateSent);
-          pFsc.setLastUploadKey(lastKeySent);
-        }
-        ds.putEntity(pFsc, user);
-
-        // renew the lock whenever we've consumed more than 33% of the time
-        // budget for the lock.  This adjusts for very slow external service
-        // response times, though if the response time is more than the lock
-        // expiration timeout, we can still get into trouble.
-        if ( (System.currentTimeMillis() - lastUpdateTimestamp + 1)
-            > (TaskLockType.UPLOAD_SUBMISSION.getLockExpirationTimeout() / 3)) {
-          // renew lock
-          TaskLock taskLock = ds.createTaskLock(user);
-          // TODO: figure out what to do if this returns false
-          if ( !taskLock.renewLock(lockId, getUploadSubmissionsTaskLockName(),
-              TaskLockType.UPLOAD_SUBMISSION) ) {
-            logger.error("UploadSubmission task lock -- FAILED renewal -- records transmitted: " + counter);
-            throw new ODKExternalServiceException("UploadSubmission TaskLock renewal failed");
+      // check if publisher is capable of batching transmission
+      if (pExtService.canBatchSubmissions()) {
+        pExtService.sendSubmissions(submissionsToSend, streaming, cc);
+        
+      } else { // publisher not capable of batching
+        int counter = 0;
+        for (Submission submission : submissionsToSend) {
+          pExtService.sendSubmission(submission, cc);
+          ++counter;
+          // See QueryByDateRange
+          // -- we are querying by the markedAsCompleteDate
+          lastDateSent = submission.getMarkedAsCompleteDate();
+          lastKeySent = submission.getKey().getKey();
+          if (streaming) {
+            pFsc.setLastStreamingCursorDate(lastDateSent);
+            pFsc.setLastStreamingKey(lastKeySent);
           } else {
-            taskLock = null;
-            logger.info("UploadSubmission task lock renewed -- records transmitted: " + counter);
-            counter = 0;
-            lastUpdateTimestamp = System.currentTimeMillis();
+            pFsc.setLastUploadCursorDate(lastDateSent);
+            pFsc.setLastUploadKey(lastKeySent);
           }
+          ds.putEntity(pFsc, user);
+
+          counter = renewTaskLock(counter);
         }
       }
-    } catch ( ODKExternalServiceException e) {
+    } catch (ODKExternalServiceException e) {
       throw e;
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
     }
 
   }
+
+  private int renewTaskLock(int counter) throws ODKTaskLockException,
+      ODKExternalServiceException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    
+    // renew the lock whenever we've consumed more than 33% of the time
+    // budget for the lock.  This adjusts for very slow external service
+    // response times, though if the response time is more than the lock
+    // expiration timeout, we can still get into trouble.
+    if ( (System.currentTimeMillis() - lastUpdateTimestamp + 1)
+        > (TaskLockType.UPLOAD_SUBMISSION.getLockExpirationTimeout() / 3)) {
+      // renew lock
+      TaskLock taskLock = ds.createTaskLock(user);
+      // TODO: figure out what to do if this returns false
+      if ( !taskLock.renewLock(lockId, getUploadSubmissionsTaskLockName(),
+          TaskLockType.UPLOAD_SUBMISSION) ) {
+        logger.error("UploadSubmission task lock -- FAILED renewal -- records transmitted: " + counter);
+        throw new ODKExternalServiceException("UploadSubmission TaskLock renewal failed");
+      } else {
+        taskLock = null;
+        logger.info("UploadSubmission task lock renewed -- records transmitted: " + counter);
+        counter = 0;
+        lastUpdateTimestamp = System.currentTimeMillis();
+      }
+    }
+    return counter;
+  }
+
 
   private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate, String uriLast)
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {

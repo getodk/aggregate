@@ -15,11 +15,11 @@
 
 package org.opendatakit.aggregate.externalservice.googleapi;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
-import java.net.URI;
+import com.google.common.base.Preconditions;
 
 /**
  * Copied due to package scoping of original Google impl. mitchellsundt@gmail.com

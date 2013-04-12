@@ -72,6 +72,8 @@ import org.opendatakit.common.web.CallingContext;
  */
 public abstract class AbstractExternalService implements ExternalService{
 
+  private static final String NO_BATCH_FUNCTIONALITY_ERROR = "ERROR! External Service does NOT implement a BATCH function to upload multiple submissions - AbstractExternalService";
+
   /**
    * Datastore entity holding registration of an external service for a specific
    * form and the cursor position within that form that was last processed by
@@ -122,10 +124,13 @@ public abstract class AbstractExternalService implements ExternalService{
   protected abstract void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException;
 
   @Override
-  public void sendSubmissions(List<Submission> submissions, CallingContext cc) throws ODKExternalServiceException {
-    for(Submission submission : submissions)  {
-      insertData(submission, cc);
-    }
+  public boolean canBatchSubmissions() {
+    return false;
+  }
+  
+  @Override
+  public void sendSubmissions(List<Submission> submissions, boolean streaming, CallingContext cc) throws ODKExternalServiceException {
+    throw new ODKExternalServiceException(NO_BATCH_FUNCTIONALITY_ERROR);
   }
 
   @Override
@@ -347,5 +352,5 @@ public abstract class AbstractExternalService implements ExternalService{
     User user = cc.getCurrentUser();
     return ds.getEntity(parameterTableRelation, fsc.getAuriService(), user);
   }
-
+  
 }
