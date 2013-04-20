@@ -551,9 +551,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			List<SubmissionKeyPart> parts) {
 		SubmissionKeyPart p = parts.get(i);
 		if (! p.getElementName().equals(group.getGroupQualifiedElementName())) {
-			throw new IllegalArgumentException("group name: " + group.getElementName()
-					+ " does not match submission key element name: " +
-					p.getElementName() );
+		   if ( FormDataModel.isFieldStoredWithinDataTable(group.getFormDataModel().getElementType()) ||
+		        !p.getElementName().equals(group.getElementName()) ) {
+    			throw new IllegalArgumentException("group name: " + group.getElementName()
+    					+ " does not match submission key element name: " +
+    					p.getElementName() );
+		   }
 		}
 		if ( p.getAuri() == null && p.getOrdinalNumber() == null) {
 			throw new IllegalArgumentException("no auri or ordinal supplied in submission key");
@@ -596,6 +599,28 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				}
 			}
 		}
+
+		// backward compatibility...
+      for ( Map.Entry<FormElementModel,SubmissionValue> entry : elementsToValues.entrySet() ) {
+        if ( elementName.equals(entry.getKey().getElementName()) ) {
+            SubmissionValue v = entry.getValue();
+            if ( v instanceof SubmissionSet ) {
+               return ((SubmissionSet) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else if ( v instanceof SubmissionRepeat ) {
+               return ((SubmissionRepeat) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else if ( v instanceof ChoiceSubmissionType ) {
+               return ((ChoiceSubmissionType) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else if ( v instanceof BlobSubmissionType ) {
+               return ((BlobSubmissionType) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else {
+               if ( i+2 != parts.size() ) {
+                  throw new IllegalStateException("submission key parts remaining at leaf node");
+               }
+               return v;
+            }
+         }
+      }
+
 		return null;
 	}
 
