@@ -16,7 +16,11 @@ package org.opendatakit.aggregate.externalservice;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
@@ -31,9 +35,11 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -291,6 +297,59 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return c;
   }
 
+  /**
+   * Implement the generic deletion of an ExternalService task here.
+   * This needs to be within a TaskLock to prevent a concurrent update of the
+   * ExternalServiceCursor from leaving the ExternalServiceCursor object in the
+   * database while the underlying Publisher records
+   * (e.g., FusionTable2ParameterTable, GoogleSpreadsheet2ParameterTable)
+   * are deleted.
+   *
+   * @param service
+   * @param cc
+   * @return true if the deletion was successful
+   * @throws ODKDatastoreException
+   */
+  public static final boolean deleteExternalServiceTask(ExternalService service, CallingContext cc) throws ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    String uriExternalService = service.getFormServiceCursor().getUri();
+    TaskLock taskLock = ds.createTaskLock(user);
+    String pLockId = UUID.randomUUID().toString();
+    boolean deleted = false;
+    try {
+      if (taskLock.obtainLock(pLockId, uriExternalService, TaskLockType.UPLOAD_SUBMISSION)) {
+        taskLock = null;
+        service.delete(cc);
+        deleted = true;
+      }
+    } catch (ODKTaskLockException e1) {
+      e1.printStackTrace();
+    } finally {
+      if (!deleted) {
+        Log logger =LogFactory.getLog(FormServiceCursor.class);
+        logger.error("Unable to delete FormServiceCursor: " + service.getFormServiceCursor().getUri());
+      }
+    }
+    taskLock = ds.createTaskLock(user);
+    try {
+      for (int i = 0; i < 10; i++) {
+        if (taskLock.releaseLock(pLockId, uriExternalService, TaskLockType.UPLOAD_SUBMISSION))
+          break;
+        try {
+          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+        } catch (InterruptedException e) {
+          // just move on, this retry mechanism is to only
+          // make things
+          // nice
+        }
+      }
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+    }
+    return deleted;
+  }
+
   public static final List<ExternalService> getExternalServicesForForm(IForm form,
       CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
@@ -367,7 +426,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
      } catch (ODKOverQuotaException e) {
        throw e;
      } catch (Exception e) {
-       throw new ODKEntityNotFoundException("Some how DB entities got into problem state", e);
+       throw new ODKEntityNotFoundException("Somehow DB entities for publisher got into problem state", e);
      }
    }
 }
