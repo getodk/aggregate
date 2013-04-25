@@ -52,10 +52,10 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Common worker implementation for the deletion of a form.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class FormDeleteWorkerImpl {
 
@@ -77,7 +77,7 @@ public class FormDeleteWorkerImpl {
 
   public final void deleteForm() throws ODKDatastoreException, ODKExternalServiceDependencyException {
 
-    
+
     logger.info("Beginning Form Deletion: " + miscTasksKey.toString() +
                   " form " + form.getFormId());
 
@@ -94,7 +94,7 @@ public class FormDeleteWorkerImpl {
       logger.error("Unexpected exception: " + e.getMessage());
       return;
     }
-    
+
     // gain lock on the formId itself...
     // the locked resource should be the formId, but for testing
     // it is useful to have the external services collide using
@@ -160,7 +160,7 @@ public class FormDeleteWorkerImpl {
 
   /**
    * Delete any miscellaneous tasks for this form.
-   * 
+   *
    * @param self
    * @return
    * @throws ODKDatastoreException
@@ -238,7 +238,7 @@ public class FormDeleteWorkerImpl {
 
   /**
    * Delete any persistent result tasks (and results files) for this form.
-   * 
+   *
    * @param self
    * @return
    * @throws ODKDatastoreException
@@ -263,50 +263,18 @@ public class FormDeleteWorkerImpl {
 
   /**
    * Delete any external service tasks for this form.
-   * 
+   *
    * @return
    * @throws ODKDatastoreException
    */
   private boolean deleteExternalServiceTasks() throws ODKDatastoreException {
     List<ExternalService> services = FormServiceCursor.getExternalServicesForForm(form, cc);
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
 
     boolean allDeleted = true;
     for (ExternalService service : services) {
-      String uriExternalService = service.getFormServiceCursor().getUri();
-      TaskLock taskLock = ds.createTaskLock(user);
-      String pLockId = UUID.randomUUID().toString();
-      boolean deleted = false;
-      try {
-        if (taskLock.obtainLock(pLockId, uriExternalService, TaskLockType.UPLOAD_SUBMISSION)) {
-          taskLock = null;
-          service.delete(cc);
-          deleted = true;
-        }
-      } catch (ODKTaskLockException e1) {
-        e1.printStackTrace();
-      } finally {
-        if (!deleted) {
-          allDeleted = false;
-          logger.error("Unable to delete FormServiceCursor: " + service.getFormServiceCursor().getUri());
-        }
-      }
-      taskLock = ds.createTaskLock(user);
-      try {
-        for (int i = 0; i < 10; i++) {
-          if (taskLock.releaseLock(pLockId, uriExternalService, TaskLockType.UPLOAD_SUBMISSION))
-            break;
-          try {
-            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-          } catch (InterruptedException e) {
-            // just move on, this retry mechanism is to only
-            // make things
-            // nice
-          }
-        }
-      } catch (ODKTaskLockException e) {
-        e.printStackTrace();
+      boolean deleted = FormServiceCursor.deleteExternalServiceTask(service, cc);
+      if ( !deleted ) {
+        allDeleted = false;
       }
     }
     return allDeleted;
@@ -339,7 +307,7 @@ public class FormDeleteWorkerImpl {
   /**
    * we have gained a lock on the form. Now go through and try to delete all
    * other MTs and external services related to this form.
-   * 
+   *
    * @return true if form is fully deleted...
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
@@ -380,7 +348,7 @@ public class FormDeleteWorkerImpl {
 
         QueryResult result = surveyQuery.executeQuery(startCursor, FORM_DELETE_RECORD_QUERY_LIMIT);
         startCursor = result.getResumeCursor();
-        
+
         if (result.getResultList().size() == 0)
           break;
 
@@ -416,10 +384,10 @@ public class FormDeleteWorkerImpl {
     if (!deleteMiscTasks(t))
       return false;
 
-    // delete the filters 
+    // delete the filters
     // wait until the end because a task could be using a filter.
     deleteFilters();
-    
+
     // delete the form.
     form.deleteForm(cc);
 
