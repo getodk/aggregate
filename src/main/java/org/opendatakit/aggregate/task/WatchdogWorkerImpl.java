@@ -265,8 +265,11 @@ public class WatchdogWorkerImpl {
     if ( makeActive ) {
       // there is work to do
       uploadSubmissions.createFormUploadTask(fsc, false, cc);
+      return true;
     }
-    return makeActive;
+
+    // go idle unless there is a chance that we have a new submission.
+    return BackendActionsTable.mayHaveRecentPublisherRevision(fsc.getUri(), cc);
   }
 
   private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
