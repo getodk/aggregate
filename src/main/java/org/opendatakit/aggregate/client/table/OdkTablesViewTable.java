@@ -232,7 +232,7 @@ public class OdkTablesViewTable extends FlexTable {
       // number of
       // user-defined columns +1 for the delete column.
       this.getFlexCellFormatter().setColSpan(start + currentRow, 0,
-          columnNames.size() - NUMBER_ADMIN_COLUMNS + 1);
+          columnNames.size() + NUMBER_ADMIN_COLUMNS);
     } else { // there are rows--display them.
 
       for (RowClient row : rows) {

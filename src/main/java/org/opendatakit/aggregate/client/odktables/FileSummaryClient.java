@@ -23,19 +23,29 @@ public class FileSummaryClient implements Serializable {
   private Long contentLength;
   // the list of media files associated with this file. Only media files
   // should be in this list, and they themselves should not have media files.
-  private List<FileSummaryClient> mediaFiles;
+  private int numMediaFiles;
   private String key;
+  // need to add and ID and change mediaFiles to numMediaFiles.
+  // also should probably add the table name and table id.
+  private String id; 
+  private String tableId;
   
+  /**
+   * Necessary for GWT serialization.
+   */
   public FileSummaryClient() {
   }
   
   public FileSummaryClient(String filename, String contentType, 
-      Long contentLength, String key, List<FileSummaryClient> mediaFiles) {
+      Long contentLength, String key, int numMediaFiles, String id, 
+      String tableId) {
     this.filename = filename;
     this.contentType = contentType;
     this.contentLength = contentLength;
     this.key = key;
-    this.mediaFiles = mediaFiles;
+    this.numMediaFiles = numMediaFiles;
+    this.id = id;
+    this.tableId = tableId;
   }
   
   public String getFilename() {
@@ -50,12 +60,19 @@ public class FileSummaryClient implements Serializable {
     return contentLength;
   }
   
-  public List<FileSummaryClient> getMediaFiles() {
-    return mediaFiles;
+  public int getNumMediaFiles() {
+    return numMediaFiles;
   }
   
   public String getKey() {
     return key;
   }
+  
+  public String getId() {
+    return id;
+  }
 
+  public String getTableId() {
+    return tableId;
+  }
 }

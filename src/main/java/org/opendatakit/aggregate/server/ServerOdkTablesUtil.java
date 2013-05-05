@@ -154,8 +154,8 @@ public class ServerOdkTablesUtil {
    * @return
    * @throws ODKDatastoreException
    */
-  public static FileSummaryClient getFileSummaryClientFromRow(Row row,
-      DbTableFiles blobSetRelation, CallingContext cc) throws 
+  public static FileSummaryClient getFileSummaryClientFromRow(Row row, 
+      String tableId, DbTableFiles blobSetRelation, CallingContext cc) throws 
       ODKDatastoreException {
     String filename = blobSetRelation.getBlobEntitySet(
         row.getValues().get(DbTableFileInfo.VALUE), cc)
@@ -167,10 +167,9 @@ public class ServerOdkTablesUtil {
         row.getValues().get(DbTableFileInfo.VALUE), cc)
         .getContentType(1, cc);
     String key = row.getValues().get(DbTableFileInfo.KEY);
-    ArrayList<FileSummaryClient> empty = 
-        new ArrayList<FileSummaryClient>(0);
+    String id = row.getRowId();
     FileSummaryClient summary = new FileSummaryClient(
-        filename, contentType, contentLength, key, empty);
+        filename, contentType, contentLength, key, 0, id, tableId);
     return summary;
   }
 }

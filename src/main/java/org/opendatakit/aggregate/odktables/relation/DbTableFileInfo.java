@@ -161,6 +161,9 @@ public class DbTableFileInfo {
    * 
    */
   public enum Type {
+    // TODO: this should maybe be "text" rather than string to match the sql
+    // lite db on the phone, and also contain doubles. also shouldn't use the 
+    // name field, as that is an enum term.
     STRING("string"), INTEGER("integer"), FILE("file");
 
     public final String name; // what you call the enum

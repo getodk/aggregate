@@ -20,7 +20,7 @@ public class OdkTablesMediaFileListPopup extends AbstractPopupBase {
         new MediaFileCallback());
 
     fileList = new FlexTable();
-    fileList.setWidget(0, 0, new ClosePopupButton(this));
+    fileList.setWidget(0, 2, new ClosePopupButton(this));
     fileList.getCellFormatter().getElement(0, 0).setAttribute("align", 
         "right");
     fileList.setText(1, 0, "Media Filename");
