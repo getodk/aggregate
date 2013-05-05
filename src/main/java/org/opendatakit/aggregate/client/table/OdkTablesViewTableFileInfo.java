@@ -53,12 +53,14 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   // this is the heading for the delete row button.
   private static final String DELETE_HEADING = "Delete";
   
-  private static final int FILENAME_COLUMN = 1;
-  private static final String FILENAME_HEADING = "Table";
-  private static final int KEY_COLUMN = 2;
+  private static final int FILENAME_COLUMN = 2;
+  private static final String FILENAME_HEADING = "Filename";
+  private static final int KEY_COLUMN = 1;
   private static final String KEY_HEADING = "Key";
   private static final int MEDIA_FILE_COLUMN = 3;
   private static final String MEDIA_FILE_HEADING = "Media files";
+  
+  private static final int numColumns = 4;
 
   // this is just the tab that opened the table
   private AggregateSubTabBase basePanel;
@@ -136,6 +138,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
 
       @Override
       public void onSuccess(TableContentsForFilesClient tcc) {
+        removeAllRows();
         setColumnHeadings();
         //setColumnHeadings(columnNames);
 
@@ -214,30 +217,35 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
       // make the display fill all the columns you have. this is the total
       // number of
       // user-defined columns +1 for the delete column.
-      this.getFlexCellFormatter().setColSpan(start + currentRow, 0,
-          columnNames.size() - NUMBER_ADMIN_COLUMNS + 1);
+      this.getFlexCellFormatter().setColSpan(1, 0,
+          numColumns);
     } else { // there are rows--display them.
       
       for (int j = 0; j < fileSummaries.size(); j++) {
         FileSummaryClient sum = fileSummaries.get(j);
-        setText(currentRow, DELETE_COLUMN, "delete");
+        setWidget(currentRow, DELETE_COLUMN, 
+          new OdkTablesDeleteFileButton(this.basePanel, 
+          currentTable.getTableId(), sum.getId()));
         setText(currentRow, KEY_COLUMN, sum.getKey());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
         Widget mediaCount;
-        if (sum.getMediaFiles().size() > 0) {
+        if (sum.getNumMediaFiles() > 0) {
           Anchor mediaCountLink = 
-              new Anchor(Integer.toString(sum.getMediaFiles().size()));
+              new Anchor(Integer.toString(sum.getNumMediaFiles()));
           mediaCountLink.addClickHandler(new MediaFileListClickHandler(
               currentTable.getTableId(), sum.getKey())); 
           mediaCount = mediaCountLink;
         } else {
-          mediaCount = new HTML(Integer.toString(sum.getMediaFiles().size()));
+          mediaCount = new HTML(Integer.toString(sum.getNumMediaFiles()));
         }
         setWidget(currentRow, MEDIA_FILE_COLUMN, mediaCount);
         if (currentRow % 2 == 0) {
           getRowFormatter().addStyleName(currentRow, "evenTableRow");
         }
         currentRow++;
+      }
+      while ( getRowCount() > currentRow ) {
+        removeRow(getRowCount()-1);
       }
     }
 

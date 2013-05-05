@@ -305,7 +305,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
           new ArrayList<FileSummaryClient>();
       for (Row row : rows) {
         FileSummaryClient summary = ServerOdkTablesUtil
-            .getFileSummaryClientFromRow(row, blobSetRelation, cc);
+            .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
         nonMediaFiles.add(summary);
       }
       return nonMediaFiles;
@@ -333,7 +333,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
           new ArrayList<FileSummaryClient>();
       for (Row row : rows) {
         FileSummaryClient summary = ServerOdkTablesUtil
-            .getFileSummaryClientFromRow(row, blobSetRelation, cc);
+            .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
         mediaFiles.add(summary);
       }
       return mediaFiles;
@@ -472,7 +472,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
         // set the media files.
         FileSummaryClient sum = new FileSummaryClient(summary.getFilename(),
             summary.getContentType(), summary.getContentLength(), 
-            summary.getKey(), mediaFiles);
+            summary.getKey(), mediaFiles.size(), summary.getId(), tableId);
         completedSummaries.add(sum);
       }
       tcc.nonMediaFiles = completedSummaries;
@@ -516,12 +516,17 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
    */
   @Override
   public void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
+      RequestFailureException, DatastoreFailureException, 
+      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
       Relation tableInfo = DbTableFileInfo.getRelation(cc);
       Entity entry = tableInfo.getEntity(rowId, cc);
+      String key = entry.getAsString(DbTableFileInfo.KEY);
+      // we also want to delete all the media files for this table. So get 
+      // them.
+      List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
       // first we want to increment the modification number
       int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
       modificationNumber++;
@@ -543,6 +548,10 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       // update db
       // Relation.putEntities(rows, cc);
       entry.put(cc);
+      // and now do the same for each of the media files.
+      for (FileSummaryClient sum : mediaFiles) {
+        deleteTableFile(sum.getTableId(), sum.getId());
+      }
 
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
