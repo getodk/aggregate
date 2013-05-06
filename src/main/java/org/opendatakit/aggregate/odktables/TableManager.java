@@ -7,12 +7,13 @@ import java.util.Map;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
-import org.opendatakit.aggregate.odktables.relation.DbColumn;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
@@ -49,7 +50,7 @@ public class TableManager {
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
   }
-
+  
   /**
    * Retrieve a list of all table entries in the datastore.
    * 
@@ -188,11 +189,16 @@ public class TableManager {
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    */
-  public TableEntry createTable(String tableId, String tableName, 
-      List<Column> columns, String metadata) throws ODKEntityPersistException, 
+  public TableEntry createTable(String tableId, String tableKey,
+      String dbTableName, String type, String tableIdAccessControls,
+      List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries) 
+          throws ODKEntityPersistException, 
       ODKDatastoreException, TableAlreadyExistsException {
     Validate.notEmpty(tableId);
-    Validate.notEmpty(tableName);
+    Validate.notEmpty(tableKey);
+    Validate.notEmpty(dbTableName);
+    Validate.notEmpty(type);
+    // tableIdAccessControls can be null.
     Validate.noNullElements(columns);
     
     // the hope here is that it creates an empty table in the db after a single
@@ -206,30 +212,47 @@ public class TableManager {
       throw new TableAlreadyExistsException(String.format(
           "Table with tableId '%s' already exists.", tableId));
     }
+    // TODO: do this for each of the necessary tableKey and dbTableName things.
+    // Also need to figure out which of these actually need to be unique in the 
+    // db, if any.
     
     // TODO do appropriate checking for metadata issues. We need to worry about
     // dbName and  the displayName.
 
-    // create table
+    // create table. "entities" will store all of the things we will need to 
+    // persist into the datastore for the table to truly be created.
     List<Entity> entities = new ArrayList<Entity>();
 
     Entity entry = creator.newTableEntryEntity(tableId, cc);
     entities.add(entry);
+    
+    Entity tableDefinition = creator.newTableDefinitionEntity(tableId, 
+        tableKey, dbTableName, type, tableIdAccessControls, cc);
+    entities.add(tableDefinition);
 
     for (Column column : columns) {
       entities.add(creator.newColumnEntity(tableId, column, cc));
     }
     
-    Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
-    entities.add(properties);
+    // SS: I think the DbTableProperties table should be phased out.
+    //Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
+    //entities.add(properties);
+    
+    if (kvsEntries == null) {
+      kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+    }
+    for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
+      entities.add(creator.newKeyValueStoreEntity(kvsEntry, cc));
+    }
 
-    Entity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER, cc
-        .getCurrentUser().getEmail()), TableRole.OWNER, cc);
+    Entity ownerAcl = creator.newTableAclEntity(tableId, 
+        new Scope(Scope.Type.USER, cc.getCurrentUser().getEmail()), 
+        TableRole.OWNER, cc);
     entities.add(ownerAcl);
 
     Relation.putEntities(entities, cc);
 
-    return converter.toTableEntry(entry, tableName);
+    return converter.toTableEntry(entry, tableKey);
   }
 
   /**
@@ -251,7 +274,7 @@ public class TableManager {
     Entity entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
     entities.add(entry);
 
-    List<Entity> columns = DbColumn.query(tableId, cc);
+    List<Entity> columns = DbColumnDefinitions.query(tableId, cc);
     entities.addAll(columns);
 
     Entity properties = DbTableProperties.getProperties(tableId, cc);

@@ -17,7 +17,7 @@ public class TableResource extends TableEntry {
   private String aclUri;
 
   public TableResource(TableEntry entry) {
-    super(entry.getTableId(), entry.getTableName(), entry.getDataEtag(), entry.getPropertiesEtag());
+    super(entry.getTableId(), entry.getTableKey(), entry.getDataEtag(), entry.getPropertiesEtag());
   }
 
   @SuppressWarnings("unused")
@@ -70,7 +70,7 @@ public class TableResource extends TableEntry {
    */
   public TableResourceClient transform() {
 	  TableResourceClient trc = new TableResourceClient(new TableEntryClient(this.getTableId(),
-			  this.getTableName(), this.getDataEtag(), this.getPropertiesEtag()));
+			  this.getTableKey(), this.getDataEtag(), this.getPropertiesEtag()));
 	  trc.setAclUri(this.getAclUri());
 	  trc.setDataUri(this.getDataUri());
 	  trc.setDiffUri(this.getDiffUri());

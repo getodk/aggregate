@@ -20,11 +20,6 @@ public class OdkTablesKeyValueStoreEntry {
 	public String tableId;
 	
 	/**
-	 * The table name of the table to which this entry belongs.
-	 */
-	public String tableName;
-	
-	/**
 	 * The partition in the key value store to which the entry belongs. For an
 	 * in depth example see KeyValueStoreManager.java in the ODK Tables project.
 	 * Otherwise, just know that it is essentially the identifier of the class

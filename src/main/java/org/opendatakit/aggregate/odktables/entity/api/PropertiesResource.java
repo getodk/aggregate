@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.odktables.entity.api;
 import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
 import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;
@@ -21,8 +22,8 @@ public class PropertiesResource extends TableProperties {
   public PropertiesResource(TableProperties tableProperties) {
     super();
     setPropertiesEtag(tableProperties.getPropertiesEtag());
-    setTableName(tableProperties.getTableName());
-    setMetadata(tableProperties.getMetadata());
+    setTableName(tableProperties.getTableKey());
+    setKeyValueStoreEntries(tableProperties.getKeyValueStoreEntries());
   }
 
   public String getSelfUri() {
@@ -42,8 +43,10 @@ public class PropertiesResource extends TableProperties {
   }
   
   public PropertiesResourceClient transform() {
-	  TablePropertiesClient tpc = new TablePropertiesClient(this.getPropertiesEtag(), 
-			  this.getTableName(), this.getMetadata());
+	  TablePropertiesClient tpc = 
+	      new TablePropertiesClient(this.getPropertiesEtag(), 
+			  this.getTableKey(), 
+			  UtilTransforms.transform(getKeyValueStoreEntries()));
 	  PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
 	  resourceClient.setSelfUri(this.getSelfUri());
 	  resourceClient.setTableUri(this.getTableUri());

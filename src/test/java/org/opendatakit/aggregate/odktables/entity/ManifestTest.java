@@ -39,14 +39,12 @@ public class ManifestTest {
 		OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
 		entry.key = "list";
 		entry.tableId = "this-is-a-uuid";
-		entry.tableName = "brother_of_skyrim_weapons";
 		entry.value = "{greetings, I am a json string (no i'm not) }";
 		entry.type = "file";
 		
 		OdkTablesKeyValueStoreEntry entry2 = new OdkTablesKeyValueStoreEntry();
 		entry2.key = "box";
 		entry2.tableId = "this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND";
-		entry2.tableName = "sister_of_skyrim_weapons";
 		entry2.value = "guess what's in the box...";
 		entry2.type = "surprise";
 		
@@ -82,13 +80,11 @@ public class ManifestTest {
 		System.out.println("0");
 		System.out.println(entries.get(0).key);
 		System.out.println(entries.get(0).tableId);
-		System.out.println(entries.get(0).tableName);
 		System.out.println(entries.get(0).type);
 		System.out.println(entries.get(0).value);
 		System.out.println("1");
 		System.out.println(entries.get(1).key);
 		System.out.println(entries.get(1).tableId);
-		System.out.println(entries.get(1).tableName);
 		System.out.println(entries.get(1).type);
 		System.out.println(entries.get(1).value);	
 		

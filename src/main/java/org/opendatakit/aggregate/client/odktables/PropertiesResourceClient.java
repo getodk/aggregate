@@ -22,8 +22,8 @@ public class PropertiesResourceClient extends TablePropertiesClient {
   public PropertiesResourceClient(TablePropertiesClient tableProperties) {
     super();
     setPropertiesEtag(tableProperties.getPropertiesEtag());
-    setTableName(tableProperties.getTableName());
-    setMetadata(tableProperties.getMetadata());
+    setTableName(tableProperties.getTableKey());
+    setKeyValueStoreEntries(tableProperties.getKeyValueStoreEntries());
   }
 
   public String getSelfUri() {

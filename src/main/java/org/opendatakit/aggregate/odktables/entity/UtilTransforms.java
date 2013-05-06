@@ -1,6 +1,10 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
+import org.opendatakit.aggregate.client.odktables.OdkTablesKeyValueStoreEntryClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ScopeClient;
 import org.opendatakit.aggregate.client.odktables.TableAclClient;
@@ -18,31 +22,83 @@ public class UtilTransforms {
 	   * Transform the object into a server-side Column object.
 	   */
 	  public static Column transform(ColumnClient client) {
-		  // have to fix this to get the appropriate type out of the enum.
-		  Column column;
-		  Column.ColumnType colType;
-		  switch (client.getType()) {
-		  case BOOLEAN:
-		    colType = Column.ColumnType.BOOLEAN;
-			  break;
-		  case STRING:
-		    colType = Column.ColumnType.STRING;
-			  break;
-		  case INTEGER:
-		    colType = Column.ColumnType.INTEGER;
-			  break;
-		  case DECIMAL:
-		    colType = Column.ColumnType.DECIMAL;
-			  break;
-		  case DATETIME:
-		    colType = Column.ColumnType.DATETIME;
-			  break;
-		  default:
-			  throw new IllegalStateException("cannot transform ColumnClient to Column, no type match.");
-		  }
-		  Column transformedColumn = new Column(client.getDbName(), colType);
+		  Column transformedColumn = new Column(client.getTableId(), 
+		      client.getElementKey(), client.getElementName(), 
+		      client.getElementType(), client.getListChildElementKeys(),
+		      client.getIsPersisted(), client.getJoins());
 		  return transformedColumn;	
 	  }
+	  
+	  /**
+	   * Transform server-side {@link OdkTablesKeyValueStoreEntry} into 
+	   * {@link OdkTablesKeyValueStoreEntryClient}.
+	   * @param server
+	   * @return
+	   */
+	  public static OdkTablesKeyValueStoreEntryClient 
+	    transform(OdkTablesKeyValueStoreEntry server) {
+	    OdkTablesKeyValueStoreEntryClient client = 
+	        new OdkTablesKeyValueStoreEntryClient();
+	    client.tableId = server.tableId;
+	    client.partition = server.partition;
+	    client.aspect = server.aspect;
+	    client.key = server.key;
+	    client.type = server.type;
+	    client.value = server.value;
+	    return client;
+	  }
+	  
+	  /**
+	   * Convenience method. Identical to calling transform on individual
+	   * entries and constructing up a list.
+	   * @param serverEntries
+	   * @return
+	   */
+	  public static List<OdkTablesKeyValueStoreEntryClient> 
+	      transform(List<OdkTablesKeyValueStoreEntry> serverEntries) {
+	    List<OdkTablesKeyValueStoreEntryClient> clientEntries = 
+	        new ArrayList<OdkTablesKeyValueStoreEntryClient>();
+	    for (OdkTablesKeyValueStoreEntry serverEntry : serverEntries) {
+	      clientEntries.add(transform(serverEntry));
+	    }
+	    return clientEntries;
+	  }
+	  
+     /**
+      * Transform client-side {@link OdkTablesKeyValueStoreEntryClient} into 
+      * {@link OdkTablesKeyValueStoreEntry}.
+      * @param clientEntry
+      * @return
+      */
+     public static OdkTablesKeyValueStoreEntry 
+       transform(OdkTablesKeyValueStoreEntryClient clientEntry) {
+       OdkTablesKeyValueStoreEntry serverEntry = 
+           new OdkTablesKeyValueStoreEntry();
+       serverEntry.tableId = clientEntry.tableId;
+       serverEntry.partition = clientEntry.partition;
+       serverEntry.aspect = clientEntry.aspect;
+       serverEntry.key = clientEntry.key;
+       serverEntry.type = clientEntry.type;
+       serverEntry.value = clientEntry.value;
+       return serverEntry;
+     }
+     
+     /**
+      * Convenience method. Identical to calling transform on individual
+      * entries and constructing up a list.
+      * @param serverEntries
+      * @return
+      */
+     public static List<OdkTablesKeyValueStoreEntry> 
+         transformToServerEntries(
+             List<OdkTablesKeyValueStoreEntryClient> clientEntries) {
+       List<OdkTablesKeyValueStoreEntry> serverEntries = 
+           new ArrayList<OdkTablesKeyValueStoreEntry>();
+       for (OdkTablesKeyValueStoreEntryClient clientEntry : clientEntries) {
+         serverEntries.add(transform(clientEntry));
+       }
+       return serverEntries;
+     }
 	  
 	  
 	  /**

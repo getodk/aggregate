@@ -19,6 +19,7 @@ import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -75,8 +76,10 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 		    // nothing is being explicitly set. Fixed by changing the type of
 		    // the variable, but should be wary of this.
 		    // first make the type TableProperties object
-		    TableProperties tableProperties = new TableProperties(properties.getPropertiesEtag(),
-		    		properties.getTableName(), properties.getMetadata());
+		    TableProperties tableProperties = new TableProperties(
+		        properties.getPropertiesEtag(), properties.getTableKey(), 
+		        UtilTransforms.transformToServerEntries(
+		            properties.getKeyValueStoreEntries()));
 		    tableProperties = pm.setProperties(tableProperties);
 		    return tableProperties.transform();
 	    } catch (ODKDatastoreException e) {

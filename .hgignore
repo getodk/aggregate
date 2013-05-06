@@ -9,3 +9,5 @@ relre:^eclipse-aggregate-gae/gwt-unitCache.*$
 relre:^.metadata/.*$
 glob:eclipse-aggregate-gae/.settings/com.google.appengine.eclipse.core.prefs
 glob:eclipse-aggregate-gae/.settings/com.google.gwt.eclipse.core.prefs
+eclipse-aggregate-gae/war/WEB-INF/appengine-generated/datastore-indexes-auto\.xml
+eclipse-aggregate-gae/war/WEB-INF/appengine-generated/local_db\.bin

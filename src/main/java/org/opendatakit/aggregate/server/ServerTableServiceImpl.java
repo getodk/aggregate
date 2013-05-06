@@ -69,7 +69,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
         @Override
         public int compare(TableEntryClient o1, TableEntryClient o2) {
-          return o1.getTableName().compareToIgnoreCase(o2.getTableName());
+          return o1.getTableKey().compareToIgnoreCase(o2.getTableKey());
         }});
       
       return clientEntries;

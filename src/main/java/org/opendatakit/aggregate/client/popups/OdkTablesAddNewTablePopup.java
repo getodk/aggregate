@@ -5,14 +5,14 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
+import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesAddTableButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableNameBox;
-
-import org.opendatakit.aggregate.client.odktables.ColumnClient;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -58,8 +58,13 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	    public void onClick(ClickEvent event) {
 	    	
           String tableName = nameBox.getValue();
+          // TODO: for now, just add the tableKey and dbTableName to be the 
+          // same as the tableName. The correct workflow and checks need to
+          // be performed.
           List<ColumnClient> columns = new ArrayList<ColumnClient>(0);
-          tableDef = new TableDefinitionClient(tableName, columns, null);
+          tableDef = new TableDefinitionClient(null, columns, tableName,
+              tableName, TableTypeClient.DATA.getRepresentation(),
+              null);
           
 	      // Set up the callback object.
 	      AsyncCallback<TableEntryClient> callback = new AsyncCallback<TableEntryClient>() {

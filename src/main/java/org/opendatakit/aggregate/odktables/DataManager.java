@@ -12,7 +12,7 @@ import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
-import org.opendatakit.aggregate.odktables.relation.DbColumn;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
@@ -68,7 +68,7 @@ public class DataManager {
     this.entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
     this.table = DbTable.getRelation(tableId, cc);
     this.logTable = DbLogTable.getRelation(tableId, cc);
-    this.columns = DbColumn.query(tableId, cc);
+    this.columns = DbColumnDefinitions.query(tableId, cc);
   }
 
   public String getTableId() {

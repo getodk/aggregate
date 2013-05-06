@@ -12,6 +12,12 @@ import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
+/**
+ * SS: I THINK THIS CLASS IS BEING PHASED OUT, AND INSTEAD WILL BE BASICALLY
+ * THE DBKEYVALUESTORE.
+ * @author dylan price?
+ *
+ */
 public class DbTableProperties {
   public static final String TABLE_ID = "TABLE_ID";
   public static final String TABLE_NAME = "TABLE_NAME";
