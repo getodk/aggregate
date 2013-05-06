@@ -10,6 +10,7 @@ import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 
 @Ignore
 public class T {
@@ -22,7 +23,7 @@ public class T {
   public static final String tableIdAccessControls = "someId";
   public static final String tableName = "people";
   public static final String tableMetadata = null;
-  public static final TableTypeClient tableType = TableTypeClient.DATA;
+  public static final TableType tableType = TableType.DATA;
   public static final String propertiesEtag = "propertiesEtag";
   @SuppressWarnings("serial")
   public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = 
@@ -90,14 +91,14 @@ public class T {
     public static final String columnType_String = "colTypeString";
     public static final String columnType_Int = "colTypeInt";
     public static final Column column_name = new Column(name, 
-        name + elementKey_suffix, name + elementName_suffix, columnType_String,
-        null, 1, null);
+        name + elementKey_suffix, name + elementName_suffix, 
+        Column.ColumnType.STRING, null, 1, null);
     public static final Column column_age = new Column(age, 
-        age + elementKey_suffix, age + elementName_suffix, columnType_Int,
-        null, 1, null);    
+        age + elementKey_suffix, age + elementName_suffix, 
+        Column.ColumnType.INTEGER, null, 1, null);    
     public static final Column column_weight = new Column(weight, 
         weight + elementKey_suffix, weight + elementName_suffix, 
-        columnType_Int, null, 1, null);  }
+        Column.ColumnType.INTEGER, null, 1, null);  }
 
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"),

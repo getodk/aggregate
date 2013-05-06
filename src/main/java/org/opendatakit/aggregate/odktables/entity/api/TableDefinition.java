@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.odktables.entity.api;
 
 import java.util.List;
 
+import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -34,7 +35,7 @@ public class TableDefinition {
   private String dbTableName;
   
   @Element(name = "type", required = true)
-  private String type;
+  private TableType type;
   
   @Element(name = "table_id_access_controls", required = false)
   private String tableIdAccessControls;
@@ -55,8 +56,18 @@ public class TableDefinition {
   private TableDefinition() {
   }
 
+  /**
+   * Construct the table definition
+   * @param tableId id of the table
+   * @param columns list of {@link Column} objects
+   * @param tableKey key of the table
+   * @param dbTableName the db name of the table
+   * @param type the string type of the table (must be one of 
+   *     {@link TableTypeClient#getRepresentation()})
+   * @param tableIdAccessControls id of the table holding access controls
+   */
   public TableDefinition(final String tableId, final List<Column> columns,
-      final String tableKey, final String dbTableName, final String type,
+      final String tableKey, final String dbTableName, final TableType type,
       final String tableIdAccessControls) {
     this.tableId = tableId;
     this.columns = columns;
@@ -78,7 +89,7 @@ public class TableDefinition {
     return this.columns;
   }
   
-  public String getType() {
+  public TableType getType() {
     return this.type;
   }
   

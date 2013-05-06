@@ -36,7 +36,7 @@ public class TableAclManagerTest {
     this.tm = new TableManager(cc);
 
     tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType.getRepresentation(), T.tableIdAccessControls, T.columns, 
+        T.tableType, T.tableIdAccessControls, T.columns, 
         T.kvsEntries);
     
     this.scope = new Scope(Scope.Type.USER, T.user);

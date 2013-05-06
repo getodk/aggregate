@@ -12,6 +12,7 @@ import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
@@ -197,14 +198,14 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public TableEntry createTable(String tableId, String tableKey,
-      String dbTableName, String type, String tableIdAccessControls,
+      String dbTableName, TableType type, String tableIdAccessControls,
       List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries) 
           throws ODKEntityPersistException, 
       ODKDatastoreException, TableAlreadyExistsException {
     Validate.notEmpty(tableId);
     Validate.notEmpty(tableKey);
     Validate.notEmpty(dbTableName);
-    Validate.notEmpty(type);
+    Validate.notNull(type);
     // tableIdAccessControls can be null.
     Validate.noNullElements(columns);
     
