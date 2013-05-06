@@ -37,7 +37,7 @@ import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValu
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.relation.DbColumn;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
@@ -223,7 +223,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      List<String> columnNames = DbColumn.queryForColumnNames(tableId, cc);
+      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, cc);
       return columnNames;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();

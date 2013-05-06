@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * This is the client-side version of 
@@ -20,19 +21,18 @@ public class TablePropertiesClient implements Serializable {
 	 */
 	private static final long serialVersionUID = 197746211663068997L;
 
-private String propertiesEtag;
-
-  private String tableName;
-
-  private String metadata;
+  private String propertiesEtag;
+  private String tableKey;
+  private List<OdkTablesKeyValueStoreEntryClient> kvsEntries;
 
   protected TablePropertiesClient() {
   }
 
-  public TablePropertiesClient(String propertiesEtag, String tableName, String metadata) {
+  public TablePropertiesClient(String propertiesEtag, String tableKey, 
+      List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
     this.propertiesEtag = propertiesEtag;
-    this.tableName = tableName;
-    this.metadata = metadata;
+    this.tableKey = tableKey;
+    this.kvsEntries = kvsEntries;
   }
 
   public String getPropertiesEtag() {
@@ -43,63 +43,29 @@ private String propertiesEtag;
     this.propertiesEtag = propertiesEtag;
   }
 
-  public String getTableName() {
-    return tableName;
+  public String getTableKey() {
+    return tableKey;
   }
 
   public void setTableName(String tableName) {
-    this.tableName = tableName;
+    this.tableKey = tableName;
   }
 
-  public String getMetadata() {
-    return metadata;
+  public List<OdkTablesKeyValueStoreEntryClient> getKeyValueStoreEntries() {
+    return this.kvsEntries;
   }
-
-  public void setMetadata(String metadata) {
-    this.metadata = metadata;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
-    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
-    result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (!(obj instanceof TablePropertiesClient))
-      return false;
-    TablePropertiesClient other = (TablePropertiesClient) obj;
-    if (metadata == null) {
-      if (other.metadata != null)
-        return false;
-    } else if (!metadata.equals(other.metadata))
-      return false;
-    if (propertiesEtag == null) {
-      if (other.propertiesEtag != null)
-        return false;
-    } else if (!propertiesEtag.equals(other.propertiesEtag))
-      return false;
-    if (tableName == null) {
-      if (other.tableName != null)
-        return false;
-    } else if (!tableName.equals(other.tableName))
-      return false;
-    return true;
+  
+  public void setKeyValueStoreEntries(
+      List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+    this.kvsEntries = kvsEntries;
   }
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesEtag=" + propertiesEtag + ", tableName=" + tableName
-        + ", metadata=" + metadata + "]";
+    return "TableProperties [propertiesEtag=" + propertiesEtag 
+        + ", tableName=" + tableKey
+        + ", kvsEntries=" + kvsEntries.toString()
+        + "]";
   }
 
 }

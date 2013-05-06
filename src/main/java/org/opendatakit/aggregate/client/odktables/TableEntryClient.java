@@ -22,17 +22,17 @@ public class TableEntryClient implements Serializable {
  
   
   private String tableId;
-  private String tableName;
+  private String tableKey;
   private String dataEtag;
   private String propertiesEtag;
 
   protected TableEntryClient() {
   }
 
-  public TableEntryClient(final String tableId, String tableName, final String dataEtag,
-      final String propertiesEtag) {
+  public TableEntryClient(final String tableId, String tableKey, 
+      final String dataEtag, final String propertiesEtag) {
     this.tableId = tableId;
-    this.tableName = tableName;
+    this.tableKey = tableKey;
     this.dataEtag = dataEtag;
     this.propertiesEtag = propertiesEtag;
   }
@@ -41,8 +41,8 @@ public class TableEntryClient implements Serializable {
     return this.tableId;
   }
 
-  public String getTableName() {
-    return this.tableName;
+  public String getTableKey() {
+    return this.tableKey;
   }
 
   public String getDataEtag() {
@@ -51,10 +51,6 @@ public class TableEntryClient implements Serializable {
 
   public void setTableId(final String tableId) {
     this.tableId = tableId;
-  }
-
-  public void setTablename(String tableName) {
-    this.tableName = tableName;
   }
 
   public void setDataEtag(final String dataEtag) {
@@ -93,10 +89,10 @@ public class TableEntryClient implements Serializable {
         return false;
     } else if (!tableId.equals(other.tableId))
       return false;
-    if (tableName == null) {
-      if (other.tableName != null)
+    if (tableKey == null) {
+      if (other.tableKey != null)
         return false;
-    } else if (!tableName.equals(other.tableName))
+    } else if (!tableKey.equals(other.tableKey))
       return false;
     return true;
   }
@@ -108,13 +104,15 @@ public class TableEntryClient implements Serializable {
     result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
     result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
+    result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
     return result;
   }
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId + ", tableName=" + tableName + ", dataEtag=" + dataEtag
+    return "TableEntry [tableId=" + tableId 
+        + ", tableKey=" + tableKey 
+        + ", dataEtag=" + dataEtag
         + ", propertiesEtag=" + propertiesEtag + "]";
   }
 }

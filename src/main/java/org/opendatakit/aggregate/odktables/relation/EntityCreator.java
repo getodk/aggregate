@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesFileManifestEntry;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
@@ -63,7 +64,7 @@ public class EntityCreator {
   }
 
   /**
-   * Create a new {@link DbColumn} entity.
+   * Create a new {@link DbColumnDefinitions} entity.
    * 
    * @param tableId
    *          the id of the table for the new column.
@@ -79,10 +80,15 @@ public class EntityCreator {
     Validate.notNull(column);
     Validate.notNull(cc);
 
-    Entity entity = DbColumn.getRelation(cc).newEntity(cc);
-    entity.set(DbColumn.TABLE_ID, tableId);
-    entity.set(DbColumn.COLUMN_NAME, column.getName());
-    entity.set(DbColumn.COLUMN_TYPE, column.getType().name());
+    Entity entity = DbColumnDefinitions.getRelation(cc).newEntity(cc);
+    entity.set(DbColumnDefinitions.TABLE_ID, tableId);
+    entity.set(DbColumnDefinitions.ELEMENT_KEY, column.getElementKey());
+    entity.set(DbColumnDefinitions.ELEMENT_NAME, column.getElementName());
+    entity.set(DbColumnDefinitions.ELEMENT_TYPE, column.getElementType());
+    entity.set(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS,
+        column.getListChildElementKeys());
+    entity.set(DbColumnDefinitions.IS_PERSISTED, column.getIsPersisted());
+    entity.set(DbColumnDefinitions.JOINS, column.getJoins());
 
     return entity;
   }
@@ -130,32 +136,108 @@ public class EntityCreator {
 	  return entity;
   }
 
+//  /**
+//   * Create a new {@link DbTableProperties} entity.
+//   * 
+//   * @param tableId
+//   *          the id of the table for the new table properties entity
+//   * @param tableKey
+//   *          a human readable name for the table
+//   * @param metadata
+//   *          application defined metadata to store with the table (may be null)
+//   * @param cc
+//   * @return the created entity, not yet persisted
+//   * @throws ODKDatastoreException
+//   */
+//  public Entity newTablePropertiesEntity(String tableId, String tableKey, 
+//      List<OdkTablesKeyValueStoreEntry> kvsEntries, CallingContext cc) 
+//          throws ODKDatastoreException {
+//    Validate.notEmpty(tableId);
+//    Validate.notEmpty(tableKey);
+//    // kvsEntries can be null. Will change to empty list.
+//    Validate.notNull(cc);
+//
+//    Entity properties = DbTableProperties.getRelation(cc).newEntity(cc);
+//    properties.set(DbTableProperties.TABLE_ID, tableId);
+//    properties.set(DbTableProperties.TABLE_NAME, tableKey);
+//    if (kvsEntries == null) {
+//      kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+//    }
+//    properties.set(DbTableProperties.TABLE_METADATA, metadata);
+//
+//    return properties;
+//  }
+  
   /**
-   * Create a new {@link DbTableProperties} entity.
-   * 
-   * @param tableId
-   *          the id of the table for the new table properties entity
-   * @param tableName
-   *          a human readable name for the table
-   * @param metadata
-   *          application defined metadata to store with the table (may be null)
+   * Return a new Entity representing a table definition. 
+   * @param tableId cannot be null
+   * @param tableKey cannot be null
+   * @param dbTableName cannot be null
+   * @param type cannot be null
+   * @param tableIdAccessControls if null, not set.
    * @param cc
-   * @return the created entity, not yet persisted
+   * @return
    * @throws ODKDatastoreException
    */
-  public Entity newTablePropertiesEntity(String tableId, String tableName, String metadata,
+  public Entity newTableDefinitionEntity(String tableId, String tableKey,
+      String dbTableName, String type, String tableIdAccessControls,
+      CallingContext cc) throws ODKDatastoreException {
+    // Validate those parameters defined as non-null in the ODK Tables Schema
+    // Google doc.
+    Validate.notEmpty(tableId);
+    Validate.notEmpty(tableKey);
+    Validate.notEmpty(dbTableName);
+    Validate.notEmpty(type);
+    // tableIdAccessControls can be null.
+    Validate.notNull(cc);
+    Entity definition = DbTableDefinitions.getRelation(cc).newEntity(cc);
+    definition.set(DbTableDefinitions.TABLE_ID, tableId);
+    definition.set(DbTableDefinitions.TABLE_KEY, tableKey);
+    definition.set(DbTableDefinitions.DB_TABLE_NAME, dbTableName);
+    definition.set(DbTableDefinitions.TYPE, type);
+    if (tableIdAccessControls != null) {
+      definition.set(DbTableDefinitions.TABLE_ID_ACCESS_CONTROLS, 
+          tableIdAccessControls);
+    }
+    return definition;
+  }
+  
+  /**
+   *  
+   * @param tableId
+   * @param partition
+   * @param aspect
+   * @param key
+   * @param type
+   * @param value
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public Entity newKeyValueStoreEntity(String tableId, String partition,
+      String aspect, String key, String type, String value, 
       CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
-    Validate.notEmpty(tableName);
-    // metadata may be null
+    Validate.notEmpty(partition);
+    Validate.notEmpty(aspect);
+    Validate.notEmpty(key);
+    Validate.notEmpty(type);
+    Validate.notEmpty(value);
     Validate.notNull(cc);
-
-    Entity properties = DbTableProperties.getRelation(cc).newEntity(cc);
-    properties.set(DbTableProperties.TABLE_ID, tableId);
-    properties.set(DbTableProperties.TABLE_NAME, tableName);
-    properties.set(DbTableProperties.TABLE_METADATA, metadata);
-
-    return properties;
+    Entity entry = DbKeyValueStore.getRelation(cc).newEntity(cc);
+    entry.set(DbKeyValueStore.TABLE_ID, tableId);
+    entry.set(DbKeyValueStore.PARTITION, partition);
+    entry.set(DbKeyValueStore.ASPECT, aspect);
+    entry.set(DbKeyValueStore.KEY, key);
+    entry.set(DbKeyValueStore.TYPE, type);
+    entry.set(DbKeyValueStore.VALUE, value);
+    return entry;
+  }
+  
+  public Entity newKeyValueStoreEntity(OdkTablesKeyValueStoreEntry entry,
+      CallingContext cc) throws ODKDatastoreException {
+    return newKeyValueStoreEntity(entry.tableId, entry.partition, 
+        entry.aspect, entry.key, entry.type, entry.value, cc);
   }
 
   /**
@@ -204,7 +286,7 @@ public class EntityCreator {
    * @param values
    *          the values to set on the row.
    * @param columns
-   *          the {@link DbColumn} entities for the table
+   *          the {@link DbColumnDefinitions} entities for the table
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
@@ -252,7 +334,7 @@ public class EntityCreator {
    * @param modificationNumber
    *          the modification number for the rows.
    * @param columns
-   *          the {@link DbColumn} entities for the table
+   *          the {@link DbColumnDefinitions} entities for the table
    * @param cc
    * @return the created entities, not yet persisted
    * @throws ODKDatastoreException
@@ -292,7 +374,7 @@ public class EntityCreator {
    *          the filter to apply to this row. If null then the existing filter
    *          will not be changed.
    * @param columns
-   *          the {@link DbColumn} entities for the table
+   *          the {@link DbColumnDefinitions} entities for the table
    * @param cc
    * @return the updated entity, not yet persisted
    * @throws ODKEntityNotFoundException
@@ -364,10 +446,10 @@ public class EntityCreator {
     }
   }
 
-  private Entity findColumn(String name, List<Entity> columns) {
+  private Entity findColumn(String elementKey, List<Entity> columns) {
     for (Entity entity : columns) {
-      String colName = entity.getString(DbColumn.COLUMN_NAME);
-      if (name.equals(colName))
+      String colName = entity.getString(DbColumnDefinitions.ELEMENT_KEY);
+      if (elementKey.equals(colName))
         return entity;
     }
     return null;
@@ -383,7 +465,7 @@ public class EntityCreator {
    * @param rows
    *          the rows to update, see {@link Row#forUpdate(String, String, Map)}
    * @param columns
-   *          the {@link DbColumn} entities for the table
+   *          the {@link DbColumnDefinitions} entities for the table
    * @param cc
    * @return the updated entities, not yet persisted
    * @throws ODKEntityNotFoundException
@@ -420,7 +502,7 @@ public class EntityCreator {
    * @param row
    *          the row
    * @param columns
-   *          the {@link DbColumn} entities for the log table
+   *          the {@link DbColumnDefinitions} entities for the log table
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
@@ -461,7 +543,7 @@ public class EntityCreator {
    * @param rows
    *          the rows
    * @param columns
-   *          the {@link DbColumn} entities for the table
+   *          the {@link DbColumnDefinitions} entities for the table
    * @param cc
    * @return the created entities, not yet persisted
    * @throws ODKDatastoreException

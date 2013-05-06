@@ -7,93 +7,98 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
+/**
+ * Represents the XML format of a table definition. This is essentially all the
+ * necessary information for a table to be defined on the server in a way taht
+ * will be ODK Tables -friendly.
+ * @author dylan price?
+ * @author sudar.sam@gmail.com
+ *
+ */
 @Root
 public class TableDefinition {
+  
+  /**
+   * This is based roughly on the ODK Tables Schema Google Doc. The required 
+   * elements are those that are not allowed to be null in 
+   * {@link DbTableDefinitions}.
+   */
+  
+  @Element(name = "table_id", required = true)
+  private String tableId;
+  
+  @Element(name = "table_key", required = true)
+  private String tableKey;
+  
+  @Element(name = "db_table_name", required = true)
+  private String dbTableName;
+  
+  @Element(name = "type", required = true)
+  private String type;
+  
+  @Element(name = "table_id_access_controls", required = false)
+  private String tableIdAccessControls;
 
-  @Element(name = "name", required = true)
-  private String tableName;
-
+  /*
+   * While not defined in DbTableDefinitions, this was originally how 
+   * column information was uploaded to the server, and will remain
+   * this way for now.
+   */
   @ElementList(inline = true)
   private List<Column> columns;
 
-  @Element(required = false)
-  private String metadata;
+// ss: trying to subsume this information into the kvs.
+//  @Element(required = false)
+//  private String metadata;
 
   @SuppressWarnings("unused")
   private TableDefinition() {
   }
 
-  public TableDefinition(final String tableName, final List<Column> columns, 
-      final String metadata) {
-    this.tableName = tableName;
+  public TableDefinition(final String tableId, final List<Column> columns,
+      final String tableKey, final String dbTableName, final String type,
+      final String tableIdAccessControls) {
+    this.tableId = tableId;
     this.columns = columns;
-    this.metadata = metadata;
+    this.tableKey = tableKey;
+    this.dbTableName = dbTableName;
+    this.type = type;
+    this.tableIdAccessControls = tableIdAccessControls;
   }
 
-  public String getTableName() {
-    return tableName;
+  public String getTableId() {
+    return this.tableId;
   }
-
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
+  
+  public String getTableKey() {
+    return this.tableKey;
   }
 
   public List<Column> getColumns() {
     return this.columns;
+  }
+  
+  public String getType() {
+    return this.type;
+  }
+  
+  public String getTableIdAccessControls() {
+    return this.tableIdAccessControls;
+  }
+  
+  public String getDbTableName() {
+    return this.getDbTableName();
   }
 
   public void setColumns(final List<Column> columns) {
     this.columns = columns;
   }
 
-  public String getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(String metadata) {
-    this.metadata = metadata;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (!(obj instanceof TableDefinition))
-      return false;
-    TableDefinition other = (TableDefinition) obj;
-    if (columns == null) {
-      if (other.columns != null)
-        return false;
-    } else if (!columns.equals(other.columns))
-      return false;
-    if (metadata == null) {
-      if (other.metadata != null)
-        return false;
-    } else if (!metadata.equals(other.metadata))
-      return false;
-    if (tableName == null) {
-      if (other.tableName != null)
-        return false;
-    } else if (!tableName.equals(other.tableName))
-      return false;
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((columns == null) ? 0 : columns.hashCode());
-    result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
-    result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
-    return result;
-  }
-
   @Override
   public String toString() {
-    return "TableDefinition [tableName=" + tableName + ", columns=" + columns + ", metadata="
-        + metadata + "]";
+    return "TableDefinition [tableId=" + tableId + ", columns=" + columns +
+        ", tableKey=" + tableKey + ", dbTableName=" + dbTableName + 
+        ", type=" + type + ", tableIdAccessControls=" + tableIdAccessControls
+        + "]";
   }
 }

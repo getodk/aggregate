@@ -18,7 +18,7 @@ public class TableResourceClient extends TableEntryClient {
   private String aclUri;
 
   public TableResourceClient(TableEntryClient entry) {
-    super(entry.getTableId(), entry.getTableName(), entry.getDataEtag(), entry.getPropertiesEtag());
+    super(entry.getTableId(), entry.getTableKey(), entry.getDataEtag(), entry.getPropertiesEtag());
   }
 
   private TableResourceClient() {

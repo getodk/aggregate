@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
@@ -74,10 +75,16 @@ public class TableServiceImpl implements TableService {
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
     // TODO: add access control stuff
-    String tableName = definition.getTableName();
+    String tableKey = definition.getTableKey();
+    String dbTableName = definition.getDbTableName();
+    String type = definition.getType();
+    String tableIdAccessControls = definition.getTableIdAccessControls();
     List<Column> columns = definition.getColumns();
-    String metadata = definition.getMetadata();
-    TableEntry entry = tm.createTable(tableId, tableName, columns, metadata);
+    // TODO: need a method to init a default minimal list of kvs entries.
+    List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+        new ArrayList<OdkTablesKeyValueStoreEntry>();
+    TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
+        tableIdAccessControls, columns, kvsEntries);
     TableResource resource = getResource(entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return resource;

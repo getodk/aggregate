@@ -37,9 +37,9 @@ public class TableEntryClientListBox extends AggregateListBox {
 	    for (TableEntryClient table : tables) {
 	    	// TODO: fix this direction stuff. and figure out wtf it is.
 	    	if (onlyIncludeTableName) {
-	    		addItem(table.getTableName(), "what the hell is direction?");
+	    		addItem(table.getTableKey(), "what the hell is direction?");
 	    	} else { // display both
-	    		addItem(table.getTableName() + "--" + table.getTableId(), "direction 2?");
+	    		addItem(table.getTableKey() + "--" + table.getTableId(), "direction 2?");
 	    	}
 	    }
 	  }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
@@ -24,7 +25,6 @@ import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.entity.PropertiesMetadata;
 import org.opendatakit.aggregate.odktables.relation.RUtil;
 import org.opendatakit.aggregate.server.ServerDataServiceImpl;
 import org.opendatakit.aggregate.server.ServerOdkTablesUtil;
@@ -64,53 +64,56 @@ public class CsvUtil {
       CallingContext cc) throws ImportFromCSVExceptionClient, 
       EtagMismatchExceptionClient, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
-    List<ColumnClient> columns = new ArrayList<ColumnClient>();
-    try {
-      CSVReader reader = new CSVReader(buffReader);
-      String[] row = reader.readNext();
-      if (row.length == 0) {
-        reader.close();
-        return true;
-      }
-      // adding columns
-      // For the server, I think this should never happen, because this is 
-      // only going to be a JSON activity...right?
-      //if ((row.length == 1) && (row[0].startsWith("{"))) {
-      //  tp.setFromJson(row[0]);
-      //  row = reader.readNext();
-      //} else {
-      int startIndex = 0;
-      if (row[startIndex].equals(LAST_MOD_TIME_LABEL)) {
-        startIndex++;
-      }
-      if ((row.length > startIndex) && row[startIndex].equals(SRC_PHONE_LABEL)) {
-        startIndex++;
-      }
-      // Here we add the columns.
-      for (int i = startIndex; i < row.length; i++) {
-        //tp.addColumn(row[i]);
-        // TODO on the phone it imports with "none". Make sure that there is a 
-        // similar default on the server. Atm I'm using "string", which might 
-        // not be the answer.
-        // TODO make the proper safe_name_entry here. Replace spaces with
-        // underscores, precede with underscore.
-        //String backingName = RUtil.convertToDbSafeBackingColumnName(row[i]);
-        ColumnClient newCol = new ColumnClient(row[i], 
-            ColumnClient.ColumnType.STRING);
-        // TODO check for name conflicts
-        columns.add(newCol);
-      }
-      // not sure what these booleans are going.
-      boolean includeTs = row[0].equals(LAST_MOD_TIME_LABEL);
-      boolean includePn = (!includeTs || (row.length > 1))
-          && row[includeTs ? 1 : 0].equals(SRC_PHONE_LABEL);
-      return importTable(reader, tableName, 
-         columns, includeTs, includePn, cc);
-    } catch (FileNotFoundException e) {
-      return false;
-    } catch (IOException e) {
-      return false;
-    }
+    LogFactory.getLog(getClass())
+        .error("importNewTable out of date and is unimplemented!");
+    return false;
+//    List<ColumnClient> columns = new ArrayList<ColumnClient>();
+//    try {
+//      CSVReader reader = new CSVReader(buffReader);
+//      String[] row = reader.readNext();
+//      if (row.length == 0) {
+//        reader.close();
+//        return true;
+//      }
+//      // adding columns
+//      // For the server, I think this should never happen, because this is 
+//      // only going to be a JSON activity...right?
+//      //if ((row.length == 1) && (row[0].startsWith("{"))) {
+//      //  tp.setFromJson(row[0]);
+//      //  row = reader.readNext();
+//      //} else {
+//      int startIndex = 0;
+//      if (row[startIndex].equals(LAST_MOD_TIME_LABEL)) {
+//        startIndex++;
+//      }
+//      if ((row.length > startIndex) && row[startIndex].equals(SRC_PHONE_LABEL)) {
+//        startIndex++;
+//      }
+//      // Here we add the columns.
+//      for (int i = startIndex; i < row.length; i++) {
+//        //tp.addColumn(row[i]);
+//        // TODO on the phone it imports with "none". Make sure that there is a 
+//        // similar default on the server. Atm I'm using "string", which might 
+//        // not be the answer.
+//        // TODO make the proper safe_name_entry here. Replace spaces with
+//        // underscores, precede with underscore.
+//        //String backingName = RUtil.convertToDbSafeBackingColumnName(row[i]);
+//        ColumnClient newCol = new ColumnClient(row[i], 
+//            ColumnClient.ColumnType.STRING);
+//        // TODO check for name conflicts
+//        columns.add(newCol);
+//      }
+//      // not sure what these booleans are going.
+//      boolean includeTs = row[0].equals(LAST_MOD_TIME_LABEL);
+//      boolean includePn = (!includeTs || (row.length > 1))
+//          && row[includeTs ? 1 : 0].equals(SRC_PHONE_LABEL);
+//      return importTable(reader, tableName, 
+//         columns, includeTs, includePn, cc);
+//    } catch (FileNotFoundException e) {
+//      return false;
+//    } catch (IOException e) {
+//      return false;
+//    }
   }
 
   /*
@@ -153,71 +156,72 @@ public class CsvUtil {
       CallingContext cc) throws BadColumnNameExceptionClient, 
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, 
       EtagMismatchExceptionClient, ImportFromCSVExceptionClient {
-    int tsIndex = includeTs ? 0 : -1;
-    int pnIndex = includePn ? (includeTs ? 1 : 0) : -1;
-    int startIndex = (includeTs ? 1 : 0) + (includePn ? 1 : 0);
-    //DbTable dbt = DbTable.getDbTable(dbh, tableId);
-    try {
-      String newTableId = CommonFieldsBase.newUri();
-      PropertiesMetadata metadataObject = new PropertiesMetadata(newTableId,
-          tableName, columns); 
-      String metadataString = metadataObject.getAsJson();
-      TableManager tm = new TableManager(cc);
-      TableDefinitionClient tableDef = new TableDefinitionClient(
-          tableName, columns, metadataString);
-      // Now create the actual table in the db. Null for the id so it auto
-      // generates a UUID.
-      //ServerTableServiceImpl tableService = new ServerTableServiceImpl();
-      // we do this just to create the table. the fact that we don't use it
-      // is ok.
-      TableEntryClient tableEntry = ServerOdkTablesUtil.createTable(
-          newTableId, tableDef, cc);
-      
-      // And now add all the rows for the doowop.
-      //ServerDataServiceImpl dataService = new ServerDataServiceImpl();
-      Map<String, String> values = new HashMap<String, String>();
-      String[] row = reader.readNext();
-      while (row != null) {
-        for (int i = 0; i < columns.size(); i++) {
-          values.put(columns.get(i).getDbName(), row[startIndex + i]);
-        }
-        // we want to generate a UUID for each row.
-        String newRowId = UUID.randomUUID().toString();
-        RowClient newTableRow = RowClient.forInsert(newRowId, values);
-        // So I think atm, that both of these should be -1, as we're not 
-        // allowing any ADDING to the table at this point from the server via
-        // CSV.
-        //String lastModTime = tsIndex == -1 ? du.formatNowForDb() : row[tsIndex];
-        //String srcPhone = pnIndex == -1 ? null : row[pnIndex];
-        DateTimeFormatter formatter =
-            DateTimeFormat.forPattern("yyyy-MM-dd-HH-mm-ss").withZoneUTC();
-        String lastModTime = formatter.print(new DateTime());
-        String srcPhone = null;
-        //dbt.addRow(values, lastModTime, srcPhone);
-        //dataService.createOrUpdateRow(newTableId, newRowId, newTableRow);
-        // TODO if this fails we should probably delete the table we've created
-        ServerOdkTablesUtil.createOrUpdateRow(newTableId, newRowId, 
-            newTableRow, cc);
-        values.clear();
-        row = reader.readNext();
-      }
-      reader.close();
-      return true;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return false;
-    } catch (DatastoreFailureException e) {
-      e.printStackTrace();
-      throw new ImportFromCSVExceptionClient("datastore failure in CsvUtil", 
-          e);
-    } catch (RequestFailureException e) {
-      e.printStackTrace();
-      throw new ImportFromCSVExceptionClient("request failure in csvutil", e);
-    } catch (AccessDeniedException e) {
-      e.printStackTrace();
-      throw new ImportFromCSVExceptionClient("access denied while importing" +
-          " from csv", e);
-    }
+    return false; // unimplemented and out of date.
+//    int tsIndex = includeTs ? 0 : -1;
+//    int pnIndex = includePn ? (includeTs ? 1 : 0) : -1;
+//    int startIndex = (includeTs ? 1 : 0) + (includePn ? 1 : 0);
+//    //DbTable dbt = DbTable.getDbTable(dbh, tableId);
+//    try {
+//      String newTableId = CommonFieldsBase.newUri();
+//      PropertiesMetadata metadataObject = new PropertiesMetadata(newTableId,
+//          tableName, columns); 
+//      String metadataString = metadataObject.getAsJson();
+//      TableManager tm = new TableManager(cc);
+//      TableDefinitionClient tableDef = new TableDefinitionClient(
+//          tableName, columns, metadataString);
+//      // Now create the actual table in the db. Null for the id so it auto
+//      // generates a UUID.
+//      //ServerTableServiceImpl tableService = new ServerTableServiceImpl();
+//      // we do this just to create the table. the fact that we don't use it
+//      // is ok.
+//      TableEntryClient tableEntry = ServerOdkTablesUtil.createTable(
+//          newTableId, tableDef, cc);
+//      
+//      // And now add all the rows for the doowop.
+//      //ServerDataServiceImpl dataService = new ServerDataServiceImpl();
+//      Map<String, String> values = new HashMap<String, String>();
+//      String[] row = reader.readNext();
+//      while (row != null) {
+//        for (int i = 0; i < columns.size(); i++) {
+//          values.put(columns.get(i).getDbName(), row[startIndex + i]);
+//        }
+//        // we want to generate a UUID for each row.
+//        String newRowId = UUID.randomUUID().toString();
+//        RowClient newTableRow = RowClient.forInsert(newRowId, values);
+//        // So I think atm, that both of these should be -1, as we're not 
+//        // allowing any ADDING to the table at this point from the server via
+//        // CSV.
+//        //String lastModTime = tsIndex == -1 ? du.formatNowForDb() : row[tsIndex];
+//        //String srcPhone = pnIndex == -1 ? null : row[pnIndex];
+//        DateTimeFormatter formatter =
+//            DateTimeFormat.forPattern("yyyy-MM-dd-HH-mm-ss").withZoneUTC();
+//        String lastModTime = formatter.print(new DateTime());
+//        String srcPhone = null;
+//        //dbt.addRow(values, lastModTime, srcPhone);
+//        //dataService.createOrUpdateRow(newTableId, newRowId, newTableRow);
+//        // TODO if this fails we should probably delete the table we've created
+//        ServerOdkTablesUtil.createOrUpdateRow(newTableId, newRowId, 
+//            newTableRow, cc);
+//        values.clear();
+//        row = reader.readNext();
+//      }
+//      reader.close();
+//      return true;
+//    } catch (IOException e) {
+//      e.printStackTrace();
+//      return false;
+//    } catch (DatastoreFailureException e) {
+//      e.printStackTrace();
+//      throw new ImportFromCSVExceptionClient("datastore failure in CsvUtil", 
+//          e);
+//    } catch (RequestFailureException e) {
+//      e.printStackTrace();
+//      throw new ImportFromCSVExceptionClient("request failure in csvutil", e);
+//    } catch (AccessDeniedException e) {
+//      e.printStackTrace();
+//      throw new ImportFromCSVExceptionClient("access denied while importing" +
+//          " from csv", e);
+//    }
   }
 
   /*

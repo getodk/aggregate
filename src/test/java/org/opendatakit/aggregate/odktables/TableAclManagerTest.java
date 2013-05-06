@@ -35,8 +35,10 @@ public class TableAclManagerTest {
     String tableProperties = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, tableName, T.columns, tableProperties);
-
+    tm.createTable(tableId, T.tableKey, T.dbTableName, 
+        T.tableType.getRepresentation(), T.tableIdAccessControls, T.columns, 
+        T.kvsEntries);
+    
     this.scope = new Scope(Scope.Type.USER, T.user);
     this.role = TableRole.FILTERED_READER;
     this.am = new TableAclManager(tableId, cc);

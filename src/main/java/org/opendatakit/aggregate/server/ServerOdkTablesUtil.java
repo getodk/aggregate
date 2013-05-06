@@ -20,10 +20,11 @@ import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -69,14 +70,22 @@ public class ServerOdkTablesUtil {
     // column resource or something, in which case the transform() method is not
     // altering all of the requisite fields.
     try {
-      String tableName = definition.getTableName();
+      String tableKey = definition.getTableKey();
+      String dbTableName = definition.getDbTableName();
+      String type = definition.getType();
+      String tableIdAccessControls = definition.getTableIdAccessControls();
+      // TODO: find a way to, for creation, generate a minimal list of 
+      // kvs entries. for now just putting in blank if you create a table
+      // from the server.
+      List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+          new ArrayList<OdkTablesKeyValueStoreEntry>();
       List<ColumnClient> columns = definition.getColumns();
       List<Column> columnsServer = new ArrayList<Column>();
       for (ColumnClient column : columns) {
         columnsServer.add(UtilTransforms.transform(column));
       }
-      String metadata = definition.getMetadata();
-      TableEntry entry = tm.createTable(tableId, tableName, columnsServer, metadata);
+      TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
+          tableIdAccessControls, columnsServer, kvsEntries);
       TableEntryClient entryClient = entry.transform();
       logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
       return entryClient;

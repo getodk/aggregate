@@ -55,7 +55,7 @@ public class DbTable {
 
   private static List<DataField> getDynamicFields(String tableId, CallingContext cc)
       throws ODKDatastoreException {
-    List<Entity> entities = DbColumn.query(tableId, cc);
+    List<Entity> entities = DbColumnDefinitions.query(tableId, cc);
     return converter.toFields(entities);
   }
 

@@ -412,7 +412,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 		  TableManager tm = new TableManager(cc);
 		  List<TableEntry> tables = tm.getTables();
 		  for (TableEntry table : tables) {
-			  if (table.getTableName().equals(tableName)) {
+			  if (table.getTableKey().equals(tableName)) {
 				  return table.getTableId();
 			  }
 		  }
@@ -520,8 +520,8 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
     List<TableEntry> entries = tm.getTables(scopes);
     String html = "<select name=\"table_name\" id=\"table_name\">";
     for (TableEntry table : entries) {
-      html = html + "<option value=\"" + table.getTableName() + "\">" 
-          + table.getTableName() + "</option>";
+      html = html + "<option value=\"" + table.getTableKey() + "\">" 
+          + table.getTableKey() + "</option>";
     }
     html = html + "</select>";
     return html;

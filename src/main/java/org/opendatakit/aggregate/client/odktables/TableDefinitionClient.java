@@ -20,86 +20,64 @@ public class TableDefinitionClient implements Serializable {
 	 */
 	private static final long serialVersionUID = -1413634509888543150L;
 
-private String tableName;
-
+  private String tableId;
+  private String tableKey;
+  private String dbTableName;
+  private String type;
+  private String tableIdAccessControls;
   private List<ColumnClient> columns;
-
-  private String metadata;
-
+  
   private TableDefinitionClient() {
   }
 
-  public TableDefinitionClient(final String tableName, 
-      final List<ColumnClient> columns, final String metadata) {
-    this.tableName = tableName;
+  public TableDefinitionClient(final String tableId, 
+      final List<ColumnClient> columns, final String tableKey, 
+      final String dbTableName, final String type, 
+      final String tableIdAccessControls) {
+    this.tableId = tableId;
     this.columns = columns;
-    this.metadata = metadata;
+    this.tableKey = tableKey;
+    this.dbTableName = dbTableName;
+    this.type = type;
+    this.tableIdAccessControls = tableIdAccessControls;
   }
 
-  public String getTableName() {
-    return tableName;
-  }
-
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
+  public String getTableId() {
+    return this.tableId;
   }
 
   public List<ColumnClient> getColumns() {
     return this.columns;
+  }
+  
+  public String getTableKey() {
+    return this.tableKey;
+  }
+  
+  public String getDbTableName() {
+    return this.dbTableName;
+  }
+  
+  public String getType() {
+    return this.type;
+  }
+  
+  public String getTableIdAccessControls() {
+    return this.tableIdAccessControls;
   }
 
   public void setColumns(final List<ColumnClient> columns) {
     this.columns = columns;
   }
 
-  public String getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(String metadata) {
-    this.metadata = metadata;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (!(obj instanceof TableDefinitionClient))
-      return false;
-    TableDefinitionClient other = (TableDefinitionClient) obj;
-    if (columns == null) {
-      if (other.columns != null)
-        return false;
-    } else if (!columns.equals(other.columns))
-      return false;
-    if (metadata == null) {
-      if (other.metadata != null)
-        return false;
-    } else if (!metadata.equals(other.metadata))
-      return false;
-    if (tableName == null) {
-      if (other.tableName != null)
-        return false;
-    } else if (!tableName.equals(other.tableName))
-      return false;
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((columns == null) ? 0 : columns.hashCode());
-    result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
-    result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
-    return result;
-  }
-
   @Override
   public String toString() {
-    return "TableDefinition [tableName=" + tableName + ", columns=" + columns + ", metadata="
-        + metadata + "]";
+    return "TableDefinitionClient[tableId=" + getTableId() 
+        + ", columns=" + getColumns().toString() 
+        + ", tableKey=" + getTableKey()
+        + ", dbTableName=" + getDbTableName()
+        + ", type=" + getType()
+        + ", tableIdAccessControls=" + getTableIdAccessControls()
+        + "]";
   }
 }

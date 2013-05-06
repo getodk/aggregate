@@ -2,9 +2,17 @@ package org.opendatakit.aggregate.odktables.entity;
 
 import java.io.Serializable;
 
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
+/**
+ * The XML document that represents a column. This is the XML representation
+ * of a column definition as stored in the {@link DbColumnDefinitions} table.
+ * @author dylan price?
+ * @author sudar.sam@gmail.com
+ *
+ */
 @Root
 public class Column implements Serializable {
 
@@ -17,19 +25,25 @@ public class Column implements Serializable {
 	 * SS: I am taking this to mean the display name.
 	 */
   @Attribute(required = true)
-  private String name;
-
+  private String tableId;
+  
   @Attribute(required = true)
-  private ColumnType type;
-
-  public enum ColumnType {
-    STRING,
-    INTEGER,
-    DECIMAL,
-    BOOLEAN,
-    DATETIME;
-    
-  }
+  private String elementKey;
+  
+  @Attribute(required = true)
+  private String elementName;
+  
+  @Attribute(required = false)
+  private String elementType;
+  
+  @Attribute(required = false)
+  private String listChildElementKeys;
+  
+  @Attribute(required = true)
+  private int isPersisted;
+  
+  @Attribute(required = false)
+  private String joins;
 
   @SuppressWarnings("unused")
   private Column() {}
@@ -45,56 +59,55 @@ public class Column implements Serializable {
    * @param displayName
    * @param type
    */
-  public Column(final String displayName, final ColumnType type) {
-    this.name = displayName;
-    this.type = type;
+  public Column(final String tableId, final String elementKey, 
+      final String elementName, final String elementType, 
+      final String listChildElementKeys, final int isPersisted, 
+      final String joins) {
+    this.tableId = tableId;
+    this.elementKey = elementKey;
+    this.elementName = elementName;
+    this.elementType = elementType;
+    this.listChildElementKeys = listChildElementKeys;
+    this.isPersisted = isPersisted;
+    this.joins = joins;
   }
 
-  public String getName() {
-    return this.name;
+  public String getTableId() {
+    return this.tableId;
   }
-
-  public ColumnType getType() {
-    return this.type;
+  
+  public String getElementKey() {
+    return this.elementKey;
   }
-
-  public void setName(final String name) {
-    this.name = name;
+  
+  public String getElementName() {
+    return this.elementName;
   }
-
-  public void setType(final ColumnType type) {
-    this.type = type;
+  
+  public String getElementType() {
+    return this.elementType;
   }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    return result;
+  
+  public String getListChildElementKeys() {
+    return this.listChildElementKeys;
   }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    Column other = (Column) obj;
-    if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
-      return false;
-    if (type != other.type)
-      return false;
-    return true;
+  
+  public int getIsPersisted() {
+    return this.isPersisted;
+  }
+  
+  public String getJoins() {
+    return this.joins;
   }
 
   public String toString() {
-    return "Column(name=" + this.getName() + ", type=" + this.getType() + ")";
+    return "Column(tableId=" + getTableId() 
+        + ", elementKey=" + this.getElementKey() 
+        + ", elementName=" + this.getElementName()
+        + ", elementType= " + this.getElementType()
+        + ", listChildElementKeys=" + this.getListChildElementKeys()
+        + ", isPersisted=" + this.getIsPersisted()
+        + ", joins=" + this.getJoins()
+        + ")";
   }
 }

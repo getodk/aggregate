@@ -108,7 +108,6 @@ public class OdkTablesKeyValueManifestManager {
 		    List<Row> infoRows = EntityConverter.toRowsFromFileInfo(DbTableFileInfo.query(tableId, cc));
 			TableManager tm = new TableManager(cc);
 			TableEntry table = tm.getTable(tableId);
-			String tableName = table.getTableName();
 			DbTableFiles blobSetRelation = new DbTableFiles(cc);
 			List<OdkTablesKeyValueStoreEntry> entries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 			for (Row row : infoRows) {
@@ -118,7 +117,6 @@ public class OdkTablesKeyValueManifestManager {
 					// for files you need to create a FileManifestEntry for the value.
 					OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
 					entry.tableId = tableId;
-					entry.tableName = tableName;
 					entry.key = row.getValues().get(DbTableFileInfo.KEY);
 					entry.type = row.getValues().get(DbTableFileInfo.VALUE_TYPE);
 					// if it's a file, make the file manifest entry.

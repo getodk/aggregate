@@ -48,8 +48,10 @@ public class DataManagerTest {
     this.tableProperties = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, tableName, T.columns, tableProperties);
-
+    tm.createTable(tableId, T.tableKey, T.dbTableName, 
+        T.tableType.getRepresentation(), T.tableIdAccessControls, T.columns, 
+        T.kvsEntries);
+    
     this.dm = new DataManager(tableId, cc);
     this.rows = T.rows;
   }

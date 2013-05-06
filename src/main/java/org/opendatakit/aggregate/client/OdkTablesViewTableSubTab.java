@@ -182,7 +182,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
     tableBox.clear();
     tableBox.addItem(""); // blank holder to start with no selection
     for (int i = 0; i < currentTables.size(); i++) {
-      tableBox.addItem(currentTables.get(i).getTableName());
+      tableBox.addItem(currentTables.get(i).getTableKey());
     }
   }
 
@@ -203,7 +203,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
       tableData.updateDisplay(currentTable);
 
       selectTablePanel.setHTML(1, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
-      selectTablePanel.setHTML(1, 1, "<h2 id=\table_name\"> " + currentTable.getTableName()
+      selectTablePanel.setHTML(1, 1, "<h2 id=\table_name\"> " + currentTable.getTableKey()
           + " </h2>");
       add(tableData);
     }
