@@ -34,7 +34,8 @@ public class EntityConverter {
   public TableEntry toTableEntry(Entity entity, String tableKey) {
     String tableId = entity.getId();
     String dataEtag = entity.getAsString(DbTableEntry.MODIFICATION_NUMBER);
-    String propertiesEtag = entity.getAsString(DbTableEntry.PROPERTIES_MOD_NUM);
+    String propertiesEtag = 
+        entity.getAsString(DbTableEntry.PROPERTIES_MOD_NUM);
     TableEntry entry = new TableEntry(tableId, tableKey, dataEtag, 
         propertiesEtag);
     return entry;
@@ -46,15 +47,16 @@ public class EntityConverter {
    * 
    * @param entities
    *          the entities to convert
-   * @param tableNames
-   *          a map of tableIds to tableNames
+   * @param tableKeys
+   *          a map of tableIds to tableKeys
    */
-  public List<TableEntry> toTableEntries(List<Entity> entities, Map<String, String> tableNames) {
+  public List<TableEntry> toTableEntries(List<Entity> entities, 
+      Map<String, String> tableKeys) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
     for (int i = 0; i < entities.size(); i++) {
       Entity entity = entities.get(i);
-      String tableName = tableNames.get(entity.getId());
-      entries.add(toTableEntry(entity, tableName));
+      String tableKey = tableKeys.get(entity.getId());
+      entries.add(toTableEntry(entity, tableKey));
     }
     return entries;
   }

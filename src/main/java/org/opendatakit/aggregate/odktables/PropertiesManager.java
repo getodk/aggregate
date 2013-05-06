@@ -10,7 +10,6 @@ import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
-import org.opendatakit.aggregate.odktables.relation.DbTableProperties;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.common.ermodel.simple.Entity;
