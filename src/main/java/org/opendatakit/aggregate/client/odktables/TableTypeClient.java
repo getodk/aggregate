@@ -11,15 +11,5 @@ package org.opendatakit.aggregate.client.odktables;
  *
  */
 public enum TableTypeClient {
-  DATA("data"), SECURITY("security"), SHORTCUT("shortcut");
-  
-  private String representation;
-  
-  private TableTypeClient(String rep) {
-    this.representation = rep;
-  }
-  
-  public String getRepresentation() {
-    return this.representation;
-  }
+  DATA, SECURITY, SHORTCUT;
 }

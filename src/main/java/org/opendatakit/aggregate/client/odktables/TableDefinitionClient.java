@@ -23,7 +23,7 @@ public class TableDefinitionClient implements Serializable {
   private String tableId;
   private String tableKey;
   private String dbTableName;
-  private String type;
+  private TableTypeClient type;
   private String tableIdAccessControls;
   private List<ColumnClient> columns;
   
@@ -32,7 +32,7 @@ public class TableDefinitionClient implements Serializable {
 
   public TableDefinitionClient(final String tableId, 
       final List<ColumnClient> columns, final String tableKey, 
-      final String dbTableName, final String type, 
+      final String dbTableName, final TableTypeClient type, 
       final String tableIdAccessControls) {
     this.tableId = tableId;
     this.columns = columns;
@@ -58,7 +58,7 @@ public class TableDefinitionClient implements Serializable {
     return this.dbTableName;
   }
   
-  public String getType() {
+  public TableTypeClient getType() {
     return this.type;
   }
   

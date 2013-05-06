@@ -3,11 +3,14 @@ package org.opendatakit.aggregate.odktables.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.resteasy.logging.Logger;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.OdkTablesKeyValueStoreEntryClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ScopeClient;
 import org.opendatakit.aggregate.client.odktables.TableAclClient;
+import org.opendatakit.aggregate.client.odktables.TableTypeClient;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 
 /**
  * Various methods for transforming objects from client to server code.
@@ -22,11 +25,51 @@ public class UtilTransforms {
 	   * Transform the object into a server-side Column object.
 	   */
 	  public static Column transform(ColumnClient client) {
+	    Column.ColumnType serverColumnType = Column.ColumnType.STRING;
+	    switch (client.getElementType()) {
+	    case BOOLEAN:
+	      serverColumnType = Column.ColumnType.BOOLEAN;
+	      break;
+	    case DATETIME:
+	      serverColumnType = Column.ColumnType.DATETIME;
+	      break;
+	    case DECIMAL:
+	      serverColumnType = Column.ColumnType.DECIMAL;
+	      break;
+	    case INTEGER:
+	      serverColumnType = Column.ColumnType.INTEGER;
+	      break;
+	    case STRING:
+	      serverColumnType = Column.ColumnType.STRING;
+	      break;
+	    default:
+	      Logger.getLogger(UtilTransforms.class).error(
+	          "unrecognized client column type: " + client.getElementType());
+	    }
 		  Column transformedColumn = new Column(client.getTableId(), 
 		      client.getElementKey(), client.getElementName(), 
-		      client.getElementType(), client.getListChildElementKeys(),
+		      serverColumnType, client.getListChildElementKeys(),
 		      client.getIsPersisted(), client.getJoins());
 		  return transformedColumn;	
+	  }
+	  
+	  public static TableType transform(TableTypeClient clientType) {
+	    TableType serverType = TableType.DATA;
+	    switch (clientType) {
+	    case DATA:
+	      serverType = TableType.DATA;
+	      break;
+	    case SECURITY:
+	      serverType = TableType.SECURITY;
+	      break;
+	    case SHORTCUT:
+	      serverType = TableType.SHORTCUT;
+	      break;
+	    default:
+         Logger.getLogger(UtilTransforms.class).error(
+             "unrecognized client table type type: " + clientType);
+       }
+	    return serverType;
 	  }
 	  
 	  /**

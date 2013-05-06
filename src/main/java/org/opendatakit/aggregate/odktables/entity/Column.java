@@ -20,6 +20,14 @@ public class Column implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -6624997293167731653L;
+	
+	public enum ColumnType {
+	  STRING,
+	  INTEGER,
+	  DECIMAL,
+	  BOOLEAN,
+	  DATETIME;
+	}
 
 	/*
 	 * SS: I am taking this to mean the display name.
@@ -34,7 +42,7 @@ public class Column implements Serializable {
   private String elementName;
   
   @Attribute(required = false)
-  private String elementType;
+  private ColumnType elementType;
   
   @Attribute(required = false)
   private String listChildElementKeys;
@@ -56,11 +64,16 @@ public class Column implements Serializable {
    * its implementation should be brought into alignment with ColumnClient,
    * which has both display and backing names when the answer to the above
    * questions is decided. 
-   * @param displayName
-   * @param type
+   * @param tableId
+   * @param elementKey
+   * @param elementName
+   * @param elementType
+   * @param listChildElementKeys
+   * @param isPersisted
+   * @param joins
    */
   public Column(final String tableId, final String elementKey, 
-      final String elementName, final String elementType, 
+      final String elementName, final ColumnType elementType, 
       final String listChildElementKeys, final int isPersisted, 
       final String joins) {
     this.tableId = tableId;
@@ -84,7 +97,7 @@ public class Column implements Serializable {
     return this.elementName;
   }
   
-  public String getElementType() {
+  public ColumnType getElementType() {
     return this.elementType;
   }
   
@@ -104,7 +117,7 @@ public class Column implements Serializable {
     return "Column(tableId=" + getTableId() 
         + ", elementKey=" + this.getElementKey() 
         + ", elementName=" + this.getElementName()
-        + ", elementType= " + this.getElementType()
+        + ", elementType= " + this.getElementType().name()
         + ", listChildElementKeys=" + this.getListChildElementKeys()
         + ", isPersisted=" + this.getIsPersisted()
         + ", joins=" + this.getJoins()

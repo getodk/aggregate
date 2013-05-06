@@ -7,11 +7,11 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.common.ermodel.simple.Entity;
@@ -84,7 +84,8 @@ public class EntityCreator {
     entity.set(DbColumnDefinitions.TABLE_ID, tableId);
     entity.set(DbColumnDefinitions.ELEMENT_KEY, column.getElementKey());
     entity.set(DbColumnDefinitions.ELEMENT_NAME, column.getElementName());
-    entity.set(DbColumnDefinitions.ELEMENT_TYPE, column.getElementType());
+    entity.set(
+        DbColumnDefinitions.ELEMENT_TYPE, column.getElementType().name());
     entity.set(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS,
         column.getListChildElementKeys());
     entity.set(DbColumnDefinitions.IS_PERSISTED, column.getIsPersisted());
@@ -135,38 +136,6 @@ public class EntityCreator {
 	  
 	  return entity;
   }
-
-//  /**
-//   * Create a new {@link DbTableProperties} entity.
-//   * 
-//   * @param tableId
-//   *          the id of the table for the new table properties entity
-//   * @param tableKey
-//   *          a human readable name for the table
-//   * @param metadata
-//   *          application defined metadata to store with the table (may be null)
-//   * @param cc
-//   * @return the created entity, not yet persisted
-//   * @throws ODKDatastoreException
-//   */
-//  public Entity newTablePropertiesEntity(String tableId, String tableKey, 
-//      List<OdkTablesKeyValueStoreEntry> kvsEntries, CallingContext cc) 
-//          throws ODKDatastoreException {
-//    Validate.notEmpty(tableId);
-//    Validate.notEmpty(tableKey);
-//    // kvsEntries can be null. Will change to empty list.
-//    Validate.notNull(cc);
-//
-//    Entity properties = DbTableProperties.getRelation(cc).newEntity(cc);
-//    properties.set(DbTableProperties.TABLE_ID, tableId);
-//    properties.set(DbTableProperties.TABLE_NAME, tableKey);
-//    if (kvsEntries == null) {
-//      kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
-//    }
-//    properties.set(DbTableProperties.TABLE_METADATA, metadata);
-//
-//    return properties;
-//  }
   
   /**
    * Return a new Entity representing a table definition. 
@@ -180,21 +149,21 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public Entity newTableDefinitionEntity(String tableId, String tableKey,
-      String dbTableName, String type, String tableIdAccessControls,
+      String dbTableName, TableType type, String tableIdAccessControls,
       CallingContext cc) throws ODKDatastoreException {
     // Validate those parameters defined as non-null in the ODK Tables Schema
     // Google doc.
     Validate.notEmpty(tableId);
     Validate.notEmpty(tableKey);
     Validate.notEmpty(dbTableName);
-    Validate.notEmpty(type);
+    Validate.notNull(type);
     // tableIdAccessControls can be null.
     Validate.notNull(cc);
     Entity definition = DbTableDefinitions.getRelation(cc).newEntity(cc);
     definition.set(DbTableDefinitions.TABLE_ID, tableId);
     definition.set(DbTableDefinitions.TABLE_KEY, tableKey);
     definition.set(DbTableDefinitions.DB_TABLE_NAME, dbTableName);
-    definition.set(DbTableDefinitions.TYPE, type);
+    definition.set(DbTableDefinitions.TYPE, type.name());
     if (tableIdAccessControls != null) {
       definition.set(DbTableDefinitions.TABLE_ID_ACCESS_CONTROLS, 
           tableIdAccessControls);

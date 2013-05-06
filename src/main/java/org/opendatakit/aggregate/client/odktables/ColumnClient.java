@@ -7,11 +7,19 @@ package org.opendatakit.aggregate.client.odktables;
  *
  */
 public class ColumnClient {
+  
+  public enum ColumnType {
+    STRING,
+    INTEGER,
+    DECIMAL,
+    BOOLEAN,
+    DATETIME;
+  }
 
   private String tableId;
   private String elementKey;
   private String elementName;
-  private String elementType;
+  private ColumnClient.ColumnType elementType;
   private String listChildElementKeys;
   private int isPersisted;
   private String joins;
@@ -27,7 +35,7 @@ public class ColumnClient {
    * @param type
    */
   public ColumnClient(final String tableId, final String elementKey,
-      final String elementName, final String elementType,
+      final String elementName, final ColumnClient.ColumnType elementType,
       final String listChildElementKeys, final int isPersisted, 
       final String joins) {
 // ss: not sure what this was.leaving it out for now.
@@ -53,7 +61,7 @@ public class ColumnClient {
     return this.elementName;
   }
   
-  public String getElementType() {
+  public ColumnClient.ColumnType getElementType() {
     return this.elementType;
   }
   

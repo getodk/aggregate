@@ -63,7 +63,7 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
           // be performed.
           List<ColumnClient> columns = new ArrayList<ColumnClient>(0);
           tableDef = new TableDefinitionClient(null, columns, tableName,
-              tableName, TableTypeClient.DATA.getRepresentation(),
+              tableName, TableTypeClient.DATA,
               null);
           
 	      // Set up the callback object.

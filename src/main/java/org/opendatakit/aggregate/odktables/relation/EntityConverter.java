@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
@@ -68,7 +69,8 @@ public class EntityConverter {
     String tableId = entity.getString(DbColumnDefinitions.TABLE_ID);
     String elementKey = entity.getString(DbColumnDefinitions.ELEMENT_KEY);
     String elementName = entity.getString(DbColumnDefinitions.ELEMENT_NAME);
-    String elementType = entity.getString(DbColumnDefinitions.ELEMENT_TYPE);
+    String elementTypeStr = entity.getString(DbColumnDefinitions.ELEMENT_TYPE);
+    ColumnType elementType = ColumnType.valueOf(elementTypeStr);
     String listChildElementKeys = 
         entity.getString(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS);
     int isPersisted = entity.getInteger(DbColumnDefinitions.IS_PERSISTED);

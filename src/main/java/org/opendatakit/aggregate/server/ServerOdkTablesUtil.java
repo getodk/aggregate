@@ -16,6 +16,7 @@ import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
+import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
@@ -25,6 +26,7 @@ import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -72,7 +74,7 @@ public class ServerOdkTablesUtil {
     try {
       String tableKey = definition.getTableKey();
       String dbTableName = definition.getDbTableName();
-      String type = definition.getType();
+      TableType type = UtilTransforms.transform(definition.getType());
       String tableIdAccessControls = definition.getTableIdAccessControls();
       // TODO: find a way to, for creation, generate a minimal list of 
       // kvs entries. for now just putting in blank if you create a table
