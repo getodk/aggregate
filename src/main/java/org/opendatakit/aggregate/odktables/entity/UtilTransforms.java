@@ -167,6 +167,11 @@ public class UtilTransforms {
 		  serverRow.setRowEtag(client.getRowEtag());
 		  serverRow.setRowId(client.getRowId());
 		  serverRow.setValues(client.getValues());
+		  serverRow.setUriUser(client.getUriUser());
+		  serverRow.setFormId(client.getFormId());
+		  serverRow.setInstanceName(client.getInstanceName());
+		  serverRow.setLocale(client.getLocale());
+		  serverRow.setTimestamp(client.getTimestamp());
 		  return serverRow;
 	  }	  
 	  
@@ -300,6 +305,11 @@ public class UtilTransforms {
 	     row.setRowEtag(serverRow.getRowEtag());
 	     row.setRowId(serverRow.getRowId());
 	     row.setValues(serverRow.getValues());
+	     row.setUriUser(serverRow.getUriUser());
+	     row.setFormId(serverRow.getFormId());
+	     row.setInstanceName(serverRow.getInstanceName());
+	     row.setLocale(serverRow.getLocale());
+	     row.setTimestamp(serverRow.getTimestamp());
 	     if (serverRow.getFilterScope().getType() == null) {
 	        row.setFilterScope(ScopeClient.EMPTY_SCOPE);
 	     } else {
@@ -334,6 +344,11 @@ public class UtilTransforms {
 	     rowClient.setRowEtag(serverResource.getRowEtag());
 	     rowClient.setRowId(serverResource.getRowId());
 	     rowClient.setValues(serverResource.getValues());
+	     rowClient.setUriUser(serverResource.getUriUser());
+	     rowClient.setFormId(serverResource.getFormId());
+	     rowClient.setInstanceName(serverResource.getInstanceName());
+	     rowClient.setLocale(serverResource.getLocale());
+	     rowClient.setTimestamp(serverResource.getTimestamp());
 	     
 	     RowResourceClient resource = new RowResourceClient(rowClient);
 	     resource.setSelfUri(serverResource.getSelfUri());
