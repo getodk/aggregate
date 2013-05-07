@@ -98,7 +98,7 @@ public class TableDefinition {
   }
   
   public String getDbTableName() {
-    return this.getDbTableName();
+    return this.dbTableName;
   }
 
   public void setColumns(final List<Column> columns) {
