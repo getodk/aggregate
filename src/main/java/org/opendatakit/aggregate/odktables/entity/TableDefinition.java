@@ -1,9 +1,9 @@
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.odktables.entity;
 
 import java.util.List;
 
 import org.opendatakit.aggregate.client.odktables.TableTypeClient;
-import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -53,7 +53,7 @@ public class TableDefinition {
 //  private String metadata;
 
   @SuppressWarnings("unused")
-  private TableDefinition() {
+  protected TableDefinition() {
   }
 
   /**

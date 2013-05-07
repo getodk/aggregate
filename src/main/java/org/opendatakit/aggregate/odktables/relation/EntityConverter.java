@@ -11,9 +11,11 @@ import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -128,6 +130,26 @@ public class EntityConverter {
     entry.type = type;
     entry.value = value;
     return entry;
+  }
+  
+  /**
+   * Return a TableDefinition based upon the {@link Entity} parameter, which
+   * must have been generated from the {@link DbTableDefinitions} relation.
+   * All fields are from the entity except the columns, which are set to null.
+   * @param definitionEntity
+   * @return
+   */
+  public TableDefinition toTableDefinition(Entity definitionEntity) {
+    String tableId = definitionEntity.getString(DbTableDefinitions.TABLE_ID);
+    String tableKey = definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
+    String dbTableName = 
+        definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
+    String tableTypeStr = definitionEntity.getString(DbTableDefinitions.TYPE);
+    TableType tableType = TableType.valueOf(tableTypeStr);
+    String tableIdAccessControls = definitionEntity.getString(
+        DbTableDefinitions.TABLE_ID_ACCESS_CONTROLS);
+    return new TableDefinition(tableId, null, tableKey, dbTableName, tableType,
+        tableIdAccessControls);
   }
   
   public List<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
@@ -359,4 +381,5 @@ public class EntityConverter {
     }
     return rows;
   }
+
 }
