@@ -15,7 +15,15 @@ import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.tables.sync.api.TablesConstants;
 
+/**
+ * Rperesents the schema for a user-defined (data, security, shortcut) table
+ * in the database.
+ * @author dylan price
+ * @author sudar.sam@gmail.com
+ *
+ */
 public class DbTable {
 
   public static final String ROW_VERSION = "ROW_VERSION";
@@ -36,6 +44,13 @@ public class DbTable {
     dataFields.add(new DataField(FILTER_TYPE, DataType.STRING, true));
     dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true).setIndexable(IndexType.HASH));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
+    
+    // And now make the OdkTables metadata columns.
+    dataFields.add(new DataField(TablesConstants.URI_USER.toUpperCase(), DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.FORM_ID.toUpperCase(), DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.INSTANCE_NAME.toUpperCase(), DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.LOCALE.toUpperCase(), DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.TIMESTAMP.toUpperCase(), DataType.DATETIME, true));
   }
 
   private static final EntityConverter converter = new EntityConverter();
