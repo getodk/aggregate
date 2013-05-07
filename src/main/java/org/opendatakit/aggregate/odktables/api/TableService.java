@@ -55,6 +55,7 @@ public interface TableService {
   public PropertiesService getProperties(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
   
+  @GET
   @Path("{tableId}/definition")
   public TableDefinitionResource getDefinition(
         @PathParam("tableId") String tableId)
