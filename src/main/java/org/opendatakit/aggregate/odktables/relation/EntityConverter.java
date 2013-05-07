@@ -20,6 +20,7 @@ import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.tables.sync.api.TablesConstants;
 
 /**
  * Converts between datastore {@link Entity} objects and domain objects in
@@ -243,6 +244,12 @@ public class EntityConverter {
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
+    row.setUriUser(entity.getString(TablesConstants.URI_USER.toUpperCase()));
+    row.setFormId(entity.getString(TablesConstants.FORM_ID.toUpperCase()));
+    row.setInstanceName(
+        entity.getString(TablesConstants.INSTANCE_NAME.toUpperCase()));
+    row.setLocale(entity.getString(TablesConstants.LOCALE.toUpperCase()));
+    row.setTimestamp(entity.getDate(TablesConstants.TIMESTAMP.toUpperCase()));
     String filterType = entity.getString(DbTable.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);
