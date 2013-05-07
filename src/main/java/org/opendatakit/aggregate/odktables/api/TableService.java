@@ -10,7 +10,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
+import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
@@ -52,6 +52,10 @@ public interface TableService {
 
   @Path("{tableId}/properties")
   public PropertiesService getProperties(@PathParam("tableId") String tableId)
+      throws ODKDatastoreException;
+  
+  @Path("{tableId}/definition")
+  public TableDefinition getDefinition(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
 
   @Path("{tableId}/diff")

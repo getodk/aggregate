@@ -13,7 +13,6 @@ import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableAclResource;
-import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.entity.serialization.ListConverter;
 import org.simpleframework.xml.Serializer;

@@ -10,6 +10,7 @@ import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.aggregate.odktables.entity.api.TableType;
@@ -156,6 +157,23 @@ public class TableManager {
     } else {
       return null;
     }
+  }
+  
+  /**
+   * Retrieve the TableDefinition for the table with the given id.
+   * @param tableId
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public TableDefinition getTableDefinition(String tableId) 
+      throws ODKDatastoreException {
+    Validate.notEmpty(tableId);
+    Entity definitionEntity = DbTableDefinitions.getDefinition(tableId, cc);
+    TableDefinition definition = converter.toTableDefinition(definitionEntity);
+    List<Entity> columnEntities = DbColumnDefinitions.query(tableId, cc);
+    List<Column> columns = converter.toColumns(columnEntities);
+    definition.setColumns(columns);
+    return definition;
   }
 
   /**

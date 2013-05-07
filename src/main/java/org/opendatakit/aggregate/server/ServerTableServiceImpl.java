@@ -169,25 +169,4 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     }
   }
 
-  // not needed after all, as this is for RESTful only?
-  private TableResourceClient getResource(TableEntry entry, UriInfo info) {
-    String tableId = entry.getTableId();
-
-    UriBuilder ub = info.getBaseUriBuilder();
-    ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getTable").build(tableId);
-    URI properties = ub.clone().path(TableService.class, "getProperties").build(tableId);
-    URI data = ub.clone().path(TableService.class, "getData").build(tableId);
-    URI diff = ub.clone().path(TableService.class, "getDiff").build(tableId);
-    URI acl = ub.clone().path(TableService.class, "getAcl").build(tableId);
-
-    TableResource resource = new TableResource(entry);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setPropertiesUri(properties.toASCIIString());
-    resource.setDataUri(data.toASCIIString());
-    resource.setDiffUri(diff.toASCIIString());
-    resource.setAclUri(acl.toASCIIString());
-    return resource.transform();
-  }
-
 }

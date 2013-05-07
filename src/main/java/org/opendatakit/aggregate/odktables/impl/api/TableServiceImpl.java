@@ -24,9 +24,9 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
-import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -70,6 +70,14 @@ public class TableServiceImpl implements TableService {
     TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
     return resource;
+  }
+  
+  @Override
+  public TableDefinition getDefinition(String tableId) 
+      throws ODKDatastoreException{
+    // TODO: permissions stuff for a table, perhaps? or just at the row level?
+    TableDefinition definition = tm.getTableDefinition(tableId);
+    return definition;
   }
 
   @Override
@@ -137,9 +145,12 @@ public class TableServiceImpl implements TableService {
     URI data = ub.clone().path(TableService.class, "getData").build(tableId);
     URI diff = ub.clone().path(TableService.class, "getDiff").build(tableId);
     URI acl = ub.clone().path(TableService.class, "getAcl").build(tableId);
+    URI definition = ub.clone().path(TableService.class, "getDefinition")
+        .build(tableId);
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());
+    resource.setDefinitionUri(definition.toASCIIString());
     resource.setPropertiesUri(properties.toASCIIString());
     resource.setDataUri(data.toASCIIString());
     resource.setDiffUri(diff.toASCIIString());

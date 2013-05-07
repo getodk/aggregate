@@ -12,6 +12,7 @@ package org.opendatakit.aggregate.client.odktables;
  */
 public class TableResourceClient extends TableEntryClient {
   private String selfUri;
+  private String definitionUri;
   private String propertiesUri;
   private String dataUri;
   private String diffUri;
@@ -26,6 +27,10 @@ public class TableResourceClient extends TableEntryClient {
 
   public String getSelfUri() {
     return this.selfUri;
+  }
+  
+  public String getDefinitionUri() {
+    return this.definitionUri;
   }
 
   public String getPropertiesUri() {
@@ -46,6 +51,10 @@ public class TableResourceClient extends TableEntryClient {
 
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
+  }
+  
+  public void setDefinitionUri(final String definitionUri) {
+    this.definitionUri = definitionUri;
   }
 
   public void setPropertiesUri(final String propertiesUri) {
