@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.entity.api.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -70,14 +71,6 @@ public class TableServiceImpl implements TableService {
     TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
     return resource;
-  }
-  
-  @Override
-  public TableDefinition getDefinition(String tableId) 
-      throws ODKDatastoreException{
-    // TODO: permissions stuff for a table, perhaps? or just at the row level?
-    TableDefinition definition = tm.getTableDefinition(tableId);
-    return definition;
   }
 
   @Override
@@ -133,6 +126,25 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableAclService getAcl(String tableId) throws ODKDatastoreException {
     return new TableAclServiceImpl(tableId, info, cc);
+  }
+  
+  
+  @Override
+  public TableDefinitionResource getDefinition(String tableId) 
+      throws ODKDatastoreException{
+    // TODO: permissions stuff for a table, perhaps? or just at the row level?
+    TableDefinition definition = tm.getTableDefinition(tableId);
+    TableDefinitionResource definitionResource = 
+        new TableDefinitionResource(definition);
+    UriBuilder ub = info.getBaseUriBuilder();
+    ub.path(TableService.class);
+    URI selfUri = ub.clone().path(TableService.class, "getDefinition")
+        .build(tableId);
+    URI tableUri = ub.clone().path(TableService.class, "getTable")
+        .build(tableId);
+    definitionResource.setSelfUri(selfUri.toASCIIString());
+    definitionResource.setTableUri(tableUri.toASCIIString());
+    return definitionResource;
   }
 
   private TableResource getResource(TableEntry entry) {
