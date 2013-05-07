@@ -36,7 +36,7 @@ public class DbColumnDefinitions {
 	// these are the column names in the COLUMN table
   public static final String TABLE_ID = "TABLE_ID";
   public static final String ELEMENT_KEY = "ELEMENT_KEY";
-  public static final String ELEMENT_NAME = "ELEMNT_NAME";
+  public static final String ELEMENT_NAME = "ELEMENT_NAME";
   public static final String ELEMENT_TYPE = "ELEMENT_TYPE";
   public static final String LIST_CHILD_ELEMENT_KEYS = 
       "LIST_CHILD_ELEMENT_KEYS";

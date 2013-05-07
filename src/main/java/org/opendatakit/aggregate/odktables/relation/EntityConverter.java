@@ -371,7 +371,8 @@ public class EntityConverter {
    *          true if the rows are from the {@link DbLogTable}
    * @return the converted rows
    */
-  public List<Row> toRows(List<Entity> entities, List<Entity> columns, boolean fromLogTable) {
+  public List<Row> toRows(List<Entity> entities, List<Entity> columns, 
+      boolean fromLogTable) {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {
       if (fromLogTable)

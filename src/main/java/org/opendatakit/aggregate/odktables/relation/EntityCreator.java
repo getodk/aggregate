@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +22,9 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.tables.sync.api.TablesConstants;
 
 /**
  * Creates and updates new Entity objects for relations.
@@ -404,14 +407,36 @@ public class EntityCreator {
     }
 
     row.set(DbTable.DELETED, deleted);
-
+    
     for (Entry<String, String> entry : values.entrySet()) {
       String value = entry.getValue();
       String name = entry.getKey();
-      Entity column = findColumn(name, columns);
-      if (column == null)
-        throw new BadColumnNameException("Bad column name " + name);
-      row.setAsString(RUtil.convertIdentifier(column.getId()), value);
+      // There are three possbilities here. 
+      // 1) The key is a shared metadata column that SHOULD be synched.
+      // 2) The key is a client only metadata column that should NOT be synched
+      // 3) The key is a user-defined column that SHOULD be synched.
+      if (TablesConstants.CLIENT_ONLY_COLUMN_NAMES.contains(name)) {
+        // 1) --no need to do anything here.
+        continue;
+      } else if (TablesConstants.SHARED_COLUMN_NAMES.contains(name)) {
+        // 2) --save the data
+        if (name.equals(TablesConstants.TIMESTAMP)) {
+          // Then we have to parse the string to a date.
+          Date date = WebUtils.parseDate(value);
+          row.set(name.toUpperCase(), date);
+        } else {
+          row.set(name.toUpperCase(), value);
+        }
+      } else {
+        // 3) --add it to the user-defined column
+        Entity column = findColumn(name, columns);
+        if (column == null) {
+          // If we don't have a colum in the aggregate db, it's ok if it's one
+          // of the Tables-only columns. Otherwise it's an error.
+          throw new BadColumnNameException("Bad column name " + name);
+        }
+        row.setAsString(RUtil.convertIdentifier(column.getId()), value);
+      }
     }
   }
 
