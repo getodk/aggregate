@@ -1,7 +1,9 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
-import org.opendatakit.aggregate.odktables.entity.TableDefinition;
+import java.util.List;
 
+import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;
@@ -18,9 +20,16 @@ public class TableDefinitionResource extends TableDefinition {
   }
   
   public TableDefinitionResource(TableDefinition definition) {
-    super(definition.getTableId(), definition.getColumns(), 
+    this(definition.getTableId(), definition.getColumns(), 
         definition.getTableKey(), definition.getDbTableName(), 
         definition.getType(), definition.getTableIdAccessControls());
+  }
+  
+  public TableDefinitionResource(String tableId, List<Column> columns,
+      String tableKey, String dbTableName, TableType type, 
+      String tableIdAccessControls) {
+    super(tableId, columns, tableKey, dbTableName, type, 
+        tableIdAccessControls);
   }
   
   public String getSelfUri() {
