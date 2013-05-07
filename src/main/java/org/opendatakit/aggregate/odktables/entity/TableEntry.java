@@ -61,15 +61,6 @@ public class TableEntry {
   public void setPropertiesEtag(String propertiesEtag) {
     this.propertiesEtag = propertiesEtag;
   }
-  
-  /**
-   * Transforms the object into client-side TableEntryClient object.
-   */
-  public TableEntryClient transform() {
-	  TableEntryClient tec = new TableEntryClient(this.getTableId(), this.getTableKey(),
-			  this.getDataEtag(), this.getPropertiesEtag());
-	  return tec;
-  }
 
   @Override
   public boolean equals(Object obj) {

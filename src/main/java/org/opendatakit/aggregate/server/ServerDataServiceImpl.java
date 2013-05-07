@@ -119,7 +119,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       TableContentsClient tcc = new TableContentsClient();
       tcc.columnNames = this.getColumnNames(tableId);
       List<RowClient> rows = new ArrayList<RowClient>();
-      rows.add(row.transform());
+      rows.add(UtilTransforms.transform(row));
       tcc.rows = rows;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
@@ -272,7 +272,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   private List<RowClient> transformRows(List<Row> rows) {
     List<RowClient> clientRows = new ArrayList<RowClient>();
     for (Row row : rows) {
-      clientRows.add(row.transform());
+      clientRows.add(UtilTransforms.transform(row));
     }
     return clientRows;
   }

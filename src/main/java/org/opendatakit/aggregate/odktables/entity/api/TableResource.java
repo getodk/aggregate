@@ -72,22 +72,6 @@ public class TableResource extends TableEntry {
   public void setAclUri(final String aclUri) {
     this.aclUri = aclUri;
   }
-  
-  /**
-   * This method transforms the TableResource into a client-side 
-   * TableResourceClient object.
-   */
-  public TableResourceClient transform() {
-	  TableResourceClient trc = new TableResourceClient(new TableEntryClient(this.getTableId(),
-			  this.getTableKey(), this.getDataEtag(), this.getPropertiesEtag()));
-	  trc.setAclUri(this.getAclUri());
-	  trc.setDataUri(this.getDataUri());
-	  trc.setDiffUri(this.getDiffUri());
-	  trc.setPropertiesUri(this.getPropertiesUri());
-	  trc.setSelfUri(this.getSelfUri());
-	  trc.setDefinitionUri(this.getDefinitionUri());
-	  return trc;
-  }
 
   /*
    * (non-Javadoc)

@@ -50,7 +50,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 			AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.READ_PROPERTIES);
 		    TableProperties properties = pm.getProperties();
-			return properties.transform(); 
+			return UtilTransforms.transform(properties); 
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
@@ -81,7 +81,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 		        UtilTransforms.transformToServerEntries(
 		            properties.getKeyValueStoreEntries()));
 		    tableProperties = pm.setProperties(tableProperties);
-		    return tableProperties.transform();
+		    return UtilTransforms.transform(tableProperties);
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);

@@ -44,25 +44,6 @@ public class RowResource extends Row {
   public void setTableUri(final String tableUri) {
     this.tableUri = tableUri;
   }
-  
-  // adding this so you can also create the client version
-  public RowResourceClient transform() {
-	  RowClient rowClient = new RowClient();
-	  rowClient.setCreateUser(this.getCreateUser());
-	  rowClient.setDeleted(this.isDeleted());
-	  rowClient.setFilterScope(this.getFilterScope().transform());
-	  rowClient.setLastUpdateUser(this.getLastUpdateUser());
-	  rowClient.setRowEtag(this.getRowEtag());
-	  rowClient.setRowId(this.getRowId());
-	  rowClient.setValues(this.getValues());
-	  
-	  RowResourceClient resource = new RowResourceClient(rowClient);
-	  resource.setSelfUri(this.getSelfUri());
-	  resource.setTableUri(this.getTableUri());
-	  
-	  return resource;
-	  
-  }
 
   @Override
   public boolean equals(final Object o) {

@@ -83,30 +83,6 @@ public class Scope {
   public void setValue(String value) {
     this.value = value;
   }
-  
-  
-  // this is the transform to the clientside scope
-  // this might be defective, so i'm commenting it out for now
-  //--some issue about "this" being null sometimes? errors at the 
-  // switch statement.
-  public ScopeClient transform() {
-	  // First get the type of this scope
-	  ScopeClient sc = null;
-	  switch(this.getType()) {
-		  case DEFAULT:
-			  sc = new ScopeClient(ScopeClient.Type.DEFAULT, this.getValue());
-			  break;
-		  case USER:
-			  sc = new ScopeClient(ScopeClient.Type.USER, this.getValue());
-			  break;
-		  case GROUP:
-			  sc = new ScopeClient(ScopeClient.Type.GROUP, this.getValue());
-			  break;
-	  }
-	  if (sc == null) sc = ScopeClient.EMPTY_SCOPE;
-	  
-	  return sc;
-  }
 
   /*
    * (non-Javadoc)
