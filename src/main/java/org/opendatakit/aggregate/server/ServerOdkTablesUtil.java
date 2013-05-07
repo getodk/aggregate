@@ -88,7 +88,7 @@ public class ServerOdkTablesUtil {
       }
       TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
           tableIdAccessControls, columnsServer, kvsEntries);
-      TableEntryClient entryClient = entry.transform();
+      TableEntryClient entryClient = UtilTransforms.transform(entry);
       logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
       return entryClient;
     } catch (ODKDatastoreException e) {
@@ -134,7 +134,7 @@ public class ServerOdkTablesUtil {
         af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
         serverRow = dm.updateRow(serverRow);
       }
-      return serverRow.transform();
+      return UtilTransforms.transform(serverRow);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new EntityNotFoundExceptionClient(e);

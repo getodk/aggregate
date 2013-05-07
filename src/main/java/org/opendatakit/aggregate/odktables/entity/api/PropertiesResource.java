@@ -42,17 +42,6 @@ public class PropertiesResource extends TableProperties {
     this.tableUri = tableUri;
   }
   
-  public PropertiesResourceClient transform() {
-	  TablePropertiesClient tpc = 
-	      new TablePropertiesClient(this.getPropertiesEtag(), 
-			  this.getTableKey(), 
-			  UtilTransforms.transform(getKeyValueStoreEntries()));
-	  PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
-	  resourceClient.setSelfUri(this.getSelfUri());
-	  resourceClient.setTableUri(this.getTableUri());
-	  return resourceClient;
-  }
-  
   @Override
   public boolean equals(final Object o) {
     if (o == this)

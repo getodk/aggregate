@@ -64,7 +64,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       List<TableEntry> entries = tm.getTables(scopes);
       ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
       for (TableEntry entry : entries) {
-        clientEntries.add(entry.transform());
+        clientEntries.add(UtilTransforms.transform(entry));
       }
       Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
         @Override
@@ -88,7 +88,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     try {
       new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
       TableEntry entry = tm.getTableNullSafe(tableId);
-      TableEntryClient resource = entry.transform();
+      TableEntryClient resource = UtilTransforms.transform(entry);
       return resource;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();

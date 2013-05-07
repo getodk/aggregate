@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.TableAclResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -115,7 +116,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		    AuthFilter af = new AuthFilter(tableId, cc);	
 		    af.checkPermission(TablePermission.READ_ACL);
 		    TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
-		    return acl.transform();
+		    return UtilTransforms.transform(acl);
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
@@ -137,7 +138,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		    if (userId.equals("null"))
 		      userId = null;
 		    TableAcl acl = am.getAcl(new Scope(Scope.Type.USER, userId));
-		    return acl.transform();
+		    return UtilTransforms.transform(acl);
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
@@ -157,7 +158,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		    AuthFilter af = new AuthFilter(tableId, cc);	
 		    af.checkPermission(TablePermission.READ_ACL);
 		    TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
-		    return acl.transform();
+		    return UtilTransforms.transform(acl);
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
@@ -178,8 +179,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		    TableAclManager am = new TableAclManager(tableId, cc);
 		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.WRITE_ACL);
-		    acl = am.setAcl(new Scope(Scope.Type.DEFAULT, null), 
-		    		this.transformTableRoleClient(acl.getRole())).transform();
+		    acl = UtilTransforms.transform(am.setAcl(
+		        new Scope(Scope.Type.DEFAULT, null), 
+		    		this.transformTableRoleClient(acl.getRole())));
 		    // Need to be careful here. A lot of transforming going on,
 		    // and it isn't clear on if the acl parameter is passed in
 		    // to be modified in place. Need to be very careful about this.
@@ -206,8 +208,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		    af.checkPermission(TablePermission.WRITE_ACL);
 		    if (userId.equals("null"))
 		      userId = null;
-		    acl = am.setAcl(new Scope(Scope.Type.USER, userId), 
-		    		this.transformTableRoleClient(acl.getRole())).transform();
+		    acl = UtilTransforms.transform(am.setAcl(
+		        new Scope(Scope.Type.USER, userId), 
+		    		this.transformTableRoleClient(acl.getRole())));
 		    // Need to be careful here. A lot of transforming going on,
 		    // and it isn't clear on if the acl parameter is passed in
 		    // to be modified in place. Need to be very careful about this.
@@ -233,8 +236,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		    TableAclManager am = new TableAclManager(tableId, cc);
 		    AuthFilter af = new AuthFilter(tableId, cc);	
 		    af.checkPermission(TablePermission.WRITE_ACL);
-		    acl = am.setAcl(new Scope(Scope.Type.GROUP, groupId), 
-		    		this.transformTableRoleClient(acl.getRole())).transform();
+		    acl = UtilTransforms.transform(am.setAcl(
+		        new Scope(Scope.Type.GROUP, groupId), 
+		    		this.transformTableRoleClient(acl.getRole())));
 		    // Need to be careful here. A lot of transforming going on,
 		    // and it isn't clear on if the acl parameter is passed in
 		    // to be modified in place. Need to be very careful about this.
@@ -339,7 +343,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    resource.setSelfUri(self.toASCIIString());
 	    resource.setAclUri(acls.toASCIIString());
 	    resource.setTableUri(table.toASCIIString());
-	    return resource.transform();
+	    return UtilTransforms.transform(resource);
   }	
   
   private List<TableAclResourceClient> getResources(List<TableAcl> acls,
@@ -382,7 +386,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
   private List<TableAclClient> transformTableAclList(List<TableAcl> acls) {
 	  List<TableAclClient> clientAcls = new ArrayList<TableAclClient>();
 	  for (TableAcl acl : acls) {
-		  clientAcls.add(acl.transform());
+		  clientAcls.add(UtilTransforms.transform(acl));
 	  }
 	  return clientAcls;
   }

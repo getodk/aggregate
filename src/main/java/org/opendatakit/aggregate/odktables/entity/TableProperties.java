@@ -73,22 +73,6 @@ public class TableProperties {
   public List<OdkTablesKeyValueStoreEntry> getKeyValueStoreEntries() {
     return this.kvsEntries;
   }
-  
-  /**
-   * Transform the object into the client-side object.
-   */
-  public TablePropertiesClient transform() {
-    List<OdkTablesKeyValueStoreEntryClient> clientEntries = 
-        new ArrayList<OdkTablesKeyValueStoreEntryClient>();
-    for (OdkTablesKeyValueStoreEntry serverEntry : 
-      this.getKeyValueStoreEntries()) {
-      clientEntries.add(UtilTransforms.transform(serverEntry));
-    }
-	  TablePropertiesClient tpClient = 
-	      new TablePropertiesClient(this.getPropertiesEtag(),
-			  this.getTableKey(), clientEntries);
-	  return tpClient;
-  }
 
   @Override
   public String toString() {

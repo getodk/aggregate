@@ -6,10 +6,21 @@ import java.util.List;
 import org.jboss.resteasy.logging.Logger;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.OdkTablesKeyValueStoreEntryClient;
+import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
+import org.opendatakit.aggregate.client.odktables.RowResourceClient;
 import org.opendatakit.aggregate.client.odktables.ScopeClient;
 import org.opendatakit.aggregate.client.odktables.TableAclClient;
+import org.opendatakit.aggregate.client.odktables.TableAclResourceClient;
+import org.opendatakit.aggregate.client.odktables.TableEntryClient;
+import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
+import org.opendatakit.aggregate.client.odktables.TableResourceClient;
+import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.opendatakit.aggregate.client.odktables.TableTypeClient;
+import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
+import org.opendatakit.aggregate.odktables.entity.api.RowResource;
+import org.opendatakit.aggregate.odktables.entity.api.TableAclResource;
+import org.opendatakit.aggregate.odktables.entity.api.TableResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableType;
 
 /**
@@ -189,7 +200,7 @@ public class UtilTransforms {
 	  /**
 	   * Transforms the object into a TableAcl object.
 	   */
-	  public TableAcl transform(TableAclClient client) {
+	  public static TableAcl transform(TableAclClient client) {
 		  TableAcl ta = new TableAcl();
 		  switch (client.getRole()) {
 		  case NONE:
@@ -215,5 +226,210 @@ public class UtilTransforms {
 		  }
 		  ta.setScope(transform(client.getScope()));
 		  return ta;	  
-	  }	  
+	  }	
+	  
+	  /**
+	   * Transforms the object into client-side TableEntryClient object.
+	   */
+	  public static TableEntryClient transform(TableEntry serverEntry) {
+	     TableEntryClient clientEntry = 
+	         new TableEntryClient(serverEntry.getTableId(), 
+	             serverEntry.getTableKey(),
+	           serverEntry.getDataEtag(), serverEntry.getPropertiesEtag());
+	     return clientEntry;
+	  }
+	  
+	  /**
+	   * This method transforms the TableResource into a client-side 
+	   * TableResourceClient object.
+	   */
+	  public static TableResourceClient transform(
+	      TableResource serverResource) {
+	     TableResourceClient clientResource =  new TableResourceClient(
+	         new TableEntryClient(serverResource.getTableId(),
+	           serverResource.getTableKey(), serverResource.getDataEtag(), 
+	           serverResource.getPropertiesEtag()));
+	     clientResource.setAclUri(serverResource.getAclUri());
+	     clientResource.setDataUri(serverResource.getDataUri());
+	     clientResource.setDiffUri(serverResource.getDiffUri());
+	     clientResource.setPropertiesUri(serverResource.getPropertiesUri());
+	     clientResource.setSelfUri(serverResource.getSelfUri());
+	     clientResource.setDefinitionUri(serverResource.getDefinitionUri());
+	     return clientResource;
+	  }
+	  
+	  public static PropertiesResourceClient transform(
+	      PropertiesResource serverResource) {
+	     TablePropertiesClient tpc = 
+	         new TablePropertiesClient(serverResource.getPropertiesEtag(), 
+	           serverResource.getTableKey(), 
+	           UtilTransforms.transform(
+	               serverResource.getKeyValueStoreEntries()));
+	     PropertiesResourceClient resourceClient = 
+	         new PropertiesResourceClient(tpc);
+	     resourceClient.setSelfUri(serverResource.getSelfUri());
+	     resourceClient.setTableUri(serverResource.getTableUri());
+	     return resourceClient;
+	  }
+	  
+	  /**
+	   * Transform the object into the client-side object.
+	   */
+	  public static TablePropertiesClient 
+	      transform(TableProperties serverProperties) {
+	    List<OdkTablesKeyValueStoreEntryClient> clientEntries = 
+	        new ArrayList<OdkTablesKeyValueStoreEntryClient>();
+	    for (OdkTablesKeyValueStoreEntry serverEntry : 
+	      serverProperties.getKeyValueStoreEntries()) {
+	      clientEntries.add(UtilTransforms.transform(serverEntry));
+	    }
+	     TablePropertiesClient tpClient = 
+	         new TablePropertiesClient(serverProperties.getPropertiesEtag(),
+	           serverProperties.getTableKey(), clientEntries);
+	     return tpClient;
+	  }
+	  
+	  /**
+	   * Transform the row into a client-side Row.
+	   */
+	  public static RowClient transform(Row serverRow) {
+	     RowClient row = new RowClient();
+	     row.setCreateUser(serverRow.getCreateUser());
+	     row.setDeleted(serverRow.isDeleted());
+	     row.setLastUpdateUser(serverRow.getLastUpdateUser());
+	     row.setRowEtag(serverRow.getRowEtag());
+	     row.setRowId(serverRow.getRowId());
+	     row.setValues(serverRow.getValues());
+	     if (serverRow.getFilterScope().getType() == null) {
+	        row.setFilterScope(ScopeClient.EMPTY_SCOPE);
+	     } else {
+	        switch(serverRow.getFilterScope().getType()) {
+	        case DEFAULT:
+	           row.setFilterScope(new ScopeClient(ScopeClient.Type.DEFAULT, 
+	               serverRow.getFilterScope().getValue()));
+	           break;
+	        case USER:
+	           row.setFilterScope(new ScopeClient(ScopeClient.Type.USER, 
+	               serverRow.getFilterScope().getValue()));      
+	           break;
+	        case GROUP:
+	           row.setFilterScope(new ScopeClient(ScopeClient.Type.GROUP, 
+	               serverRow.getFilterScope().getValue()));       
+	           break;
+	        default:
+	           row.setFilterScope(ScopeClient.EMPTY_SCOPE);
+	        }
+	     }
+	     return row;
+	  }
+	  
+	  // adding this so you can also create the client version
+	  public static RowResourceClient transform(RowResource serverResource) {
+	     RowClient rowClient = new RowClient();
+	     rowClient.setCreateUser(serverResource.getCreateUser());
+	     rowClient.setDeleted(serverResource.isDeleted());
+	     rowClient.setFilterScope(
+	         UtilTransforms.transform(serverResource.getFilterScope()));
+	     rowClient.setLastUpdateUser(serverResource.getLastUpdateUser());
+	     rowClient.setRowEtag(serverResource.getRowEtag());
+	     rowClient.setRowId(serverResource.getRowId());
+	     rowClient.setValues(serverResource.getValues());
+	     
+	     RowResourceClient resource = new RowResourceClient(rowClient);
+	     resource.setSelfUri(serverResource.getSelfUri());
+	     resource.setTableUri(serverResource.getTableUri());
+	     
+	     return resource;
+	     
+	  }
+	  
+	  public static ScopeClient transform(Scope serverScope) {
+	     // First get the type of this scope
+	     ScopeClient sc = null;
+	     switch(serverScope.getType()) {
+	        case DEFAULT:
+	           sc = new ScopeClient(ScopeClient.Type.DEFAULT, 
+	               serverScope.getValue());
+	           break;
+	        case USER:
+	           sc = new ScopeClient(ScopeClient.Type.USER, 
+	               serverScope.getValue());
+	           break;
+	        case GROUP:
+	           sc = new ScopeClient(ScopeClient.Type.GROUP, 
+	               serverScope.getValue());
+	           break;
+	     }
+	     if (sc == null) sc = ScopeClient.EMPTY_SCOPE;
+	     return sc;
+	  }
+	  
+	  /**
+	   * Transforms the TableAclObject into a TableAclClient object.
+	   */
+	  public static TableAclClient transform(TableAcl serverAcl) {
+	     TableAclClient tac = new TableAclClient();
+	     switch (serverAcl.getRole()) {
+	     case NONE:
+	        tac.setRole(TableRoleClient.NONE);
+	        break;
+	     case FILTERED_WRITER:
+	        tac.setRole(TableRoleClient.FILTERED_WRITER);
+	        break;
+	     case UNFILTERED_READER_FILTERED_WRITER:
+	        tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
+	        break;
+	     case READER:
+	        tac.setRole(TableRoleClient.READER);
+	        break;
+	     case WRITER:
+	        tac.setRole(TableRoleClient.WRITER);
+	        break;
+	     case OWNER:
+	        tac.setRole(TableRoleClient.OWNER);
+	        break;
+	     default:
+	        throw new IllegalStateException(
+	            "No assignable permissions in transforming table role.");     
+	     }
+	     tac.setScope(UtilTransforms.transform(serverAcl.getScope()));
+	     return tac;
+	  }
+	  
+	  /**
+	   * Transform into the client-side TableAclResource.
+	   */
+	  public static TableAclResourceClient transform(
+	      TableAclResource serverResource) {
+	     TableAclClient tac = new TableAclClient();
+	     // now set the correct client side role
+	     switch (serverResource.getRole()) {
+	     case NONE:
+	        tac.setRole(TableRoleClient.NONE);
+	        break;
+	     case FILTERED_WRITER:
+	        tac.setRole(TableRoleClient.FILTERED_WRITER);
+	        break;
+	     case UNFILTERED_READER_FILTERED_WRITER:
+	        tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
+	        break;
+	     case READER:
+	        tac.setRole(TableRoleClient.READER);
+	        break;
+	     case WRITER:
+	        tac.setRole(TableRoleClient.WRITER);
+	        break;
+	     case OWNER:
+	        tac.setRole(TableRoleClient.OWNER);
+	        break;
+	     default:
+	        throw new IllegalStateException("No assignable permissions in transforming table role.");     
+	     }
+	     tac.setScope(UtilTransforms.transform(serverResource.getScope()));  
+	     TableAclResourceClient tarc = new TableAclResourceClient(tac);
+	     tarc.setAclUri(serverResource.getAclUri());
+	     tarc.setSelfUri(serverResource.getSelfUri());
+	     tarc.setTableUri(serverResource.getTableUri());
+	     return tarc;
+	  }
 }

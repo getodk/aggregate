@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -69,7 +70,7 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 	private List<RowClient> transformRows(List<Row> rows) {
 		List<RowClient> clientRows = new ArrayList<RowClient>();
 		for (Row row : rows) {
-			clientRows.add(row.transform());
+			clientRows.add(UtilTransforms.transform(row));
 		}
 		return clientRows;
 	}

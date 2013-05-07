@@ -52,37 +52,6 @@ public class TableAcl {
   public void setRole(TableRole role) {
     this.role = role;
   }
-  
-  /**
-   * Transforms the TableAclObject into a TableAclClient object.
-   */
-  public TableAclClient transform() {
-	  TableAclClient tac = new TableAclClient();
-	  switch (this.getRole()) {
-	  case NONE:
-		  tac.setRole(TableRoleClient.NONE);
-		  break;
-	  case FILTERED_WRITER:
-		  tac.setRole(TableRoleClient.FILTERED_WRITER);
-		  break;
-	  case UNFILTERED_READER_FILTERED_WRITER:
-		  tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
-		  break;
-	  case READER:
-		  tac.setRole(TableRoleClient.READER);
-		  break;
-	  case WRITER:
-		  tac.setRole(TableRoleClient.WRITER);
-		  break;
-	  case OWNER:
-		  tac.setRole(TableRoleClient.OWNER);
-		  break;
-	  default:
-		  throw new IllegalStateException("No assignable permissions in transforming table role."); 		
-	  }
-	  tac.setScope(this.getScope().transform());
-	  return tac;
-  }
 
   /*
    * (non-Javadoc)
