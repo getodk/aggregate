@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.odktables.entity.api.TableType;
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -17,6 +19,7 @@ import org.simpleframework.xml.Root;
  *
  */
 @Root
+@Default(value = DefaultType.FIELD, required = false)
 public class TableDefinition {
   
   /**

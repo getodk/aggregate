@@ -170,6 +170,8 @@ public class TableResource extends TableEntry {
     StringBuilder builder = new StringBuilder();
     builder.append("TableResource [selfUri=");
     builder.append(selfUri);
+    builder.append(", defintionUri=");
+    builder.append(definitionUri);
     builder.append(", propertiesUri=");
     builder.append(propertiesUri);
     builder.append(", dataUri=");

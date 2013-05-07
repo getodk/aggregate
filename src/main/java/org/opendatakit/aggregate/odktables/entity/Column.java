@@ -29,9 +29,6 @@ public class Column implements Serializable {
 	  DATETIME;
 	}
 
-	/*
-	 * SS: I am taking this to mean the display name.
-	 */
   @Attribute(required = true)
   private String tableId;
   
