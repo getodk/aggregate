@@ -1,5 +1,8 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
+
 /**
  * This is a simple struct-like object that will hold the rows
  * from the key value store. It is meant to be parsed into 
@@ -12,11 +15,13 @@ package org.opendatakit.aggregate.odktables.entity;
  * @author sudar.sam@gmail.com
  *
  */
+@Root(strict = false)
 public class OdkTablesKeyValueStoreEntry {
 
 	/**
 	 * The table id of the table to which this entry belongs.
 	 */
+  @Element(required = true)
 	public String tableId;
 	
 	/**
@@ -28,6 +33,7 @@ public class OdkTablesKeyValueStoreEntry {
 	 * ColumnProperties are the exception, belonging simply to the partitions
 	 * "Table" and "Column".
 	 */
+  @Element(required = false)
 	public String partition;
 	
 	/**
@@ -37,6 +43,7 @@ public class OdkTablesKeyValueStoreEntry {
 	 * key (ie its unique column identifier for the table). A particular saved
 	 * graph view might have the display name of that graph.
 	 */
+  @Element(required = false)
 	public String aspect;
 	
 	/**
@@ -45,6 +52,7 @@ public class OdkTablesKeyValueStoreEntry {
 	 * mean that this entry is important to the list view of 
 	 * the table.
 	 */
+  @Element(required = false)
 	public String key;
 	
 	/**
@@ -55,6 +63,7 @@ public class OdkTablesKeyValueStoreEntry {
 	 * FileManifestEntry object with information relating to
 	 * the version of the file and how to get it.
 	 */
+  @Element(required = false)
 	public String type;
 	
 	/**
@@ -62,6 +71,7 @@ public class OdkTablesKeyValueStoreEntry {
 	 * is a string. If it is a File, it is a FileManifestEntry
 	 * JSON object.
 	 */
+  @Element(required = false)
 	public String value;
 	
 }

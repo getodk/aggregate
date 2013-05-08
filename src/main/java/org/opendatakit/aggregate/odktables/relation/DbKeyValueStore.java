@@ -38,7 +38,7 @@ public class DbKeyValueStore {
     dataFields.add(new DataField(ASPECT, DataType.STRING, false));
     dataFields.add(new DataField(KEY, DataType.STRING, false));
     dataFields.add(new DataField(TYPE, DataType.STRING, false));
-    dataFields.add(new DataField(VALUE, DataType.STRING, false));
+    dataFields.add(new DataField(VALUE, DataType.STRING, true));
   }
   
   public static Relation getRelation(CallingContext cc) 

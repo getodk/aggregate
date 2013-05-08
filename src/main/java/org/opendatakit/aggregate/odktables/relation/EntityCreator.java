@@ -194,7 +194,6 @@ public class EntityCreator {
     Validate.notEmpty(aspect);
     Validate.notEmpty(key);
     Validate.notEmpty(type);
-    Validate.notEmpty(value);
     Validate.notNull(cc);
     Entity entry = DbKeyValueStore.getRelation(cc).newEntity(cc);
     entry.set(DbKeyValueStore.TABLE_ID, tableId);
@@ -208,8 +207,14 @@ public class EntityCreator {
   
   public Entity newKeyValueStoreEntity(OdkTablesKeyValueStoreEntry entry,
       CallingContext cc) throws ODKDatastoreException {
-    return newKeyValueStoreEntity(entry.tableId, entry.partition, 
-        entry.aspect, entry.key, entry.type, entry.value, cc);
+    String tableId = entry.tableId;
+    String partition = entry.partition;
+    String aspect = entry.aspect;
+    String key = entry.key;
+    String type = entry.type;
+    String value = entry.value;
+    return newKeyValueStoreEntity(tableId, partition, aspect, key, type,
+        value, cc);
   }
 
   /**
