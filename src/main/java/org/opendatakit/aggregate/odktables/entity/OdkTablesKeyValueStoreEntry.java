@@ -73,5 +73,46 @@ public class OdkTablesKeyValueStoreEntry {
 	 */
   @Element(required = false)
 	public String value;
+  
+  @Override 
+  public String toString() {
+    return "[tableId=" + tableId
+        + ", partition=" + partition
+        + ", aspect=" + aspect
+        + ", key=" + key
+        + ", type=" + type
+        + ", value=" + value
+        + "]";
+  }
+  
+  @Override
+  public int hashCode() {
+    int result = 17;
+    result = 37 * result + tableId.hashCode();
+    result = 37 * result + partition.hashCode();
+    result = 37 * result + aspect.hashCode();
+    result = 37 * result + key.hashCode();
+    result = 37 * result + type.hashCode();
+    result = 37 * result + value.hashCode();
+    return result;
+  }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OdkTablesKeyValueStoreEntry)) {
+      return false;
+    }
+    OdkTablesKeyValueStoreEntry other = (OdkTablesKeyValueStoreEntry) o;
+    return 
+        tableId == null ? other.tableId == null : tableId.equals(other.tableId) &&
+        partition == null ? other.partition == null : partition.equals(other.partition) &&
+        aspect == null ? other.aspect == null : aspect.equals(other.aspect) &&
+        key == null ? other.key == null : key.equals(other.key) &&
+        type == null ? other.type == null : type.equals(other.type) &&
+        value == null ? other.value == null : value.equals(other.value);
+  }
 	
 }
