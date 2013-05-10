@@ -61,8 +61,10 @@ public class EntityCreator {
       tableId = CommonFieldsBase.newUri();
 
     Entity entity = DbTableEntry.getRelation(cc).newEntity(tableId, cc);
-    entity.set(DbTableEntry.MODIFICATION_NUMBER, 0);
-    entity.set(DbTableEntry.PROPERTIES_MOD_NUM, 0);
+    entity.set(DbTableEntry.DATA_ETAG, 
+        Long.toString(System.currentTimeMillis()));
+    entity.set(DbTableEntry.PROPERTIES_ETAG,
+        Long.toString(System.currentTimeMillis()));
     return entity;
   }
 
@@ -130,7 +132,8 @@ public class EntityCreator {
 	  entity.set(DbTable.CREATE_USER, cc.getCurrentUser().getEmail());
 	  // TODO last update same as create? correct?
 	  entity.set(DbTable.LAST_UPDATE_USER, cc.getCurrentUser().getEmail());
-	  entity.set(DbTable.MODIFICATION_NUMBER, INITIAL_MODIFICATION_NUMBER);
+	  entity.set(DbTable.DATA_ETAG_AT_MODIFICATION, 
+	      Long.toString(System.currentTimeMillis()));
 	  entity.set(DbTable.DELETED, false);
 	  entity.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
 	  // TODO is this the right kind of scope to be setting? one wonders...
@@ -255,8 +258,7 @@ public class EntityCreator {
    *          the {@link DbTable} relation.
    * @param rowId
    *          the id of the new row. May be null to auto generate.
-   * @param modificationNumber
-   *          the modification number for this row.
+   * @param dataEtag the etag of the data the time of this row
    * @param filter
    *          the scope of the filter. If null, the {@link Scope#EMPTY_SCOPE}
    *          will be applied.
@@ -269,11 +271,12 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public Entity newRowEntity(Relation table, String rowId, int modificationNumber, Scope filter,
+  public Entity newRowEntity(Relation table, String rowId, String dataEtag, 
+      Scope filter,
       Map<String, String> values, List<Entity> columns, CallingContext cc)
       throws ODKDatastoreException, BadColumnNameException {
     Validate.notNull(table);
-    Validate.isTrue(modificationNumber >= 0);
+    Validate.notEmpty(dataEtag);
     if (filter == null)
       filter = Scope.EMPTY_SCOPE;
     Validate.noNullElements(values.keySet());
@@ -297,7 +300,7 @@ public class EntityCreator {
     Entity row = table.newEntity(rowId, cc);
     User user = cc.getCurrentUser();
     row.set(DbTable.CREATE_USER, user.getEmail());
-    setRowFields(row, modificationNumber, user, filter, false, values, columns);
+    setRowFields(row, dataEtag, user, filter, false, values, columns);
     return row;
   }
 
@@ -308,8 +311,8 @@ public class EntityCreator {
    *          the {@link DbTable} relation
    * @param rows
    *          the rows, see {@link Row#forInsert(String, String, Map)}
-   * @param modificationNumber
-   *          the modification number for the rows.
+   * @param dataEtag
+   *        the dataEtag (i.e. of the table) at the time of new rows
    * @param columns
    *          the {@link DbColumnDefinitions} entities for the table
    * @param cc
@@ -317,18 +320,19 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public List<Entity> newRowEntities(Relation table, List<Row> rows, int modificationNumber,
-      List<Entity> columns, CallingContext cc) throws ODKDatastoreException, BadColumnNameException {
+  public List<Entity> newRowEntities(Relation table, List<Row> rows, 
+      String dataEtag, List<Entity> columns, CallingContext cc) 
+          throws ODKDatastoreException, BadColumnNameException {
     Validate.notNull(table);
     Validate.noNullElements(rows);
-    Validate.isTrue(modificationNumber >= 0);
+    Validate.notEmpty(dataEtag);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
 
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
-      Entity entity = newRowEntity(table, row.getRowId(), modificationNumber, row.getFilterScope(),
-          row.getValues(), columns, cc);
+      Entity entity = newRowEntity(table, row.getRowId(), dataEtag, 
+          row.getFilterScope(), row.getValues(), columns, cc);
       entities.add(entity);
     }
     return entities;
@@ -339,8 +343,7 @@ public class EntityCreator {
    * 
    * @param table
    *          the {@link DbTable} relation
-   * @param modificationNumber
-   *          the modification number for this row
+   * @param dataEtag the etag of the data at the time of this update
    * @param rowId
    *          the id of the row
    * @param currentEtag
@@ -361,12 +364,13 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public Entity updateRowEntity(Relation table, int modificationNumber, String rowId,
-      String currentEtag, Map<String, String> values, Scope filter, List<Entity> columns,
-      CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException,
+  public Entity updateRowEntity(Relation table, String dataEtag, String rowId,
+      String currentEtag, Map<String, String> values, Scope filter, 
+      List<Entity> columns, CallingContext cc) throws 
+      ODKEntityNotFoundException, ODKDatastoreException,
       EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
-    Validate.isTrue(modificationNumber >= 0);
+    Validate.notEmpty(dataEtag);
     Validate.notEmpty(rowId);
     // if currentEtag is null we will catch it later
     Validate.noNullElements(values.keySet());
@@ -377,19 +381,20 @@ public class EntityCreator {
     Entity row = table.getEntity(rowId, cc);
     String rowEtag = row.getString(DbTable.ROW_VERSION);
     if (currentEtag == null || !currentEtag.equals(rowEtag)) {
-      throw new EtagMismatchException(String.format("%s does not match %s for rowId %s",
-          currentEtag, rowEtag, row.getId()));
+      throw new EtagMismatchException(String.format("%s does not match %s " +
+      		"for rowId %s", currentEtag, rowEtag, row.getId()));
     }
 
-    setRowFields(row, modificationNumber, cc.getCurrentUser(), filter, false, values, columns);
+    setRowFields(row, dataEtag, cc.getCurrentUser(), filter, false, values, 
+        columns);
     return row;
   }
 
-  private void setRowFields(Entity row, int modificationNumber, User lastUpdatedUser,
+  private void setRowFields(Entity row, String dataEtag, User lastUpdatedUser,
       Scope filterScope, boolean deleted, Map<String, String> values, List<Entity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
-    row.set(DbTable.MODIFICATION_NUMBER, modificationNumber);
+    row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
     row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getEmail());
 
     // if filterScope is null, don't change the value
@@ -461,8 +466,7 @@ public class EntityCreator {
    * 
    * @param table
    *          the {@link DbTable} relation.
-   * @param modificationNumber
-   *          the modification number for the rows.
+   * @param dataEtag the data etag at the time of update
    * @param rows
    *          the rows to update, see {@link Row#forUpdate(String, String, Map)}
    * @param columns
@@ -477,17 +481,18 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public List<Entity> updateRowEntities(Relation table, int modificationNumber, List<Row> rows,
-      List<Entity> columns, CallingContext cc) throws ODKEntityNotFoundException,
+  public List<Entity> updateRowEntities(Relation table, String dataEtag, 
+      List<Row> rows, List<Entity> columns, CallingContext cc) 
+          throws ODKEntityNotFoundException,
       ODKDatastoreException, EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
-    Validate.isTrue(modificationNumber >= 0);
+    Validate.notEmpty(dataEtag);
     Validate.noNullElements(rows);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
-      entities.add(updateRowEntity(table, modificationNumber, row.getRowId(), row.getRowEtag(),
+      entities.add(updateRowEntity(table, dataEtag, row.getRowId(), row.getRowEtag(),
           row.getValues(), row.getFilterScope(), columns, cc));
     }
     return entities;
@@ -498,8 +503,7 @@ public class EntityCreator {
    * 
    * @param logTable
    *          the {@link DbLogTable} relation.
-   * @param modificationNumber
-   *          the modification number for the row.
+   * @param dataEtag the data etag at the time of creation
    * @param row
    *          the row
    * @param columns
@@ -508,10 +512,10 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newLogEntity(Relation logTable, int modificationNumber, Entity row,
+  public Entity newLogEntity(Relation logTable, String dataEtag, Entity row,
       List<Entity> columns, CallingContext cc) throws ODKDatastoreException {
     Validate.notNull(logTable);
-    Validate.isTrue(modificationNumber >= 0);
+    Validate.notEmpty(dataEtag);
     Validate.notNull(row);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
@@ -519,7 +523,7 @@ public class EntityCreator {
     Entity entity = logTable.newEntity(cc);
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
-    entity.set(DbLogTable.MODIFICATION_NUMBER, modificationNumber);
+    entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
     entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
     entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
@@ -539,8 +543,7 @@ public class EntityCreator {
    * 
    * @param logTable
    *          the {@link DbLogTable} relation
-   * @param modificationNumber
-   *          the modification number for the rows.
+   * @param dataEtag the data etag at the time of the updates
    * @param rows
    *          the rows
    * @param columns
@@ -549,16 +552,17 @@ public class EntityCreator {
    * @return the created entities, not yet persisted
    * @throws ODKDatastoreException
    */
-  public List<Entity> newLogEntities(Relation logTable, int modificationNumber, List<Entity> rows,
-      List<Entity> columns, CallingContext cc) throws ODKDatastoreException {
+  public List<Entity> newLogEntities(Relation logTable, String dataEtag, 
+      List<Entity> rows, List<Entity> columns, CallingContext cc) 
+          throws ODKDatastoreException {
     Validate.notNull(logTable);
-    Validate.isTrue(modificationNumber >= 0);
+    Validate.notEmpty(dataEtag);
     Validate.noNullElements(rows);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
     List<Entity> entities = new ArrayList<Entity>();
     for (Entity row : rows) {
-      Entity entity = newLogEntity(logTable, modificationNumber, row, columns, cc);
+      Entity entity = newLogEntity(logTable, dataEtag, row, columns, cc);
       entities.add(entity);
     }
     return entities;

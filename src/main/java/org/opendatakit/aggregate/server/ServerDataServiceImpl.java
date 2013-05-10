@@ -527,10 +527,10 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       // we also want to delete all the media files for this table. So get 
       // them.
       List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
-      // first we want to increment the modification number
-      int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
-      modificationNumber++;
-      entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
+      // first we want to get a new etag
+      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
+      dataEtag = Long.toString(System.currentTimeMillis());
+      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
       entry.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
       entry.set(DbTable.DELETED, true);
 

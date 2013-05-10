@@ -27,7 +27,10 @@ import org.opendatakit.tables.sync.api.TablesConstants;
 public class DbTable {
 
   public static final String ROW_VERSION = "ROW_VERSION";
-  public static final String MODIFICATION_NUMBER = "MODIFICATION_NUMBER";
+  /**
+   * This should hold the data etag at the time the row was modified/created.
+   */
+  public static final String DATA_ETAG_AT_MODIFICATION = "DATA_ETAG_AT_MODIFICATION";
   public static final String CREATE_USER = "CREATE_USER";
   public static final String LAST_UPDATE_USER = "LAST_UPDATE_USER";
   public static final String FILTER_TYPE = "FILTER_TYPE";
@@ -38,19 +41,26 @@ public class DbTable {
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
-    dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false));
+    dataFields.add(new DataField(DATA_ETAG_AT_MODIFICATION, DataType.STRING, 
+        false));
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, true));
     dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, true));
     dataFields.add(new DataField(FILTER_TYPE, DataType.STRING, true));
-    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true).setIndexable(IndexType.HASH));
+    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true)
+    .setIndexable(IndexType.HASH));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
     
     // And now make the OdkTables metadata columns.
-    dataFields.add(new DataField(TablesConstants.URI_USER.toUpperCase(), DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.FORM_ID.toUpperCase(), DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.INSTANCE_NAME.toUpperCase(), DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.LOCALE.toUpperCase(), DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.TIMESTAMP.toUpperCase(), DataType.DATETIME, true));
+    dataFields.add(new DataField(TablesConstants.URI_USER.toUpperCase(), 
+        DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.FORM_ID.toUpperCase(), 
+        DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.INSTANCE_NAME.toUpperCase(), 
+        DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.LOCALE.toUpperCase(), 
+        DataType.STRING, true));
+    dataFields.add(new DataField(TablesConstants.TIMESTAMP.toUpperCase(), 
+        DataType.DATETIME, true));
   }
 
   private static final EntityConverter converter = new EntityConverter();
@@ -62,13 +72,16 @@ public class DbTable {
     return getRelation(tableId, fields, cc);
   }
 
-  private static Relation getRelation(String tableId, List<DataField> fields, CallingContext cc)
+  private static Relation getRelation(String tableId, List<DataField> fields, 
+      CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation = new Relation(RUtil.NAMESPACE, RUtil.convertIdentifier(tableId), fields, cc);
+    Relation relation = new Relation(RUtil.NAMESPACE, 
+        RUtil.convertIdentifier(tableId), fields, cc);
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, CallingContext cc)
+  private static List<DataField> getDynamicFields(String tableId, 
+      CallingContext cc)
       throws ODKDatastoreException {
     List<Entity> entities = DbColumnDefinitions.query(tableId, cc);
     return converter.toFields(entities);
@@ -95,7 +108,8 @@ public class DbTable {
    *           if one of the rows does not exist
    * @throws ODKDatastoreException
    */
-  public static List<Entity> query(Relation table, List<String> rowIds, CallingContext cc)
+  public static List<Entity> query(Relation table, List<String> rowIds, 
+      CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     Validate.notNull(table);
     Validate.noNullElements(rowIds);

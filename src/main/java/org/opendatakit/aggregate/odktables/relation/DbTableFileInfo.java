@@ -89,7 +89,7 @@ public class DbTableFileInfo {
     columns.add(VALUE_TYPE);
     columns.add(VALUE);
     columns.add(DbTable.ROW_VERSION);
-    columns.add(DbTable.MODIFICATION_NUMBER);
+    columns.add(DbTable.DATA_ETAG_AT_MODIFICATION);
     columns.add(DbTable.CREATE_USER);
     columns.add(DbTable.LAST_UPDATE_USER);
     columns.add(DbTable.FILTER_TYPE);
@@ -98,8 +98,10 @@ public class DbTableFileInfo {
     columnNames = Collections.unmodifiableList(columns);
   }
 
-  public static Relation getRelation(CallingContext cc) throws ODKDatastoreException {
-    Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
+  public static Relation getRelation(CallingContext cc) 
+      throws ODKDatastoreException {
+    Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME, 
+        dataFields, cc);
     return relation;
   }
 
@@ -108,7 +110,8 @@ public class DbTableFileInfo {
    */
   public static List<Entity> query(String tableId, CallingContext cc) 
       throws ODKDatastoreException {
-    return getRelation(cc).query("DbTableFileInfo.query()", cc).equal(TABLE_ID, tableId).execute();
+    return getRelation(cc).query("DbTableFileInfo.query()", cc)
+        .equal(TABLE_ID, tableId).execute();
   }
   
   /**

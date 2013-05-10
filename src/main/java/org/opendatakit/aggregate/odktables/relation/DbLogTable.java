@@ -16,7 +16,8 @@ public class DbLogTable {
 
   public static final String ROW_ID = "ROW_ID";
   public static final String ROW_VERSION = "ROW_VERSION";
-  public static final String MODIFICATION_NUMBER = "MODIFICATION_NUMBER";
+  public static final String DATA_ETAG_AT_MODIFICATION = 
+      "DATA_ETAG_AT_MODIFICATION";
   public static final String CREATE_USER = "CREATE_USER";
   public static final String LAST_UPDATE_USER = "LAST_UPDATE_USER";
   public static final String FILTER_TYPE = "FILTER_TYPE";
@@ -26,14 +27,17 @@ public class DbLogTable {
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(new DataField(ROW_ID, DataType.STRING, false).setIndexable(IndexType.HASH));
+    dataFields.add(new DataField(ROW_ID, DataType.STRING, false)
+    .setIndexable(IndexType.HASH));
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
-    dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false)
+    dataFields.add(new DataField(DATA_ETAG_AT_MODIFICATION, DataType.STRING, 
+        false)
         .setIndexable(IndexType.ORDERED));
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, true));
     dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, true));
     dataFields.add(new DataField(FILTER_TYPE, DataType.STRING, true));
-    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true).setIndexable(IndexType.HASH));
+    dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true)
+    .setIndexable(IndexType.HASH));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
   }
 
@@ -46,14 +50,17 @@ public class DbLogTable {
     return getRelation(tableId, fields, cc);
   }
 
-  private static Relation getRelation(String tableId, List<DataField> fields, CallingContext cc)
+  private static Relation getRelation(String tableId, List<DataField> fields, 
+      CallingContext cc)
       throws ODKDatastoreException {
     tableId += "_LOG";
-    Relation relation = new Relation(RUtil.NAMESPACE, RUtil.convertIdentifier(tableId), fields, cc);
+    Relation relation = new Relation(RUtil.NAMESPACE, 
+        RUtil.convertIdentifier(tableId), fields, cc);
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, CallingContext cc)
+  private static List<DataField> getDynamicFields(String tableId, 
+      CallingContext cc)
       throws ODKDatastoreException {
     List<Entity> entities = DbColumnDefinitions.query(tableId, cc);
     return converter.toFields(entities);

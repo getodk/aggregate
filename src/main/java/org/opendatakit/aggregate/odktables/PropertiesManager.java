@@ -78,7 +78,7 @@ public class PropertiesManager {
     definitionEntity = DbTableDefinitions.getDefinition(tableId, cc);
     String tableKey = 
         definitionEntity.getAsString(DbTableDefinitions.TABLE_KEY);
-    String propertiesEtag = entry.getAsString(DbTableEntry.PROPERTIES_MOD_NUM);
+    String propertiesEtag = entry.getString(DbTableEntry.PROPERTIES_ETAG);
     return converter.toTableProperties(kvsEntities, tableKey, 
         propertiesEtag);
   }
@@ -107,12 +107,11 @@ public class PropertiesManager {
       // refresh entry
       entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
 
-      int modificationNumber = 
-          entry.getInteger(DbTableEntry.PROPERTIES_MOD_NUM);
+      String propertiesEtag = 
+          entry.getString(DbTableEntry.PROPERTIES_ETAG);
 
       // check etags
       String currentEtag = tableProperties.getPropertiesEtag();
-      String propertiesEtag = String.valueOf(modificationNumber);
       if (currentEtag == null || !currentEtag.equals(propertiesEtag)) {
         throw new EtagMismatchException(String.format(
             "%s does not match %s for properties for table with tableId %s", 
@@ -120,9 +119,8 @@ public class PropertiesManager {
       }
 
       // increment modification number
-      // TODO: this should probably be strings, not ints.
-      modificationNumber++;
-      entry.set(DbTableEntry.PROPERTIES_MOD_NUM, modificationNumber);
+      propertiesEtag = Long.toString(System.currentTimeMillis());
+      entry.set(DbTableEntry.PROPERTIES_ETAG, propertiesEtag);
       
       // TODO: we should probably be diff'ing somehow, so we don't have to 
       // change all of the entries. However, it's not obvious how to do that
@@ -164,6 +162,6 @@ public class PropertiesManager {
     }
     return converter.toTableProperties(kvsEntities, 
         definitionEntity.getString(DbTableDefinitions.TABLE_KEY),
-        entry.getAsString(DbTableEntry.PROPERTIES_MOD_NUM));
+        entry.getString(DbTableEntry.PROPERTIES_ETAG));
   }
 }
