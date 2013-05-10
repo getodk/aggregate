@@ -182,11 +182,17 @@ public class DataManager {
       List<Entity> results = query.execute();
       entities.addAll(results);
     }
+    // TODO: this may be broken after switching mod numbers to etag at the time
+    // of creation/update--which is what it was really doing but with just a
+    // mod number
     Collections.sort(entities, new Comparator<Entity>() {
       public int compare(Entity o1, Entity o2) {
-        int modNum1 = o1.getInteger(DbLogTable.MODIFICATION_NUMBER);
-        int modNum2 = o2.getInteger(DbLogTable.MODIFICATION_NUMBER);
-        return modNum1 - modNum2;
+        Long time1 = 
+            Long.parseLong(o1.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
+        Long time2 = 
+            Long.parseLong(o2.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
+        // TODO: is this a safe cast? likely no...
+        return (int) (time1 - time2);
       }
     });
     List<Row> logRows = converter.toRows(entities, columns, true);
@@ -200,8 +206,11 @@ public class DataManager {
    */
   private Query buildRowsSinceQuery(String dataEtag) {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
-    query.greaterThanOrEqual(DbLogTable.MODIFICATION_NUMBER, Integer.parseInt(dataEtag));
-    query.sortAscending(DbLogTable.MODIFICATION_NUMBER);
+    // TODO: did this break (if it ever worked) when converted to string etags
+    // instead of flawed mod numbers?
+    query.greaterThanOrEqual(DbLogTable.DATA_ETAG_AT_MODIFICATION, 
+        Long.parseLong(dataEtag));
+    query.sortAscending(DbLogTable.DATA_ETAG_AT_MODIFICATION);
     return query;
   }
 
@@ -399,21 +408,23 @@ public class DataManager {
       // refresh entry
       entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
 
-      // increment modification number
-      int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
-      modificationNumber++;
-      entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
+      // get new data etag
+      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
+      dataEtag = Long.toString(System.currentTimeMillis());
+      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
 
       // create or update entities
       if (insert) {
-        rowEntities = creator.newRowEntities(table, rows, modificationNumber, columns, cc);
+        rowEntities = 
+            creator.newRowEntities(table, rows, dataEtag, columns, cc);
       } else {
-        rowEntities = creator.updateRowEntities(table, modificationNumber, rows, columns, cc);
+        rowEntities = 
+            creator.updateRowEntities(table, dataEtag, rows, columns, cc);
       }
 
       // create log table entries
-      List<Entity> logEntities = creator.newLogEntities(logTable, modificationNumber, rowEntities,
-          columns, cc);
+      List<Entity> logEntities = 
+          creator.newLogEntities(logTable, dataEtag, rowEntities, columns, cc);
 
       // update db
       Relation.putEntities(logEntities, cc);
@@ -458,17 +469,18 @@ public class DataManager {
     Validate.noNullElements(rowIds);
 
     // lock table
-    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
+    LockTemplate lock = new LockTemplate(tableId, 
+        ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
       lock.acquire();
 
       // refresh entry
       entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
 
-      // increment modification number
-      int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
-      modificationNumber++;
-      entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
+      // get new dataEtag
+      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
+      dataEtag = Long.toString(System.currentTimeMillis());
+      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
 
       // get entities and mark deleted
       List<Entity> rows = DbTable.query(table, rowIds, cc);
@@ -478,8 +490,8 @@ public class DataManager {
       }
 
       // create log table entries
-      List<Entity> logRows = creator
-          .newLogEntities(logTable, modificationNumber, rows, columns, cc);
+      List<Entity> logRows = 
+          creator.newLogEntities(logTable, dataEtag, rows, columns, cc);
 
       // update db
       Relation.putEntities(logRows, cc);

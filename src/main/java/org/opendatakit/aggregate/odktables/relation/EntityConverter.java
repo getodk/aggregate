@@ -37,9 +37,9 @@ public class EntityConverter {
    */
   public TableEntry toTableEntry(Entity entity, String tableKey) {
     String tableId = entity.getId();
-    String dataEtag = entity.getAsString(DbTableEntry.MODIFICATION_NUMBER);
+    String dataEtag = entity.getString(DbTableEntry.DATA_ETAG);
     String propertiesEtag = 
-        entity.getAsString(DbTableEntry.PROPERTIES_MOD_NUM);
+        entity.getString(DbTableEntry.PROPERTIES_ETAG);
     TableEntry entry = new TableEntry(tableId, tableKey, dataEtag, 
         propertiesEtag);
     return entry;
@@ -84,7 +84,8 @@ public class EntityConverter {
   }
 
   /**
-   * Convert a list of {@link DbColumnDefinitions} entities to a list of {@link Column}
+   * Convert a list of {@link DbColumnDefinitions} entities to a list of 
+   * {@link Column} objects.
    */
   public List<Column> toColumns(List<Entity> entities) {
     List<Column> columns = new ArrayList<Column>();
@@ -93,18 +94,6 @@ public class EntityConverter {
     }
     return columns;
   }
-
-// ss: I think we can do away with this since we're doing away with the 
-// DbTableProperties table.
-//  /**
-//   * Convert a {@link DbTableProperties} entity to a {@link TableProperties}.
-//   */
-//  public TableProperties toTableProperties(Entity entity, String propertiesEtag) {
-//    TableProperties properties = new TableProperties(propertiesEtag,
-//        entity.getString(DbTableProperties.TABLE_NAME),
-//        entity.getString(DbTableProperties.TABLE_METADATA));
-//    return properties;
-//  }
   
   public TableProperties toTableProperties(List<Entity> kvsEntities,
       String tableKey, String propertiesEtag) {

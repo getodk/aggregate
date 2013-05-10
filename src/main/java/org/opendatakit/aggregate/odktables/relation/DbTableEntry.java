@@ -11,16 +11,16 @@ import org.opendatakit.common.web.CallingContext;
 
 public class DbTableEntry {
 
-  public static final String MODIFICATION_NUMBER = "MODIFICATION_NUMBER";
-  public static final String PROPERTIES_MOD_NUM = "PROPERTIES_MOD_NUM";
+  public static final String DATA_ETAG = "DATA_ETAG";
+  public static final String PROPERTIES_ETAG = "PROPERTIES_ETAG";
 
   private static final String RELATION_NAME = "TABLE_ENTRY";
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(new DataField(MODIFICATION_NUMBER, DataType.INTEGER, false));
-    dataFields.add(new DataField(PROPERTIES_MOD_NUM, DataType.INTEGER, false));
+    dataFields.add(new DataField(DATA_ETAG, DataType.STRING, false));
+    dataFields.add(new DataField(PROPERTIES_ETAG, DataType.STRING, false));
   }
 
   public static Relation getRelation(CallingContext cc) throws ODKDatastoreException {
