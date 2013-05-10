@@ -212,7 +212,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   }
 
   /**
-   * Gets the user-defined/pertinent column names.
+   * Gets the element_names of the columns.
    * 
    * @return List<String> of the column names
    */
