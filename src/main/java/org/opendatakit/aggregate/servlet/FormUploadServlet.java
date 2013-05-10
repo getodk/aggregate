@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormAlreadyExistsException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
@@ -49,10 +48,10 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet to upload, parse, and save an XForm
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class FormUploadServlet extends ServletUtilBase {
 
@@ -142,7 +141,7 @@ public class FormUploadServlet extends ServletUtilBase {
 
   /**
    * Handler for HTTP Get request to create xform upload page
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -156,7 +155,7 @@ public class FormUploadServlet extends ServletUtilBase {
        * If we have an OpenRosa version header, assume that this is due to a
        * channel redirect (http: => https:) and that the request was originally
        * a HEAD request. Reply with a response appropriate for a HEAD request.
-       * 
+       *
        * It is unclear whether this is a GAE issue or a Spring Frameworks issue.
        */
       logger.warn("Inside doGet -- replying as doHead");
@@ -207,7 +206,7 @@ public class FormUploadServlet extends ServletUtilBase {
   /**
    * Handler for HTTP Post request that takes an xform, parses, and saves a
    * parsed version in the datastore
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -216,27 +215,6 @@ public class FormUploadServlet extends ServletUtilBase {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     Double openRosaVersion = getOpenRosaVersion(req);
-
-    /*
-     * OAuth application-layer support for ODK Build publishing. This is broken
-     * with spring security (which is outside the app layer).
-     * 
-     * User user = cc.getCurrentUser(); if (user instanceof
-     * org.opendatakit.common.security.gae.UserImpl) { // We are in app engine
-     * 
-     * String authParam = getParameter(req, ServletConsts.AUTHENTICATION);
-     * 
-     * if (authParam != null &&
-     * authParam.equalsIgnoreCase(ServletConsts.AUTHENTICATION_OAUTH)) { // Try
-     * OAuth authentication try { user =
-     * ((org.opendatakit.common.security.gae.UserServiceImpl)
-     * cc.getUserService()).getCurrentOAuthUser(); if (user.isAnonymous()) {
-     * resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-     * ErrorConsts.OAUTH_ERROR); return; } } catch (OAuthRequestException e) {
-     * resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-     * ErrorConsts.OAUTH_ERROR + "\n Reason: " + e.getLocalizedMessage());
-     * return; } } }
-     */
 
     // verify request is multipart
     if (!ServletFileUpload.isMultipartContent(req)) {
@@ -307,7 +285,7 @@ public class FormUploadServlet extends ServletUtilBase {
           }
           out.write("<p>Click ");
 
-          out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+          out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
           out.write(" to return to add new form page.</p>");
           out.write(HtmlConsts.BODY_CLOSE);
           out.write(HtmlConsts.HTML_CLOSE);
@@ -341,25 +319,25 @@ public class FormUploadServlet extends ServletUtilBase {
         }
 
       } catch (ODKFormAlreadyExistsException e) {
-        logger.info("Form already exists: " + e.getMessage());
+        logger.info("Form already exists: " + e.toString());
         resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS + "\n"
-            + e.getMessage());
+            + e.toString());
       } catch (ODKIncompleteSubmissionData e) {
-        logger.warn("Form upload parsing error: " + e.getMessage());
+        logger.warn("Form upload parsing error: " + e.toString());
         switch (e.getReason()) {
         case TITLE_MISSING:
           createTitleQuestionWebpage(resp, inputXml, xmlFileName, cc);
           return;
         case ID_MALFORMED:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + "\n" + e.getMessage());
+              + "\n" + e.toString());
         case ID_MISSING:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
         case MISSING_XML:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
         case BAD_JR_PARSE:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + "\n" + e.getMessage());
+              + "\n" + e.toString());
         case MISMATCHED_SUBMISSION_ELEMENT:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
               ErrorConsts.FORM_INVALID_SUBMISSION_ELEMENT);
@@ -368,30 +346,25 @@ public class FormUploadServlet extends ServletUtilBase {
         }
       } catch (ODKEntityPersistException e) {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
-        logger.error("Form upload persistence error: " + e.getMessage());
+        logger.error("Form upload persistence error: " + e.toString());
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.toString());
       } catch (ODKDatastoreException e) {
-        logger.error("Form upload persistence error: " + e.getMessage());
+        logger.error("Form upload persistence error: " + e.toString());
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
-      } catch (ODKConversionException e) {
-        logger.error("Form upload persistence error: " + e.getMessage());
-        e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM
-            + "\n" + e.getMessage());
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.toString());
       } catch (ODKParseException e) {
         // unfortunately, the underlying javarosa utility swallows the parsing
         // error.
-        logger.error("Form upload persistence error: " + e.getMessage());
+        logger.error("Form upload persistence error: " + e.toString());
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-            ErrorConsts.PARSING_PROBLEM + "\n" + e.getMessage());
+            ErrorConsts.PARSING_PROBLEM + "\n" + e.toString());
       }
     } catch (FileUploadException e) {
-      logger.error("Form upload persistence error: " + e.getMessage());
+      logger.error("Form upload persistence error: " + e.toString());
       e.printStackTrace(resp.getWriter());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.UPLOAD_PROBLEM);
     }

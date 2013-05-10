@@ -27,5 +27,9 @@ import java.io.Serializable;
  */
 public enum FormElementNamespace implements Serializable {
 	METADATA,
-	VALUES
+	VALUES;
+	
+	private FormElementNamespace() {
+	  // GWT
+	}
 }

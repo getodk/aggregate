@@ -26,6 +26,9 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 import org.springframework.beans.factory.InitializingBean;
 
 public class WatchdogImpl implements Watchdog, InitializingBean {
+  /** cached value of the fast-publishing flag */
+  private boolean lastFastPublishingEnabledFlag = false;
+
   Datastore datastore = null;
   UserService userService = null;
   UploadSubmissions uploadSubmissions = null;
@@ -41,7 +44,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
 
   /**
    * Implementation of CallingContext.
-   * 
+   *
    * @author mitchellsundt@gmail.com
    *
    */
@@ -50,14 +53,14 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      boolean asDaemon = true;
      String serverUrl;
      String secureServerUrl;
-     
+
      CallingContextImpl() {
 
         Realm realm = userService.getCurrentRealm();
         Integer identifiedPort = realm.getPort();
         Integer identifiedSecurePort = realm.getSecurePort();
         String identifiedHostname = realm.getHostname();
-        
+
         if ( identifiedHostname == null || identifiedHostname.length() == 0 ) {
            try {
               identifiedHostname = InetAddress.getLocalHost().getCanonicalHostName();
@@ -79,21 +82,21 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
               identifiedPort = HtmlConsts.WEB_PORT;
            }
         }
-        
-        
-        boolean expectedPort = 
+
+
+        boolean expectedPort =
            (identifiedScheme.equalsIgnoreCase("http") &&
                  identifiedPort == HtmlConsts.WEB_PORT) ||
            (identifiedScheme.equalsIgnoreCase("https") &&
                  identifiedPort == HtmlConsts.SECURE_WEB_PORT);
-        
+
         String path = "";
         if ( ctxt != null ) {
            path = ctxt.getContextPath();
         }
-        
+
         if (!expectedPort) {
-           serverUrl = identifiedScheme + "://" + identifiedHostname + BasicConsts.COLON + 
+           serverUrl = identifiedScheme + "://" + identifiedHostname + BasicConsts.COLON +
               Integer.toString(identifiedPort) + path;
          } else {
            serverUrl = identifiedScheme + "://" + identifiedHostname + path;
@@ -105,15 +108,15 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
            if ( identifiedSecurePort != null && identifiedSecurePort != 0 &&
                  identifiedSecurePort != HtmlConsts.SECURE_WEB_PORT ) {
               // explicitly name the port
-              secureServerUrl = "https://" + identifiedHostname + BasicConsts.COLON + 
-              Integer.toString(identifiedSecurePort) + path; 
+              secureServerUrl = "https://" + identifiedHostname + BasicConsts.COLON +
+              Integer.toString(identifiedSecurePort) + path;
            } else {
               // assume it is the default https port...
-              secureServerUrl = "https://" + identifiedHostname + path; 
+              secureServerUrl = "https://" + identifiedHostname + path;
            }
         }
      }
-     
+
      @Override
      public boolean getAsDeamon() {
         return asDaemon;
@@ -145,7 +148,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
            return httpClientFactory;
         } else if ( BeanDefs.IMAGE_UTIL.equals(beanName)) {
            return imageUtil;
-        } 
+        }
         throw new IllegalStateException("unable to locate bean");
      }
 
@@ -173,12 +176,12 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      public String getServerURL() {
         return serverUrl;
      }
-     
+
      @Override
      public String getSecureServerURL() {
         return secureServerUrl;
      }
-     
+
      @Override
      public ServletContext getServletContext() {
         return ctxt;
@@ -197,13 +200,6 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
      public String getWebApplicationURL(String servletAddr) {
         return getWebApplicationURL() + BasicConsts.FORWARDSLASH + servletAddr;
      }
-  }
-  
-  @Override
-  public void createWatchdogTask(long checkIntervalMilliseconds) {
-    // No op because appengine cron.xml automatically schedules and calls the
-    // task
-    throw new IllegalStateException("this should not be called!");
   }
 
   @Override
@@ -304,7 +300,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
 
   @Override
   public void afterPropertiesSet() throws Exception {
-     System.out.println("afterPropertiesSet WATCHDOG TASK IN TOMCAT");
+     System.out.println("afterPropertiesSet WATCHDOG TASK IN GAE");
      if ( datastore == null ) throw new IllegalStateException("no datastore specified");
      if ( userService == null ) throw new IllegalStateException("no user service specified");
      if ( uploadSubmissions == null ) throw new IllegalStateException("no uploadSubmissions specified");
@@ -321,5 +317,15 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   @Override
   public CallingContext getCallingContext() {
      return new CallingContextImpl();
+  }
+
+  @Override
+  public void setFasterWatchdogCycleEnabled(boolean value) {
+    lastFastPublishingEnabledFlag = value;
+  }
+
+  @Override
+  public boolean getFasterWatchdogCycleEnabled() {
+    return lastFastPublishingEnabledFlag;
   }
 }

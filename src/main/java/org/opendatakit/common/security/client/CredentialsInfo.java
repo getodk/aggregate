@@ -21,79 +21,80 @@ import java.io.Serializable;
 import com.google.gwt.http.client.URL;
 
 /**
- * Transport object for communicating password changes between GWT client and server.
+ * Transport object for communicating password changes between GWT client and
+ * server.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class CredentialsInfo implements Serializable {
 
-	/**
+  /**
    * 
    */
   private static final long serialVersionUID = -8984148650618368023L;
   String username;
-	String digestAuthHash;
-	String basicAuthHash;
-	String basicAuthSalt;
-	
-	public String getRequestParameters() {
-		StringBuilder postData = new StringBuilder();
-		// note param pairs are separated by a '&'
-		// and each key-value pair is separated by a '='
-		postData.append("username=").append(URL.encode(username));
-		postData.append("&");
-		postData.append("digestAuthHash=").append(URL.encode(digestAuthHash));
-		if ( basicAuthHash != null && basicAuthSalt != null) {
-			postData.append("&");
-			postData.append("basicAuthHash=").append(URL.encode(basicAuthHash));
-			postData.append("&");
-			postData.append("basicAuthSalt=").append(URL.encode(basicAuthSalt));
-		}
-		return postData.toString();
-	}
+  String digestAuthHash;
+  String basicAuthHash;
+  String basicAuthSalt;
 
-	public CredentialsInfo() {
-	}
-	
-	public CredentialsInfo( String username, String digestAuthHash, 
-							String basicAuthHash, String basicAuthSalt ) {
-		this.username = username;
-		this.digestAuthHash = digestAuthHash;
-		this.basicAuthHash = basicAuthHash;
-		this.basicAuthSalt = basicAuthSalt;
-	}
+  public String getRequestParameters() {
+    StringBuilder postData = new StringBuilder();
+    // note param pairs are separated by a '&'
+    // and each key-value pair is separated by a '='
+    postData.append("username=").append(URL.encode(username));
+    postData.append("&");
+    postData.append("digestAuthHash=").append(URL.encode(digestAuthHash));
+    if (basicAuthHash != null && basicAuthSalt != null) {
+      postData.append("&");
+      postData.append("basicAuthHash=").append(URL.encode(basicAuthHash));
+      postData.append("&");
+      postData.append("basicAuthSalt=").append(URL.encode(basicAuthSalt));
+    }
+    return postData.toString();
+  }
 
-	public String getUsername() {
-		return username;
-	}
+  public CredentialsInfo() {
+  }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+  public CredentialsInfo(String username, String digestAuthHash, String basicAuthHash,
+      String basicAuthSalt) {
+    this.username = username;
+    this.digestAuthHash = digestAuthHash;
+    this.basicAuthHash = basicAuthHash;
+    this.basicAuthSalt = basicAuthSalt;
+  }
 
-	public String getDigestAuthHash() {
-		return digestAuthHash;
-	}
+  public String getUsername() {
+    return username;
+  }
 
-	public void setDigestAuthHash(String digestAuthHash) {
-		this.digestAuthHash = digestAuthHash;
-	}
+  public void setUsername(String username) {
+    this.username = username;
+  }
 
-	public String getBasicAuthHash() {
-		return basicAuthHash;
-	}
+  public String getDigestAuthHash() {
+    return digestAuthHash;
+  }
 
-	public void setBasicAuthHash(String basicAuthHash) {
-		this.basicAuthHash = basicAuthHash;
-	}
+  public void setDigestAuthHash(String digestAuthHash) {
+    this.digestAuthHash = digestAuthHash;
+  }
 
-	public String getBasicAuthSalt() {
-		return basicAuthSalt;
-	}
+  public String getBasicAuthHash() {
+    return basicAuthHash;
+  }
 
-	public void setBasicAuthSalt(String basicAuthSalt) {
-		this.basicAuthSalt = basicAuthSalt;
-	}
-	
+  public void setBasicAuthHash(String basicAuthHash) {
+    this.basicAuthHash = basicAuthHash;
+  }
+
+  public String getBasicAuthSalt() {
+    return basicAuthSalt;
+  }
+
+  public void setBasicAuthSalt(String basicAuthSalt) {
+    this.basicAuthSalt = basicAuthSalt;
+  }
+
 }

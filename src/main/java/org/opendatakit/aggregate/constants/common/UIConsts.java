@@ -16,8 +16,8 @@
 
 package org.opendatakit.aggregate.constants.common;
 
-public class UIConsts { 
-  public static final String VERSION_STRING = "v1.2.0 Production";
+public class UIConsts {
+  public static final String VERSION_STRING = "v1.3.1 Production";
 
   public static final String URI_DEFAULT = "no uuid";
   public static final String FSC_URI_PARAM = "fsc";
@@ -30,6 +30,7 @@ public class UIConsts {
   public static final String FILTER_NONE = "none";
 
   public static final String FORM_UPLOAD_SERVLET_ADDR = "formUpload";
+  public static final String SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR = "ssl/oauth2-service-account";
   
   // url pattern for uploading files associated with ODKTables tables
   public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR = 
@@ -46,5 +47,9 @@ public class UIConsts {
   public static final String ERROR_NO_NAME = "You need to provide a name for this filter group to continue";
   public static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
   public static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
+  public static final String PROMPT_FOR_REDCAP_APIKEY_TXT = "Please enter the REDCap API Key to access this server";
+  public static final String REPROMPT_FOR_REDCAP_APIKEY_TXT = "That is not a valid REDCap API Key. Please enter the REDCap API Key to access this server";
+  public static final String PROMPT_FOR_EMAIL_TXT = "Please enter the e-mail address that will be granted access to these documents";
+  public static final String REPROMPT_FOR_EMAIL_TXT = "That is not a valid e-mail address. Please enter the e-mail address that will be granted access to these documents";
 
 }

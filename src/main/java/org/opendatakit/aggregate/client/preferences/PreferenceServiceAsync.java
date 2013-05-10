@@ -20,10 +20,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface PreferenceServiceAsync {
 
-  void setGoogleMapsKey(String key, AsyncCallback<Void> callback);
-
   void getPreferences(AsyncCallback<PreferenceSummary> callback);
 
   void setOdkTablesEnabled(Boolean enabled, AsyncCallback<Void> callback);
+
+  void setFasterBackgroundActionsDisabled(Boolean disabled, AsyncCallback<Void> callback);
 
 }

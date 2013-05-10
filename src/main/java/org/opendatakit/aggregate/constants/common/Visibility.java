@@ -25,6 +25,10 @@ public enum Visibility implements Serializable {
   
   private String displayText;
   
+  private Visibility() {
+    // GWT
+  }
+  
   private Visibility(String display) {
     displayText = display;
   }

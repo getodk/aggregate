@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -82,16 +81,16 @@ public class TaskLockImpl implements TaskLock {
     b.setLength(0);
     b.append("SET @present := NOW(),");
     b.append(" @uriUser := '");
-    b.append(StringEscapeUtils.escapeSql(user.getUriUser()));
+    b.append(user.getUriUser().replaceAll("'", "''"));
     b.append("',");
     b.append(" @uriLock := '");
-    b.append(StringEscapeUtils.escapeSql(uri));
+    b.append(uri.replaceAll("'", "''"));
     b.append("',");
     b.append(" @formId := '");
-    b.append(StringEscapeUtils.escapeSql(entity.getFormId()));
+    b.append(entity.getFormId().replaceAll("'", "''"));
     b.append("',");
     b.append(" @taskType := '");
-    b.append(StringEscapeUtils.escapeSql(entity.getTaskType()));
+    b.append(entity.getTaskType().replaceAll("'", "''"));
     b.append("',");
     b.append(" @lifetimeMicroseconds := ");
     b.append(1000L * l);

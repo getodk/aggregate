@@ -7,9 +7,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverBackedSelenium;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
 
 import com.thoughtworks.selenium.Selenium;
 import com.thoughtworks.selenium.Wait;
@@ -25,7 +25,7 @@ public class TestUploadForm {
   private static String username = "aggregate";
   private static String password = "aggregate";
   private static int port;
-  private static WebDriver driver;
+  private static FirefoxDriver driver;
   private static Selenium selenium;
 
   @BeforeClass
@@ -35,7 +35,9 @@ public class TestUploadForm {
     baseUrl = System.getProperty("test.server.baseUrl");
     port = Integer.parseInt(System.getProperty("test.server.port"));
     // We should also test different browsers?
-    driver = new FirefoxDriver();
+    FirefoxProfile profile = new FirefoxProfile();
+    profile.setPreference("network.negotiate-auth.trusteduris", hostname);
+    driver = new FirefoxDriver(profile);
     driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     selenium = new WebDriverBackedSelenium(driver, "http://" + username + ":" + password + "@"
         + hostname + ":" + port + baseUrl);
@@ -44,8 +46,13 @@ public class TestUploadForm {
     System.out.println(hostname);
     System.out.println(baseUrl);
     System.out.println(port + "");
-    
+
     selenium.open("local_login.html");
+    try {
+      Thread.sleep(7000);
+    } catch (Exception e) {
+    }
+
     Wait mainload = new Wait() {
       public boolean until() {
         return selenium.isTextPresent("Form Management");

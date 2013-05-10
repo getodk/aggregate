@@ -40,6 +40,7 @@ public final class ExternServSummary implements Serializable {
 	private Date timeLastUploadCursor;
 	private Date timeLastStreamingCursor;
 	private ExternalServiceType externalServiceType;
+	private String ownership;
 	private String name;
 
 	public ExternServSummary() {
@@ -51,7 +52,7 @@ public final class ExternServSummary implements Serializable {
 			ExternalServicePublicationOption externalServicePublicationOption,
 			Boolean uploadCompleted,
 			Date timeLastUploadCursor, Date timeLastStreamingCursor,
-			ExternalServiceType externalServiceTypeName, String name) {
+			ExternalServiceType externalServiceTypeName, String ownership, String name) {
 		this.uri = uri;
 		this.user = user;
 		this.operationalStatus = status;
@@ -61,6 +62,7 @@ public final class ExternServSummary implements Serializable {
 		this.timeLastUploadCursor = timeLastUploadCursor;
 		this.timeLastStreamingCursor = timeLastStreamingCursor;
 		this.externalServiceType = externalServiceTypeName;
+		this.ownership = ownership;
 		this.name = name;
 	}
 
@@ -96,7 +98,11 @@ public final class ExternServSummary implements Serializable {
 		return externalServiceType;
 	}
 
-	public String getName() {
+	public String getOwnership() {
+     return ownership;
+   }
+
+   public String getName() {
 		return name;
 	}
 

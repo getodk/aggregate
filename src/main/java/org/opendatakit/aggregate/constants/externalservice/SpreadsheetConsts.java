@@ -16,10 +16,10 @@
 package org.opendatakit.aggregate.constants.externalservice;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class SpreadsheetConsts {
   /**
@@ -50,12 +50,12 @@ public final class SpreadsheetConsts {
    */
   public static final String WORKSHEETS_FEED = SPREADSHEETS_SCOPE + "worksheets/";
   public static final String DOCS_SCOPE = "https://docs.google.com/feeds/";
-  public static final String DOC_FEED = DOCS_SCOPE + "default" + FEED_PERMISSIONS;
+  public static final String DOC_FEED = DOCS_SCOPE + "default/private/full";
 
   public static final int SERVER_TIMEOUT = 60000;
 
   public static final int WORKSHEET_CREATION_DELAY = 15000;
- 
+
   /**
    * Characters which cause problems in Google Spreadsheet headers. Removed in
    * the GoogleSpreadsheetHeaderFormatter.

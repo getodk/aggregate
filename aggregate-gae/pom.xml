@@ -108,6 +108,9 @@
 			  <serverId>local.gae</serverId>
 			  <appDir>${project.build.directory}/${project.build.finalName}</appDir>
 			  <sdkDir>${gae.home}</sdkDir>
+			  <jvmFlags>
+				<jvmFlag>-Ddatastore.default_high_rep_job_policy_unapplied_job_pct=20</jvmFlag>
+			  </jvmFlags>
 			  <port>${test.server.port}</port>
 			  <monitorPort>${test.server.gae.monitor.port}</monitorPort>
 			</configuration>
@@ -142,7 +145,8 @@
 		  <version>${maven.surefire.plugin.version}</version>
 		  <inherited>true</inherited>
 		  <configuration>
-		    <skipTests>true</skipTests>
+			<argLine>${surefire.argLine}</argLine>
+			<skipTests>true</skipTests>
 			<classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
 			<excludes>
 			  <exclude>**/integration/**</exclude>

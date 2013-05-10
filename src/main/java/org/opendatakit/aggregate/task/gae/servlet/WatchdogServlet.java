@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -33,10 +32,10 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WatchdogServlet extends ServletUtilBase{
   /**
@@ -44,14 +43,16 @@ public class WatchdogServlet extends ServletUtilBase{
    */
   private static final long serialVersionUID = 4295412985320942609L;
 
+  private static final Log logger = LogFactory.getLog(WatchdogServlet.class);
+
   /**
    * URI from base
    */
   public static final String ADDR = "gae/watchdog";
-  
+
   /**
    * Handler for HTTP Get request to run watchdog task
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -60,20 +61,10 @@ public class WatchdogServlet extends ServletUtilBase{
 	CallingContext cc = ContextFactory.getCallingContext(this, req);
 	cc.setAsDaemon(true);
 
-	Log logger = LogFactory.getLog(WatchdogServlet.class);
-	
-    // get parameter
-    String checkIntervalString = getParameter(req, ServletConsts.CHECK_INTERVAL_PARAM);
-    if (checkIntervalString == null) {
-      errorMissingParam(resp);
-      return;
-    }
-    long checkIntervalMilliseconds = Long.parseLong(checkIntervalString);
-    
     logger.info("Beginning servlet processing");
     WatchdogWorkerImpl worker = new WatchdogWorkerImpl();
     try {
-      worker.checkTasks(checkIntervalMilliseconds, cc);
+      worker.checkTasks(cc);
       logger.info("ending successful servlet processing");
       resp.setStatus(HttpServletResponse.SC_ACCEPTED);
     } catch (ODKExternalServiceException e) {

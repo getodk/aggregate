@@ -40,6 +40,10 @@ public enum SubTabs implements Serializable {
    private String tabLabel;
    private String hashString;
    
+   private SubTabs() {
+     // GWT
+   }
+   
    private SubTabs(String label, String hash) {
      tabLabel = label;
      hashString = hash;
