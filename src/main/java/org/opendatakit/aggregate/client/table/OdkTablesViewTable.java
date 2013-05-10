@@ -67,7 +67,8 @@ public class OdkTablesViewTable extends FlexTable {
     this.currentTable = null;
   }
 
-  public OdkTablesViewTable(AggregateSubTabBase tableSubTab, TableEntryClient table) {
+  public OdkTablesViewTable(AggregateSubTabBase tableSubTab, 
+      TableEntryClient table) {
     this(tableSubTab);
 
     updateDisplay(table);
@@ -80,9 +81,9 @@ public class OdkTablesViewTable extends FlexTable {
    */
   public void updateDisplay(TableEntryClient table) {
     TableEntryClient oldTable = this.currentTable;
-    
-    //for testing timing
-    //Window.alert("in odktablesViewTable.updateDisplay()");
+
+    // for testing timing
+    // Window.alert("in odktablesViewTable.updateDisplay()");
 
     this.currentTable = table;
 
@@ -104,12 +105,12 @@ public class OdkTablesViewTable extends FlexTable {
       public void onFailure(Throwable caught) {
         if (caught instanceof EntityNotFoundExceptionClient) {
           // if this happens it is PROBABLY, but not necessarily, because
-          // we've deleted the table. 
+          // we've deleted the table.
           // TODO ensure the correct exception makes it here
           ((OdkTablesViewTableSubTab) AggregateUI.getUI()
-            .getSubTab(SubTabs.VIEWTABLE)).setTabToDislpayZero();
+              .getSubTab(SubTabs.VIEWTABLE)).setTabToDislpayZero();
         } else if (caught instanceof PermissionDeniedExceptionClient) {
-          // do nothing, b/c it's probably legitimate that you don't get an 
+          // do nothing, b/c it's probably legitimate that you don't get an
           // error if there are rows you're not allowed to see.
 
         } else {
@@ -180,11 +181,11 @@ public class OdkTablesViewTable extends FlexTable {
    * }
    */
 
-  /*
-   * This is the method that actually updates the column headings. It is its own
-   * method so that it can be called cleanly in the updateTableData method. If
-   * the code is AFTER the call to SecureGWT, as it was at first, you can get
-   * null pointer exceptions, as the async callback may have not returned.
+  /**
+   * This is the method that actually updates the column headings. It is its 
+   * own method so that it can be called cleanly in the updateTableData method. 
+   * If the code is AFTER the call to SecureGWT, as it was at first, you can 
+   * get null pointer exceptions, as the async callback may have not returned.
    */
   private void setColumnHeadings(List<String> columns) {
     this.removeAllRows();
@@ -193,19 +194,16 @@ public class OdkTablesViewTable extends FlexTable {
     // Otherwise set the headings.
     if (columns.size() == NUMBER_ADMIN_COLUMNS) {
       setText(0, 0, NO_DATA_MESSAGE);
-    } else {   
+    } else {
       // set the delete column
       setText(0, 0, DELETE_ROW_HEADING);
       int i = 1;
       // make the headings
       for (String name : this.columnNames) {
-        // the rows that come through beginning with "_" are user-defined.
-        // we only want to display those (as long as you're not displaying
-        // metadata), so select those, remove them, and add them.
-        if (name.substring(0, 1).equalsIgnoreCase("_")) {
-          setText(0, i, name.substring(1, name.length()));
-          i++;
-        }
+        // We might have to do checking eventually to ensure metadata columns
+        // are only displayed when necessary.
+        setText(0, i, name);
+        i++;
       }
 
       getRowFormatter().addStyleName(0, "titleBar");
@@ -267,7 +265,7 @@ public class OdkTablesViewTable extends FlexTable {
       }
     }
   }
-  
+
   /**
    * Returns the view this table is currently displaying.
    */

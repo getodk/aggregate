@@ -179,7 +179,8 @@ public class DataManager {
     List<Entity> entities = new ArrayList<Entity>();
     for (Scope scope : scopes) {
       Query query = buildRowsSinceQuery(dataEtag);
-      query = narrowByScope(query, scope);
+      // TODO: don't forget to add this back in when scopes are figured out
+      //query = narrowByScope(query, scope);
       List<Entity> results = query.execute();
       entities.addAll(results);
     }
@@ -209,8 +210,7 @@ public class DataManager {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
     // TODO: did this break (if it ever worked) when converted to string etags
     // instead of flawed mod numbers?
-    query.greaterThanOrEqual(DbLogTable.DATA_ETAG_AT_MODIFICATION, 
-        Long.parseLong(dataEtag));
+    query.greaterThanOrEqual(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
     query.sortAscending(DbLogTable.DATA_ETAG_AT_MODIFICATION);
     return query;
   }
