@@ -423,12 +423,14 @@ public class EntityCreator {
       if (TablesConstants.CLIENT_ONLY_COLUMN_NAMES.contains(name)) {
         // 1) --no need to do anything here.
         continue;
-      } else if (TablesConstants.SHARED_COLUMN_NAMES.contains(name)) {
+      } else if (TablesConstants.SHARED_COLUMN_NAMES.contains(name) 
+            || name.equals("last_mod_time")) {
         // 2) --save the data
-        if (name.equals(TablesConstants.TIMESTAMP)) {
+        // used to search for timestamp, but that's apparently incorrect?
+        if (name.equals("last_mod_time")) {//name.equals(TablesConstants.TIMESTAMP)) {
           // Then we have to parse the string to a date.
           Date date = WebUtils.parseDate(value);
-          row.set(name.toUpperCase(), date);
+          row.set(TablesConstants.TIMESTAMP.toUpperCase(), date);
         } else {
           row.set(name.toUpperCase(), value);
         }
