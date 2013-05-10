@@ -1,7 +1,8 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
-import java.util.List;
+import org.opendatakit.aggregate.client.form.MediaFileSummary;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * Represents a summary of a file that has been uploaded to be associated with
@@ -11,7 +12,7 @@ import java.util.List;
  * @author sudar.sam@gmail.com
  *
  */
-public class FileSummaryClient implements Serializable {
+public class FileSummaryClient implements IsSerializable {
 
   /**
    * 
@@ -30,10 +31,9 @@ public class FileSummaryClient implements Serializable {
   private String id; 
   private String tableId;
   
-  /**
-   * Necessary for GWT serialization.
-   */
-  public FileSummaryClient() {
+  @SuppressWarnings("unused")
+  private FileSummaryClient() {
+    // necessary for gwt serialization
   }
   
   public FileSummaryClient(String filename, String contentType, 

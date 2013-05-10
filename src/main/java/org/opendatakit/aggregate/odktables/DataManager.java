@@ -32,6 +32,7 @@ import org.opendatakit.common.web.CallingContext;
  * Manages read, insert, update, and delete operations on the rows of a table.
  * 
  * @author the.dylan.price@gmail.com
+ * @author sudar.sam@gmail.com
  * 
  */
 

@@ -37,6 +37,7 @@ import org.opendatakit.tables.sync.api.TablesConstants;
  * all into one place.
  * 
  * @author the.dylan.price@gmail.com
+ * @author sudar.sam@gmail.com
  * 
  */
 

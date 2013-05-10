@@ -1,7 +1,8 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
 import java.util.List;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This is the client-side version of 
@@ -13,7 +14,7 @@ import java.util.List;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableDefinitionClient implements Serializable {
+public class TableDefinitionClient implements IsSerializable {
 
   /**
 	 * 
@@ -27,7 +28,9 @@ public class TableDefinitionClient implements Serializable {
   private String tableIdAccessControls;
   private List<ColumnClient> columns;
   
+  @SuppressWarnings("unused")
   private TableDefinitionClient() {
+    // necessary for gwt serialization
   }
 
   public TableDefinitionClient(final String tableId, 

@@ -1,9 +1,6 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
-
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
-import org.opendatakit.aggregate.odktables.entity.TableRole;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This is the client-side version of
@@ -16,7 +13,7 @@ import org.opendatakit.aggregate.odktables.entity.TableRole;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableAclClient implements Serializable {
+public class TableAclClient implements IsSerializable {
 
   /**
 	 * 

@@ -1,12 +1,10 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.opendatakit.common.utils.WebUtils;
-import org.simpleframework.xml.Element;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This object represents a Row on the client side of the code. It is based 
@@ -17,14 +15,14 @@ import org.simpleframework.xml.Element;
  * @author sudar.sam@gmail.com
  *
  */
-public class RowClient implements Serializable {
+public class RowClient implements IsSerializable {
 
   /**
 	 * 
 	 */
 	private static final long serialVersionUID = -3396839962551194663L;
 
-private String rowId;
+  private String rowId;
 
   private String rowEtag;
 
@@ -69,7 +67,8 @@ private String rowId;
    * @param rowEtag
    * @param values
    */
-  public static RowClient forUpdate(String rowId, String rowEtag, Map<String, String> values) {
+  public static RowClient forUpdate(String rowId, String rowEtag, 
+      Map<String, String> values) {
     RowClient row = new RowClient();
     row.rowId = rowId;
     row.rowEtag = rowEtag;
@@ -192,14 +191,6 @@ private String rowId;
     this.timestamp = timestamp;
   }
   
-  /**
-   * Sets the row's stringified date field.
-   * @param timestamp
-   */
-  public void setTimestamp(Date timestamp) {
-    this.timestamp = WebUtils.iso8601Date(timestamp);
-  }
-
   /*
    * (non-Javadoc)
    * 

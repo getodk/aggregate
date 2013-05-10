@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * This is the client-side version of RowResource. It is based heavily on 
  * org.opendatakit.aggregate.odktables.entity.api.RowResource.java.
@@ -9,7 +11,7 @@ package org.opendatakit.aggregate.client.odktables;
  * @author sudars
  *
  */
-public class RowResourceClient extends RowClient {
+public class RowResourceClient extends RowClient implements IsSerializable{
 
   private String selfUri;
   private String tableUri;
