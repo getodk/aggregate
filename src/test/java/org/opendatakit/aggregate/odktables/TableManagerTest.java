@@ -119,7 +119,7 @@ public class TableManagerTest {
     tm.getTableNullSafe(tableId);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testGetTableNullTableId() throws ODKEntityNotFoundException, ODKDatastoreException {
     tm.getTableNullSafe(null);
   }
@@ -182,7 +182,7 @@ public class TableManagerTest {
     tm.deleteTable(tableId);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testDeleteTableNullTableId() throws ODKDatastoreException, ODKTaskLockException {
     tm.deleteTable(null);
   }

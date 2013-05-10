@@ -23,14 +23,22 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class Preferences {
-  
+
+  public static interface PreferencesCompletionCallback {
+	  public void refreshFromUpdatedPreferences();
+  }
+
   private static final String NULL_PREFERENCES_ERROR = "ERROR: somehow got a null preference summary";
 
-  private static String googleMapsApiKey;
-  
+  private static String googleSimpleApiKey;
+
+  private static String googleApiClientId;
+
   private static Boolean odkTablesEnabled;
 
-  public static void updatePreferences() {
+  private static Boolean fasterBackgroundActionsDisabled;
+
+  public static void updatePreferences(final PreferencesCompletionCallback callback) {
     SecureGWT.getPreferenceService().getPreferences(new AsyncCallback<PreferenceSummary>() {
       public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
@@ -41,17 +49,30 @@ public class Preferences {
           GWT.log(NULL_PREFERENCES_ERROR);
           AggregateUI.getUI().reportError(new Throwable(NULL_PREFERENCES_ERROR));
         }
-        
-        googleMapsApiKey = summary.getGoogleMapsApiKey();
+
+        googleSimpleApiKey = summary.getGoogleSimpleApiKey();
+        googleApiClientId = summary.getGoogleApiClientId();
         odkTablesEnabled = summary.getOdkTablesEnabled();
+        fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
+
+        if (callback != null) {
+        	callback.refreshFromUpdatedPreferences();
+        }
       }
     });
-    
+
   }
-  
-  public static String getGoogleMapsApiKey() {
-    if(googleMapsApiKey != null) {
-      return googleMapsApiKey;
+
+  public static String getGoogleSimpleApiKey() {
+    if(googleSimpleApiKey != null) {
+      return googleSimpleApiKey;
+    }
+    return "";
+  }
+
+  public static String getGoogleApiClientId() {
+    if(googleApiClientId != null) {
+      return googleApiClientId;
     }
     return "";
   }
@@ -62,7 +83,7 @@ public class Preferences {
     }
     return Boolean.FALSE;
   }
-  
+
   public static void setOdkTablesBoolean(Boolean enabled) {
     SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
@@ -73,11 +94,18 @@ public class Preferences {
         // do nothing
       }
     });
-    odkTablesEnabled = enabled;    
+    odkTablesEnabled = enabled;
   }
-  
-  public static void setGoogleMapsApiKey(String mapsApiKey) {
-    SecureGWT.getPreferenceService().setGoogleMapsKey(mapsApiKey, new AsyncCallback<Void>() {
+
+  public static Boolean getFasterBackgroundActionsDisabled() {
+    if(fasterBackgroundActionsDisabled != null) {
+      return fasterBackgroundActionsDisabled;
+    }
+    return Boolean.FALSE;
+  }
+
+  public static void setFasterBackgroundActionsDisabledBoolean(Boolean disabled) {
+    SecureGWT.getPreferenceService().setFasterBackgroundActionsDisabled(disabled, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
       }
@@ -86,8 +114,8 @@ public class Preferences {
         // do nothing
       }
     });
-    googleMapsApiKey = mapsApiKey;
+    fasterBackgroundActionsDisabled = disabled;
   }
- 
-  
+
+
 }

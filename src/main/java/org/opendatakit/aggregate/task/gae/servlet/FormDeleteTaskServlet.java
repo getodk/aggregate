@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -37,10 +37,10 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class FormDeleteTaskServlet extends ServletUtilBase {
 
@@ -49,6 +49,8 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = 8219849865201422548L;
 
+  private static final Log logger = LogFactory.getLog(FormDeleteTaskServlet.class);
+
   /**
    * URI from base
    */
@@ -56,7 +58,7 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
 
   /**
    * Handler for HTTP Get request that shows the list of forms
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
    *      javax.servlet.http.HttpServletResponse)
    */
@@ -64,8 +66,6 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     cc.setAsDaemon(true);
-
-    Log logger = LogFactory.getLog(FormDeleteTaskServlet.class);
 
     // get parameter
 

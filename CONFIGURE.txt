@@ -24,7 +24,7 @@ The steps required are:
 
 (0) Install the latest Java 6 SDK
 
-(1) Install Eclipse 3.6.2 or higher.  This workspace WILL NOT work with 
+(1) Install Eclipse 3.7.2 or higher.  This workspace WILL NOT work with 
     Eclipse 3.5.2 and earlier.
 
 (2) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
@@ -35,17 +35,17 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.6.1 or higher SDK defined.
-	If the default App Engine version is not 1.6.1, you may need to 
+    Be sure there is an App Engine 1.7.3 or higher SDK defined.
+	If the default App Engine version is not 1.7.3, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.4.0 or higher.
+    Be sure there is a WebToolkit SDK defined 2.5.0 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.4.0).  The GWT library is installed as 
+	pom.xml (currently 2.5.0).  The GWT library is installed as 
 	part of the plugin and can be found in:
-	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.4.0...\gwt-2.4.0
+	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.5.0...\gwt-2.5.0
 
 File / Import:
 
@@ -154,7 +154,7 @@ Full Development Environment Configuration
 (1) Install Maven 3.  This will generally set up a maven repository under
     the user's home directory:  ${HOME}/.m2/repository
 
-(2) Install Eclipse 3.6.2 or higher.  This workspace WILL NOT work with 
+(2) Install Eclipse 3.7.2 or higher.  This workspace WILL NOT work with 
     Eclipse 3.5.2 and earlier.
 
 (3) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
@@ -235,23 +235,24 @@ A minimal file is:
   	  <id>gae</id>
   	  <activation><activeByDefault>true</activeByDefault></activation>
   	  <properties>
-		<temp.home>C:\\Users\\user\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Program Files (x86)\\Google AE\\appengine-java-sdk-1.6.4</gae.home>
-		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.1.0</bitrock.home>
-	    <keystore.propertyfile>\C:\\Users\\user\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
+		<localRepository>${user.home}/.m2/repository</localRepository>
+		<temp.home>C:\\Users\\Administrator\\AppData\\Local\\Temp</temp.home>
+	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.7.3</gae.home>
+		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.5.1</bitrock.home>
+	    <keystore.propertyfile>\C:\\Users\\Administrator\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
 		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.5\\bin\\mysql.exe</mysql.client.executable>
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
 		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.1\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
-		<selenium.home>C:\\Users\\user\\Documents\\selenium\\selenium-2.23.1</selenium.home>
-		<selenium.libs>C:\\Users\\user\\Documents\\selenium\\selenium-2.23.1\\libs</selenium.libs>
+		<selenium.home>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.25.0</selenium.home>
+		<selenium.libs>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.25.0\\libs</selenium.libs>
 		<test.server.hostname>YOUR.FULLY.QUALIFIED.HOSTNAME.AND.ORG</test.server.hostname>
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
 		<test.server.gae.monitor.port>7075</test.server.gae.monitor.port>
 		<firefox.executable></firefox.executable>
-		<catalina.zip>file:///C:\\Users\\user\\Downloads\\apache-tomcat-6.0.35-windows-x64.zip</catalina.zip>
+		<catalina.zip>file:///C:\\Users\\Administrator\\.m2\\apache-tomcat-6.0.35-windows-x64.zip</catalina.zip>
 	  </properties>
   	</profile>
   </profiles>
@@ -274,15 +275,15 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.6.1 or higher SDK defined.
+    Be sure there is an App Engine 1.7.3 or higher SDK defined.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 1.6.1).
+	pom.xml (currently 1.7.3).
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.4.0 or higher.
+    Be sure there is a WebToolkit SDK defined 2.5.0 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.4.0).
+	pom.xml (currently 2.5.0).
 	
   Java / Build Path / Classpath Variables:
 
@@ -342,6 +343,7 @@ openFile
 -Dosgi.requiredJavaVersion=1.5
 -Xms100m
 -Xmx1024m
+-startup
 ------------------------------end----------------------
 
 (12)  If you want to experiment with building Maven inside Eclipse, 

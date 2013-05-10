@@ -12,7 +12,7 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Determines how tables are represented in GoogleSpreadsheets
- * 
+ *
  * @author the.dylan.price@gmail.com
  */
 public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter implements
@@ -29,7 +29,7 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
    * in FormElementModel. Generates the same headers as BasicHeaderFormatter,
    * but additionally includes the parent UID of the form as the first header,
    * and removes all unsafe characters from the headers.
-   * 
+   *
    * @param formDefinition
    *          the xform that is being used to create the header
    * @param rootGroup
@@ -59,6 +59,9 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
     {
       String header = headers.get(i);
       header = header.replaceAll(SpreadsheetConsts.UNSAFE_CHAR_CLASS, "");
+      if ( Character.isDigit(header.charAt(0)) ) {
+        header = "n" + header;
+      }
       headers.set(i, header);
     }
 

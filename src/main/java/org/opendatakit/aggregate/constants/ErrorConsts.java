@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -19,10 +19,10 @@ package org.opendatakit.aggregate.constants;
 
 /**
  * Constants used in ODK aggregate to report errors
- *  
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class ErrorConsts {
 
@@ -31,9 +31,9 @@ public final class ErrorConsts {
    */
   public static final String ODKID_NOT_FOUND =
       "Unable to find form with matching Form Id as submission";
-  public static final String FORM_NOT_FOUND = 
+  public static final String FORM_NOT_FOUND =
       "Form not found";
-  public static final String FORM_DEFINITION_INVALID = 
+  public static final String FORM_DEFINITION_INVALID =
       "Form definition incomplete or missing";
   /**
    * Error message for if key was not successfully part of the request
@@ -43,10 +43,10 @@ public final class ErrorConsts {
    * Error message if the FORM ID in the form already exists
    */
   public static final String FORM_WITH_ODKID_EXISTS = "Form Already Exists for this Namespace/Id attribute";
-  
+
   public static final String FORM_INVALID_SUBMISSION_ELEMENT = "Attributes of submission element do not match form attributes";
   /**
-   * Error message if not all information was received 
+   * Error message if not all information was received
    */
   public static final String MISSING_FORM_INFO = "Did not receive Form Name and Form XML description";
 
@@ -54,9 +54,9 @@ public final class ErrorConsts {
    * Error message if form ID was not specified
    */
   public static final String MISSING_FORM_ID = "Form did not specify a Form ID. For information on Form ID please check the Open Data Kit FAQ";
-  
+
   /**
-   * Error message if request is not multi-part 
+   * Error message if request is not multi-part
    */
   public static final String NO_MULTI_PART_CONTENT = "Request does not contain Multi Part Content";
   public static final String INCOMPLETE_DATA = "Problem locating part of the submission data needed to complete request";
@@ -80,7 +80,7 @@ public final class ErrorConsts {
   public static final String UNKNOWN_INTERFACE = "Some how did not get a SubmissionField or SubmissionRepeat";
   public static final String INVALID_PARAMS = "Parameter(s) are not valid";
   public static final String MISSING_PARAMS = "One or more required parameters are missing";
-  
+
   /**
    * Constant string identifying XML stream
    */
@@ -93,14 +93,7 @@ public final class ErrorConsts {
   public static final String PERSISTENCE_LAYER_PROBLEM = "Problem persisting data or accessing data";
   public static final String UPLOAD_PROBLEM = "Upload transmission unexpectedly failed";
   public static final String EXPORTED_FILE_PROBLEM = "Problem accessing exported datafile";
-  
+
   public static final String JAVA_ROSA_PARSING_PROBLEM = "Problem with JavaRosa Parsing Form:";
   public static final String ERROR_OBTAINING_FUSION_TABLE_ID = "ERROR CREATING FUSION TABLE - DID NOT GET A TABLE NUMBER";
-
-  /**
-   * Error message if OAuth authentication failed.
-   */
-  public static final String OAUTH_ERROR = "OAuth authentication failed.";
-  public static final String OAUTH_SECURITY_ERROR_WHILE_RETRIEVING_SESSION_TOKEN = "Security error while retrieving session token.";
-  public static final String OAUTH_SERVER_REJECTED_ONE_TIME_USE_TOKEN = "Server rejected one time use token.";
 }

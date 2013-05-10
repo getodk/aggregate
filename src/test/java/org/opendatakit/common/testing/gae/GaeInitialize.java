@@ -8,9 +8,10 @@ import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 
 class GaeInitialize implements ICommonTestSetup {
-
+  
     private final LocalServiceTestHelper helper =
-        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+        new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
+          .setDefaultHighRepJobPolicyUnappliedJobPercentage(20).setStoreDelayMs(800));
 
     public Environment gaeEnvironment = null;
 

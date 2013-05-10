@@ -33,6 +33,8 @@ import com.google.appengine.api.taskqueue.TaskOptions;
  */
 public class TaskOptionsBuilder {
 
+  public static final String FRONTEND_QUEUE = "frontend-queue";
+
   private final TaskOptions task;
 
   TaskOptionsBuilder(String addr) {

@@ -39,16 +39,16 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class JsonElementFormatter implements ElementFormatter {
   private static final String JSON_NULL = "null";
   private static final String JSON_TRUE = "true";
   private static final String JSON_FALSE = "false";
-  
+
   private RepeatCallbackFormatter callbackFormatter;
 
   private String baseWebServerUrl;
@@ -69,8 +69,13 @@ public class JsonElementFormatter implements ElementFormatter {
   private boolean includeAccuracy;
 
   /**
+   * express multiple-choice values as an array of strings.
+   */
+  private boolean expressMultipleChoiceListsAsArrays;
+
+  /**
    * Construct a JSON Element Formatter
-   * 
+   *
    * @param separateGpsCoordinates
    *          separate the GPS coordinates of latitude and longitude into
    *          columns
@@ -78,19 +83,22 @@ public class JsonElementFormatter implements ElementFormatter {
    *          include GPS altitude data
    * @param includeGpsAccuracy
    *          include GPS accuracy data
+   * @param expressMultipleChoiceListsAsArrays
+   *          if true, express the multiple-choice fields as arrays of strings
    */
   public JsonElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-      boolean includeGpsAccuracy, RepeatCallbackFormatter formatter) {
+      boolean includeGpsAccuracy, boolean expressMultipleChoiceListsAsArrays, RepeatCallbackFormatter formatter) {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
+    this.expressMultipleChoiceListsAsArrays = expressMultipleChoiceListsAsArrays;
     callbackFormatter = formatter;
     baseWebServerUrl = null;
   }
 
   /**
    * Construct a JSON Element Formatter with links
-   * 
+   *
    * @param webServerUrl
    *          base url for the web app (e.g.,
    *          localhost:8080/ODKAggregatePlatform)
@@ -101,10 +109,14 @@ public class JsonElementFormatter implements ElementFormatter {
    *          include GPS altitude data
    * @param includeGpsAccuracy
    *          include GPS accuracy data
+   * @param expressMultipleChoiceListsAsArrays
+   *          if true, express the multiple-choice fields as arrays of strings
    */
   public JsonElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
-      boolean includeGpsAltitude, boolean includeGpsAccuracy, RepeatCallbackFormatter formatter) {
-    this(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, formatter);
+      boolean includeGpsAltitude, boolean includeGpsAccuracy,
+      boolean expressMultipleChoiceListsAsArrays, RepeatCallbackFormatter formatter) {
+    this(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy,
+         expressMultipleChoiceListsAsArrays, formatter);
     baseWebServerUrl = webServerUrl;
   }
 
@@ -154,15 +166,29 @@ public class JsonElementFormatter implements ElementFormatter {
     if ( choices.size() == 0 ) {
       addToJsonValueToRow(null, true, element.getElementName(), row);
     } else {
-      boolean first = true;
-      for (String s : choices) {
-        if (!first) {
-          b.append(" ");
+      if ( expressMultipleChoiceListsAsArrays ) {
+        b.append("[");
+        boolean first = true;
+        for (String s : choices) {
+          if (!first) {
+            b.append(",");
+          }
+          first = false;
+          b.append("\"").append(s).append("\"");
         }
-        first = false;
-        b.append(s);
+        b.append("]");
+        addToJsonValueToRow(b.toString(), false, element.getElementName(), row);
+      } else {
+        boolean first = true;
+        for (String s : choices) {
+          if (!first) {
+            b.append(" ");
+          }
+          first = false;
+          b.append(s);
+        }
+        addToJsonValueToRow(b.toString(), true, element.getElementName(), row);
       }
-      addToJsonValueToRow(b.toString(), true, element.getElementName(), row);
     }
   }
 

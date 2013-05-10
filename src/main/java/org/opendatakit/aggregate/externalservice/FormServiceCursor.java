@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -16,7 +16,11 @@ package org.opendatakit.aggregate.externalservice;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
@@ -31,27 +35,29 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class FormServiceCursor extends CommonFieldsBase {
 
-  private static final String TABLE_NAME = "_form_service_cursor";
-  
+  private static final String TABLE_NAME = "_form_service_cursor_2";
+
   private static final DataField URI_MD5_FORM_ID_PROPERTY = new DataField("URI_MD5_FORM_ID",
 	      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   private static final DataField AURI_SERVICE_PROPERTY = new DataField("AURI_SERVICE",
 	      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  
+
   private static final DataField EXT_SERVICE_TYPE_PROPERTY = new DataField("EXT_SERVICE_TYPE",
       DataField.DataType.STRING, false, 200L);
   private static final DataField EXTERNAL_SERVICE_OPTION = new DataField("EXTERNAL_SERVICE_OPTION",
@@ -61,6 +67,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
 		  DataField.DataType.BOOLEAN, true);
   private static final DataField OPERATIONAL_STATUS = new DataField("OPERATIONAL_STATUS",
 		  DataField.DataType.STRING, true, 80L);
+  private static final DataField RETRY_STATUS = new DataField("RETRY_STATUS",
+      DataField.DataType.STRING, true, 80L);
   private static final DataField ESTABLISHMENT_DATETIME = new DataField("ESTABLISHMENT_DATETIME",
       DataField.DataType.DATETIME, false);
   private static final DataField UPLOAD_COMPLETED_PROPERTY = new DataField("UPLOAD_COMPLETED",
@@ -78,7 +86,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
 
 	/**
 	 * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
-	 * 
+	 *
 	 * @param databaseSchema
 	 * @param tableName
 	 */
@@ -90,6 +98,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     fieldList.add(EXTERNAL_SERVICE_OPTION);
     fieldList.add(IS_EXTERNAL_SERVICE_PREPARED);
     fieldList.add(OPERATIONAL_STATUS);
+    fieldList.add(RETRY_STATUS);
     fieldList.add(ESTABLISHMENT_DATETIME);
     fieldList.add(UPLOAD_COMPLETED_PROPERTY);
     fieldList.add(LAST_UPLOAD_CURSOR_DATE_PROPERTY);
@@ -101,7 +110,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
 
 	/**
 	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 * 
+	 *
 	 * @param ref
 	 * @param user
 	 */
@@ -139,23 +148,37 @@ public final class FormServiceCursor extends CommonFieldsBase {
   public Boolean isExternalServicePrepared() {
 	  return getBooleanField(IS_EXTERNAL_SERVICE_PREPARED);
   }
-  
+
   public void setIsExternalServicePrepared(Boolean value) {
 	  setBooleanField(IS_EXTERNAL_SERVICE_PREPARED, value);
   }
-  
+
   public OperationalStatus getOperationalStatus() {
 	  String value = getStringField(OPERATIONAL_STATUS);
 	  if ( value == null ) return null;
 	  return OperationalStatus.valueOf(value);
   }
-  
+
   public void setOperationalStatus(OperationalStatus value) {
     if (!setStringField(OPERATIONAL_STATUS, value.name())) {
         throw new IllegalArgumentException("overflow operationalStatus");
     }
   }
-  
+// TODO: implement failure after N retries (TBD)
+// RetryStatus is added to support that determination.
+//
+//  public String getRetryStatus() {
+//     String value = getStringField(RETRY_STATUS);
+//     if ( value == null ) return null;
+//     return value;
+//  }
+//
+//  public void setRetryStatus(String value) {
+//    if (!setStringField(RETRY_STATUS, value)) {
+//      throw new IllegalArgumentException("overflow retryStatus");
+//    }
+//  }
+
   public Date getEstablishmentDateTime() {
     return getDateField(ESTABLISHMENT_DATETIME);
   }
@@ -237,12 +260,12 @@ public final class FormServiceCursor extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow formId");
     }
   }
-  
+
   public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException, ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
     IForm form = FormFactory.retrieveFormByFormId(getFormId(), cc);
     return constructExternalService(this, form, cc);
   }
-  
+
   private static FormServiceCursor relation = null;
 
   private static synchronized final FormServiceCursor assertRelation(CallingContext cc)
@@ -273,7 +296,60 @@ public final class FormServiceCursor extends CommonFieldsBase {
 
     return c;
   }
-  
+
+  /**
+   * Implement the generic deletion of an ExternalService task here.
+   * This needs to be within a TaskLock to prevent a concurrent update of the
+   * ExternalServiceCursor from leaving the ExternalServiceCursor object in the
+   * database while the underlying Publisher records
+   * (e.g., FusionTable2ParameterTable, GoogleSpreadsheet2ParameterTable)
+   * are deleted.
+   *
+   * @param service
+   * @param cc
+   * @return true if the deletion was successful
+   * @throws ODKDatastoreException
+   */
+  public static final boolean deleteExternalServiceTask(ExternalService service, CallingContext cc) throws ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    String uriExternalService = service.getFormServiceCursor().getUri();
+    TaskLock taskLock = ds.createTaskLock(user);
+    String pLockId = UUID.randomUUID().toString();
+    boolean deleted = false;
+    try {
+      if (taskLock.obtainLock(pLockId, uriExternalService, TaskLockType.UPLOAD_SUBMISSION)) {
+        taskLock = null;
+        service.delete(cc);
+        deleted = true;
+      }
+    } catch (ODKTaskLockException e1) {
+      e1.printStackTrace();
+    } finally {
+      if (!deleted) {
+        Log logger =LogFactory.getLog(FormServiceCursor.class);
+        logger.error("Unable to delete FormServiceCursor: " + service.getFormServiceCursor().getUri());
+      }
+    }
+    taskLock = ds.createTaskLock(user);
+    try {
+      for (int i = 0; i < 10; i++) {
+        if (taskLock.releaseLock(pLockId, uriExternalService, TaskLockType.UPLOAD_SUBMISSION))
+          break;
+        try {
+          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+        } catch (InterruptedException e) {
+          // just move on, this retry mechanism is to only
+          // make things
+          // nice
+        }
+      }
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+    }
+    return deleted;
+  }
+
   public static final List<ExternalService> getExternalServicesForForm(IForm form,
       CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
@@ -287,7 +363,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     List<? extends CommonFieldsBase> fscList = query.executeQuery();
     for (CommonFieldsBase cb : fscList) {
       FormServiceCursor c = (FormServiceCursor) cb;
-      
+
       ExternalService obj = constructExternalService(c, form, cc);
       esList.add(obj);
 
@@ -308,7 +384,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
       throw e;
     }
   }
-  
+
    public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate,
          CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
       List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
@@ -329,7 +405,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
       }
       return fscList;
    }
-   
+
    public static final ExternalService constructExternalService(FormServiceCursor fsc, IForm form,
        CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
      try {
@@ -338,15 +414,19 @@ public final class FormServiceCursor extends CommonFieldsBase {
          return new FusionTable(fsc, form, cc);
        case GOOGLE_SPREADSHEET:
          return new GoogleSpreadsheet(fsc, form, cc);
+       case JSON_SERVER:
+         return new JsonServer(fsc, form, cc);
        case OHMAGE_JSON_SERVER:
          return new OhmageJsonServer(fsc, form, cc);
+       case REDCAP_SERVER:
+         return new REDCapServer(fsc, form, cc);
        default:
          return null;
        }
      } catch (ODKOverQuotaException e) {
        throw e;
      } catch (Exception e) {
-       throw new ODKEntityNotFoundException("Some how DB entities got into problem state", e);
+       throw new ODKEntityNotFoundException("Somehow DB entities for publisher got into problem state", e);
      }
    }
 }

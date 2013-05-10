@@ -2,7 +2,7 @@ package org.opendatakit.aggregate.odktables;
 
 import java.util.List;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableRole;

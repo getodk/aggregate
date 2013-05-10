@@ -23,22 +23,23 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * The submission key represents an XPath-style identification of a particular data element
- * on the server.  The base 
- * 
+ * on the server.  The base
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class SubmissionKey {
-	private final String key;
-	
+
+  private final String key;
+
 	public SubmissionKey( String key ) {
 		this.key = key;
 	}
-	
+
 	/**
-	 * Used by form deletion. 
-	 * 
+	 * Used by form deletion.
+	 *
 	 * @param formId
 	 * @param modelVersion
 	 * @param uiVersion
@@ -61,7 +62,7 @@ public class SubmissionKey {
 		b.append(SubmissionKeyPart.K_CLOSE_BRACKET);
 		this.key = b.toString();
 	}
-	
+
 	public String toString() {
 		return key;
 	}
@@ -87,4 +88,11 @@ public class SubmissionKey {
 		}
 		return parts;
 	}
+
+	@Override
+   public boolean equals(Object obj) {
+	  if ( !(obj instanceof SubmissionKey) ) return false;
+	  SubmissionKey other = (SubmissionKey) obj;
+	  return (key == null) ? (other.key == null) : key.equals(other.key);
+   }
 }

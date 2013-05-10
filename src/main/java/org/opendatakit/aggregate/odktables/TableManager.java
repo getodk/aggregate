@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Scope;
@@ -140,6 +140,7 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public TableEntry getTable(String tableId) throws ODKDatastoreException {
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
     // get table entry
@@ -187,8 +188,9 @@ public class TableManager {
    *           if no table with the given table id was found
    * @throws ODKDatastoreException
    */
-  public TableEntry getTableNullSafe(String tableId) 
-      throws ODKEntityNotFoundException, ODKDatastoreException {
+  public TableEntry getTableNullSafe(String tableId) throws ODKEntityNotFoundException,
+      ODKDatastoreException {
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
     // get table entry entity
     Entity entryEntity = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
@@ -220,8 +222,11 @@ public class TableManager {
       List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries) 
           throws ODKEntityPersistException, 
       ODKDatastoreException, TableAlreadyExistsException {
+	Validate.notNull(tableId);
     Validate.notEmpty(tableId);
+	Validate.notNull(tableKey);
     Validate.notEmpty(tableKey);
+	Validate.notNull(dbTableName);
     Validate.notEmpty(dbTableName);
     Validate.notNull(type);
     // tableIdAccessControls can be null.
@@ -293,6 +298,7 @@ public class TableManager {
    */
   public void deleteTable(String tableId) throws ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException {
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
     List<Entity> entities = new ArrayList<Entity>();

@@ -38,6 +38,7 @@ import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -53,6 +54,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+
 
 public class AggregateUI implements EntryPoint {
 
@@ -111,7 +113,7 @@ public class AggregateUI implements EntryPoint {
     /*
      * CRITICAL NOTE: Do not do **anything** in this constructor that might
      * cause something underneath to call AggregateUI.get()
-     * 
+     *
      * The singleton is not yet assigned!!!
      */
     singleton = null;
@@ -196,8 +198,8 @@ public class AggregateUI implements EntryPoint {
   private void initializeUserAndPreferences() {
     lastUserInfoUpdateAttemptTimestamp = lastRealmInfoUpdateAttemptTimestamp = System
         .currentTimeMillis();
-   
-    
+
+
     // the first realm request will often fail because the cookie
     // should/could be null (e.g., for anonymous users).
     SecureGWT.getSecurityService().getRealmInfo(Cookies.getCookie("JSESSIONID"),
@@ -214,7 +216,7 @@ public class AggregateUI implements EntryPoint {
             // OK. So it failed. If it did, just try doing everything
             // again. We should have a valid session cookie after the
             // first failure, so these should all then work.
-            Preferences.updatePreferences();
+            Preferences.updatePreferences(null);
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
               @Override
@@ -251,7 +253,7 @@ public class AggregateUI implements EntryPoint {
 
           @Override
           public void onSuccess(RealmSecurityInfo result) {
-            Preferences.updatePreferences();
+            Preferences.updatePreferences(null);
             realmInfo = result;
             // it worked the first time! Now do the user info request.
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
@@ -385,7 +387,7 @@ public class AggregateUI implements EntryPoint {
 
     return subTab;
   }
-  
+
   public AggregateTabBase getTab(Tabs tabType) {
     return tabMap.get(tabType);
   }
@@ -551,8 +553,8 @@ public class AggregateUI implements EntryPoint {
       HelpSliderConsts[] helpVals = subTabObj.getHelpSliderContent();
       if (helpVals != null) {
         for (int i = 0; i < helpVals.length; i++) {
-          TreeItem helpItem = new TreeItem(helpVals[i].getTitle());
-          TreeItem content = new TreeItem(helpVals[i].getContent());
+          TreeItem helpItem = new TreeItem(SafeHtmlUtils.fromString(helpVals[i].getTitle()));
+          TreeItem content = new TreeItem(SafeHtmlUtils.fromString(helpVals[i].getContent()));
           helpItem.setState(false);
           helpItem.addItem(content);
           rootItem.addItem(helpItem);
@@ -566,11 +568,11 @@ public class AggregateUI implements EntryPoint {
   public void displayErrorPanel() {
     errorPanel.setVisible(true);
   }
-  
+
   public void hideErrorPanel() {
     errorPanel.setVisible(false);
   }
-  
+
   public void displayHelpPanel() {
     wrappingLayoutPanel.add(helpPanel);
     resize();
@@ -617,7 +619,7 @@ public class AggregateUI implements EntryPoint {
     displayErrorPanel();
     Window.alert(textMessage);
   }
-  
+
   public void clearError() {
     hideErrorPanel();
   }

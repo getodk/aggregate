@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;

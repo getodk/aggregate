@@ -30,21 +30,19 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class FilterSubTab extends AggregateSubTabBase {
 
+  public static final int DEFAULT_FETCH_LIMIT = 100;
+
   private FilterNavigationTable navTable;
-  
+
   private FiltersDataPanel filtersPanel;
   private SubmissionPanel submissionPanel;
-  
+
   private FilterGroup currentlyDisplayedFilterGroup;
-  private Boolean displayMetaData;
-  private int queryFilterLimit;
 
   public FilterSubTab() {
     // vertical
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
-    
-    queryFilterLimit = FilterGroup.DEFAULT_FETCH_LIMIT;
-    displayMetaData = false;
+
     getElement().setId("filter_sub_tab");
 
     // create Nav Panel
@@ -59,37 +57,36 @@ public class FilterSubTab extends AggregateSubTabBase {
     filtersNSubmissions.add(filtersPanel);
     filtersNSubmissions.getElement().getFirstChildElement().getFirstChildElement()
     .getFirstChildElement().setId("filters_panel"); // TODO: improve this
-    
+
     submissionPanel = new SubmissionPanel();
-    
+
     filtersNSubmissions.add(submissionPanel);
     filtersNSubmissions.getElement().setId("filters_data");
     filtersNSubmissions.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_JUSTIFY);
-    
+
     add(filtersNSubmissions);
   }
 
   private void setCurrentlyDisplayedFilterGroup(FilterGroup newFilterGroup) {
+    // preserve the fetch limit as we switch filters...
+    newFilterGroup.setQueryFetchLimit(getQueryFetchLimit());
     currentlyDisplayedFilterGroup = newFilterGroup;
-    currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
-    currentlyDisplayedFilterGroup.setQueryFetchLimit(queryFilterLimit);
     navTable.updateNavTable(newFilterGroup);
   }
-  
+
   public FilterGroup getDisplayedFilterGroup() {
     if(currentlyDisplayedFilterGroup == null) {
       return new FilterGroup(UIConsts.FILTER_NONE, null, null);
     }
     return currentlyDisplayedFilterGroup;
   }
-  
+
   public void updateAfterSave(FilterGroup filterGroup) {
     currentlyDisplayedFilterGroup = filterGroup;
-    currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
     navTable.updateNavAfterSave(filterGroup);
     update();
   }
-  
+
   public void switchFilterGroup(FilterGroup filterGroup) {
     // check if filter group is changed, if the same no need to do anything
     if(getDisplayedFilterGroup().equals(filterGroup)) {
@@ -102,7 +99,7 @@ public class FilterSubTab extends AggregateSubTabBase {
   public void removeFilterGroupWithinForm() {
     String formId = getDisplayedFilterGroup().getFormId();
     FilterGroup blankFilterGroup = new FilterGroup(UIConsts.FILTER_NONE, formId, null);
-    setCurrentlyDisplayedFilterGroup(blankFilterGroup);    
+    setCurrentlyDisplayedFilterGroup(blankFilterGroup);
     update();
   }
 
@@ -128,23 +125,21 @@ public class FilterSubTab extends AggregateSubTabBase {
     return submissionPanel.getSubmissionTable();
   }
 
-  public Boolean getDisplayMetaData() {
-    return displayMetaData;
-  }
-
   public void setDisplayMetaData(Boolean displayMetaData) {
-    this.displayMetaData = displayMetaData;
     this.currentlyDisplayedFilterGroup.setIncludeMetadata(displayMetaData);
   }
-  
+
   public int getQueryFetchLimit() {
-    return queryFilterLimit;
+    if (this.currentlyDisplayedFilterGroup != null) {
+      return this.currentlyDisplayedFilterGroup.getQueryFetchLimit();
+    }
+    return FilterGroup.DEFAULT_FETCH_LIMIT;
   }
+
   public void setQueryFetchLimit(int fetchLimit) {
-    this.queryFilterLimit = fetchLimit;
     this.currentlyDisplayedFilterGroup.setQueryFetchLimit(fetchLimit);
   }
-  
+
   @Override
   public HelpSliderConsts[] getHelpSliderContent() {
     return FilterConsts.values();

@@ -46,10 +46,10 @@ import com.google.gdata.util.AuthenticationException;
 
 /**
  * Common worker implementation for the creation of google spreadsheets.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WorksheetCreatorWorkerImpl {
 
@@ -60,9 +60,9 @@ public class WorksheetCreatorWorkerImpl {
 	private final ExternalServicePublicationOption esType;
 	private final CallingContext cc;
 	private final String pFormIdLockId;
-	
-	public WorksheetCreatorWorkerImpl(IForm form, 
-			SubmissionKey miscTasksKey, long attemptCount, 
+
+	public WorksheetCreatorWorkerImpl(IForm form,
+			SubmissionKey miscTasksKey, long attemptCount,
 			String spreadsheetName, ExternalServicePublicationOption esType,
 			CallingContext cc) {
 		this.form = form;
@@ -74,7 +74,7 @@ public class WorksheetCreatorWorkerImpl {
 		pFormIdLockId = UUID.randomUUID().toString();
 	}
 
-	private final GoogleSpreadsheet getGoogleSpreadsheetWithName() 
+	private final GoogleSpreadsheet getGoogleSpreadsheetWithName()
 						throws ODKDatastoreException {
 		List<ExternalService> remoteServers = FormServiceCursor
 				.getExternalServicesForForm(form, cc);
@@ -98,8 +98,8 @@ public class WorksheetCreatorWorkerImpl {
 	}
 
 	public final void worksheetCreator() {
-     
-     Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+
+     Log logger = LogFactory.getLog(WorksheetCreatorWorkerImpl.class);
      logger.info("Beginning Worksheet Creator: " + miscTasksKey.toString() +
                    " form " + form.getFormId());
 
@@ -107,18 +107,20 @@ public class WorksheetCreatorWorkerImpl {
 		try {
 		    t = new MiscTasks(miscTasksKey, cc);
 		} catch (Exception e) {
+        logger.error("worksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " MiscTasks retrieval exception: " + e.toString());
 			return;
 		}
 		// gain lock on the formId itself...
 		// the locked resource should be the formId, but for testing
-		// it is useful to have the external services collide using 
+		// it is useful to have the external services collide using
 		// formId.  Prefix with MT: to indicate that it is a miscellaneousTask
 		// lock.
 	    Datastore ds = cc.getDatastore();
 	    User user = cc.getCurrentUser();
 		String lockedResourceName = t.getMiscTaskLockName();
 		TaskLock formIdTaskLock = ds.createTaskLock(user);
-		
+
 		boolean locked = false;
 		try {
 			if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
@@ -128,22 +130,24 @@ public class WorksheetCreatorWorkerImpl {
 			formIdTaskLock = null;
 		} catch (ODKTaskLockException e1) {
 			e1.printStackTrace(); // Occasionally expected...
-		} 
-		
+		}
+
 		if(!locked) {
 		  return;
 		}
-		
+
 		try {
 		  if ( t.getRequestDate().before(form.getCreationDate())) {
 			  // form is newer, so the task must not refer to this form definition...
 			  doMarkAsComplete(t);
 		  } else {
 			  // worksheet creation request should have been created after the form...
-			  doWorksheetCreator();
+			  doWorksheetCreator(logger);
 		  }
 		} catch (Exception e2) {
 		  // some other unexpected exception...
+        logger.error("worksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " Unexpected exception from work body: " + e2.toString());
 		  e2.printStackTrace();
 		} finally {
 			formIdTaskLock = ds.createTaskLock(user);
@@ -155,7 +159,7 @@ public class WorksheetCreatorWorkerImpl {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
-						// just move on, this retry mechanism 
+						// just move on, this retry mechanism
 						// is to make things nice
 					}
 				}
@@ -164,15 +168,15 @@ public class WorksheetCreatorWorkerImpl {
 			}
 		}
 	}
-	
+
 	public void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException, ODKOverQuotaException {
 		// and mark us as completed... (don't delete for audit..).
 		t.setCompletionDate(new Date());
 		t.setStatus(FormActionStatus.SUCCESSFUL);
 		t.persist(cc);
 	}
-	
-	public final void doWorksheetCreator() {
+
+	public final void doWorksheetCreator(Log logger) {
 	  try {
 		// get spreadsheet
 		GoogleSpreadsheet spreadsheet = getGoogleSpreadsheetWithName();
@@ -185,31 +189,43 @@ public class WorksheetCreatorWorkerImpl {
 		// generate worksheets
 		try {
 			spreadsheet.generateWorksheets(cc);
+         logger.info("doWorksheetCreator: " + miscTasksKey.toString() +
+               " form " + form.getFormId() + " Successful worksheet creation!");
 		} catch ( AuthenticationException e ) {
+        logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " Exception: " + e.toString());
 		  throw new ODKExternalServiceCredentialsException(e);
+		} catch (ODKExternalServiceException e ) {
+        logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+            " form " + form.getFormId() + " Exception: " + e.toString());
+		  throw e;
 		} catch (Exception e) {
+	     logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+	                   " form " + form.getFormId() + " Exception: " + e.toString());
 			throw new ODKExternalServiceException(e);
 		}
 
 		// the above may have taken a while -- re-fetch the data to see if it has changed...
 	    MiscTasks r = new MiscTasks(miscTasksKey, cc);
 	    if ( attemptCount.equals(r.getAttemptCount()) ) {
-	    	
+	      // still the same attempt...
 			// if we need to upload submissions, start a task to do so
 	    	UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 			if (!esType.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
-				us.createFormUploadTask(spreadsheet.getFormServiceCursor(), cc);
+				us.createFormUploadTask(spreadsheet.getFormServiceCursor(), true, cc);
 			}
-			
+
 			doMarkAsComplete(r);
 	    }
 	  } catch (Exception e ) {
+       logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
+           " form " + form.getFormId() + " Initiating failure recovery: " + e.toString());
 		  failureRecovery(e);
 	  }
 	}
 
 	private void failureRecovery(Exception e) {
-	// three exceptions possible: 
+	// three exceptions possible:
 	// ODKFormNotFoundException, ODKDatastoreException, ODKExternalServiceException, Exception
 	e.printStackTrace();
 	MiscTasks r;
@@ -220,6 +236,9 @@ public class WorksheetCreatorWorkerImpl {
 	    	r.persist(cc);
 	    }
 	} catch (Exception ex) {
+     Log logger = LogFactory.getLog(WorksheetCreatorWorkerImpl.class);
+     logger.error("failureRecovery: " + miscTasksKey.toString() +
+         " form " + form.getFormId() + " Exception during failure recovery: " + ex.toString());
 		// something is hosed -- don't attempt to continue.
 		// TODO: watchdog: find this once lastRetryDate is way late?
 	}
