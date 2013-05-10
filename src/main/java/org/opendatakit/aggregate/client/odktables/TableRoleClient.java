@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.Lists;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This is the client-side version of
@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
  * @author sudar.sam@gmail.com
  *
  */
-public enum TableRoleClient {
+public enum TableRoleClient implements IsSerializable {
   NONE("No permissions. Can not see that the table exists."),
   
   FILTERED_READER("Can read properties and read filtered data .", 

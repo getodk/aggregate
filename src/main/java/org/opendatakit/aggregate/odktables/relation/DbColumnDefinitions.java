@@ -59,14 +59,26 @@ public class DbColumnDefinitions {
     dataFields.add(new DataField(JOINS, DataType.STRING, true));
   }
 
-  public static Relation getRelation(CallingContext cc) throws ODKDatastoreException {
+  public static Relation getRelation(CallingContext cc) 
+      throws ODKDatastoreException {
     Relation relation = 
         new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
     return relation;
   }
 
-  public static List<Entity> query(String tableId, CallingContext cc) throws ODKDatastoreException {
-    return getRelation(cc).query("DbColumn.query()", cc).equal(TABLE_ID, tableId).execute();
+  /**
+   * Gets all of the columns in the column definitions table. This will not
+   * include metadata columns present in the data tables, like last_mod_time
+   * or rowid.
+   * @param tableId
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static List<Entity> query(String tableId, CallingContext cc) 
+      throws ODKDatastoreException {
+    return getRelation(cc).query("DbColumnDefinitions.query()", cc)
+        .equal(TABLE_ID, tableId).execute();
   }
 
   /**
@@ -77,8 +89,8 @@ public class DbColumnDefinitions {
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<String> queryForColumnNames(String tableId, CallingContext cc)
-      throws ODKDatastoreException {
+  public static List<String> queryForColumnNames(String tableId, 
+      CallingContext cc) throws ODKDatastoreException {
     @SuppressWarnings("unchecked")
     List<String> columnNames = (List<String>) getRelation(cc)
         .query("DbColumn.queryForColumnNames()", cc).equal(TABLE_ID, tableId)

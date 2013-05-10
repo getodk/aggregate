@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 
 /**
  * Type of tables. The representation field is the magic string that has to
@@ -10,6 +12,6 @@ package org.opendatakit.aggregate.client.odktables;
  * @author sudars
  *
  */
-public enum TableTypeClient {
+public enum TableTypeClient implements IsSerializable {
   DATA, SECURITY, SHORTCUT;
 }

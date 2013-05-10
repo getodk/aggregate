@@ -1,12 +1,14 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * This is the client-side code of
  * {@link org.opendatakit.aggregate.odktables.entity.Column}
  * @author sudar.sam@gmail.com
  *
  */
-public class ColumnClient {
+public class ColumnClient implements IsSerializable{
   
   public enum ColumnType {
     STRING,
@@ -25,7 +27,9 @@ public class ColumnClient {
   private String joins;
 
   @SuppressWarnings("unused")
-  private ColumnClient() {}
+  private ColumnClient() {
+    // necessary for gwt serialization
+  }
 
   /**
    * Create a column. Spaces will be replaced by underscores. The backing 

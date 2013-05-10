@@ -27,6 +27,7 @@ import org.opendatakit.tables.sync.api.TablesConstants;
  * org.opendatakit.aggregate.odktables.entity.
  * 
  * @author the.dylan.price@gmail.com
+ * @author sudar.sam@gmail.com
  * 
  */
 
@@ -218,7 +219,9 @@ public class EntityConverter {
   }
 
   /**
-   * Convert a {@link DbTable} entity into a {@link Row}
+   * Convert a {@link DbTable} entity into a {@link Row}. The returned row 
+   * will have the {@link DbTable} metadata columns such as timestamp and 
+   * row_version set.
    * 
    * @param entity
    *          the {@link DbTable} entity.

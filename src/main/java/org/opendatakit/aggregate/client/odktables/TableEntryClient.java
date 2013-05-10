@@ -1,6 +1,6 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This is the client-side version of 
@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableEntryClient implements Serializable {
+public class TableEntryClient implements IsSerializable {
 
   /**
 	 * 

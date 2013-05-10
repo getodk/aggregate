@@ -1,11 +1,17 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * 
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesKeyValueStoreEntryClient {
+public class OdkTablesKeyValueStoreEntryClient implements IsSerializable {
+  
+  public OdkTablesKeyValueStoreEntryClient() { 
+    // necessary for gwt serialization
+  }
 
   public String tableId;
   public String partition;

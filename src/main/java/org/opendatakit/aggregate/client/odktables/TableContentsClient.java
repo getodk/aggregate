@@ -1,7 +1,8 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
 import java.util.List;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This represents the contents of a table. Essentially it is a wrapper
@@ -14,17 +15,15 @@ import java.util.List;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableContentsClient implements Serializable {
+public class TableContentsClient implements IsSerializable {
 	
 	/**
    * 
    */
   private static final long serialVersionUID = -6147882937837108750L;
   
-  /**
-   * Necessary for GWT serialization.
-   */
   public TableContentsClient() {
+    // necessary for gwt serialization
   }
 
   /**

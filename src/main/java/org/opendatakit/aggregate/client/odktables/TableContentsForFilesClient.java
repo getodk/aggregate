@@ -1,7 +1,8 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
 import java.util.List;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This represents the contents of a table that will display information about
@@ -16,17 +17,15 @@ import java.util.List;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableContentsForFilesClient implements Serializable {
+public class TableContentsForFilesClient implements IsSerializable {
    
    /**
    * 
    */
   private static final long serialVersionUID = -5644953958281330962L;
   
-  /**
-   * Necessary for GWT serialization.
-   */
   public TableContentsForFilesClient() {
+    // necessary for gwt serialization
   }
    
    /**

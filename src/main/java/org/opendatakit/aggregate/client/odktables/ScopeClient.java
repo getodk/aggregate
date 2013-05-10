@@ -1,10 +1,10 @@
 package org.opendatakit.aggregate.client.odktables;
 
-import java.io.Serializable;
 
-import org.apache.commons.lang.Validate;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.simpleframework.xml.Element;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This is the client-side version of org.opendatakit.aggregate.odktables.entity.Scope.java
@@ -15,7 +15,7 @@ import org.simpleframework.xml.Element;
  * @author sudar.sam@gmail.com
  *
  */
-public class ScopeClient implements Serializable {
+public class ScopeClient implements IsSerializable {
 
     /**
 	 * 

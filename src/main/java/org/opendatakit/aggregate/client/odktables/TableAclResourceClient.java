@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * This is the client-side version of 
  * org.opendatakit.aggregate.odktables.entity.api.TableAclResource.java.
@@ -10,7 +12,8 @@ package org.opendatakit.aggregate.client.odktables;
  * @author sudar.sam@gmail.com
  *
  */
-public class TableAclResourceClient extends TableAclClient {
+public class TableAclResourceClient extends TableAclClient 
+    implements IsSerializable{
 
   private String selfUri;
   private String aclUri;

@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * This is the client-side version of 
  * org.opendatakit.aggregate.odktables.entity.api.PropertiesResource.java.
@@ -11,12 +13,19 @@ package org.opendatakit.aggregate.client.odktables;
  * @author sudar.sam@gmail.com
  *
  */
-public class PropertiesResourceClient extends TablePropertiesClient {
+public class PropertiesResourceClient extends TablePropertiesClient 
+  implements IsSerializable{
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = -3016334795208571037L;
   private String selfUri;
   private String tableUri;
 
+  @SuppressWarnings("unused")
   private PropertiesResourceClient() {
+    // necessary for gwt serialization
   }
 
   public PropertiesResourceClient(TablePropertiesClient tableProperties) {
