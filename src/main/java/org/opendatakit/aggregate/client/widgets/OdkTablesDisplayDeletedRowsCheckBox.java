@@ -28,7 +28,7 @@ public class OdkTablesDisplayDeletedRowsCheckBox extends AggregateCheckBox
 
 	public OdkTablesDisplayDeletedRowsCheckBox(OdkTablesViewTableSubTab tableSubTab, 
 			Boolean accept) {
-		super(null, TOOLTIP_TXT, HELP_BALLOON_TXT);
+		super(TOOLTIP_TXT, HELP_BALLOON_TXT);
 		this.tableSubTab = tableSubTab;
 		setValue(accept);
 		
