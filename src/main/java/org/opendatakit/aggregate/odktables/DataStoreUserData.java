@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
-import org.opendatakit.aggregate.server.ServerPreferences;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;

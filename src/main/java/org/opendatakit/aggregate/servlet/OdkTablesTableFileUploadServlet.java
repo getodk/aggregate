@@ -315,7 +315,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
              out.write("<p>No files have been uploaded!</p>");
              out.write("<p>You must select a file to upload.</p>");
              out.write("<p>Click ");
-             out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+             out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
              out.write(" to return try again.</p>");
              out.write(HtmlConsts.BODY_CLOSE);
              out.write(HtmlConsts.HTML_CLOSE);			    
@@ -326,7 +326,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
              out.write("<p>No files have been uploaded!</p>");
              out.write("<p>You must enter a key for the file.</p>");
              out.write("<p>Click ");
-             out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+             out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
              out.write(" to return try again.</p>");
              out.write(HtmlConsts.BODY_CLOSE);
              out.write(HtmlConsts.HTML_CLOSE);
@@ -339,7 +339,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
     			  out.write(HtmlConsts.BODY_OPEN);
     			  out.write("<p>Successful file upload.</p>");
     			  out.write("<p>Click ");
-    			  out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+    			  out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
     			  out.write(" to return to add another file.</p>");
     			  out.write(HtmlConsts.BODY_CLOSE);
     			  out.write(HtmlConsts.HTML_CLOSE);
@@ -365,7 +365,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
              }
              out.write("<p>You must resolve these conflicts.</p>");
              out.write("<p>Click ");
-             out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here"));
+             out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
              out.write(" to return try again.</p>");             
              out.write(HtmlConsts.BODY_CLOSE);
              out.write(HtmlConsts.HTML_CLOSE);
