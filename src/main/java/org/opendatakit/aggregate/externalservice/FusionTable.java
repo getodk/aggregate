@@ -67,10 +67,10 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class FusionTable extends OAuth2ExternalService implements ExternalService {
   private static final int MAX_INSERT_STRING_LEN = 30000;
@@ -96,7 +96,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
 
   /**
    * Common base initialization of a FusionTable (both new and existing).
-   * 
+   *
    * @param entity
    * @param formServiceCursor
    * @param form
@@ -112,7 +112,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
   /**
    * Continuation of the creation of a brand new FusionTable. Needed because
    * entity must be passed into two objects in the constructor.
-   * 
+   *
    * @param entity
    * @param form
    * @param externalServiceOption
@@ -145,7 +145,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
   /**
    * Reconstruct a FusionTable definition from its persisted representation in
    * the datastore.
-   * 
+   *
    * @param formServiceCursor
    * @param form
    * @param cc
@@ -163,7 +163,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
 
   /**
    * Create a brand new FusionTable
-   * 
+   *
    * @param form
    * @param externalServiceOption
    * @param ownerUserEmail
@@ -183,7 +183,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
   /**
    * Helper function to create a FusionTable parameter table (missing the
    * not-yet-created tableId).
-   * 
+   *
    * @param ownerEmail
    * @param cc
    * @return
@@ -513,7 +513,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
         createViewStmt += " = T" + counter + ".'" + FormatConsts.HEADER_PARENT_UID + "' \n";
         counter++;
       }
-      createViewStmt += ")";          
+      createViewStmt += ")";
       resultRequest = executeStmt(POST, FUSION_TABLE_QUERY_API, createViewStmt, null, cc);
     } catch (ODKExternalServiceException e) {
       logger.error("Failed to create fusion table VIEW: " + e.getMessage());
@@ -626,7 +626,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
   /**
    * Private class that turns a submission into the formatted strings to be
    * batched
-   * 
+   *
    */
 
   private class FusionTableFormattedSubmission {
@@ -720,7 +720,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
 
   /**
    * Private class that determines how to break up the submission into batches
-   * 
+   *
    */
   private class SubmissionBatcher {
 
@@ -767,10 +767,10 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     /**
      * Get string for batch insert, removes the string so not available after
      * the first call
-     * 
-     * 
+     *
+     *
      * @param tableId
-     * 
+     *
      * @return string and remove from batch temp storage
      */
     String getBatchInsertString(String tableId) {
@@ -794,10 +794,10 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     /**
      * Processes the next group of submissions producing the strings for group
      * inserts
-     * 
+     *
      * Throws an exception if all strings have not been removed as assuming if
      * not removed, never got transmitted
-     * 
+     *
      * @return true if more submissions need to be processed to be sent, false
      *         if all submissions have been processed
      * @throws ODKExternalServiceException
@@ -827,10 +827,12 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
         for (String tableId : tableIds) {
           String formattedSubmissionStr = formatSub.getFormattedStringForTable(tableId);
           String concatStr = formattedSubmissionStrings.get(tableId);
-          if (concatStr != null) {
-            concatStr += "; " + formattedSubmissionStr;
+          if (concatStr != null && concatStr.length() != 0) {
+            if ( formattedSubmissionStr.length() != 0 ) {
+              concatStr += "; " + formattedSubmissionStr;
+            }
           } else {
-            concatStr = formattedSubmissionStr;
+              concatStr = formattedSubmissionStr;
           }
           formattedSubmissionStrings.put(tableId, concatStr);
         }
