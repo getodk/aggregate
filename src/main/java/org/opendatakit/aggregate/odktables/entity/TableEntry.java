@@ -1,12 +1,11 @@
 package org.opendatakit.aggregate.odktables.entity;
 
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;
 
 /**
- * A TableEntry defines very only the tableId, the tableKey (for now), and 
+ * A TableEntry defines very only the tableId, the tableKey (for now), and
  * etags for the data and the properties. This stands in as a quick point of
  * reference for clients to access properties and data etags to see if changes
  * have been made.
@@ -26,7 +25,7 @@ public class TableEntry {
   protected TableEntry() {
   }
 
-  public TableEntry(final String tableId, String tableKey, 
+  public TableEntry(final String tableId, String tableKey,
       final String dataEtag, final String propertiesEtag) {
     this.tableId = tableId;
     this.tableKey = tableKey;
@@ -107,10 +106,10 @@ public class TableEntry {
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId 
-        + ", tableKey=" + tableKey 
+    return "TableEntry [tableId=" + tableId
+        + ", tableKey=" + tableKey
         + ", dataEtag=" + dataEtag
-        + ", propertiesEtag=" + propertiesEtag 
+        + ", propertiesEtag=" + propertiesEtag
         + "]";
   }
 }

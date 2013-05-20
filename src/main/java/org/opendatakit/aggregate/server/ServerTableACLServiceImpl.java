@@ -22,13 +22,12 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
-import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.entity.api.TableAclResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -38,7 +37,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		ServerTableACLService {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 9023285673934784466L;
 
@@ -51,7 +50,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
 		    AuthFilter af = new AuthFilter(tableId, cc);
-		    
+
 		    af.checkPermission(TablePermission.READ_ACL);
 		    List<TableAcl> acls = am.getAcls();
 		    return transformTableAclList(acls);
@@ -86,13 +85,13 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public List<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException, 
+	public List<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException,
 			RequestFailureException, PermissionDeniedExceptionClient, DatastoreFailureException {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);		
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.READ_ACL);
 		    List<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
 		    return transformTableAclList(acls);
@@ -113,7 +112,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);	
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.READ_ACL);
 		    TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
 		    return UtilTransforms.transform(acl);
@@ -127,13 +126,13 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public TableAclClient getUserAcl(String userId, String tableId) throws AccessDeniedException, 
+	public TableAclClient getUserAcl(String userId, String tableId) throws AccessDeniedException,
 			RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);	
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.READ_ACL);
 		    if (userId.equals("null"))
 		      userId = null;
@@ -149,13 +148,13 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public TableAclClient getGroupAcl(String groupId, String tableId) throws AccessDeniedException, 
+	public TableAclClient getGroupAcl(String groupId, String tableId) throws AccessDeniedException,
 			RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);	
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.READ_ACL);
 		    TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
 		    return UtilTransforms.transform(acl);
@@ -180,7 +179,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.WRITE_ACL);
 		    acl = UtilTransforms.transform(am.setAcl(
-		        new Scope(Scope.Type.DEFAULT, null), 
+		        new Scope(Scope.Type.DEFAULT, null),
 		    		this.transformTableRoleClient(acl.getRole())));
 		    // Need to be careful here. A lot of transforming going on,
 		    // and it isn't clear on if the acl parameter is passed in
@@ -204,12 +203,12 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);		
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.WRITE_ACL);
 		    if (userId.equals("null"))
 		      userId = null;
 		    acl = UtilTransforms.transform(am.setAcl(
-		        new Scope(Scope.Type.USER, userId), 
+		        new Scope(Scope.Type.USER, userId),
 		    		this.transformTableRoleClient(acl.getRole())));
 		    // Need to be careful here. A lot of transforming going on,
 		    // and it isn't clear on if the acl parameter is passed in
@@ -234,10 +233,10 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);	
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.WRITE_ACL);
 		    acl = UtilTransforms.transform(am.setAcl(
-		        new Scope(Scope.Type.GROUP, groupId), 
+		        new Scope(Scope.Type.GROUP, groupId),
 		    		this.transformTableRoleClient(acl.getRole())));
 		    // Need to be careful here. A lot of transforming going on,
 		    // and it isn't clear on if the acl parameter is passed in
@@ -261,7 +260,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);		
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.DELETE_ACL);
 		    am.deleteAcl(new Scope(Scope.Type.DEFAULT, null));
 	    } catch (ODKDatastoreException e) {
@@ -281,7 +280,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);			
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.DELETE_ACL);
 		    am.deleteAcl(new Scope(Scope.Type.USER, userId));
 	    } catch (ODKDatastoreException e) {
@@ -301,7 +300,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
 	    try {
 		    TableAclManager am = new TableAclManager(tableId, cc);
-		    AuthFilter af = new AuthFilter(tableId, cc);		
+		    AuthFilter af = new AuthFilter(tableId, cc);
 		    af.checkPermission(TablePermission.DELETE_ACL);
 		    am.deleteAcl(new Scope(Scope.Type.USER, groupId));
 	    } catch (ODKDatastoreException e) {
@@ -312,7 +311,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
-	
+
   private TableAclResourceClient getResource(TableAcl acl, TableAclManager am, UriInfo info) {
 	    String tableId = am.getTableId();
 	    Scope.Type type = acl.getScope().getType();
@@ -344,8 +343,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    resource.setAclUri(acls.toASCIIString());
 	    resource.setTableUri(table.toASCIIString());
 	    return UtilTransforms.transform(resource);
-  }	
-  
+  }
+
   private List<TableAclResourceClient> getResources(List<TableAcl> acls,
 		  TableAclManager am, UriInfo info) {
 	    List<TableAclResourceClient> resources = new ArrayList<TableAclResourceClient>();
@@ -354,7 +353,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 	    }
 	    return resources;
   }
-  
+
   /*
    * This method transforms a TableRole into a TableRoleClient.
    */
@@ -375,10 +374,10 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 		  return TableRole.OWNER;
 	  default:
 		  throw new IllegalStateException("No assignable permissions in transforming table role, " +
-		  		"ServerTableACLServiceImpl."); 		
+		  		"ServerTableACLServiceImpl.");
 	  }
   }
-  
+
   /*
    * This transforms a list of TableAcl objects to a list of
    * TableAclClient objects.

@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import org.apache.commons.lang3.Validate;
-import org.opendatakit.aggregate.client.odktables.ScopeClient;
 import org.simpleframework.xml.Element;
 
 public class Scope {
@@ -26,7 +25,7 @@ public class Scope {
 
   /**
    * Constructs a new Scope.
-   * 
+   *
    * @param type
    *          the type of the scope. Must not be null. The empty scope may be
    *          accessed as {@link Scope#EMPTY_SCOPE}.
@@ -86,7 +85,7 @@ public class Scope {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -100,7 +99,7 @@ public class Scope {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -124,7 +123,7 @@ public class Scope {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

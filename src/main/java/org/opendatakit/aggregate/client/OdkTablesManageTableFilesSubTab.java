@@ -3,24 +3,13 @@ package org.opendatakit.aggregate.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTableFileInfo;
-import org.opendatakit.aggregate.client.widgets.AggregateListBox;
-import org.opendatakit.aggregate.client.widgets.OdkTablesDisplayDeletedRowsCheckBox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
-import org.opendatakit.aggregate.client.widgets.TableEntryClientListBox;
-import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -35,16 +24,16 @@ import com.google.gwt.user.client.ui.ListBox;
  * table. And then you can come to this page to see which files are actually
  * associated with the table, as well as set the keys which will say which file
  * does what.
- * 
+ *
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
 
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
   private FlexTable selectTablePanel;
-  
+
   // the string constants for adding a file
   private static final String ADD_FILE_TXT = "Add a table file";
   private static final String ADD_FILE_TOOLTIP_TXT = "Upload a file";
@@ -57,7 +46,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   /**
    * This will be the box that lets you choose which of the tables you are going
    * to view.
-   * 
+   *
    * @return
    */
   private ListBox tableBox;
@@ -82,7 +71,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   public OdkTablesManageTableFilesSubTab() {
 
     addFileButton = new ServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
-        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT, 
+        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT,
         ADD_FILE_BALLOON_TXT);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
@@ -134,7 +123,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
     add(tableFileData);
 
   }
-  
+
   /**
    * Call this to remove any currently displayed data, set the selected table
    * in the list box to zero, and generally reset this page.
@@ -143,7 +132,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
     selectedValue = 0;
     tableBox.setSelectedIndex(0);
     updateContentsForSelectedTable();
-  }  
+  }
 
   private void updateTableList() {
     SecureGWT.getServerTableService()
@@ -160,7 +149,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
 
         addTablesToListBox(tables);
         tableBox.setItemSelected(selectedValue, true);
-        
+
         // This makes the server go crazy with requests.
         //AggregateUI.getUI().getTimer().refreshNow();
 
@@ -177,7 +166,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   /*
    * temporarily existed to display deleted rows public Boolean
    * getDisplayDeleted() { return displayDeleted; }
-   * 
+   *
    * public void setDisplayDeleted(Boolean display) { this.displayDeleted =
    * display; }
    */
@@ -231,14 +220,14 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   public void updateTableData() {
     tableFileData.updateDisplay(currentTable);
   }
-  
+
   /**
-   * Set the table to be displayed. You have to set the it in 
+   * Set the table to be displayed. You have to set the it in
    * the selectedValue and update it. O(n), could be improved.
    * @param tableId
    */
   public void setCurrentTable(String tableId) {
-    boolean foundTable = false; 
+    boolean foundTable = false;
     // We want to traverse the list of tables and find the index.
     for (int i = 0; i < currentTables.size(); i++) {
       if (currentTables.get(i).getTableId().equals(tableId)) {

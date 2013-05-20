@@ -19,16 +19,15 @@ import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
-import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.tables.sync.api.TablesConstants;
 
 /**
  * Converts between datastore {@link Entity} objects and domain objects in
  * org.opendatakit.aggregate.odktables.entity.
- * 
+ *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 
 public class EntityConverter {
@@ -39,9 +38,9 @@ public class EntityConverter {
   public TableEntry toTableEntry(Entity entity, String tableKey) {
     String tableId = entity.getId();
     String dataEtag = entity.getString(DbTableEntry.DATA_ETAG);
-    String propertiesEtag = 
+    String propertiesEtag =
         entity.getString(DbTableEntry.PROPERTIES_ETAG);
-    TableEntry entry = new TableEntry(tableId, tableKey, dataEtag, 
+    TableEntry entry = new TableEntry(tableId, tableKey, dataEtag,
         propertiesEtag);
     return entry;
   }
@@ -49,13 +48,13 @@ public class EntityConverter {
   /**
    * Convert a list of {@link DbTableEntry} entities to a list of
    * {@link TableEntry}
-   * 
+   *
    * @param entities
    *          the entities to convert
    * @param tableKeys
    *          a map of tableIds to tableKeys
    */
-  public List<TableEntry> toTableEntries(List<Entity> entities, 
+  public List<TableEntry> toTableEntries(List<Entity> entities,
       Map<String, String> tableKeys) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
     for (int i = 0; i < entities.size(); i++) {
@@ -75,7 +74,7 @@ public class EntityConverter {
     String elementName = entity.getString(DbColumnDefinitions.ELEMENT_NAME);
     String elementTypeStr = entity.getString(DbColumnDefinitions.ELEMENT_TYPE);
     ColumnType elementType = ColumnType.valueOf(elementTypeStr);
-    String listChildElementKeys = 
+    String listChildElementKeys =
         entity.getString(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS);
     int isPersisted = entity.getInteger(DbColumnDefinitions.IS_PERSISTED);
     String joins = entity.getString(DbColumnDefinitions.JOINS);
@@ -85,7 +84,7 @@ public class EntityConverter {
   }
 
   /**
-   * Convert a list of {@link DbColumnDefinitions} entities to a list of 
+   * Convert a list of {@link DbColumnDefinitions} entities to a list of
    * {@link Column} objects.
    */
   public List<Column> toColumns(List<Entity> entities) {
@@ -95,16 +94,16 @@ public class EntityConverter {
     }
     return columns;
   }
-  
+
   public TableProperties toTableProperties(List<Entity> kvsEntities,
       String tableKey, String propertiesEtag) {
-    List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+    List<OdkTablesKeyValueStoreEntry> kvsEntries =
         toOdkTablesKeyValueStoreEntry(kvsEntities);
     TableProperties properties = new TableProperties(propertiesEtag, tableKey,
         kvsEntries);
     return properties;
   }
-  
+
   public OdkTablesKeyValueStoreEntry toOdkTablesKeyValueStoreEntry(
       Entity entity) {
     String tableId = entity.getString(DbKeyValueStore.TABLE_ID);
@@ -122,7 +121,7 @@ public class EntityConverter {
     entry.value = value;
     return entry;
   }
-  
+
   /**
    * Return a TableDefinition based upon the {@link Entity} parameter, which
    * must have been generated from the {@link DbTableDefinitions} relation.
@@ -133,7 +132,7 @@ public class EntityConverter {
   public TableDefinition toTableDefinition(Entity definitionEntity) {
     String tableId = definitionEntity.getString(DbTableDefinitions.TABLE_ID);
     String tableKey = definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
-    String dbTableName = 
+    String dbTableName =
         definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
     String tableTypeStr = definitionEntity.getString(DbTableDefinitions.TYPE);
     TableType tableType = TableType.valueOf(tableTypeStr);
@@ -142,10 +141,10 @@ public class EntityConverter {
     return new TableDefinition(tableId, null, tableKey, dbTableName, tableType,
         tableIdAccessControls);
   }
-  
+
   public List<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
       List<Entity> kvsEntities) {
-    List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+    List<OdkTablesKeyValueStoreEntry> kvsEntries =
         new ArrayList<OdkTablesKeyValueStoreEntry>();
     for (Entity entity : kvsEntities) {
       kvsEntries.add(toOdkTablesKeyValueStoreEntry(entity));
@@ -184,7 +183,7 @@ public class EntityConverter {
    * Convert a {@link Column} to a {@link DataField}
    */
   public DataField toField(Column column) {
-    // ss: exactly what the point of this method is eludes me. However, I 
+    // ss: exactly what the point of this method is eludes me. However, I
     // believe that the "type" of an ODK Tables Column on the aggregate side
     // is always a string. Tables permits more complicated types like image,
     // location, etc, and therefore there is no way/reason to map each level
@@ -198,7 +197,7 @@ public class EntityConverter {
    * Convert a {@link DbColumnDefinitions} entity to a {@link DataField}
    */
   public DataField toField(Entity entity) {
-    // ss: exactly what the point of this method is eludes me. However, I 
+    // ss: exactly what the point of this method is eludes me. However, I
     // believe that the "type" of an ODK Tables Column on the aggregate side
     // is always a string. Tables permits more complicated types like image,
     // location, etc, and therefore there is no way/reason to map each level
@@ -219,10 +218,10 @@ public class EntityConverter {
   }
 
   /**
-   * Convert a {@link DbTable} entity into a {@link Row}. The returned row 
-   * will have the {@link DbTable} metadata columns such as timestamp and 
+   * Convert a {@link DbTable} entity into a {@link Row}. The returned row
+   * will have the {@link DbTable} metadata columns such as timestamp and
    * row_version set.
-   * 
+   *
    * @param entity
    *          the {@link DbTable} entity.
    * @param columns
@@ -258,10 +257,10 @@ public class EntityConverter {
     row.setValues(getRowValues(entity, columns));
     return row;
   }
-  
+
   /**
-   * This method creates a row from an entity retrieved from the 
-   * DbTableFileInfo table. It makes use of the static List of 
+   * This method creates a row from an entity retrieved from the
+   * DbTableFileInfo table. It makes use of the static List of
    * String column names in that class.
    * @param entity
    * @return
@@ -293,12 +292,12 @@ public class EntityConverter {
 	    values.put(columnName, value);
 	  }
 	  row.setValues(values);
-	  return row;  
+	  return row;
   }
-  
+
   /**
    * Return a list of rows from a list of entities queried from the
-   * DbTableFileInfo table. Just calls {@link toRowFromFileInfo()} 
+   * DbTableFileInfo table. Just calls {@link toRowFromFileInfo()}
    * for every entity in the list. However, it does NOT include
    * deleted rows.
    * @param entities
@@ -317,7 +316,7 @@ public class EntityConverter {
 
   /**
    * Convert a {@link DbLogTable} entity into a {@link Row}
-   * 
+   *
    * @param entity
    *          the {@link DbLogTable} entity.
    * @param columns
@@ -361,7 +360,7 @@ public class EntityConverter {
   /**
    * Convert a list of {@link DbTable} or {@link DbLogTable} entities into a
    * list of {@link Row}
-   * 
+   *
    * @param entities
    *          the {@link DbTable} or {@link DbLogTable} entities
    * @param columns
@@ -370,7 +369,7 @@ public class EntityConverter {
    *          true if the rows are from the {@link DbLogTable}
    * @return the converted rows
    */
-  public List<Row> toRows(List<Entity> entities, List<Entity> columns, 
+  public List<Row> toRows(List<Entity> entities, List<Entity> columns,
       boolean fromLogTable) {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {

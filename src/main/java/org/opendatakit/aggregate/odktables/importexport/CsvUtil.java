@@ -1,43 +1,21 @@
 package org.opendatakit.aggregate.odktables.importexport;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.joda.time.ReadableInstant;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.ImportFromCSVExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
-import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
-import org.opendatakit.aggregate.client.odktables.RowClient;
-import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.relation.RUtil;
-import org.opendatakit.aggregate.server.ServerDataServiceImpl;
-import org.opendatakit.aggregate.server.ServerOdkTablesUtil;
-import org.opendatakit.aggregate.server.ServerTableServiceImpl;
-import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
- * Holds various things for importing and exporting tables through CSVs. 
+ * Holds various things for importing and exporting tables through CSVs.
  * <p>
  * Modified from the same class on the phone.
  * @author sudar.sam@gmail.com
@@ -55,13 +33,13 @@ public class CsvUtil {
    * Tables imported through this function are added to the active key value
    * store. Doing it another way would give users a workaround to add tables to
    * the server database.
-   * 
+   *
    * @param file
    * @param tableName
    * @return
    */
-  public boolean importNewTable(BufferedReader buffReader, String tableName, 
-      CallingContext cc) throws ImportFromCSVExceptionClient, 
+  public boolean importNewTable(BufferedReader buffReader, String tableName,
+      CallingContext cc) throws ImportFromCSVExceptionClient,
       EtagMismatchExceptionClient, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     LogFactory.getLog(getClass())
@@ -76,7 +54,7 @@ public class CsvUtil {
 //        return true;
 //      }
 //      // adding columns
-//      // For the server, I think this should never happen, because this is 
+//      // For the server, I think this should never happen, because this is
 //      // only going to be a JSON activity...right?
 //      //if ((row.length == 1) && (row[0].startsWith("{"))) {
 //      //  tp.setFromJson(row[0]);
@@ -92,13 +70,13 @@ public class CsvUtil {
 //      // Here we add the columns.
 //      for (int i = startIndex; i < row.length; i++) {
 //        //tp.addColumn(row[i]);
-//        // TODO on the phone it imports with "none". Make sure that there is a 
-//        // similar default on the server. Atm I'm using "string", which might 
+//        // TODO on the phone it imports with "none". Make sure that there is a
+//        // similar default on the server. Atm I'm using "string", which might
 //        // not be the answer.
 //        // TODO make the proper safe_name_entry here. Replace spaces with
 //        // underscores, precede with underscore.
 //        //String backingName = RUtil.convertToDbSafeBackingColumnName(row[i]);
-//        ColumnClient newCol = new ColumnClient(row[i], 
+//        ColumnClient newCol = new ColumnClient(row[i],
 //            ColumnClient.ColumnType.STRING);
 //        // TODO check for name conflicts
 //        columns.add(newCol);
@@ -107,7 +85,7 @@ public class CsvUtil {
 //      boolean includeTs = row[0].equals(LAST_MOD_TIME_LABEL);
 //      boolean includePn = (!includeTs || (row.length > 1))
 //          && row[includeTs ? 1 : 0].equals(SRC_PHONE_LABEL);
-//      return importTable(reader, tableName, 
+//      return importTable(reader, tableName,
 //         columns, includeTs, includePn, cc);
 //    } catch (FileNotFoundException e) {
 //      return false;
@@ -119,7 +97,7 @@ public class CsvUtil {
   /*
   public boolean importAddToTable(File file, String tableId) {
     // TODO is this the correct KVS to get the properties from?
-    TableProperties tp = 
+    TableProperties tp =
         TableProperties.getTablePropertiesForTable(dbh, tableId,
         KeyValueStore.Type.ACTIVE);
     try {
@@ -151,10 +129,10 @@ public class CsvUtil {
     }
   }*/
 
-  private boolean importTable(CSVReader reader, String tableName, 
-      List<ColumnClient> columns, boolean includeTs, boolean includePn, 
-      CallingContext cc) throws BadColumnNameExceptionClient, 
-      EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, 
+  private boolean importTable(CSVReader reader, String tableName,
+      List<ColumnClient> columns, boolean includeTs, boolean includePn,
+      CallingContext cc) throws BadColumnNameExceptionClient,
+      EntityNotFoundExceptionClient, PermissionDeniedExceptionClient,
       EtagMismatchExceptionClient, ImportFromCSVExceptionClient {
     return false; // unimplemented and out of date.
 //    int tsIndex = includeTs ? 0 : -1;
@@ -164,7 +142,7 @@ public class CsvUtil {
 //    try {
 //      String newTableId = CommonFieldsBase.newUri();
 //      PropertiesMetadata metadataObject = new PropertiesMetadata(newTableId,
-//          tableName, columns); 
+//          tableName, columns);
 //      String metadataString = metadataObject.getAsJson();
 //      TableManager tm = new TableManager(cc);
 //      TableDefinitionClient tableDef = new TableDefinitionClient(
@@ -176,7 +154,7 @@ public class CsvUtil {
 //      // is ok.
 //      TableEntryClient tableEntry = ServerOdkTablesUtil.createTable(
 //          newTableId, tableDef, cc);
-//      
+//
 //      // And now add all the rows for the doowop.
 //      //ServerDataServiceImpl dataService = new ServerDataServiceImpl();
 //      Map<String, String> values = new HashMap<String, String>();
@@ -188,7 +166,7 @@ public class CsvUtil {
 //        // we want to generate a UUID for each row.
 //        String newRowId = UUID.randomUUID().toString();
 //        RowClient newTableRow = RowClient.forInsert(newRowId, values);
-//        // So I think atm, that both of these should be -1, as we're not 
+//        // So I think atm, that both of these should be -1, as we're not
 //        // allowing any ADDING to the table at this point from the server via
 //        // CSV.
 //        //String lastModTime = tsIndex == -1 ? du.formatNowForDb() : row[tsIndex];
@@ -200,7 +178,7 @@ public class CsvUtil {
 //        //dbt.addRow(values, lastModTime, srcPhone);
 //        //dataService.createOrUpdateRow(newTableId, newRowId, newTableRow);
 //        // TODO if this fails we should probably delete the table we've created
-//        ServerOdkTablesUtil.createOrUpdateRow(newTableId, newRowId, 
+//        ServerOdkTablesUtil.createOrUpdateRow(newTableId, newRowId,
 //            newTableRow, cc);
 //        values.clear();
 //        row = reader.readNext();
@@ -212,7 +190,7 @@ public class CsvUtil {
 //      return false;
 //    } catch (DatastoreFailureException e) {
 //      e.printStackTrace();
-//      throw new ImportFromCSVExceptionClient("datastore failure in CsvUtil", 
+//      throw new ImportFromCSVExceptionClient("datastore failure in CsvUtil",
 //          e);
 //    } catch (RequestFailureException e) {
 //      e.printStackTrace();
@@ -234,7 +212,7 @@ public class CsvUtil {
     return export(file, tableId, includeTs, includePn, false);
   }
 
-  
+
   private boolean export(File file, String tableId, boolean includeTs, boolean includePn,
       boolean raw) {
     // TODO test that this is the correct KVS to get the export from.

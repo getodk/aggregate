@@ -6,26 +6,23 @@ import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesViewTableSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
+import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteRowButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 
 /**
  * Displays the contents of a table.
- * 
+ *
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 public class OdkTablesViewTable extends FlexTable {
 
@@ -67,7 +64,7 @@ public class OdkTablesViewTable extends FlexTable {
     this.currentTable = null;
   }
 
-  public OdkTablesViewTable(AggregateSubTabBase tableSubTab, 
+  public OdkTablesViewTable(AggregateSubTabBase tableSubTab,
       TableEntryClient table) {
     this(tableSubTab);
 
@@ -99,7 +96,7 @@ public class OdkTablesViewTable extends FlexTable {
 
   public void updateData(TableEntryClient table) {
     // set up the callback object
-    AsyncCallback<TableContentsClient> getDataCallback = 
+    AsyncCallback<TableContentsClient> getDataCallback =
         new AsyncCallback<TableContentsClient>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -129,7 +126,7 @@ public class OdkTablesViewTable extends FlexTable {
       }
     };
 
-    SecureGWT.getServerDataService().getTableContents(table.getTableId(), 
+    SecureGWT.getServerDataService().getTableContents(table.getTableId(),
         getDataCallback);
   }
 
@@ -137,54 +134,54 @@ public class OdkTablesViewTable extends FlexTable {
    * public void updateRows(TableEntryClient table) { // set up the callback
    * object AsyncCallback<List<RowClient>> getRowsCallback = new
    * AsyncCallback<List<RowClient>>() {
-   * 
+   *
    * @Override public void onFailure(Throwable caught) {
    * AggregateUI.getUI().reportError(caught); }
-   * 
+   *
    * @Override public void onSuccess(List<RowClient> rowList) { rows = rowList;
    * setRows(rows);
-   * 
+   *
    * AggregateUI.getUI().getTimer().refreshNow();
-   * 
+   *
    * } };
-   * 
+   *
    * // otherwise, we need to get the data.
    * SecureGWT.getServerDataService().getRows(table.getTableId(),
    * getRowsCallback); }
-   * 
+   *
    * /** updates the column names.
-   * 
+   *
    * @param table
-   * 
+   *
    * public void updateColumns(TableEntryClient table) {
-   * 
+   *
    * AsyncCallback<List<String>> columnNamesCallback = new
    * AsyncCallback<List<String>>() {
-   * 
+   *
    * @Override public void onFailure(Throwable caught) {
    * AggregateUI.getUI().reportError(caught); }
-   * 
+   *
    * @Override public void onSuccess(List<String> columns) { columnNames =
    * columns; setColumnHeadings(columns);
-   * 
+   *
    * AggregateUI.getUI().getTimer().refreshNow();
-   * 
+   *
    * }
-   * 
-   * 
+   *
+   *
    * };
-   * 
-   * 
+   *
+   *
    * SecureGWT.getServerDataService().getColumnNames(table.getTableId(),
    * columnNamesCallback);
-   * 
+   *
    * }
    */
 
   /**
-   * This is the method that actually updates the column headings. It is its 
-   * own method so that it can be called cleanly in the updateTableData method. 
-   * If the code is AFTER the call to SecureGWT, as it was at first, you can 
+   * This is the method that actually updates the column headings. It is its
+   * own method so that it can be called cleanly in the updateTableData method.
+   * If the code is AFTER the call to SecureGWT, as it was at first, you can
    * get null pointer exceptions, as the async callback may have not returned.
    */
   private void setColumnHeadings(List<String> columns) {
@@ -247,7 +244,7 @@ public class OdkTablesViewTable extends FlexTable {
         // this point)
         if (!row.isDeleted()) {
           // now set the delete button
-          setWidget(currentRow, 0, new OdkTablesDeleteRowButton(this, 
+          setWidget(currentRow, 0, new OdkTablesDeleteRowButton(this,
               currentTable.getTableId(), row.getRowId()));
           int j = 1;
           for (String column : columnNames) {

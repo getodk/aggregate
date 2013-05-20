@@ -1,15 +1,11 @@
 package org.opendatakit.aggregate.server;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,21 +13,16 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.exception.TableAlreadyExistsExceptionClient;
-import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.ServerTableService;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.api.TableService;
-import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
-import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.impl.api.TableServiceImpl;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -40,14 +31,13 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class ServerTableServiceImpl extends RemoteServiceServlet implements ServerTableService {
 
   /**
-	 * 
+	 *
 	 */
   private static final long serialVersionUID = 3291707708959185034L;
   private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
@@ -70,7 +60,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
         public int compare(TableEntryClient o1, TableEntryClient o2) {
           return o1.getTableKey().compareToIgnoreCase(o2.getTableKey());
         }});
-      
+
       return clientEntries;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
@@ -103,8 +93,8 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
    * CommonfieldsBase.
    */
   @Override
-  public TableEntryClient createTable(String tableId, 
-      TableDefinitionClient definition) throws AccessDeniedException, 
+  public TableEntryClient createTable(String tableId,
+      TableDefinitionClient definition) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, TableAlreadyExistsExceptionClient {
     // check for null UUID, assign random if true.

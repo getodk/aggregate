@@ -8,7 +8,6 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -19,7 +18,7 @@ public class OdkTablesConfirmDeleteTablePopup extends AbstractPopupBase {
 	  private static final String HELP_BALLOON_TXT = "Completely delete this table.";
 
 	  private final String tableId;
-	  
+
 	  private OdkTablesTableList parentTable;
 
 	  public OdkTablesConfirmDeleteTablePopup(OdkTablesTableList parentTable,

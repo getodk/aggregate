@@ -2,7 +2,6 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.opendatakit.common.ermodel.simple.Entity;
@@ -27,17 +26,17 @@ import org.opendatakit.common.web.CallingContext;
  * --BLOB_TYPE (the type of what the value is pointing to. eg file, int, String)
  * --VALUE (the unique identifer to the set in the blob relation. So this is the
  * value that you would get and then use to query the blobset to get the actual
- * set of 1 file.) 
- * --IS_MEDIA: this tells you if the file is actually a media file that 
- * should not be displayed with the regular files. Instead it should be 
+ * set of 1 file.)
+ * --IS_MEDIA: this tells you if the file is actually a media file that
+ * should not be displayed with the regular files. Instead it should be
  * accessed as a link to a popup as in FormList.
  * <p>
  * Each file is uploaded as an "EntitySet" of size 1. This set comes with a
  * unique key that allows access of all the files in the set, which in this case
  * will just have an "attachment count" of one, as the set is only of size one.
- * 
+ *
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 public class DbTableFileInfo {
 
@@ -53,7 +52,7 @@ public class DbTableFileInfo {
   // be displayed to the user on the server. The underscore will be truncated.
   public static final String TABLE_ID = "TABLE_UUID";
   public static final String KEY = "_KEY";
-  
+
   // This is really the type of the entry to say what the value will be. if it
   // is of type file, then the value is the key to the blobset of size one
   // that has the file. If the type is string, then the value is the actual
@@ -98,9 +97,9 @@ public class DbTableFileInfo {
     columnNames = Collections.unmodifiableList(columns);
   }
 
-  public static Relation getRelation(CallingContext cc) 
+  public static Relation getRelation(CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME, 
+    Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME,
         dataFields, cc);
     return relation;
   }
@@ -108,12 +107,12 @@ public class DbTableFileInfo {
   /**
    * I'm pretty sure this returns the entries for the passed in table id.
    */
-  public static List<Entity> query(String tableId, CallingContext cc) 
+  public static List<Entity> query(String tableId, CallingContext cc)
       throws ODKDatastoreException {
     return getRelation(cc).query("DbTableFileInfo.query()", cc)
         .equal(TABLE_ID, tableId).execute();
   }
-  
+
   /**
    * Get all the non-media files that have been uploaded for the given table
    * id. This will be things that have been uploaded directly, not as media
@@ -123,12 +122,12 @@ public class DbTableFileInfo {
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<Entity> queryForNonMediaFiles(String tableId, 
+  public static List<Entity> queryForNonMediaFiles(String tableId,
       CallingContext cc) throws ODKDatastoreException {
     return getRelation(cc).query("DbTableFileInfo.queryForNonMediaFiles", cc)
         .equal(TABLE_ID, tableId).equal(IS_MEDIA, false).execute();
   }
-  
+
   /**
    * Return the media files for the given table that are associated with the
    * given key. Being associated with the given key is checked by comparing
@@ -140,7 +139,7 @@ public class DbTableFileInfo {
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<Entity> queryForMediaFiles(String tableId, String key, 
+  public static List<Entity> queryForMediaFiles(String tableId, String key,
       CallingContext cc) throws ODKDatastoreException {
     List<Entity> allFiles = query(tableId, cc);
     List<Entity> mediaFiles = new ArrayList<Entity>();
@@ -159,13 +158,13 @@ public class DbTableFileInfo {
    * These are the types that are currently supported in the datastore. They are
    * important for knowing how to generate the manifest of what needs to be
    * pushed to the phone.
-   * 
+   *
    * @author sudars
-   * 
+   *
    */
   public enum Type {
     // TODO: this should maybe be "text" rather than string to match the sql
-    // lite db on the phone, and also contain doubles. also shouldn't use the 
+    // lite db on the phone, and also contain doubles. also shouldn't use the
     // name field, as that is an enum term.
     STRING("string"), INTEGER("integer"), FILE("file");
 

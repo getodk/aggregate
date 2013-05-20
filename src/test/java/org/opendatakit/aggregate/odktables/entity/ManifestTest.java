@@ -13,14 +13,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
-import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
-import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.TestContextFactory;
 
 /**
  * Super basic test to see if the jackson library worked as expected.
@@ -28,12 +21,12 @@ import org.opendatakit.common.web.TestContextFactory;
  *
  */
 public class ManifestTest {
-	
-	@Test 
+
+	@Test
 	public void test() {
 		assertTrue(true);
 	}
-	
+
 	@Test
 	public void toJson() throws JsonGenerationException, JsonMappingException, IOException {
 		OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
@@ -41,30 +34,30 @@ public class ManifestTest {
 		entry.tableId = "this-is-a-uuid";
 		entry.value = "{greetings, I am a json string (no i'm not) }";
 		entry.type = "file";
-		
+
 		OdkTablesKeyValueStoreEntry entry2 = new OdkTablesKeyValueStoreEntry();
 		entry2.key = "box";
 		entry2.tableId = "this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND";
 		entry2.value = "guess what's in the box...";
 		entry2.type = "surprise";
-		
+
 		List<OdkTablesKeyValueStoreEntry> entryList = new ArrayList<OdkTablesKeyValueStoreEntry>();
 		entryList.add(entry);
 		entryList.add(entry2);
-		
+
 		OdkTablesKeyValueManifestManager manifest = new OdkTablesKeyValueManifestManager();
 		manifest.addEntries(entryList);
-		
+
 		assertEquals("[{\"tableId\":\"this-is-a-uuid\",\"tableName\":\"brother_of_skyrim_weapons\",\"key\":\"list\",\"type\":\"file\",\"value\":\"{greetings, I am a json string (no i'm not) }\"},{\"tableId\":\"this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND\",\"tableName\":\"sister_of_skyrim_weapons\",\"key\":\"box\",\"type\":\"surprise\",\"value\":\"guess what's in the box...\"}]",
 				manifest.getManifestForTesting());
 	}
-	
+
 	/**
 	 * This will hopefully take things from a manifest and convert them to objects.
 	 * The manifest comes from a certain snapshot of the datastore.
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws IOException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
 	@Test
 	public void getObjectsFromManifest() throws JsonParseException, JsonMappingException, IOException {
@@ -86,13 +79,13 @@ public class ManifestTest {
 		System.out.println(entries.get(1).key);
 		System.out.println(entries.get(1).tableId);
 		System.out.println(entries.get(1).type);
-		System.out.println(entries.get(1).value);	
-		
+		System.out.println(entries.get(1).value);
+
 		OdkTablesFileManifestEntry fileEntry = mapper.readValue(entries.get(0).value, OdkTablesFileManifestEntry.class);
 		System.out.println(fileEntry.downloadUrl);
 		System.out.println(fileEntry.filename);
 		System.out.println(fileEntry.md5hash);
 	}
-	
+
 
 }

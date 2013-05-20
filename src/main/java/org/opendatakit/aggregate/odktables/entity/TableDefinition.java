@@ -21,30 +21,30 @@ import org.simpleframework.xml.Root;
 @Root
 @Default(value = DefaultType.FIELD, required = false)
 public class TableDefinition {
-  
+
   /**
-   * This is based roughly on the ODK Tables Schema Google Doc. The required 
-   * elements are those that are not allowed to be null in 
+   * This is based roughly on the ODK Tables Schema Google Doc. The required
+   * elements are those that are not allowed to be null in
    * {@link DbTableDefinitions}.
    */
-  
+
   @Element(name = "table_id", required = true)
   private String tableId;
-  
+
   @Element(name = "table_key", required = true)
   private String tableKey;
-  
+
   @Element(name = "db_table_name", required = true)
   private String dbTableName;
-  
+
   @Element(name = "type", required = true)
   private TableType type;
-  
+
   @Element(name = "table_id_access_controls", required = false)
   private String tableIdAccessControls;
 
   /*
-   * While not defined in DbTableDefinitions, this was originally how 
+   * While not defined in DbTableDefinitions, this was originally how
    * column information was uploaded to the server, and will remain
    * this way for now.
    */
@@ -55,7 +55,6 @@ public class TableDefinition {
 //  @Element(required = false)
 //  private String metadata;
 
-  @SuppressWarnings("unused")
   protected TableDefinition() {
   }
 
@@ -65,7 +64,7 @@ public class TableDefinition {
    * @param columns list of {@link Column} objects
    * @param tableKey key of the table
    * @param dbTableName the db name of the table
-   * @param type the string type of the table (must be one of 
+   * @param type the string type of the table (must be one of
    *     {@link TableTypeClient#getRepresentation()})
    * @param tableIdAccessControls id of the table holding access controls
    */
@@ -83,7 +82,7 @@ public class TableDefinition {
   public String getTableId() {
     return this.tableId;
   }
-  
+
   public String getTableKey() {
     return this.tableKey;
   }
@@ -91,15 +90,15 @@ public class TableDefinition {
   public List<Column> getColumns() {
     return this.columns;
   }
-  
+
   public TableType getType() {
     return this.type;
   }
-  
+
   public String getTableIdAccessControls() {
     return this.tableIdAccessControls;
   }
-  
+
   public String getDbTableName() {
     return this.dbTableName;
   }
@@ -111,7 +110,7 @@ public class TableDefinition {
   @Override
   public String toString() {
     return "TableDefinition [tableId=" + tableId + ", columns=" + columns +
-        ", tableKey=" + tableKey + ", dbTableName=" + dbTableName + 
+        ", tableKey=" + tableKey + ", dbTableName=" + dbTableName +
         ", type=" + type + ", tableIdAccessControls=" + tableIdAccessControls
         + "]";
   }

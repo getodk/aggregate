@@ -1,8 +1,5 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
-import org.opendatakit.aggregate.client.odktables.TableAclClient;
-import org.opendatakit.aggregate.client.odktables.TableAclResourceClient;
-import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -73,7 +70,7 @@ public class TableAclResource extends TableAcl {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -88,7 +85,7 @@ public class TableAclResource extends TableAcl {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -120,7 +117,7 @@ public class TableAclResource extends TableAcl {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

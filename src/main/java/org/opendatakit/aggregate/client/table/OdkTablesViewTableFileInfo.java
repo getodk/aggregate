@@ -5,16 +5,11 @@ import java.util.List;
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesManageTableFilesSubTab;
-import org.opendatakit.aggregate.client.OdkTablesViewTableSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
-import org.opendatakit.aggregate.client.odktables.RowClient;
-import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.popups.MediaFileListPopup;
 import org.opendatakit.aggregate.client.popups.OdkTablesMediaFileListPopup;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
@@ -22,7 +17,6 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -32,9 +26,9 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * Displays the entries in the {@link DbTableFileInfo} table that pertain to a
  * specific table.
- * 
+ *
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 public class OdkTablesViewTableFileInfo extends FlexTable {
 
@@ -43,7 +37,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
 
   // that table's info rows
   //private List<RowClient> rows;
-  
+
   private List<FileSummaryClient> fileSummaries;
 
   // columnnames.
@@ -52,14 +46,14 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   private static final int DELETE_COLUMN = 0;
   // this is the heading for the delete row button.
   private static final String DELETE_HEADING = "Delete";
-  
+
   private static final int FILENAME_COLUMN = 2;
   private static final String FILENAME_HEADING = "Filename";
   private static final int KEY_COLUMN = 1;
   private static final String KEY_HEADING = "Key";
   private static final int MEDIA_FILE_COLUMN = 3;
   private static final String MEDIA_FILE_HEADING = "Media files";
-  
+
   private static final int numColumns = 4;
 
   // this is just the tab that opened the table
@@ -79,9 +73,9 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
    * Should this even exist?
    */
   public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab) {
-    
+
     setColumnHeadings();
-    
+
     // add styling
     addStyleName("dataTable");
     getElement().setId("form_management_table");
@@ -92,7 +86,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
     this.currentTable = null;
   }
 
-  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab, 
+  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab,
       TableEntryClient table) {
     this(tableSubTab);
 
@@ -121,13 +115,13 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
 
   public void updateData(TableEntryClient table) {
     // set up the callback object
-    AsyncCallback<TableContentsForFilesClient> getDataCallback = 
+    AsyncCallback<TableContentsForFilesClient> getDataCallback =
         new AsyncCallback<TableContentsForFilesClient>() {
       @Override
       public void onFailure(Throwable caught) {
         if (caught instanceof EntityNotFoundExceptionClient) {
           // if this happens it is PROBABLY, but not necessarily, because
-          // we've deleted the table. 
+          // we've deleted the table.
           // TODO ensure the correct exception makes it here
           ((OdkTablesManageTableFilesSubTab) AggregateUI.getUI()
               .getSubTab(SubTabs.MANAGEFILES)).setTabToDislpayZero();
@@ -149,16 +143,16 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
       }
     };
 
-    SecureGWT.getServerDataService().getFileInfoContents(table.getTableId(), 
+    SecureGWT.getServerDataService().getFileInfoContents(table.getTableId(),
         getDataCallback);
   }
-  
+
   private void setColumnHeadings() {
     // create the table headers.
     setText(0, DELETE_COLUMN, DELETE_HEADING);
     setText(0, FILENAME_COLUMN, FILENAME_HEADING);
     setText(0, KEY_COLUMN, KEY_HEADING);
-    setText(0, MEDIA_FILE_COLUMN, MEDIA_FILE_HEADING); 
+    setText(0, MEDIA_FILE_COLUMN, MEDIA_FILE_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
   }
 
@@ -220,20 +214,20 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
       this.getFlexCellFormatter().setColSpan(1, 0,
           numColumns);
     } else { // there are rows--display them.
-      
+
       for (int j = 0; j < fileSummaries.size(); j++) {
         FileSummaryClient sum = fileSummaries.get(j);
-        setWidget(currentRow, DELETE_COLUMN, 
-          new OdkTablesDeleteFileButton(this.basePanel, 
+        setWidget(currentRow, DELETE_COLUMN,
+          new OdkTablesDeleteFileButton(this.basePanel,
           currentTable.getTableId(), sum.getId()));
         setText(currentRow, KEY_COLUMN, sum.getKey());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
         Widget mediaCount;
         if (sum.getNumMediaFiles() > 0) {
-          Anchor mediaCountLink = 
+          Anchor mediaCountLink =
               new Anchor(Integer.toString(sum.getNumMediaFiles()));
           mediaCountLink.addClickHandler(new MediaFileListClickHandler(
-              currentTable.getTableId(), sum.getKey())); 
+              currentTable.getTableId(), sum.getKey()));
           mediaCount = mediaCountLink;
         } else {
           mediaCount = new HTML(Integer.toString(sum.getNumMediaFiles()));
@@ -264,7 +258,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
 //        if (!row.isDeleted()) {
 //          // now set the delete button
 //          setWidget(currentRow, 0,
-//              new OdkTablesDeleteFileButton(this.basePanel, 
+//              new OdkTablesDeleteFileButton(this.basePanel,
 //                  currentTable.getTableId(), row.getRowId()));
 //          int j = 1;
 //          for (String column : columnNames) {
@@ -282,25 +276,25 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
 //      }
 //    }
   }
-  
+
   private class MediaFileListClickHandler implements ClickHandler {
 
     private String tableId;
     private String key;
-    
+
     public MediaFileListClickHandler(String tableId, String key) {
       this.tableId = tableId;
       this.key = key;
     }
-    
+
     @Override
     public void onClick(ClickEvent event) {
-      OdkTablesMediaFileListPopup mediaListpopup = 
+      OdkTablesMediaFileListPopup mediaListpopup =
           new OdkTablesMediaFileListPopup(tableId, key);
       mediaListpopup.setPopupPositionAndShow(
           mediaListpopup.getPositionCallBack());
     }
-    
-  } 
+
+  }
 
 }

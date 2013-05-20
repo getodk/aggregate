@@ -1,22 +1,15 @@
 package org.opendatakit.aggregate.client.widgets;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.submission.Column;
-import org.opendatakit.aggregate.constants.common.UIDisplayType;
-
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.ListBox;
 
 /**
  * This will just provide a list box of String values. It is modeled after
- * ColumnListBox. 
- * 
+ * ColumnListBox.
+ *
  * NB: not currently used, b/c can't do updates and whatnot.
- * 
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -43,5 +36,5 @@ public class TableEntryClientListBox extends AggregateListBox {
 	    	}
 	    }
 	  }
-	  
+
 }
