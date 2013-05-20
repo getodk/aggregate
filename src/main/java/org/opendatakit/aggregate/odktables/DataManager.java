@@ -30,10 +30,10 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Manages read, insert, update, and delete operations on the rows of a table.
- * 
+ *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 
 public class DataManager {
@@ -48,7 +48,7 @@ public class DataManager {
 
   /**
    * Construct a new DataManager.
-   * 
+   *
    * @param tableId
    *          the unique identifier of the table
    * @param cc
@@ -78,7 +78,7 @@ public class DataManager {
 
   /**
    * Retrieve all current rows of the table.
-   * 
+   *
    * @return all the rows of the table.
    * @throws ODKDatastoreException
    */
@@ -90,7 +90,7 @@ public class DataManager {
 
   /**
    * Retrieve all current rows of the table, filtered by the given scope.
-   * 
+   *
    * @param scope
    *          the scope to filter by
    * @return all the rows of the table, filtered by the given scope
@@ -107,7 +107,7 @@ public class DataManager {
   /**
    * Retrieve all current rows of the table, filtered by rows that match any of
    * the given scopes.
-   * 
+   *
    * @param scopes
    *          the scopes to filter by
    * @return all the rows of the table, filtered by the given scopes
@@ -132,7 +132,7 @@ public class DataManager {
 
   /**
    * Retrieves a set of rows representing the changes since the given data etag.
-   * 
+   *
    * @param dataEtag
    *          the data etag
    * @return the rows which have changed or been added since the given data etag
@@ -148,7 +148,7 @@ public class DataManager {
   /**
    * Retrieves a set of row representing the changes since the given data etag,
    * and filtered to rows which match the given scope.
-   * 
+   *
    * @param dataEtag
    *          the data etag
    * @param scope
@@ -167,7 +167,7 @@ public class DataManager {
   /**
    * Retrieves a set of row representing the changes since the given data etag,
    * and filtered to rows which match any of the given scopes.
-   * 
+   *
    * @param dataEtag
    *          the data etag
    * @param scopes
@@ -189,12 +189,11 @@ public class DataManager {
     // mod number
     Collections.sort(entities, new Comparator<Entity>() {
       public int compare(Entity o1, Entity o2) {
-        Long time1 = 
+        Long time1 =
             Long.parseLong(o1.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
-        Long time2 = 
+        Long time2 =
             Long.parseLong(o2.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
-        // TODO: is this a safe cast? likely no...
-        return (int) (time1 - time2);
+        return Long.compare(time1,time2);
       }
     });
     List<Row> logRows = converter.toRows(entities, columns, true);
@@ -218,7 +217,7 @@ public class DataManager {
   /**
    * Narrows the given {@link DbLogTable} query to filter to rows which match
    * the given scope.
-   * 
+   *
    * @param query
    *          the query
    * @param scope
@@ -237,7 +236,7 @@ public class DataManager {
    * list of unique rows. In the case where there is more than one row with the
    * same rowId, only the last (highest index) row is included in the returned
    * list.
-   * 
+   *
    * @param rows
    *          the rows
    * @return the list of unique rows
@@ -252,7 +251,7 @@ public class DataManager {
 
   /**
    * Retrieve a row from the table.
-   * 
+   *
    * @param rowId
    *          the id of the row
    * @return the row, or null if no such row exists
@@ -269,7 +268,7 @@ public class DataManager {
 
   /**
    * Retrieve a row from the table.
-   * 
+   *
    * @param rowId
    *          the id of the row
    * @return the row
@@ -286,7 +285,7 @@ public class DataManager {
   /**
    * Insert a single row into the table. This is equivalent to calling
    * {@link #insertRows(List)} with a list of size 1.
-   * 
+   *
    * @param row
    *          the row to insert. See {@link Row#forInsert(String, String, Map)}.
    *          {@link Row#getRowEtag()}, {@link Row#isDeleted()},
@@ -312,7 +311,7 @@ public class DataManager {
 
   /**
    * Insert a list of rows.
-   * 
+   *
    * @param rows
    *          the list of rows. See
    *          {@link Row#forInsert(String, String, java.util.Map)}.
@@ -341,7 +340,7 @@ public class DataManager {
 
   /**
    * Updates a row. This is equivalent to calling {@link #updateRows(List)}.
-   * 
+   *
    * @param row
    *          the row to update. See {@link Row#forUpdate(String, String, Map)}.
    *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
@@ -369,7 +368,7 @@ public class DataManager {
 
   /**
    * Updates a list of rows.
-   * 
+   *
    * @param rows
    *          the rows to update. See
    *          {@link Row#forUpdate(String, String, java.util.Map)}
@@ -387,7 +386,7 @@ public class DataManager {
    * @throws BadColumnNameException
    *           if one of the passed in rows set a value for a column which
    *           doesn't exist in the table
-   * 
+   *
    */
   public List<Row> updateRows(List<Row> rows) throws ODKEntityNotFoundException,
       ODKDatastoreException, ODKTaskLockException, EtagMismatchException, BadColumnNameException {
@@ -416,15 +415,15 @@ public class DataManager {
 
       // create or update entities
       if (insert) {
-        rowEntities = 
+        rowEntities =
             creator.newRowEntities(table, rows, dataEtag, columns, cc);
       } else {
-        rowEntities = 
+        rowEntities =
             creator.updateRowEntities(table, dataEtag, rows, columns, cc);
       }
 
       // create log table entries
-      List<Entity> logEntities = 
+      List<Entity> logEntities =
           creator.newLogEntities(logTable, dataEtag, rowEntities, columns, cc);
 
       // update db
@@ -440,7 +439,7 @@ public class DataManager {
   /**
    * Delete a row. This is equivalent to calling {@link #deleteRows(List)} with
    * a list of size 1.
-   * 
+   *
    * @param rowId
    *          the row to delete.
    * @throws ODKEntityNotFoundException
@@ -457,7 +456,7 @@ public class DataManager {
 
   /**
    * Deletes a set of rows.
-   * 
+   *
    * @param rowIds
    *          the rows to delete.
    * @throws ODKEntityNotFoundException
@@ -470,7 +469,7 @@ public class DataManager {
     Validate.noNullElements(rowIds);
 
     // lock table
-    LockTemplate lock = new LockTemplate(tableId, 
+    LockTemplate lock = new LockTemplate(tableId,
         ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
       lock.acquire();
@@ -491,7 +490,7 @@ public class DataManager {
       }
 
       // create log table entries
-      List<Entity> logRows = 
+      List<Entity> logRows =
           creator.newLogEntities(logTable, dataEtag, rows, columns, cc);
 
       // update db
