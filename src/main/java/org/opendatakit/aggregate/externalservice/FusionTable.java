@@ -178,6 +178,7 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
       String ownerEmail, CallingContext cc) throws ODKEntityPersistException,
       ODKOverQuotaException, ODKDatastoreException {
     this(newFusionTableEntity(ownerEmail, cc), form, externalServiceOption, cc);
+    persist(cc);
   }
 
   /**
@@ -210,13 +211,16 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
     try {
       if (accessToken == null && !forceRefresh) {
         accessToken = ServerPreferencesProperties.getServerPreferencesProperty(cc,
-            ServerPreferencesProperties.GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN);
+            ServerPreferencesProperties.GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN +
+            "|" + objectEntity.getOwnerEmail());
       }
 
       if (accessToken == null || forceRefresh) {
-        accessToken = getOAuth2AccessToken(FUSION_TABLE_OAUTH2_SCOPE, cc);
+        accessToken = getOAuth2AccessToken(FUSION_TABLE_OAUTH2_SCOPE,
+                                           objectEntity.getOwnerEmail(), cc);
         ServerPreferencesProperties.setServerPreferencesProperty(cc,
-            ServerPreferencesProperties.GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN, accessToken);
+            ServerPreferencesProperties.GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN +
+            "|" + objectEntity.getOwnerEmail(), accessToken);
       }
       return accessToken;
     } catch (Exception e) {
