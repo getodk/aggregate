@@ -1,7 +1,5 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -28,7 +26,7 @@ public class TableResource extends TableEntry {
   public String getSelfUri() {
     return this.selfUri;
   }
-  
+
   public String getDefinitionUri() {
     return this.definitionUri;
   }
@@ -52,7 +50,7 @@ public class TableResource extends TableEntry {
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
   }
-  
+
   public void setDefinitionUri(final String definitionUri) {
     this.definitionUri = definitionUri;
   }
@@ -75,7 +73,7 @@ public class TableResource extends TableEntry {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -128,7 +126,7 @@ public class TableResource extends TableEntry {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -146,7 +144,7 @@ public class TableResource extends TableEntry {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

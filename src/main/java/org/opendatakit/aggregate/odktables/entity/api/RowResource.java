@@ -1,7 +1,5 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
-import org.opendatakit.aggregate.client.odktables.RowClient;
-import org.opendatakit.aggregate.client.odktables.RowResourceClient;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;

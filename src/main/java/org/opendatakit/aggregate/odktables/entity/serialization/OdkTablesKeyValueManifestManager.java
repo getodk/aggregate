@@ -6,15 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesFileManifestEntry;
@@ -24,7 +20,6 @@ import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
-import org.opendatakit.aggregate.server.ServerDataServiceImpl;
 import org.opendatakit.aggregate.servlet.OdkTablesTableFileDownloadServlet;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -42,17 +37,17 @@ import org.opendatakit.common.web.constants.BasicConsts;
  *
  */
 public class OdkTablesKeyValueManifestManager {
-	
+
 	private List<OdkTablesKeyValueStoreEntry> entries;
-	
+
 	private ObjectMapper mapper;
-	
+
 	private String tableId;
-	
+
 	private CallingContext cc;
-	
+
 	private String manifest = null;
-	
+
 	/**
 	 * Get the manifest ready for a specific table.
 	 */
@@ -61,7 +56,7 @@ public class OdkTablesKeyValueManifestManager {
 		this.cc = cc;
 		mapper = new ObjectMapper();
 	}
-	
+
 	/**
 	 * Generic constructor. Used mostly for testing the json serialization,
 	 * not for use in actual manifest generation for tables.
@@ -70,25 +65,25 @@ public class OdkTablesKeyValueManifestManager {
 		mapper = new ObjectMapper();
 		entries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Get the manifest in the format of a JSON String. It generates the manifest
 	 * the first time it is called. This meant if the object was created and something
 	 * was changed in the datastore, it might not be up to date. This seems unlikely/
 	 * unimportant.
 	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonGenerationException 
-	 * @throws AccessDeniedException 
-	 * @throws RequestFailureException 
-	 * @throws DatastoreFailureException 
-	 * @throws PermissionDeniedExceptionClient 
+	 * @throws IOException
+	 * @throws JsonMappingException
+	 * @throws JsonGenerationException
+	 * @throws AccessDeniedException
+	 * @throws RequestFailureException
+	 * @throws DatastoreFailureException
+	 * @throws PermissionDeniedExceptionClient
 	 */
-	public String getManifest() throws JsonGenerationException, JsonMappingException, IOException, 
-			PermissionDeniedExceptionClient, DatastoreFailureException, RequestFailureException, 
+	public String getManifest() throws JsonGenerationException, JsonMappingException, IOException,
+			PermissionDeniedExceptionClient, DatastoreFailureException, RequestFailureException,
 			AccessDeniedException {
 		if (manifest == null) {
 			entries = getEntries();
@@ -96,14 +91,14 @@ public class OdkTablesKeyValueManifestManager {
 		}
 		return manifest;
 	}
-	
+
 	/**
 	 * Gets the entries in the manifest for the tableId.
 	 */
-	public List<OdkTablesKeyValueStoreEntry> getEntries() throws 
+	public List<OdkTablesKeyValueStoreEntry> getEntries() throws
 			PermissionDeniedExceptionClient, DatastoreFailureException, RequestFailureException,
 			AccessDeniedException, JsonGenerationException, IOException {
-		
+
 		try {
 		    List<Row> infoRows = EntityConverter.toRowsFromFileInfo(DbTableFileInfo.query(tableId, cc));
 			TableManager tm = new TableManager(cc);
@@ -131,20 +126,20 @@ public class OdkTablesKeyValueManifestManager {
 						Map<String, String> properties = new HashMap<String, String>();
 						properties.put(ServletConsts.BLOB_KEY, row.getValues().get(DbTableFileInfo.VALUE));
 						properties.put(ServletConsts.AS_ATTACHMENT, "true");
-						String url = cc.getServerURL() + BasicConsts.FORWARDSLASH + 
+						String url = cc.getServerURL() + BasicConsts.FORWARDSLASH +
 								OdkTablesTableFileDownloadServlet.ADDR;
 						fileEntry.downloadUrl = HtmlUtil.createLinkWithProperties(url, properties);
 						// now convert this object to json and set it to the entry's value.
 						ObjectMapper mapper = new ObjectMapper();
 						entry.value = mapper.writeValueAsString(fileEntry);
 
-					} else { 
+					} else {
 						// if it's not a file, we just set the value. as input.
 						entry.value = row.getValues().get(DbTableFileInfo.VALUE);
 					}
 					// and now add the completed entry to the list of entries
 					entries.add(entry);
-						
+
 				}
 			}
 			return entries;
@@ -152,8 +147,8 @@ public class OdkTablesKeyValueManifestManager {
 			e.printStackTrace();
 			throw new DatastoreFailureException(e);
 		}
-	}	 
-	
+	}
+
 	/**
 	 * A single add method for testing json serialization.
 	 * @param newEntry
@@ -161,7 +156,7 @@ public class OdkTablesKeyValueManifestManager {
 	public void addEntry(OdkTablesKeyValueStoreEntry newEntry) {
 		entries.add(newEntry);
 	}
-	
+
 	/**
 	 * Convenience method for adding a list of entries. Equivalent to
 	 * calling addEntry multiple times. Only for use in testing.
@@ -171,17 +166,17 @@ public class OdkTablesKeyValueManifestManager {
 			addEntry(entry);
 		}
 	}
-	
+
 	/**
 	 * Get manifest for testing.
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonGenerationException 
+	 * @throws IOException
+	 * @throws JsonMappingException
+	 * @throws JsonGenerationException
 	 */
 	public String getManifestForTesting() throws JsonGenerationException, JsonMappingException, IOException {
 		return mapper.writeValueAsString(entries);
 	}
-	
-	
-	
+
+
+
 }

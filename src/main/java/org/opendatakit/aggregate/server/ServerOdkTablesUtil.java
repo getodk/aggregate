@@ -16,7 +16,6 @@ import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
@@ -51,7 +50,7 @@ import org.opendatakit.common.web.CallingContext;
 public class ServerOdkTablesUtil {
 
   /**
-   * Create a table in the datastore. 
+   * Create a table in the datastore.
    * @param tableId
    * @param definition
    * @param cc
@@ -59,9 +58,9 @@ public class ServerOdkTablesUtil {
    * @throws DatastoreFailureException
    * @throws TableAlreadyExistsExceptionClient
    */
-  public static TableEntryClient createTable(String tableId, 
+  public static TableEntryClient createTable(String tableId,
       TableDefinitionClient definition,
-      CallingContext cc) throws DatastoreFailureException, 
+      CallingContext cc) throws DatastoreFailureException,
       TableAlreadyExistsExceptionClient {
     TableManager tm = new TableManager(cc);
     Log logger = LogFactory.getLog(ServerOdkTablesUtil.class);
@@ -76,10 +75,10 @@ public class ServerOdkTablesUtil {
       String dbTableName = definition.getDbTableName();
       TableType type = UtilTransforms.transform(definition.getType());
       String tableIdAccessControls = definition.getTableIdAccessControls();
-      // TODO: find a way to, for creation, generate a minimal list of 
+      // TODO: find a way to, for creation, generate a minimal list of
       // kvs entries. for now just putting in blank if you create a table
       // from the server.
-      List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+      List<OdkTablesKeyValueStoreEntry> kvsEntries =
           new ArrayList<OdkTablesKeyValueStoreEntry>();
       List<ColumnClient> columns = definition.getColumns();
       List<Column> columnsServer = new ArrayList<Column>();
@@ -99,7 +98,7 @@ public class ServerOdkTablesUtil {
       throw new TableAlreadyExistsExceptionClient(e);
     }
   }
-  
+
   /**
    * Create or update a row in the datastore.
    * @param tableId
@@ -115,10 +114,10 @@ public class ServerOdkTablesUtil {
    * @throws BadColumnNameExceptionClient
    * @throws EntityNotFoundExceptionClient
    */
-  public static RowClient createOrUpdateRow(String tableId, String rowId, 
-      RowClient row, CallingContext cc) throws AccessDeniedException, 
-      RequestFailureException, DatastoreFailureException, 
-      EtagMismatchExceptionClient, PermissionDeniedExceptionClient, 
+  public static RowClient createOrUpdateRow(String tableId, String rowId,
+      RowClient row, CallingContext cc) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException,
+      EtagMismatchExceptionClient, PermissionDeniedExceptionClient,
       BadColumnNameExceptionClient, EntityNotFoundExceptionClient {
     try {
       // first transform row into a server-side row
@@ -155,9 +154,9 @@ public class ServerOdkTablesUtil {
       throw new EtagMismatchExceptionClient(e);
     }
   }
-  
+
   /**
-   * Create a FileSummaryClient object from a row that originated from 
+   * Create a FileSummaryClient object from a row that originated from
    * EntityConverter.
    * @param row
    * @param blobSetRelation
@@ -165,8 +164,8 @@ public class ServerOdkTablesUtil {
    * @return
    * @throws ODKDatastoreException
    */
-  public static FileSummaryClient getFileSummaryClientFromRow(Row row, 
-      String tableId, DbTableFiles blobSetRelation, CallingContext cc) throws 
+  public static FileSummaryClient getFileSummaryClientFromRow(Row row,
+      String tableId, DbTableFiles blobSetRelation, CallingContext cc) throws
       ODKDatastoreException {
     String filename = blobSetRelation.getBlobEntitySet(
         row.getValues().get(DbTableFileInfo.VALUE), cc)

@@ -1,16 +1,10 @@
 package org.opendatakit.aggregate.server;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -22,20 +16,14 @@ import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ServerDataService;
 import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.entity.OdkTablesFileManifestEntry;
-import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
-import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
-import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
@@ -43,7 +31,6 @@ import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
-import org.opendatakit.aggregate.servlet.OdkTablesTableFileDownloadServlet;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -52,23 +39,21 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.utils.HtmlUtil;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
  * For ODKTables.
- * 
+ *
  * @author sudar.sam@gmail.com
- * 
+ *
  */
-public class ServerDataServiceImpl extends RemoteServiceServlet 
+public class ServerDataServiceImpl extends RemoteServiceServlet
     implements ServerDataService {
 
   /**
-	 * 
+	 *
 	 */
   private static final long serialVersionUID = -5051558217315955180L;
 
@@ -135,9 +120,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   }
 
   @Override
-  public RowClient createOrUpdateRow(String tableId, String rowId, 
-      RowClient row) throws AccessDeniedException, RequestFailureException, 
-      DatastoreFailureException, EtagMismatchExceptionClient, 
+  public RowClient createOrUpdateRow(String tableId, String rowId,
+      RowClient row) throws AccessDeniedException, RequestFailureException,
+      DatastoreFailureException, EtagMismatchExceptionClient,
       PermissionDeniedExceptionClient, BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -181,8 +166,8 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   }
 
   @Override
-  public void deleteRow(String tableId, String rowId) throws 
-      AccessDeniedException, RequestFailureException, 
+  public void deleteRow(String tableId, String rowId) throws
+      AccessDeniedException, RequestFailureException,
       DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -213,7 +198,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 
   /**
    * Gets the element_names of the columns.
-   * 
+   *
    * @return List<String> of the column names
    */
   @Override
@@ -237,18 +222,18 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   /*
    * don't think i need this, but i'm keeping it so that i can use the code for
    * a reference later if i need to.
-   * 
+   *
    * /** Gets ALL the column names, keeping the user-defined ones pretty.
-   * 
+   *
    * @param rows
-   * 
+   *
    * @return
    */
   /*
    * Uses the other getColumnNames, which gets the pretty ones. Gets all the
    * names, removes the "TABLE_UUID_.*" ones, and then adds them back in after
    * being translated to the pretty ones.
-   * 
+   *
    * @Override public List<String> getAllColumnNames(String tableId) throws
    * DatastoreFailureException { HttpServletRequest req =
    * this.getThreadLocalRequest(); CallingContext cc =
@@ -257,14 +242,14 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
    * DataManager(tableId, cc); AuthFilter af = new AuthFilter(tableId, cc);
    * Set<DataField> dataFields = DbTable.getRelation(tableId,
    * cc).getDataFields();
-   * 
+   *
    * // TODO: look into seeing if you need to have a scope on column names. //
    * TODO: see if there is a better way to remove the pretty ones, or make //
    * sure that you can't name a column TABLE_UUID_ List<String> columnNames =
    * getColumnNames(tableId); for (DataField df : dataFields) { // don't add if
    * it starts with this, as you'll add it later if (!df.getName().substring(0,
    * 11).equals("TABLE_UUID_")) { columnNames.add(df.getName()); } }
-   * 
+   *
    * return columnNames; } catch (ODKDatastoreException e) {
    * e.printStackTrace(); throw new DatastoreFailureException(e); } }
    */
@@ -283,11 +268,11 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
    * were uploaded NOT through the "upload additional media files" link on the
    * file upload servlets. This does not include their associated media files.
    * <p>
-   * NB: this does NOT use the same 
-   * {@link Datamanager} class as the rest of the DataService methods, as this 
-   * is considered accessing a unique table that is part of the back-end, 
+   * NB: this does NOT use the same
+   * {@link Datamanager} class as the rest of the DataService methods, as this
+   * is considered accessing a unique table that is part of the back-end,
    * rather than one of the tables that is created by the user.
-   * 
+   *
    * @param tableId
    *          the string uid of the table whose files you want
    */
@@ -301,7 +286,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       DbTableFiles blobSetRelation = new DbTableFiles(cc);
       List<Row> rows = EntityConverter.toRowsFromFileInfo(
           DbTableFileInfo.queryForNonMediaFiles(tableId, cc));
-      List<FileSummaryClient> nonMediaFiles = 
+      List<FileSummaryClient> nonMediaFiles =
           new ArrayList<FileSummaryClient>();
       for (Row row : rows) {
         FileSummaryClient summary = ServerOdkTablesUtil
@@ -317,7 +302,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       throw new DatastoreFailureException(e);
     }
   }
-  
+
 
   @Override
   public List<FileSummaryClient> getMedialFilesKey(String tableId, String key)
@@ -329,7 +314,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       DbTableFiles blobSetRelation = new DbTableFiles(cc);
       List<Row> rows = EntityConverter.toRowsFromFileInfo(
           DbTableFileInfo.queryForMediaFiles(tableId, key, cc));
-      List<FileSummaryClient> mediaFiles = 
+      List<FileSummaryClient> mediaFiles =
           new ArrayList<FileSummaryClient>();
       for (Row row : rows) {
         FileSummaryClient summary = ServerOdkTablesUtil
@@ -433,8 +418,8 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
    * adds the correct filename and returns only the non-deleted rows.
    */
   @Override
-  public TableContentsForFilesClient getFileInfoContents(String tableId) 
-      throws AccessDeniedException, RequestFailureException, 
+  public TableContentsForFilesClient getFileInfoContents(String tableId)
+      throws AccessDeniedException, RequestFailureException,
       DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient {
     TableContentsForFilesClient tcc = new TableContentsForFilesClient();
@@ -457,13 +442,13 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 //      List<RowClient> newRows = new ArrayList<RowClient>();
       // this will hold the summaries for all the non media files. the
       // media files are associated with entries.
-      List<FileSummaryClient> completedSummaries = 
+      List<FileSummaryClient> completedSummaries =
           new ArrayList<FileSummaryClient>();
       for (FileSummaryClient summary : nonMediaSummaries) {
         // first get the media files for this key.
         //String key = row.getValues().get(DbTableFileInfo.KEY)
         // get the media files for this file.
-        List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, 
+        List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId,
             summary.getKey());
 //        String filename = blobSetRelation.getBlobEntitySet(
 //            row.getValues().get(DbTableFileInfo.VALUE), cc)
@@ -471,13 +456,13 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
         //FileSummaryClient summary = new FileSummaryClient(key, key, null, key, mediaFiles)
         // set the media files.
         FileSummaryClient sum = new FileSummaryClient(summary.getFilename(),
-            summary.getContentType(), summary.getContentLength(), 
+            summary.getContentType(), summary.getContentLength(),
             summary.getKey(), mediaFiles.size(), summary.getId(), tableId);
         completedSummaries.add(sum);
       }
       tcc.nonMediaFiles = completedSummaries;
-      
-      
+
+
 //      for (RowClient row : tcc.rows) {
 //        // we only want the non-deleted rows
 //        if (!row.isDeleted()) {
@@ -516,7 +501,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
    */
   @Override
   public void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, 
+      RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -524,7 +509,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       Relation tableInfo = DbTableFileInfo.getRelation(cc);
       Entity entry = tableInfo.getEntity(rowId, cc);
       String key = entry.getAsString(DbTableFileInfo.KEY);
-      // we also want to delete all the media files for this table. So get 
+      // we also want to delete all the media files for this table. So get
       // them.
       List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
       // first we want to get a new etag

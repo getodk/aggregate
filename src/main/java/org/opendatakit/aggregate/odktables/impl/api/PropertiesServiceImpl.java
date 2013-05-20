@@ -10,7 +10,6 @@ import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
-import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -33,7 +32,7 @@ public class PropertiesServiceImpl implements PropertiesService {
   }
 
   @Override
-  public PropertiesResource getProperties() throws ODKDatastoreException, 
+  public PropertiesResource getProperties() throws ODKDatastoreException,
       PermissionDeniedException {
     // TODO re-add permissions stuff.
     //af.checkPermission(TablePermission.READ_PROPERTIES);
@@ -42,8 +41,8 @@ public class PropertiesServiceImpl implements PropertiesService {
   }
 
   @Override
-  public PropertiesResource setProperties(TableProperties properties) 
-      throws ODKDatastoreException, EtagMismatchException, 
+  public PropertiesResource setProperties(TableProperties properties)
+      throws ODKDatastoreException, EtagMismatchException,
       ODKTaskLockException, PermissionDeniedException {
     // TODO re-add permissions
     //af.checkPermission(TablePermission.WRITE_PROPERTIES);

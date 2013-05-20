@@ -9,7 +9,6 @@ import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole;
@@ -37,9 +36,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Manages creating, deleting, and getting tables.
- * 
+ *
  * @author the.dylan.price@gmail.com
- * 
+ *
  */
 public class TableManager {
 
@@ -52,16 +51,16 @@ public class TableManager {
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
   }
-  
+
   /**
    * Retrieve a list of all table entries in the datastore.
-   * 
+   *
    * @return a list of all table entries.
    * @throws ODKDatastoreException
    */
   public List<TableEntry> getTables() throws ODKDatastoreException {
     // get table entries
-    Query query = 
+    Query query =
         DbTableEntry.getRelation(cc).query("TableManager.getTables", cc);
     List<Entity> entries = query.execute();
 
@@ -71,15 +70,15 @@ public class TableManager {
   /**
    * Retrieve a list of all table entries in the datastore that the given scopes
    * are allowed to see.
-   * 
+   *
    * @param scopes
    *          the scopes
    * @return a list of table entries which the given scopes are allowed to see
    * @throws ODKDatastoreException
    */
   public List<TableEntry> getTables(List<Scope> scopes) throws ODKDatastoreException {
-    // Oct15--changing this just to point to get ALL the tables. This is to 
-    // avoid the permissions issue we have for now, as everything should be 
+    // Oct15--changing this just to point to get ALL the tables. This is to
+    // avoid the permissions issue we have for now, as everything should be
     // getting tables through this class.
     // TODO fix this to again get things to point at scopes.
     /*
@@ -104,13 +103,13 @@ public class TableManager {
   }
 
   /**
-   * Retrieve a list of {@link TableEntry} objects from a list of 
+   * Retrieve a list of {@link TableEntry} objects from a list of
    * {@link Entity} objects retrieved from {@link DbTableEntry}.
    * @param entries
    * @return
    * @throws ODKDatastoreException
    */
-  private List<TableEntry> getTableEntries(List<Entity> entries) 
+  private List<TableEntry> getTableEntries(List<Entity> entries)
       throws ODKDatastoreException {
     // get table names
     List<String> tableIds = new ArrayList<String>();
@@ -119,7 +118,7 @@ public class TableManager {
     }
     // Will map ID to tableKey. To get the tableKey we need the TableDefinition
     Map<String, String> tableKeys = new HashMap<String, String>();
-    Query definitionsQuery = 
+    Query definitionsQuery =
         DbTableDefinitions.getRelation(cc).query("TableManager.getTables", cc);
     definitionsQuery.include(DbTableDefinitions.TABLE_ID, tableIds);
     List<Entity> definitionEntities = definitionsQuery.execute();
@@ -133,7 +132,7 @@ public class TableManager {
 
   /**
    * Retrieve the table entry for the given tableId.
-   * 
+   *
    * @param tableId
    *          the id of a table
    * @return the table entry, or null if no such table exists
@@ -144,7 +143,7 @@ public class TableManager {
     Validate.notEmpty(tableId);
 
     // get table entry
-    Query query = 
+    Query query =
         DbTableEntry.getRelation(cc).query("TableManager.getTable", cc);
     query.equal(CommonFieldsBase.URI_COLUMN_NAME, tableId);
     Entity entryEntity = query.get();
@@ -159,14 +158,14 @@ public class TableManager {
       return null;
     }
   }
-  
+
   /**
    * Retrieve the TableDefinition for the table with the given id.
    * @param tableId
    * @return
    * @throws ODKDatastoreException
    */
-  public TableDefinition getTableDefinition(String tableId) 
+  public TableDefinition getTableDefinition(String tableId)
       throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Entity definitionEntity = DbTableDefinitions.getDefinition(tableId, cc);
@@ -179,7 +178,7 @@ public class TableManager {
 
   /**
    * Retrieve the table entry for the given tableId.
-   * 
+   *
    * @param tableId
    *          the id of the table previously created with
    *          {@link #createTable(String, List)}
@@ -202,7 +201,7 @@ public class TableManager {
 
   /**
    * Creates a new table.
-   * 
+   *
    * @param tableId
    *          the unique identifier for the table
    * @param tableName
@@ -219,8 +218,8 @@ public class TableManager {
    */
   public TableEntry createTable(String tableId, String tableKey,
       String dbTableName, TableType type, String tableIdAccessControls,
-      List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries) 
-          throws ODKEntityPersistException, 
+      List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries)
+          throws ODKEntityPersistException,
       ODKDatastoreException, TableAlreadyExistsException {
 	Validate.notNull(tableId);
     Validate.notEmpty(tableId);
@@ -231,7 +230,7 @@ public class TableManager {
     Validate.notNull(type);
     // tableIdAccessControls can be null.
     Validate.noNullElements(columns);
-    
+
     // the hope here is that it creates an empty table in the db after a single
     // odktable table has been created.
     DbTableFiles blobRelationSet = new DbTableFiles(cc);
@@ -244,31 +243,31 @@ public class TableManager {
           "Table with tableId '%s' already exists.", tableId));
     }
     // TODO: do this for each of the necessary tableKey and dbTableName things.
-    // Also need to figure out which of these actually need to be unique in the 
+    // Also need to figure out which of these actually need to be unique in the
     // db, if any.
-    
+
     // TODO do appropriate checking for metadata issues. We need to worry about
     // dbName and  the displayName.
 
-    // create table. "entities" will store all of the things we will need to 
+    // create table. "entities" will store all of the things we will need to
     // persist into the datastore for the table to truly be created.
     List<Entity> entities = new ArrayList<Entity>();
 
     Entity entry = creator.newTableEntryEntity(tableId, cc);
     entities.add(entry);
-    
-    Entity tableDefinition = creator.newTableDefinitionEntity(tableId, 
+
+    Entity tableDefinition = creator.newTableDefinitionEntity(tableId,
         tableKey, dbTableName, type, tableIdAccessControls, cc);
     entities.add(tableDefinition);
 
     for (Column column : columns) {
       entities.add(creator.newColumnEntity(tableId, column, cc));
     }
-    
+
     // SS: I think the DbTableProperties table should be phased out.
     //Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
     //entities.add(properties);
-    
+
     if (kvsEntries == null) {
       kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     }
@@ -276,8 +275,8 @@ public class TableManager {
       entities.add(creator.newKeyValueStoreEntity(kvsEntry, cc));
     }
 
-    Entity ownerAcl = creator.newTableAclEntity(tableId, 
-        new Scope(Scope.Type.USER, cc.getCurrentUser().getEmail()), 
+    Entity ownerAcl = creator.newTableAclEntity(tableId,
+        new Scope(Scope.Type.USER, cc.getCurrentUser().getEmail()),
         TableRole.OWNER, cc);
     entities.add(ownerAcl);
 
@@ -288,7 +287,7 @@ public class TableManager {
 
   /**
    * Deletes a table.
-   * 
+   *
    * @param tableId
    *          the unique identifier of the table to delete.
    * @throws ODKEntityNotFoundException
@@ -318,9 +317,9 @@ public class TableManager {
     Relation table = DbTable.getRelation(tableId, cc);
     Relation logTable = DbLogTable.getRelation(tableId, cc);
 
-    LockTemplate dataLock = 
+    LockTemplate dataLock =
         new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
-    LockTemplate propsLock = 
+    LockTemplate propsLock =
         new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
     try {
       dataLock.acquire();
