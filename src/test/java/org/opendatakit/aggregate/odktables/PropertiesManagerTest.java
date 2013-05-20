@@ -31,8 +31,10 @@ public class PropertiesManagerTest {
     this.tableMetadata = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, tableName, T.columns, tableMetadata);
-
+    tm.createTable(tableId, T.tableKey, T.dbTableName, 
+        T.tableType, T.tableIdAccessControls, T.columns, 
+        T.kvsEntries);
+    
     this.pm = new PropertiesManager(tableId, cc);
   }
 
@@ -47,10 +49,13 @@ public class PropertiesManagerTest {
 
   @Test
   public void testGetTableProperties() throws ODKDatastoreException {
-    TableProperties expected = new TableProperties(null, tableName, tableMetadata);
+    TableProperties expected = new TableProperties(T.propertiesEtag, 
+        T.tableKey, T.kvsEntries);
     TableProperties actual = pm.getProperties();
-    assertEquals(expected.getTableName(), actual.getTableName());
-    assertEquals(expected.getMetadata(), actual.getMetadata());
+    assertEquals(expected.getTableKey(), actual.getTableKey());
+    // not sure this will work...
+    assertEquals(expected.getKeyValueStoreEntries(), 
+        actual.getKeyValueStoreEntries());
   }
 
   @Test
@@ -66,19 +71,21 @@ public class PropertiesManagerTest {
   public void testSetTableMetadata() throws ODKTaskLockException, ODKDatastoreException,
       EtagMismatchException {
     TableProperties expected = pm.getProperties();
-    expected.setMetadata("some metadata");
+    expected.setKeyValueStoreEntries(T.kvsEntries);
 
     doTestSetProperties(expected);
   }
 
-  private void doTestSetProperties(TableProperties expected) throws EtagMismatchException,
-      ODKTaskLockException, ODKDatastoreException {
+  private void doTestSetProperties(TableProperties expected) 
+      throws EtagMismatchException, ODKTaskLockException, 
+      ODKDatastoreException {
     pm.setProperties(expected);
 
     TableProperties actual = pm.getProperties();
 
-    assertEquals(expected.getTableName(), actual.getTableName());
-    assertEquals(expected.getMetadata(), actual.getMetadata());
+    assertEquals(expected.getTableKey(), actual.getTableKey());
+    assertEquals(expected.getKeyValueStoreEntries(), 
+        actual.getKeyValueStoreEntries());
   }
 
   @Test
@@ -94,7 +101,7 @@ public class PropertiesManagerTest {
   public void testSetTableMetadataChangesPropertiesModNum() throws ODKTaskLockException,
       ODKDatastoreException, EtagMismatchException {
     TableProperties properties = pm.getProperties();
-    properties.setMetadata("some metadata");
+    properties.setKeyValueStoreEntries(T.kvsEntries);
 
     doTestSetPropertiesChangesModNum(properties);
   }

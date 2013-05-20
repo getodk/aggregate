@@ -16,5 +16,16 @@ public class RUtil {
     id = "table:" + id;
     return id.replace('-', '_').replace(':', '_').toUpperCase();
   }
+  
+  /**
+   * Return a db-safe version of the proposed column name. This should be 
+   * equivalent to how it would be on the phone. At the moment replaces spaces
+   * with underscores and precedes with an underscore.
+   * @param proposedName
+   * @return
+   */
+  public static String convertToDbSafeBackingColumnName(String proposedName) {
+    return "_" + proposedName.replace(" ", "_");
+  }
 
 }

@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
+import org.opendatakit.aggregate.client.odktables.TableEntryClient;
+import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -9,13 +11,14 @@ import org.simpleframework.xml.Root;
 @Default(value = DefaultType.FIELD, required = true)
 public class TableResource extends TableEntry {
   private String selfUri;
+  private String definitionUri;
   private String propertiesUri;
   private String dataUri;
   private String diffUri;
   private String aclUri;
 
   public TableResource(TableEntry entry) {
-    super(entry.getTableId(), entry.getTableName(), entry.getDataEtag(), entry.getPropertiesEtag());
+    super(entry.getTableId(), entry.getTableKey(), entry.getDataEtag(), entry.getPropertiesEtag());
   }
 
   @SuppressWarnings("unused")
@@ -24,6 +27,10 @@ public class TableResource extends TableEntry {
 
   public String getSelfUri() {
     return this.selfUri;
+  }
+  
+  public String getDefinitionUri() {
+    return this.definitionUri;
   }
 
   public String getPropertiesUri() {
@@ -44,6 +51,10 @@ public class TableResource extends TableEntry {
 
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
+  }
+  
+  public void setDefinitionUri(final String definitionUri) {
+    this.definitionUri = definitionUri;
   }
 
   public void setPropertiesUri(final String propertiesUri) {
@@ -101,6 +112,13 @@ public class TableResource extends TableEntry {
         return false;
     } else if (!selfUri.equals(other.selfUri))
       return false;
+    if (definitionUri == null) {
+      if (other.definitionUri != null) {
+        return false;
+      } else if (!definitionUri.equals(other.definitionUri)) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -122,6 +140,7 @@ public class TableResource extends TableEntry {
     result = prime * result + ((diffUri == null) ? 0 : diffUri.hashCode());
     result = prime * result + ((propertiesUri == null) ? 0 : propertiesUri.hashCode());
     result = prime * result + ((selfUri == null) ? 0 : selfUri.hashCode());
+    result = prime * result + ((definitionUri == null) ? 0 : definitionUri.hashCode());
     return result;
   }
 
@@ -135,6 +154,8 @@ public class TableResource extends TableEntry {
     StringBuilder builder = new StringBuilder();
     builder.append("TableResource [selfUri=");
     builder.append(selfUri);
+    builder.append(", defintionUri=");
+    builder.append(definitionUri);
     builder.append(", propertiesUri=");
     builder.append(propertiesUri);
     builder.append(", dataUri=");

@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.Ignore;
+import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 
 @Ignore
 public class T {
@@ -15,8 +18,22 @@ public class T {
   public static final String user = "someone@gmail.com";
   public static final String group = "somegroup";
   public static final String tableId = "people";
+  public static final String tableKey = "peopleKey";
+  public static final String dbTableName = "peopleDbTableName";
+  public static final String tableIdAccessControls = "someId";
   public static final String tableName = "people";
   public static final String tableMetadata = null;
+  public static final TableType tableType = TableType.DATA;
+  public static final String propertiesEtag = "propertiesEtag";
+  @SuppressWarnings("serial")
+  public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+      new ArrayList<OdkTablesKeyValueStoreEntry>() {
+
+    {
+      kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
+      kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
+    }
+  };
   @SuppressWarnings("serial")
   public static final List<Column> columns = new ArrayList<Column>() {
     {
@@ -32,16 +49,56 @@ public class T {
       add(Row.forInsert(T.Data.JOHN.getId(), T.Data.JOHN.getValues()));
     }
   };
+  
+  public static class OdkTablesKeyValueStoreEntries {
+    public static final OdkTablesKeyValueStoreEntry entryOne;
+    public static final OdkTablesKeyValueStoreEntry entryTwo;
+    public static final String entryOnePartition = "tablePartition";
+    public static final String entryOneAspect = "tableAspect";
+    public static final String entryOneKey = "theKey";
+    public static final String entryOneType = "object";
+    public static final String entryOneValue = "objectValue";
+    public static final String entryTwoPartition = "customPartition";
+    public static final String entryTwoAspect = "customAspect";
+    public static final String entryTwoKey = "laClave";
+    public static final String entryTwoType = "text";
+    public static final String entryTwoValue = "thereIsNoPassword";
+    static {
+      entryOne = new OdkTablesKeyValueStoreEntry();
+      entryOne.tableId = T.tableId;
+      entryOne.partition = entryOnePartition;
+      entryOne.aspect = entryOneAspect;
+      entryOne.key = entryOneKey;
+      entryOne.type = entryOneType;
+      entryOne.value = entryOneValue;
+      entryTwo = new OdkTablesKeyValueStoreEntry();
+      entryTwo.tableId = T.tableId;
+      entryTwo.partition = entryTwoPartition;
+      entryTwo.aspect = entryTwoAspect;
+      entryTwo.key = entryTwoKey;
+      entryTwo.type = entryTwoType;
+      entryTwo.value = entryTwoValue;
+    }
+  }
 
   public static class Columns {
 
     public static final String name = "name";
+    public static final String elementKey_suffix = "_elementKey";
+    public static final String elementName_suffix = "_elementName";
     public static final String age = "age";
     public static final String weight = "weight";
-    public static final Column column_name = new Column(name, ColumnType.STRING);
-    public static final Column column_age = new Column(age, ColumnType.INTEGER);
-    public static final Column column_weight = new Column(weight, ColumnType.INTEGER);
-  }
+    public static final String columnType_String = "colTypeString";
+    public static final String columnType_Int = "colTypeInt";
+    public static final Column column_name = new Column(name, 
+        name + elementKey_suffix, name + elementName_suffix, 
+        Column.ColumnType.STRING, null, 1, null);
+    public static final Column column_age = new Column(age, 
+        age + elementKey_suffix, age + elementName_suffix, 
+        Column.ColumnType.INTEGER, null, 1, null);    
+    public static final Column column_weight = new Column(weight, 
+        weight + elementKey_suffix, weight + elementName_suffix, 
+        Column.ColumnType.INTEGER, null, 1, null);  }
 
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"),

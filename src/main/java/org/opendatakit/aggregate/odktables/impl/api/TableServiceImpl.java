@@ -22,11 +22,14 @@ import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.Column;
+import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
-import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
+import org.opendatakit.aggregate.odktables.entity.api.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
@@ -62,7 +65,9 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableResource getTable(String tableId) throws ODKDatastoreException,
       PermissionDeniedException {
-    new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
+    // Oct15 removing permissions stuff
+    // TODO fix the above
+    //new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
     TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
     return resource;
@@ -72,10 +77,16 @@ public class TableServiceImpl implements TableService {
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
     // TODO: add access control stuff
-    String tableName = definition.getTableName();
+    String tableKey = definition.getTableKey();
+    String dbTableName = definition.getDbTableName();
+    TableType type = definition.getType();
+    String tableIdAccessControls = definition.getTableIdAccessControls();
     List<Column> columns = definition.getColumns();
-    String metadata = definition.getMetadata();
-    TableEntry entry = tm.createTable(tableId, tableName, columns, metadata);
+    // TODO: need a method to init a default minimal list of kvs entries.
+    List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+        new ArrayList<OdkTablesKeyValueStoreEntry>();
+    TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
+        tableIdAccessControls, columns, kvsEntries);
     TableResource resource = getResource(entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return resource;
@@ -116,6 +127,25 @@ public class TableServiceImpl implements TableService {
   public TableAclService getAcl(String tableId) throws ODKDatastoreException {
     return new TableAclServiceImpl(tableId, info, cc);
   }
+  
+  
+  @Override
+  public TableDefinitionResource getDefinition(String tableId) 
+      throws ODKDatastoreException{
+    // TODO: permissions stuff for a table, perhaps? or just at the row level?
+    TableDefinition definition = tm.getTableDefinition(tableId);
+    TableDefinitionResource definitionResource = 
+        new TableDefinitionResource(definition);
+    UriBuilder ub = info.getBaseUriBuilder();
+    ub.path(TableService.class);
+    URI selfUri = ub.clone().path(TableService.class, "getDefinition")
+        .build(tableId);
+    URI tableUri = ub.clone().path(TableService.class, "getTable")
+        .build(tableId);
+    definitionResource.setSelfUri(selfUri.toASCIIString());
+    definitionResource.setTableUri(tableUri.toASCIIString());
+    return definitionResource;
+  }
 
   private TableResource getResource(TableEntry entry) {
     String tableId = entry.getTableId();
@@ -127,9 +157,12 @@ public class TableServiceImpl implements TableService {
     URI data = ub.clone().path(TableService.class, "getData").build(tableId);
     URI diff = ub.clone().path(TableService.class, "getDiff").build(tableId);
     URI acl = ub.clone().path(TableService.class, "getAcl").build(tableId);
+    URI definition = ub.clone().path(TableService.class, "getDefinition")
+        .build(tableId);
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());
+    resource.setDefinitionUri(definition.toASCIIString());
     resource.setPropertiesUri(properties.toASCIIString());
     resource.setDataUri(data.toASCIIString());
     resource.setDiffUri(diff.toASCIIString());

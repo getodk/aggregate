@@ -3,6 +3,8 @@ package org.opendatakit.aggregate.odktables.entity;
 import java.util.Collections;
 import java.util.List;
 
+import org.opendatakit.aggregate.client.odktables.TableRoleClient;
+
 import com.google.common.collect.Lists;
 
 public enum TableRole {
@@ -93,4 +95,5 @@ public enum TableRole {
     WRITE_ACL,
     DELETE_ACL,
   }
+
 }

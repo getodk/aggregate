@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import org.opendatakit.aggregate.client.odktables.TableAclClient;
+import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 

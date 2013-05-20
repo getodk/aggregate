@@ -16,11 +16,13 @@ public class MediaFileListPopup extends AbstractPopupBase {
   
   public MediaFileListPopup(String formId) {
 
-    SecureGWT.getFormAdminService().getFormMediaFileList(formId, new MediaFileCallback());
+    SecureGWT.getFormAdminService().getFormMediaFileList(formId, 
+        new MediaFileCallback());
 
     fileList = new FlexTable();
     fileList.setWidget(0, 0, new ClosePopupButton(this));
-    fileList.getCellFormatter().getElement(0, 0).setAttribute("align", "right");
+    fileList.getCellFormatter().getElement(0, 0).setAttribute("align", 
+        "right");
     fileList.setText(1, 0, "Media Filename");
     fileList.setText(1, 1, "Content Type");
     fileList.setText(1, 2, "Length");
@@ -30,7 +32,8 @@ public class MediaFileListPopup extends AbstractPopupBase {
   }
   
   
-  private class MediaFileCallback implements AsyncCallback<ArrayList<MediaFileSummary>> {
+  private class MediaFileCallback implements 
+      AsyncCallback<ArrayList<MediaFileSummary>> {
 
     @Override
     public void onFailure(Throwable caught) {
