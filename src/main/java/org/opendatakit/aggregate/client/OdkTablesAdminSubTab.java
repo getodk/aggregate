@@ -5,6 +5,7 @@ import org.opendatakit.aggregate.client.table.OdkAdminListTable;
 import org.opendatakit.aggregate.client.widgets.AddTablesAdminButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 

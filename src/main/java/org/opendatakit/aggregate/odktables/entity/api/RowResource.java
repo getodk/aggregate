@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.odktables.entity.api;
 
+import org.opendatakit.aggregate.client.odktables.RowClient;
+import org.opendatakit.aggregate.client.odktables.RowResourceClient;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -25,6 +27,11 @@ public class RowResource extends Row {
     setLastUpdateUser(row.getLastUpdateUser());
     setFilterScope(row.getFilterScope());
     setValues(row.getValues());
+    setUriUser(row.getUriUser());
+    setFormId(row.getFormId());
+    setInstanceName(row.getInstanceName());
+    setLocale(row.getLocale());
+    setTimestamp(row.getTimestamp());
   }
 
   public String getSelfUri() {

@@ -41,4 +41,6 @@
   <source path='client/table'/>
   <source path='client/widgets'/>
   <source path='constants/common'/>
+  <!-- tables only -->
+  <source path='client/odktables'/>
 </module>

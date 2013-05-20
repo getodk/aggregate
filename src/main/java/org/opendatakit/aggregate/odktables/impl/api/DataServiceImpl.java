@@ -39,22 +39,29 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public List<RowResource> getRows() throws ODKDatastoreException, PermissionDeniedException {
-    af.checkPermission(TablePermission.READ_ROW);
+    // TODO remove comments and do permissions.
+    //af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
+    rows = dm.getRows();
+    /* Oct15--changing this to avoid scopes
+     //TODO fix the above so it uses permissions.
     if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
       rows = dm.getRows();
     } else {
       List<Scope> scopes = AuthFilter.getScopes(cc);
       rows = dm.getRows(scopes);
-    }
+    }*/
     return getResources(rows);
   }
 
   @Override
   public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException {
-    af.checkPermission(TablePermission.READ_ROW);
+    // TODO remove comments and do permissions
+    //af.checkPermission(TablePermission.READ_ROW);
     Row row = dm.getRowNullSafe(rowId);
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    // Oct15--removing this
+    // TODO fix the filters.
+    //af.checkFilter(TablePermission.UNFILTERED_READ, row);
     RowResource resource = getResource(row);
     return resource;
   }
@@ -63,13 +70,15 @@ public class DataServiceImpl implements DataService {
   public RowResource createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
       ODKDatastoreException, EtagMismatchException, PermissionDeniedException,
       BadColumnNameException {
-    af.checkPermission(TablePermission.WRITE_ROW);
+    // TODO re-do permissions stuff
+    //af.checkPermission(TablePermission.WRITE_ROW);
     row.setRowId(rowId);
     Row dbRow = dm.getRow(rowId);
     if (dbRow == null) {
       row = dm.insertRow(row);
     } else {
-      af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
+      // TODO re-do permissions stuff
+      //af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
       row = dm.updateRow(row);
     }
     RowResource resource = getResource(row);
@@ -79,9 +88,11 @@ public class DataServiceImpl implements DataService {
   @Override
   public void deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
-    af.checkPermission(TablePermission.DELETE_ROW);
+    // TODO re-do permissions stuff
+    //af.checkPermission(TablePermission.DELETE_ROW);
     Row row = dm.getRowNullSafe(rowId);
-    af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
+    // TODO re-do permissions stuff
+    //af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
     dm.deleteRow(rowId);
   }
 

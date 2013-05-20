@@ -33,16 +33,20 @@ public class PropertiesServiceImpl implements PropertiesService {
   }
 
   @Override
-  public PropertiesResource getProperties() throws ODKDatastoreException, PermissionDeniedException {
-    af.checkPermission(TablePermission.READ_PROPERTIES);
+  public PropertiesResource getProperties() throws ODKDatastoreException, 
+      PermissionDeniedException {
+    // TODO re-add permissions stuff.
+    //af.checkPermission(TablePermission.READ_PROPERTIES);
     TableProperties properties = pm.getProperties();
     return getResource(properties);
   }
 
   @Override
-  public PropertiesResource setProperties(TableProperties properties) throws ODKDatastoreException,
-      EtagMismatchException, ODKTaskLockException, PermissionDeniedException {
-    af.checkPermission(TablePermission.WRITE_PROPERTIES);
+  public PropertiesResource setProperties(TableProperties properties) 
+      throws ODKDatastoreException, EtagMismatchException, 
+      ODKTaskLockException, PermissionDeniedException {
+    // TODO re-add permissions
+    //af.checkPermission(TablePermission.WRITE_PROPERTIES);
     properties = pm.setProperties(properties);
     return getResource(properties);
   }

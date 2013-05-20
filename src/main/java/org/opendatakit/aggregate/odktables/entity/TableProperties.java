@@ -1,27 +1,52 @@
 package org.opendatakit.aggregate.odktables.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opendatakit.aggregate.client.odktables.OdkTablesKeyValueStoreEntryClient;
+import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
+/**
+ * Per Dylan's thesis, a TableProperties object represents only the metadata.
+ * The structural layout of the table is stored in the 
+ * {@link DbTableDefinitions} and {@link DbColumnDefinitions} tables. The 
+ * metadata stored in this {@link TableProperties} object consists of a list of
+ * key value store entries.
+ * @author dylan price?
+ * @author sudar.sam@gmail.com
+ *
+ */
 @Root(strict = false)
 public class TableProperties {
 
   @Element(name = "etag", required = false)
   private String propertiesEtag;
 
-  @Element(name = "name", required = true)
-  private String tableName;
+  @Element(name = "tableKey", required = true)
+  private String tableKey;
 
-  @Element(required = false)
-  private String metadata;
+  @ElementList(inline = true, required = false)
+  private List<OdkTablesKeyValueStoreEntry> kvsEntries;
 
   protected TableProperties() {
   }
 
-  public TableProperties(String propertiesEtag, String tableName, String metadata) {
+  /**
+   * 
+   * @param propertiesEtag
+   * @param tableKey the tableKey field from {@link DbTableDefinition}
+   * @param keyValueStoreEntries
+   */
+  public TableProperties(String propertiesEtag, String tableKey, 
+      List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries) {
     this.propertiesEtag = propertiesEtag;
-    this.tableName = tableName;
-    this.metadata = metadata;
+    this.tableKey = tableKey;
+    this.kvsEntries = keyValueStoreEntries;
   }
 
   public String getPropertiesEtag() {
@@ -32,63 +57,29 @@ public class TableProperties {
     this.propertiesEtag = propertiesEtag;
   }
 
-  public String getTableName() {
-    return tableName;
+  public String getTableKey() {
+    return tableKey;
   }
 
   public void setTableName(String tableName) {
-    this.tableName = tableName;
+    this.tableKey = tableName;
+  }
+  
+  public void setKeyValueStoreEntries(
+      List<OdkTablesKeyValueStoreEntry> kvsEntries) {
+    this.kvsEntries = kvsEntries;
   }
 
-  public String getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(String metadata) {
-    this.metadata = metadata;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
-    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
-    result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (!(obj instanceof TableProperties))
-      return false;
-    TableProperties other = (TableProperties) obj;
-    if (metadata == null) {
-      if (other.metadata != null)
-        return false;
-    } else if (!metadata.equals(other.metadata))
-      return false;
-    if (propertiesEtag == null) {
-      if (other.propertiesEtag != null)
-        return false;
-    } else if (!propertiesEtag.equals(other.propertiesEtag))
-      return false;
-    if (tableName == null) {
-      if (other.tableName != null)
-        return false;
-    } else if (!tableName.equals(other.tableName))
-      return false;
-    return true;
+  public List<OdkTablesKeyValueStoreEntry> getKeyValueStoreEntries() {
+    return this.kvsEntries;
   }
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesEtag=" + propertiesEtag + ", tableName=" + tableName
-        + ", metadata=" + metadata + "]";
+    return "TableProperties [propertiesEtag=" + propertiesEtag 
+        + ", tableName=" + tableKey
+        + ", kvsEntries=" + this.kvsEntries.toString()
+        + "]";
   }
 
 }

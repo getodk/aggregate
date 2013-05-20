@@ -26,6 +26,9 @@ public class AuthFilterTest {
 
   private CallingContext cc;
   private String tableId;
+  private String tableKey;
+  private String dbTableName;
+  private String tableIdAccessControls;
   private TableManager tm;
   private TableAclManager am;
   private AuthFilter af;
@@ -37,7 +40,9 @@ public class AuthFilterTest {
     this.tableId = T.tableId;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, T.tableName, T.columns, T.tableMetadata);
+    tm.createTable(tableId, T.tableKey, T.dbTableName, 
+        T.tableType, T.tableIdAccessControls, T.columns, 
+        T.kvsEntries);
 
     this.am = new TableAclManager(tableId, cc);
     this.af = new AuthFilter(tableId, cc);
