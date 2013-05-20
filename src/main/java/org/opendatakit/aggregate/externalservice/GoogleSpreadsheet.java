@@ -394,13 +394,16 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     try {
       if (accessToken == null && !forceRefresh) {
         accessToken = ServerPreferencesProperties.getServerPreferencesProperty(cc,
-          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN);
+          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN +
+          "|" + objectEntity.getOwnerEmail());
       }
 
       if (accessToken == null || forceRefresh) {
-        accessToken = getOAuth2AccessToken(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, cc);
+        accessToken = getOAuth2AccessToken(GOOGLE_SPREADSHEET_OAUTH2_SCOPE,
+                                           objectEntity.getOwnerEmail(), cc);
         ServerPreferencesProperties.setServerPreferencesProperty(cc,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN, accessToken);
+            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN +
+            "|" + objectEntity.getOwnerEmail(), accessToken);
       }
       return accessToken;
     } catch (Exception e) {
