@@ -104,21 +104,18 @@ public class Scope {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if ( obj == null ) {
+      return false;
+    }
+    if ( obj == this ) {
       return true;
-    if (obj == null)
+    }
+    if (!(obj instanceof Scope)) {
       return false;
-    if (!(obj instanceof Scope))
-      return false;
+    }
     Scope other = (Scope) obj;
-    if (type != other.type)
-      return false;
-    if (value == null) {
-      if (other.value != null)
-        return false;
-    } else if (!value.equals(other.value))
-      return false;
-    return true;
+    return (type == null ? other.type == null : type.equals(other.type))
+        && (value == null ? other.value == null : value.equals(other.value));
   }
 
   /*

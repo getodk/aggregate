@@ -72,21 +72,18 @@ public class TableAcl {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if ( obj == null ) {
+      return false;
+    }
+    if ( obj == this ) {
       return true;
-    if (obj == null)
+    }
+    if (!(obj instanceof TableAcl)) {
       return false;
-    if (!(obj instanceof TableAcl))
-      return false;
+    }
     TableAcl other = (TableAcl) obj;
-    if (role != other.role)
-      return false;
-    if (scope == null) {
-      if (other.scope != null)
-        return false;
-    } else if (!scope.equals(other.scope))
-      return false;
-    return true;
+    return (role == null ? other.role == null : role.equals(other.role))
+        && (scope == null ? other.scope == null : scope.equals(other.scope));
   }
 
   /*
