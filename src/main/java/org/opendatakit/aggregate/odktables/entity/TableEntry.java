@@ -62,46 +62,32 @@ public class TableEntry {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (!(obj instanceof TableEntry))
-      return false;
-    TableEntry other = (TableEntry) obj;
-    if (dataEtag == null) {
-      if (other.dataEtag != null)
-        return false;
-    } else if (!dataEtag.equals(other.dataEtag))
-      return false;
-    if (propertiesEtag == null) {
-      if (other.propertiesEtag != null)
-        return false;
-    } else if (!propertiesEtag.equals(other.propertiesEtag))
-      return false;
-    if (tableId == null) {
-      if (other.tableId != null)
-        return false;
-    } else if (!tableId.equals(other.tableId))
-      return false;
-    if (tableKey == null) {
-      if (other.tableKey != null)
-        return false;
-    } else if (!tableKey.equals(other.tableKey))
-      return false;
-    return true;
-  }
-
-  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
-    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
     result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
+    result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
+    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
     return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if ( obj == null ) {
+      return false;
+    }
+    if ( obj == this ) {
+      return true;
+    }
+    if (!(obj instanceof TableEntry)) {
+      return false;
+    }
+    TableEntry other = (TableEntry) obj;
+    return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
+        && (tableKey == null ? other.tableKey == null : tableKey.equals(other.tableKey))
+        && (dataEtag == null ? other.dataEtag == null : dataEtag.equals(other.dataEtag))
+        && (propertiesEtag == null ? other.propertiesEtag == null : propertiesEtag.equals(other.propertiesEtag));
   }
 
   @Override

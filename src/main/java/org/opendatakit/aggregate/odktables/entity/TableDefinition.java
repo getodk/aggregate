@@ -14,6 +14,7 @@ import org.simpleframework.xml.Root;
  * Represents the XML format of a table definition. This is essentially all the
  * necessary information for a table to be defined on the server in a way taht
  * will be ODK Tables -friendly.
+ *
  * @author dylan price?
  * @author sudar.sam@gmail.com
  *
@@ -44,33 +45,38 @@ public class TableDefinition {
   private String tableIdAccessControls;
 
   /*
-   * While not defined in DbTableDefinitions, this was originally how
-   * column information was uploaded to the server, and will remain
-   * this way for now.
+   * While not defined in DbTableDefinitions, this was originally how column
+   * information was uploaded to the server, and will remain this way for now.
    */
   @ElementList(inline = true)
   private List<Column> columns;
 
-// ss: trying to subsume this information into the kvs.
-//  @Element(required = false)
-//  private String metadata;
+  // ss: trying to subsume this information into the kvs.
+  // @Element(required = false)
+  // private String metadata;
 
   protected TableDefinition() {
   }
 
   /**
    * Construct the table definition
-   * @param tableId id of the table
-   * @param columns list of {@link Column} objects
-   * @param tableKey key of the table
-   * @param dbTableName the db name of the table
-   * @param type the string type of the table (must be one of
-   *     {@link TableTypeClient#getRepresentation()})
-   * @param tableIdAccessControls id of the table holding access controls
+   *
+   * @param tableId
+   *          id of the table
+   * @param columns
+   *          list of {@link Column} objects
+   * @param tableKey
+   *          key of the table
+   * @param dbTableName
+   *          the db name of the table
+   * @param type
+   *          the string type of the table (must be one of
+   *          {@link TableTypeClient#getRepresentation()})
+   * @param tableIdAccessControls
+   *          id of the table holding access controls
    */
-  public TableDefinition(final String tableId, final List<Column> columns,
-      final String tableKey, final String dbTableName, final TableType type,
-      final String tableIdAccessControls) {
+  public TableDefinition(final String tableId, final List<Column> columns, final String tableKey,
+      final String dbTableName, final TableType type, final String tableIdAccessControls) {
     this.tableId = tableId;
     this.columns = columns;
     this.tableKey = tableKey;
@@ -109,9 +115,42 @@ public class TableDefinition {
 
   @Override
   public String toString() {
-    return "TableDefinition [tableId=" + tableId + ", columns=" + columns +
-        ", tableKey=" + tableKey + ", dbTableName=" + dbTableName +
-        ", type=" + type + ", tableIdAccessControls=" + tableIdAccessControls
-        + "]";
+    return "TableDefinition [tableId=" + tableId + ", columns=" + columns + ", tableKey="
+        + tableKey + ", dbTableName=" + dbTableName + ", type=" + type + ", tableIdAccessControls="
+        + tableIdAccessControls + "]";
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
+    result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
+    result = prime * result + ((dbTableName == null) ? 0 : dbTableName.hashCode());
+    result = prime * result + ((type == null) ? 0 : type.hashCode());
+    result = prime * result + ((tableIdAccessControls == null) ? 0 : tableIdAccessControls.hashCode());
+    result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if ( obj == null ) {
+      return false;
+    }
+    if ( obj == this ) {
+      return true;
+    }
+    if (!(obj instanceof TableDefinition)) {
+      return false;
+    }
+    TableDefinition other = (TableDefinition) obj;
+    return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
+        && (tableKey == null ? other.tableKey == null : tableKey.equals(other.tableKey))
+        && (dbTableName == null ? other.dbTableName == null : dbTableName.equals(other.dbTableName))
+        && (type == null ? other.type == null : type.equals(other.type))
+        && (tableIdAccessControls == null ? other.tableIdAccessControls == null : tableIdAccessControls.equals(other.tableIdAccessControls))
+        && (columns == null ? other.columns == null : columns.equals(other.columns));
+  }
+
 }

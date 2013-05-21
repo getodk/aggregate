@@ -28,4 +28,33 @@ public class OdkTablesFileManifestEntry {
    * downloaded.
    */
   public String downloadUrl;
+
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((filename == null) ? 0 : filename.hashCode());
+    result = prime * result + ((md5hash == null) ? 0 : md5hash.hashCode());
+    result = prime * result + ((downloadUrl == null) ? 0 : downloadUrl.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if ( obj == null ) {
+      return false;
+    }
+    if ( obj == this ) {
+      return true;
+    }
+    if (!(obj instanceof OdkTablesFileManifestEntry)) {
+      return false;
+    }
+    OdkTablesFileManifestEntry other = (OdkTablesFileManifestEntry) obj;
+    return (filename == null ? other.filename == null : filename.equals(other.filename))
+        && (md5hash == null ? other.md5hash == null : md5hash.equals(other.md5hash))
+        && (downloadUrl == null ? other.downloadUrl == null : downloadUrl.equals(other.downloadUrl));
+  }
+
 }
