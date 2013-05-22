@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
@@ -41,7 +57,7 @@ public class DbTable {
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
-    dataFields.add(new DataField(DATA_ETAG_AT_MODIFICATION, DataType.STRING, 
+    dataFields.add(new DataField(DATA_ETAG_AT_MODIFICATION, DataType.STRING,
         false));
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, true));
     dataFields.add(new DataField(LAST_UPDATE_USER, DataType.STRING, true));
@@ -49,17 +65,17 @@ public class DbTable {
     dataFields.add(new DataField(FILTER_VALUE, DataType.STRING, true)
     .setIndexable(IndexType.HASH));
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
-    
+
     // And now make the OdkTables metadata columns.
-    dataFields.add(new DataField(TablesConstants.URI_USER.toUpperCase(), 
+    dataFields.add(new DataField(TablesConstants.URI_USER.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.FORM_ID.toUpperCase(), 
+    dataFields.add(new DataField(TablesConstants.FORM_ID.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.INSTANCE_NAME.toUpperCase(), 
+    dataFields.add(new DataField(TablesConstants.INSTANCE_NAME.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.LOCALE.toUpperCase(), 
+    dataFields.add(new DataField(TablesConstants.LOCALE.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.TIMESTAMP.toUpperCase(), 
+    dataFields.add(new DataField(TablesConstants.TIMESTAMP.toUpperCase(),
         DataType.DATETIME, true));
   }
 
@@ -72,15 +88,15 @@ public class DbTable {
     return getRelation(tableId, fields, cc);
   }
 
-  private static Relation getRelation(String tableId, List<DataField> fields, 
+  private static Relation getRelation(String tableId, List<DataField> fields,
       CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation = new Relation(RUtil.NAMESPACE, 
+    Relation relation = new Relation(RUtil.NAMESPACE,
         RUtil.convertIdentifier(tableId), fields, cc);
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, 
+  private static List<DataField> getDynamicFields(String tableId,
       CallingContext cc)
       throws ODKDatastoreException {
     List<Entity> entities = DbColumnDefinitions.query(tableId, cc);
@@ -97,7 +113,7 @@ public class DbTable {
 
   /**
    * Retrieve a list of {@link DbTable} row entities.
-   * 
+   *
    * @param table
    *          the {@link DbTable} relation.
    * @param rowIds
@@ -108,7 +124,7 @@ public class DbTable {
    *           if one of the rows does not exist
    * @throws ODKDatastoreException
    */
-  public static List<Entity> query(Relation table, List<String> rowIds, 
+  public static List<Entity> query(Relation table, List<String> rowIds,
       CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     Validate.notNull(table);

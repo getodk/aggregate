@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.common.ermodel.simple;
 
 import java.util.ArrayList;
@@ -15,7 +31,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 /**
  * Query is a query over a Relation.
- * 
+ *
  * @author the.dylan.price@gmail.com
  */
 public class Query {
@@ -38,7 +54,7 @@ public class Query {
 
   /**
    * Add an equal filter to the query.
-   * 
+   *
    * @param fieldName
    *          the name of an field in the Relation.
    * @param value
@@ -52,7 +68,7 @@ public class Query {
 
   /**
    * Add a not equal filter to the query.
-   * 
+   *
    * @param fieldName
    *          the name of an field in the Relation.
    * @param value
@@ -66,7 +82,7 @@ public class Query {
 
   /**
    * Add a greater than filter to the query.
-   * 
+   *
    * @param fieldName
    *          the name of an field in the Relation.
    * @param value
@@ -80,7 +96,7 @@ public class Query {
 
   /**
    * Add a greater than or equal filter to the query.
-   * 
+   *
    * @param fieldName
    *          the name of an field in the Relation.
    * @param value
@@ -94,7 +110,7 @@ public class Query {
 
   /**
    * Add a less than filter to the query.
-   * 
+   *
    * @param fieldName
    *          the name of an field in the Relation.
    * @param value
@@ -108,7 +124,7 @@ public class Query {
 
   /**
    * Add a less than or equal filter to the query.
-   * 
+   *
    * @param fieldName
    *          the name of an field in the Relation.
    * @param value
@@ -123,7 +139,7 @@ public class Query {
   /**
    * Adds a filter to the query. Alternative API to {@link #equal},
    * {@link #greaterThan}, etc.
-   * 
+   *
    * @param fieldName
    *          the name of an field in the Relation.
    * @param op
@@ -143,7 +159,7 @@ public class Query {
 
   /**
    * Adds an ascending sort to the query.
-   * 
+   *
    * @param fieldName
    *          the name of the field to sort by. This field must be an field in
    *          the Relation of this query.
@@ -155,7 +171,7 @@ public class Query {
 
   /**
    * Adds a descending sort to the query.
-   * 
+   *
    * @param fieldName
    *          the name of the field to sort by. This field must be an field in
    *          the Relation of this query.
@@ -168,7 +184,7 @@ public class Query {
   /**
    * Adds a sort to the query. Alternative API to {@link #sortAscending} and
    * {@link #sortDescending}.
-   * 
+   *
    * @param fieldName
    *          the name of the field to sort by. This field must be an field in
    *          the Relation of this query.
@@ -187,7 +203,7 @@ public class Query {
   /**
    * Narrows the scope of the query to only include entities whose value for the
    * given fieldName is in values.
-   * 
+   *
    * @param fieldName
    *          the name of the field to filter with. This must be an field in the
    *          Relation of this query.
@@ -208,7 +224,7 @@ public class Query {
 
   /**
    * Get the single entity result of the query.
-   * 
+   *
    * @return the entity which is the sole result of executing this query, or
    *         null if the query returned no results
    * @throws ODKDatastoreException
@@ -242,7 +258,7 @@ public class Query {
 
   /**
    * Execute the query and return a list of all results.
-   * 
+   *
    * @return a list of all the entities which matched the query.
    * @throws ODKDatastoreException
    */
@@ -262,7 +278,7 @@ public class Query {
   /**
    * Retrieves all distinct values for the given field, with any sort and filter
    * criteria.
-   * 
+   *
    * @param fieldName
    *          the name of the field to retrieve distinct values for.
    * @return a list of distinct values for the given field, narrowed by any

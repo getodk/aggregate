@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
@@ -27,9 +43,9 @@ import com.google.gwt.user.client.ui.HTML;
  *
  */
 public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
-	  
+
 	  private TableDefinitionClient tableDef;
-	  
+
 	  // the textbox for the table name
 	  private OdkTablesTableNameBox nameBox;
 
@@ -38,7 +54,7 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 
 	    AggregateButton addTableButton = new OdkTablesAddTableButton();
 	    addTableButton.addClickHandler(new ExecuteAdd());
-	    
+
 	    nameBox = new OdkTablesTableNameBox(this);
 
 	    FlexTable layout = new FlexTable();
@@ -56,16 +72,16 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 
 	    @Override
 	    public void onClick(ClickEvent event) {
-	    	
+
           String tableName = nameBox.getValue();
-          // TODO: for now, just add the tableKey and dbTableName to be the 
+          // TODO: for now, just add the tableKey and dbTableName to be the
           // same as the tableName. The correct workflow and checks need to
           // be performed.
           List<ColumnClient> columns = new ArrayList<ColumnClient>(0);
           tableDef = new TableDefinitionClient(null, columns, tableName,
               tableName, TableTypeClient.DATA,
               null);
-          
+
 	      // Set up the callback object.
 	      AsyncCallback<TableEntryClient> callback = new AsyncCallback<TableEntryClient>() {
 	        @Override
@@ -77,14 +93,14 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	        public void onSuccess(TableEntryClient table) {
 	          AggregateUI.getUI().clearError();
 
-	          
+
 	          AggregateUI.getUI().getTimer().refreshNow();
 	        }
 	      };
 	      Window.alert("before call");
-	      // Make the call to the form service. null tableId so that the 
+	      // Make the call to the form service. null tableId so that the
 	      // server knows to generate a random UUID.
-	      SecureGWT.getServerTableService().createTable(null, 
+	      SecureGWT.getServerTableService().createTable(null,
 	    		  tableDef, callback);
 	      hide();
 	    }

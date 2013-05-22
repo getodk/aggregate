@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.servlet;
 
 import java.io.BufferedReader;
@@ -36,22 +52,22 @@ import org.opendatakit.common.web.constants.BasicConsts;
 public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = -890634967842304210L;
-  
-  private static final Log logger = 
+
+  private static final Log logger =
       LogFactory.getLog(OdkTablesUploadTableFromCSVServlet.class);
-  
-  private static final String ADDR = 
+
+  private static final String ADDR =
       UIConsts.UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR;
-  
+
   /**
    * title for generated webpage
    */
   public static final String TITLE_INFO = "OdkTables Upload Table From CSV";
-  
-  
+
+
   private static final String UPLOAD_PAGE_BODY_START =
 
        "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Import a table from a CSV</h2></p>"
@@ -60,7 +76,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
         + "<form id=\"ie_backward_compatible_form\""
         + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
         + " action=\""; // emit the ADDR
-  
+
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
       + "     <table id=\"uploadTable\">"
      + "    <tr>"
@@ -79,14 +95,14 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
       + "</tr>"
       + " </table>\n"
       + "</form>";
-  
+
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-     
+
      CallingContext cc = ContextFactory.getCallingContext(this, req);
-     
+
      //TODO deal with the javarosa stuff, as in FormUploadServlet's corresponding method
-     
+
        StringBuilder headerString = new StringBuilder();
        headerString.append("<script type=\"application/javascript\" src=\"");
        headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
@@ -100,7 +116,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
        headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
        headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
        headerString.append("\" />");
-       
+
        // header info
        beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
        PrintWriter out = resp.getWriter();
@@ -109,7 +125,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
        out.write(UPLOAD_PAGE_BODY_MIDDLE);
        finishBasicHtmlResponse(resp);
   }
-  
+
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
      CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -120,13 +136,13 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
      resp.setHeader("Location", url);
      resp.setStatus(204); // no content...
   }
-  
+
   /**
-   * Handler for HTTP Post request that takes a CSV file, uses that file to 
+   * Handler for HTTP Post request that takes a CSV file, uses that file to
    * add a new OdkTables table to the datastore.
    */
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     // TODO here do I need to handle the log stuff?
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -135,24 +151,24 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
           ErrorConsts.NO_MULTI_PART_CONTENT);
       return;
     }
-    
+
     try {
       MultiPartFormData uploadedFormItems = new MultiPartFormData(req);
-      
+
       MultiPartFormItem csvFile = uploadedFormItems
           .getFormDataByFieldName("table_file");
-      
+
       String tableName = uploadedFormItems
           .getSimpleFormField("table_name");
-      
+
       resp.setStatus(HttpServletResponse.SC_CREATED);
-      resp.setHeader("Location", cc.getServerURL() + 
+      resp.setHeader("Location", cc.getServerURL() +
           BasicConsts.FORWARDSLASH + ADDR);
-      
+
       CsvUtil csvUtil = new CsvUtil();
       byte[] bytes = csvFile.getStream().toByteArray();
       ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-      BufferedReader br = 
+      BufferedReader br =
           new BufferedReader(new InputStreamReader(inputStream));
       boolean success = csvUtil.importNewTable(br, tableName, cc);
       PrintWriter out = resp.getWriter();
@@ -192,8 +208,8 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
-    } 
+    }
   }
-  
+
 
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.api;
 
 import java.util.List;
@@ -27,19 +43,19 @@ public interface TableService {
 
   @GET
   @Path("{tableId}")
-  public TableResource getTable(@PathParam("tableId") String tableId) 
+  public TableResource getTable(@PathParam("tableId") String tableId)
       throws ODKDatastoreException,
       PermissionDeniedException;
 
   @PUT
   @Path("{tableId}")
-  public TableResource createTable(@PathParam("tableId") String tableId, 
+  public TableResource createTable(@PathParam("tableId") String tableId,
       TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException;
 
   @DELETE
   @Path("{tableId}")
-  public void deleteTable(@PathParam("tableId") String tableId) 
+  public void deleteTable(@PathParam("tableId") String tableId)
       throws ODKDatastoreException,
       ODKTaskLockException, PermissionDeniedException;
 
@@ -48,13 +64,13 @@ public interface TableService {
       throws ODKDatastoreException;
 
   @Path("{tableId}/rows")
-  public DataService getData(@PathParam("tableId") String tableId) 
+  public DataService getData(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
 
   @Path("{tableId}/properties")
   public PropertiesService getProperties(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
-  
+
   @GET
   @Path("{tableId}/definition")
   public TableDefinitionResource getDefinition(
@@ -62,10 +78,10 @@ public interface TableService {
       throws ODKDatastoreException;
 
   @Path("{tableId}/diff")
-  public DiffService getDiff(@PathParam("tableId") String tableId) 
+  public DiffService getDiff(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
 
   @Path("{tableId}/acl")
-  public TableAclService getAcl(@PathParam("tableId") String tableId) 
+  public TableAclService getAcl(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
 }

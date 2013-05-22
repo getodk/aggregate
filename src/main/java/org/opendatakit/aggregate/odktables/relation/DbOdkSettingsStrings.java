@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
@@ -18,7 +34,7 @@ import org.opendatakit.common.web.CallingContext;
  * information on the phone.
  * <br>
  * This is modeled off of DbColumn.java.
- * ...although in actuality this might be exactly what 
+ * ...although in actuality this might be exactly what
  * DbTableProperties currently accomplishes, so for now
  * I'm going to let this sit.
  * @author sudar.sam@gmail.com
@@ -32,12 +48,12 @@ public class DbOdkSettingsStrings {
 	// is this how i want to be calling this?
 	public static final String ETAG = "ETAG";
 	public static final String STRING = "STRING";
-	
+
 	// this will be appended to the end of the table as the name
 	public static final String RELATION_NAME = "TABLE_STRINGS";
-	
+
 	private static final List<DataField> dataFields;
-	
+
 	/*
 	 * the static block does it all once. supposed to be more efficient.
 	 */
@@ -48,12 +64,12 @@ public class DbOdkSettingsStrings {
 		dataFields.add(new DataField(ETAG, DataType.STRING, false));
 		dataFields.add(new DataField(STRING, DataType.STRING, false));
 	}
-	
+
 	public static Relation getRelation(CallingContext cc) throws ODKDatastoreException {
 		Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
 		return relation;
 	}
-	
+
 	/**
 	 * Get all the entities (rows) in this table for the given tableId.
 	 * @param tableId
@@ -68,5 +84,5 @@ public class DbOdkSettingsStrings {
 				.execute();
 	}
 
-	
+
 }

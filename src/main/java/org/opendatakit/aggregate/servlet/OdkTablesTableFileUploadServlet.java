@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
@@ -50,19 +66,19 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 
 	private static final long serialVersionUID = -1173762226947584151L;
-	
-	private static final Log logger = 
+
+	private static final Log logger =
 	    LogFactory.getLog(OdkTablesTableFileUploadServlet.class);
-	
+
 	// so this is the URI from the base, which Mitch said by convention they've been including.
 	// i'm not sure if this is the correct place/way to be adding mine.
 	private static final String ADDR = UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR;
-	
+
 	/**
 	 * Title for generated webpage.
 	 */
 	public static final String TITLE_INFO = "OdkTables File Upload";
-	
+
 	private static final String UPLOAD_PAGE_BODY_START =
 
 		  "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Upload a file associated with a table</h2></p>"
@@ -70,8 +86,8 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	      + "<![endif] -->"
 	      + "<form id=\"ie_backward_compatible_form\""
 	      + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
-	      + " action=\"";// emit the ADDR	
-	
+	      + " action=\"";// emit the ADDR
+
 	  private String UPLOAD_PAGE_BODY_MIDDLE_1 = "\">"
 		      + "	  <table id=\"uploadTable\">"
 			  + "		<tr>"
@@ -128,15 +144,15 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 		      + "	  </form>"
 		      + "<p>Media files that are necessary for any of the uploaded files "
 		      + "(if any) should be in a single directory without subdirectories.</p>"
-		      + "<br><br>";	
-	  
+		      + "<br><br>";
+
 	  @Override
 	  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		  
+
 		  CallingContext cc = ContextFactory.getCallingContext(this, req);
-		  
+
 		  //TODO deal with the javarosa stuff, as in FormUploadServlet's corresponding method
-		  
+
 		    StringBuilder headerString = new StringBuilder();
 		    headerString.append("<script type=\"application/javascript\" src=\"");
 		    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
@@ -150,14 +166,14 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 		    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
 		    headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
 		    headerString.append("\" />");
-		    
+
 		    // header info
 		    beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
 		    PrintWriter out = resp.getWriter();
 		    out.write(UPLOAD_PAGE_BODY_START);
 		    out.write(cc.getWebApplicationURL(ADDR));
 		    try {
-		    String body_middle = UPLOAD_PAGE_BODY_MIDDLE_1 + 
+		    String body_middle = UPLOAD_PAGE_BODY_MIDDLE_1 +
 		        getSelectTableHtml(cc) + UPLOAD_PAGE_BODY_MIDDLE_2;
 		    out.write(body_middle);
 		    } catch (ODKDatastoreException e) {
@@ -166,7 +182,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 		    }
 		    finishBasicHtmlResponse(resp);
 	  }
-	  
+
 	  /**
 	   * Handler for HTTP head request. This is used to verify that channel security
 	   * and authentication have been properly established when uploading form
@@ -182,8 +198,8 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 		  resp.setHeader("Location", url);
 		  resp.setStatus(204); // no content...
 	  }
-	  
-	  
+
+
 	  /**
 	   * Handler for HTTP Post request that takes a file and adds it to the datastore.
 	   */
@@ -192,85 +208,85 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 		  //TODO handle the logging stuff in the friendlytable_log table, that I need to
 		  // create. it also apparently matters which of the tables is written first, so
 		  // be sure to look how Dylan does it first.
-		  
+
 		  // will let the MultiPartFormData files, odk's custom parsing library,
 		  // handle the parsing.
-		  
+
 		  CallingContext cc = ContextFactory.getCallingContext(this, req);
-		  
-		  // verify the requist is multipart, which you have set above in 
+
+		  // verify the requist is multipart, which you have set above in
 		  // UPLOAD_PAGE_BODY_START
 		  if (!ServletFileUpload.isMultipartContent(req)) {
 			  resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.NO_MULTI_PART_CONTENT);
 			  return;
 		  }
-		  		  
+
 		  try {
 			  // process the form
 			  MultiPartFormData uploadedFormItems = new MultiPartFormData(req);
-			  
+
 			  // This will house all of the files being uploaded at this time.
-	         Set<Map.Entry<String,MultiPartFormItem>> fileSet = 
+	         Set<Map.Entry<String,MultiPartFormItem>> fileSet =
 	               uploadedFormItems.getFileNameEntrySet();
-	         
-			  
+
+
 			  // "table_file" is what the input was called in the table above. not sure
 			  // if this is actually what i want it to be here.
 			  MultiPartFormItem tableFile = uploadedFormItems
 					  .getFormDataByFieldName("table_file");
-			  
+
 			  String tableName = uploadedFormItems
 					  .getSimpleFormField("table_name");
-			  
+
 			  String fileKey = uploadedFormItems
 					  .getSimpleFormField("file_key");
-			  
+
 			  String pathPrefix = uploadedFormItems
 			      .getSimpleFormField("path_prefix");
-			  
+
 			  resp.setStatus(HttpServletResponse.SC_CREATED);
 			  resp.setHeader("Location", cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR);
-			  
+
 			  // first we need to get the id of the table.
 			  String tableId = getTableId(tableName, cc);
-			  
+
 			  // This will store all of the new entities we are adding. They are
 			  // held in this list first so that we can construct them as they
 			  // would be exist in the database and then check for conflicts.
-			  // If there are no conflicts, you move through the entities and 
+			  // If there are no conflicts, you move through the entities and
 			  // call put() to persist them. If you are uploading huge numbers
 			  // if files, might this be a memory limitation?
 			  List<Entity> newEntities = new ArrayList<Entity>();
-			  
+
 			  DbTableFiles fileBlobSet = new DbTableFiles(cc);
 			  BlobEntitySet instance = fileBlobSet.newBlobEntitySet(cc);
 			  // TODO: for now this is the filename, but eventually i will want to have another
-			  // input field that is "path prefix" that will tell you how to prefix 
+			  // input field that is "path prefix" that will tell you how to prefix
 			  // the file additions.
-			  instance.addBlob(tableFile.getStream().toByteArray(), 
+			  instance.addBlob(tableFile.getStream().toByteArray(),
 					  tableFile.getContentType(), tableFile.getFilename(), false, cc);
-			  
+
 			  // now we want to put the pertinent information into the user-friendly table.
 			  // why he didn't make this a util class I do not know.
 			  EntityCreator ec = new EntityCreator();
-			  Entity newRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.FILE.name, 
+			  Entity newRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.FILE.name,
 					  fileKey, instance.getUri(), false, cc);
 			  newEntities.add(newRow);
-			  
+
 			  /*
 			  // TEST TEST TEST
 			  // this is testing that you can do add other things to the key value
 			  // store and have them sync.
-			  Entity stringRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.STRING.name, 
+			  Entity stringRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.STRING.name,
 			      "stringKey", "string value", cc);
 			  stringRow.put(cc);
 			  Entity intRow = ec.newTableFileInfoEntity(tableId,
 			      DbTableFileInfo.Type.INTEGER.name, "intKey", "55", cc);
 			  intRow.put(cc);
 			  */
-			  
+
 			  // now let's handle the media files.
-			  // This will be the suffix for the media files. 
+			  // This will be the suffix for the media files.
 			  int i = 1;
 			  for (Map.Entry<String,MultiPartFormItem> itm : fileSet) {
 			    if (itm.getKey().equals(tableFile.getFilename()))
@@ -278,7 +294,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	          fileBlobSet = new DbTableFiles(cc);
 	          instance = fileBlobSet.newBlobEntitySet(cc);
 	           // TODO: for now this is the filename, but eventually i will want to have another
-	           // input field that is "path prefix" that will tell you how to prefix 
+	           // input field that is "path prefix" that will tell you how to prefix
 	           // the file additions.
 	          String tempFileName;
 	          if (pathPrefix.equals("")) {
@@ -286,25 +302,25 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	          } else {
 	           tempFileName = pathPrefix + "/" + itm.getValue().getFilename();
 	          }
-	          
-	           instance.addBlob(itm.getValue().getStream().toByteArray(), 
+
+	           instance.addBlob(itm.getValue().getStream().toByteArray(),
 	                 itm.getValue().getContentType(), tempFileName, false, cc);
-	           
+
 	           // now we want to put the pertinent information into the user-friendly table.
-	           String tempFileKey = fileKey + "_" + String.valueOf(i); 
+	           String tempFileKey = fileKey + "_" + String.valueOf(i);
 	           // why he didn't make this a util class I do not know.
-	           newRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.FILE.name, 
+	           newRow = ec.newTableFileInfoEntity(tableId, DbTableFileInfo.Type.FILE.name,
 	                 tempFileKey, instance.getUri(), true, cc);
 	           newEntities.add(newRow);
 	           i++;
 			  }
-			  
+
 			  // now check for collisions.
 			  List<Row> existingRows = getFileRows(req, tableId);
 			  List<Row> newRows = EntityConverter.toRowsFromFileInfo(newEntities);
 			  List<String> conflictingKeys = getDuplicateKeys(existingRows,
 			      newRows);
-			  List<String> conflictingFiles = getDuplicateFileNames(cc, 
+			  List<String> conflictingFiles = getDuplicateFileNames(cc,
 			      existingRows, newRows);
 			  // first and foremost, you have to have a key.
 			  fileKey = uploadedFormItems.getSimpleFormField("file_key");
@@ -318,7 +334,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
              out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
              out.write(" to return try again.</p>");
              out.write(HtmlConsts.BODY_CLOSE);
-             out.write(HtmlConsts.HTML_CLOSE);			    
+             out.write(HtmlConsts.HTML_CLOSE);
 			  } else if (fileKey.equals("")) {
              PrintWriter out = resp.getWriter();
              out.write(HtmlConsts.HTML_OPEN);
@@ -330,9 +346,9 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
              out.write(" to return try again.</p>");
              out.write(HtmlConsts.BODY_CLOSE);
              out.write(HtmlConsts.HTML_CLOSE);
-			  } else if (conflictingKeys.size() == 0 && conflictingFiles.size() == 0) { 
+			  } else if (conflictingKeys.size() == 0 && conflictingFiles.size() == 0) {
 			    // persist all the entities
-			    for (Entity entity : newEntities) 
+			    for (Entity entity : newEntities)
 			      entity.put(cc);
     			  PrintWriter out = resp.getWriter();
     			  out.write(HtmlConsts.HTML_OPEN);
@@ -366,12 +382,12 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
              out.write("<p>You must resolve these conflicts.</p>");
              out.write("<p>Click ");
              out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
-             out.write(" to return try again.</p>");             
+             out.write(" to return try again.</p>");
              out.write(HtmlConsts.BODY_CLOSE);
              out.write(HtmlConsts.HTML_CLOSE);
 			  }
-			  
-			  
+
+
 		  } catch (ODKDatastoreException e) {
 			  logger.error("File upload persistence error: " + e.getMessage());
 			  e.printStackTrace();
@@ -394,7 +410,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
               ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
         } catch (AccessDeniedException e) {
           // I don't think this should happen, as by the time you've gotten
-          // to this servlet, you should have already had appropriate 
+          // to this servlet, you should have already had appropriate
           // permissions to see this table and access things.
           logger.error("Error uploading files, access denied when accessing" +
               " the datastore: " + e.getMessage());
@@ -402,9 +418,9 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
           resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
               ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
         }
-		  
+
 	  }
-	  
+
 	  /*
 	   * Takes in the table name and returns the tableId.
 	   */
@@ -417,15 +433,15 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 			  }
 		  }
 		  // if you're here, you need to return something
-		  // this will throw an error later. 
+		  // this will throw an error later.
 		  return "";
 	  }
-	  
+
   /**
    * Get the rows in DbTableFileInfo for the corresponding table key.
    */
   private List<Row> getFileRows(HttpServletRequest req, String tableId)
-      throws AccessDeniedException, RequestFailureException, 
+      throws AccessDeniedException, RequestFailureException,
       DatastoreFailureException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
@@ -436,8 +452,8 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
     }
-  }  
-  
+  }
+
   /**
    * This method returns the duplicate keys that are preventing the current
    * upload.
@@ -464,16 +480,16 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
     }
     return duplicates;
   }
-  
+
   /**
-   * This method returns the duplicate filenames that would occur on the 
+   * This method returns the duplicate filenames that would occur on the
    * current upload.
    * @param newRows the new rows you are adding
    * @param oldRows the rows already in the database
    * @return the conflicting keys
    */
-  private List<String> getDuplicateFileNames(CallingContext cc, 
-      List<Row> newRows,  List<Row> oldRows) 
+  private List<String> getDuplicateFileNames(CallingContext cc,
+      List<Row> newRows,  List<Row> oldRows)
       throws ODKDatastoreException {
     List<String> duplicates = new ArrayList<String>();
     // First we're going to convert the current rows to a set based on their
@@ -506,25 +522,25 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
     }
     return duplicates;
   }
-  
+
   /**
    * This generates the HTML for a selector box to allow the selection of
    * a table name from the list of available tables.
    * @param cc
    * @return
    */
-  private String getSelectTableHtml(CallingContext cc)  
+  private String getSelectTableHtml(CallingContext cc)
        throws ODKDatastoreException {
     TableManager tm = new TableManager(cc);
     List<Scope> scopes = AuthFilter.getScopes(cc);
     List<TableEntry> entries = tm.getTables(scopes);
     String html = "<select name=\"table_name\" id=\"table_name\">";
     for (TableEntry table : entries) {
-      html = html + "<option value=\"" + table.getTableKey() + "\">" 
+      html = html + "<option value=\"" + table.getTableKey() + "\">"
           + table.getTableKey() + "</option>";
     }
     html = html + "</select>";
     return html;
   }
-	  
+
 }

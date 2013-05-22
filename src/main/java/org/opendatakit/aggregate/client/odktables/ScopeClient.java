@@ -1,10 +1,26 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.odktables;
 
 
+import java.io.Serializable;
+
 import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.simpleframework.xml.Element;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * This is the client-side version of org.opendatakit.aggregate.odktables.entity.Scope.java
@@ -15,15 +31,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @author sudar.sam@gmail.com
  *
  */
-public class ScopeClient implements IsSerializable {
+public class ScopeClient implements Serializable {
 
     /**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7603521544860371942L;
 
 	public static final ScopeClient EMPTY_SCOPE;
-  
+
 	static {
 	  EMPTY_SCOPE = new ScopeClient();
 	  EMPTY_SCOPE.initFields(null, null);
@@ -43,7 +59,7 @@ public class ScopeClient implements IsSerializable {
 
   /**
    * Constructs a new Scope.
-   * 
+   *
    * @param type
    *          the type of the scope. Must not be null. The empty scope may be
    *          accessed as {@link Scope#EMPTY_SCOPE}.
@@ -101,10 +117,10 @@ public class ScopeClient implements IsSerializable {
   public void setValue(String value) {
     this.value = value;
   }
-  
+
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -118,7 +134,7 @@ public class ScopeClient implements IsSerializable {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -142,7 +158,7 @@ public class ScopeClient implements IsSerializable {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

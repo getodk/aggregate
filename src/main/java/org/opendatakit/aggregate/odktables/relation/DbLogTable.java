@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
@@ -16,7 +32,7 @@ public class DbLogTable {
 
   public static final String ROW_ID = "ROW_ID";
   public static final String ROW_VERSION = "ROW_VERSION";
-  public static final String DATA_ETAG_AT_MODIFICATION = 
+  public static final String DATA_ETAG_AT_MODIFICATION =
       "DATA_ETAG_AT_MODIFICATION";
   public static final String CREATE_USER = "CREATE_USER";
   public static final String LAST_UPDATE_USER = "LAST_UPDATE_USER";
@@ -30,7 +46,7 @@ public class DbLogTable {
     dataFields.add(new DataField(ROW_ID, DataType.STRING, false)
     .setIndexable(IndexType.HASH));
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
-    dataFields.add(new DataField(DATA_ETAG_AT_MODIFICATION, DataType.STRING, 
+    dataFields.add(new DataField(DATA_ETAG_AT_MODIFICATION, DataType.STRING,
         false)
         .setIndexable(IndexType.ORDERED));
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, true));
@@ -50,16 +66,16 @@ public class DbLogTable {
     return getRelation(tableId, fields, cc);
   }
 
-  private static Relation getRelation(String tableId, List<DataField> fields, 
+  private static Relation getRelation(String tableId, List<DataField> fields,
       CallingContext cc)
       throws ODKDatastoreException {
     tableId += "_LOG";
-    Relation relation = new Relation(RUtil.NAMESPACE, 
+    Relation relation = new Relation(RUtil.NAMESPACE,
         RUtil.convertIdentifier(tableId), fields, cc);
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, 
+  private static List<DataField> getDynamicFields(String tableId,
       CallingContext cc)
       throws ODKDatastoreException {
     List<Entity> entities = DbColumnDefinitions.query(tableId, cc);

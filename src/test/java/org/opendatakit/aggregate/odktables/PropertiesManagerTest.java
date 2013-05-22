@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables;
 
 import static org.junit.Assert.assertEquals;
@@ -31,10 +47,10 @@ public class PropertiesManagerTest {
     this.tableMetadata = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
-    
+
     this.pm = new PropertiesManager(tableId, cc);
   }
 
@@ -49,12 +65,12 @@ public class PropertiesManagerTest {
 
   @Test
   public void testGetTableProperties() throws ODKDatastoreException {
-    TableProperties expected = new TableProperties(T.propertiesEtag, 
+    TableProperties expected = new TableProperties(T.propertiesEtag,
         T.tableKey, T.kvsEntries);
     TableProperties actual = pm.getProperties();
     assertEquals(expected.getTableKey(), actual.getTableKey());
     // not sure this will work...
-    assertEquals(expected.getKeyValueStoreEntries(), 
+    assertEquals(expected.getKeyValueStoreEntries(),
         actual.getKeyValueStoreEntries());
   }
 
@@ -76,15 +92,15 @@ public class PropertiesManagerTest {
     doTestSetProperties(expected);
   }
 
-  private void doTestSetProperties(TableProperties expected) 
-      throws EtagMismatchException, ODKTaskLockException, 
+  private void doTestSetProperties(TableProperties expected)
+      throws EtagMismatchException, ODKTaskLockException,
       ODKDatastoreException {
     pm.setProperties(expected);
 
     TableProperties actual = pm.getProperties();
 
     assertEquals(expected.getTableKey(), actual.getTableKey());
-    assertEquals(expected.getKeyValueStoreEntries(), 
+    assertEquals(expected.getKeyValueStoreEntries(),
         actual.getKeyValueStoreEntries());
   }
 

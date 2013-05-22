@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
@@ -13,7 +29,7 @@ import com.google.gwt.user.client.ui.HTML;
 
 /**
  * The popup that performs the deletion of a file from the datastore.
- * NB: This differs from the {@link OdkTablesConfirmDeleteRowPopup} in 
+ * NB: This differs from the {@link OdkTablesConfirmDeleteRowPopup} in
  * that it deletes a row in an actual datastore table, as opposed to
  * a row in a user-defined OdkTables table.
  * @author sudar.sam@gmail.com
@@ -29,7 +45,7 @@ public class OdkTablesConfirmDeleteFilePopup extends AbstractPopupBase {
 	  private final String tableId;
 	  // the row you're deleting
 	  private final String rowId;
-	  
+
 	  private AggregateSubTabBase basePanel;
 
 	  public OdkTablesConfirmDeleteFilePopup(AggregateSubTabBase basePanel,
@@ -67,7 +83,7 @@ public class OdkTablesConfirmDeleteFilePopup extends AbstractPopupBase {
 	        @Override
 	        public void onSuccess(Void v) {
 	          AggregateUI.getUI().clearError();
-	          
+
 	          AggregateUI.getUI().getTimer().refreshNow();
 	        }
 	      };
