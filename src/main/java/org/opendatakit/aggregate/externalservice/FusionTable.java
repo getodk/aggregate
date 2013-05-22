@@ -373,13 +373,16 @@ public class FusionTable extends OAuth2ExternalService implements ExternalServic
       while (batcher.processSubmissionsForBatch()) {
 
         String tmpStr = batcher.getBatchInsertString(objectEntity.getFusionTableId());
-        //System.out.println(tmpStr);
-        executeStmt(POST, FUSION_TABLE_QUERY_API, tmpStr, null, cc);
+        if ( tmpStr != null && tmpStr.length() != 0 ) {
+          executeStmt(POST, FUSION_TABLE_QUERY_API, tmpStr, null, cc);
+        }
 
         // upload repeat value
         for (FusionTable2RepeatParameterTable tableId : repeatElementEntities) {
-          executeStmt(POST, FUSION_TABLE_QUERY_API,
-              batcher.getBatchInsertString(tableId.getFusionTableId()), null, cc);
+          tmpStr = batcher.getBatchInsertString(tableId.getFusionTableId());
+          if ( tmpStr != null && tmpStr.length() != 0 ) {
+            executeStmt(POST, FUSION_TABLE_QUERY_API, tmpStr, null, cc);
+          }
         }
 
         // See QueryByDateRange
