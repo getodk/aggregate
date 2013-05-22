@@ -1,19 +1,35 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.odktables;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
- * This is the client-side version of 
+ * This is the client-side version of
  * org.opendatakit.aggregate.odktables.entity.api.TableAclResource.java.
  * <br>
  * The idea is that this will perform the same function but on the client side.
- * Usual caveat that it is currently unclear if this is necessary and if a 
+ * Usual caveat that it is currently unclear if this is necessary and if a
  * new non-phone object has to be created for the server.
  * @author sudar.sam@gmail.com
  *
  */
-public class TableAclResourceClient extends TableAclClient 
-    implements IsSerializable{
+public class TableAclResourceClient extends TableAclClient
+    implements Serializable {
 
   private String selfUri;
   private String aclUri;
@@ -76,7 +92,7 @@ public class TableAclResourceClient extends TableAclClient
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -91,7 +107,7 @@ public class TableAclResourceClient extends TableAclClient
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -123,7 +139,7 @@ public class TableAclResourceClient extends TableAclClient
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

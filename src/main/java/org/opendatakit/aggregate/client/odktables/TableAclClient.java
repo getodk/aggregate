@@ -1,22 +1,38 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.odktables;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity. 
+ * org.opendatakit.aggregate.odktables.entity.
  * <br>
  * The idea is that this will be the client-side object that will perform
- * the same function. Now standard caveat applies that at this point it 
+ * the same function. Now standard caveat applies that at this point it
  * is not yet clear if this will be necessary, or if a new non-phone
  * object performing the same function needs to be created for the server.
  * @author sudar.sam@gmail.com
  *
  */
-public class TableAclClient implements IsSerializable {
+public class TableAclClient implements Serializable {
 
   /**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 3563986876354300986L;
 
@@ -62,11 +78,11 @@ private ScopeClient scope;
   public void setRole(TableRoleClient role) {
     this.role = role;
   }
-  
+
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -80,7 +96,7 @@ private ScopeClient scope;
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -104,7 +120,7 @@ private ScopeClient scope;
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override

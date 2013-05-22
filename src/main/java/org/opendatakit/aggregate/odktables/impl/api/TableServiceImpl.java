@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
@@ -83,7 +99,7 @@ public class TableServiceImpl implements TableService {
     String tableIdAccessControls = definition.getTableIdAccessControls();
     List<Column> columns = definition.getColumns();
     // TODO: need a method to init a default minimal list of kvs entries.
-    List<OdkTablesKeyValueStoreEntry> kvsEntries = 
+    List<OdkTablesKeyValueStoreEntry> kvsEntries =
         new ArrayList<OdkTablesKeyValueStoreEntry>();
     TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
         tableIdAccessControls, columns, kvsEntries);
@@ -127,14 +143,14 @@ public class TableServiceImpl implements TableService {
   public TableAclService getAcl(String tableId) throws ODKDatastoreException {
     return new TableAclServiceImpl(tableId, info, cc);
   }
-  
-  
+
+
   @Override
-  public TableDefinitionResource getDefinition(String tableId) 
+  public TableDefinitionResource getDefinition(String tableId)
       throws ODKDatastoreException{
     // TODO: permissions stuff for a table, perhaps? or just at the row level?
     TableDefinition definition = tm.getTableDefinition(tableId);
-    TableDefinitionResource definitionResource = 
+    TableDefinitionResource definitionResource =
         new TableDefinitionResource(definition);
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);

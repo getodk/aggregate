@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables;
 
 import static org.junit.Assert.assertEquals;
@@ -69,8 +85,8 @@ public class TableManagerTest {
 
   @Test
   public void testCreateTable() throws ODKDatastoreException, TableAlreadyExistsException {
-    TableEntry entry = tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    TableEntry entry = tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
     assertEquals(tableId, entry.getTableId());
     assertNotNull(entry.getDataEtag());
@@ -79,11 +95,11 @@ public class TableManagerTest {
   @Test(expected = TableAlreadyExistsException.class)
   public void testCreateTableAlreadyExists() throws ODKDatastoreException,
       TableAlreadyExistsException {
-    tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
-        T.kvsEntries);    
-    tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
+        T.kvsEntries);
+    tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
   }
 
@@ -107,8 +123,8 @@ public class TableManagerTest {
 
   @Test
   public void testGetTable() throws ODKDatastoreException, TableAlreadyExistsException {
-    TableEntry expected = tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    TableEntry expected = tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
     TableEntry actual = tm.getTableNullSafe(tableId);
     assertEquals(expected, actual);
@@ -129,11 +145,11 @@ public class TableManagerTest {
       ODKTaskLockException, TableAlreadyExistsException {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
-    TableEntry one = tm.createTable(tableId2, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    TableEntry one = tm.createTable(tableId2, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
-    TableEntry two = tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    TableEntry two = tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
 
     expected.add(one);
@@ -150,13 +166,13 @@ public class TableManagerTest {
       TableAlreadyExistsException {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
-    TableEntry one = tm.createTable(tableId2, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    TableEntry one = tm.createTable(tableId2, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
-    tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);
-    
+
     TableAclManager am = new TableAclManager(one.getTableId(), cc);
     Scope scope = new Scope(Scope.Type.DEFAULT, null);
     am.setAcl(scope, TableRole.READER);
@@ -171,8 +187,8 @@ public class TableManagerTest {
   @Test(expected = ODKEntityNotFoundException.class)
   public void testDeleteTable() throws ODKDatastoreException, ODKTaskLockException,
       TableAlreadyExistsException {
-    tm.createTable(tableId, T.tableKey, T.dbTableName, 
-        T.tableType, T.tableIdAccessControls, T.columns, 
+    tm.createTable(tableId, T.tableKey, T.dbTableName,
+        T.tableType, T.tableIdAccessControls, T.columns,
         T.kvsEntries);    tm.deleteTable(tableId);
     tm.getTableNullSafe(tableId);
   }

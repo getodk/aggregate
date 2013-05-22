@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
@@ -20,25 +36,25 @@ import org.opendatakit.common.web.CallingContext;
  * a mirrored architecture. It is based on the ODK Tables Schema Google doc.
  * <p>
  * This is the table (i.e. "relation") that appears in the datastore as the
- * "_ODKTABLES_COLUMN" table. This is the table that stores the 
- * information about the "columns" that are in the different odktables 
- * tables. It has the type and name information. Therefore this is the 
+ * "_ODKTABLES_COLUMN" table. This is the table that stores the
+ * information about the "columns" that are in the different odktables
+ * tables. It has the type and name information. Therefore this is the
  * datastore table that you query to get all the column names for a certain
  * table. Each entity (row in this "relation") has the table id that the
  * column belongs to, along with the column type and name.
- * 
+ *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
  *
  */
 public class DbColumnDefinitions {
-	
+
 	// these are the column names in the COLUMN table
   public static final String TABLE_ID = "TABLE_ID";
   public static final String ELEMENT_KEY = "ELEMENT_KEY";
   public static final String ELEMENT_NAME = "ELEMENT_NAME";
   public static final String ELEMENT_TYPE = "ELEMENT_TYPE";
-  public static final String LIST_CHILD_ELEMENT_KEYS = 
+  public static final String LIST_CHILD_ELEMENT_KEYS =
       "LIST_CHILD_ELEMENT_KEYS";
   public static final String IS_PERSISTED = "IS_PERSISTED";
   public static final String JOINS = "JOINS";
@@ -59,9 +75,9 @@ public class DbColumnDefinitions {
     dataFields.add(new DataField(JOINS, DataType.STRING, true));
   }
 
-  public static Relation getRelation(CallingContext cc) 
+  public static Relation getRelation(CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation = 
+    Relation relation =
         new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
     return relation;
   }
@@ -75,7 +91,7 @@ public class DbColumnDefinitions {
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<Entity> query(String tableId, CallingContext cc) 
+  public static List<Entity> query(String tableId, CallingContext cc)
       throws ODKDatastoreException {
     return getRelation(cc).query("DbColumnDefinitions.query()", cc)
         .equal(TABLE_ID, tableId).execute();
@@ -89,7 +105,7 @@ public class DbColumnDefinitions {
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<String> queryForColumnNames(String tableId, 
+  public static List<String> queryForColumnNames(String tableId,
       CallingContext cc) throws ODKDatastoreException {
     @SuppressWarnings("unchecked")
     List<String> columnNames = (List<String>) getRelation(cc)

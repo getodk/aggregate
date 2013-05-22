@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
@@ -21,18 +37,18 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 /**
  * The servlet that handles the downloading of table files. Based mostly on
  * XFormsDownloadServlet.
- * 
+ *
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
 
   /**
-	 * 
+	 *
 	 */
   private static final long serialVersionUID = -4681728139240108291L;
 
-  private static final Log logger = 
+  private static final Log logger =
       LogFactory.getLog(OdkTablesTableFileDownloadServlet.class);
 
   /**
@@ -44,13 +60,13 @@ public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
    * Handler for the HTTP Get request.
    */
   @Override
-  public void doGet(HttpServletRequest req, HttpServletResponse resp) 
+  public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // verify the parameters you expect are there
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
-    String downloadAsAttachmentString = 
+    String downloadAsAttachmentString =
         getParameter(req, ServletConsts.AS_ATTACHMENT);
 
     if (keyString == null) {
@@ -106,11 +122,11 @@ public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
         resp.setContentLength(contentLength.intValue());
       }
 
-      if (downloadAsAttachmentString != null 
+      if (downloadAsAttachmentString != null
           && !"".equals(downloadAsAttachmentString)) {
         // set the file name if we're downloading to the disk
         if (unrootedFileName != null) {
-          resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, 
+          resp.addHeader(HtmlConsts.CONTENT_DISPOSITION,
               "attachment; filename=\""
               + unrootedFileName + "\"");
         }

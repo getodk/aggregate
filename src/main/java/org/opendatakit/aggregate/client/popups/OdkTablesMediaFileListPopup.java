@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.List;
@@ -13,26 +29,26 @@ import com.google.gwt.user.client.ui.FlexTable;
 public class OdkTablesMediaFileListPopup extends AbstractPopupBase {
 
   private FlexTable fileList;
-  
+
   public OdkTablesMediaFileListPopup(String tableId, String key) {
-    
-    SecureGWT.getServerDataService().getMedialFilesKey(tableId, key, 
+
+    SecureGWT.getServerDataService().getMedialFilesKey(tableId, key,
         new MediaFileCallback());
 
     fileList = new FlexTable();
     fileList.setWidget(0, 2, new ClosePopupButton(this));
-    fileList.getCellFormatter().getElement(0, 0).setAttribute("align", 
+    fileList.getCellFormatter().getElement(0, 0).setAttribute("align",
         "right");
     fileList.setText(1, 0, "Media Filename");
     fileList.setText(1, 1, "Content Type");
     fileList.setText(1, 2, "Length");
     fileList.getRowFormatter().addStyleName(1, "titleBar");
-  
-    setWidget(fileList);   
+
+    setWidget(fileList);
   }
-  
-  
-  private class MediaFileCallback implements 
+
+
+  private class MediaFileCallback implements
       AsyncCallback<List<FileSummaryClient>> {
 
     @Override
@@ -42,9 +58,9 @@ public class OdkTablesMediaFileListPopup extends AbstractPopupBase {
 
     @Override
     public void onSuccess(List<FileSummaryClient> result) {
-      if(result == null) 
+      if(result == null)
         return;
-      
+
       int index = 2;
       for(FileSummaryClient file : result) {
         fileList.setText(index, 0, file.getFilename());
@@ -53,7 +69,7 @@ public class OdkTablesMediaFileListPopup extends AbstractPopupBase {
         index++;
       }
     }
-    
+
   }
-  
+
 }

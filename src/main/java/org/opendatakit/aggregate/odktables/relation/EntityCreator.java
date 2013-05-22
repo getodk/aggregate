@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
@@ -35,26 +51,26 @@ import org.opendatakit.tables.sync.api.TablesConstants;
  * would therefore have to go look at the datafields contained in that entity
  * and set them by hand. This class handles that for you and aggregates them
  * all into one place.
- * 
+ *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
- * 
+ *
  */
 
 public class EntityCreator {
-	
+
   public static final int INITIAL_MODIFICATION_NUMBER = 1;
 
   /**
    * Create a new {@link DbTableEntry} entity.
-   * 
+   *
    * @param tableId
    *          the table id. May be null to auto generate.
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newTableEntryEntity(String tableId, CallingContext cc) 
+  public Entity newTableEntryEntity(String tableId, CallingContext cc)
       throws ODKDatastoreException {
     Validate.notNull(cc);
 
@@ -62,7 +78,7 @@ public class EntityCreator {
       tableId = CommonFieldsBase.newUri();
 
     Entity entity = DbTableEntry.getRelation(cc).newEntity(tableId, cc);
-    entity.set(DbTableEntry.DATA_ETAG, 
+    entity.set(DbTableEntry.DATA_ETAG,
         Long.toString(System.currentTimeMillis()));
     entity.set(DbTableEntry.PROPERTIES_ETAG,
         Long.toString(System.currentTimeMillis()));
@@ -71,7 +87,7 @@ public class EntityCreator {
 
   /**
    * Create a new {@link DbColumnDefinitions} entity.
-   * 
+   *
    * @param tableId
    *          the id of the table for the new column.
    * @param column
@@ -80,7 +96,7 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newColumnEntity(String tableId, Column column, 
+  public Entity newColumnEntity(String tableId, Column column,
       CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(column);
@@ -99,10 +115,10 @@ public class EntityCreator {
 
     return entity;
   }
-  
+
   /**
    * Create a new {@link DbTableFileInfo} entity. This should be called
-   * whenever you are adding a file to the 
+   * whenever you are adding a file to the
    * @param tableId
    * 			the id of the table the file is associated with
    * @param type
@@ -115,37 +131,37 @@ public class EntityCreator {
    *        whether or not this is a media file.
    * @return
    */
-  public Entity newTableFileInfoEntity(String tableId, String type, String key, 
-      String uri, boolean isMedia, CallingContext cc) 
+  public Entity newTableFileInfoEntity(String tableId, String type, String key,
+      String uri, boolean isMedia, CallingContext cc)
       throws ODKDatastoreException {
 	  // first do some preliminary checks
 	  Validate.notEmpty(tableId);
 	  Validate.notEmpty(uri);
-	  
+
 	  Entity entity = DbTableFileInfo.getRelation(cc).newEntity(cc);
 	  entity.set(DbTableFileInfo.TABLE_ID, tableId);
 	  entity.set(DbTableFileInfo.VALUE_TYPE, type);
 	  entity.set(DbTableFileInfo.KEY, key);
 	  entity.set(DbTableFileInfo.VALUE, uri);
 	  entity.set(DbTableFileInfo.IS_MEDIA, isMedia);
-	  
+
 	  // now set the universal fields
 	  entity.set(DbTable.CREATE_USER, cc.getCurrentUser().getEmail());
 	  // TODO last update same as create? correct?
 	  entity.set(DbTable.LAST_UPDATE_USER, cc.getCurrentUser().getEmail());
-	  entity.set(DbTable.DATA_ETAG_AT_MODIFICATION, 
+	  entity.set(DbTable.DATA_ETAG_AT_MODIFICATION,
 	      Long.toString(System.currentTimeMillis()));
 	  entity.set(DbTable.DELETED, false);
 	  entity.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
 	  // TODO is this the right kind of scope to be setting? one wonders...
 	  entity.set(DbTable.FILTER_VALUE, (String) null);
-	  entity.set(DbTable.FILTER_TYPE, (String) null);	  
-	  
+	  entity.set(DbTable.FILTER_TYPE, (String) null);
+
 	  return entity;
   }
-  
+
   /**
-   * Return a new Entity representing a table definition. 
+   * Return a new Entity representing a table definition.
    * @param tableId cannot be null
    * @param tableKey cannot be null
    * @param dbTableName cannot be null
@@ -172,14 +188,14 @@ public class EntityCreator {
     definition.set(DbTableDefinitions.DB_TABLE_NAME, dbTableName);
     definition.set(DbTableDefinitions.TYPE, type.name());
     if (tableIdAccessControls != null) {
-      definition.set(DbTableDefinitions.TABLE_ID_ACCESS_CONTROLS, 
+      definition.set(DbTableDefinitions.TABLE_ID_ACCESS_CONTROLS,
           tableIdAccessControls);
     }
     return definition;
   }
-  
+
   /**
-   *  
+   *
    * @param tableId
    * @param partition
    * @param aspect
@@ -191,7 +207,7 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public Entity newKeyValueStoreEntity(String tableId, String partition,
-      String aspect, String key, String type, String value, 
+      String aspect, String key, String type, String value,
       CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notEmpty(partition);
@@ -208,7 +224,7 @@ public class EntityCreator {
     entry.set(DbKeyValueStore.VALUE, value);
     return entry;
   }
-  
+
   public Entity newKeyValueStoreEntity(OdkTablesKeyValueStoreEntry entry,
       CallingContext cc) throws ODKDatastoreException {
     String tableId = entry.tableId;
@@ -223,7 +239,7 @@ public class EntityCreator {
 
   /**
    * Create a new {@link DbTableAcl} entity.
-   * 
+   *
    * @param tableId
    *          the id of the table for the new table acl entity
    * @param scope
@@ -254,7 +270,7 @@ public class EntityCreator {
 
   /**
    * Create a new {@link DbTable} row entity.
-   * 
+   *
    * @param table
    *          the {@link DbTable} relation.
    * @param rowId
@@ -272,7 +288,7 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public Entity newRowEntity(Relation table, String rowId, String dataEtag, 
+  public Entity newRowEntity(Relation table, String rowId, String dataEtag,
       Scope filter,
       Map<String, String> values, List<Entity> columns, CallingContext cc)
       throws ODKDatastoreException, BadColumnNameException {
@@ -307,7 +323,7 @@ public class EntityCreator {
 
   /**
    * Create a collection of new {@link DbTable} entities
-   * 
+   *
    * @param table
    *          the {@link DbTable} relation
    * @param rows
@@ -321,8 +337,8 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public List<Entity> newRowEntities(Relation table, List<Row> rows, 
-      String dataEtag, List<Entity> columns, CallingContext cc) 
+  public List<Entity> newRowEntities(Relation table, List<Row> rows,
+      String dataEtag, List<Entity> columns, CallingContext cc)
           throws ODKDatastoreException, BadColumnNameException {
     Validate.notNull(table);
     Validate.noNullElements(rows);
@@ -332,7 +348,7 @@ public class EntityCreator {
 
     List<Entity> entities = new ArrayList<Entity>();
     for (Row row : rows) {
-      Entity entity = newRowEntity(table, row.getRowId(), dataEtag, 
+      Entity entity = newRowEntity(table, row.getRowId(), dataEtag,
           row.getFilterScope(), row.getValues(), columns, cc);
       entities.add(entity);
     }
@@ -341,7 +357,7 @@ public class EntityCreator {
 
   /**
    * Update an existing {@link DbTable} entity.
-   * 
+   *
    * @param table
    *          the {@link DbTable} relation
    * @param dataEtag the etag of the data at the time of this update
@@ -366,8 +382,8 @@ public class EntityCreator {
    * @throws BadColumnNameException
    */
   public Entity updateRowEntity(Relation table, String dataEtag, String rowId,
-      String currentEtag, Map<String, String> values, Scope filter, 
-      List<Entity> columns, CallingContext cc) throws 
+      String currentEtag, Map<String, String> values, Scope filter,
+      List<Entity> columns, CallingContext cc) throws
       ODKEntityNotFoundException, ODKDatastoreException,
       EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
@@ -386,7 +402,7 @@ public class EntityCreator {
       		"for rowId %s", currentEtag, rowEtag, row.getId()));
     }
 
-    setRowFields(row, dataEtag, cc.getCurrentUser(), filter, false, values, 
+    setRowFields(row, dataEtag, cc.getCurrentUser(), filter, false, values,
         columns);
     return row;
   }
@@ -418,18 +434,18 @@ public class EntityCreator {
     }
 
     row.set(DbTable.DELETED, deleted);
-    
+
     for (Entry<String, String> entry : values.entrySet()) {
       String value = entry.getValue();
       String name = entry.getKey();
-      // There are three possbilities here. 
+      // There are three possbilities here.
       // 1) The key is a shared metadata column that SHOULD be synched.
       // 2) The key is a client only metadata column that should NOT be synched
       // 3) The key is a user-defined column that SHOULD be synched.
       if (TablesConstants.CLIENT_ONLY_COLUMN_NAMES.contains(name)) {
         // 1) --no need to do anything here.
         continue;
-      } else if (TablesConstants.SHARED_COLUMN_NAMES.contains(name) 
+      } else if (TablesConstants.SHARED_COLUMN_NAMES.contains(name)
             || name.equals("last_mod_time")) {
         // 2) --save the data
         // used to search for timestamp, but that's apparently incorrect?
@@ -464,7 +480,7 @@ public class EntityCreator {
 
   /**
    * Updates a collection of {@link DbTable} entities.
-   * 
+   *
    * @param table
    *          the {@link DbTable} relation.
    * @param dataEtag the data etag at the time of update
@@ -482,8 +498,8 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public List<Entity> updateRowEntities(Relation table, String dataEtag, 
-      List<Row> rows, List<Entity> columns, CallingContext cc) 
+  public List<Entity> updateRowEntities(Relation table, String dataEtag,
+      List<Row> rows, List<Entity> columns, CallingContext cc)
           throws ODKEntityNotFoundException,
       ODKDatastoreException, EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
@@ -501,7 +517,7 @@ public class EntityCreator {
 
   /**
    * Create a new {@link DbLogTable} row entity.
-   * 
+   *
    * @param logTable
    *          the {@link DbLogTable} relation.
    * @param dataEtag the data etag at the time of creation
@@ -541,7 +557,7 @@ public class EntityCreator {
 
   /**
    * Create a collection of new {@link DbLogTable} entities
-   * 
+   *
    * @param logTable
    *          the {@link DbLogTable} relation
    * @param dataEtag the data etag at the time of the updates
@@ -553,8 +569,8 @@ public class EntityCreator {
    * @return the created entities, not yet persisted
    * @throws ODKDatastoreException
    */
-  public List<Entity> newLogEntities(Relation logTable, String dataEtag, 
-      List<Entity> rows, List<Entity> columns, CallingContext cc) 
+  public List<Entity> newLogEntities(Relation logTable, String dataEtag,
+      List<Entity> rows, List<Entity> columns, CallingContext cc)
           throws ODKDatastoreException {
     Validate.notNull(logTable);
     Validate.notEmpty(dataEtag);
@@ -568,6 +584,6 @@ public class EntityCreator {
     }
     return entities;
   }
- 
-  
+
+
 }

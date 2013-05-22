@@ -1,26 +1,42 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.odktables;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
- * This is the client-side version of 
+ * This is the client-side version of
  * org.opendatakit.aggregate.odktables.entity.TableEntry.java.
  * <br>
  * The idea is that this is the client-side implementation of the same
- * object. Usual caveat that it is unclear yet whether this all is 
- * necessary and if similar non-phone objects will be needed on the 
+ * object. Usual caveat that it is unclear yet whether this all is
+ * necessary and if similar non-phone objects will be needed on the
  * server side.
  * @author sudar.sam@gmail.com
  *
  */
-public class TableEntryClient implements IsSerializable {
+public class TableEntryClient implements Serializable {
 
   /**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7094543853434685403L;
- 
-  
+
+
   private String tableId;
   private String tableKey;
   private String dataEtag;
@@ -29,7 +45,7 @@ public class TableEntryClient implements IsSerializable {
   protected TableEntryClient() {
   }
 
-  public TableEntryClient(final String tableId, String tableKey, 
+  public TableEntryClient(final String tableId, String tableKey,
       final String dataEtag, final String propertiesEtag) {
     this.tableId = tableId;
     this.tableKey = tableKey;
@@ -110,8 +126,8 @@ public class TableEntryClient implements IsSerializable {
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId 
-        + ", tableKey=" + tableKey 
+    return "TableEntry [tableId=" + tableId
+        + ", tableKey=" + tableKey
         + ", dataEtag=" + dataEtag
         + ", propertiesEtag=" + propertiesEtag + "]";
   }
