@@ -445,10 +445,14 @@ public class BackendActionsTable extends CommonFieldsBase {
           // enqueue any request first...
           if (activeSchedulingTimeInThePast || requestedWatchdogSchedulingTime == now) {
 
-            // fire the Watchdog ONLY if we are not
-            // doing fast publishing. During fast publishing,
-            // the watchdog is fired during rescheduleWatchdog()...
-            if (!wd.getFasterWatchdogCycleEnabled()) {
+            // fire the Watchdog ONLY if:
+            // we are doing fast publishing and the watchdog has not been run in a while
+            // or
+            // we are not doing fast publishing.
+            // During fast publishing, the watchdog should be enqueued during rescheduleWatchdog()...
+            if ((wd.getFasterWatchdogCycleEnabled() &&
+                  (lastWatchdogStartTime < (now - (FAST_PUBLISHING_RETRY_MILLISECONDS + PUBLISHING_DELAY_MILLISECONDS))))
+                  || !wd.getFasterWatchdogCycleEnabled()) {
               wd.onUsage(0L, cc); // no wait, as we are well past due...
             }
 
