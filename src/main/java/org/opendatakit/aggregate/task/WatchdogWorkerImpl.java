@@ -24,8 +24,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.BeanDefs;
+import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
+import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
+import org.opendatakit.aggregate.constants.externalservice.OhmageJsonServerConsts;
+import org.opendatakit.aggregate.constants.externalservice.REDCapServerConsts;
+import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -161,6 +167,35 @@ public class WatchdogWorkerImpl {
         // TODO: should handle resume-initiate somehow?
         continue;
       }
+      if (fsc.getOperationalStatus() == OperationalStatus.PAUSED ) {
+        activeTasks = true;
+        ExternalServiceType type = fsc.getExternalServiceType();
+        long backoffInterval = 60000L; // 1 minute
+        switch ( type ) {
+        case GOOGLE_SPREADSHEET:
+          backoffInterval = SpreadsheetConsts.BACKOFF_DELAY_MILLISECONDS;
+          break;
+        case JSON_SERVER:
+          backoffInterval = JsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
+          break;
+        case OHMAGE_JSON_SERVER:
+          backoffInterval = OhmageJsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
+          break;
+        case GOOGLE_FUSIONTABLES:
+          backoffInterval = FusionTableConsts.BACKOFF_DELAY_MILLISECONDS;
+          break;
+        case REDCAP_SERVER:
+          backoffInterval = REDCapServerConsts.BACKOFF_DELAY_MILLISECONDS;
+          break;
+        default:
+          this.logger.equals("Unrecognized ExternalServiceType: " + type.name());
+        }
+        if ( fsc.getLastUpdateDate().getTime() + backoffInterval < System.currentTimeMillis() ) {
+          fsc.setOperationalStatus(OperationalStatus.ACTIVE);
+          cc.getDatastore().putEntity(fsc, cc.getCurrentUser());
+        }
+      }
+
       if (fsc.getOperationalStatus() != OperationalStatus.ACTIVE) {
         // TODO: should handle resume-initiate somehow?
         continue;
