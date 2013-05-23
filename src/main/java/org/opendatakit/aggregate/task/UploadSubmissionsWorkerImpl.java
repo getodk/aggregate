@@ -39,6 +39,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
@@ -289,7 +290,7 @@ public class UploadSubmissionsWorkerImpl {
       // check if publisher is capable of batching transmission
       if (pExtService.canBatchSubmissions()) {
         pExtService.sendSubmissions(submissionsToSend, streaming, cc);
-        
+
       } else { // publisher not capable of batching
         int counter = 0;
         for (Submission submission : submissionsToSend) {
@@ -312,8 +313,28 @@ public class UploadSubmissionsWorkerImpl {
         }
       }
     } catch (ODKExternalServiceException e) {
+      pFsc.setOperationalStatus(OperationalStatus.PAUSED);
+      try {
+        ds.putEntity(pFsc, user);
+      } catch (ODKEntityPersistException ex) {
+        // ignore -- important exception is the external service exception
+        ex.printStackTrace();
+      } catch (ODKOverQuotaException ex) {
+        // ignore -- important exception is the external service exception
+        ex.printStackTrace();
+      }
       throw e;
     } catch (Exception e) {
+      pFsc.setOperationalStatus(OperationalStatus.PAUSED);
+      try {
+        ds.putEntity(pFsc, user);
+      } catch (ODKEntityPersistException ex) {
+        // ignore -- important exception is the external service exception
+        ex.printStackTrace();
+      } catch (ODKOverQuotaException ex) {
+        // ignore -- important exception is the external service exception
+        ex.printStackTrace();
+      }
       throw new ODKExternalServiceException(e);
     }
 
@@ -323,7 +344,7 @@ public class UploadSubmissionsWorkerImpl {
       ODKExternalServiceException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    
+
     // renew the lock whenever we've consumed more than 33% of the time
     // budget for the lock.  This adjusts for very slow external service
     // response times, though if the response time is more than the lock
