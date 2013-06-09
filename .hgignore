@@ -12,4 +12,5 @@ glob:eclipse-aggregate-gae/.settings/com.google.gwt.eclipse.core.prefs
 eclipse-aggregate-gae/war/WEB-INF/appengine-generated/datastore-indexes-auto\.xml
 eclipse-aggregate-gae/war/WEB-INF/appengine-generated/local_db\.bin
 eclipse-aggregate-gae/\.gwt/\.gwt-log_0
+eclipse-aggregate-gae/\.gwt/\.gwt-log
 eclipse-aggregate-gae/war/WEB-INF/lib/appengine-api-1\.0-sdk-1\.6\.6\.jar
