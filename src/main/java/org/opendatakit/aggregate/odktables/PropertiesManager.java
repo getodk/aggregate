@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
@@ -147,20 +149,37 @@ public class PropertiesManager {
       // TableDefinition here. However, we're going to have to pass on this
       // for now and assume that once you've synched to the server, the
       // definition is static and immutable.
-
+      Log log = LogFactory.getLog(PropertiesManager.class.getCanonicalName());
+      log.info("before kvs stuff in set properties");
       List<OdkTablesKeyValueStoreEntry> kvsEntries =
           tableProperties.getKeyValueStoreEntries();
       EntityCreator creator = new EntityCreator();
       List<Entity> kvsEntities = new ArrayList<Entity>();
+      OdkTablesKeyValueStoreEntry holderEntry = null;
+      try {
       for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
+        holderEntry = kvsEntry;
         Entity kvsEntity = creator.newKeyValueStoreEntity(kvsEntry, cc);
         kvsEntities.add(kvsEntity);
+      }
+      } catch (Exception e) {
+        e.printStackTrace();
+        // what is the deal.
+        log.info(holderEntry.partition);
+        log.info(holderEntry.aspect);
+        log.info(holderEntry.key);
+        log.info(holderEntry.value);
+        throw new ODKDatastoreException("Something went wrong in creating " +
+        		"key value " +
+        		"store entries: " + e.getLocalizedMessage());
       }
       // Wipe the existing kvsEntries.
       // Caution! See javadoc of {@link clearAllEntries} and note that this is
       // not done transactionally, so you could end up in a rough spot if your
       // pursuant call to add all the new entities fails.
+      log.info("Made it past add all to lists");
       DbKeyValueStore.clearAllEntries(tableId, cc);
+      log.info("made it past clear");
       // Now put all the entries.
       for (Entity kvsEntity : kvsEntities) {
         kvsEntity.put(cc);
