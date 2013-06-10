@@ -82,15 +82,17 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     try { // Must use try so that you can catch the ODK specific errors.
       DataManager dm = new DataManager(tableId, cc);
       AuthFilter af = new AuthFilter(tableId, cc);
-      af.checkPermission(TablePermission.READ_ROW);
+      // TODO: auth stuff
+//      af.checkPermission(TablePermission.READ_ROW);
       List<Row> rows;
-      if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
-        rows = dm.getRows();
-      } else {
-        List<Scope> scopes = AuthFilter.getScopes(cc);
-        rows = dm.getRows(scopes);
-        // rows = dm.getRows();
-      }
+      rows = dm.getRows();
+//      if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
+//        rows = dm.getRows();
+//      } else {
+//        List<Scope> scopes = AuthFilter.getScopes(cc);
+//        rows = dm.getRows(scopes);
+//        // rows = dm.getRows();
+//      }
       return transformRows(rows);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -98,10 +100,12 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
-    } catch (PermissionDeniedException e) {
-      e.printStackTrace();
-      throw new PermissionDeniedExceptionClient(e);
     }
+    // TODO: auth stuff.
+//    } catch (PermissionDeniedException e) {
+//      e.printStackTrace();
+//      throw new PermissionDeniedExceptionClient(e);
+//    }
   }
 
   @Override
