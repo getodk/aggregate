@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
-import org.mortbay.log.Log;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 
@@ -79,7 +78,6 @@ public class Preferences {
   }
 
   public static Boolean getOdkTablesEnabled() {
-    boolean debug = odkTablesEnabled;
     if(odkTablesEnabled != null) {
       return odkTablesEnabled;
     }
