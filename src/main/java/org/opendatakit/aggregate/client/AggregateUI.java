@@ -477,7 +477,8 @@ public class AggregateUI implements EntryPoint {
     case ADMIN:
       return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
     case ODKTABLES:
-    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
+    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER)
+    	    && Preferences.getOdkTablesEnabled();
     default:
       return false;
     }
