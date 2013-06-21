@@ -205,7 +205,7 @@ public class OdkTablesViewTable extends FlexTable {
 
     // If there are no user-defined columns display the message.
     // Otherwise set the headings.
-    if (columns.size() == NUMBER_ADMIN_COLUMNS) {
+    if (columns.size() == 0) {
       setText(0, 0, NO_DATA_MESSAGE);
     } else {
       // set the delete column
@@ -234,7 +234,7 @@ public class OdkTablesViewTable extends FlexTable {
 
     // if there are no columns, then we only want to display the no data
     // message.
-    if (columnNames.size() == NUMBER_ADMIN_COLUMNS) {
+    if (columnNames.size() == 0) {
       return;
       // otherwise check if there are no rows.
     } else if (rows.size() == 0) {
