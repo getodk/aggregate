@@ -18,11 +18,15 @@ package org.opendatakit.aggregate.server;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
+import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.servlet.AggregateHtmlServlet;
 import org.opendatakit.aggregate.task.Watchdog;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -30,6 +34,7 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class PreferenceServiceImpl extends RemoteServiceServlet implements
@@ -63,6 +68,8 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
 
     try {
       ServerPreferencesProperties.setOdkTablesEnabled(cc,enabled);
+      Log logger = LogFactory.getLog(PreferenceServiceImpl.class);
+      logger.error("setting odk tables enabled with enabled: " + Boolean.toString(enabled));
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);

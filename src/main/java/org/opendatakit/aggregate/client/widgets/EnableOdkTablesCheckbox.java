@@ -32,7 +32,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
     ValueChangeHandler<Boolean> {
 
-  private static final String LABEL = "ODK Tables Syncronization Functionality";
+  private static final String LABEL = "ODK Tables Syncronization Functionality (Requires page refresh)";
   private static final String TOOLTIP_TXT = "Enable/Disable ODK Tables Sync Functionality";
   private static final String HELP_BALLOON_TXT = "Check this box if you want to manage ODK Tables.  "
       + "Otherwise leave unchecked.";

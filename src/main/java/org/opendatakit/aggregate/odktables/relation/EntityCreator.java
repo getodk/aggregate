@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.entity.Row;
@@ -462,6 +464,8 @@ public class EntityCreator {
         if (column == null) {
           // If we don't have a colum in the aggregate db, it's ok if it's one
           // of the Tables-only columns. Otherwise it's an error.
+          Log log = LogFactory.getLog(EntityCreator.class);
+          log.error("bad column name: " + name);
           throw new BadColumnNameException("Bad column name " + name);
         }
         row.setAsString(RUtil.convertIdentifier(column.getId()), value);
