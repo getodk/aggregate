@@ -44,6 +44,7 @@ import org.opendatakit.common.web.CallingContext;
  *
  */
 public class PropertiesManager {
+  private static final Log log = LogFactory.getLog(PropertiesManager.class);
 
   private CallingContext cc;
   private String tableId;
@@ -149,8 +150,7 @@ public class PropertiesManager {
       // TableDefinition here. However, we're going to have to pass on this
       // for now and assume that once you've synched to the server, the
       // definition is static and immutable.
-      Log log = LogFactory.getLog(PropertiesManager.class.getCanonicalName());
-      log.info("before kvs stuff in set properties");
+      log.info("setProperties: before kvs stuff in set properties");
       List<OdkTablesKeyValueStoreEntry> kvsEntries =
           tableProperties.getKeyValueStoreEntries();
       EntityCreator creator = new EntityCreator();
@@ -165,21 +165,19 @@ public class PropertiesManager {
       } catch (Exception e) {
         e.printStackTrace();
         // what is the deal.
-        log.info(holderEntry.partition);
-        log.info(holderEntry.aspect);
-        log.info(holderEntry.key);
-        log.info(holderEntry.value);
+        log.error("setProperties (" + holderEntry.partition + ", " +
+                  holderEntry.aspect + ", " + holderEntry.key + ") failed: " + e.toString());
         throw new ODKDatastoreException("Something went wrong in creating " +
         		"key value " +
-        		"store entries: " + e.getLocalizedMessage());
+        		"store entries: " + e.toString());
       }
       // Wipe the existing kvsEntries.
       // Caution! See javadoc of {@link clearAllEntries} and note that this is
       // not done transactionally, so you could end up in a rough spot if your
       // pursuant call to add all the new entities fails.
-      log.info("Made it past add all to lists");
+      log.info("setProperties Made it past add all to lists");
       DbKeyValueStore.clearAllEntries(tableId, cc);
-      log.info("made it past clear");
+      log.info("setProperties made it past clear");
       // Now put all the entries.
       for (Entity kvsEntity : kvsEntities) {
         kvsEntity.put(cc);
