@@ -54,6 +54,8 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 
 
 public class AggregateUI implements EntryPoint {
@@ -80,10 +82,10 @@ public class AggregateUI implements EntryPoint {
   private static AggregateUI singleton = null;
 
   // session variables for tab visibility
-  public static boolean manageVisible = false;
-  public static boolean adminVisible = false;
-  public static boolean odkTablesVisible = false;
-  
+  private static boolean manageVisible = false;
+  private static boolean adminVisible = false;
+  private static boolean odkTablesVisible = false;
+
   // hack...
   public static final String QUOTA_EXCEEDED = "Quota exceeded";
 
@@ -275,6 +277,30 @@ public class AggregateUI implements EntryPoint {
         });
   }
 
+  public void updateOdkTablesFeatureVisibility() {
+    odkTablesVisible = Preferences.getOdkTablesEnabled();
+    AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
+    odkTables.setVisible(odkTablesVisible);
+    for (int i = 0; i < tabPosition.size(); i++) {
+      if ( tabPosition.get(i).equals(Tabs.ODKTABLES) ) {
+        Widget w = ((Widget) mainNav.getTabBar().getTab(i));
+        w.setVisible(odkTablesVisible);
+      }
+    }
+    AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
+    if (AminTab instanceof AdminTabUI) {
+      AdminTabUI adminTab = (AdminTabUI) AminTab;
+      if (odkTablesVisible) {
+        adminTab.displayOdkTablesSubTab();
+      } else {
+        adminTab.hideOdkTablesSubTab();
+      }
+    } else {
+      AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
+    }
+
+  }
+
   private void commonUserInfoUpdateCompleteAction() {
     settingsBar.update();
 
@@ -283,10 +309,10 @@ public class AggregateUI implements EntryPoint {
 
     ManageTabUI management = new ManageTabUI(this);
     addTabToDatastructures(management, Tabs.MANAGEMENT);
-   
+
     OdkTablesTabUI odkTables = new OdkTablesTabUI(this);
     addTabToDatastructures(odkTables, Tabs.ODKTABLES);
-    
+
     AdminTabUI admin = new AdminTabUI(this);
     addTabToDatastructures(admin, Tabs.ADMIN);
 
@@ -301,16 +327,17 @@ public class AggregateUI implements EntryPoint {
         mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
         manageVisible = true;
       }
-      
+
       if (authorizedForTab(Tabs.ODKTABLES)) {
     	  mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
-    	  odkTablesVisible = true;
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
         mainNav.add(admin, Tabs.ADMIN.getTabLabel());
         adminVisible = true;
       }
+
+      updateOdkTablesFeatureVisibility();
 
       // Select the correct menu item based on url hash.
       int selected = 0;
@@ -477,8 +504,7 @@ public class AggregateUI implements EntryPoint {
     case ADMIN:
       return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
     case ODKTABLES:
-    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER)
-    	    && Preferences.getOdkTablesEnabled();
+    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
     default:
       return false;
     }

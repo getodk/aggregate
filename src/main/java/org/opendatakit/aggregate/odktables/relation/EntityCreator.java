@@ -60,6 +60,7 @@ import org.opendatakit.tables.sync.api.TablesConstants;
  */
 
 public class EntityCreator {
+  public static final Log log = LogFactory.getLog(EntityCreator.class);
 
   public static final int INITIAL_MODIFICATION_NUMBER = 1;
 
@@ -464,7 +465,6 @@ public class EntityCreator {
         if (column == null) {
           // If we don't have a colum in the aggregate db, it's ok if it's one
           // of the Tables-only columns. Otherwise it's an error.
-          Log log = LogFactory.getLog(EntityCreator.class);
           log.error("bad column name: " + name);
           throw new BadColumnNameException("Bad column name " + name);
         }
