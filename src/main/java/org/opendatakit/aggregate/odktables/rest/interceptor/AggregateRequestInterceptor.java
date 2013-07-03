@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.odktables.api.client;
+package org.opendatakit.aggregate.odktables.rest.interceptor;
 
 import java.io.IOException;
 import java.net.URI;

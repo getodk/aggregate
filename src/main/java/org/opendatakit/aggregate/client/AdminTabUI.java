@@ -20,6 +20,8 @@ import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
+import com.google.gwt.user.client.ui.Widget;
+
 public class AdminTabUI extends AggregateTabBase {
 
   private OdkTablesAdminSubTab odkTablesAdminTab;
@@ -43,12 +45,23 @@ public class AdminTabUI extends AggregateTabBase {
     registerClickHandlers(Tabs.ADMIN, baseUI);
   }
 
+  private void changeVisibilityOdkTablesSubTab(boolean outcome) {
+    SubTabInterface odkTablesAdmin = getSubTab(SubTabs.TABLES);
+    ((OdkTablesAdminSubTab) odkTablesAdmin).setVisible(outcome);
+    for (int i = 0; i < subTabPosition.size(); i++) {
+      if ( subTabPosition.get(i).equals(SubTabs.TABLES) ) {
+        Widget w = ((Widget) this.getTabBar().getTab(i));
+        w.setVisible(outcome);
+      }
+    }
+  }
+
   public void displayOdkTablesSubTab() {
-    showSubTab(odkTablesAdminTab, SubTabs.TABLES);
+    changeVisibilityOdkTablesSubTab(true);
   }
 
   public void hideOdkTablesSubTab() {
-    hideSubTab(odkTablesAdminTab);
+    changeVisibilityOdkTablesSubTab(false);
   }
 
 }

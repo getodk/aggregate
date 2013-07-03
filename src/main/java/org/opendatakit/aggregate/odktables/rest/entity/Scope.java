@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
 import org.apache.commons.lang3.Validate;
 import org.simpleframework.xml.Element;

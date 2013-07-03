@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opendatakit.aggregate.odktables.entity.serialization;
+package org.opendatakit.aggregate.odktables.rest.serialization;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

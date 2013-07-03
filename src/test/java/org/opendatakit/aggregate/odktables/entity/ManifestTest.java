@@ -30,6 +30,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 
 /**
  * Super basic test to see if the jackson library worked as expected.

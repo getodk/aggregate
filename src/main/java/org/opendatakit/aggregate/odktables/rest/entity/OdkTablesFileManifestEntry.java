@@ -14,7 +14,8 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.odktables.rest.entity;
+
 
 /**
  * This represents information about a file so that a phone running ODKTables

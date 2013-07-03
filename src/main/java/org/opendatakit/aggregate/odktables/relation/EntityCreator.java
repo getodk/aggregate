@@ -25,14 +25,15 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.TableRole;
-import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -42,7 +43,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.tables.sync.api.TablesConstants;
 
 /**
  * Creates and updates new Entity objects for relations.
@@ -445,17 +445,17 @@ public class EntityCreator {
       // 1) The key is a shared metadata column that SHOULD be synched.
       // 2) The key is a client only metadata column that should NOT be synched
       // 3) The key is a user-defined column that SHOULD be synched.
-      if (TablesConstants.CLIENT_ONLY_COLUMN_NAMES.contains(name)) {
+      if (TableConstants.CLIENT_ONLY_COLUMN_NAMES.contains(name)) {
         // 1) --no need to do anything here.
         continue;
-      } else if (TablesConstants.SHARED_COLUMN_NAMES.contains(name)
+      } else if (TableConstants.SHARED_COLUMN_NAMES.contains(name)
             || name.equals("last_mod_time")) {
         // 2) --save the data
         // used to search for timestamp, but that's apparently incorrect?
         if (name.equals("last_mod_time")) {//name.equals(TablesConstants.TIMESTAMP)) {
           // Then we have to parse the string to a date.
           Date date = WebUtils.parseDate(value);
-          row.set(TablesConstants.TIMESTAMP.toUpperCase(), date);
+          row.set(TableConstants.TIMESTAMP.toUpperCase(), date);
         } else {
           row.set(name.toUpperCase(), value);
         }

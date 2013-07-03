@@ -14,9 +14,8 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;

@@ -14,17 +14,17 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.io.Serializable;
 
-import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
 /**
  * The XML document that represents a column. This is the XML representation
- * of a column definition as stored in the {@link DbColumnDefinitions} table.
+ * of a column definition as stored in the (keep this fully qualified!)
+ * {@link org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions} table.
  * @author dylan price?
  * @author sudar.sam@gmail.com
  *

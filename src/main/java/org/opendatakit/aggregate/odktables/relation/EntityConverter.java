@@ -21,21 +21,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
-import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
-import org.opendatakit.aggregate.odktables.entity.TableDefinition;
-import org.opendatakit.aggregate.odktables.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.entity.TableProperties;
-import org.opendatakit.aggregate.odktables.entity.TableRole;
-import org.opendatakit.aggregate.odktables.entity.api.TableType;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
+import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
-import org.opendatakit.tables.sync.api.TablesConstants;
 
 /**
  * Converts between datastore {@link Entity} objects and domain objects in
@@ -251,12 +251,12 @@ public class EntityConverter {
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
-    row.setUriUser(entity.getString(TablesConstants.URI_USER.toUpperCase()));
-    row.setFormId(entity.getString(TablesConstants.FORM_ID.toUpperCase()));
+    row.setUriUser(entity.getString(TableConstants.URI_USER.toUpperCase()));
+    row.setFormId(entity.getString(TableConstants.FORM_ID.toUpperCase()));
     row.setInstanceName(
-        entity.getString(TablesConstants.INSTANCE_NAME.toUpperCase()));
-    row.setLocale(entity.getString(TablesConstants.LOCALE.toUpperCase()));
-    row.setTimestamp(entity.getDate(TablesConstants.TIMESTAMP.toUpperCase()));
+        entity.getString(TableConstants.INSTANCE_NAME.toUpperCase()));
+    row.setLocale(entity.getString(TableConstants.LOCALE.toUpperCase()));
+    row.setTimestamp(entity.getDate(TableConstants.TIMESTAMP.toUpperCase()));
     String filterType = entity.getString(DbTable.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);

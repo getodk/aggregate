@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity.serialization;
+package org.opendatakit.aggregate.odktables.rest.serialization;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,29 +14,37 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.opendatakit.aggregate.odktables.entity.TableProperties;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;
 
 @Root
 @Default(DefaultType.FIELD)
-public class PropertiesResource extends TableProperties {
+public class RowResource extends Row {
 
   private String selfUri;
   private String tableUri;
 
   @SuppressWarnings("unused")
-  private PropertiesResource() {
+  private RowResource() {
   }
 
-  public PropertiesResource(TableProperties tableProperties) {
+  public RowResource(Row row) {
     super();
-    setPropertiesEtag(tableProperties.getPropertiesEtag());
-    setTableName(tableProperties.getTableKey());
-    setKeyValueStoreEntries(tableProperties.getKeyValueStoreEntries());
+    setRowId(row.getRowId());
+    setRowEtag(row.getRowEtag());
+    setDeleted(row.isDeleted());
+    setCreateUser(row.getCreateUser());
+    setLastUpdateUser(row.getLastUpdateUser());
+    setFilterScope(row.getFilterScope());
+    setValues(row.getValues());
+    setUriUser(row.getUriUser());
+    setFormId(row.getFormId());
+    setInstanceName(row.getInstanceName());
+    setLocale(row.getLocale());
+    setTimestamp(row.getTimestamp());
   }
 
   public String getSelfUri() {
@@ -59,9 +67,9 @@ public class PropertiesResource extends TableProperties {
   public boolean equals(final Object o) {
     if (o == this)
       return true;
-    if (!(o instanceof PropertiesResource))
+    if (!(o instanceof RowResource))
       return false;
-    final PropertiesResource other = (PropertiesResource) o;
+    final RowResource other = (RowResource) o;
     if (!other.canEqual((java.lang.Object) this))
       return false;
     if (!super.equals(o))
@@ -76,7 +84,7 @@ public class PropertiesResource extends TableProperties {
   }
 
   public boolean canEqual(final Object other) {
-    return other instanceof PropertiesResource;
+    return other instanceof RowResource;
   }
 
   @Override
@@ -90,7 +98,7 @@ public class PropertiesResource extends TableProperties {
   }
 
   public String toString() {
-    return "PropertiesResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
+    return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
         + ", tableUri=" + this.getTableUri() + ")";
   }
 

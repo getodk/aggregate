@@ -14,22 +14,21 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
-import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 /**
  * Per Dylan's thesis, a TableProperties object represents only the metadata.
- * The structural layout of the table is stored in the
- * {@link DbTableDefinitions} and {@link DbColumnDefinitions} tables. The
- * metadata stored in this {@link TableProperties} object consists of a list of
- * key value store entries.
+ * The structural layout of the table is stored in the (keep these fully qualified!)
+ * {@link org.opendatakit.aggregate.odktables.relation.DbTableDefinitions} and
+ * {@link org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions}
+ * tables. The metadata stored in this {@link TableProperties} object consists
+ * of a list of key value store entries.
  * @author dylan price?
  * @author sudar.sam@gmail.com
  *

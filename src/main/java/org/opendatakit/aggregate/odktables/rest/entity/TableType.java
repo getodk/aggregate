@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
 public enum TableType {
 

@@ -14,12 +14,10 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity.api;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.TableDefinition;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;
