@@ -19,7 +19,8 @@ package org.opendatakit.aggregate.odktables.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.resteasy.logging.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.OdkTablesKeyValueStoreEntryClient;
 import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
@@ -33,11 +34,19 @@ import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.opendatakit.aggregate.client.odktables.TableTypeClient;
-import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
-import org.opendatakit.aggregate.odktables.entity.api.RowResource;
-import org.opendatakit.aggregate.odktables.entity.api.TableAclResource;
-import org.opendatakit.aggregate.odktables.entity.api.TableResource;
-import org.opendatakit.aggregate.odktables.entity.api.TableType;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 
 /**
  * Various methods for transforming objects from client to server code.
@@ -46,6 +55,7 @@ import org.opendatakit.aggregate.odktables.entity.api.TableType;
  *
  */
 public class UtilTransforms {
+	private static final Log log = LogFactory.getLog(UtilTransforms.class);
 
   /**
    * Transform the object into a server-side Column object.
@@ -69,8 +79,7 @@ public class UtilTransforms {
       serverColumnType = Column.ColumnType.STRING;
       break;
     default:
-      Logger.getLogger(UtilTransforms.class).error(
-          "unrecognized client column type: " + client.getElementType());
+    	log.error("unrecognized client column type: " + client.getElementType());
     }
     Column transformedColumn = new Column(client.getTableId(), client.getElementKey(),
         client.getElementName(), serverColumnType, client.getListChildElementKeys(),
@@ -91,8 +100,7 @@ public class UtilTransforms {
       serverType = TableType.SHORTCUT;
       break;
     default:
-      Logger.getLogger(UtilTransforms.class).error(
-          "unrecognized client table type type: " + clientType);
+      log.error("unrecognized client table type type: " + clientType);
     }
     return serverType;
   }

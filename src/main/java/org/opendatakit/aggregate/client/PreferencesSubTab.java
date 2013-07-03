@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompl
 import org.opendatakit.aggregate.client.widgets.DisableFasterBackgroundActionsCheckbox;
 import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
-import org.opendatakit.aggregate.constants.common.Tabs;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;

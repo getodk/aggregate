@@ -14,12 +14,10 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.client.odktables.TableTypeClient;
-import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Element;
@@ -41,8 +39,9 @@ public class TableDefinition {
 
   /**
    * This is based roughly on the ODK Tables Schema Google Doc. The required
-   * elements are those that are not allowed to be null in
-   * {@link DbTableDefinitions}.
+   * elements are those that are not allowed to be null in (keep this fully
+   * qualified!)
+   * {@link org.opendatakit.aggregate.odktables.relation.DbTableDefinitions}.
    */
 
   @Element(name = "table_id", required = true)
@@ -86,8 +85,10 @@ public class TableDefinition {
    * @param dbTableName
    *          the db name of the table
    * @param type
-   *          the string type of the table (must be one of
-   *          {@link TableTypeClient#getRepresentation()})
+   *          the string type of the table (must be one of (keep this fully
+   *          qualified!)
+   *          {@link org.opendatakit.aggregate.client.odktables.TableTypeClient#getRepresentation()}
+   *          )
    * @param tableIdAccessControls
    *          id of the table holding access controls
    */
@@ -144,17 +145,18 @@ public class TableDefinition {
     result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
     result = prime * result + ((dbTableName == null) ? 0 : dbTableName.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
-    result = prime * result + ((tableIdAccessControls == null) ? 0 : tableIdAccessControls.hashCode());
+    result = prime * result
+        + ((tableIdAccessControls == null) ? 0 : tableIdAccessControls.hashCode());
     result = prime * result + ((columns == null) ? 0 : columns.hashCode());
     return result;
   }
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
     if (!(obj instanceof TableDefinition)) {
@@ -165,7 +167,8 @@ public class TableDefinition {
         && (tableKey == null ? other.tableKey == null : tableKey.equals(other.tableKey))
         && (dbTableName == null ? other.dbTableName == null : dbTableName.equals(other.dbTableName))
         && (type == null ? other.type == null : type.equals(other.type))
-        && (tableIdAccessControls == null ? other.tableIdAccessControls == null : tableIdAccessControls.equals(other.tableIdAccessControls))
+        && (tableIdAccessControls == null ? other.tableIdAccessControls == null
+            : tableIdAccessControls.equals(other.tableIdAccessControls))
         && (columns == null ? other.columns == null : columns.equals(other.columns));
   }
 

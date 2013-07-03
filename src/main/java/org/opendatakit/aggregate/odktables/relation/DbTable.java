@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -31,10 +32,9 @@ import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.tables.sync.api.TablesConstants;
 
 /**
- * Rperesents the schema for a user-defined (data, security, shortcut) table
+ * Represents the schema for a user-defined (data, security, shortcut) table
  * in the database.
  * @author dylan price
  * @author sudar.sam@gmail.com
@@ -67,15 +67,15 @@ public class DbTable {
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
 
     // And now make the OdkTables metadata columns.
-    dataFields.add(new DataField(TablesConstants.URI_USER.toUpperCase(),
+    dataFields.add(new DataField(TableConstants.URI_USER.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.FORM_ID.toUpperCase(),
+    dataFields.add(new DataField(TableConstants.FORM_ID.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.INSTANCE_NAME.toUpperCase(),
+    dataFields.add(new DataField(TableConstants.INSTANCE_NAME.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.LOCALE.toUpperCase(),
+    dataFields.add(new DataField(TableConstants.LOCALE.toUpperCase(),
         DataType.STRING, true));
-    dataFields.add(new DataField(TablesConstants.TIMESTAMP.toUpperCase(),
+    dataFields.add(new DataField(TableConstants.TIMESTAMP.toUpperCase(),
         DataType.DATETIME, true));
   }
 

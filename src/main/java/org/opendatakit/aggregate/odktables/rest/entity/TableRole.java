@@ -14,12 +14,11 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.entity;
+package org.opendatakit.aggregate.odktables.rest.entity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 public enum TableRole {
   NONE("No permissions. Can not see that the table exists."),
@@ -68,7 +67,12 @@ public enum TableRole {
 
   TableRole(String description, TablePermission... permissions) {
     this.description = description;
-    this.permissions = Lists.newArrayList(permissions);
+    if ( permissions == null ) {
+	  throw new NullPointerException("empty permissions list");
+	}
+    ArrayList<TablePermission> list = new ArrayList<TablePermission>(permissions.length);
+    Collections.addAll(list, permissions);
+    this.permissions = list;
   }
 
   /**

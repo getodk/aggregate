@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Ignore;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.api.TableType;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 
 @Ignore
 public class T {

@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 /**
  * This is the client-side code of
- * {@link org.opendatakit.aggregate.odktables.entity.Column}
+ * {@link org.opendatakit.aggregate.odktables.rest.entity.Column}
  * @author sudar.sam@gmail.com
  *
  */

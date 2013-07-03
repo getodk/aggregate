@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.opendatakit.aggregate.odktables.api.client.AggregateRequestInterceptor;
+import org.opendatakit.aggregate.odktables.rest.interceptor.AggregateRequestInterceptor;
 import org.opendatakit.aggregate.odktables.entity.Column;
 import org.opendatakit.aggregate.odktables.entity.Row;
 import org.opendatakit.aggregate.odktables.entity.TableProperties;
