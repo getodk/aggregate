@@ -10,10 +10,10 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer.InvalidAuthTokenException;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.api.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import com.google.common.collect.Lists;
@@ -50,7 +50,7 @@ public class CreateTableTest implements PerfTest {
       // create table
       List<Column> columns = new ArrayList<Column>();
       for (int i = 0; i < numCols; i++) {
-        columns.add(new Column(colName(i), ColumnType.STRING));
+        columns.add(new Column(tableId, colName(i), colName(i), ColumnType.STRING, null, 1, null));
       }
       synchronizer.createTable(tableId, tableName, columns, null);
 
