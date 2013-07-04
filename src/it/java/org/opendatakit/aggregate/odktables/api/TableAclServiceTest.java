@@ -7,11 +7,11 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
-import org.opendatakit.aggregate.odktables.entity.TableRole;
-import org.opendatakit.aggregate.odktables.entity.api.TableAclResource;
-import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
