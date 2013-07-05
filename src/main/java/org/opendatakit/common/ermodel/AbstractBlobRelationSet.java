@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -33,9 +33,9 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * Base class for manipulating blob sets. The constructors assume that the base
  * name of the table is UPPER_CASE only.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class AbstractBlobRelationSet implements BlobRelationSet {
 
@@ -46,7 +46,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
   /**
    * Standard constructor. Use for tables your application knows about and
    * manipulates directly.
-   * 
+   *
    * @param tableName
    *          must be UPPER_CASE beginning with an upper case letter. The actual
    *          table names in the datastore will have 3 leading underscores. 3
@@ -76,12 +76,12 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
    * everything. Aggregate, for example, ensures that submission tables start
    * with an alphabetic character, and that internal tracking tables start with
    * a leading underscore ('_').
-   * 
+   *
    * TableNames cannot collide if their namespaces are different. Namespaces
    * should be short 2-4 character prefixes. The overall length of the table
    * names in the database are limited to about 64 characters, so you want to
    * use short names.
-   * 
+   *
    * @param namespace
    *          must be UPPER_CASE beginning with an upper case letter.
    * @param tableName
@@ -118,7 +118,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
    * This is primarily for accessing the existing tables of form submissions or
    * the Aggregate internal data model. If you aren't accessing those, you
    * should not be using this constructor.
-   * 
+   *
    * @param type
    * @param tableName
    * @param fields
@@ -181,7 +181,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
   /**
    * Create a new blob entity. This entity does not exist in the database until
    * you put() it there.
-   * 
+   *
    * @param cc
    * @return
    * @throws ODKDatastoreException
@@ -198,7 +198,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
   /**
    * Create a new blob entity. This entity does not exist in the database until
    * you put() it there.
-   * 
+   *
    * @param uri
    *          primary key of this Blob set.
    * @param cc
@@ -215,7 +215,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 
   /**
    * Get an existing blob entity.
-   * 
+   *
    * @param uri
    *          primary key of this Blob set.
    * @param cc
@@ -233,7 +233,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
   /**
    * Get an existing blob entity. This API is useful for retrieving Blob sets in
    * the SUBMISSIONS or INTERNALS table namespaces.
-   * 
+   *
    * @param uri
    *          primary key of this Blob set.
    * @param topLevelUri
@@ -388,7 +388,8 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 
     @Override
     public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType,
-        String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
+        String unrootedFilePath, boolean overwriteOK, CallingContext cc)
+        throws ODKDatastoreException {
       return m.setValueFromByteArray(byteArray, contentType, unrootedFilePath, overwriteOK, cc);
     }
   }
@@ -405,38 +406,49 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
     User user = cc.getCurrentUser();
     String schemaName = ds.getDefaultSchemaName();
 
-    // create the 3 relation prototypes...
-    BinaryContent protoCtntRelation = null;
-    BinaryContentRefBlob protoVRefRelation = null;
-    RefBlob protoRefBlobRelation = null;
+    synchronized (AbstractBlobRelationSet.class) {
+      // create the 3 relation prototypes...
+      BinaryContent protoCtntRelation = null;
+      BinaryContentRefBlob protoVRefRelation = null;
+      RefBlob protoRefBlobRelation = null;
 
-    String ctntName = backingBaseTableName.toLowerCase() + CTNT_SUFFIX;
-    String vrefName = backingBaseTableName.toLowerCase() + VREF_SUFFIX;
-    String blobName = backingBaseTableName.toLowerCase() + BLOB_SUFFIX;
+      String ctntName = backingBaseTableName.toLowerCase() + CTNT_SUFFIX;
+      String vrefName = backingBaseTableName.toLowerCase() + VREF_SUFFIX;
+      String blobName = backingBaseTableName.toLowerCase() + BLOB_SUFFIX;
 
-    // track which ones already exist.
-    // if they don't yet exist, if we get a failure,
-    // we'll attempt to drop them.
-    boolean ctntExists = ds.hasRelation(schemaName, ctntName, user);
-    boolean vrefExists = ds.hasRelation(schemaName, vrefName, user);
-    boolean blobExists = ds.hasRelation(schemaName, blobName, user);
+      // track which ones already exist.
+      // if they don't yet exist, if we get a failure,
+      // we'll attempt to drop them.
+      boolean ctntExists = ds.hasRelation(schemaName, ctntName, user);
+      boolean vrefExists = ds.hasRelation(schemaName, vrefName, user);
+      boolean blobExists = ds.hasRelation(schemaName, blobName, user);
 
-    protoCtntRelation = new BinaryContent(schemaName, ctntName);
-    protoVRefRelation = new BinaryContentRefBlob(schemaName, vrefName);
-    protoRefBlobRelation = new RefBlob(schemaName, blobName);
+      protoCtntRelation = new BinaryContent(schemaName, ctntName);
+      protoVRefRelation = new BinaryContentRefBlob(schemaName, vrefName);
+      protoRefBlobRelation = new RefBlob(schemaName, blobName);
 
-    // create them in the persistence layer
-    try {
-      ds.assertRelation(protoCtntRelation, user);
+      // create them in the persistence layer
       try {
-        ds.assertRelation(protoVRefRelation, user);
-
+        ds.assertRelation(protoCtntRelation, user);
         try {
-          ds.assertRelation(protoRefBlobRelation, user);
+          ds.assertRelation(protoVRefRelation, user);
+
+          try {
+            ds.assertRelation(protoRefBlobRelation, user);
+          } catch (ODKDatastoreException e) {
+            if (!blobExists) {
+              try {
+                ds.dropRelation(protoRefBlobRelation, user);
+              } catch (Exception e1) {
+                // ignore
+              }
+            }
+            throw e;
+          }
         } catch (ODKDatastoreException e) {
-          if (!blobExists) {
+          if (!vrefExists) {
             try {
-              ds.dropRelation(protoRefBlobRelation, user);
+              ds.dropRelation(protoVRefRelation, user);
             } catch (Exception e1) {
               // ignore
             }
@@ -444,29 +456,20 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
           throw e;
         }
       } catch (ODKDatastoreException e) {
-        if (!vrefExists) {
+        if (!ctntExists) {
           try {
-            ds.dropRelation(protoVRefRelation, user);
+            ds.dropRelation(protoCtntRelation, user);
           } catch (Exception e1) {
             // ignore
           }
         }
         throw e;
       }
-    } catch (ODKDatastoreException e) {
-      if (!ctntExists) {
-        try {
-          ds.dropRelation(protoCtntRelation, user);
-        } catch (Exception e1) {
-          // ignore
-        }
-      }
-      throw e;
-    }
 
-    // OK we have them persisted -- remember the prototypes...
-    ctntRelation = protoCtntRelation;
-    vrefRelation = protoVRefRelation;
-    blobRelation = protoRefBlobRelation;
+      // OK we have them persisted -- remember the prototypes...
+      ctntRelation = protoCtntRelation;
+      vrefRelation = protoVRefRelation;
+      blobRelation = protoRefBlobRelation;
+    }
   }
 }

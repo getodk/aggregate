@@ -113,11 +113,16 @@ public class DbTableFileInfo {
     columnNames = Collections.unmodifiableList(columns);
   }
 
-  public static Relation getRelation(CallingContext cc)
+  private static Relation theRelation = null;
+
+  public static synchronized Relation getRelation(CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME,
+    if ( theRelation == null ) {
+      Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME,
         dataFields, cc);
-    return relation;
+      theRelation = relation;
+    }
+    return theRelation;
   }
 
   /**
