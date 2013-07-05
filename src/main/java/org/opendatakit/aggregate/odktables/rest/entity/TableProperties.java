@@ -73,8 +73,8 @@ public class TableProperties {
     return tableKey;
   }
 
-  public void setTableName(String tableName) {
-    this.tableKey = tableName;
+  public void setTableKey(String tableKey) {
+    this.tableKey = tableKey;
   }
 
   public void setKeyValueStoreEntries(

@@ -49,6 +49,8 @@ public class ManifestTest {
 	public void toJson() throws JsonGenerationException, JsonMappingException, IOException {
 		OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
 		entry.key = "list";
+		entry.partition = null;
+		entry.aspect = "brother_of_skyrim_weapons";
 		entry.tableId = "this-is-a-uuid";
 		entry.value = "{greetings, I am a json string (no i'm not) }";
 		entry.type = "file";
@@ -56,6 +58,8 @@ public class ManifestTest {
 		OdkTablesKeyValueStoreEntry entry2 = new OdkTablesKeyValueStoreEntry();
 		entry2.key = "box";
 		entry2.tableId = "this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND";
+		entry2.partition = "foo";
+		entry2.aspect = "sister_of_skyrim_weapons";
 		entry2.value = "guess what's in the box...";
 		entry2.type = "surprise";
 
@@ -66,7 +70,7 @@ public class ManifestTest {
 		OdkTablesKeyValueManifestManager manifest = new OdkTablesKeyValueManifestManager();
 		manifest.addEntries(entryList);
 
-		assertEquals("[{\"tableId\":\"this-is-a-uuid\",\"tableName\":\"brother_of_skyrim_weapons\",\"key\":\"list\",\"type\":\"file\",\"value\":\"{greetings, I am a json string (no i'm not) }\"},{\"tableId\":\"this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND\",\"tableName\":\"sister_of_skyrim_weapons\",\"key\":\"box\",\"type\":\"surprise\",\"value\":\"guess what's in the box...\"}]",
+		assertEquals("[{\"tableId\":\"this-is-a-uuid\",\"partition\":null,\"aspect\":\"brother_of_skyrim_weapons\",\"key\":\"list\",\"type\":\"file\",\"value\":\"{greetings, I am a json string (no i'm not) }\"},{\"tableId\":\"this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND\",\"partition\":\"foo\",\"aspect\":\"sister_of_skyrim_weapons\",\"key\":\"box\",\"type\":\"surprise\",\"value\":\"guess what's in the box...\"}]",
 				manifest.getManifestForTesting());
 	}
 
