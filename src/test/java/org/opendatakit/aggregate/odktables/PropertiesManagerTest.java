@@ -78,7 +78,7 @@ public class PropertiesManagerTest {
   public void testSetTableName() throws ODKTaskLockException, ODKDatastoreException,
       EtagMismatchException {
     TableProperties expected = pm.getProperties();
-    expected.setTableName("a new name");
+    expected.setTableKey("a new name");
 
     doTestSetProperties(expected);
   }
@@ -108,7 +108,7 @@ public class PropertiesManagerTest {
   public void testSetTableNameChangesPropertiesModNum() throws ODKDatastoreException,
       ODKTaskLockException, EtagMismatchException {
     TableProperties properties = pm.getProperties();
-    properties.setTableName("a new table name");
+    properties.setTableKey("a new table name");
 
     doTestSetPropertiesChangesModNum(properties);
   }
@@ -142,9 +142,9 @@ public class PropertiesManagerTest {
   public void testCantChangePropertiesWithOldEtag() throws ODKDatastoreException,
       EtagMismatchException, ODKTaskLockException {
     TableProperties properties = pm.getProperties();
-    properties.setTableName("new name");
+    properties.setTableKey("new name");
     pm.setProperties(properties);
-    properties.setTableName("new name 2");
+    properties.setTableKey("new name 2");
     pm.setProperties(properties);
   }
 }
