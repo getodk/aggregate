@@ -57,11 +57,16 @@ public class DbKeyValueStore {
     dataFields.add(new DataField(VALUE, DataType.STRING, true, 63000L));
   }
 
-  public static Relation getRelation(CallingContext cc)
+  private static Relation theRelation = null;
+
+  public static synchronized Relation getRelation(CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation =
+    if ( theRelation == null ) {
+      Relation relation =
         new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
-    return relation;
+      theRelation = relation;
+    }
+    return theRelation;
   }
 
   /**

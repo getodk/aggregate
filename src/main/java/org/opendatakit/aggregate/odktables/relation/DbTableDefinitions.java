@@ -66,11 +66,16 @@ public class DbTableDefinitions {
         new DataField(TABLE_ID_ACCESS_CONTROLS, DataType.STRING, true));
   }
 
-  public static Relation getRelation(CallingContext cc)
+  private static Relation theRelation = null;
+
+  public static synchronized Relation getRelation(CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation =
+    if ( theRelation == null) {
+      Relation relation =
         new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
-    return relation;
+      theRelation = relation;
+    }
+    return theRelation;
   }
 
   public static Entity getDefinition(String tableId, CallingContext cc)
