@@ -19,28 +19,24 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.opendatakit.aggregate.odktables.api.client.AggregateRequestInterceptor;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.TableProperties;
-import org.opendatakit.aggregate.odktables.entity.api.PropertiesResource;
-import org.opendatakit.aggregate.odktables.entity.api.RowResource;
-import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
-import org.opendatakit.aggregate.odktables.entity.api.TableResource;
-import org.opendatakit.aggregate.odktables.entity.serialization.JsonObjectHttpMessageConverter;
-import org.opendatakit.aggregate.odktables.entity.serialization.ListConverter;
-import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLSerializerForAggregate;
-import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXmlHttpMessageConverter;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.rest.interceptor.AggregateRequestInterceptor;
+import org.opendatakit.aggregate.odktables.rest.serialization.JsonObjectHttpMessageConverter;
+import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
+import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXmlHttpMessageConverter;
 import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.convert.Registry;
-import org.simpleframework.xml.convert.RegistryStrategy;
-import org.simpleframework.xml.core.Persister;
-import org.simpleframework.xml.strategy.Strategy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -122,7 +118,7 @@ public class AggregateSynchronizer {
     }
 
     for (TableResource tableResource : tableResources)
-      tables.put(tableResource.getTableId(), tableResource.getTableName());
+      tables.put(tableResource.getTableId(), tableResource.getTableKey());
 
     return tables;
   }
@@ -132,10 +128,9 @@ public class AggregateSynchronizer {
 
     // build request
     URI uri = baseUri.resolve(tableId);
-    TableDefinition definition = new TableDefinition(tableName, columns, tableProperties);
+    TableDefinition definition = new TableDefinition(tableName, columns, tableName, tableName, TableType.DATA, tableProperties);
     HttpEntity<TableDefinition> requestEntity = new HttpEntity<TableDefinition>(definition,
         requestHeaders);
-
     // create table
     ResponseEntity<TableResource> resourceEntity;
     try {
@@ -208,8 +203,16 @@ public class AggregateSynchronizer {
       String tableName, String tableProperties) throws IOException {
     TableResource resource = getResource(tableId);
 
+    List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+    OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
+    entry.partition = "table";
+    entry.aspect = "metadata";
+    entry.key = "my_value";
+    entry.type = "text";
+    entry.value = tableProperties;
+    keyValueStoreEntries.add(entry);
     // put new properties
-    TableProperties properties = new TableProperties(propertiesEtag, tableName, tableProperties);
+    TableProperties properties = new TableProperties(propertiesEtag, tableName, keyValueStoreEntries);
     HttpEntity<TableProperties> entity = new HttpEntity<TableProperties>(properties, requestHeaders);
     ResponseEntity<PropertiesResource> updatedEntity;
     try {

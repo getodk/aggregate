@@ -10,10 +10,11 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.opendatakit.aggregate.odktables.entity.api.TableDefinition;
-import org.opendatakit.aggregate.odktables.entity.api.TableResource;
-import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLSerializerForAggregate;
-import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXmlHttpMessageConverter;
+import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
+import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXmlHttpMessageConverter;
 import org.simpleframework.xml.Serializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -71,8 +72,7 @@ public abstract class AbstractServiceTest {
   protected TableResource createTable() {
     URI uri = baseUri.resolve(T.tableId);
 
-    TableDefinition definition = new TableDefinition(T.tableName, T.columns, T.tableMetadata);
-
+    TableDefinition definition = new TableDefinition(T.tableName, T.columns, T.tableName, T.tableName, TableType.DATA, null);
     HttpEntity<TableDefinition> entity = entity(definition);
 
     ResponseEntity<TableResource> resp = rt.exchange(uri, HttpMethod.PUT, entity,

@@ -58,15 +58,21 @@ File / Import:
 	
 (4)	Edit odk-gae-settings / common / security.properties
 
-Be sure to set the security.server.superUser to your gmail account. Save.
+In this file:
 
-(5) Select the 'build.xml' (Ant Buildfile), right-click, and 
+Set the security.server.superUser to your gmail account.
+
+Additionally, set the security.server.hostname=
+(blank) or to a dynamic DNS name or IP for your development box.
+
+Save.
+
+(5) In the odk-gae-settings project, select 
+the 'build.xml' (Ant Buildfile), right-click, and 
 choose Run As / Ant Build.  This will rebuild the configuration 
 jar and copy it into the eclipse project.
 
-(6) Return to Eclipse:
-
-Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
+(6) Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
 
 This should now build without errors.  
 

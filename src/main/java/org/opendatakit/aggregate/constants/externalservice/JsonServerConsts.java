@@ -21,15 +21,17 @@ import java.util.Map;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class JsonServerConsts {
 
+  public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
+
   public static final Map<ElementType, JsonServerType> typeMap = new HashMap<ElementType, JsonServerType>();
-  static {   
+  static {
     typeMap.put(ElementType.STRING, JsonServerType.STRING);
     typeMap.put(ElementType.JRDATETIME, JsonServerType.DATE);
     typeMap.put(ElementType.JRDATE, JsonServerType.DATE);

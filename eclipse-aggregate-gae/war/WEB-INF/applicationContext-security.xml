@@ -103,7 +103,13 @@
 		<!-- ODK Tables API -->
 		<intercept-url pattern="/odktables/**" access="true" />
 		<intercept-url pattern="/odktablesui*" access="true" />
-
+		<!-- odk tables file upload and download stuff -->
+		<intercept-url pattern="/tableFileUpload/**" access="true" />
+		<intercept-url pattern="/tableFileDownload/**" access="true" />
+		<intercept-url pattern="/tableKeyValueManifest/**" access="true" />
+		<!-- odk tables upload file from CSV -->
+		<intercept-url pattern="/uploadTableFromCSV/**" access="true" />
+		
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />
 	</filter-security-metadata-source>

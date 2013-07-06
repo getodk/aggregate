@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
@@ -13,24 +29,27 @@ import com.google.gwt.user.client.ui.FlexTable;
 public class MediaFileListPopup extends AbstractPopupBase {
 
   private FlexTable fileList;
-  
+
   public MediaFileListPopup(String formId) {
 
-    SecureGWT.getFormAdminService().getFormMediaFileList(formId, new MediaFileCallback());
+    SecureGWT.getFormAdminService().getFormMediaFileList(formId,
+        new MediaFileCallback());
 
     fileList = new FlexTable();
     fileList.setWidget(0, 0, new ClosePopupButton(this));
-    fileList.getCellFormatter().getElement(0, 0).setAttribute("align", "right");
+    fileList.getCellFormatter().getElement(0, 0).setAttribute("align",
+        "right");
     fileList.setText(1, 0, "Media Filename");
     fileList.setText(1, 1, "Content Type");
     fileList.setText(1, 2, "Length");
     fileList.getRowFormatter().addStyleName(1, "titleBar");
-  
-    setWidget(fileList);   
+
+    setWidget(fileList);
   }
-  
-  
-  private class MediaFileCallback implements AsyncCallback<ArrayList<MediaFileSummary>> {
+
+
+  private class MediaFileCallback implements
+      AsyncCallback<ArrayList<MediaFileSummary>> {
 
     @Override
     public void onFailure(Throwable caught) {
@@ -39,9 +58,9 @@ public class MediaFileListPopup extends AbstractPopupBase {
 
     @Override
     public void onSuccess(ArrayList<MediaFileSummary> result) {
-      if(result == null) 
+      if(result == null)
         return;
-      
+
       int index = 2;
       for(MediaFileSummary file : result) {
         fileList.setText(index, 0, file.getFilename());
@@ -50,7 +69,7 @@ public class MediaFileListPopup extends AbstractPopupBase {
         index++;
       }
     }
-    
+
   }
-  
+
 }

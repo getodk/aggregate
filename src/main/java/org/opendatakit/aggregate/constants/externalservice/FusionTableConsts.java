@@ -22,10 +22,10 @@ import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class FusionTableConsts {
 
@@ -38,12 +38,14 @@ public final class FusionTableConsts {
   public static final String FUSION_SCOPE = "https://www.googleapis.com/fusiontables/v1/query";
   public static final String SINGLE_QUOTE = "'";
   public static final String HTML_ESCAPED_SINGLE_QUOTE = "&#39;";
- 
+
   public static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 60000;
   public static final int SERVICE_TIMEOUT_MILLISECONDS = 60000;
-  
+
+  public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
+
   public static final Map<ElementType, FusionTableType> typeMap = new HashMap<ElementType, FusionTableType>();
-  static {  
+  static {
     typeMap.put(ElementType.STRING, FusionTableType.STRING);
     typeMap.put(ElementType.JRDATETIME, FusionTableType.DATE);
     typeMap.put(ElementType.JRDATE, FusionTableType.DATE);

@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.constants.common;
 
 public class UIConsts {
-  public static final String VERSION_STRING = "v1.3.1 Production";
+  public static final String VERSION_STRING = "v1.3.2 Production";
 
   public static final String URI_DEFAULT = "no uuid";
   public static final String FSC_URI_PARAM = "fsc";
@@ -31,6 +31,16 @@ public class UIConsts {
 
   public static final String FORM_UPLOAD_SERVLET_ADDR = "formUpload";
   public static final String SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR = "ssl/oauth2-service-account";
+  
+  // url pattern for uploading files associated with ODKTables tables
+  public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR = 
+      "tableFileUpload";
+  // url pattern for downloading files associated with odktables tables
+  public static final String TABLE_FILE_DOWNLOAD_SERVLET_ADDR = 
+      "tableFileDownload";
+  // url pattern for uploading a table from a CSV file
+  public static final String UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR = 
+      "uploadTableFromCSV";
 
   public static final String SUBMISSION_SERVLET_ADDR = "submission";
   public static final String ERROR_NO_FILTERS = "You need at least one filter to save a group.";

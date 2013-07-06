@@ -36,3 +36,11 @@
 	color: #000000;
 	background-color: #ffffff;
 }
+
+.tableList {
+	border-collapse: collapse;
+	border-width: 1px;
+	border-style: solid;
+	border_color: #07115A;
+	width:100%;
+}
