@@ -278,7 +278,7 @@ public class UtilTransforms {
 
   public static PropertiesResourceClient transform(PropertiesResource serverResource) {
     TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getPropertiesEtag(),
-        serverResource.getTableKey(), UtilTransforms.transform(serverResource
+        serverResource.getTableId(), UtilTransforms.transform(serverResource
             .getKeyValueStoreEntries()));
     PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
     resourceClient.setSelfUri(serverResource.getSelfUri());
@@ -295,7 +295,7 @@ public class UtilTransforms {
       clientEntries.add(UtilTransforms.transform(serverEntry));
     }
     TablePropertiesClient tpClient = new TablePropertiesClient(
-        serverProperties.getPropertiesEtag(), serverProperties.getTableKey(), clientEntries);
+        serverProperties.getPropertiesEtag(), serverProperties.getTableId(), clientEntries);
     return tpClient;
   }
 

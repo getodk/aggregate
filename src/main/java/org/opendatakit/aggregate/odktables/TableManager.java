@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
@@ -343,6 +344,7 @@ public class TableManager {
       Relation.deleteEntities(entities, cc);
       table.dropRelation(cc);
       logTable.dropRelation(cc);
+      DbKeyValueStore.clearAllEntries(tableId, cc);
     } finally {
       propsLock.release();
       dataLock.release();

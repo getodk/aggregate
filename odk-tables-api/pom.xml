@@ -29,8 +29,7 @@
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
             <includes>
-                <include>**/odktables/api/**</include>
-                <include>**/odktables/entity/**</include>
+                <include>**/odktables/rest/**</include>
             </includes>
           </configuration>
         </plugin>
@@ -45,7 +44,7 @@
               </goals>
               <configuration>
                   <sourcepath>../src/main/java</sourcepath>
-                  <subpackages>org.opendatakit.aggregate.odktables.api:org.opendatakit.aggregate.odktables.entity</subpackages>
+                  <subpackages>org.opendatakit.aggregate.odktables.rest</subpackages>
                   <failOnError>false</failOnError>
               </configuration>
             </execution>
@@ -62,7 +61,8 @@
                   </goals>
                   <configuration>
                       <outputDirectory>${project.build.directory}</outputDirectory>
-                      <includeArtifactIds>simple-xml</includeArtifactIds>
+                      <includeArtifactIds>simple-xml,joda-time,commons-lang3</includeArtifactIds>
+					  <!-- also uses spring framework components (but uses different android artifact) -->
                   </configuration>
               </execution>
           </executions>
