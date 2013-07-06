@@ -85,7 +85,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 		    // the variable, but should be wary of this.
 		    // first make the type TableProperties object
 		    TableProperties tableProperties = new TableProperties(
-		        properties.getPropertiesEtag(), properties.getTableKey(),
+		        properties.getPropertiesEtag(), properties.getTableId(),
 		        UtilTransforms.transformToServerEntries(
 		            properties.getKeyValueStoreEntries()));
 		    tableProperties = pm.setProperties(tableProperties);

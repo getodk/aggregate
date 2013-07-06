@@ -39,8 +39,8 @@ public class TableProperties {
   @Element(name = "etag", required = false)
   private String propertiesEtag;
 
-  @Element(name = "tableKey", required = true)
-  private String tableKey;
+  @Element(name = "tableId", required = true)
+  private String tableId;
 
   @ElementList(inline = true, required = false)
   private List<OdkTablesKeyValueStoreEntry> kvsEntries;
@@ -54,10 +54,10 @@ public class TableProperties {
    * @param tableKey the tableKey field from {@link DbTableDefinition}
    * @param keyValueStoreEntries
    */
-  public TableProperties(String propertiesEtag, String tableKey,
+  public TableProperties(String propertiesEtag, String tableId,
       List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries) {
     this.propertiesEtag = propertiesEtag;
-    this.tableKey = tableKey;
+    this.tableId = tableId;
     this.kvsEntries = keyValueStoreEntries;
   }
 
@@ -69,12 +69,12 @@ public class TableProperties {
     this.propertiesEtag = propertiesEtag;
   }
 
-  public String getTableKey() {
-    return tableKey;
+  public String getTableId() {
+    return tableId;
   }
 
-  public void setTableKey(String tableKey) {
-    this.tableKey = tableKey;
+  public void setTableId(String tableId) {
+    this.tableId = tableId;
   }
 
   public void setKeyValueStoreEntries(
@@ -91,7 +91,7 @@ public class TableProperties {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
-    result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
+    result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
     result = prime * result + ((kvsEntries == null) ? 0 : kvsEntries.hashCode());
     return result;
   }
@@ -109,14 +109,14 @@ public class TableProperties {
     }
     TableProperties other = (TableProperties) obj;
     return (propertiesEtag == null ? other.propertiesEtag == null : propertiesEtag.equals(other.propertiesEtag))
-        && (tableKey == null ? other.tableKey == null : tableKey.equals(other.tableKey))
+        && (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
         && (kvsEntries == null ? other.kvsEntries == null : kvsEntries.equals(other.kvsEntries));
   }
 
   @Override
   public String toString() {
     return "TableProperties [propertiesEtag=" + propertiesEtag
-        + ", tableName=" + tableKey
+        + ", tableId=" + tableId
         + ", kvsEntries=" + this.kvsEntries.toString()
         + "]";
   }

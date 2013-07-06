@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 /**
@@ -33,9 +34,16 @@ import org.simpleframework.xml.Root;
 @Default(value = DefaultType.FIELD, required = false)
 public class TableEntry {
 
+  @Element(required = true)
   private String tableId;
+
+  @Element(required = true)
   private String tableKey;
+
+  @Element(required = false)
   private String dataEtag;
+
+  @Element(required = false)
   private String propertiesEtag;
 
   protected TableEntry() {

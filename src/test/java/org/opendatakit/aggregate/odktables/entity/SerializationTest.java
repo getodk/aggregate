@@ -164,6 +164,7 @@ public class SerializationTest {
     expected.setSelfUri("http://localhost:8080/odktables/tables/1");
     expected.setDataUri("http://localhost:8080/odktables/tables/1/rows");
     expected.setPropertiesUri("http://localhost:8080/odktables/tables/1/columns");
+    expected.setDefinitionUri("http://localhost:8080/odktables/tables/1/definition");
     expected.setDiffUri("http://localhost:8080/odktables/tables/1/rows/diff");
     expected.setAclUri("http://localhost:8080/odktables/tables/1/acl");
     serializer.write(expected, writer);

@@ -34,7 +34,7 @@ public class PropertiesResource extends TableProperties {
   public PropertiesResource(TableProperties tableProperties) {
     super();
     setPropertiesEtag(tableProperties.getPropertiesEtag());
-    setTableKey(tableProperties.getTableKey());
+    setTableId(tableProperties.getTableId());
     setKeyValueStoreEntries(tableProperties.getKeyValueStoreEntries());
   }
 

@@ -54,7 +54,8 @@ public class DbKeyValueStore {
     dataFields.add(new DataField(ASPECT, DataType.STRING, false));
     dataFields.add(new DataField(KEY, DataType.STRING, false));
     dataFields.add(new DataField(TYPE, DataType.STRING, false));
-    dataFields.add(new DataField(VALUE, DataType.STRING, true, 63000L));
+    // NOTE: 19200L is due to a limitation in MySQL
+    dataFields.add(new DataField(VALUE, DataType.STRING, true, 19200L));
   }
 
   private static Relation theRelation = null;

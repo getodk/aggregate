@@ -95,10 +95,10 @@ public class PropertiesManager {
     entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
     kvsEntities = DbKeyValueStore.getKVSEntries(tableId, cc);
     definitionEntity = DbTableDefinitions.getDefinition(tableId, cc);
-    String tableKey =
-        definitionEntity.getAsString(DbTableDefinitions.TABLE_KEY);
+    String tableId =
+        definitionEntity.getAsString(DbTableDefinitions.TABLE_ID);
     String propertiesEtag = entry.getString(DbTableEntry.PROPERTIES_ETAG);
-    return converter.toTableProperties(kvsEntities, tableKey,
+    return converter.toTableProperties(kvsEntities, tableId,
         propertiesEtag);
   }
 
@@ -194,7 +194,7 @@ public class PropertiesManager {
       lock.release();
     }
     return converter.toTableProperties(kvsEntities,
-        definitionEntity.getString(DbTableDefinitions.TABLE_KEY),
+        definitionEntity.getString(DbTableDefinitions.TABLE_ID),
         entry.getString(DbTableEntry.PROPERTIES_ETAG));
   }
 }

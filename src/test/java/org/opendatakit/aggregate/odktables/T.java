@@ -30,41 +30,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 @Ignore
 public class T {
 
-  public static final String user = "someone@gmail.com";
-  public static final String group = "somegroup";
-  public static final String tableId = "people";
-  public static final String tableKey = "peopleKey";
-  public static final String dbTableName = "peopleDbTableName";
-  public static final String tableIdAccessControls = "someId";
-  public static final String tableName = "people";
-  public static final String tableMetadata = null;
-  public static final TableType tableType = TableType.DATA;
-  public static final String propertiesEtag = "propertiesEtag";
-  @SuppressWarnings("serial")
-  public static final List<OdkTablesKeyValueStoreEntry> kvsEntries =
-      new ArrayList<OdkTablesKeyValueStoreEntry>() {
-
-    {
-      kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
-      kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
-    }
-  };
-  @SuppressWarnings("serial")
-  public static final List<Column> columns = new ArrayList<Column>() {
-    {
-      add(T.Columns.column_name);
-      add(T.Columns.column_age);
-      add(T.Columns.column_weight);
-    }
-  };
-  @SuppressWarnings("serial")
-  public static final List<Row> rows = new ArrayList<Row>() {
-    {
-      add(Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues()));
-      add(Row.forInsert(T.Data.JOHN.getId(), T.Data.JOHN.getValues()));
-    }
-  };
-
   public static class OdkTablesKeyValueStoreEntries {
     public static final OdkTablesKeyValueStoreEntry entryOne;
     public static final OdkTablesKeyValueStoreEntry entryTwo;
@@ -105,19 +70,16 @@ public class T {
     public static final String weight = "weight";
     public static final String columnType_String = "colTypeString";
     public static final String columnType_Int = "colTypeInt";
-    public static final Column column_name = new Column(name,
-        name + elementKey_suffix, name + elementName_suffix,
-        Column.ColumnType.STRING, null, 1, null);
-    public static final Column column_age = new Column(age,
-        age + elementKey_suffix, age + elementName_suffix,
-        Column.ColumnType.INTEGER, null, 1, null);
-    public static final Column column_weight = new Column(weight,
-        weight + elementKey_suffix, weight + elementName_suffix,
-        Column.ColumnType.INTEGER, null, 1, null);  }
+    public static final Column column_name = new Column(name, name + elementKey_suffix, name
+        + elementName_suffix, Column.ColumnType.STRING, null, 1, null);
+    public static final Column column_age = new Column(age, age + elementKey_suffix, age
+        + elementName_suffix, Column.ColumnType.INTEGER, null, 1, null);
+    public static final Column column_weight = new Column(weight, weight + elementKey_suffix,
+        weight + elementName_suffix, Column.ColumnType.INTEGER, null, 1, null);
+  }
 
   public static enum Data {
-    DYLAN("1", "dylan", "23", "175"),
-    JOHN("2", "john", "58", "200");
+    DYLAN("1", "dylan", "23", "175"), JOHN("2", "john", "58", "200");
     private final String id;
     private final String name;
     private final String age;
@@ -125,9 +87,9 @@ public class T {
 
     public Map<String, String> getValues() {
       final java.util.HashMap<java.lang.String, java.lang.String> map = new HashMap<String, String>();
-      map.put(Columns.name, name);
-      map.put(Columns.age, age);
-      map.put(Columns.weight, weight);
+      map.put(Columns.column_name.getElementKey(), name);
+      map.put(Columns.column_age.getElementKey(), age);
+      map.put(Columns.column_weight.getElementKey(), weight);
       return map;
     }
 
@@ -159,4 +121,34 @@ public class T {
       return this.weight;
     }
   }
+
+  public static final String user = "someone@gmail.com";
+  public static final String group = "somegroup";
+  public static final String tableId = "people";
+  public static final String tableKey = "peopleKey";
+  public static final String dbTableName = "peopleDbTableName";
+  public static final String tableIdAccessControls = "someId";
+  public static final String tableName = "people";
+  public static final String tableMetadata = null;
+  public static final TableType tableType = TableType.DATA;
+  public static final String propertiesEtag = "propertiesEtag";
+
+  @SuppressWarnings("serial")
+  public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+
+  @SuppressWarnings("serial")
+  public static final List<Column> columns = new ArrayList<Column>();
+
+  @SuppressWarnings("serial")
+  public static final List<Row> rows = new ArrayList<Row>();
+
+  static {
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
+    columns.add(T.Columns.column_name);
+    columns.add(T.Columns.column_age);
+    columns.add(T.Columns.column_weight);
+    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues()));
+    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.Data.JOHN.getValues()));
+  };
 }

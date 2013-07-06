@@ -232,9 +232,13 @@ public class Row {
    * @param timestamp
    */
   public void setTimestamp(Date timestamp) {
-    DateTime dt = new DateTime(timestamp);
-    DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-    this.timestamp = fmt.print(dt);
+    if ( timestamp == null ) {
+      this.timestamp = null;
+    } else {
+      DateTime dt = new DateTime(timestamp);
+      DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+      this.timestamp = fmt.print(dt);
+    }
   }
 
   @Override

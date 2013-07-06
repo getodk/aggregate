@@ -112,10 +112,10 @@ public class EntityConverter {
   }
 
   public TableProperties toTableProperties(List<Entity> kvsEntities,
-      String tableKey, String propertiesEtag) {
+      String tableId, String propertiesEtag) {
     List<OdkTablesKeyValueStoreEntry> kvsEntries =
         toOdkTablesKeyValueStoreEntry(kvsEntities);
-    TableProperties properties = new TableProperties(propertiesEtag, tableKey,
+    TableProperties properties = new TableProperties(propertiesEtag, tableId,
         kvsEntries);
     return properties;
   }
@@ -149,7 +149,7 @@ public class EntityConverter {
     String tableId = definitionEntity.getString(DbTableDefinitions.TABLE_ID);
     String tableKey = definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
     String dbTableName =
-        definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
+        definitionEntity.getString(DbTableDefinitions.DB_TABLE_NAME);
     String tableTypeStr = definitionEntity.getString(DbTableDefinitions.TYPE);
     TableType tableType = TableType.valueOf(tableTypeStr);
     String tableIdAccessControls = definitionEntity.getString(
