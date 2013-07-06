@@ -1214,7 +1214,7 @@
 						<configuration>
 						  <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
 						  <additionalClasspathElements>
-							<additionalClasspathElement>${selenium.home}/selenium-java-2.28.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.home}/selenium-java-2.33.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/bsh-1.3.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
@@ -1225,12 +1225,12 @@
 							<additionalClasspathElement>${selenium.libs}/commons-jxpath-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-lang3-3.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-logging-1.1.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.7.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/guava-13.0.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.9.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/guava-14.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-core-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-library-1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-2.11.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.11.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-2.12.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.12.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/httpclient-4.2.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/httpcore-4.2.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/httpmime-4.2.1.jar</additionalClasspathElement>
@@ -1242,9 +1242,10 @@
 							<additionalClasspathElement>${selenium.libs}/json-20080701.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/junit-dep-4.11.jar</additionalClasspathElement>
 							<additionalClasspathElement>${localRepository}/junit/junit/${junit.version}/junit-${junit.version}.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.16.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.17.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/netty-3.5.7.Final.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/operadriver-1.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/operadriver-1.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.0.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/serializer-2.7.1.jar</additionalClasspathElement>
