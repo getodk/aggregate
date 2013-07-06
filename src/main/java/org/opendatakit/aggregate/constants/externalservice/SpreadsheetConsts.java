@@ -56,6 +56,8 @@ public final class SpreadsheetConsts {
 
   public static final int WORKSHEET_CREATION_DELAY = 15000;
 
+  public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
+
   /**
    * Characters which cause problems in Google Spreadsheet headers. Removed in
    * the GoogleSpreadsheetHeaderFormatter.

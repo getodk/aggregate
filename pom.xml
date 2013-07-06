@@ -32,6 +32,8 @@
 		<build.helper.maven.plugin.version>1.7</build.helper.maven.plugin.version>
 		<gwt.maven.plugin.version>2.5.0</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.4</maven.gae.plugin.version>
+		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
+		<maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
 		<maven.war.plugin.version>2.3</maven.war.plugin.version>
 		<maven.antrun.plugin.version>1.7</maven.antrun.plugin.version>
 		<maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
@@ -279,7 +281,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency> <!-- required by spring-security odk-SNAPSHOT -->
+        <dependency> <!-- required by spring-security odk-SNAPSHOT -->
 		  <groupId>net.sf.ehcache</groupId>
 		  <artifactId>ehcache</artifactId>
 		  <version>1.6.2</version>
@@ -413,13 +415,6 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
-		  <groupId>com.google.http-client</groupId>
-		  <artifactId>google-http-client-jackson</artifactId>
-		  <version>${google.api-client.version}</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency>
-		<dependency>
 		  <groupId>com.google.oauth-client</groupId>
 		  <artifactId>google-oauth-client</artifactId>
 		  <version>${google.api-client.version}</version>
@@ -509,6 +504,13 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.2</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 			<version>1.3.9</version>
@@ -553,6 +555,13 @@
 			<groupId>org.opendatakit</groupId>
 			<artifactId>odk-tomcatutil</artifactId> <!-- see src/main/libs/readme.txt -->
 			<version>1.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -963,6 +972,16 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${maven.jar.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${maven.javadoc.plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

@@ -98,6 +98,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
     <url-pattern>/aggregateui/preferenceservice</url-pattern>
   </servlet-mapping>
 
+  <!--  odk tables servlets -->
   <servlet>
     <servlet-name>odkTablesAdminServiceImpl</servlet-name>
     <servlet-class>org.opendatakit.aggregate.server.OdkTablesAdminServiceImpl</servlet-class>
@@ -107,6 +108,56 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
     <servlet-name>odkTablesAdminServiceImpl</servlet-name>
     <url-pattern>/aggregateui/odktablesadmin</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverDataServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerDataServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    	<servlet-name>serverDataServiceImpl</servlet-name>
+    	<url-pattern>/aggregateui/serverdataservice</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverDiffServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerDiffServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverDiffServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/serverdiffservice</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverPropertiesServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerPropertiesServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverPropertiesServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/serverpropertiesservice</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>serverTableACLServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerTableACLServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverTableACLServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/servertableaclservice</url-pattern>
+  </servlet-mapping>  
+
+  <servlet>
+      <servlet-name>serverTableServiceImpl</servlet-name>
+      <servlet-class>org.opendatakit.aggregate.server.ServerTableServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>serverTableServiceImpl</servlet-name>
+      <url-pattern>/aggregateui/servertableservice</url-pattern>
+  </servlet-mapping>  
 
 
   <servlet>
@@ -197,6 +248,48 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
 		<servlet-name>submission</servlet-name>
 		<url-pattern>/submission</url-pattern>
 	</servlet-mapping>
+	
+		<!-- servlet for uploading files associated with ODKTables tables -->
+	<servlet>
+	    <servlet-name>tableFileUpload</servlet-name>
+	    <servlet-class>org.opendatakit.aggregate.servlet.OdkTablesTableFileUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>tableFileUpload</servlet-name>
+	    <url-pattern>/tableFileUpload</url-pattern>
+	</servlet-mapping>
+	
+	<!--  servlet for downloading files associated with ODKTables tables -->
+	<servlet>
+	    <servlet-name>tableFileDownload</servlet-name>
+	    <servlet-class>org.opendatakit.aggregate.servlet.OdkTablesTableFileDownloadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>tableFileDownload</servlet-name>
+	    <url-pattern>/tableFileDownload</url-pattern>
+	</servlet-mapping>
+	
+	<!--  servlet for getting the manifest for a table -->
+	<servlet>
+	    <servlet-name>tableKeyValueManifest</servlet-name>
+	    <servlet-class>org.opendatakit.aggregate.servlet.OdkTablesManifestServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>tableKeyValueManifest</servlet-name>
+	    <url-pattern>/tableKeyValueManifest</url-pattern>
+	</servlet-mapping>
+	
+	<!--  servlet for uploading a table from a CSV -->
+	<servlet>
+	    <servlet-name>uploadTableFromCSV</servlet-name>
+	    <servlet-class>org.opendatakit.aggregate.servlet.OdkTablesUploadTableFromCSVServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>uploadTableFromCSV</servlet-name>
+	    <url-pattern> /uploadTableFromCSV</url-pattern>
+	</servlet-mapping>
+	
+	
 
 	<servlet>
 		<servlet-name>upload</servlet-name>

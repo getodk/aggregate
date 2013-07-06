@@ -730,6 +730,17 @@ If you are replacing an existing application already on appspot, the application
                     <value>gae</value>
                 </compareText>
             </ruleList>
+            <validationActionList>
+                <throwError text="Invalid application id. An application id is an 'Application' shown on the Google AppEngine dashboard.">
+                    <ruleList>
+                        <regExMatch>
+                            <logic>does_not_match</logic>
+                            <pattern>^[^ .:/[\]]*$</pattern>
+                            <text>${app_id}</text>
+                        </regExMatch>
+                    </ruleList>
+                </throwError>
+            </validationActionList>
         </parameterGroup>
         <stringParameter>
             <name>master_slave_app_id</name>
@@ -754,6 +765,17 @@ If you are replacing an existing application already on appspot, the application
                     </ruleList>
                 </ruleGroup>
             </ruleList>
+            <validationActionList>
+                <throwError text="Invalid application id. An application id is an 'Application' shown on the Google AppEngine dashboard.">
+                    <ruleList>
+                        <regExMatch>
+                            <logic>does_not_match</logic>
+                            <pattern>^[^ .:/[\]]*$</pattern>
+                            <text>${master_slave_app_id}</text>
+                        </regExMatch>
+                    </ruleList>
+                </throwError>
+            </validationActionList>
         </stringParameter>
     </parameterList>
     <postInstallationActionList>

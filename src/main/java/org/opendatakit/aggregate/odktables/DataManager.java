@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
@@ -8,16 +24,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
-import org.opendatakit.aggregate.odktables.relation.DbColumn;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -30,9 +46,10 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Manages read, insert, update, and delete operations on the rows of a table.
- * 
+ *
  * @author the.dylan.price@gmail.com
- * 
+ * @author sudar.sam@gmail.com
+ *
  */
 
 public class DataManager {
@@ -47,7 +64,7 @@ public class DataManager {
 
   /**
    * Construct a new DataManager.
-   * 
+   *
    * @param tableId
    *          the unique identifier of the table
    * @param cc
@@ -68,7 +85,7 @@ public class DataManager {
     this.entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
     this.table = DbTable.getRelation(tableId, cc);
     this.logTable = DbLogTable.getRelation(tableId, cc);
-    this.columns = DbColumn.query(tableId, cc);
+    this.columns = DbColumnDefinitions.query(tableId, cc);
   }
 
   public String getTableId() {
@@ -77,7 +94,7 @@ public class DataManager {
 
   /**
    * Retrieve all current rows of the table.
-   * 
+   *
    * @return all the rows of the table.
    * @throws ODKDatastoreException
    */
@@ -89,7 +106,7 @@ public class DataManager {
 
   /**
    * Retrieve all current rows of the table, filtered by the given scope.
-   * 
+   *
    * @param scope
    *          the scope to filter by
    * @return all the rows of the table, filtered by the given scope
@@ -106,7 +123,7 @@ public class DataManager {
   /**
    * Retrieve all current rows of the table, filtered by rows that match any of
    * the given scopes.
-   * 
+   *
    * @param scopes
    *          the scopes to filter by
    * @return all the rows of the table, filtered by the given scopes
@@ -131,7 +148,7 @@ public class DataManager {
 
   /**
    * Retrieves a set of rows representing the changes since the given data etag.
-   * 
+   *
    * @param dataEtag
    *          the data etag
    * @return the rows which have changed or been added since the given data etag
@@ -147,7 +164,7 @@ public class DataManager {
   /**
    * Retrieves a set of row representing the changes since the given data etag,
    * and filtered to rows which match the given scope.
-   * 
+   *
    * @param dataEtag
    *          the data etag
    * @param scope
@@ -166,7 +183,7 @@ public class DataManager {
   /**
    * Retrieves a set of row representing the changes since the given data etag,
    * and filtered to rows which match any of the given scopes.
-   * 
+   *
    * @param dataEtag
    *          the data etag
    * @param scopes
@@ -178,15 +195,23 @@ public class DataManager {
     List<Entity> entities = new ArrayList<Entity>();
     for (Scope scope : scopes) {
       Query query = buildRowsSinceQuery(dataEtag);
-      query = narrowByScope(query, scope);
+      // TODO: don't forget to add this back in when scopes are figured out
+      //query = narrowByScope(query, scope);
       List<Entity> results = query.execute();
       entities.addAll(results);
     }
+    // TODO: we need to do this differently. Likely need to query for the
+    // record containing the given ETAG then query for records with an
+    // internal server timestamp column more recent than that one.
+    //
+    // TODO: this may be broken after switching mod numbers to etag at the time
+    // of creation/update--which is what it was really doing but with just a
+    // mod number
     Collections.sort(entities, new Comparator<Entity>() {
       public int compare(Entity o1, Entity o2) {
-        int modNum1 = o1.getInteger(DbLogTable.MODIFICATION_NUMBER);
-        int modNum2 = o2.getInteger(DbLogTable.MODIFICATION_NUMBER);
-        return modNum1 - modNum2;
+        // TODO: this is very much broken.
+        return o1.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION)
+            .compareTo(o2.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
       }
     });
     List<Row> logRows = converter.toRows(entities, columns, true);
@@ -200,15 +225,17 @@ public class DataManager {
    */
   private Query buildRowsSinceQuery(String dataEtag) {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
-    query.greaterThanOrEqual(DbLogTable.MODIFICATION_NUMBER, Integer.parseInt(dataEtag));
-    query.sortAscending(DbLogTable.MODIFICATION_NUMBER);
+    // TODO: did this break (if it ever worked) when converted to string etags
+    // instead of flawed mod numbers?
+    query.greaterThanOrEqual(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
+    query.sortAscending(DbLogTable.DATA_ETAG_AT_MODIFICATION);
     return query;
   }
 
   /**
    * Narrows the given {@link DbLogTable} query to filter to rows which match
    * the given scope.
-   * 
+   *
    * @param query
    *          the query
    * @param scope
@@ -227,7 +254,7 @@ public class DataManager {
    * list of unique rows. In the case where there is more than one row with the
    * same rowId, only the last (highest index) row is included in the returned
    * list.
-   * 
+   *
    * @param rows
    *          the rows
    * @return the list of unique rows
@@ -242,7 +269,7 @@ public class DataManager {
 
   /**
    * Retrieve a row from the table.
-   * 
+   *
    * @param rowId
    *          the id of the row
    * @return the row, or null if no such row exists
@@ -259,7 +286,7 @@ public class DataManager {
 
   /**
    * Retrieve a row from the table.
-   * 
+   *
    * @param rowId
    *          the id of the row
    * @return the row
@@ -276,7 +303,7 @@ public class DataManager {
   /**
    * Insert a single row into the table. This is equivalent to calling
    * {@link #insertRows(List)} with a list of size 1.
-   * 
+   *
    * @param row
    *          the row to insert. See {@link Row#forInsert(String, String, Map)}.
    *          {@link Row#getRowEtag()}, {@link Row#isDeleted()},
@@ -302,7 +329,7 @@ public class DataManager {
 
   /**
    * Insert a list of rows.
-   * 
+   *
    * @param rows
    *          the list of rows. See
    *          {@link Row#forInsert(String, String, java.util.Map)}.
@@ -331,7 +358,7 @@ public class DataManager {
 
   /**
    * Updates a row. This is equivalent to calling {@link #updateRows(List)}.
-   * 
+   *
    * @param row
    *          the row to update. See {@link Row#forUpdate(String, String, Map)}.
    *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
@@ -359,7 +386,7 @@ public class DataManager {
 
   /**
    * Updates a list of rows.
-   * 
+   *
    * @param rows
    *          the rows to update. See
    *          {@link Row#forUpdate(String, String, java.util.Map)}
@@ -377,7 +404,7 @@ public class DataManager {
    * @throws BadColumnNameException
    *           if one of the passed in rows set a value for a column which
    *           doesn't exist in the table
-   * 
+   *
    */
   public List<Row> updateRows(List<Row> rows) throws ODKEntityNotFoundException,
       ODKDatastoreException, ODKTaskLockException, EtagMismatchException, BadColumnNameException {
@@ -399,21 +426,23 @@ public class DataManager {
       // refresh entry
       entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
 
-      // increment modification number
-      int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
-      modificationNumber++;
-      entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
+      // get new data etag
+      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
+      dataEtag = Long.toString(System.currentTimeMillis());
+      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
 
       // create or update entities
       if (insert) {
-        rowEntities = creator.newRowEntities(table, rows, modificationNumber, columns, cc);
+        rowEntities =
+            creator.newRowEntities(table, rows, dataEtag, columns, cc);
       } else {
-        rowEntities = creator.updateRowEntities(table, modificationNumber, rows, columns, cc);
+        rowEntities =
+            creator.updateRowEntities(table, dataEtag, rows, columns, cc);
       }
 
       // create log table entries
-      List<Entity> logEntities = creator.newLogEntities(logTable, modificationNumber, rowEntities,
-          columns, cc);
+      List<Entity> logEntities =
+          creator.newLogEntities(logTable, dataEtag, rowEntities, columns, cc);
 
       // update db
       Relation.putEntities(logEntities, cc);
@@ -428,7 +457,7 @@ public class DataManager {
   /**
    * Delete a row. This is equivalent to calling {@link #deleteRows(List)} with
    * a list of size 1.
-   * 
+   *
    * @param rowId
    *          the row to delete.
    * @throws ODKEntityNotFoundException
@@ -445,7 +474,7 @@ public class DataManager {
 
   /**
    * Deletes a set of rows.
-   * 
+   *
    * @param rowIds
    *          the rows to delete.
    * @throws ODKEntityNotFoundException
@@ -458,17 +487,18 @@ public class DataManager {
     Validate.noNullElements(rowIds);
 
     // lock table
-    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
+    LockTemplate lock = new LockTemplate(tableId,
+        ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
       lock.acquire();
 
       // refresh entry
       entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
 
-      // increment modification number
-      int modificationNumber = entry.getInteger(DbTableEntry.MODIFICATION_NUMBER);
-      modificationNumber++;
-      entry.set(DbTableEntry.MODIFICATION_NUMBER, modificationNumber);
+      // get new dataEtag
+      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
+      dataEtag = Long.toString(System.currentTimeMillis());
+      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
 
       // get entities and mark deleted
       List<Entity> rows = DbTable.query(table, rowIds, cc);
@@ -478,8 +508,8 @@ public class DataManager {
       }
 
       // create log table entries
-      List<Entity> logRows = creator
-          .newLogEntities(logTable, modificationNumber, rows, columns, cc);
+      List<Entity> logRows =
+          creator.newLogEntities(logTable, dataEtag, rows, columns, cc);
 
       // update db
       Relation.putEntities(logRows, cc);

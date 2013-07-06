@@ -130,7 +130,7 @@ public class JsonElementFormatter implements ElementFormatter {
       String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
     if (blobSubmission == null || (blobSubmission.getAttachmentCount(cc) == 0)
         || (blobSubmission.getContentHash(1, cc) == null)) {
-      row.addFormattedValue(null);
+      addToJsonValueToRow(null, true, element.getElementName(), row);
       return;
     }
 

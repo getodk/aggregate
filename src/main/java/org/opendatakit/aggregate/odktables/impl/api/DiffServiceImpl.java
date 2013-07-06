@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
@@ -12,11 +28,10 @@ import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.TableService;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
-import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -38,14 +53,15 @@ public class DiffServiceImpl implements DiffService {
   @Override
   public List<RowResource> getRowsSince(String dataEtag) throws ODKDatastoreException,
       PermissionDeniedException {
-    af.checkPermission(TablePermission.READ_ROW);
+    // TODO re-do permissions stuff
+    //af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
-    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
+    /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
       rows = dm.getRowsSince(dataEtag);
-    } else {
+    } else {*/
       List<Scope> scopes = AuthFilter.getScopes(cc);
       rows = dm.getRowsSince(dataEtag, scopes);
-    }
+    //}
     return getResources(rows);
   }
 

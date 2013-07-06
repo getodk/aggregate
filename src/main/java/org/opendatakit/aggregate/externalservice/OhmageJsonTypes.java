@@ -16,16 +16,17 @@ import com.google.gson.JsonSerializer;
 
 /**
  * TODO: comment and deal with null/empty value args
- * 
+ *
  * @author the.dylan.price@gmail.com
- * 
+ *
  */
 public class OhmageJsonTypes {
 
 	public static final class Survey implements JsonSerializer<Survey> {
 		/**
-		 * a string in the ISO 8601 format to the detail of seconds “YYYY-MM-DD
-		 * hh:mm:ss”.
+		 * a string in the ISO 8601 format to the detail of seconds:
+		 *
+		 * YYYY-MM-DD hh:mm:ss.
 		 */
 		private String date;
 

@@ -9,9 +9,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.api.RowResource;
-import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class DataServiceTest extends AbstractServiceTest {
     TableResource resource = rt.getForObject(baseUri.resolve(T.tableId), TableResource.class);
     baseUri = URI.create(resource.getDataUri());
   }
-  
+
   @Test
   public void testGetRowsNoRows() {
     List<?> rows = rt.getForObject(baseUri, List.class);

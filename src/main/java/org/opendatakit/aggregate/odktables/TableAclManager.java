@@ -1,15 +1,31 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables;
 
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
-import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
-import org.opendatakit.aggregate.odktables.entity.TableRole;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -17,9 +33,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Manages retrieving and setting access control lists on a table.
- * 
+ *
  * @author the.dylan.price@gmail.com
- * 
+ *
  */
 public class TableAclManager {
   private CallingContext cc;
@@ -29,7 +45,7 @@ public class TableAclManager {
 
   /**
    * Construct a new TableAclManager.
-   * 
+   *
    * @param tableId
    *          the unique identifier of the table
    * @param cc
@@ -61,7 +77,7 @@ public class TableAclManager {
 
   /**
    * Get all acls for the table.
-   * 
+   *
    * @return a list of TableAcl
    * @throws ODKDatastoreException
    */
@@ -72,7 +88,7 @@ public class TableAclManager {
 
   /**
    * Get all acls for the table and given scope type.
-   * 
+   *
    * @param type
    *          the type of acls to retrieve
    * @return a list of TableAcl
@@ -87,7 +103,7 @@ public class TableAclManager {
 
   /**
    * Get the access control list for the given scope.
-   * 
+   *
    * @param scope
    *          the scope of the list
    * @return the acl, or null if none exists
@@ -107,7 +123,7 @@ public class TableAclManager {
 
   /**
    * Set the permissions of an access control list.
-   * 
+   *
    * @param scope
    *          the scope of the acl
    * @param role
@@ -133,7 +149,7 @@ public class TableAclManager {
 
   /**
    * Delete the acl with the given scope.
-   * 
+   *
    * @param scope
    *          the scope of the acl
    * @throws ODKDatastoreException
