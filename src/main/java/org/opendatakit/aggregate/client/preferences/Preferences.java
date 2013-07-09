@@ -26,6 +26,8 @@ public class Preferences {
 
   public static interface PreferencesCompletionCallback {
 	  public void refreshFromUpdatedPreferences();
+
+	  public void failedRefresh();
   }
 
   private static final String NULL_PREFERENCES_ERROR = "ERROR: somehow got a null preference summary";
@@ -42,6 +44,9 @@ public class Preferences {
     SecureGWT.getPreferenceService().getPreferences(new AsyncCallback<PreferenceSummary>() {
       public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
+          if (callback != null) {
+            callback.failedRefresh();
+          }
       }
 
       public void onSuccess(PreferenceSummary summary) {

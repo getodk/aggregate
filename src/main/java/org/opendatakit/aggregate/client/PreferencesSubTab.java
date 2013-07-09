@@ -163,6 +163,12 @@ public class PreferencesSubTab extends AggregateSubTabBase {
         odkTablesEnable.updateValue(enabled);
         AggregateUI.getUI().updateOdkTablesFeatureVisibility();
       }
+
+      @Override
+      public void failedRefresh() {
+        // Error message is displayed. Leave everything as-is.
+        AggregateUI.getUI().updateOdkTablesFeatureVisibility();
+      }
     });
   }
 

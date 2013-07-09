@@ -47,11 +47,16 @@ public class AdminTabUI extends AggregateTabBase {
 
   private void changeVisibilityOdkTablesSubTab(boolean outcome) {
     SubTabInterface odkTablesAdmin = getSubTab(SubTabs.TABLES);
-    ((OdkTablesAdminSubTab) odkTablesAdmin).setVisible(outcome);
+    OdkTablesAdminSubTab subTab = ((OdkTablesAdminSubTab) odkTablesAdmin);
+    if ( subTab != null ) {
+      subTab.setVisible(outcome);
+    }
     for (int i = 0; i < subTabPosition.size(); i++) {
       if ( subTabPosition.get(i).equals(SubTabs.TABLES) ) {
         Widget w = ((Widget) this.getTabBar().getTab(i));
-        w.setVisible(outcome);
+        if ( w != null ) {
+          w.setVisible(outcome);
+        }
       }
     }
   }
