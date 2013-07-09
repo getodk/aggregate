@@ -476,6 +476,7 @@ public class SecurityServiceUtil {
       UserSecurityInfo anonymous = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS);
       TreeSet<GrantedAuthorityName> userGroups = new TreeSet<GrantedAuthorityName>();
       userGroups.add(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+      userGroups.add(GrantedAuthorityName.GROUP_FORM_MANAGERS); // issue 710
       anonymous.setAssignedUserGroups(userGroups);
       users.add(anonymous);
 		// NOTE: No users are defined at this point (including the superUser) see superUserBootstrap below...
