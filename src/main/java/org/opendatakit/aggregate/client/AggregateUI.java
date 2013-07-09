@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.client.handlers.RefreshCloseHandler;
 import org.opendatakit.aggregate.client.handlers.RefreshOpenHandler;
 import org.opendatakit.aggregate.client.handlers.RefreshSelectionHandler;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
@@ -217,7 +218,6 @@ public class AggregateUI implements EntryPoint {
             // OK. So it failed. If it did, just try doing everything
             // again. We should have a valid session cookie after the
             // first failure, so these should all then work.
-            Preferences.updatePreferences(null);
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
               @Override
@@ -229,7 +229,17 @@ public class AggregateUI implements EntryPoint {
               public void onSuccess(UserSecurityInfo result) {
                 userInfo = result;
                 if (realmInfo != null && userInfo != null) {
-                  commonUserInfoUpdateCompleteAction();
+                  Preferences.updatePreferences(new PreferencesCompletionCallback() {
+
+                    @Override
+                    public void refreshFromUpdatedPreferences() {
+                      commonUserInfoUpdateCompleteAction();
+                    }
+
+                    @Override
+                    public void failedRefresh() {
+                      commonUserInfoUpdateCompleteAction();
+                    }});
                 }
               }
             });
@@ -254,7 +264,6 @@ public class AggregateUI implements EntryPoint {
 
           @Override
           public void onSuccess(RealmSecurityInfo result) {
-            Preferences.updatePreferences(null);
             realmInfo = result;
             // it worked the first time! Now do the user info request.
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
@@ -268,7 +277,17 @@ public class AggregateUI implements EntryPoint {
               public void onSuccess(UserSecurityInfo result) {
                 userInfo = result;
                 if (realmInfo != null && userInfo != null) {
-                  commonUserInfoUpdateCompleteAction();
+                  Preferences.updatePreferences(new PreferencesCompletionCallback() {
+
+                    @Override
+                    public void refreshFromUpdatedPreferences() {
+                      commonUserInfoUpdateCompleteAction();
+                    }
+
+                    @Override
+                    public void failedRefresh() {
+                      commonUserInfoUpdateCompleteAction();
+                    }});
                 }
               }
             });
@@ -277,27 +296,34 @@ public class AggregateUI implements EntryPoint {
   }
 
   public void updateOdkTablesFeatureVisibility() {
-    odkTablesVisible = Preferences.getOdkTablesEnabled();
-    AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
-    odkTables.setVisible(odkTablesVisible);
-    for (int i = 0; i < tabPosition.size(); i++) {
-      if ( tabPosition.get(i).equals(Tabs.ODKTABLES) ) {
-        Widget w = ((Widget) mainNav.getTabBar().getTab(i));
-        w.setVisible(odkTablesVisible);
+    if ( authorizedForTab(Tabs.ODKTABLES) ) {
+      odkTablesVisible = Preferences.getOdkTablesEnabled();
+      AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
+      if ( odkTables != null ) {
+        odkTables.setVisible(odkTablesVisible);
       }
-    }
-    AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
-    if (AminTab instanceof AdminTabUI) {
-      AdminTabUI adminTab = (AdminTabUI) AminTab;
-      if (odkTablesVisible) {
-        adminTab.displayOdkTablesSubTab();
-      } else {
-        adminTab.hideOdkTablesSubTab();
+      for (int i = 0; i < mainNav.getWidgetCount(); i++) {
+        Widget w = mainNav.getWidget(i);
+        if ( w != null && w instanceof OdkTablesTabUI ) {
+          w.setVisible(odkTablesVisible);
+          ((Widget) mainNav.getTabBar().getTab(i)).setVisible(odkTablesVisible);
+        }
       }
-    } else {
-      AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
-    }
 
+      if ( authorizedForTab(Tabs.ADMIN) ) {
+        AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
+        if (AminTab != null && AminTab instanceof AdminTabUI) {
+          AdminTabUI adminTab = (AdminTabUI) AminTab;
+          if (odkTablesVisible) {
+            adminTab.displayOdkTablesSubTab();
+          } else {
+            adminTab.hideOdkTablesSubTab();
+          }
+        } else {
+          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
+        }
+      }
+    }
   }
 
   private void commonUserInfoUpdateCompleteAction() {
@@ -336,8 +362,6 @@ public class AggregateUI implements EntryPoint {
         adminVisible = true;
       }
 
-      updateOdkTablesFeatureVisibility();
-
       // Select the correct menu item based on url hash.
       int selected = 0;
       String mainMenu = hash.get(UrlHash.MAIN_MENU);
@@ -349,6 +373,8 @@ public class AggregateUI implements EntryPoint {
       mainNav.selectTab(selected);
 
     }
+
+    updateOdkTablesFeatureVisibility();
 
     // AND schedule an async operation to
     // refresh the tabs that are not selected.

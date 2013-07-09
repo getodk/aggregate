@@ -70,6 +70,11 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
           public void refreshFromUpdatedPreferences() {
             AggregateUI.getUI().updateOdkTablesFeatureVisibility();
           }
+
+          @Override
+          public void failedRefresh() {
+            AggregateUI.getUI().updateOdkTablesFeatureVisibility();
+          }
         });
       }
     });
