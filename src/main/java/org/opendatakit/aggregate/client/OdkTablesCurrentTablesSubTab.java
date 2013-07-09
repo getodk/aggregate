@@ -60,11 +60,11 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
 
     //addButton = new OdkTablesAddTableButton();
 
-    importTableButton = new ServletPopupButton(IMPORT_TABLE_BUTTON_TXT,
-        IMPORT_TABLE_TXT, UIConsts.UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR, this,
-        IMPORT_TABLE_TOOLTIP_TEXT, IMPORT_TABLE_BALLOON_TXT);
-
-    add(importTableButton);
+//    importTableButton = new ServletPopupButton(IMPORT_TABLE_BUTTON_TXT,
+//        IMPORT_TABLE_TXT, UIConsts.UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR, this,
+//        IMPORT_TABLE_TOOLTIP_TEXT, IMPORT_TABLE_BALLOON_TXT);
+//
+//    add(importTableButton);
     add(tableList);
 
   }
