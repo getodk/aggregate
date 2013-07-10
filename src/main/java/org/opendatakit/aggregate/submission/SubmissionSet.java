@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -66,10 +66,10 @@ import org.opendatakit.common.web.constants.BasicConsts;
 /**
  * Groups a set of submission values together so they can be stored in a
  * databstore entity
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionElement {
 
@@ -79,13 +79,13 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * layer. These manifest as phantom tables and subordinate structures in the
 	 * data model. Abstract that all away at this level.
 	 */
-	
+
 	/**
 	 * dbEntities holds the map of all backing objects used to store this submission
 	 * set record.  It excludes the binary and choice tables, which are independent
-	 * elements.  Everything is broken if we have two or more backing objects residing in 
-	 * the same table because DDRelationName is the key into this map, and that would be 
-	 * the same for all records held in a given table. 
+	 * elements.  Everything is broken if we have two or more backing objects residing in
+	 * the same table because DDRelationName is the key into this map, and that would be
+	 * the same for all records held in a given table.
 	 */
 	private final Map<DDRelationName, DynamicCommonFieldsBase> dbEntities =
 					new HashMap<DDRelationName, DynamicCommonFieldsBase>();
@@ -114,7 +114,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	/**
 	 * Identifier for the parent for persistence co-location.
-	 * 
+	 *
 	 * TODO: does this have special treatment if a repeat group?
 	 */
 	private final EntityKey topLevelTableKey;
@@ -124,12 +124,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * in this submission set. OrdinalNumbering is determined by the
 	 * FormDataModel.getChildren() list.
 	 */
-	private final Map<FormElementModel, SubmissionValue> elementsToValues = 
+	private final Map<FormElementModel, SubmissionValue> elementsToValues =
 					new HashMap<FormElementModel, SubmissionValue>();
 
 	/**
 	 * Construct an empty repeating group.
-	 * 
+	 *
 	 * @param enclosingSet
 	 * @param ordinalNumber
 	 * @param group
@@ -161,14 +161,14 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		buildSubmissionFields(group, cc);
 	}
 
-	public SubmissionSet(Long modelVersion, Long uiVersion, 
+	public SubmissionSet(Long modelVersion, Long uiVersion,
 			IForm form,
 			CallingContext cc)
 			throws ODKDatastoreException {
 		this(modelVersion, uiVersion, null, form, cc);
 	}
 
-	public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, 
+	public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup,
 			IForm form,
 			CallingContext cc)
 			throws ODKDatastoreException {
@@ -197,7 +197,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	 * Submission sets may be split over multiple database records by either
 	 * inserting a nested phantom table, moving a geopoint to a different table,
 	 * or moving an entire non-repeating group to a different table.
-	 * 
+	 *
 	 * @param m
 	 * @return true if this element may identify a new table or if its children
 	 *         may have a new table within them.
@@ -271,9 +271,9 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			this.topLevelTableKey = key;
 		} else {
 			DynamicBase entity = (DynamicBase) row;
-			// we aren't the top level record so manufacture the 
+			// we aren't the top level record so manufacture the
 			// entity key of the top level record from the relation
-			// for that record and the up-pointer in our record 
+			// for that record and the up-pointer in our record
 			// that holds the AURI for that top level record.
 			this.topLevelTableKey = new EntityKey(form.getTopLevelGroupElement()
 			      .getFormDataModel().getBackingObjectPrototype(), entity
@@ -327,7 +327,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	/**
 	 * Recursively use form definition to recreate the submission
-	 * 
+	 *
 	 * @param form
 	 *            persistence manager used to retrieve form elements
 	 * @param element
@@ -519,7 +519,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			DynamicBase entity = (DynamicBase) getGroupBackingObject();
 			b.append(enclosingSet.getFullyQualifiedElementName(null));
 			b.append(BasicConsts.FORWARDSLASH);
-			b.append(group.getElementName());
+			b.append(group.getGroupQualifiedElementName());
 			b.append("[@ordinal=");
 			b.append(entity.getOrdinalNumber());
 			b.append("]");
@@ -536,7 +536,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	/**
 	 * Keys are of the form
 	 * <code>formId/topLevelGroupName[@key=PK]/repeatGroupA/.../thisGroup[@key=PK]/element</code>
-	 * 
+	 *
 	 * @param element
 	 *            may be null; must be in this SubmissionSet
 	 * @return submissionKey specifying the key to the top-level submission, the
@@ -550,10 +550,13 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	public SubmissionElement resolveSubmissionKeyBeginningAt(int i,
 			List<SubmissionKeyPart> parts) {
 		SubmissionKeyPart p = parts.get(i);
-		if (! p.getElementName().equals(group.getElementName())) {
-			throw new IllegalArgumentException("group name: " + group.getElementName()
-					+ " does not match submission key element name: " + 
-					p.getElementName() );
+		if (! p.getElementName().equals(group.getGroupQualifiedElementName())) {
+		   if ( FormDataModel.isFieldStoredWithinDataTable(group.getFormDataModel().getElementType()) ||
+		        !p.getElementName().equals(group.getElementName()) ) {
+    			throw new IllegalArgumentException("group name: " + group.getElementName()
+    					+ " does not match submission key element name: " +
+    					p.getElementName() );
+		   }
 		}
 		if ( p.getAuri() == null && p.getOrdinalNumber() == null) {
 			throw new IllegalArgumentException("no auri or ordinal supplied in submission key");
@@ -561,7 +564,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		if ( p.getAuri() != null && !p.getAuri().equals(getGroupBackingObject().getUri()) ) {
 			throw new IllegalArgumentException("the auri of this group does not match!");
 		}
-		
+
 		if ( p.getOrdinalNumber() != null) {
 			Long ordinal = null;
 			try {
@@ -574,11 +577,11 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				throw new IllegalArgumentException("the ordinal of this group does not match!");
 			}
 		}
-		
+
 		if ( i+1 == parts.size() ) return this;
 		String elementName = parts.get(i+1).getElementName();
 		for ( Map.Entry<FormElementModel,SubmissionValue> entry : elementsToValues.entrySet() ) {
-			if ( elementName.equals(entry.getKey().getGroupQualifiedElementName()) ) {
+		  if ( elementName.equals(entry.getKey().getGroupQualifiedElementName()) ) {
 				SubmissionValue v = entry.getValue();
 				if ( v instanceof SubmissionSet ) {
 					return ((SubmissionSet) v).resolveSubmissionKeyBeginningAt(i+1,parts);
@@ -596,6 +599,28 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 				}
 			}
 		}
+
+		// backward compatibility...
+      for ( Map.Entry<FormElementModel,SubmissionValue> entry : elementsToValues.entrySet() ) {
+        if ( elementName.equals(entry.getKey().getElementName()) ) {
+            SubmissionValue v = entry.getValue();
+            if ( v instanceof SubmissionSet ) {
+               return ((SubmissionSet) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else if ( v instanceof SubmissionRepeat ) {
+               return ((SubmissionRepeat) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else if ( v instanceof ChoiceSubmissionType ) {
+               return ((ChoiceSubmissionType) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else if ( v instanceof BlobSubmissionType ) {
+               return ((BlobSubmissionType) v).resolveSubmissionKeyBeginningAt(i+1,parts);
+            } else {
+               if ( i+2 != parts.size() ) {
+                  throw new IllegalStateException("submission key parts remaining at leaf node");
+               }
+               return v;
+            }
+         }
+      }
+
 		return null;
 	}
 
@@ -637,7 +662,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	/**
 	 * Construct value list in the order in which the values should appear.
-	 * 
+	 *
 	 * @return list of populated submission values
 	 */
 	public List<SubmissionValue> getSubmissionValues() {
@@ -696,7 +721,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	/**
 	 * Get a map of the submission values with the field/element name as the key
-	 * 
+	 *
 	 * @return map of submission values
 	 */
 	public Map<FormElementModel, SubmissionValue> getSubmissionValuesMap() {
@@ -705,7 +730,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	/**
 	 * Get the datastore key that uniquely identifies the submission
-	 * 
+	 *
 	 * @return datastore key
 	 */
 	public EntityKey getKey() {
@@ -723,7 +748,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	protected DynamicCommonFieldsBase getGroupBackingObject() {
 		return getGroupBackingObject(group);
 	}
-	
+
 	public Date getCreationDate() {
 		return getGroupBackingObject().getCreationDate();
 	}
@@ -766,7 +791,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	/**
 	 * Format this submission's properties into a Row object.
-	 *  
+	 *
 	 * @param propertyNames - if null, all properties are emitted.  Otherwise, a list of those to emit.
 	 * @param elemFormatter
 	 * @param includeParentUid - true if the parentUid should be included
@@ -786,7 +811,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	public SubmissionSet getEnclosingSet() {
 		return enclosingSet;
 	}
-	
+
 	public void printSubmission(PrintWriter out) {
 
 		List<SubmissionValue> values = getSubmissionValues();
@@ -808,19 +833,19 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	@Override
 	public boolean depthFirstTraversal( SubmissionVisitor visitor ) {
 	  if ( visitor.traverse(this) ) return true;
-	  
+
      for (SubmissionValue value : getSubmissionValues()) {
        if ( value != null && value.depthFirstTraversal(visitor) ) return true;
      }
-	 
+
      return false;
 	}
-	
+
 	/**
 	 * Remove the element from the submission.
 	 * Only implemented for binary attachments at this time.
 	 * For use when manually marking a form as complete.
-	 * 
+	 *
 	 * @param m
 	 */
 	public void removeElementValue(FormElementModel m) {
@@ -834,7 +859,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
 	  elementsToValues.remove(m);
 	}
-	
+
 	public void persist(CallingContext cc)
 			throws ODKEntityPersistException, ODKOverQuotaException {
 		// persist everything underneath us...
@@ -866,7 +891,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		Datastore ds = cc.getDatastore();
 		User user = cc.getCurrentUser();
 		ds.putEntities(others, user);
-		
+
 		// and finally, persist us...
 		ds.putEntity(getGroupBackingObject(), user);
 	}
@@ -893,11 +918,11 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 	public String getPropertyName() {
 		return group.getElementName();
 	}
-	
+
 	public FormElementModel getFormElementModel() {
 	  return group;
 	}
-	
+
 	private String getOrdinalNumAsStr() {
 	  if(group.getElementType() == FormElementModel.ElementType.REPEAT) {
 	    DynamicBase entity = (DynamicBase) getGroupBackingObject();

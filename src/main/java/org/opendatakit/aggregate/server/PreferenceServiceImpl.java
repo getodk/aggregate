@@ -18,6 +18,8 @@ package org.opendatakit.aggregate.server;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
@@ -35,6 +37,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class PreferenceServiceImpl extends RemoteServiceServlet implements
 org.opendatakit.aggregate.client.preferences.PreferenceService {
 
+  private static final Log log = LogFactory.getLog(PreferenceServiceImpl.class);
   /**
    * Serialization Identifier
    */
@@ -63,6 +66,8 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
 
     try {
       ServerPreferencesProperties.setOdkTablesEnabled(cc,enabled);
+
+      log.info("setOdkTablesEnabled as: " + Boolean.toString(enabled));
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
@@ -81,6 +86,7 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
     try {
       ServerPreferencesProperties.setFasterBackgroundActionsDisabled(cc, disabled);
 
+      log.info("setFasterBackgroundActionsDisabled as: " + Boolean.toString(disabled));
       Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
       // NOTE: this will fire off a watchdog worker
       // if we are re-enabling faster publishing

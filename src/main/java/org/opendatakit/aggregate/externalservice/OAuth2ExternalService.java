@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.externalservice;
 
 import java.io.BufferedReader;
@@ -113,12 +129,13 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
    * the server.
    *
    * @param scopes
+   * @param emailUser -- user email
    * @param cc
    * @return access token (must be a Bearer token).
    * @throws ODKEntityNotFoundException
    * @throws ODKOverQuotaException
    */
-  protected String getOAuth2AccessToken(String scopes, CallingContext cc)
+  protected String getOAuth2AccessToken(String scopes, String emailUser, CallingContext cc)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
 
     String serviceEmailAddress = ServerPreferencesProperties.getServerPreferencesProperty(cc,
@@ -154,6 +171,9 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
     }
 
     jwtBody.put("iss", serviceEmailAddress);
+    if ( emailUser != null ) {
+      jwtBody.put("prn", emailUser.substring(SecurityUtils.MAILTO_COLON.length()));
+    }
     jwtBody.put("scope", scopes);
     jwtBody.put("aud", "https://accounts.google.com/o/oauth2/token");
     int now = ((int) (System.currentTimeMillis() / 1000L));
@@ -318,8 +338,13 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
       int statusCode = response.getStatusLine().getStatusCode();
 
       if (statusCode != HttpStatus.SC_OK) {
-        throw new IllegalArgumentException("Error with Oauth2 token request - reason: "
+        if ( emailUser != null ) {
+          // try to gain non-principal rights
+          return getOAuth2AccessToken(scopes, null, cc);
+        } else {
+          throw new IllegalArgumentException("Error with Oauth2 token request - reason: "
             + response.getStatusLine().getReasonPhrase() + " status code: " + statusCode);
+        }
       } else {
         HttpEntity entity = response.getEntity();
 
@@ -378,7 +403,10 @@ public abstract class OAuth2ExternalService extends AbstractExternalService {
           newPerm.put("type", "user");
           newPerm.put("value", email.substring(SecurityUtils.MAILTO_COLON.length()));
           String body = mapper.writeValueAsString(newPerm);
-          resultRequest = executeStmt(POST, "https://www.googleapis.com/drive/v2/files/" + URLEncoder.encode(tableId, "UTF-8") + "/permissions",body, null, cc);
+          List<NameValuePair> optionalArgs = new ArrayList<NameValuePair>();
+          optionalArgs.add(new BasicNameValuePair("sendNotificationEmails", Boolean.FALSE.toString()));
+          optionalArgs.add(new BasicNameValuePair("transferOwnership", Boolean.TRUE.toString()));
+          resultRequest = executeStmt(POST, "https://www.googleapis.com/drive/v2/files/" + URLEncoder.encode(tableId, "UTF-8") + "/permissions",body, optionalArgs, cc);
         }
 
         return tableId;

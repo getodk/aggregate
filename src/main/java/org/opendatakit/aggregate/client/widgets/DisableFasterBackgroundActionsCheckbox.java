@@ -65,10 +65,7 @@ public final class DisableFasterBackgroundActionsCheckbox extends AggregateCheck
       @Override
       public void onSuccess(Void result) {
         AggregateUI.getUI().clearError();
-        Preferences.updatePreferences(new PreferencesCompletionCallback() {
-			@Override
-			public void refreshFromUpdatedPreferences() {
-			}});
+        Preferences.updatePreferences(null);
       }
     });
   }

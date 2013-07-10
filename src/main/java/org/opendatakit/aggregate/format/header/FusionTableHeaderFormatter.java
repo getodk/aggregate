@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.format.header;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
@@ -26,10 +27,10 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implements HeaderFormatter {
 
@@ -37,7 +38,7 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
   /**
    * Iterates the forms and creates the headers and types based off the passed
    * in FormElementModel
-   * 
+   *
    * @param formDefinition
    *          the xform that is being used to create the header
    * @param rootGroup
@@ -50,7 +51,7 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
    */
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
       List<FormElementModel> propertyNamesArg) {
-    
+
 	propertyNames = propertyNamesArg;
     headers = new ArrayList<String>();
     types = new ArrayList<ElementType>();
@@ -59,8 +60,23 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
       headers.add(FormatConsts.HEADER_PARENT_UID);
       types.add(ElementType.METADATA);
     }
-    
+
     processElementForColumnHead(rootGroup, rootGroup, BasicConsts.EMPTY_STRING);
+
+    /*
+     * And patch up the returned headers. If, after stripping the characters
+     * that Google Spreadsheets does not like, the leading character is a
+     * number, prefix an 'n' to the column name.
+     */
+    for ( int i = 0 ; i < headers.size() ; ++i ) {
+      String h = headers.get(i);
+      String stripped = h.replaceAll(SpreadsheetConsts.UNSAFE_CHAR_CLASS, "");
+
+      if ( Character.isDigit(stripped.charAt(0)) ) {
+        h = "n" + h;
+        headers.set(i, h);
+      }
+    }
     return headers;
   }
 
