@@ -74,9 +74,9 @@ public class BackendActionsTable extends CommonFieldsBase {
   public static final long PUBLISHING_DELAY_MILLISECONDS = 500L + PersistConsts.MAX_SETTLE_MILLISECONDS;
   /**
    * delay between watchdog sweeps (primarily to nudge failed publishers
-   * onward). 1 minute.
+   * onward). 30 seconds.
    */
-  public static final long FAST_PUBLISHING_RETRY_MILLISECONDS = 60L * 1000L;
+  public static final long FAST_PUBLISHING_RETRY_MILLISECONDS = 30L * 1000L;
   /** delay between watchdog sweeps when there are no active tasks. 15 minutes. */
   public static final long IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 15L * 60000L;
 
@@ -178,6 +178,33 @@ public class BackendActionsTable extends CommonFieldsBase {
       datastore.putEntity(record, user);
     }
     return record;
+  }
+
+  public static final synchronized boolean mayHaveRecentPublisherRevision(String uriFsc, CallingContext cc)
+        throws ODKDatastoreException {
+    boolean wasDaemon = cc.getAsDeamon();
+    cc.setAsDaemon(true);
+    try {
+      Datastore ds = cc.getDatastore();
+      User user = cc.getCurrentUser();
+      long now = System.currentTimeMillis();
+      if (lastHashmapCleanTimestamp + HASHMAP_LIFETIME_MILLISECONDS < now) {
+        lastPublisherRevision.clear();
+        lastHashmapCleanTimestamp = now;
+      }
+
+      BackendActionsTable t = null;
+      Long oldTime = lastPublisherRevision.get(uriFsc);
+      if (oldTime == null) {
+        // see if we have anything in the table (created if missing).
+        t = BackendActionsTable.getSingletonRecord(uriFsc, ds, user);
+        oldTime = t.getLastRevisionDate().getTime();
+        lastPublisherRevision.put(uriFsc, oldTime);
+      }
+      return ( oldTime + HASHMAP_LIFETIME_MILLISECONDS + PUBLISHING_DELAY_MILLISECONDS > now );
+    } finally {
+      cc.setAsDaemon(wasDaemon);
+    }
   }
 
   public static final synchronized boolean triggerPublisher(String uriFsc, CallingContext cc) {
@@ -418,10 +445,14 @@ public class BackendActionsTable extends CommonFieldsBase {
           // enqueue any request first...
           if (activeSchedulingTimeInThePast || requestedWatchdogSchedulingTime == now) {
 
-            // fire the Watchdog ONLY if we are not
-            // doing fast publishing. During fast publishing,
-            // the watchdog is fired during rescheduleWatchdog()...
-            if (!wd.getFasterWatchdogCycleEnabled()) {
+            // fire the Watchdog ONLY if:
+            // we are doing fast publishing and the watchdog has not been run in a while
+            // or
+            // we are not doing fast publishing.
+            // During fast publishing, the watchdog should be enqueued during rescheduleWatchdog()...
+            if ((wd.getFasterWatchdogCycleEnabled() &&
+                  (lastWatchdogStartTime < (now - (FAST_PUBLISHING_RETRY_MILLISECONDS + PUBLISHING_DELAY_MILLISECONDS))))
+                  || !wd.getFasterWatchdogCycleEnabled()) {
               wd.onUsage(0L, cc); // no wait, as we are well past due...
             }
 

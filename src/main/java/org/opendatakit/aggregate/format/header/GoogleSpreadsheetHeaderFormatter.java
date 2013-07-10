@@ -1,3 +1,17 @@
+/**
+ * Copyright (C) 2010 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.format.header;
 
 import java.util.ArrayList;
@@ -12,7 +26,7 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Determines how tables are represented in GoogleSpreadsheets
- * 
+ *
  * @author the.dylan.price@gmail.com
  */
 public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter implements
@@ -29,7 +43,7 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
    * in FormElementModel. Generates the same headers as BasicHeaderFormatter,
    * but additionally includes the parent UID of the form as the first header,
    * and removes all unsafe characters from the headers.
-   * 
+   *
    * @param formDefinition
    *          the xform that is being used to create the header
    * @param rootGroup
@@ -59,6 +73,9 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
     {
       String header = headers.get(i);
       header = header.replaceAll(SpreadsheetConsts.UNSAFE_CHAR_CLASS, "");
+      if ( Character.isDigit(header.charAt(0)) ) {
+        header = "n" + header;
+      }
       headers.set(i, header);
     }
 

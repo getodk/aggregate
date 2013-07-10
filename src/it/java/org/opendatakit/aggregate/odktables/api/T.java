@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Ignore;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.Column.ColumnType;
-import org.opendatakit.aggregate.odktables.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
 
 @Ignore
 public class T {
@@ -33,14 +33,14 @@ public class T {
 
   public static class Columns {
 
+    public static final String tableId = "my_table_id";
     public static final String name = "name";
     public static final String age = "age";
     public static final String weight = "weight";
-    public static final Column column_name = new Column(name, ColumnType.STRING);
-    public static final Column column_age = new Column(age, ColumnType.INTEGER);
-    public static final Column column_weight = new Column(weight, ColumnType.INTEGER);
+    public static final Column column_name = new Column(tableId, name, name, ColumnType.STRING, null, 1, null);
+    public static final Column column_age = new Column(tableId, age, age, ColumnType.INTEGER, null, 1, null);
+    public static final Column column_weight = new Column(tableId, weight, weight, ColumnType.INTEGER, null, 1, null);
   }
-
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"),
     JOHN("2", "john", "58", "200");

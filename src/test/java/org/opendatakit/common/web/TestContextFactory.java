@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.common.web;
 
 import javax.servlet.ServletContext;
@@ -15,7 +31,7 @@ public class TestContextFactory {
 
 	  public static final String USER_BEAN = "user_service";
 	  public static final String DATASTORE_BEAN = "datastore";
-  
+
 	    /**
 	     * Singleton of the application context
 	     */
@@ -45,17 +61,17 @@ public class TestContextFactory {
 	    		datastore = (Datastore) applicationContext.getBean(DATASTORE_BEAN);
 	    		userService = (UserService) applicationContext.getBean(USER_BEAN);
 	    	}
-	    	
+
 			@Override
 	    	public Object getBean(String beanName) {
 				return applicationContext.getBean(beanName);
 	    	}
-	    	
+
 			@Override
 	    	public Datastore getDatastore() {
 	    		return datastore;
 	    	}
-	    	
+
 			@Override
 	    	public UserService getUserService() {
 	    		return userService;
@@ -65,17 +81,17 @@ public class TestContextFactory {
 			public ServletContext getServletContext() {
 				return null;
 			}
-	    	
+
 			@Override
 	    	public String getWebApplicationURL() {
 	    		return webApplicationBase + BasicConsts.FORWARDSLASH;
 	    	}
-	    	
+
 			@Override
 	    	public String getWebApplicationURL(String servletAddr) {
 	    		return webApplicationBase + BasicConsts.FORWARDSLASH + servletAddr;
 	    	}
-	    	
+
 			@Override
 	    	public String getServerURL() {
 	    		return serverUrl;
@@ -85,17 +101,17 @@ public class TestContextFactory {
 			public String getSecureServerURL() {
 				return secureServerUrl;
 			}
-	    	
+
 			@Override
 	    	public void setAsDaemon(boolean asDaemon ) {
 	    		this.asDaemon = asDaemon;
 	    	}
-	    	
+
 			@Override
 	    	public boolean getAsDeamon() {
 	    		return asDaemon;
 	    	}
-	    	
+
 			@Override
 	    	public User getCurrentUser() {
 	    		return asDaemon ? userService.getDaemonAccountUser() : userService.getCurrentUser();
@@ -103,10 +119,10 @@ public class TestContextFactory {
 	    }
 
 	    /**
-	     * Private constructor 
+	     * Private constructor
 	     */
 	    private TestContextFactory() {}
-	    
+
 	    public static CallingContext getCallingContext() {
 	    	return new CallingContextImpl();
 	    }

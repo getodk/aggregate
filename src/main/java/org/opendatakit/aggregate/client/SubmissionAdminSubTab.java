@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2011 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
@@ -28,7 +44,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
   private static final String SUBMISSION_BALLOON_TXT = "Upload submission data for a preload form.";
   private static final String SUBMISSION_BUTTON_TEXT = "<img src=\"images/blue_up_arrow.png\" /> "
       + SUBMISSION_TXT;
-  
+
   // ui elements
   private FormListBox formsBox;
   private PurgeUpToDateButton purgeSubmission;
@@ -40,17 +56,17 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
   public SubmissionAdminSubTab() {
     // vertical
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
-    
+
     formsBox = new FormListBox(new ChangeDropDownHandler());
     submissions = new ScrollPanel();
     submissions.getElement().setId("submission_admin_list");
-    
+
     purgeSubmission = new PurgeUpToDateButton();
     purgeSubmission.setSelectedForm(selectedForm);
-    
+
     ServletPopupButton uploadSubmission = new ServletPopupButton(SUBMISSION_BUTTON_TEXT, SUBMISSION_TXT,
         UIConsts.SUBMISSION_SERVLET_ADDR, this, SUBMISSION_TOOLTIP_TXT, SUBMISSION_BALLOON_TXT);
-    
+
     // create navigation buttons to servlet
     FlexTable navTable = new FlexTable();
     navTable.setWidget(0, 0, new Label("Form: "));
@@ -77,13 +93,13 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
 
     public void onSuccess(ArrayList<FormSummary> formsFromService) {
       AggregateUI.getUI().clearError();
-      
+
       // setup the display with the latest updates
       formsBox.updateFormDropDown(formsFromService);
-      
+
       // update the class state with the currently displayed form
       selectedForm = formsBox.getSelectedForm();
-      
+
       // Make the call to get the published services
       updateContent();
     }
@@ -95,7 +111,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       formsBox.setVisible(true);
       submissions.setVisible(true);
        FormServiceAsync formSvc = SecureGWT.getFormService();
-   
+
        // Make the call to the form service.
        formSvc.getForms(new UpdateAction());
     } else {
@@ -103,7 +119,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       submissions.setVisible(false);
     }
   }
-  
+
   private void updateContent() {
     purgeSubmission.setSelectedForm(selectedForm);
     updateSubmissionsAdminTable();
@@ -126,7 +142,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     if (selectedForm == null) {
       return;
     }
-    
+
     // request the update if form is not the "none" form (ie id will equal null or the empty string)
     if (selectedForm.getId() != null && selectedForm.getId().length() > 0) {
       FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, selectedForm.getId(), null);
@@ -134,10 +150,10 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     }
 
   }
-  
+
   /**
    * Handler to process the change in the form drop down
-   * 
+   *
    */
   private class ChangeDropDownHandler implements ChangeHandler {
     @Override
@@ -149,7 +165,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       updateContent();
     }
   }
-  
+
   @Override
   public HelpSliderConsts[] getHelpSliderContent() {
     return null;

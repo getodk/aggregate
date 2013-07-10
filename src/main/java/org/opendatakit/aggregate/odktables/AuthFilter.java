@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables;
 
 import java.util.HashSet;
@@ -5,12 +21,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.Scope.Type;
-import org.opendatakit.aggregate.odktables.entity.TableAcl;
-import org.opendatakit.aggregate.odktables.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -30,7 +46,7 @@ public class AuthFilter {
 
   /**
    * Checks that the current user has the given permission.
-   * 
+   *
    * @param permission
    *          the permission to check
    * @throws ODKDatastoreException
@@ -49,7 +65,7 @@ public class AuthFilter {
   /**
    * Check if the current user has the given permission. An exception-safe
    * alternative to {@link #checkPermission(TablePermission)}
-   * 
+   *
    * @param permission
    *          the permission to check
    * @return true if the user has the given permission, false otherwise
@@ -64,12 +80,12 @@ public class AuthFilter {
   /**
    * Check that the user either has the given permission or is within the scope
    * of the filter on the given row.
-   * 
+   *
    * In other words, if the user has the given permission, then they pass the
    * check and the method returns. However, if the user does not have the given
    * permission, then they must fall within the scope of the filter on the given
    * row.
-   * 
+   *
    * @param permission
    *          the permission that guards access to the row. Should be one of
    *          {@link TablePermission#UNFILTERED_READ},

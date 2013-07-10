@@ -322,14 +322,14 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
     if (es != null) {
       try {
-        es.delete(cc);
+        boolean deleted = FormServiceCursor.deleteExternalServiceTask(es, cc);
         // and insert a sleep to let this settle before returning
         try {
           Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
         } catch (InterruptedException e) {
         }
         // success!
-        return true;
+        return deleted;
       } catch (ODKOverQuotaException e) {
         e.printStackTrace();
         throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);

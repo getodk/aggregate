@@ -28,6 +28,8 @@ import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
  */
 public class REDCapServerConsts {
 
+  public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
+
   public static final Map<ElementType, REDCapServerType> typeMap = new HashMap<ElementType, REDCapServerType>();
   static {
     typeMap.put(ElementType.STRING, REDCapServerType.STRING);
