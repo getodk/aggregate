@@ -128,6 +128,10 @@ public class TableManager {
    */
   private List<TableEntry> getTableEntries(List<Entity> entries)
       throws ODKDatastoreException {
+    if ( entries == null || entries.size() == 0 ) {
+      List<TableEntry> fetchedEntries = new ArrayList<TableEntry>();
+      return fetchedEntries;
+    }
     // get table names
     List<String> tableIds = new ArrayList<String>();
     for (Entity entry : entries) {
