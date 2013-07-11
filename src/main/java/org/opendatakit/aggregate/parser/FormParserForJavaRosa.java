@@ -623,7 +623,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
               }
             } catch (Exception e1) {
               // assume it is because the table is too wide...
-              log.warn("Create failed -- assuming phantom table required " + tableKey(tbl));
+              log.warn("Create failed -- assuming phantom table required " + tableKey(tbl) + " Exception: " + e1.toString());
               // we expect the following dropRelation to fail,
               // as the most likely state of the system is
               // that the table was unable to be created.
