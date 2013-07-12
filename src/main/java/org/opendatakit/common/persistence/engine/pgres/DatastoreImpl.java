@@ -43,7 +43,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
@@ -55,8 +54,12 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
-  private static final int MAX_COLUMN_NAME_LEN = 64;
-  private static final int MAX_TABLE_NAME_LEN = 60; // reserve 4 char for idx name
+  // issue 868 - PostgreSQL apparently has a 63-character limit on its column
+  // names.
+  private static final int MAX_COLUMN_NAME_LEN = 63;
+  // issue 868 - assume this is also true of table names...
+  private static final int MAX_TABLE_NAME_LEN = 59; // reserve 4 char for idx
+                                                    // name
 
   private final DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
   private DataSource dataSource = null;
@@ -306,12 +309,13 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     return MAX_TABLE_NAME_LEN;
   }
 
-  private final boolean updateRelation(JdbcTemplate jc, CommonFieldsBase relation, String originalStatement) {
+  private final boolean updateRelation(JdbcTemplate jc, CommonFieldsBase relation,
+      String originalStatement) {
 
     String qs = TableDefinition.TABLE_DEF_QUERY;
     List<?> columns;
-    columns = jc.query(qs,
-        new Object[] { relation.getSchemaName(), relation.getTableName() }, tableDef);
+    columns = jc.query(qs, new Object[] { relation.getSchemaName(), relation.getTableName() },
+        tableDef);
     dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS, columns.size());
 
     if (columns.size() > 0) {
@@ -329,24 +333,24 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         TableDefinition d = map.get(f.getName());
         if (d == null) {
           StringBuilder b = new StringBuilder();
-          if ( originalStatement == null ) {
+          if (originalStatement == null) {
             b.append(" Retrieving expected definition (");
-              boolean first = true;
-              for (DataField field : relation.getFieldList()) {
-                if ( !first ) {
-                  b.append(K_CS);
-                }
-                first = false;
-                b.append(field.getName());
+            boolean first = true;
+            for (DataField field : relation.getFieldList()) {
+              if (!first) {
+                b.append(K_CS);
               }
+              first = false;
+              b.append(field.getName());
+            }
             b.append(")");
           } else {
             b.append(" Created with: ");
             b.append(originalStatement);
           }
           throw new IllegalStateException("did not find expected column " + f.getName()
-              + " in table " + relation.getSchemaName() + "." + relation.getTableName() +
-              b.toString());
+              + " in table " + relation.getSchemaName() + "." + relation.getTableName()
+              + b.toString());
         }
         if (f.getDataType() == DataField.DataType.BOOLEAN
             && d.getDataType() == DataField.DataType.STRING) {
@@ -404,9 +408,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
 
       // do serializable read on the information schema...
-      paramTransactionDefinition.setIsolationLevel(DefaultTransactionDefinition.ISOLATION_SERIALIZABLE);
+      paramTransactionDefinition
+          .setIsolationLevel(DefaultTransactionDefinition.ISOLATION_SERIALIZABLE);
       paramTransactionDefinition.setReadOnly(true);
-      status=tm.getTransaction(paramTransactionDefinition);
+      status = tm.getTransaction(paramTransactionDefinition);
 
       // see if relation already is defined and update it with dimensions...
       if (updateRelation(jc, relation, null)) {
@@ -417,9 +422,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       } else {
         tm.commit(status);
         // Try a new transaction to create the table
-        paramTransactionDefinition.setIsolationLevel(DefaultTransactionDefinition.ISOLATION_SERIALIZABLE);
+        paramTransactionDefinition
+            .setIsolationLevel(DefaultTransactionDefinition.ISOLATION_SERIALIZABLE);
         paramTransactionDefinition.setReadOnly(false);
-        status=tm.getTransaction(paramTransactionDefinition);
+        status = tm.getTransaction(paramTransactionDefinition);
 
         // need to create the table...
         StringBuilder b = new StringBuilder();
@@ -518,7 +524,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + createTableStmt);
 
         jc.execute(createTableStmt);
-        LogFactory.getLog(DatastoreImpl.class).info("create table success (before updateRelation): " + relation.getTableName());
+        LogFactory.getLog(DatastoreImpl.class).info(
+            "create table success (before updateRelation): " + relation.getTableName());
 
         String idx;
         // create other indicies
@@ -534,7 +541,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         tm.commit(status);
       }
     } catch (Exception e) {
-      if ( status != null ) {
+      if (status != null) {
         tm.rollback(status);
       }
       throw new ODKDatastoreException(e);
