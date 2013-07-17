@@ -31,7 +31,8 @@ public enum ExternalServiceType implements Serializable {
   JSON_SERVER("Z-ALPHA JSON Server"),
   OHMAGE_JSON_SERVER("Z-ALPHA Ohmage JSON Server"),
   GOOGLE_FUSIONTABLES( "Google FusionTables"),
-  REDCAP_SERVER("Z-ALPHA REDCap Server");
+  REDCAP_SERVER("Z-ALPHA REDCap Server"),
+  GOOGLE_MAP_ENGINE("Google Map Engine");
 
   private String serviceName;
 
