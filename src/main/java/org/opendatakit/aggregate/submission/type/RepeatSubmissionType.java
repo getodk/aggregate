@@ -83,6 +83,11 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     this.uriAssociatedRow = uriAssociatedRow;
   }
 
+  @Override
+  public final FormElementModel getFormElementModel() {
+    return repeatGroup;
+  }
+  
   public SubmissionSet getEnclosingSet() {
     return enclosingSet;
   }

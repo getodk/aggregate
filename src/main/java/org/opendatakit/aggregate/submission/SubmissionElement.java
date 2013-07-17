@@ -15,6 +15,8 @@
  */
 package org.opendatakit.aggregate.submission;
 
+import org.opendatakit.aggregate.datamodel.FormElementModel;
+
 /**
  * Common base class to SubmissionSet, SubmissionValue
  * 
@@ -31,6 +33,14 @@ public interface SubmissionElement {
 	   */
 	  public String getPropertyName();
 
+	 
+	  /**
+	   * Get the submission element's form element model
+	   * @return
+	   *    form element model
+	   */
+	  public FormElementModel getFormElementModel();
+	  
 	  /**
 	   * Perform a left-to-right depth-first traversal of the submission.
 	   * 

@@ -31,62 +31,65 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
 
 public abstract class MetadataBaseType<T> implements SubmissionField<T> {
-	/**
-	 * Backing object holding the value of the submission field
-	 */
-	protected final DynamicCommonFieldsBase backingObject;
-	protected final DataField field;
-	protected final FormElementModel metadataType;
+  /**
+   * Backing object holding the value of the submission field
+   */
+  protected final DynamicCommonFieldsBase backingObject;
+  protected final DataField field;
+  protected final FormElementModel metadataType;
 
-	MetadataBaseType(DynamicCommonFieldsBase backingObject, FormElementModel metadataType, DataField field) {
-	  this.backingObject = backingObject;
-	  this.field = field;
-	  this.metadataType = metadataType;
-	}
+  MetadataBaseType(DynamicCommonFieldsBase backingObject, FormElementModel metadataType,
+      DataField field) {
+    this.backingObject = backingObject;
+    this.field = field;
+    this.metadataType = metadataType;
+  }
 
-	@Override
-	public void getValueFromEntity(CallingContext cc)
-			throws ODKDatastoreException {
-		// no-op
-	}
+  @Override
+  public final FormElementModel getFormElementModel() {
+    return metadataType;
+  }
 
-	@Override
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList,
-			CallingContext cc) throws ODKDatastoreException {
-		// no-op
-	}
+  @Override
+  public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
+    // no-op
+  }
 
-	@Override
-	public void persist(CallingContext cc) throws ODKEntityPersistException {
-		// no-op
-	}
+  @Override
+  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+      throws ODKDatastoreException {
+    // no-op
+  }
 
-	@Override
-	public String getPropertyName() {
-		return metadataType.toString();
-	}
+  @Override
+  public void persist(CallingContext cc) throws ODKEntityPersistException {
+    // no-op
+  }
 
-	@Override
-	public boolean depthFirstTraversal(SubmissionVisitor visitor) {
-	  return visitor.traverse(this);
-	}
-	
-	@Override
-	public boolean isBinary() {
-		return false;
-	}
+  @Override
+  public String getPropertyName() {
+    return metadataType.toString();
+  }
 
-	@Override
-	public void setValueFromString(String value) throws ODKConversionException,
-			ODKDatastoreException {
-		throw new IllegalStateException("unexpected call to setValueFromString");
-	}
+  @Override
+  public boolean depthFirstTraversal(SubmissionVisitor visitor) {
+    return visitor.traverse(this);
+  }
 
-	@Override
-	public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-			String contentType, String unrootedFilePath, boolean overwriteOK,
-			CallingContext cc) throws ODKDatastoreException {
-		throw new IllegalStateException("unexpected call to setValueFromByteArray");
-	}
+  @Override
+  public boolean isBinary() {
+    return false;
+  }
+
+  @Override
+  public void setValueFromString(String value) throws ODKConversionException, ODKDatastoreException {
+    throw new IllegalStateException("unexpected call to setValueFromString");
+  }
+
+  @Override
+  public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType,
+      String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
+    throw new IllegalStateException("unexpected call to setValueFromByteArray");
+  }
 
 }
