@@ -103,10 +103,6 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   @Override
-  public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
-  }
-
-  @Override
   protected String getOwnership() {
     return objectEntity.getOwnerEmail().substring(EmailParser.K_MAILTO.length());
   }
