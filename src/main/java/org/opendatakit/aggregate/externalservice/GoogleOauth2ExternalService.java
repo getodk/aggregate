@@ -39,7 +39,7 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Permission;
 import com.google.gdata.util.ServiceException;
@@ -56,7 +56,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
   protected final Log oauth2logger;
 
   protected HttpRequestFactory requestFactory;
-  
+
   protected GoogleOauth2ExternalService(String credentialScope, IForm form,
       FormServiceCursor formServiceCursor, ElementFormatter formatter,
       HeaderFormatter headerFormatter, Log logger, CallingContext cc)
@@ -95,7 +95,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
     }
 
   }
-  
+
   protected static GoogleCredential getCredential(String scopes, CallingContext cc)
       throws ODKExternalServiceCredentialsException {
     try {
@@ -126,11 +126,11 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
         break;
       }
       PrivateKey serviceAccountPrivateKey = (PrivateKey )key;
-      
+
       HttpClientFactory httpClientFactory = (HttpClientFactory) cc
           .getBean(BeanDefs.HTTP_CLIENT_FACTORY);
       HttpTransport httpTransport = httpClientFactory.getGoogleOAuth2Transport();
-      
+
       GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
           .setJsonFactory(jsonFactory).setServiceAccountId(serviceAccountUser)
           .setServiceAccountScopes(Collections.singleton(scopes))
@@ -143,24 +143,24 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
     }
   }
 
-  
+
   protected Drive getGoogleDrive() {
     return new Drive.Builder(httpTransport, jsonFactory, credential).setApplicationName(
         ServletConsts.APPLICATION_NAME).build();
   }
-  
+
   protected void executeDrivePermission(Drive drive, String fileId, String email)
       throws ODKExternalServiceException {
 
     oauth2logger.info("Switching file permissions");
-    
+
     if (email == null) {
       throw new ODKExternalServiceException(NO_EMAIL_SPECIFIED_ERROR);
     }
 
     try {
       String userName = email.substring(SecurityUtils.MAILTO_COLON.length());
-      
+
       Permission newPermission = new Permission();
       newPermission.setKind("drive#permission");
       newPermission.setRole("owner");
@@ -183,7 +183,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       throw new ODKExternalServiceException(e);
     }
   }
-  
+
   protected void executeDrivePermission(String fileId, String email)
       throws ODKExternalServiceException {
     executeDrivePermission(getGoogleDrive(), fileId, email);
@@ -232,5 +232,5 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
 
     return response;
   }
-  
+
 }
