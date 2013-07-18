@@ -90,7 +90,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
 
   /**
    * Common base initialization of a Google Map Engine (both new and existing).
-   * 
+   *
    * @param entity
    * @param formServiceCursor
    * @param form
@@ -115,7 +115,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
   /**
    * Continuation of the creation of a brand new Google Map Engine. Needed
    * because entity must be passed into two objects in the constructor.
-   * 
+   *
    * @param entity
    * @param form
    * @param externalServiceOption
@@ -137,7 +137,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
   /**
    * Reconstruct a Google Map Engine definition from its persisted
    * representation in the datastore.
-   * 
+   *
    * @param formServiceCursor
    * @param form
    * @param cc
@@ -153,7 +153,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
 
   /**
    * Create a brand new Google Map Engine
-   * 
+   *
    * @param form
    * @param externalServiceOption
    * @param ownerUserEmail
@@ -177,7 +177,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
   /**
    * Helper function to create a Google Map Engine parameter table (missing the
    * not-yet-created album identifier and gme identifier).
-   * 
+   *
    * @param ownerEmail
    * @param cc
    * @return
@@ -286,8 +286,8 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
 
     JsonObject feature = new JsonObject();
     feature.addProperty("type", "Feature");
-   
-   
+
+
     // find the geopoint
     // if non specified system should skip this submission
     String qualifiedGeoPointName = geoPointField.getGroupQualifiedElementName();
@@ -314,7 +314,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
     if(!hasGeoPoint) {
       return;
     }
-    
+
     JsonObject properties = new JsonObject();
     properties.addProperty("gx_id", submission.getKey().getKey());
     for (SubmissionValue value : valuesValues) {
@@ -323,7 +323,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
       if(qualifiedGeoPointName.equals(fem.getGroupQualifiedElementName())) {
         continue;
       }
-      
+
       FormDataModel fdm = fem.getFormDataModel();
       // check to see if it's unwanted meta data
       if(fdm == null)
@@ -358,11 +358,11 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
         String valueStr = getValueAsString(value, submission, cc);
         properties.addProperty(xpath, valueStr);
       }
-      
+
     }
 
-    
-    
+
+
     // finish formatting
     feature.add("properties", properties);
 
@@ -378,10 +378,10 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
       executeGMEStmt("POST", statement, cc);
     } catch (Exception e) {
       throw new ODKExternalServiceException(e);
-    } 
+    }
   }
 
-  private String getValueAsString(SubmissionValue value, Submission submission, 
+  private String getValueAsString(SubmissionValue value, Submission submission,
       CallingContext cc) throws ODKExternalServiceException {
     // TODO: this needs to change if you only want the single value this is WAY TOO complex
     Row row = new Row(submission.constructSubmissionKey(submission.getFormElementModel()));
@@ -543,7 +543,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
     + objectEntity.getGmeAssetId() + "/features/batchInsert");
 
     System.out.println("URL:" + url);
-    
+
     HttpContent entity = null;
     if (statement != null) {
 
@@ -551,7 +551,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
         // entity = new StringEntity(statement, "application/json", UTF_8);
         entity = new ByteArrayContent("application/json",
             statement.getBytes(FusionTableConsts.FUSTABLE_ENCODE));
-      
+
     }
 
     HttpRequest request = requestFactory.buildRequest(method, url, entity);
@@ -561,12 +561,12 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
     int statusCode = resp.getStatusCode();
     if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
       throw new ODKExternalServiceCredentialsException(response.toString() + statement);
-    } else if (!(statusCode == HttpServletResponse.SC_OK || statusCode == HttpServletResponse.SC_CONFLICT)) {
+    } else if (!(statusCode == HttpServletResponse.SC_OK || statusCode == HttpServletResponse.SC_NO_CONTENT || statusCode == HttpServletResponse.SC_CONFLICT)) {
       throw new ODKExternalServiceException(response.toString() + statement);
     }
 
     return response;
   }
-  
-  
+
+
 }

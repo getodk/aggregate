@@ -27,13 +27,9 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-client-1.15.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-1.15.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-appengine-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-gson-1.15.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-jackson2-1.15.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.15.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-appengine-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-java6-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-jetty-1.15.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gson-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guava-jdk5-13.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
@@ -44,7 +40,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpcore-4.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpmime-4.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-2.1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.9.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.9.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
@@ -99,7 +94,6 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/joda-time-2.2.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/opencsv-2.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/xpp3-1.1.4c.jar"/>
@@ -108,6 +102,9 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/google-api-services-drive-v2-rev86-1.15.0-rc.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/google-api-services-drive-v2-rev85-1.15.0-rc.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/google-http-client-jackson2-1.15.0-rc.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-2.1.3.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
