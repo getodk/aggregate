@@ -251,7 +251,7 @@ public class EntityConverter {
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
-    row.setUriUser(entity.getString(TableConstants.URI_USER.toUpperCase()));
+    row.setUriUser(entity.getString(TableConstants.URI_ACCESS_CONTROL.toUpperCase()));
     row.setFormId(entity.getString(TableConstants.FORM_ID.toUpperCase()));
     row.setInstanceName(
         entity.getString(TableConstants.INSTANCE_NAME.toUpperCase()));
