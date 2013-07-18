@@ -67,7 +67,7 @@ public class DbTable {
     dataFields.add(new DataField(DELETED, DataType.BOOLEAN, false));
 
     // And now make the OdkTables metadata columns.
-    dataFields.add(new DataField(TableConstants.URI_USER.toUpperCase(),
+    dataFields.add(new DataField(TableConstants.URI_ACCESS_CONTROL.toUpperCase(),
         DataType.STRING, true));
     dataFields.add(new DataField(TableConstants.FORM_ID.toUpperCase(),
         DataType.STRING, true));
