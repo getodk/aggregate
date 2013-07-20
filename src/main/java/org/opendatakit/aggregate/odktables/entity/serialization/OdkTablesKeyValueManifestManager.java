@@ -116,7 +116,8 @@ public class OdkTablesKeyValueManifestManager {
 			AccessDeniedException, JsonGenerationException, IOException {
 
 		try {
-		    List<Row> infoRows = EntityConverter.toRowsFromFileInfo(DbTableFileInfo.query(tableId, cc));
+		   List<Row> infoRows = EntityConverter.toRowsFromFileInfo(
+		       DbTableFileInfo.queryForTableId(tableId, cc));
 			TableManager tm = new TableManager(cc);
 			TableEntry table = tm.getTable(tableId);
 			DbTableFiles blobSetRelation = new DbTableFiles(cc);
@@ -128,19 +129,22 @@ public class OdkTablesKeyValueManifestManager {
 					// for files you need to create a FileManifestEntry for the value.
 					OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
 					entry.tableId = tableId;
-					entry.key = row.getValues().get(DbTableFileInfo.KEY);
-					entry.type = row.getValues().get(DbTableFileInfo.VALUE_TYPE);
+//	TODO: all these things got commented out when we redid the file stuff. needs
+// to be re-implemented.
+					entry.key = "OdkTablesKeyValueManifestManager not implemented";
+					entry.type = "OdkTablesKeyValueManifestManager not implemented";
 					// if it's a file, make the file manifest entry.
-					if (entry.type.equalsIgnoreCase(DbTableFileInfo.Type.FILE.name)) {
+//					if (entry.type.equalsIgnoreCase(DbTableFileInfo.Type.FILE.name)) {
+	             if (entry.type.equalsIgnoreCase("unimplemented")) {
 						OdkTablesFileManifestEntry fileEntry = new OdkTablesFileManifestEntry();
-						fileEntry.filename = blobSetRelation.getBlobEntitySet(row.getValues().get(DbTableFileInfo.VALUE), cc)
-								.getUnrootedFilename(1, cc);
-						fileEntry.md5hash = blobSetRelation.getBlobEntitySet(row.getValues().get(DbTableFileInfo.VALUE), cc)
-								.getContentHash(1, cc);
+//						fileEntry.filename = blobSetRelation.getBlobEntitySet(row.getValues().get(DbTableFileInfo.VALUE), cc)
+//								.getUnrootedFilename(1, cc);
+//						fileEntry.md5hash = blobSetRelation.getBlobEntitySet(row.getValues().get(DbTableFileInfo.VALUE), cc)
+//								.getContentHash(1, cc);
 						// now generate the download url. look at XFormsManifestXmlTable as an
 						// example of how Mitch did it.
 						Map<String, String> properties = new HashMap<String, String>();
-						properties.put(ServletConsts.BLOB_KEY, row.getValues().get(DbTableFileInfo.VALUE));
+//						properties.put(ServletConsts.BLOB_KEY, row.getValues().get(DbTableFileInfo.VALUE));
 						properties.put(ServletConsts.AS_ATTACHMENT, "true");
 						String url = cc.getServerURL() + BasicConsts.FORWARDSLASH +
 								OdkTablesTableFileDownloadServlet.ADDR;
@@ -151,7 +155,7 @@ public class OdkTablesKeyValueManifestManager {
 
 					} else {
 						// if it's not a file, we just set the value. as input.
-						entry.value = row.getValues().get(DbTableFileInfo.VALUE);
+//						entry.value = row.getValues().get(DbTableFileInfo.VALUE);
 					}
 					// and now add the completed entry to the list of entries
 					entries.add(entry);
