@@ -140,10 +140,11 @@ public class WatchdogWorkerImpl {
       FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
       PurgeOlderSubmissions purgeSubmissions = (PurgeOlderSubmissions) cc
           .getBean(BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN);
+      JsonFileGenerator jsonGenerator = (JsonFileGenerator) cc.getBean(BeanDefs.JSON_FILE_BEAN);
       boolean foundActiveTasks = false;
       // NOTE: do not short-circuit these check actions...
       foundActiveTasks = foundActiveTasks | checkFormServiceCursors(uploadSubmissions, cc);
-      foundActiveTasks = foundActiveTasks | checkPersistentResults(csvGenerator, kmlGenerator, cc);
+      foundActiveTasks = foundActiveTasks | checkPersistentResults(csvGenerator, kmlGenerator, jsonGenerator, cc);
       foundActiveTasks = foundActiveTasks | checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
       activeTasks = foundActiveTasks;
     } finally {
@@ -167,8 +168,8 @@ public class WatchdogWorkerImpl {
         // TODO: should handle resume-initiate somehow?
         continue;
       }
-      if (fsc.getOperationalStatus() == OperationalStatus.PAUSED ) {
-        activeTasks = true;
+      OperationalStatus opStatus = fsc.getOperationalStatus();
+      if (opStatus == OperationalStatus.PAUSED || opStatus == OperationalStatus.ACTIVE_PAUSE) {
         ExternalServiceType type = fsc.getExternalServiceType();
         long backoffInterval = 60000L; // 1 minute
         switch ( type ) {
@@ -188,15 +189,22 @@ public class WatchdogWorkerImpl {
           backoffInterval = REDCapServerConsts.BACKOFF_DELAY_MILLISECONDS;
           break;
         default:
-          this.logger.equals("Unrecognized ExternalServiceType: " + type.name());
+          this.logger.equals("No explicit backoff delay set for ExternalServiceType: " + type.name() + " therefore using default");
         }
+        
+        // make sure we reset the watchdog for as short as possible
+        if(opStatus == OperationalStatus.ACTIVE_PAUSE) {
+          activeTasks = true;
+        }
+        
         if ( fsc.getLastUpdateDate().getTime() + backoffInterval < System.currentTimeMillis() ) {
-          fsc.setOperationalStatus(OperationalStatus.ACTIVE);
+          activeTasks = true;
+          fsc.setOperationalStatus(OperationalStatus.ACTIVE_RETRY);
           cc.getDatastore().putEntity(fsc, cc.getCurrentUser());
         }
       }
 
-      if (fsc.getOperationalStatus() != OperationalStatus.ACTIVE) {
+      if (!(opStatus == OperationalStatus.ACTIVE || opStatus == OperationalStatus.ACTIVE_RETRY)) {
         // TODO: should handle resume-initiate somehow?
         continue;
       }
@@ -307,7 +315,7 @@ public class WatchdogWorkerImpl {
     return BackendActionsTable.mayHaveRecentPublisherRevision(fsc.getUri(), cc);
   }
 
-  private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
+  private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator, JsonFileGenerator jsonGenerator,
       CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
     try {
       logger.info("Checking all persistent results");
@@ -331,6 +339,12 @@ public class WatchdogWorkerImpl {
           break;
         case KML:
           kmlGenerator.createKmlTask(form, persistentResult, attemptCount, cc);
+          break;
+        case JSONFILE:
+          jsonGenerator.createJsonFileTask(form, persistentResult.getSubmissionKey(), attemptCount, cc);
+          break;
+        default:
+          this.logger.equals("No generator defined for Persisted Result Type: " + persistentResult.getResultType().name());
           break;
         }
       }

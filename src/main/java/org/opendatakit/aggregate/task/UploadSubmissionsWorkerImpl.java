@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
+import org.opendatakit.aggregate.externalservice.ExternalServiceUtils;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -282,8 +283,6 @@ public class UploadSubmissionsWorkerImpl {
 
   private void sendSubmissions(List<Submission> submissionsToSend, boolean streaming)
       throws ODKExternalServiceException {
-    Date lastDateSent = null;
-    String lastKeySent = null;
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     try {
@@ -296,24 +295,16 @@ public class UploadSubmissionsWorkerImpl {
         for (Submission submission : submissionsToSend) {
           pExtService.sendSubmission(submission, cc);
           ++counter;
-          // See QueryByDateRange
-          // -- we are querying by the markedAsCompleteDate
-          lastDateSent = submission.getMarkedAsCompleteDate();
-          lastKeySent = submission.getKey().getKey();
-          if (streaming) {
-            pFsc.setLastStreamingCursorDate(lastDateSent);
-            pFsc.setLastStreamingKey(lastKeySent);
-          } else {
-            pFsc.setLastUploadCursorDate(lastDateSent);
-            pFsc.setLastUploadKey(lastKeySent);
-          }
+       
+          // persist updated last send date
+          ExternalServiceUtils.updateFscToSuccessfulSubmissionDate(pFsc, submission, streaming);
           ds.putEntity(pFsc, user);
 
           counter = renewTaskLock(counter);
         }
       }
     } catch (ODKExternalServiceException e) {
-      pFsc.setOperationalStatus(OperationalStatus.PAUSED);
+      ExternalServiceUtils.pauseFscOperationalStatus(pFsc);
       try {
         ds.putEntity(pFsc, user);
       } catch (ODKEntityPersistException ex) {
@@ -325,7 +316,7 @@ public class UploadSubmissionsWorkerImpl {
       }
       throw e;
     } catch (Exception e) {
-      pFsc.setOperationalStatus(OperationalStatus.PAUSED);
+      ExternalServiceUtils.pauseFscOperationalStatus(pFsc);
       try {
         ds.putEntity(pFsc, user);
       } catch (ODKEntityPersistException ex) {
@@ -339,6 +330,8 @@ public class UploadSubmissionsWorkerImpl {
     }
 
   }
+
+
 
   private int renewTaskLock(int counter) throws ODKTaskLockException,
       ODKExternalServiceException {
