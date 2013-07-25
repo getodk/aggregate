@@ -215,6 +215,10 @@ public class FileServiceImpl implements FileService {
           ec.newTableFileInfoEntity(appId, tableId, wholePath, cc);
       // Persist the entity.
       tableFileInfoRow.put(cc);
+      resp.setStatus(HttpServletResponse.SC_CREATED);
+      resp.addHeader("Location", wholePath);
+//      resp.setContentType("text/plain");
+//      resp.getWriter().append("This is the content");
     } catch (ODKDatastoreException e) {
       LOGGER.error(("ODKTables file upload persistence error: " 
           + e.getMessage()));
