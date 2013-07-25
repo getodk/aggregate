@@ -82,7 +82,8 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       this.credential = null;
       this.httpTransport = null;
       this.requestFactory = null;
-      if (fsc.getOperationalStatus().equals(OperationalStatus.ACTIVE)) {
+      OperationalStatus currentStatus = fsc.getOperationalStatus();
+      if (currentStatus == OperationalStatus.ACTIVE || currentStatus == OperationalStatus.ACTIVE_RETRY) {
         fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
         try {
           persist(cc);

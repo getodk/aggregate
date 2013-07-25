@@ -67,7 +67,6 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-
 // TODO: upgrade to the fusion table service api
 // http://code.google.com/p/google-api-java-client/wiki/APIs#Fusion_Tables_API
 
@@ -99,9 +98,6 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
    */
   private final List<FusionTable2RepeatParameterTable> repeatElementEntities = new ArrayList<FusionTable2RepeatParameterTable>();
 
-  
-
-  
   /**
    * Common base initialization of a FusionTable (both new and existing).
    * 
@@ -356,8 +352,6 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   public void sendSubmissions(List<Submission> submissions, boolean streaming, CallingContext cc)
       throws ODKExternalServiceException {
 
-    Date lastDateSent = null;
-    String lastKeySent = null;
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     try {
@@ -383,16 +377,10 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
         // -- we are querying by the markedAsCompleteDate
         // update the last one proccessed
         Submission lastSubmission = batcher.getLastProccessedSubmission();
-        lastDateSent = lastSubmission.getMarkedAsCompleteDate();
-        lastKeySent = lastSubmission.getKey().getKey();
-        if (streaming) {
-          fsc.setLastStreamingCursorDate(lastDateSent);
-          fsc.setLastStreamingKey(lastKeySent);
-        } else {
-          fsc.setLastUploadCursorDate(lastDateSent);
-          fsc.setLastUploadKey(lastKeySent);
-        }
+        // persist updated last send date
+        ExternalServiceUtils.updateFscToSuccessfulSubmissionDate(fsc, lastSubmission, streaming);
         ds.putEntity(fsc, user);
+
       }
 
     } catch (ODKExternalServiceCredentialsException e) {
