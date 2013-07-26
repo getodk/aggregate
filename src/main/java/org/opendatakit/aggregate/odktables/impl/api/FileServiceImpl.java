@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.common.ermodel.BlobEntitySet;
@@ -61,13 +63,7 @@ public class FileServiceImpl implements FileService {
       return;
     }
     String appId = segments.get(0).toString();
-    String tableId;
-    if (segments.size() == 2) {
-      // Then the second parameter is the file name, not the id.
-      tableId = DEFAULT_TABLE_ID;
-    } else {
-      tableId = segments.get(1).toString();
-    }
+    String tableId = getTableIdFromPathSegments(segments);
     // Now construct the whole path.
     StringBuilder sb = new StringBuilder();
     int i = 0;
@@ -81,18 +77,28 @@ public class FileServiceImpl implements FileService {
     String wholePath = sb.toString();
     
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
-    // Now get the necessary parameters. The only thing we'll expect from the 
-    // client is the recognition that they're about to get a big ol' file.
     String downloadAsAttachmentString = 
         req.getParameter(FileService.PARAM_AS_ATTACHMENT);
     byte[] fileBlob;
-    String unrootedFileName; // should always be the same as the wholePath.
     String contentType;
     Long contentLength;
     try {
+      List<Entity> entities = DbTableFileInfo.queryForEntity(appId, tableId, 
+          wholePath, cc);
+      if (entities.size() > 1) {
+        Log log = LogFactory.getLog(DbTableFileInfo.class);
+        log.error("more than one entity for appId: " + appId + ", tableId: " 
+            + tableId + ", pathToFile: " + wholePath);
+      } else if (entities.size() < 1) {
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND, 
+            "no file found for: " + wholePath);
+        return;
+      }
+      Entity dbTableFileInfoRow = entities.get(0);
+      String uri = dbTableFileInfoRow.getId();
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
       BlobEntitySet blobEntitySet = 
-          dbTableFiles.getBlobEntitySet(wholePath, cc);
+          dbTableFiles.getBlobEntitySet(uri, cc);
       // We should only ever have one, as wholePath is the primary key.
       if (blobEntitySet.getAttachmentCount(cc) > 1) {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -104,16 +110,12 @@ public class FileServiceImpl implements FileService {
         return;
       }
       fileBlob = blobEntitySet.getBlob(1, cc);
-      unrootedFileName = dbTableFiles.getBlobEntitySet(wholePath, cc)
-          .getUnrootedFilename(1, cc);
-      if (!wholePath.equals(unrootedFileName)) {
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            "Unrooted filename didn't match path.");
-      }
-      contentType = dbTableFiles.getBlobEntitySet(wholePath, cc)
-          .getContentType(1, cc);
-      contentLength = dbTableFiles.getBlobEntitySet(wholePath, cc)
-          .getContentLength(1, cc);
+      contentType = blobEntitySet.getContentType(1, cc);
+//      contentType = dbTableFiles.getBlobEntitySet(wholePath, cc)
+//          .getContentType(1, cc);
+      contentLength = blobEntitySet.getContentLength(1, cc);
+//      contentLength = dbTableFiles.getBlobEntitySet(wholePath, cc)
+//          .getContentLength(1, cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -133,10 +135,8 @@ public class FileServiceImpl implements FileService {
       if (downloadAsAttachmentString != null 
           && !"".equals(downloadAsAttachmentString)) {
         // Set the filename we're downloading to the disk.
-        if (unrootedFileName != null) {
-          resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; " +
-          		"filename=\" unrootedFileName + \"");
-        }
+        resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; " +
+        		"filename=\"" + wholePath + "\"");
       }
       OutputStream os = resp.getOutputStream();
       os.write(fileBlob);
@@ -163,13 +163,7 @@ public class FileServiceImpl implements FileService {
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
     // First parse the url to get the correct app and table ids.
     String appId = segments.get(0).toString();
-    String tableId;
-    if (segments.size() == 2) {
-      // Then the second parameter is the file name, not the id.
-      tableId = DEFAULT_TABLE_ID;
-    } else {
-      tableId = segments.get(1).toString();
-    }
+    String tableId = getTableIdFromPathSegments(segments);
     if (!appId.equals("tables")) {
       // For now we'll just do tables. eventually we want all apps.
       // TODO: incorporate checking for apps
@@ -194,37 +188,75 @@ public class FileServiceImpl implements FileService {
       // Process the file.
       InputStream is = req.getInputStream();
       byte[] fileBlob = IOUtils.toByteArray(is);
-      // Now that we have retrieved the file from the request, we have two 
-      // things to do: 1) persist the actual file itself. 2) update the user-
-      // friendly table that keeps the information about the tables and the
-      // apps/tableids they're associated with.
+      // We are going to store the file in two tables: 1) a user-friendly table
+      // that relates an app and table id to the name of a file; 2) a table
+      // that holds the actual blob. 
       //
-      // 1) Persist the file.
+      // Table 1 is represented by DbTableFileInfo. Each row of this table 
+      // contains a uri, appid, tableid, and pathToFile.
+      // Table 2 is a BlobEntitySet. The top level URI of this blob entity set
+      // is the uri from table 1. Each blob set here has a single attachment
+      // count of 1--the blob of the file itself. The pathToFile of this 
+      // attachment is null. 
+      //
+      // So, now that we have retrieved the file from the request, we have two 
+      // things to do: 1) create an entry in the user-friendly table so we can
+      // bet a uri. 2) add the file to the blob entity set, using the top level
+      // uri as the row uri from table 1.
+      //
+      // 1) Create an entry in the user friendly table.
+      EntityCreator ec = new EntityCreator();
+      Entity tableFileInfoRow = ec.newTableFileInfoEntity(appId, tableId, 
+          wholePath, cc);
+      String rowUri = tableFileInfoRow.getId();
+      tableFileInfoRow.put(cc);
+      // 2) Put the blob in the datastore. 
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
       // Although this is called an entity set, it in fact represents a single 
       // file, because we have chosen to use it this way in this case. For more 
-      // information see the docs in DbTableFiles.
-      BlobEntitySet instance = dbTableFiles.newBlobEntitySet(wholePath, cc);
+      // information see the docs in DbTableFiles. We'll use the uri of the 
+      // corresponding row in the DbTableFileInfo table.
+      BlobEntitySet instance = dbTableFiles.newBlobEntitySet(rowUri, cc);
       // TODO: this being set to true is probably where some sort of versioning
       // should happen.
-      instance.addBlob(fileBlob, contentType, wholePath, true, cc);
-      // 2) Update the user-friendly table.
-      // Create the row entity.
-      EntityCreator ec = new EntityCreator();
-      Entity tableFileInfoRow = 
-          ec.newTableFileInfoEntity(appId, tableId, wholePath, cc);
-      // Persist the entity.
-      tableFileInfoRow.put(cc);
+      instance.addBlob(fileBlob, contentType, null, true, cc);
+
       resp.setStatus(HttpServletResponse.SC_CREATED);
       resp.addHeader("Location", wholePath);
-//      resp.setContentType("text/plain");
-//      resp.getWriter().append("This is the content");
     } catch (ODKDatastoreException e) {
       LOGGER.error(("ODKTables file upload persistence error: " 
           + e.getMessage()));
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
     }
+  }
+  
+  /**
+   * Retrieve the table id given the path. The first segment (position 0) is 
+   * known to be the app id, as all files must be associated with an app id.
+   * Not all files must be associated with a table, however, so it parses 
+   * position 1 to see if it can be a UUID. If so, it assumes it is a table id.
+   * Otherwise it returns the {@link DEFAULT_TABLE_ID}.
+   * @param segments
+   * @return
+   */
+  private String getTableIdFromPathSegments(List<PathSegment> segments) {
+    String tableId;
+    if (segments.size() == 2) {
+      // Then the second parameter is the file name, not the id.
+      tableId = DEFAULT_TABLE_ID;
+    } else {
+      // We have to see if it could be a tableId. If it can, then we assume it
+      // is a table id. Otherwise we give it the default tableId.
+      try {
+        UUID.fromString(segments.get(1).toString());
+        tableId = segments.get(1).toString();
+      } catch (IllegalArgumentException e) {
+        // Then we can assume it's not a table id and we'll use the real one.
+      }
+      tableId = DEFAULT_TABLE_ID;
+    }
+    return tableId;
   }
 
 }
