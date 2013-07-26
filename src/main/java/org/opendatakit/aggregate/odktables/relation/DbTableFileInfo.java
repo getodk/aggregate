@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -73,8 +75,8 @@ public class DbTableFileInfo {
     .setIndexable(IndexType.HASH));
     dataFields.add(new DataField(TABLE_ID, DataType.STRING, false)
         .setIndexable(IndexType.HASH));
-    dataFields.add(new DataField(PATH_TO_FILE, DataType.LONG_STRING, true, 
-        32000L));
+    dataFields.add(new DataField(PATH_TO_FILE, DataType.STRING, true, 
+        20480L));
     // and add the things from DbTable
     dataFields.addAll(DbTable.getStaticFields());
     // TODO: do the appropriate time stamping and things.
@@ -106,6 +108,13 @@ public class DbTableFileInfo {
       throws ODKDatastoreException {
     return getRelation(cc).query("DbTableFileInfo.queryForAppId()", cc)
         .equal(APP_ID, appId).execute();
+  }
+  
+  public static List<Entity> queryForEntity(String appId, String tableId, 
+      String wholePath, CallingContext cc) throws ODKDatastoreException {
+    return getRelation(cc).query(
+        "DbTableFileInfo.queryForEntity()", cc).equal(APP_ID, appId)
+        .equal(TABLE_ID, tableId).equal(PATH_TO_FILE, wholePath).execute();
   }
 
 }
