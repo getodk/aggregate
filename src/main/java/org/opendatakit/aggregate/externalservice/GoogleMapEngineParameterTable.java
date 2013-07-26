@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.opendatakit.aggregate.externalservice;
 
 import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
@@ -8,6 +23,12 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
+/**
+ * Parameter table for publisher into Google Map Engine service.
+ *
+ * @author wbrunette@gmail.com
+ *
+ */
 public class GoogleMapEngineParameterTable extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_google_map_engine";
@@ -28,7 +49,7 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
   /**
    * Construct a relation prototype. Only called via
    * {@link #assertRelation(CallingContext)}
-   * 
+   *
    * @param databaseSchema
    * @param tableName
    */
@@ -44,7 +65,7 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
 
   /**
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   * 
+   *
    * @param ref
    * @param user
    */
@@ -67,7 +88,7 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow gme asset id");
     }
   }
-  
+
   public String getGoogleDriveFolderId() {
     return getStringField(GOOGLE_DRIVE_FOLDER_ID_PROPERTY);
   }
@@ -77,7 +98,7 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow google drive folder id");
     }
   }
-  
+
   public String getGeoPointElementKey() {
     return getStringField(GEO_POINT_ELEMENT_KEY_PROPERTY);
   }
@@ -87,7 +108,7 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow geo point element key");
     }
   }
-  
+
   public GmePhotoHostType getPhotoHostType() {
     String typeString = getStringField(PHOTO_HOST_TYPE_PROPERTY);
     return GmePhotoHostType.valueOf(typeString);
@@ -98,7 +119,7 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow gme host type");
     }
   }
-  
+
   public String getOwnerEmail() {
     return getStringField(OWNER_EMAIL_PROPERTY);
   }
