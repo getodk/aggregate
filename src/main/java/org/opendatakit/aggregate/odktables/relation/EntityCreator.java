@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
@@ -529,12 +530,14 @@ public class EntityCreator {
    *          the row
    * @param columns
    *          the {@link DbColumnDefinitions} entities for the log table
+   * @param sequencer
+   *          the sequencer for ordering the log entries
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
   public Entity newLogEntity(Relation logTable, String dataEtag, Entity row,
-      List<Entity> columns, CallingContext cc) throws ODKDatastoreException {
+      List<Entity> columns, Sequencer sequencer, CallingContext cc) throws ODKDatastoreException {
     Validate.notNull(logTable);
     Validate.notEmpty(dataEtag);
     Validate.notNull(row);
@@ -545,6 +548,7 @@ public class EntityCreator {
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
     entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
+    entity.set(DbLogTable.SEQUENCE_VALUE, sequencer.getNextSequenceValue());
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
     entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
     entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
@@ -569,12 +573,14 @@ public class EntityCreator {
    *          the rows
    * @param columns
    *          the {@link DbColumnDefinitions} entities for the table
+   * @param sequencer
+   *          the sequencer for ordering the log entries
    * @param cc
    * @return the created entities, not yet persisted
    * @throws ODKDatastoreException
    */
   public List<Entity> newLogEntities(Relation logTable, String dataEtag,
-      List<Entity> rows, List<Entity> columns, CallingContext cc)
+      List<Entity> rows, List<Entity> columns, Sequencer sequencer, CallingContext cc)
           throws ODKDatastoreException {
     Validate.notNull(logTable);
     Validate.notEmpty(dataEtag);
@@ -583,7 +589,7 @@ public class EntityCreator {
     Validate.notNull(cc);
     List<Entity> entities = new ArrayList<Entity>();
     for (Entity row : rows) {
-      Entity entity = newLogEntity(logTable, dataEtag, row, columns, cc);
+      Entity entity = newLogEntity(logTable, dataEtag, row, columns, sequencer, cc);
       entities.add(entity);
     }
     return entities;

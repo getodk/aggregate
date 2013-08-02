@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.util.Date;
 import java.util.List;
 
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
@@ -28,6 +29,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 public class ServerPreferencesProperties extends CommonFieldsBase {
@@ -52,7 +54,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   private static final String SITE_KEY = "SITE_KEY";
 
   public static final String GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN = "GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN";
-  
+
   public static final String OAUTH2_ACCESS_TOKEN_POSTFIX = "_OAUTH2_ACCESS_TOKEN";
   public static final String OAUTH2_REFRESH_TOKEN_POSTFIX = "_OAUTH2_REFRESH_TOKEN";
   public static final String OAUTH2_EXPIRATION_TIME_POSTFIX = "_OAUTH2_EXPIRATION_TIME";
@@ -61,6 +63,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   private static final String FASTER_WATCHDOG_CYCLE_ENABLED = "FASTER_WATCHDOG_CYCLE_ENABLED";
   private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
 
+  private static final String ODK_TABLES_SEQUENCER_BASE = "ODK_TABLES_SEQUENCER_BASE";
   /**
    * Construct a relation prototype.
    *
@@ -131,6 +134,28 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   public static void setOdkTablesEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, ODK_TABLES_ENABLED, enabled.toString());
+  }
+
+  public static String unsafeIncOdkTablesSequencerBase(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, ODK_TABLES_SEQUENCER_BASE);
+    String newValue = WebUtils.iso8601Date(new Date());
+    if ( value != null && value.compareTo(newValue) >= 0 ) {
+      // the saved value String-compares greater
+      // than the current time string.
+
+      // parse the current time string...
+      Date d = WebUtils.parseDate(value);
+      if ( d == null ) {
+        throw new IllegalStateException("The saved ODK_TABLES_SEQUENCER_BASE value could not be parsed!");
+      }
+      // add 1 millisecond and retry...
+      newValue = WebUtils.iso8601Date(new Date(d.getTime()+1));
+      if ( value.compareTo(newValue) >= 0 ) {
+        throw new IllegalStateException("The new ODK_TABLES_SEQUENCER_BASE value was not greater than the saved value.");
+      }
+    }
+    setServerPreferencesProperty(cc, ODK_TABLES_SEQUENCER_BASE, newValue);
+    return newValue;
   }
 
   public static Boolean getFasterWatchdogCycleEnabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
