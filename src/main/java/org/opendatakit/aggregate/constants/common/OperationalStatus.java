@@ -18,19 +18,9 @@ package org.opendatakit.aggregate.constants.common;
 
 import java.io.Serializable;
 
-
-/**
- * 
- * ACTIVE_PAUSE and ACTIVE_RETRY were added because we wanted to be able to not slow down the watch dog schedule for a single exception
- * 
- * @author wbrunette@gmail.com
- *
- */
 public enum OperationalStatus implements Serializable {
   ESTABLISHED,
-  ACTIVE,
-  ACTIVE_PAUSE,
-  ACTIVE_RETRY,
+  ACTIVE, 
   PAUSED, 
   COMPLETED, 
   ABANDONED,

@@ -11,7 +11,6 @@
   <packaging>war</packaging>
   <name>ODK Aggregate for Google Appengine</name>
   <properties>
-    <gae.version>${gooogle.appengine.sdk.version}</gae.version>
     <test.server.baseUrl>/</test.server.baseUrl>
   </properties>
   <dependencies>
@@ -107,7 +106,6 @@
 			<version>${maven.gae.plugin.version}</version>
 			<configuration>
 			  <serverId>local.gae</serverId>
-			  <unpackVersion>${gooogle.appengine.sdk.version}</unpackVersion>
 			  <appDir>${project.build.directory}/${project.build.finalName}</appDir>
 			  <sdkDir>${gae.home}</sdkDir>
 			  <jvmFlags>
@@ -133,66 +131,12 @@
 				</execution>
 			</executions>
 			<dependencies>
-				<dependency>
-				  <groupId>net.kindleit</groupId>
-				  <artifactId>gae-runtime</artifactId>
-				  <version>${gooogle.appengine.sdk.version}</version>
-				  <type>pom</type>
-				</dependency>
-				<dependency>
-				  <groupId>com.google.appengine</groupId>
-				  <artifactId>appengine-tools-sdk</artifactId>
-				  <version>${gooogle.appengine.sdk.version}</version>
-				</dependency>
-
-				<!-- Google App Engine Runtime Dependencies -->
-				<dependency>
-				  <groupId>org.apache.geronimo.specs</groupId>
-				  <artifactId>geronimo-jta_1.1_spec</artifactId>
-				  <version>1.1.1</version>
-				  <scope>runtime</scope>
-				</dependency>
-
-				<dependency>
-				  <groupId>org.apache.geronimo.specs</groupId>
-				  <artifactId>geronimo-jpa_3.0_spec</artifactId>
-				  <version>1.1.1</version>
-				  <scope>runtime</scope>
-				</dependency>
-
-				<dependency>
-				  <groupId>javax.jdo</groupId>
-				  <artifactId>jdo2-api</artifactId>
-				  <version>2.3-eb</version>
-				  <scope>runtime</scope>
-				</dependency>
-
-				<dependency>
-				  <groupId>org.datanucleus</groupId>
-				  <artifactId>datanucleus-core</artifactId>
-				  <version>1.1.5</version>
-				</dependency>
-
-				<dependency>
-				  <groupId>com.google.appengine.orm</groupId>
-				  <artifactId>datanucleus-appengine</artifactId>
-				  <version>1.0.10</version>
-				  <scope>runtime</scope>
-				</dependency>
-
-				<dependency>
-				  <groupId>org.datanucleus</groupId>
-				  <artifactId>datanucleus-jpa</artifactId>
-				  <version>1.1.5</version>
-				  <scope>runtime</scope>
-				</dependency>
-
-				<!-- App Engine Runtime Dependencies-->
-				<dependency>
-				  <groupId>com.google.appengine</groupId>
-				  <artifactId>appengine-api-1.0-sdk</artifactId>
-				  <version>${gooogle.appengine.sdk.version}</version>
-				</dependency>
+			  <dependency>
+				<groupId>net.kindleit</groupId>
+				<artifactId>gae-runtime</artifactId>
+				<version>${gooogle.appengine.sdk.version}</version>
+				<type>pom</type>
+			  </dependency>
 			</dependencies>
         </plugin>
 		<plugin>

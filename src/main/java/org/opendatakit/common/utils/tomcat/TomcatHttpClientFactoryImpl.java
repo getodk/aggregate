@@ -15,36 +15,25 @@
  */
 package org.opendatakit.common.utils.tomcat;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 import org.opendatakit.common.utils.HttpClientFactory;
 
-import com.google.api.client.googleapis.apache.GoogleApacheHttpTransport;
-import com.google.api.client.http.HttpTransport;
-
 /**
  * Implementation that just uses Apache's default http client.
  * 
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class TomcatHttpClientFactoryImpl implements HttpClientFactory {
 
-  public TomcatHttpClientFactoryImpl() {
-  }
+	public TomcatHttpClientFactoryImpl() {
+	}
 
-  @Override
-  public HttpClient createHttpClient(HttpParams params) {
-    return new DefaultHttpClient(params);
-  }
-
-  @Override
-  public HttpTransport getGoogleOAuth2Transport() throws GeneralSecurityException, IOException {
-    return GoogleApacheHttpTransport.newTrustedTransport();
-  }
+	@Override
+	public HttpClient createHttpClient(HttpParams params) {
+		return new DefaultHttpClient(params);
+	}
 
 }

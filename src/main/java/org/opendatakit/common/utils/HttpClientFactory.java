@@ -15,27 +15,20 @@
  */
 package org.opendatakit.common.utils;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.params.HttpParams;
 
-import com.google.api.client.http.HttpTransport;
-
 /**
- * Interface for the bean that will construct an HttpClient that is appropriate
- * for the GAE or Tomcat container in which the application runs. The GAE
- * variant maps the Apache request into underlying GAE URLFetchService. The
- * Tomcat variant just uses the default Apache client.
+ * Interface for the bean that will construct an HttpClient that is 
+ * appropriate for the GAE or Tomcat container in which the application
+ * runs.  The GAE variant maps the Apache request into underlying 
+ * GAE URLFetchService.  The Tomcat variant just uses the default 
+ * Apache client. 
  * 
  * @author mitchellsundt@gmail.com
- * @author wbrunette@gmail.com
- * 
+ *
  */
 public interface HttpClientFactory {
 
-  public HttpClient createHttpClient(HttpParams params);
-
-  public HttpTransport getGoogleOAuth2Transport() throws GeneralSecurityException, IOException;
+	public HttpClient createHttpClient(HttpParams params);
 }

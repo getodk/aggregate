@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
@@ -33,6 +32,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;

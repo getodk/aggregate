@@ -145,6 +145,10 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
     persist(cc);
   }
 
+  @Override
+  public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
+  }
+
   private void submitPost(String actionType, HttpEntity postentity, List<NameValuePair> qparam,
       CallingContext cc) {
 
