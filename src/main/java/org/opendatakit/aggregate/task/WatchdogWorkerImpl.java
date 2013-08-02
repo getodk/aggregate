@@ -66,64 +66,63 @@ public class WatchdogWorkerImpl {
     public final String uri;
     public final Date markedAsCompleteDate;
 
-    SubmissionMetadata( String uri, Date markedAsCompleteDate ) {
+    SubmissionMetadata(String uri, Date markedAsCompleteDate) {
       this.uri = uri;
       this.markedAsCompleteDate = markedAsCompleteDate;
     }
   }
 
   // accessed only by getLastSubmissionMetadata
-  private Map<String, SubmissionMetadata> formSubmissionsMap =
-      new HashMap<String, SubmissionMetadata>();
+  private Map<String, SubmissionMetadata> formSubmissionsMap = new HashMap<String, SubmissionMetadata>();
 
   /**
    * Determine and return the metadata for the last submission against this
-   * form.  That metadata consists of the marked-as-complete date and uri
-   * of the submission.  Used to determine whether to launch an upload task.
+   * form. That metadata consists of the marked-as-complete date and uri of the
+   * submission. Used to determine whether to launch an upload task.
    *
    * @param form
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  private synchronized SubmissionMetadata getLastSubmissionMetadata( IForm form, CallingContext cc )
+  private synchronized SubmissionMetadata getLastSubmissionMetadata(IForm form, CallingContext cc)
       throws ODKDatastoreException {
 
     // use cached value -- prevents excessive queries against the form tables
     // during Watchdog verification of streaming publishers.
     SubmissionMetadata metadata = formSubmissionsMap.get(form.getUri());
-    if ( metadata != null ) return metadata;
+    if (metadata != null)
+      return metadata;
 
     // compute the upper limit for data we want to process
     // limitDate is the datastore's settle time into the past.
     Date limitDate = new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS);
     QueryResumePoint qrp = new QueryResumePoint(
-        TopLevelDynamicBase.FIELD_NAME_MARKED_AS_COMPLETE_DATE,
-                          WebUtils.iso8601Date(limitDate), null, false);
+        TopLevelDynamicBase.FIELD_NAME_MARKED_AS_COMPLETE_DATE, WebUtils.iso8601Date(limitDate),
+        null, false);
 
     FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
     filterGroup.setCursor(qrp.transform());
     filterGroup.setQueryFetchLimit(1);
 
-    // query for the most recent submission that was marked-as-complete for this form
-    QueryByUIFilterGroup query =
-        new QueryByUIFilterGroup(form, filterGroup,
-              CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
+    // query for the most recent submission that was marked-as-complete for this
+    // form
+    QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup,
+        CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
 
     List<Submission> submissions = query.getResultSubmissions(cc);
     if (submissions != null && submissions.size() >= 1) {
       Submission lastSubmission = submissions.get(0);
-      metadata = new SubmissionMetadata( lastSubmission.getKey().getKey(),
-                                      lastSubmission.getMarkedAsCompleteDate());
+      metadata = new SubmissionMetadata(lastSubmission.getKey().getKey(),
+          lastSubmission.getMarkedAsCompleteDate());
       formSubmissionsMap.put(form.getUri(), metadata);
       return metadata;
     }
     return null;
   }
 
-  public void checkTasks(CallingContext cc)
-      throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException,
-      ODKIncompleteSubmissionData {
+  public void checkTasks(CallingContext cc) throws ODKExternalServiceException,
+      ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData {
     logger.info("---------------------BEGIN Watchdog");
     boolean cullThisWatchdog = false;
     boolean activeTasks = true;
@@ -133,18 +132,22 @@ public class WatchdogWorkerImpl {
       cullThisWatchdog = BackendActionsTable.updateWatchdogStart(wd, cc);
       formSubmissionsMap.clear();
 
-      UploadSubmissions uploadSubmissions = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+      UploadSubmissions uploadSubmissions = (UploadSubmissions) cc
+          .getBean(BeanDefs.UPLOAD_TASK_BEAN);
       CsvGenerator csvGenerator = (CsvGenerator) cc.getBean(BeanDefs.CSV_BEAN);
       KmlGenerator kmlGenerator = (KmlGenerator) cc.getBean(BeanDefs.KML_BEAN);
       WorksheetCreator worksheetCreator = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
       FormDelete formDelete = (FormDelete) cc.getBean(BeanDefs.FORM_DELETE_BEAN);
       PurgeOlderSubmissions purgeSubmissions = (PurgeOlderSubmissions) cc
           .getBean(BeanDefs.PURGE_OLDER_SUBMISSIONS_BEAN);
+      JsonFileGenerator jsonGenerator = (JsonFileGenerator) cc.getBean(BeanDefs.JSON_FILE_BEAN);
       boolean foundActiveTasks = false;
       // NOTE: do not short-circuit these check actions...
       foundActiveTasks = foundActiveTasks | checkFormServiceCursors(uploadSubmissions, cc);
-      foundActiveTasks = foundActiveTasks | checkPersistentResults(csvGenerator, kmlGenerator, cc);
-      foundActiveTasks = foundActiveTasks | checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
+      foundActiveTasks = foundActiveTasks
+          | checkPersistentResults(csvGenerator, kmlGenerator, jsonGenerator, cc);
+      foundActiveTasks = foundActiveTasks
+          | checkMiscTasks(worksheetCreator, formDelete, purgeSubmissions, cc);
       activeTasks = foundActiveTasks;
     } finally {
       // NOTE: if the above threw an exception, we re-start the watchdog.
@@ -154,11 +157,12 @@ public class WatchdogWorkerImpl {
     }
   }
 
-  private boolean checkFormServiceCursors(
-      UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKExternalServiceException,
-      ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData {
+  private boolean checkFormServiceCursors(UploadSubmissions uploadSubmissions, CallingContext cc)
+      throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException,
+      ODKIncompleteSubmissionData {
 
-    Date olderThanDate = new Date(System.currentTimeMillis() - BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
+    Date olderThanDate = new Date(System.currentTimeMillis()
+        - BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
     List<FormServiceCursor> fscList = FormServiceCursor.queryFormServiceCursorRelation(
         olderThanDate, cc);
     boolean activeTasks = false;
@@ -167,36 +171,55 @@ public class WatchdogWorkerImpl {
         // TODO: should handle resume-initiate somehow?
         continue;
       }
-      if (fsc.getOperationalStatus() == OperationalStatus.PAUSED ) {
-        activeTasks = true;
-        ExternalServiceType type = fsc.getExternalServiceType();
-        long backoffInterval = 60000L; // 1 minute
-        switch ( type ) {
-        case GOOGLE_SPREADSHEET:
-          backoffInterval = SpreadsheetConsts.BACKOFF_DELAY_MILLISECONDS;
-          break;
-        case JSON_SERVER:
-          backoffInterval = JsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
-          break;
-        case OHMAGE_JSON_SERVER:
-          backoffInterval = OhmageJsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
-          break;
-        case GOOGLE_FUSIONTABLES:
-          backoffInterval = FusionTableConsts.BACKOFF_DELAY_MILLISECONDS;
-          break;
-        case REDCAP_SERVER:
-          backoffInterval = REDCapServerConsts.BACKOFF_DELAY_MILLISECONDS;
-          break;
-        default:
-          this.logger.equals("Unrecognized ExternalServiceType: " + type.name());
+      OperationalStatus opStatus = fsc.getOperationalStatus();
+      if (opStatus == OperationalStatus.PAUSED || opStatus == OperationalStatus.ACTIVE_PAUSE) {
+        // when PAUSED, retry the publisher at most **twice** every idle-watchdog retry interval
+        // (every 7.5 minutes). NOTE: This only happens if there are other active publishers and a
+        // flow of new submissions into the system (whether or not they submit into the table being
+        // published).  If there are no new submissions, this backoff results in the publisher
+        // being re-run less often -- i.e., once every idle-watchdog retry interval (every 15 minutes).
+        long backoffInterval =
+            ( BackendActionsTable.IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS -
+              PersistConsts.MAX_SETTLE_MILLISECONDS ) / 2L; // slop
+        // but, if ACTIVE_PAUSE, ...
+        if (opStatus == OperationalStatus.ACTIVE_PAUSE) {
+          // we want the watchdog to run more frequently than its idling interval
+          activeTasks = true;
+          // and we want a shorter backoff interval (e.g., 60 seconds)
+          ExternalServiceType type = fsc.getExternalServiceType();
+          switch (type) {
+          case GOOGLE_SPREADSHEET:
+            backoffInterval = SpreadsheetConsts.BACKOFF_DELAY_MILLISECONDS;
+            break;
+          case JSON_SERVER:
+            backoffInterval = JsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
+            break;
+          case OHMAGE_JSON_SERVER:
+            backoffInterval = OhmageJsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
+            break;
+          case GOOGLE_FUSIONTABLES:
+            backoffInterval = FusionTableConsts.BACKOFF_DELAY_MILLISECONDS;
+            break;
+          case REDCAP_SERVER:
+            backoffInterval = REDCapServerConsts.BACKOFF_DELAY_MILLISECONDS;
+            break;
+          default:
+            backoffInterval = 60000L; // 1 minute
+            this.logger.equals("No explicit backoff delay set for ExternalServiceType: "
+                + type.name() + " therefore using default");
+          }
         }
-        if ( fsc.getLastUpdateDate().getTime() + backoffInterval < System.currentTimeMillis() ) {
-          fsc.setOperationalStatus(OperationalStatus.ACTIVE);
+
+        if (fsc.getLastUpdateDate().getTime() + backoffInterval < System.currentTimeMillis()) {
+          // the paused task needs to be moved into ACTIVE_RETRY
+          activeTasks = true;
+          opStatus = OperationalStatus.ACTIVE_RETRY;
+          fsc.setOperationalStatus(OperationalStatus.ACTIVE_RETRY);
           cc.getDatastore().putEntity(fsc, cc.getCurrentUser());
         }
       }
 
-      if (fsc.getOperationalStatus() != OperationalStatus.ACTIVE) {
+      if (!(opStatus == OperationalStatus.ACTIVE || opStatus == OperationalStatus.ACTIVE_RETRY)) {
         // TODO: should handle resume-initiate somehow?
         continue;
       }
@@ -244,9 +267,9 @@ public class WatchdogWorkerImpl {
 
   /**
    * Determine whether the form has recently-completed submissions that have not
-   * yet been published.  Use a cache of SubmissionMetadata to minimize queries
-   * against the database in the case where there are many publishers for a given
-   * table.
+   * yet been published. Use a cache of SubmissionMetadata to minimize queries
+   * against the database in the case where there are many publishers for a
+   * given table.
    *
    * @param fsc
    * @param uploadSubmissions
@@ -273,23 +296,22 @@ public class WatchdogWorkerImpl {
 
     // determine whether we should make this publisher active
     boolean makeActive = false;
-    if ( metadata != null &&
-         metadata.markedAsCompleteDate.compareTo(fsc.getEstablishmentDateTime()) >= 0 ) {
+    if (metadata != null
+        && metadata.markedAsCompleteDate.compareTo(fsc.getEstablishmentDateTime()) >= 0) {
       // submissions have occurred after the establishment time
       Date limit = fsc.getLastStreamingCursorDate();
-      if ( limit == null ) {
+      if (limit == null) {
         // streaming hasn't started yet...
         makeActive = true;
       } else {
         // streaming has started
         int cmpDates = metadata.markedAsCompleteDate.compareTo(limit);
-        if ( cmpDates > 0 ) {
+        if (cmpDates > 0) {
           // the latest submission is more recent than that last streamed
           makeActive = true;
-        } else if ( cmpDates == 0 ) {
+        } else if (cmpDates == 0) {
           // the latest submission is at the same time as that last streamed
-          if ( fsc.getLastStreamingKey() == null ||
-               !metadata.uri.equals(fsc.getLastStreamingKey()) ) {
+          if (fsc.getLastStreamingKey() == null || !metadata.uri.equals(fsc.getLastStreamingKey())) {
             // the latest submission is not the one last streamed.
             makeActive = true;
           }
@@ -297,7 +319,7 @@ public class WatchdogWorkerImpl {
       }
     }
 
-    if ( makeActive ) {
+    if (makeActive) {
       // there is work to do
       uploadSubmissions.createFormUploadTask(fsc, false, cc);
       return true;
@@ -308,7 +330,8 @@ public class WatchdogWorkerImpl {
   }
 
   private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
-      CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+      JsonFileGenerator jsonGenerator, CallingContext cc) throws ODKDatastoreException,
+      ODKFormNotFoundException {
     try {
       logger.info("Checking all persistent results");
       boolean activeTasks = false;
@@ -320,8 +343,8 @@ public class WatchdogWorkerImpl {
         persistentResult.persist(cc);
         IForm form = FormFactory.retrieveFormByFormId(persistentResult.getFormId(), cc);
         if (!form.hasValidFormDefinition()) {
-          logger.warn("Form of stalled task is ill-formed: " +
-              persistentResult.getSubmissionKey() + " formId: " + persistentResult.getFormId());
+          logger.warn("Form of stalled task is ill-formed: " + persistentResult.getSubmissionKey()
+              + " formId: " + persistentResult.getFormId());
           continue; // skip this and move on...
         }
         activeTasks = true;
@@ -331,6 +354,14 @@ public class WatchdogWorkerImpl {
           break;
         case KML:
           kmlGenerator.createKmlTask(form, persistentResult, attemptCount, cc);
+          break;
+        case JSONFILE:
+          jsonGenerator.createJsonFileTask(form, persistentResult.getSubmissionKey(), attemptCount,
+              cc);
+          break;
+        default:
+          this.logger.equals("No generator defined for Persisted Result Type: "
+              + persistentResult.getResultType().name());
           break;
         }
       }

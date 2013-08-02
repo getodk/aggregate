@@ -74,18 +74,6 @@ public interface ExternalService {
   public void initiate(CallingContext cc) throws ODKExternalServiceException, ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException;
 
   /**
-   * (re-)share the published files with the specified ownerEmail. The publisher
-   * may or may not support management of who has access to the published files.
-   * If it does, this API can be used to allow other parties to see the data.
-   *
-   * @param ownerEmail
-   * @param cc
-   * @throws ODKDatastoreException
-   * @throws ODKExternalServiceException
-   */
-  public void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException;
-
-  /**
    * get the FormServiceCursor for this external service connection.
    *
    * @return

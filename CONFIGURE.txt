@@ -90,6 +90,13 @@ toggle the App Engine SDK between the default and specific settings (to make a r
 (7) Select eclipse-aggregate-gae project.
 
 Click on the red toolbox (GWT compile) to compile the GWT Java code into javascript.
+For the Project, specify 'eclipse-gae-project'. This should auto-populate the 
+'Entry Point Modules' section and highlight 'AggregateUI'.  If not, click Add and 
+choose 'AggregateUI' as the entry point module to compile. If you ever need to browse
+to this, it is located under:
+
+  Package: org.opendatakit.aggregate
+  Filename: AggregateUI.gwt.xml
 
 (8) Running:
 

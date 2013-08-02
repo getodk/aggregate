@@ -385,7 +385,18 @@ public final class FormServiceCursor extends CommonFieldsBase {
     }
   }
 
-   public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate,
+  /**
+   * Retrieve the list of FormServiceCursor objects that have not been updated
+   * more recently than the olderThanDate.  I.e., old ones that might need to
+   * be kicked into action.
+   *
+   * @param olderThanDate
+   * @param cc
+   * @return
+   * @throws ODKEntityNotFoundException
+   * @throws ODKOverQuotaException
+   */
+  public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate,
          CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
       List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
       try {
@@ -412,6 +423,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
        switch (fsc.getExternalServiceType()) {
        case GOOGLE_FUSIONTABLES:
          return new FusionTable(fsc, form, cc);
+       case GOOGLE_MAP_ENGINE:
+         return new GoogleMapEngine(fsc, form, cc);
        case GOOGLE_SPREADSHEET:
          return new GoogleSpreadsheet(fsc, form, cc);
        case JSON_SERVER:
