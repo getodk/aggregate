@@ -56,12 +56,12 @@ public class DiffServiceImpl implements DiffService {
     // TODO re-do permissions stuff
     //af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
-    /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
+    /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) { */
       rows = dm.getRowsSince(dataEtag);
-    } else {*/
+    /*} else {
       List<Scope> scopes = AuthFilter.getScopes(cc);
       rows = dm.getRowsSince(dataEtag, scopes);
-    //}
+    }*/
     return getResources(rows);
   }
 

@@ -34,6 +34,8 @@ public class DbLogTable {
   public static final String ROW_VERSION = "ROW_VERSION";
   public static final String DATA_ETAG_AT_MODIFICATION =
       "DATA_ETAG_AT_MODIFICATION";
+  // we need to maintain a global sequence value within the log table
+  public static final String SEQUENCE_VALUE = "SEQUENCE_VALUE";
   public static final String CREATE_USER = "CREATE_USER";
   public static final String LAST_UPDATE_USER = "LAST_UPDATE_USER";
   public static final String FILTER_TYPE = "FILTER_TYPE";
@@ -47,6 +49,9 @@ public class DbLogTable {
     .setIndexable(IndexType.HASH));
     dataFields.add(new DataField(ROW_VERSION, DataType.STRING, false));
     dataFields.add(new DataField(DATA_ETAG_AT_MODIFICATION, DataType.STRING,
+        false)
+        .setIndexable(IndexType.HASH));
+    dataFields.add(new DataField(SEQUENCE_VALUE, DataType.STRING,
         false)
         .setIndexable(IndexType.ORDERED));
     dataFields.add(new DataField(CREATE_USER, DataType.STRING, true));
