@@ -18,10 +18,12 @@
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- do not upgrade to 1.7.3 - http://code.google.com/p/googleappengine/issues/detail?id=8294 -->
-		<gooogle.appengine.sdk.version>1.6.6</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
+		<gooogle.appengine.sdk.version>1.8.0</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
+		<gae.version>${gooogle.appengine.sdk.version}</gae.version>
 		<google.gdata.version>1.47.1</google.gdata.version>
-		<google.api-client.version>1.12.0-beta</google.api-client.version>
-		<google.gwt.version>2.5.0</google.gwt.version>
+		<google.api-client.version>1.15.0-rc</google.api-client.version>
+		<google.api-services-drive.version>v2-rev85-1.15.0-rc</google.api-services-drive.version>
+		<google.gwt.version>2.5.1</google.gwt.version>
         <org.jboss.resteasy.version>2.3.4.Final</org.jboss.resteasy.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.12.4</maven.surefire.report.plugin.version>
@@ -30,8 +32,8 @@
 		<maven.failsafe.plugin.version>2.12.4</maven.failsafe.plugin.version>
 		<cargo.maven2.plugin.version>1.3.1</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.7</build.helper.maven.plugin.version>
-		<gwt.maven.plugin.version>2.5.0</gwt.maven.plugin.version>
-		<maven.gae.plugin.version>0.9.4</maven.gae.plugin.version>
+		<gwt.maven.plugin.version>2.5.1</gwt.maven.plugin.version>
+		<maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
 		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
 		<maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
 		<maven.war.plugin.version>2.3</maven.war.plugin.version>
@@ -387,6 +389,13 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
+		  <groupId>com.google.apis</groupId>
+		  <artifactId>google-api-services-drive</artifactId>
+		  <version>${google.api-services-drive.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
 		  <groupId>com.google.code.gson</groupId>
 		  <artifactId>gson</artifactId>
 		  <version>2.1</version>
@@ -408,6 +417,13 @@
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
+ 		  <groupId>com.google.http-client</groupId>
+		  <artifactId>google-http-client-appengine</artifactId>
+		  <version>${google.api-client.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
 		  <groupId>com.google.http-client</groupId>
 		  <artifactId>google-http-client-jackson</artifactId>
 		  <version>${google.api-client.version}</version>
@@ -417,6 +433,13 @@
 		<dependency>
 		  <groupId>com.google.oauth-client</groupId>
 		  <artifactId>google-oauth-client</artifactId>
+		  <version>${google.api-client.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.google.oauth-client</groupId>
+		  <artifactId>google-oauth-client-appengine</artifactId>
 		  <version>${google.api-client.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
@@ -809,7 +832,7 @@
 		<dependency>
 			<groupId>xpp3</groupId>
 			<artifactId>xpp3</artifactId>
-			<version>1.1.3.3</version>
+			<version>1.1.4c</version>
 		</dependency>
         <!-- for odktables api -->
 		<dependency>
@@ -1008,6 +1031,11 @@
 					<dependencies>
 						<dependency>	
 							<groupId>com.google.gwt</groupId>
+							<artifactId>gwt-codeserver</artifactId>
+							<version>${google.gwt.version}</version>
+						</dependency>
+						<dependency>	
+							<groupId>com.google.gwt</groupId>
 							<artifactId>gwt-user</artifactId>
 							<version>${google.gwt.version}</version>
 						</dependency>
@@ -1020,6 +1048,12 @@
 							<groupId>javax.validation</groupId>
 							<artifactId>validation-api</artifactId>
 							<version>1.0.0.GA</version>
+						</dependency>
+						<dependency>
+							<groupId>javax.validation</groupId>
+							<artifactId>validation-api</artifactId>
+							<version>1.0.0.GA</version>
+							<classifier>sources</classifier>
 						</dependency>
 					</dependencies>
 					<executions>
