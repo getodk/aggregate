@@ -57,21 +57,22 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 	    try {
 		    DataManager dm = new DataManager(tableId, cc);
 		    AuthFilter af = new AuthFilter(tableId, cc);
-		    af.checkPermission(TablePermission.READ_ROW);
+		    // TODO: fix this once permissions are working...
+//		    af.checkPermission(TablePermission.READ_ROW);
 		    List<Row> rows;
-		    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
+//		    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
 		      rows = dm.getRowsSince(dataEtag);
-		    } else {
-		      List<Scope> scopes = AuthFilter.getScopes(cc);
-		      rows = dm.getRowsSince(dataEtag, scopes);
-		    }
+//		    } else {
+//		      List<Scope> scopes = AuthFilter.getScopes(cc);
+//		      rows = dm.getRowsSince(dataEtag, scopes);
+//		    }
 		    return transformRows(rows);
 	    } catch (ODKDatastoreException e) {
 	    	e.printStackTrace();
 	    	throw new DatastoreFailureException(e);
-	    } catch (PermissionDeniedException e) {
-	    	e.printStackTrace();
-	    	throw new PermissionDeniedExceptionClient(e);
+//	    } catch (PermissionDeniedException e) {
+//	    	e.printStackTrace();
+//	    	throw new PermissionDeniedExceptionClient(e);
 	    }
 	}
 
