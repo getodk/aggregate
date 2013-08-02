@@ -17,13 +17,16 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,10 +52,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpMediaType;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.drive.Drive;
@@ -233,7 +238,18 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
     HttpContent entity = null;
     if (statement != null) {
       if (isFTQuery) {
-        url.set("sql", statement);
+        Map<String,String> formContent = new HashMap<String,String>();
+        formContent.put("sql", statement);
+        UrlEncodedContent urlEntity = new UrlEncodedContent(formContent);
+        entity = urlEntity;
+        HttpMediaType t = urlEntity.getMediaType();
+        if ( t != null ) {
+          t.setCharsetParameter(Charset.forName(FusionTableConsts.FUSTABLE_ENCODE));
+        } else {
+          t = new HttpMediaType("application", "x-www-form-urlencoded");
+          t.setCharsetParameter(Charset.forName(FusionTableConsts.FUSTABLE_ENCODE));
+          urlEntity.setMediaType(t);
+        }
       } else {
         // the alternative -- using ContentType.create(,) throws an exception???
         // entity = new StringEntity(statement, "application/json", UTF_8);
