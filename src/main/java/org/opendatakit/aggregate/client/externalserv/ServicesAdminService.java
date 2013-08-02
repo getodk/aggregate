@@ -16,11 +16,9 @@
 
 package org.opendatakit.aggregate.client.externalserv;
 
-
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
-import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
@@ -33,7 +31,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * servers (e.g., Google Fusion Tables or Google Spreadsheets).
  *
  * @author mitchellsundt@gmail.com
- * @author wbrunette@gmail.com
  *
  */
 @RemoteServiceRelativePath("servicesadminservice")
@@ -43,8 +40,6 @@ public interface ServicesAdminService extends RemoteService {
 
   String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
-  String createMapEngine(String formId, ExternalServicePublicationOption esOption, String assetId, String geopoint, GmePhotoHostType gmePhotoHostType, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
@@ -58,6 +53,4 @@ public interface ServicesAdminService extends RemoteService {
   void restartPublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-
-  GmeSettings getGoogleMapEngineSettings(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 }

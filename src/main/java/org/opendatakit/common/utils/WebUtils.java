@@ -15,7 +15,6 @@ package org.opendatakit.common.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -31,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.javarosa.core.model.utils.DateUtils;
-import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
@@ -379,28 +377,11 @@ public class WebUtils {
     return b.toString();
   }
 
-  public static String readResponse( HttpResponse resp ) throws IOException {
+  public static String readResponse( HttpResponse resp ) {
+    StringBuffer response = new StringBuffer();
 
     HttpEntity e = resp.getEntity();
     if ( e != null ) {
-        return WebUtils.readResponseHelper(e.getContent());
-    }
-    
-    return BasicConsts.EMPTY_STRING;
-  }
-  
-  public static String readGoogleResponse(com.google.api.client.http.HttpResponse resp ) throws IOException {
-    if (resp != null ) {
-        return WebUtils.readResponseHelper(resp.getContent());
-    } 
-    
-    return BasicConsts.EMPTY_STRING;
-  }
-  
-  private static String readResponseHelper(InputStream content) {
-    StringBuffer response = new StringBuffer();
-
-    if (content != null) {
       // TODO: this section of code is possibly causing 'WARNING: Going to buffer
       // response body of large or unknown size. Using getResponseBodyAsStream
       // instead is recommended.'
@@ -409,7 +390,7 @@ public class WebUtils {
       BufferedReader reader = null;
       InputStreamReader isr = null;
       try {
-        reader = new BufferedReader(isr = new InputStreamReader(content, HtmlConsts.UTF8_ENCODE));
+        reader = new BufferedReader(isr = new InputStreamReader(e.getContent(), HtmlConsts.UTF8_ENCODE));
         String responseLine;
         while ((responseLine = reader.readLine()) != null) {
           response.append(responseLine);
@@ -439,6 +420,4 @@ public class WebUtils {
     }
     return response.toString();
   }
-  
-
 }

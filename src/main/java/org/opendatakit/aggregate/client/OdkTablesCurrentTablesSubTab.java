@@ -21,6 +21,7 @@ import java.util.List;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 

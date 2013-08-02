@@ -20,7 +20,6 @@ import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.AbstractPopupBase;
-import org.opendatakit.aggregate.client.popups.OdkTablesConfirmDeleteRowPopup;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

@@ -13,29 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.submission;
+package org.opendatakit.aggregate.externalservice;
+
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 
 /**
- * Common base class to SubmissionSet, SubmissionValue
  * 
- * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
+ * @author mitchellsundt@gmail.com
  * 
  */
-public interface SubmissionElement {
+final class TableId {
 
-	  /**
-	   * Get Property Name
-	   * 
-	   * @return property name
-	   */
-	  public String getPropertyName();
+  private final String id;
 
-	  /**
-	   * Perform a left-to-right depth-first traversal of the submission.
-	   * 
-	   * @param visitor to invoke on each element in the submission.
-	   * @return true if the traversal should end (short-circuit) immediately.
-	   */
-	  public boolean depthFirstTraversal( SubmissionVisitor visitor );
+  private final FormElementModel element;
+
+  public TableId(String id, FormElementModel element) {
+    this.id = id;
+    this.element = element;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public FormElementModel getElement() {
+    return element;
+  }
 }
