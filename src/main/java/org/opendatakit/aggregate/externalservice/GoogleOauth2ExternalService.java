@@ -43,7 +43,9 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
+import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.SecurityUtils;
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -113,7 +115,9 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       if (currentStatus == OperationalStatus.ACTIVE || currentStatus == OperationalStatus.ACTIVE_RETRY) {
         fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
         try {
-          persist(cc);
+          Datastore ds = cc.getDatastore();
+          User user = cc.getCurrentUser();
+          ds.putEntity(fsc, user);
         } catch (Exception e1) {
           oauth2logger.error("Unable to persist bad credentials status" + e1.toString());
           throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
