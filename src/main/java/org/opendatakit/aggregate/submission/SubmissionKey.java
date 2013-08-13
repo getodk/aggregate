@@ -110,11 +110,19 @@ public class SubmissionKey {
 
       int idx = remainder.indexOf(SubmissionKeyPart.K_CLOSE_BRACKET_SLASH);
       if (idx == -1) {
-        throw new IllegalStateException("Did not find [@key=...]/ within SubmissionKey: " + key);
+        int endIndex = remainder.length()-1;
+        char lastChar = remainder.charAt(endIndex);
+        if(lastChar == ']') {
+          firstPart = remainder.substring(0, endIndex + 1);
+          remainder = remainder.substring(endIndex + 1);
+        } else {
+          throw new IllegalStateException("Did not find [@key=...]/ within SubmissionKey: " + key);
+        }
+      } else {
+        firstPart = remainder.substring(0, idx + 1);
+        remainder = remainder.substring(idx + SubmissionKeyPart.K_CLOSE_BRACKET_SLASH.length());
       }
-      firstPart = remainder.substring(0, idx + 1);
-      remainder = remainder.substring(idx + SubmissionKeyPart.K_CLOSE_BRACKET_SLASH.length());
-
+        
       // firstPart is the elementname[@key=...] string
       stringParts.add(firstPart);
     }
