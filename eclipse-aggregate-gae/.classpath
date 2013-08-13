@@ -24,12 +24,13 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-3.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-meta-3.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gin-1.5.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-client-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-appengine-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.15.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-appengine-1.15.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-client-1.16.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-services-drive-v2-rev93-1.16.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-1.16.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-appengine-1.16.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.16.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.16.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-appengine-1.16.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gson-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guava-jdk5-13.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
@@ -102,7 +103,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/google-api-services-drive-v2-rev85-1.15.0-rc.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
