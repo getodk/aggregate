@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
@@ -36,7 +51,7 @@ public class FileServiceImpl implements FileService {
   private static final Log LOGGER = LogFactory.getLog(FileServiceImpl.class);
   
   /** String to stand in for those things in the app's root directory. */
-  private static final String DEFAULT_TABLE_ID = "defaultTableId";
+  public static final String DEFAULT_TABLE_ID = "defaultTableId";
   
   private static final String PATH_DELIMITER = "/";
 
@@ -111,11 +126,7 @@ public class FileServiceImpl implements FileService {
       }
       fileBlob = blobEntitySet.getBlob(1, cc);
       contentType = blobEntitySet.getContentType(1, cc);
-//      contentType = dbTableFiles.getBlobEntitySet(wholePath, cc)
-//          .getContentType(1, cc);
       contentLength = blobEntitySet.getContentLength(1, cc);
-//      contentLength = dbTableFiles.getBlobEntitySet(wholePath, cc)
-//          .getContentLength(1, cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
