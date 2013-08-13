@@ -110,6 +110,12 @@ public class DbTableFileInfo {
         .equal(APP_ID, appId).execute();
   }
   
+  public static List<Entity> queryForAppAndTable(String appId, String tableId,
+      CallingContext cc) throws ODKDatastoreException {
+    return getRelation(cc).query("DbTableFileInfo.queryForAppAndTable()", cc)
+        .equal(APP_ID, appId).equal(TABLE_ID, tableId).execute();
+  }
+  
   public static List<Entity> queryForEntity(String appId, String tableId, 
       String wholePath, CallingContext cc) throws ODKDatastoreException {
     return getRelation(cc).query(
