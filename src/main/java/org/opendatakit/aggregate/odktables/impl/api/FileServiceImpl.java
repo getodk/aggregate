@@ -87,16 +87,7 @@ public class FileServiceImpl implements FileService {
     String appId = segments.get(0).toString();
     String tableId = getTableIdFromPathSegments(segments);
     // Now construct the whole path.
-    StringBuilder sb = new StringBuilder();
-    int i = 0;
-    for (PathSegment segment : segments) {
-      sb.append(segment.toString());
-      if (i < segments.size() - 1) {
-        sb.append(PATH_DELIMITER);
-      }
-      ++i;
-    }
-    String wholePath = sb.toString();
+    String wholePath = constructPathFromSegments(segments);
     
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
     String downloadAsAttachmentString = 
@@ -189,28 +180,7 @@ public class FileServiceImpl implements FileService {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
           FileService.ERROR_MSG_UNRECOGNIZED_APP_ID + appId);
     }
-    // Now construct up the path from the segments.
-    // We are NOT going to include the app id. Therefore if you upload a file
-    // with a path of appid/myDir/myFile.html, the path will be stored as 
-    // myDir/myFile.html. This is so that when you get the filename on the 
-    // manifest, it won't matter what is the root directory of your app on your
-    // device. Otherwise you might have to strip the first path segment or do
-    // something similar.
-    StringBuilder sb = new StringBuilder();
-    int i = 0;
-    for (PathSegment segment : segments) {
-      if (i == 0) {
-        i++;
-        continue;
-      }
-      sb.append(segment.toString());
-      if (i < segments.size() - 1) {
-        sb.append(PATH_DELIMITER);
-      }
-      i++;
-    }
-    String wholePath = sb.toString();
-    
+    String wholePath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
     try {
       // Process the file.
@@ -257,6 +227,37 @@ public class FileServiceImpl implements FileService {
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
     }
+  }
+  
+  /**
+   * Construct the path for the file. This is the entire path excluding the app
+   * id.
+   * @param segments
+   * @return
+   */
+  private String constructPathFromSegments(List<PathSegment> segments) {
+    // Now construct up the path from the segments.
+    // We are NOT going to include the app id. Therefore if you upload a file
+    // with a path of appid/myDir/myFile.html, the path will be stored as 
+    // myDir/myFile.html. This is so that when you get the filename on the 
+    // manifest, it won't matter what is the root directory of your app on your
+    // device. Otherwise you might have to strip the first path segment or do
+    // something similar.
+    StringBuilder sb = new StringBuilder();
+    int i = 0;
+    for (PathSegment segment : segments) {
+      if (i == 0) {
+        i++;
+        continue;
+      }
+      sb.append(segment.toString());
+      if (i < segments.size() - 1) {
+        sb.append(PATH_DELIMITER);
+      }
+      i++;
+    }
+    String wholePath = sb.toString();
+    return wholePath;
   }
   
   /**
