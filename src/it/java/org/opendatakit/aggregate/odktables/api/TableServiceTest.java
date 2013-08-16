@@ -7,7 +7,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.entity.api.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.web.client.HttpClientErrorException;
 
 public class TableServiceTest extends AbstractServiceTest {

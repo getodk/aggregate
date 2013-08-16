@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -47,32 +47,32 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Describes everything about the database representation of a given xform as
- * extracted by javarosa during parsing of the xform and as backed by the 
+ * extracted by javarosa during parsing of the xform and as backed by the
  * FormDataModel within the persistence layer.  The form definition begins
- * with the SubmissionAssocationTable record that maps a particular 
+ * with the SubmissionAssocationTable record that maps a particular
  * (form id, model version, ui version) to a particular database representation.
  * That table also contains flags for the state of the database representation
  * and whether or not submissions are accepted into that representation.
  * All other flags and metadata associated with the xform will be stored
  * separately in the form information table.
- * 
+ *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- * 
+ *
  */
 public class FormDefinition {
-	
+
 	private static final Log logger = LogFactory.getLog(FormDefinition.class.getName());
 
 	/**
 	 * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.
 	 * If forms are deleted and reloaded, they get a different key each time.
 	 * The key is defined in the SubmissionAssociationTable.
-	 * 
+	 *
 	 * NOTE: should only be accessed via synchronized methods to get or remove forms.
 	 */
 	private static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
-	
+
 	/** the entity that defines the mapping of the form id to this data model */
 	private final SubmissionAssociationTable submissionAssociation;
 	/** list of all the elements in this submission definition */
@@ -88,14 +88,14 @@ public class FormDefinition {
 
 	private FormDataModel topLevelGroup = null;
 	private FormElementModel topLevelGroupElement = null;
-	
+
 	private final String qualifiedTopLevelTable;
 	private final String formId;
-	
+
 	public static final class OrdinalSequence {
 		Long ordinal;
 		int sequenceCounter;
-		
+
 		OrdinalSequence() {
 			ordinal = 1L;
 			sequenceCounter = 1;
@@ -137,37 +137,37 @@ public class FormDefinition {
 		}
 	    return sa;
 	}
-	
+
 	/**
 	 * Traverse the form data model and assertRelation() on all the backing objects.
 	 * Called from within the synchronized getFormDefinition() static method.
-	 * 
+	 *
 	 * @param m
 	 * @param objs
 	 * @param cc
 	 * @throws ODKDatastoreException
 	 */
-	private static final void assertBackingObjects( FormDataModel m, 
+	private static synchronized final void assertBackingObjects( FormDataModel m,
 	    Set<CommonFieldsBase> objs, CallingContext cc ) throws ODKDatastoreException {
 	  CommonFieldsBase obj = m.getBackingObjectPrototype();
 	  if ( obj != null && !objs.contains(obj) ) {
 	    objs.add(obj);
 	    cc.getDatastore().assertRelation(obj, cc.getCurrentUser());
 	  }
-	  
+
 	  for ( FormDataModel c : m.getChildren() ) {
 	    assertBackingObjects(c, objs, cc);
 	  }
 	}
-	
+
 	/**
-	 * Synchronized access to the formDefinitions map.  Synchronization is only required for the 
-	 * put operation on the map, but also aids in efficient quota usage during periods of intense start-up. 
-	 * 
+	 * Synchronized access to the formDefinitions map.  Synchronization is only required for the
+	 * put operation on the map, but also aids in efficient quota usage during periods of intense start-up.
+	 *
 	 * @param xformParameters  -- the form id, version and ui version of a form definition.
 	 * @param uriSubmissionDataModel -- the uri of the definition specification.
 	 * @param cc
-	 * @return The definition.  The uriSubmissionDataModel is used to ensure that the 
+	 * @return The definition.  The uriSubmissionDataModel is used to ensure that the
 	 * 			currently valid definition of a form is being used (should the form be
 	 * 			deleted then reloaded).
 	 */
@@ -195,7 +195,7 @@ public class FormDefinition {
 
 			    // try to retrieve based upon this uri...
 			    FormDefinition fd = formDefinitions.get(uriSubmissionDataModel);
-			    if ( fd != null ) { 
+			    if ( fd != null ) {
 			    	// found it...
 			    	return fd;
 			    } else {
@@ -204,12 +204,12 @@ public class FormDefinition {
 					Query query = ds.createQuery(fdm, "FormDefinition.getFormDefinition", user);
 					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
 					fdmList = query.executeQuery();
-					
+
 					if ( fdmList == null || fdmList.size() == 0 ) {
 				    	logger.warn("No FDM records for formId " + formId);
 						return null;
 					}
-					
+
 					// try to construct the fd...
 					try {
 						fd = new FormDefinition(sa, formId, fdmList, cc);
@@ -253,7 +253,7 @@ public class FormDefinition {
 	public FormDefinition(SubmissionAssociationTable sa, String formId, List<?> formDataModelList, CallingContext cc) {
 		this.submissionAssociation = sa;
 		this.formId = formId;
-		
+
 		// map of tableName to map of columnName, FDM record
 		Map<String, Map<String, FormDataModel >> eeMap = new HashMap< String, Map<String, FormDataModel>>();
 
@@ -282,7 +282,7 @@ public class FormDefinition {
 					}
 				} else {
 					// should be either a structured field (e.g., geopoint),
-					// group or repeat element or 
+					// group or repeat element or
 					// one of the auxiliary table types.
 					// assume it is for now; will throw an exception later...
 					switch ( type ) {
@@ -309,10 +309,10 @@ public class FormDefinition {
 				mfdm.put(column, m);
 			}
 		}
-		
+
 		// stitch up data model's parent and child links...
-		// everything has a parent except the top-level group and 
-		// long string text ref tables, which refer to the 
+		// everything has a parent except the top-level group and
+		// long string text ref tables, which refer to the
 		// key into the form_info table...
 		int nullParentCount = 0;
 		for ( FormDataModel m : elementList ) {
@@ -323,7 +323,7 @@ public class FormDefinition {
 				m.print(System.err);
 				throw new IllegalStateException(str);
 			}
-			
+
 			FormDataModel p = uriMap.get(uriParent);
 			if ( p != null ) {
 				m.setParent(p);
@@ -350,17 +350,17 @@ public class FormDefinition {
 		for ( FormDataModel m : elementList ) {
 			m.validateChildren();
 		}
-		
-		// OK.  we have the list of tables, map of fqn's, 
-		// form name, non-repeat groups, geopoints, and 
+
+		// OK.  we have the list of tables, map of fqn's,
+		// form name, non-repeat groups, geopoints, and
 		// fully linked map of parent and children.
-		
+
 		// Now construct the descriptions of the tables
 		// that represent this form.
 		backingTableMap = new HashMap<String, DynamicCommonFieldsBase>();
 		for ( FormDataModel m : tableList ) {
 			String tableName = (String) m.getPersistAsQualifiedTableName();
-			
+
 			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			if ( b != null ) {
 				throw new IllegalStateException("Backing table already linked back: " + tableName);
@@ -388,7 +388,7 @@ public class FormDefinition {
 			}
 			backingTableMap.put(tableName, b);
 		}
-		
+
 
 		for ( FormDataModel m : groupList ) {
 			if ( m.getPersistAsTable() == null ) {
@@ -416,7 +416,7 @@ public class FormDefinition {
 						break;
 					}
 					FormDataModel parent = current.getParent();
-					if ( parent != null && 
+					if ( parent != null &&
 						 ( !current.getPersistAsQualifiedTableName().equals(parent.getPersistAsQualifiedTableName())) ) {
 						// backing tables are different -- not equivalent!
 						equivalentToTopLevelGroup = false;
@@ -438,7 +438,7 @@ public class FormDefinition {
 		// set the backing object for the geopointList.
 		// Geopoint value fields are all stored within the same table...
 		// if the backing table was not yet defined by the groupList loop
-		// above, then the backing table will never be equivalent to 
+		// above, then the backing table will never be equivalent to
 		// a top-level group.
 		for ( FormDataModel m : geopointList ) {
 			if ( m.getPersistAsTable() == null ) {
@@ -454,13 +454,13 @@ public class FormDefinition {
 		}
 
 		// and now handle the primitive data elements in the main form...
-		// all the backing tables must have been created at this point, 
+		// all the backing tables must have been created at this point,
 		// so it is a logic error if we find one that isn't.
 		for ( Map.Entry<String, Map<String, FormDataModel>> e : eeMap.entrySet() ) {
 			String tableName = e.getKey();
 			DynamicCommonFieldsBase b = backingTableMap.get(tableName);
 			Collection<FormDataModel> c = e.getValue().values();
-			
+
 			// we should have created all the backing tables in the previous
 			// two loops.  If not, it is a logic error.
 			if ( b == null ) {
@@ -492,7 +492,7 @@ public class FormDefinition {
 					if ( name == null ) name = "--blank--";
 					throw new IllegalStateException("Element: " + name + "uri: " + m.getUri() + "Unexpected data type: " + m.getElementType().toString());
 				}
-				
+
 				DataField dfd = null;
 				dfd = new DataField(m.getPersistAsColumn(), dataType, true);
 				b.addDataField(dfd);
@@ -500,7 +500,7 @@ public class FormDefinition {
 				m.setBackingObject(b);
 			}
 		}
-		
+
 		if ( topLevelGroup == null ) {
 			throw new IllegalStateException("Top level group could not be found");
 		}
@@ -510,7 +510,7 @@ public class FormDefinition {
 		}
 
 		qualifiedTopLevelTable = topLevelGroup.getPersistAsQualifiedTableName();
-		
+
 		topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
 	}
 
@@ -530,37 +530,37 @@ public class FormDefinition {
 					ds.putEntity(sa, user);
 					// forget us in the local cache...
 				    forget(sa.getUriSubmissionDataModel());
-				    
+
 				    String uriSubmissionDataModel = sa.getUriSubmissionDataModel();
-				    
+
 			    	// retrieve it...
 				    FormDataModel fdm = FormDataModel.assertRelation(cc);
 					Query query = ds.createQuery(fdm, "FormDefinition.deleteAbnormalModel", user);
 					query.addFilter(FormDataModel.URI_SUBMISSION_DATA_MODEL, FilterOperation.EQUAL, uriSubmissionDataModel);
 					fdmList = query.executeQuery();
-						
+
 					if ( fdmList == null || fdmList.size() == 0 ) {
 						return;
 					}
-	
+
 					// delete the form data model...
 					List<EntityKey> eks = new ArrayList<EntityKey>();
 				    for ( CommonFieldsBase m : fdmList ) {
 						eks.add(m.getEntityKey());
 				    }
 				    ds.deleteEntities(eks, user);
-				    
+
 				    // and delete the SA record
 				    ds.deleteEntity(sa.getEntityKey(), user);
 				    // just in case...
 				    forget(uriSubmissionDataModel);
-				    
+
 				    // and see if we have anything more to clean up...
 				    sa = getSubmissionAssociation( formId, true, cc );
 				}
-			    
+
 			    // we don't delete the data tables -- the user may want to manually recover the data
-			    
+
 			} catch (ODKDatastoreException e) {
 		    	logger.warn("Persistence Layer failure deleting abnormal form definition " + e.getMessage() + " for formId " + formId);
 			}
@@ -596,42 +596,42 @@ public class FormDefinition {
 	    		e.printStackTrace();
 	    	}
 	    }
-		
+
 		// delete the SA table linking to the model (orphans the model)...
 		ds.deleteEntity(submissionAssociation.getEntityKey(), user);
 		// forget us in the local cache (optimization...)
 	    forget(submissionAssociation.getUriSubmissionDataModel());
 	}
-	
+
 	public void persistSubmissionAssociation(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
-		// the only mutable part of the form definition is the 
+		// the only mutable part of the form definition is the
 		// submission association table's flags...
 		User user = cc.getCurrentUser();
 		Datastore ds = cc.getDatastore();
 		ds.putEntity(submissionAssociation, user);
 	}
-	
+
 	public boolean getIsSubmissionAllowed() {
 		return submissionAssociation.getIsSubmissionAllowed();
 	}
-	
+
 	public void setIsSubmissionAllowed(Boolean value) {
 		submissionAssociation.setIsSubmissionAllowed(value);
 	}
-	
+
 	/**
 	 * Get the top-level group for this form.
-	 * 
+	 *
 	 * @return
 	 */
 	public final FormDataModel getTopLevelGroup() {
 		return topLevelGroup;
 	}
-	
+
 	public final FormElementModel getTopLevelGroupElement() {
 		return topLevelGroupElement;
 	}
-	
+
 	public final FormElementModel getElementByName(String name) {
 		String[] path = name.split("/");
 		FormElementModel m = topLevelGroupElement;
@@ -640,15 +640,15 @@ public class FormDefinition {
 			if ( first ) {
 				first = false;
 				// first entry can be form id...
-				if ( formId.equals(p) ) continue; 
+				if ( formId.equals(p) ) continue;
 			}
 
 			m = getElementByNameHelper(m, p);
 			if ( m == null ) return null;
 		}
-		return m;		
+		return m;
 	}
-	
+
 	private final FormElementModel getElementByNameHelper(FormElementModel group, String name) {
 		if ( group.getElementName() != null && group.getElementName().equals(name)) {
 			return group;
@@ -660,15 +660,15 @@ public class FormDefinition {
 		}
 		return null;
 	}
-	
+
 	public final String getQualifiedTopLevelTable() {
 		return qualifiedTopLevelTable;
 	}
-	
+
 	public CommonFieldsBase getQualifiedTable(String qualifiedTableName) {
 		return backingTableMap.get(qualifiedTableName);
 	}
-	
+
 	public Collection<? extends CommonFieldsBase> getBackingTableSet() {
 		return backingTableMap.values();
 	}
@@ -676,7 +676,7 @@ public class FormDefinition {
 	public SubmissionAssociationTable getSubmissionAssociation() {
 		return submissionAssociation;
 	}
-	
+
 	public String getFormId() {
 		return formId;
 	}

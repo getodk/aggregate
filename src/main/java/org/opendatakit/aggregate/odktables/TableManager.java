@@ -22,15 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
-import org.opendatakit.aggregate.odktables.entity.Column;
-import org.opendatakit.aggregate.odktables.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.entity.Scope;
-import org.opendatakit.aggregate.odktables.entity.TableDefinition;
-import org.opendatakit.aggregate.odktables.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.entity.TableRole;
-import org.opendatakit.aggregate.odktables.entity.api.TableType;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
@@ -39,6 +33,13 @@ import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
+import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
@@ -127,6 +128,10 @@ public class TableManager {
    */
   private List<TableEntry> getTableEntries(List<Entity> entries)
       throws ODKDatastoreException {
+    if ( entries == null || entries.size() == 0 ) {
+      List<TableEntry> fetchedEntries = new ArrayList<TableEntry>();
+      return fetchedEntries;
+    }
     // get table names
     List<String> tableIds = new ArrayList<String>();
     for (Entity entry : entries) {
@@ -343,6 +348,7 @@ public class TableManager {
       Relation.deleteEntities(entities, cc);
       table.dropRelation(cc);
       logTable.dropRelation(cc);
+      DbKeyValueStore.clearAllEntries(tableId, cc);
     } finally {
       propsLock.release();
       dataLock.release();

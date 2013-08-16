@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -39,9 +39,9 @@ import org.opendatakit.common.web.CallingContext;
  * Base class for user-defined relations. The constructors assume that the name
  * of the table is UPPER_CASE only, as are the names of the DataFields in the
  * relation.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class Relation {
 
@@ -65,7 +65,7 @@ public class Relation {
   /**
    * Standard constructor. Use for tables your application knows about and
    * manipulates directly.
-   * 
+   *
    * @param tableName
    *          must be UPPER_CASE beginning with an upper case letter. The actual
    *          table name in the datastore will have 3 leading underscores.
@@ -95,12 +95,12 @@ public class Relation {
    * everything. Aggregate, for example, ensures that submission tables start
    * with an alphabetic character, and that internal tracking tables start with
    * a leading underscore ('_').
-   * 
+   *
    * TableNames cannot collide if their namespaces are different. Namespaces
    * should be short 2-4 character prefixes. The overall length of the table
    * names in the database are limited to about 64 characters, so you want to
    * use short names.
-   * 
+   *
    * @param namespace
    *          must be UPPER_CASE beginning with an upper case letter.
    * @param tableName
@@ -136,7 +136,7 @@ public class Relation {
    * This is primarily for accessing the existing tables of form submissions or
    * the Aggregate internal data model. If you aren't accessing those, you
    * should not be using this constructor.
-   * 
+   *
    * @param type
    * @param tableName
    * @param fields
@@ -199,7 +199,7 @@ public class Relation {
   /**
    * Create a new entity. This entity does not exist in the database until you
    * put() it there.
-   * 
+   *
    * @param cc
    * @return
    */
@@ -213,7 +213,7 @@ public class Relation {
   /**
    * Create a new entity. This entity does not exist in the database until you
    * put() it there.
-   * 
+   *
    * @param uri
    *          the primary key for this new entity. The key must be a string less
    *          than 80 characters long. It should be in a URI-style format --
@@ -221,7 +221,7 @@ public class Relation {
    *          followed by a string in that namespace. The default is a uri in
    *          the UUID namespace. You can construct one of these UUID uris using
    *          CommonFieldsBase.newUri().
-   * 
+   *
    *          Those are of the form: "uuid:371adf05-3cea-4e11-b56c-3b3a1ec25761"
    * @param cc
    * @return
@@ -241,7 +241,7 @@ public class Relation {
 
   /**
    * Fetch the entity with the given primary key (uri).
-   * 
+   *
    * @param uri
    * @param cc
    * @return
@@ -258,7 +258,7 @@ public class Relation {
 
   /**
    * Creates an empty query which can be used to query this relation.
-   * 
+   *
    * @return an empty Query.
    */
   public Query query(String loggingContextTag, CallingContext cc) {
@@ -274,7 +274,7 @@ public class Relation {
    * This deletes all records in your table and drops it from the datastore. The
    * deletion step is non-optimal for MySQL/Postgresql, but is required for
    * Google BigTables, as that has no concept of dropping a relation.
-   * 
+   *
    * @param cc
    * @throws ODKDatastoreException
    */
@@ -299,7 +299,7 @@ public class Relation {
   /**
    * Retrieve the DataField that matches the given fieldName. Useful when
    * working with a dynamically-constructed table.
-   * 
+   *
    * @param fieldName
    * @return
    */
@@ -336,9 +336,9 @@ public class Relation {
 
   /**
    * The backing object for the Entity.
-   * 
+   *
    * @author mitchellsundt@gmail.com
-   * 
+   *
    */
   protected static class RelationImpl extends CommonFieldsBase {
 
@@ -359,9 +359,9 @@ public class Relation {
 
   /**
    * Implementation of the Entity interface.
-   * 
+   *
    * @author mitchellsundt@gmail.com
-   * 
+   *
    */
   protected class EntityImpl implements Entity {
 
@@ -370,7 +370,7 @@ public class Relation {
 
     /**
      * Constructor used only be RelationManipulator
-     * 
+     *
      * @param backingObject
      */
     public EntityImpl(RelationImpl backingObject) {
@@ -578,7 +578,7 @@ public class Relation {
 
     /**
      * Save this entity into the datastore.
-     * 
+     *
      * @param cc
      * @throws ODKEntityPersistException
      * @throws ODKOverQuotaException
@@ -593,7 +593,7 @@ public class Relation {
 
     /**
      * Remove this entity from the datastore.
-     * 
+     *
      * @param cc
      * @throws ODKDatastoreException
      */
@@ -610,10 +610,10 @@ public class Relation {
      * debugging mismatched uses of DataFields. DataField equality is '=='
      * equivalence. You must use the same DataField as that used when creating
      * the relation.
-     * 
+     *
      * Use {@link Relation.getDataField(String fieldName)} to retrieve the
      * DataField for a given field name.
-     * 
+     *
      * @param fieldName
      * @return
      */
@@ -641,7 +641,7 @@ public class Relation {
    * Note that the fields: _URI, _LAST_UPDATE_DATE, _LAST_UPDATE_URI_USER,
    * _CREATION_DATE, _CREATOR_URI_USER are always present and should not be
    * passed into the fields list.
-   * 
+   *
    * @param fields
    * @param cc
    * @throws ODKDatastoreException
@@ -681,15 +681,17 @@ public class Relation {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     String schema = ds.getDefaultSchemaName();
-    RelationImpl candidate = new RelationImpl(schema, backingTableName, definedFields);
-    ds.assertRelation(candidate, user);
-    prototype = candidate;
+    synchronized (Relation.class) {
+      RelationImpl candidate = new RelationImpl(schema, backingTableName, definedFields);
+      ds.assertRelation(candidate, user);
+      prototype = candidate;
+    }
   }
 
   /**
    * This is just a convenience method. It may fail midway through saving the
    * list of entities.
-   * 
+   *
    * @param eList
    * @param cc
    * @throws ODKEntityPersistException
@@ -711,7 +713,7 @@ public class Relation {
   /**
    * This is just a convenience function. It can fail after having deleted only
    * some of the entities.
-   * 
+   *
    * @param eList
    * @param cc
    * @throws ODKDatastoreException

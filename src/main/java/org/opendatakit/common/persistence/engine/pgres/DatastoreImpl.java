@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -42,20 +42,28 @@ import org.opendatakit.common.security.User;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
-  private static final int MAX_COLUMN_NAME_LEN = 64;
-  private static final int MAX_TABLE_NAME_LEN = 60; // reserve 4 char for idx name
+  // issue 868 - PostgreSQL apparently has a 63-character limit on its column
+  // names.
+  private static final int MAX_COLUMN_NAME_LEN = 63;
+  // issue 868 - assume this is also true of table names...
+  private static final int MAX_TABLE_NAME_LEN = 59; // reserve 4 char for idx
+                                                    // name
 
   private final DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
   private DataSource dataSource = null;
+  private DataSourceTransactionManager tm = null;
 
   private static final Long MAX_BLOB_SIZE = 65536 * 4096L;
   private String schemaName = null;
@@ -65,6 +73,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   public void setDataSource(DataSource dataSource) {
     this.dataSource = dataSource;
+    this.tm = new DataSourceTransactionManager(dataSource);
   }
 
   public void setSchemaName(String schemaName) {
@@ -276,7 +285,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       throw new IllegalStateException("Unexpected data type");
     }
   }
-  
+
   void recordQueryUsage(CommonFieldsBase relation, int recCount) {
     dam.recordQueryUsage(relation, recCount);
   }
@@ -300,12 +309,13 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     return MAX_TABLE_NAME_LEN;
   }
 
-  private final boolean updateRelation(CommonFieldsBase relation) {
+  private final boolean updateRelation(JdbcTemplate jc, CommonFieldsBase relation,
+      String originalStatement) {
 
     String qs = TableDefinition.TABLE_DEF_QUERY;
     List<?> columns;
-    columns = getJdbcConnection().query(qs,
-        new Object[] { relation.getSchemaName(), relation.getTableName() }, tableDef);
+    columns = jc.query(qs, new Object[] { relation.getSchemaName(), relation.getTableName() },
+        tableDef);
     dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS, columns.size());
 
     if (columns.size() > 0) {
@@ -322,8 +332,25 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       for (DataField f : relation.getFieldList()) {
         TableDefinition d = map.get(f.getName());
         if (d == null) {
+          StringBuilder b = new StringBuilder();
+          if (originalStatement == null) {
+            b.append(" Retrieving expected definition (");
+            boolean first = true;
+            for (DataField field : relation.getFieldList()) {
+              if (!first) {
+                b.append(K_CS);
+              }
+              first = false;
+              b.append(field.getName());
+            }
+            b.append(")");
+          } else {
+            b.append(" Created with: ");
+            b.append(originalStatement);
+          }
           throw new IllegalStateException("did not find expected column " + f.getName()
-              + " in table " + relation.getSchemaName() + "." + relation.getTableName());
+              + " in table " + relation.getSchemaName() + "." + relation.getTableName()
+              + b.toString());
         }
         if (f.getDataType() == DataField.DataType.BOOLEAN
             && d.getDataType() == DataField.DataType.STRING) {
@@ -375,12 +402,31 @@ public class DatastoreImpl implements Datastore, InitializingBean {
    */
   @Override
   public void assertRelation(CommonFieldsBase relation, User user) throws ODKDatastoreException {
+    JdbcTemplate jc = getJdbcConnection();
+    TransactionStatus status = null;
     try {
+      DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
+
+      // do serializable read on the information schema...
+      paramTransactionDefinition
+          .setIsolationLevel(DefaultTransactionDefinition.ISOLATION_SERIALIZABLE);
+      paramTransactionDefinition.setReadOnly(true);
+      status = tm.getTransaction(paramTransactionDefinition);
+
       // see if relation already is defined and update it with dimensions...
-      if (updateRelation(relation)) {
+      if (updateRelation(jc, relation, null)) {
         // it exists -- we're done!
+        tm.commit(status);
+        status = null;
         return;
       } else {
+        tm.commit(status);
+        // Try a new transaction to create the table
+        paramTransactionDefinition
+            .setIsolationLevel(DefaultTransactionDefinition.ISOLATION_SERIALIZABLE);
+        paramTransactionDefinition.setReadOnly(false);
+        status = tm.getTransaction(paramTransactionDefinition);
+
         // need to create the table...
         StringBuilder b = new StringBuilder();
         b.append(K_CREATE_TABLE);
@@ -474,28 +520,37 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         }
         b.append(K_CLOSE_PAREN);
 
-        getJdbcConnection().execute(b.toString());
+        String createTableStmt = b.toString();
+        LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + createTableStmt);
+
+        jc.execute(createTableStmt);
+        LogFactory.getLog(DatastoreImpl.class).info(
+            "create table success (before updateRelation): " + relation.getTableName());
 
         String idx;
         // create other indicies
         for (DataField f : relation.getFieldList()) {
           if ((f.getIndexable() != IndexType.NONE) && (f != relation.primaryKey)) {
             idx = relation.getTableName() + "_" + shortPrefix(f.getName());
-            createIndex(relation, idx, f);
+            createIndex(jc, relation, idx, f);
           }
         }
 
         // and update the relation with actual dimensions...
-        updateRelation(relation);
+        updateRelation(jc, relation, createTableStmt);
+        tm.commit(status);
       }
     } catch (Exception e) {
+      if (status != null) {
+        tm.rollback(status);
+      }
       throw new ODKDatastoreException(e);
     }
   }
 
   /**
    * Construct a 3-character or more prefix for use in the index name.
-   * 
+   *
    * @param name
    * @return
    */
@@ -513,7 +568,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     return b.toString().toLowerCase();
   }
 
-  private void createIndex(CommonFieldsBase tbl, String idxName, DataField field) {
+  private void createIndex(JdbcTemplate jc, CommonFieldsBase tbl, String idxName, DataField field) {
     StringBuilder b = new StringBuilder();
 
     b.append(K_CREATE_INDEX);
@@ -537,7 +592,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     b.append(K_BQ);
     b.append(" )");
 
-    getJdbcConnection().execute(b.toString());
+    jc.execute(b.toString());
   }
 
   @Override
@@ -571,7 +626,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   /***************************************************************************
    * Entity manipulation APIs
-   * 
+   *
    */
 
   @SuppressWarnings("unchecked")

@@ -22,13 +22,13 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.entity.api.Error;
-import org.opendatakit.aggregate.odktables.entity.api.Error.ErrorType;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.rest.entity.Error;
+import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 
 @Provider
 public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesException> {

@@ -65,9 +65,14 @@ public class DbOdkSettingsStrings {
 		dataFields.add(new DataField(STRING, DataType.STRING, false));
 	}
 
-	public static Relation getRelation(CallingContext cc) throws ODKDatastoreException {
-		Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
-		return relation;
+	private static Relation theRelation = null;
+
+	public static synchronized Relation getRelation(CallingContext cc) throws ODKDatastoreException {
+	  if ( theRelation == null) {
+	    Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
+	    theRelation = relation;
+	  }
+	  return theRelation;
 	}
 
 	/**

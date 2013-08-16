@@ -356,7 +356,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     return MAX_TABLE_NAME_LEN;
   }
 
-  private final boolean updateRelation(CommonFieldsBase relation) {
+  private final boolean updateRelation(CommonFieldsBase relation, String originalStatement) {
 
     Map<String, ShowDefinition> defns = ShowDefinition.query(relation.getSchemaName(),
         relation.getTableName(), getJdbcConnection(), dam);
@@ -370,8 +370,25 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       for (DataField f : relation.getFieldList()) {
         ShowDefinition d = defns.get(f.getName());
         if (d == null) {
+          StringBuilder b = new StringBuilder();
+          if ( originalStatement == null ) {
+            b.append(" Retrieving expected definition (");
+              boolean first = true;
+              for (DataField field : relation.getFieldList()) {
+                if ( !first ) {
+                  b.append(K_CS);
+                }
+                first = false;
+                b.append(field.getName());
+              }
+            b.append(")");
+          } else {
+            b.append(" Created with: ");
+            b.append(originalStatement);
+          }
           throw new IllegalStateException("did not find expected column " + f.getName()
-              + " in table " + relation.getSchemaName() + "." + relation.getTableName());
+              + " in table " + relation.getSchemaName() + "." + relation.getTableName() +
+              b.toString());
         }
         if (f.getDataType() == DataField.DataType.BOOLEAN
             && d.getDataType() == DataField.DataType.STRING) {
@@ -427,7 +444,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     try {
       LogFactory.getLog(DatastoreImpl.class).info("before updateRelation: " + relation.getTableName());
       // see if relation already is defined and update it with dimensions...
-      if (updateRelation(relation)) {
+      if (updateRelation(relation, null)) {
         // it exists -- we're done!
         return;
       } else {
@@ -545,12 +562,13 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         }
         b.append(K_CLOSE_PAREN);
 
-        LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + b.toString());
-        getJdbcConnection().execute(b.toString());
+        String createTableStmt = b.toString();
+        LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + createTableStmt);
+        getJdbcConnection().execute(createTableStmt);
         LogFactory.getLog(DatastoreImpl.class).info("create table success (before updateRelation): " + relation.getTableName());
 
         // and update the relation with actual dimensions...
-        updateRelation(relation);
+        updateRelation(relation, createTableStmt);
       }
     } catch (Exception e) {
       LogFactory.getLog(DatastoreImpl.class).warn("Failure: " + relation.getTableName() + " exception: " + e.toString());

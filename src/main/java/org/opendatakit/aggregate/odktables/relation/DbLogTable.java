@@ -66,7 +66,7 @@ public class DbLogTable {
     return getRelation(tableId, fields, cc);
   }
 
-  private static Relation getRelation(String tableId, List<DataField> fields,
+  private static synchronized Relation getRelation(String tableId, List<DataField> fields,
       CallingContext cc)
       throws ODKDatastoreException {
     tableId += "_LOG";

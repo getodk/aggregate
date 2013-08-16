@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
 
-import org.opendatakit.aggregate.odktables.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.simpleframework.xml.Element;
 
 /**

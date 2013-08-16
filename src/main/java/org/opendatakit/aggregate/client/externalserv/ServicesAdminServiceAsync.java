@@ -17,35 +17,40 @@
 package org.opendatakit.aggregate.client.externalserv;
 
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServicesAdminServiceAsync {
 
-  void getExternalServices(String formid,
-        AsyncCallback<ExternServSummary[]> callback);
+  void getExternalServices(String formid, AsyncCallback<ExternServSummary[]> callback);
 
-	void createFusionTable(String formId, ExternalServicePublicationOption esOption,
+  void createFusionTable(String formId, ExternalServicePublicationOption esOption,
       String ownerEmail, AsyncCallback<String> callback);
 
-	void createGoogleSpreadsheet(String formId, String name,
-			ExternalServicePublicationOption esOption, String ownerEmail,
-			AsyncCallback<String> callback);
+  void createMapEngine(String formId, ExternalServicePublicationOption esOption, String assetId,
+      String geopoint, GmePhotoHostType gmePhotoHostType, String ownerEmail,
+      AsyncCallback<String> callback);
 
-   void createSimpleJsonServer(String formId, String authKey, String url,
-	      ExternalServicePublicationOption es, String ownerEmail, AsyncCallback<String> callback);
+  void createGoogleSpreadsheet(String formId, String name,
+      ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
-	void createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp,
+  void createSimpleJsonServer(String formId, String authKey, String url,
+      ExternalServicePublicationOption es, String ownerEmail, AsyncCallback<String> callback);
+
+  void createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp,
       String user, String hashedPassword, String url, ExternalServicePublicationOption es,
       String ownerEmail, AsyncCallback<String> callback);
 
   void createRedCapServer(String formId, String apiKey, String url,
-	      ExternalServicePublicationOption esOption, String ownerEmail,
-	      AsyncCallback<String> callback);
+      ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
   void deletePublisher(String uri, AsyncCallback<Boolean> callback);
 
   void restartPublisher(String uri, AsyncCallback<Void> callback);
 
   void updateApiKeyAndRestartPublisher(String uri, String apiKey, AsyncCallback<Void> callback);
+
+  void getGoogleMapEngineSettings(String formId, AsyncCallback<GmeSettings> callback);
+
 }

@@ -18,13 +18,12 @@ package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
 
-import org.opendatakit.aggregate.client.form.MediaFileSummary;
-
 /**
  * Represents a summary of a file that has been uploaded to be associated with
  * a table.
  * <p>
- * Modeled on {@link MediaFileSummary}
+ * Modeled on (keep this fully qualified!)
+ * {@link org.opendatakit.aggregate.client.form.MediaFileSummary}
  * @author sudar.sam@gmail.com
  *
  */

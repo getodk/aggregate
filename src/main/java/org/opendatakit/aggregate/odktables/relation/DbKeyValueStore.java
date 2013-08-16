@@ -54,14 +54,20 @@ public class DbKeyValueStore {
     dataFields.add(new DataField(ASPECT, DataType.STRING, false));
     dataFields.add(new DataField(KEY, DataType.STRING, false));
     dataFields.add(new DataField(TYPE, DataType.STRING, false));
-    dataFields.add(new DataField(VALUE, DataType.LONG_STRING, true, 32000L));
+    // NOTE: 19200L is due to a limitation in MySQL
+    dataFields.add(new DataField(VALUE, DataType.STRING, true, 19200L));
   }
 
-  public static Relation getRelation(CallingContext cc)
+  private static Relation theRelation = null;
+
+  public static synchronized Relation getRelation(CallingContext cc)
       throws ODKDatastoreException {
-    Relation relation =
+    if ( theRelation == null ) {
+      Relation relation =
         new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
-    return relation;
+      theRelation = relation;
+    }
+    return theRelation;
   }
 
   /**
