@@ -22,7 +22,7 @@ public class TableConstants {
   // tablename is chosen by user...
   public static final String ID = "id";
   public static final String ROW_ID = "id";
-  public static final String URI_USER = "uri_user";
+  public static final String URI_ACCESS_CONTROL = "uri_access_control";
   public static final String SYNC_TAG = "sync_tag";
   public static final String SYNC_STATE = "sync_state";
   public static final String TRANSACTIONING = "transactioning";
@@ -65,7 +65,7 @@ public class TableConstants {
   static {
     SHARED_COLUMN_NAMES = new HashSet<String>();
     CLIENT_ONLY_COLUMN_NAMES = new HashSet<String>();
-    SHARED_COLUMN_NAMES.add(URI_USER);
+    SHARED_COLUMN_NAMES.add(URI_ACCESS_CONTROL);
     SHARED_COLUMN_NAMES.add(TIMESTAMP);
     SHARED_COLUMN_NAMES.add(FORM_ID);
     SHARED_COLUMN_NAMES.add(INSTANCE_NAME);

@@ -169,6 +169,7 @@ public class FileManifestManager {
       String urlPartial = cc.getServerURL() + BasicConsts.FORWARDSLASH + 
           ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + 
           BasicConsts.FORWARDSLASH +  FileService.SERVLET_PATH + 
+          BasicConsts.FORWARDSLASH + appId +
           BasicConsts.FORWARDSLASH + pathToFile;
       String urlComplete = HtmlUtil.createLinkWithProperties(urlPartial, 
           properties);
