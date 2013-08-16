@@ -36,17 +36,19 @@ import org.apache.http.NameValuePair;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
+import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.security.SecurityUtils;
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
@@ -113,7 +115,9 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       if (currentStatus == OperationalStatus.ACTIVE || currentStatus == OperationalStatus.ACTIVE_RETRY) {
         fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
         try {
-          persist(cc);
+          Datastore ds = cc.getDatastore();
+          User user = cc.getCurrentUser();
+          ds.putEntity(fsc, user);
         } catch (Exception e1) {
           oauth2logger.error("Unable to persist bad credentials status" + e1.toString());
           throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
@@ -244,17 +248,17 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
         entity = urlEntity;
         HttpMediaType t = urlEntity.getMediaType();
         if ( t != null ) {
-          t.setCharsetParameter(Charset.forName(FusionTableConsts.FUSTABLE_ENCODE));
+          t.setCharsetParameter(Charset.forName(HtmlConsts.UTF8_ENCODE));
         } else {
           t = new HttpMediaType("application", "x-www-form-urlencoded");
-          t.setCharsetParameter(Charset.forName(FusionTableConsts.FUSTABLE_ENCODE));
+          t.setCharsetParameter(Charset.forName(HtmlConsts.UTF8_ENCODE));
           urlEntity.setMediaType(t);
         }
       } else {
         // the alternative -- using ContentType.create(,) throws an exception???
         // entity = new StringEntity(statement, "application/json", UTF_8);
         entity = new ByteArrayContent("application/json",
-            statement.getBytes(FusionTableConsts.FUSTABLE_ENCODE));
+            statement.getBytes(HtmlConsts.UTF8_ENCODE));
       }
     }
 
