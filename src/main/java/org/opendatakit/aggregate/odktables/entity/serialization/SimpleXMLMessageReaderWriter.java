@@ -33,6 +33,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
+import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
 import org.simpleframework.xml.Serializer;
 
 @Produces("text/xml")

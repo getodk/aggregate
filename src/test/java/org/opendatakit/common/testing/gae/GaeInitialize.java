@@ -27,7 +27,7 @@ class GaeInitialize implements ICommonTestSetup {
 
     private final LocalServiceTestHelper helper =
         new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
-          .setDefaultHighRepJobPolicyUnappliedJobPercentage(20).setStoreDelayMs(800));
+        .setDefaultHighRepJobPolicyUnappliedJobPercentage(00).setStoreDelayMs(0));
 
     public Environment gaeEnvironment = null;
 

@@ -30,6 +30,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 
 /**
  * Super basic test to see if the jackson library worked as expected.
@@ -47,6 +49,8 @@ public class ManifestTest {
 	public void toJson() throws JsonGenerationException, JsonMappingException, IOException {
 		OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
 		entry.key = "list";
+		entry.partition = null;
+		entry.aspect = "brother_of_skyrim_weapons";
 		entry.tableId = "this-is-a-uuid";
 		entry.value = "{greetings, I am a json string (no i'm not) }";
 		entry.type = "file";
@@ -54,6 +58,8 @@ public class ManifestTest {
 		OdkTablesKeyValueStoreEntry entry2 = new OdkTablesKeyValueStoreEntry();
 		entry2.key = "box";
 		entry2.tableId = "this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND";
+		entry2.partition = "foo";
+		entry2.aspect = "sister_of_skyrim_weapons";
 		entry2.value = "guess what's in the box...";
 		entry2.type = "surprise";
 
@@ -64,7 +70,7 @@ public class ManifestTest {
 		OdkTablesKeyValueManifestManager manifest = new OdkTablesKeyValueManifestManager();
 		manifest.addEntries(entryList);
 
-		assertEquals("[{\"tableId\":\"this-is-a-uuid\",\"tableName\":\"brother_of_skyrim_weapons\",\"key\":\"list\",\"type\":\"file\",\"value\":\"{greetings, I am a json string (no i'm not) }\"},{\"tableId\":\"this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND\",\"tableName\":\"sister_of_skyrim_weapons\",\"key\":\"box\",\"type\":\"surprise\",\"value\":\"guess what's in the box...\"}]",
+		assertEquals("[{\"tableId\":\"this-is-a-uuid\",\"partition\":null,\"aspect\":\"brother_of_skyrim_weapons\",\"key\":\"list\",\"type\":\"file\",\"value\":\"{greetings, I am a json string (no i'm not) }\"},{\"tableId\":\"this-is-a-uuid-TIMES-ONE-FREAKING-THOUSAND\",\"partition\":\"foo\",\"aspect\":\"sister_of_skyrim_weapons\",\"key\":\"box\",\"type\":\"surprise\",\"value\":\"guess what's in the box...\"}]",
 				manifest.getManifestForTesting());
 	}
 
@@ -81,7 +87,7 @@ public class ManifestTest {
 		//System.out.println(jsonManifest);
 		//String singleEntry = "{\"tableId\":\"b6ca94aa-68e2-4e8f-adf8-94ced5780fe3\",\"tableName\":\"skyrim weapons\",\"key\":\"box\",\"type\":\"file\",\"value\":\"{\"\"testesttest\"\"}\"\"}";
 				//{\"filename\":\"hellodatastore.txt\",\"md5hash\":\"md5:21f818fff26882fc9251a2a7c85e2cb0\",\"downloadUrl\":\"http://172.28.7.25:8888/tableFileDownload?blobKey=uuid%3A9ff2964c-266c-43f9-8d70-79adb281fc67&as_attachment=true\"}\"}";
-		String escapedManifest = "[{\"tableId\":\"b6ca94aa-68e2-4e8f-adf8-94ced5780fe3\",\"tableName\":\"skyrim weapons\",\"key\":\"detail\",\"type\":\"file\",\"value\":\"{\\\"filename\\\":\\\"emailPicsImport.py\\\",\\\"md5hash\\\":\\\"md5:333d7fa21642c1c8f1353d5f854631dd\\\",\\\"downloadUrl\\\":\\\"http://172.28.7.25:8888/tableFileDownload?blobKey=uuid%3A15e8556d-a4a9-456c-ab67-107e2e4dda5d&as_attachment=true\\\"}\"},{\"tableId\":\"b6ca94aa-68e2-4e8f-adf8-94ced5780fe3\",\"tableName\":\"skyrim weapons\",\"key\":\"box\",\"type\":\"file\",\"value\":\"{\\\"filename\\\":\\\"hellodatastore.txt\\\",\\\"md5hash\\\":\\\"md5:21f818fff26882fc9251a2a7c85e2cb0\\\",\\\"downloadUrl\\\":\\\"http://172.28.7.25:8888/tableFileDownload?blobKey=uuid%3A9ff2964c-266c-43f9-8d70-79adb281fc67&as_attachment=true\\\"}\"}]";
+		String escapedManifest = "[{\"tableId\":\"b6ca94aa-68e2-4e8f-adf8-94ced5780fe3\",\"partition\":\"skyrim weapons\",\"aspect\":null,\"key\":\"detail\",\"type\":\"file\",\"value\":\"{\\\"filename\\\":\\\"emailPicsImport.py\\\",\\\"md5hash\\\":\\\"md5:333d7fa21642c1c8f1353d5f854631dd\\\",\\\"downloadUrl\\\":\\\"http://172.28.7.25:8888/tableFileDownload?blobKey=uuid%3A15e8556d-a4a9-456c-ab67-107e2e4dda5d&as_attachment=true\\\"}\"},{\"tableId\":\"b6ca94aa-68e2-4e8f-adf8-94ced5780fe3\",\"partition\":\"skyrim weapons\",\"aspect\":null,\"key\":\"box\",\"type\":\"file\",\"value\":\"{\\\"filename\\\":\\\"hellodatastore.txt\\\",\\\"md5hash\\\":\\\"md5:21f818fff26882fc9251a2a7c85e2cb0\\\",\\\"downloadUrl\\\":\\\"http://172.28.7.25:8888/tableFileDownload?blobKey=uuid%3A9ff2964c-266c-43f9-8d70-79adb281fc67&as_attachment=true\\\"}\"}]";
 		ObjectMapper mapper = new ObjectMapper();
 		TypeReference<ArrayList<OdkTablesKeyValueStoreEntry>> typeRef = new TypeReference<ArrayList<OdkTablesKeyValueStoreEntry>>() {};
 		ArrayList<OdkTablesKeyValueStoreEntry> entries = mapper.readValue(escapedManifest, typeRef);

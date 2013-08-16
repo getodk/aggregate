@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
-import org.opendatakit.aggregate.odktables.entity.Row;
-import org.opendatakit.aggregate.odktables.entity.Scope;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
@@ -34,6 +32,8 @@ import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;
@@ -200,16 +200,18 @@ public class DataManager {
       List<Entity> results = query.execute();
       entities.addAll(results);
     }
+    // TODO: we need to do this differently. Likely need to query for the
+    // record containing the given ETAG then query for records with an
+    // internal server timestamp column more recent than that one.
+    //
     // TODO: this may be broken after switching mod numbers to etag at the time
     // of creation/update--which is what it was really doing but with just a
     // mod number
     Collections.sort(entities, new Comparator<Entity>() {
       public int compare(Entity o1, Entity o2) {
-        Long time1 =
-            Long.parseLong(o1.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
-        Long time2 =
-            Long.parseLong(o2.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
-        return Long.compare(time1,time2);
+        // TODO: this is very much broken.
+        return o1.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION)
+            .compareTo(o2.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
       }
     });
     List<Row> logRows = converter.toRows(entities, columns, true);

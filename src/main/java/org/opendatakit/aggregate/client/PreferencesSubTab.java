@@ -43,7 +43,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private static final String GOOGLE_API_CLIENT_ID_INFO = "<p>Necessary for publishing to Google Spreadsheets and Fusion Tables</p>";
   private static final String FEATURES_LABEL = "<h2>Aggregate Features</h2>";
 
-
   private static final String NEW_SERVICE_ACCOUNT_TXT = "Change Google API Credentials";
   private static final String NEW_SERVICE_ACCOUNT_TOOLTIP_TXT = "Upload NEW Google Simple API Key and Oauth2 Service Account information.";
   private static final String NEW_SERVICE_ACCOUNT_BALLOON_TXT = "Upload a NEW Google Simple API Key and Oauth2 Service Account information to Aggregate.";
@@ -99,17 +98,20 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
     setCredentialValues();
 
-    ServletPopupButton newCredential = new ServletPopupButton(NEW_SERVICE_ACCOUNT_BUTTON_TEXT, NEW_SERVICE_ACCOUNT_TXT,
-        UIConsts.SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR, this, NEW_SERVICE_ACCOUNT_TOOLTIP_TXT, NEW_SERVICE_ACCOUNT_BALLOON_TXT);
+    ServletPopupButton newCredential = new ServletPopupButton(NEW_SERVICE_ACCOUNT_BUTTON_TEXT,
+        NEW_SERVICE_ACCOUNT_TXT, UIConsts.SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR, this,
+        NEW_SERVICE_ACCOUNT_TOOLTIP_TXT, NEW_SERVICE_ACCOUNT_BALLOON_TXT);
     newCredential.setStylePrimaryName(INDENTED_STYLE);
     add(newCredential);
     // add(new UpdateGMapsKeyButton(mapsApiKey));
-    // add(new UpdateGoogleClientCredentialsButton(googleApiClientId.getText()));
+    // add(new
+    // UpdateGoogleClientCredentialsButton(googleApiClientId.getText()));
 
     HTML features = new HTML(FEATURES_LABEL);
     add(features);
 
-    disableFasterBackgroundActions = new DisableFasterBackgroundActionsCheckbox(Preferences.getFasterBackgroundActionsDisabled());
+    disableFasterBackgroundActions = new DisableFasterBackgroundActionsCheckbox(
+        Preferences.getFasterBackgroundActionsDisabled());
     add(disableFasterBackgroundActions);
 
     HTML br = new HTML("<br>");
@@ -121,44 +123,52 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   @Override
   public boolean canLeave() {
-	  return true;
+    return true;
   }
 
   private void setCredentialValues() {
-	String value;
+    String value;
 
-	value = SafeHtmlUtils.fromString(Preferences.getGoogleSimpleApiKey()).asString();
-	if ( value.length() == 0 ) {
-		value = "undefined";
-		simpleApiKey.setStyleName(UNDEFINED_STYLE, true);
-		simpleApiKey.setStyleName(DEFINED_STYLE, false);
-	} else {
-		simpleApiKey.setStyleName(UNDEFINED_STYLE, false);
-		simpleApiKey.setStyleName(DEFINED_STYLE, true);
-	}
+    value = SafeHtmlUtils.fromString(Preferences.getGoogleSimpleApiKey()).asString();
+    if (value.length() == 0) {
+      value = "undefined";
+      simpleApiKey.setStyleName(UNDEFINED_STYLE, true);
+      simpleApiKey.setStyleName(DEFINED_STYLE, false);
+    } else {
+      simpleApiKey.setStyleName(UNDEFINED_STYLE, false);
+      simpleApiKey.setStyleName(DEFINED_STYLE, true);
+    }
     simpleApiKey.setText(value);
 
     value = SafeHtmlUtils.fromString(Preferences.getGoogleApiClientId()).asString();
-	if ( value.length() == 0 ) {
-		value = "undefined";
-		googleApiClientId.setStyleName(UNDEFINED_STYLE, true);
-		googleApiClientId.setStyleName(DEFINED_STYLE, false);
-	} else {
-		googleApiClientId.setStyleName(UNDEFINED_STYLE, false);
-		googleApiClientId.setStyleName(DEFINED_STYLE, true);
-	}
+    if (value.length() == 0) {
+      value = "undefined";
+      googleApiClientId.setStyleName(UNDEFINED_STYLE, true);
+      googleApiClientId.setStyleName(DEFINED_STYLE, false);
+    } else {
+      googleApiClientId.setStyleName(UNDEFINED_STYLE, false);
+      googleApiClientId.setStyleName(DEFINED_STYLE, true);
+    }
     googleApiClientId.setText(value);
   }
 
   @Override
   public void update() {
     Preferences.updatePreferences(new PreferencesCompletionCallback() {
-		@Override
-		public void refreshFromUpdatedPreferences() {
-		    setCredentialValues();
-		    disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
-		    odkTablesEnable.updateValue(Preferences.getOdkTablesEnabled());
-		}
+      @Override
+      public void refreshFromUpdatedPreferences() {
+        setCredentialValues();
+        disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
+        boolean enabled = Preferences.getOdkTablesEnabled();
+        odkTablesEnable.updateValue(enabled);
+        AggregateUI.getUI().updateOdkTablesFeatureVisibility();
+      }
+
+      @Override
+      public void failedRefresh() {
+        // Error message is displayed. Leave everything as-is.
+        AggregateUI.getUI().updateOdkTablesFeatureVisibility();
+      }
     });
   }
 

@@ -23,8 +23,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import org.opendatakit.aggregate.odktables.entity.api.RowResource;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 @Produces(MediaType.TEXT_XML)

@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.client.handlers.RefreshCloseHandler;
 import org.opendatakit.aggregate.client.handlers.RefreshOpenHandler;
 import org.opendatakit.aggregate.client.handlers.RefreshSelectionHandler;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
@@ -54,6 +55,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Widget;
 
 
 public class AggregateUI implements EntryPoint {
@@ -80,10 +82,10 @@ public class AggregateUI implements EntryPoint {
   private static AggregateUI singleton = null;
 
   // session variables for tab visibility
-  public static boolean manageVisible = false;
-  public static boolean adminVisible = false;
-  public static boolean odkTablesVisible = false;
-  
+  private static boolean manageVisible = false;
+  private static boolean adminVisible = false;
+  private static boolean odkTablesVisible = false;
+
   // hack...
   public static final String QUOTA_EXCEEDED = "Quota exceeded";
 
@@ -216,7 +218,6 @@ public class AggregateUI implements EntryPoint {
             // OK. So it failed. If it did, just try doing everything
             // again. We should have a valid session cookie after the
             // first failure, so these should all then work.
-            Preferences.updatePreferences(null);
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
               @Override
@@ -228,7 +229,17 @@ public class AggregateUI implements EntryPoint {
               public void onSuccess(UserSecurityInfo result) {
                 userInfo = result;
                 if (realmInfo != null && userInfo != null) {
-                  commonUserInfoUpdateCompleteAction();
+                  Preferences.updatePreferences(new PreferencesCompletionCallback() {
+
+                    @Override
+                    public void refreshFromUpdatedPreferences() {
+                      commonUserInfoUpdateCompleteAction();
+                    }
+
+                    @Override
+                    public void failedRefresh() {
+                      commonUserInfoUpdateCompleteAction();
+                    }});
                 }
               }
             });
@@ -253,7 +264,6 @@ public class AggregateUI implements EntryPoint {
 
           @Override
           public void onSuccess(RealmSecurityInfo result) {
-            Preferences.updatePreferences(null);
             realmInfo = result;
             // it worked the first time! Now do the user info request.
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
@@ -267,12 +277,53 @@ public class AggregateUI implements EntryPoint {
               public void onSuccess(UserSecurityInfo result) {
                 userInfo = result;
                 if (realmInfo != null && userInfo != null) {
-                  commonUserInfoUpdateCompleteAction();
+                  Preferences.updatePreferences(new PreferencesCompletionCallback() {
+
+                    @Override
+                    public void refreshFromUpdatedPreferences() {
+                      commonUserInfoUpdateCompleteAction();
+                    }
+
+                    @Override
+                    public void failedRefresh() {
+                      commonUserInfoUpdateCompleteAction();
+                    }});
                 }
               }
             });
           }
         });
+  }
+
+  public void updateOdkTablesFeatureVisibility() {
+    if ( authorizedForTab(Tabs.ODKTABLES) ) {
+      odkTablesVisible = Preferences.getOdkTablesEnabled();
+      AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
+      if ( odkTables != null ) {
+        odkTables.setVisible(odkTablesVisible);
+      }
+      for (int i = 0; i < mainNav.getWidgetCount(); i++) {
+        Widget w = mainNav.getWidget(i);
+        if ( w != null && w instanceof OdkTablesTabUI ) {
+          w.setVisible(odkTablesVisible);
+          ((Widget) mainNav.getTabBar().getTab(i)).setVisible(odkTablesVisible);
+        }
+      }
+
+      if ( authorizedForTab(Tabs.ADMIN) ) {
+        AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
+        if (AminTab != null && AminTab instanceof AdminTabUI) {
+          AdminTabUI adminTab = (AdminTabUI) AminTab;
+          if (odkTablesVisible) {
+            adminTab.displayOdkTablesSubTab();
+          } else {
+            adminTab.hideOdkTablesSubTab();
+          }
+        } else {
+          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
+        }
+      }
+    }
   }
 
   private void commonUserInfoUpdateCompleteAction() {
@@ -283,10 +334,10 @@ public class AggregateUI implements EntryPoint {
 
     ManageTabUI management = new ManageTabUI(this);
     addTabToDatastructures(management, Tabs.MANAGEMENT);
-   
+
     OdkTablesTabUI odkTables = new OdkTablesTabUI(this);
     addTabToDatastructures(odkTables, Tabs.ODKTABLES);
-    
+
     AdminTabUI admin = new AdminTabUI(this);
     addTabToDatastructures(admin, Tabs.ADMIN);
 
@@ -301,10 +352,9 @@ public class AggregateUI implements EntryPoint {
         mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
         manageVisible = true;
       }
-      
+
       if (authorizedForTab(Tabs.ODKTABLES)) {
     	  mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
-    	  odkTablesVisible = true;
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
@@ -323,6 +373,8 @@ public class AggregateUI implements EntryPoint {
       mainNav.selectTab(selected);
 
     }
+
+    updateOdkTablesFeatureVisibility();
 
     // AND schedule an async operation to
     // refresh the tabs that are not selected.
@@ -477,8 +529,7 @@ public class AggregateUI implements EntryPoint {
     case ADMIN:
       return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
     case ODKTABLES:
-    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER)
-    	    && Preferences.getOdkTablesEnabled();
+    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
     default:
       return false;
     }

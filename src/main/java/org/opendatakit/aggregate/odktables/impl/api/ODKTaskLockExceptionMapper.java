@@ -22,8 +22,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.entity.api.Error;
-import org.opendatakit.aggregate.odktables.entity.api.Error.ErrorType;
+import org.opendatakit.aggregate.odktables.rest.entity.Error;
+import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 @Provider

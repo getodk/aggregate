@@ -47,7 +47,7 @@ public class PropertiesResourceClient extends TablePropertiesClient
   public PropertiesResourceClient(TablePropertiesClient tableProperties) {
     super();
     setPropertiesEtag(tableProperties.getPropertiesEtag());
-    setTableName(tableProperties.getTableKey());
+    setTableId(tableProperties.getTableId());
     setKeyValueStoreEntries(tableProperties.getKeyValueStoreEntries());
   }
 

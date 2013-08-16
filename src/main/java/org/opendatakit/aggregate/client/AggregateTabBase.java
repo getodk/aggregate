@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.TabPanel;
 public class AggregateTabBase extends TabPanel {
 
   // Navigation
-  private ArrayList<SubTabs> subTabPosition;
+  protected ArrayList<SubTabs> subTabPosition;
 
   protected HashMap<SubTabs, SubTabInterface> subTabMap;
 
