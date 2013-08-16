@@ -6,7 +6,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -27,6 +27,7 @@ public class FileManifestServiceImpl implements FileManifestService {
 
   @Override
   @GET
+  @Produces("application/json")
   public String getFileManifest(@Context ServletContext servletContext, 
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
       @QueryParam (PARAM_APP_ID) String appId,

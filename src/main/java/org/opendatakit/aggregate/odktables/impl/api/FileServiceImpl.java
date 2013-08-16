@@ -54,6 +54,13 @@ public class FileServiceImpl implements FileService {
   public static final String DEFAULT_TABLE_ID = "defaultTableId";
   
   private static final String PATH_DELIMITER = "/";
+  
+  /** 
+   * The name of the folder that contains the files associated with a table in
+   * an app. 
+   * @see #getTableIdFromPathSegments(List)
+   */
+  private static final String TABLES_FOLDER = "tables";
 
   @Override
   @GET
@@ -182,10 +189,20 @@ public class FileServiceImpl implements FileService {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
           FileService.ERROR_MSG_UNRECOGNIZED_APP_ID + appId);
     }
-    // Now construct up the whole path from the segments.
+    // Now construct up the path from the segments.
+    // We are NOT going to include the app id. Therefore if you upload a file
+    // with a path of appid/myDir/myFile.html, the path will be stored as 
+    // myDir/myFile.html. This is so that when you get the filename on the 
+    // manifest, it won't matter what is the root directory of your app on your
+    // device. Otherwise you might have to strip the first path segment or do
+    // something similar.
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (PathSegment segment : segments) {
+      if (i == 0) {
+        i++;
+        continue;
+      }
       sb.append(segment.toString());
       if (i < segments.size() - 1) {
         sb.append(PATH_DELIMITER);
@@ -246,25 +263,24 @@ public class FileServiceImpl implements FileService {
    * Retrieve the table id given the path. The first segment (position 0) is 
    * known to be the app id, as all files must be associated with an app id.
    * Not all files must be associated with a table, however, so it parses 
-   * position 1 to see if it can be a UUID. If so, it assumes it is a table id.
-   * Otherwise it returns the {@link DEFAULT_TABLE_ID}.
+   * to find the table id. Otherwise it returns the {@link DEFAULT_TABLE_ID}.
+   * <p>
+   * The convention is that any table id must be of the form:
+   * /appid/tables/tableid. So the 2nd position (0 indexed) will be the table 
+   * idea if the first position is "tables".
    * @param segments
    * @return
    */
   private String getTableIdFromPathSegments(List<PathSegment> segments) {
     String tableId;
-    if (segments.size() == 2) {
-      // Then the second parameter is the file name, not the id.
+    if (segments.size() <= 3) {
+      // Then we aren't a file name.
       tableId = DEFAULT_TABLE_ID;
-    } else {
+    } else if (segments.get(1).equals(TABLES_FOLDER)){
       // We have to see if it could be a tableId. If it can, then we assume it
       // is a table id. Otherwise we give it the default tableId.
-      try {
-        UUID.fromString(segments.get(1).toString());
-        tableId = segments.get(1).toString();
-      } catch (IllegalArgumentException e) {
-        // Then we can assume it's not a table id and we'll use the real one.
-      }
+      tableId = segments.get(2).toString();
+    } else {
       tableId = DEFAULT_TABLE_ID;
     }
     return tableId;
