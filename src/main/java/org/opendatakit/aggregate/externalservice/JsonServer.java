@@ -18,6 +18,7 @@
 package org.opendatakit.aggregate.externalservice;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  *
@@ -157,7 +159,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     try {
 
       ByteArrayOutputStream baStream = new ByteArrayOutputStream();
-      PrintWriter pWriter = new PrintWriter(baStream);
+      PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(baStream, HtmlConsts.UTF8_ENCODE));
 
       System.out.println("Sending one JSON Submission");
 
