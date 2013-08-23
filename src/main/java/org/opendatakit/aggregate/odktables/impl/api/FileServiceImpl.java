@@ -50,8 +50,10 @@ public class FileServiceImpl implements FileService {
   
   private static final Log LOGGER = LogFactory.getLog(FileServiceImpl.class);
   
-  /** String to stand in for those things in the app's root directory. */
-  public static final String DEFAULT_TABLE_ID = "defaultTableId";
+  /** 
+   * String to stand in for those things in the app's root directory. 
+   */
+  public static final String DEFAULT_TABLE_ID = null;
   
   private static final String PATH_DELIMITER = "/";
   
