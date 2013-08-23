@@ -274,10 +274,11 @@ public class FileServiceImpl implements FileService {
    */
   private String getTableIdFromPathSegments(List<PathSegment> segments) {
     String tableId;
-    if (segments.size() <= 3) {
-      // Then we aren't a file name.
+    if (segments.size() < 4) {
+      // Then we aren't a file name, b/c we're assuming it must be 
+      // appid/tables/tableid/file
       tableId = DEFAULT_TABLE_ID;
-    } else if (segments.get(1).equals(TABLES_FOLDER)){
+    } else if (segments.get(1).toString().equals(TABLES_FOLDER)){
       // We have to see if it could be a tableId. If it can, then we assume it
       // is a table id. Otherwise we give it the default tableId.
       tableId = segments.get(2).toString();
