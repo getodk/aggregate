@@ -73,8 +73,8 @@ public class DbTableFileInfo {
     dataFields = new ArrayList<DataField>();
     dataFields.add(new DataField(APP_ID, DataType.STRING, false)
     .setIndexable(IndexType.HASH));
-    dataFields.add(new DataField(TABLE_ID, DataType.STRING, false)
-        .setIndexable(IndexType.HASH));
+    // can be null because we're 
+    dataFields.add(new DataField(TABLE_ID, DataType.STRING, true));
     dataFields.add(new DataField(PATH_TO_FILE, DataType.STRING, true, 
         20480L));
     // and add the things from DbTable

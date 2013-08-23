@@ -133,7 +133,6 @@ public class EntityCreator {
       String pathToFile, CallingContext cc) throws ODKDatastoreException {
 	  // first do some preliminary checks
 	  Validate.notEmpty(appId);
-	  Validate.notEmpty(tableId);
 	  Validate.notEmpty(pathToFile);
 
 	  Entity entity = DbTableFileInfo.getRelation(cc).newEntity(cc);
