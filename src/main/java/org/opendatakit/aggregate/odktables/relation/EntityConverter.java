@@ -32,7 +32,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
-import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -89,13 +88,12 @@ public class EntityConverter {
     String elementKey = entity.getString(DbColumnDefinitions.ELEMENT_KEY);
     String elementName = entity.getString(DbColumnDefinitions.ELEMENT_NAME);
     String elementTypeStr = entity.getString(DbColumnDefinitions.ELEMENT_TYPE);
-    ColumnType elementType = ColumnType.valueOf(elementTypeStr);
     String listChildElementKeys =
         entity.getString(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS);
     int isPersisted = entity.getInteger(DbColumnDefinitions.IS_PERSISTED);
     String joins = entity.getString(DbColumnDefinitions.JOINS);
-    Column column = new Column(tableId, elementKey, elementName, elementType,
-        listChildElementKeys, isPersisted, joins);
+    Column column = new Column(tableId, elementKey, elementName, 
+        elementTypeStr, listChildElementKeys, isPersisted, joins);
     return column;
   }
 
@@ -213,11 +211,17 @@ public class EntityConverter {
    * Convert a {@link DbColumnDefinitions} entity to a {@link DataField}
    */
   public DataField toField(Entity entity) {
-    // ss: exactly what the point of this method is eludes me. However, I
-    // believe that the "type" of an ODK Tables Column on the aggregate side
-    // is always a string. Tables permits more complicated types like image,
-    // location, etc, and therefore there is no way/reason to map each level
-    // to the aggregate side.
+    // Note that here is where Aggregate is deciding that all the column types
+    // in the user-defined columns are in fact of type DataType.STRING. 
+    // Therefore we're not allowing any sort of more fancy number searching or
+    // anything like that on the server. This should eventually map more
+    // intelligently. It is not being done at this point because exactly what
+    // we do in the case of changing table properties is not defined. Therefore
+    // if someone was to start out with a number, and aggregate had the column
+    // type as a number, and they decided to change it, there could be issues.
+    // This whole process needs to be more thought out. But for now, they're
+    // remaining all types as a String.
+    // TODO: make map ODKTables column types to the appropriate aggregate type.
     DataField field = new DataField(RUtil.convertIdentifier(entity.getId()),
         DataType.STRING, true);
     return field;

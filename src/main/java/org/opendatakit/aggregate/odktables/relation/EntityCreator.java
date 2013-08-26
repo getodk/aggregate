@@ -111,7 +111,7 @@ public class EntityCreator {
     entity.set(DbColumnDefinitions.ELEMENT_KEY, column.getElementKey());
     entity.set(DbColumnDefinitions.ELEMENT_NAME, column.getElementName());
     entity.set(
-        DbColumnDefinitions.ELEMENT_TYPE, column.getElementType().name());
+        DbColumnDefinitions.ELEMENT_TYPE, column.getElementType());
     entity.set(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS,
         column.getListChildElementKeys());
     entity.set(DbColumnDefinitions.IS_PERSISTED, column.getIsPersisted());
