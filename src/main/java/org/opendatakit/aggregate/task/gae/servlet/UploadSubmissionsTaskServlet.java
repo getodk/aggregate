@@ -114,13 +114,17 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     } catch (ODKExternalServiceException e) {
-      e.printStackTrace();
       logger.error(e.toString());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     } catch (ODKFormNotFoundException e) {
       logger.error(e.toString());
       odkIdNotFoundError(resp);
+      return;
+    } catch (Exception e) {
+      e.printStackTrace();
+      logger.error(e.toString());
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     }
   }

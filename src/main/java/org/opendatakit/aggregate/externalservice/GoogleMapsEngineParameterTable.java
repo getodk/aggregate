@@ -29,7 +29,7 @@ import org.opendatakit.common.web.CallingContext;
  * @author wbrunette@gmail.com
  *
  */
-public class GoogleMapEngineParameterTable extends CommonFieldsBase {
+public class GoogleMapsEngineParameterTable extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_google_map_engine";
 
@@ -53,7 +53,7 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
    * @param databaseSchema
    * @param tableName
    */
-  GoogleMapEngineParameterTable(String schemaName) {
+  GoogleMapsEngineParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(GME_ASSET_ID_PROPERTY);
     fieldList.add(GEO_POINT_ELEMENT_KEY_PROPERTY);
@@ -69,14 +69,14 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
    * @param ref
    * @param user
    */
-  private GoogleMapEngineParameterTable(GoogleMapEngineParameterTable ref, User user) {
+  private GoogleMapsEngineParameterTable(GoogleMapsEngineParameterTable ref, User user) {
     super(ref, user);
   }
 
   // Only called from within the persistence layer.
   @Override
-  public GoogleMapEngineParameterTable getEmptyRow(User user) {
-    return new GoogleMapEngineParameterTable(this, user);
+  public GoogleMapsEngineParameterTable getEmptyRow(User user) {
+    return new GoogleMapsEngineParameterTable(this, user);
   }
 
   public String getGmeAssetId() {
@@ -138,15 +138,15 @@ public class GoogleMapEngineParameterTable extends CommonFieldsBase {
     setBooleanField(READY_PROPERTY, value);
   }
 
-  private static GoogleMapEngineParameterTable relation = null;
+  private static GoogleMapsEngineParameterTable relation = null;
 
-  public static synchronized final GoogleMapEngineParameterTable assertRelation(CallingContext cc)
+  public static synchronized final GoogleMapsEngineParameterTable assertRelation(CallingContext cc)
       throws ODKDatastoreException {
     if (relation == null) {
-      GoogleMapEngineParameterTable relationPrototype;
+      GoogleMapsEngineParameterTable relationPrototype;
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
-      relationPrototype = new GoogleMapEngineParameterTable(ds.getDefaultSchemaName());
+      relationPrototype = new GoogleMapsEngineParameterTable(ds.getDefaultSchemaName());
       ds.assertRelation(relationPrototype, user); // may throw exception...
       // at this point, the prototype has become fully populated
       relation = relationPrototype; // set static variable only upon success...

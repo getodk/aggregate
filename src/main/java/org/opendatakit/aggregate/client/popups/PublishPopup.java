@@ -112,7 +112,7 @@ public final class PublishPopup extends AbstractPopupBase {
         new GmeSettingsCallback());
 
     ExternalServiceType[] valuesToShow = { ExternalServiceType.GOOGLE_FUSIONTABLES,
-        ExternalServiceType.GOOGLE_SPREADSHEET, ExternalServiceType.GOOGLE_MAP_ENGINE,
+        ExternalServiceType.GOOGLE_SPREADSHEET, ExternalServiceType.GOOGLE_MAPS_ENGINE,
         ExternalServiceType.REDCAP_SERVER, ExternalServiceType.JSON_SERVER,
         ExternalServiceType.OHMAGE_JSON_SERVER };
     serviceType = new EnumListBox<ExternalServiceType>(valuesToShow, ES_TYPE_TOOLTIP,
@@ -306,7 +306,7 @@ public final class PublishPopup extends AbstractPopupBase {
       ohmageBar.setVisible(false);
       optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
       break;
-    case GOOGLE_MAP_ENGINE:
+    case GOOGLE_MAPS_ENGINE:
       gmeBar.setVisible(true);
       gsBar.setVisible(false);
       jsBar.setVisible(false);
@@ -379,7 +379,7 @@ public final class PublishPopup extends AbstractPopupBase {
         SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, ownerEmail,
             new ReportFailureCallback());
         break;
-      case GOOGLE_MAP_ENGINE:
+      case GOOGLE_MAPS_ENGINE:
         GmePhotoHostType photoType = gmePhotoHostType.getSelectedValue();
         SecureGWT.getServicesAdminService().createMapEngine(formId, serviceOp, gmeAssetId.getText(), gmeGeoPoint.getElementKey(), photoType, ownerEmail,
             new ReportFailureCallback());

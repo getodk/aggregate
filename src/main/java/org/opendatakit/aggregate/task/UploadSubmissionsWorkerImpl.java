@@ -15,6 +15,9 @@
  */
 package org.opendatakit.aggregate.task;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -195,8 +198,14 @@ public class UploadSubmissionsWorkerImpl {
         throw new IllegalStateException("Unexpected ExternalServiceOption: " + pEsOption.name());
       }
     } catch (ODKExternalServiceException e) {
+      Writer writer = new StringWriter();
+      PrintWriter printWriter = new PrintWriter(writer);
+      e.printStackTrace(printWriter);
+      logger.error(writer.toString());
+      e.printStackTrace();
       throw e;
     } catch (Exception e) {
+      e.printStackTrace();
       logger.error("Unexpected exception: " + e.getMessage());
       throw new ODKExternalServiceException(e);
     } finally {
@@ -215,9 +224,11 @@ public class UploadSubmissionsWorkerImpl {
       } catch (ODKTaskLockException e) {
         // if release fails, it will eventually be cleared...
         e.printStackTrace();
+        logger.error("Failed trying to release lock");
       }
     }
 
+   
     if (reQueue) {
       // create another task to continue upload
       UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc
@@ -315,6 +326,7 @@ public class UploadSubmissionsWorkerImpl {
         }
       }
     } catch (ODKExternalServiceCredentialsException e) {
+      e.printStackTrace();
       // The main goal of this catch is to avoid
       // silently transitioning BAD_CREDENTIALS into
       // the PAUSED state.
@@ -335,6 +347,7 @@ public class UploadSubmissionsWorkerImpl {
       }
       throw e;
     } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
       ExternalServiceUtils.pauseFscOperationalStatus(pFsc);
       try {
         ds.putEntity(pFsc, user);
@@ -347,6 +360,7 @@ public class UploadSubmissionsWorkerImpl {
       }
       throw e;
     } catch (Exception e) {
+      e.printStackTrace();
       ExternalServiceUtils.pauseFscOperationalStatus(pFsc);
       try {
         ds.putEntity(pFsc, user);

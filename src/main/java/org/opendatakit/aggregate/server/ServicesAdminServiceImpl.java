@@ -38,7 +38,7 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
-import org.opendatakit.aggregate.externalservice.GoogleMapEngine;
+import org.opendatakit.aggregate.externalservice.GoogleMapsEngine;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.externalservice.JsonServer;
 import org.opendatakit.aggregate.externalservice.OhmageJsonServer;
@@ -503,7 +503,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
             "Geo Point field must be supplied to transfer data to Google Map Engine");
       }
       FormElementKey geoPointFieldKey = geoPointField.constructFormElementKey(form);
-      GoogleMapEngine gme = new GoogleMapEngine(form, esOption, assetId, geoPointFieldKey.toString(), gmePhotoHostType, ownerEmail, cc);
+      GoogleMapsEngine gme = new GoogleMapsEngine(form, esOption, assetId, geoPointFieldKey.toString(), gmePhotoHostType, ownerEmail, cc);
       gme.initiate(cc);
       return gme.getFormServiceCursor().getUri();
     } catch (ODKOverQuotaException e) {

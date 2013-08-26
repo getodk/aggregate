@@ -67,16 +67,17 @@ import com.google.api.services.drive.model.Permission;
 import com.google.gdata.util.ServiceException;
 
 /**
- * Refactoring and base implementation using the new gdata APIs for
- * accessing Google Spreadsheet, Fusion Table and Map Engine.
- *
+ * Refactoring and base implementation using the new gdata APIs for accessing
+ * Google Spreadsheet, Fusion Table and Map Engine.
+ * 
  * @author wbrunette@gmail.com
- *
+ * 
  */
 public abstract class GoogleOauth2ExternalService extends AbstractExternalService {
 
   private static final String NO_EMAIL_SPECIFIED_ERROR = "No email specified to add file permission to";
   private static final String NO_PERM_RETURNED = "GOT No permssion returned in the response";
+
   private static final JsonFactory jsonFactory = new JacksonFactory();
 
   protected GoogleCredential credential;
@@ -89,7 +90,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
   protected GoogleOauth2ExternalService(String credentialScope, IForm form,
       FormServiceCursor formServiceCursor, ElementFormatter formatter,
       HeaderFormatter headerFormatter, Log logger, CallingContext cc)
-      throws ODKExternalServiceException {
+      throws ODKExternalServiceCredentialsException, ODKExternalServiceException {
     super(form, formServiceCursor, formatter, headerFormatter, cc);
 
     this.oauth2logger = logger;
@@ -112,7 +113,8 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       this.httpTransport = null;
       this.requestFactory = null;
       OperationalStatus currentStatus = fsc.getOperationalStatus();
-      if (currentStatus == OperationalStatus.ACTIVE || currentStatus == OperationalStatus.ACTIVE_RETRY) {
+      if (currentStatus == OperationalStatus.ACTIVE
+          || currentStatus == OperationalStatus.ACTIVE_RETRY) {
         fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
         try {
           Datastore ds = cc.getDatastore();
@@ -122,8 +124,8 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
           oauth2logger.error("Unable to persist bad credentials status" + e1.toString());
           throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
         }
-        throw e;
       }
+      throw e;
     }
 
   }
@@ -138,13 +140,13 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
 
       if (serviceAccountUser == null || privateKeyString == null
           || serviceAccountUser.length() == 0 || privateKeyString.length() == 0) {
-        throw new IllegalArgumentException(
+        throw new ODKExternalServiceCredentialsException(
             "No OAuth2 credentials. Have you supplied any OAuth2 credentials on the Site Admin / Preferences page?");
       }
 
       byte[] privateKeyBytes = Base64.decodeBase64(privateKeyString);
 
-   // TODO: CHANGE TO MORE OPTIMAL METHOD
+      // TODO: CHANGE TO MORE OPTIMAL METHOD
       KeyStore ks = null;
       ks = KeyStore.getInstance("PKCS12");
       ks.load(new ByteArrayInputStream(privateKeyBytes), "notasecret".toCharArray());
@@ -157,7 +159,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
         key = ks.getKey(keyName, "notasecret".toCharArray());
         break;
       }
-      PrivateKey serviceAccountPrivateKey = (PrivateKey )key;
+      PrivateKey serviceAccountPrivateKey = (PrivateKey) key;
 
       HttpClientFactory httpClientFactory = (HttpClientFactory) cc
           .getBean(BeanDefs.HTTP_CLIENT_FACTORY);
@@ -174,7 +176,6 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       throw new ODKExternalServiceCredentialsException(e);
     }
   }
-
 
   protected Drive getGoogleDrive() {
     return new Drive.Builder(httpTransport, jsonFactory, credential).setApplicationName(
@@ -242,12 +243,12 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
     HttpContent entity = null;
     if (statement != null) {
       if (isFTQuery) {
-        Map<String,String> formContent = new HashMap<String,String>();
+        Map<String, String> formContent = new HashMap<String, String>();
         formContent.put("sql", statement);
         UrlEncodedContent urlEntity = new UrlEncodedContent(formContent);
         entity = urlEntity;
         HttpMediaType t = urlEntity.getMediaType();
-        if ( t != null ) {
+        if (t != null) {
           t.setCharsetParameter(Charset.forName(HtmlConsts.UTF8_ENCODE));
         } else {
           t = new HttpMediaType("application", "x-www-form-urlencoded");
