@@ -466,6 +466,8 @@ public class DataManager {
                                   columns, sequencer, cc);
 
       // update db
+      // This is where a user-defined table actually gets created for the first
+      // time.
       Relation.putEntities(logEntities, cc);
       Relation.putEntities(rowEntities, cc);
       entry.put(cc);

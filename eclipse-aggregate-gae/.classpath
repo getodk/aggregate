@@ -10,7 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-codec-1.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-io-2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang3-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang3-3.1.jar" sourcepath="/Users/sudars/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/ehcache-1.6.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-1.0-1.47.1.jar"/>
