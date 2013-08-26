@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.ermodel.simple.Query;
 import org.opendatakit.common.ermodel.simple.Relation;

@@ -94,10 +94,10 @@ import com.google.gson.JsonPrimitive;
  * @author wbrunette@gmail.com
  * 
  */
-public class GoogleMapEngine extends GoogleOauth2ExternalService implements ExternalService {
+public class GoogleMapsEngine extends GoogleOauth2ExternalService implements ExternalService {
 
 
-  private static final Log logger = LogFactory.getLog(GoogleMapEngine.class.getName());
+  private static final Log logger = LogFactory.getLog(GoogleMapsEngine.class.getName());
 
   private static final String GME_ASSET_ID = "gme_table_id";
   private static final String GME_OAUTH2_SCOPE = "https://www.googleapis.com/auth/mapsengine https://www.googleapis.com/auth/drive";
@@ -114,7 +114,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
   /**
    * Datastore entity specific to this type of external service
    */
-  private final GoogleMapEngineParameterTable objectEntity;
+  private final GoogleMapsEngineParameterTable objectEntity;
 
   /**
    * The geoPoint field in submission used to locate the submission on google
@@ -130,7 +130,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
    * @param form
    * @param cc
    */
-  private GoogleMapEngine(GoogleMapEngineParameterTable entity,
+  private GoogleMapsEngine(GoogleMapsEngineParameterTable entity,
       FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
       throws ODKExternalServiceException {
     super(GME_OAUTH2_SCOPE, form, formServiceCursor, new BasicElementFormatter(false, false, false,
@@ -160,12 +160,12 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
    * @throws ODKDatastoreException
    * @throws ODKExternalServiceException
    */
-  private GoogleMapEngine(GoogleMapEngineParameterTable entity, IForm form,
+  private GoogleMapsEngine(GoogleMapsEngineParameterTable entity, IForm form,
       ExternalServicePublicationOption externalServiceOption, CallingContext cc)
       throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException,
       ODKExternalServiceException {
     this(entity, createFormServiceCursor(form, entity, externalServiceOption,
-        ExternalServiceType.GOOGLE_MAP_ENGINE, cc), form, cc);
+        ExternalServiceType.GOOGLE_MAPS_ENGINE, cc), form, cc);
     persist(cc);
   }
 
@@ -179,10 +179,10 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
    * @throws ODKDatastoreException
    * @throws ODKExternalServiceException
    */
-  public GoogleMapEngine(FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
+  public GoogleMapsEngine(FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
       throws ODKDatastoreException, ODKExternalServiceException {
 
-    this(retrieveEntity(GoogleMapEngineParameterTable.assertRelation(cc), formServiceCursor, cc),
+    this(retrieveEntity(GoogleMapsEngineParameterTable.assertRelation(cc), formServiceCursor, cc),
         formServiceCursor, form, cc);
   }
 
@@ -200,7 +200,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
    * @throws ODKDatastoreException
    * @throws ODKExternalServiceException
    */
-  public GoogleMapEngine(IForm form, ExternalServicePublicationOption externalServiceOption,
+  public GoogleMapsEngine(IForm form, ExternalServicePublicationOption externalServiceOption,
       String gmeAssetId, String geoPointField, GmePhotoHostType gmePhotoHostType,
       String ownerEmail, CallingContext cc) throws ODKEntityPersistException,
       ODKOverQuotaException, ODKDatastoreException, ODKExternalServiceException {
@@ -218,14 +218,14 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
    * @return
    * @throws ODKDatastoreException
    */
-  private static final GoogleMapEngineParameterTable newGmeEntity(String gmeAssetId,
+  private static final GoogleMapsEngineParameterTable newGmeEntity(String gmeAssetId,
       String geoPointField, GmePhotoHostType gmePhotoHostType, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
-    GoogleMapEngineParameterTable t = ds.createEntityUsingRelation(
-        GoogleMapEngineParameterTable.assertRelation(cc), user);
+    GoogleMapsEngineParameterTable t = ds.createEntityUsingRelation(
+        GoogleMapsEngineParameterTable.assertRelation(cc), user);
     t.setGmeAssetId(gmeAssetId);
     t.setGeoPointElementKey(geoPointField);
     t.setPhotoHostType(gmePhotoHostType);
@@ -317,6 +317,9 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
         if (value instanceof GeoPointSubmissionType) {
           GeoPointSubmissionType geoSub = (GeoPointSubmissionType) value;
           GeoPoint geoPoint = geoSub.getValue();
+          if(geoPoint.getLatitude() == null || geoPoint.getLatitude() == null) {
+            continue;
+          }
           JsonArray coord = new JsonArray();
           coord.add(new JsonPrimitive(geoPoint.getLatitude()));
           coord.add(new JsonPrimitive(geoPoint.getLongitude()));
@@ -485,6 +488,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
         drive.permissions().insert(picture.getId(), generatePublicPermission()).execute();
 
       } catch (IOException e) {
+        e.printStackTrace();
         throw new ODKExternalServiceException(e);
       }
 
@@ -637,6 +641,7 @@ public class GoogleMapEngine extends GoogleOauth2ExternalService implements Exte
       folder = drive.files().insert(folder).execute();
       return folder.getId();
     } catch (IOException e) {
+      e.printStackTrace();
       throw new ODKExternalServiceException(e);
     }
   }
