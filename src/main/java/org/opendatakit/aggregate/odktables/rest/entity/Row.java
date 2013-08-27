@@ -315,9 +315,9 @@ public class Row {
     builder.append("Row [rowId=");
     builder.append(rowId);
     builder.append(", rowEtag=");
+    builder.append(rowEtag);
     builder.append(", dataEtagAtModification=");
     builder.append(dataEtagAtModification);
-    builder.append(rowEtag);
     builder.append(", deleted=");
     builder.append(deleted);
     builder.append(", createUser=");
