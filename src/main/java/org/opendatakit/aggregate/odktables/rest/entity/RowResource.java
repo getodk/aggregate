@@ -39,6 +39,7 @@ public class RowResource extends Row {
     super();
     setRowId(row.getRowId());
     setRowEtag(row.getRowEtag());
+    setDataEtagAtModification(row.getDataEtagAtModification());
     setDeleted(row.isDeleted());
     setCreateUser(row.getCreateUser());
     setLastUpdateUser(row.getLastUpdateUser());
