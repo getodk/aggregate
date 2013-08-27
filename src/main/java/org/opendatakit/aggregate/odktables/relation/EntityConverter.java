@@ -252,6 +252,8 @@ public class EntityConverter {
     Row row = new Row();
     row.setRowId(entity.getId());
     row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
+    row.setDataEtagAtModification(
+        entity.getString(DbTable.DATA_ETAG_AT_MODIFICATION));
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
@@ -347,6 +349,8 @@ public class EntityConverter {
     Row row = new Row();
     row.setRowId(entity.getString(DbLogTable.ROW_ID));
     row.setRowEtag(entity.getString(DbLogTable.ROW_VERSION));
+    row.setDataEtagAtModification(
+        entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
     row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
     row.setCreateUser(entity.getString(DbLogTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));
