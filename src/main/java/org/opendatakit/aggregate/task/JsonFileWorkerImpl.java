@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.task;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
@@ -71,7 +72,7 @@ public class JsonFileWorkerImpl {
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      PrintWriter pw = new PrintWriter(stream);
+      PrintWriter pw = new PrintWriter(new OutputStreamWriter(stream, HtmlConsts.UTF8_ENCODE));
 
       PersistentResults r = new PersistentResults(persistentResultsKey, cc);
       String filterGroupUri = r.getFilterGroupUri();

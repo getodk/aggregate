@@ -423,8 +423,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
        switch (fsc.getExternalServiceType()) {
        case GOOGLE_FUSIONTABLES:
          return new FusionTable(fsc, form, cc);
-       case GOOGLE_MAP_ENGINE:
-         return new GoogleMapEngine(fsc, form, cc);
+       case GOOGLE_MAPS_ENGINE:
+         return new GoogleMapsEngine(fsc, form, cc);
        case GOOGLE_SPREADSHEET:
          return new GoogleSpreadsheet(fsc, form, cc);
        case JSON_SERVER:
