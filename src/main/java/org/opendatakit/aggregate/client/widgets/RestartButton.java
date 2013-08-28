@@ -27,19 +27,24 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
- * Delete the publishing of data to an external service.
- *
+ * Restarts Publisher because of failures
  */
 public final class RestartButton extends AggregateButton implements ClickHandler {
 
-  private static final String BUTTON_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher";
-  private static final String TOOLTIP_TEXT = "There were publishing failures - click to Restart the Publisher";
-  private static final String HELP_BALLOON_TXT = "The external service was failing or the credentials were bad. Click to restart the publisher.";
+  private static final String BUTTON_BAD_CREDENTIAL_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Credential was BAD";
+  private static final String TOOLTIP_BAD_CREDENTIAL_TEXT = "Publish failure because of bad credential - click to Restart the Publisher";
+  private static final String HELP_BALLOON_BAD_CREDENTIAL_TXT = "The external service was failing or the credentials were bad. Click to restart the publisher.";
+
+  private static final String BUTTON_FAILURE_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Failed";
+  private static final String TOOLTIP_FAILURE_TEXT = "Publish failure because of repeated failure - click to Restart the Publisher";
+  private static final String HELP_BALLOON_FAILURE_TXT = "The external service was failing. Click to restart the publisher.";
 
   private final ExternServSummary publisher;
 
-  public RestartButton(ExternServSummary publisher) {
-    super(BUTTON_TXT, TOOLTIP_TEXT, HELP_BALLOON_TXT);
+  public RestartButton(ExternServSummary publisher, boolean credentialFailure) {
+    super(credentialFailure ? BUTTON_BAD_CREDENTIAL_TXT : BUTTON_FAILURE_TXT,
+        credentialFailure ? TOOLTIP_BAD_CREDENTIAL_TEXT : TOOLTIP_FAILURE_TEXT,
+        credentialFailure ? HELP_BALLOON_BAD_CREDENTIAL_TXT : HELP_BALLOON_FAILURE_TXT);
     this.publisher = publisher;
     addStyleDependentName("negative");
   }
@@ -61,22 +66,7 @@ public final class RestartButton extends AggregateButton implements ClickHandler
     ExternalServiceType type = publisher.getExternalServiceType();
 
     switch (type) {
-    case GOOGLE_SPREADSHEET:
-      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new ReportErrorsCallback());
-      break;
-    case JSON_SERVER:
-      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new ReportErrorsCallback());
-      break;
-    case OHMAGE_JSON_SERVER:
-      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new ReportErrorsCallback());
-      break;
-    case GOOGLE_FUSIONTABLES:
-      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new ReportErrorsCallback());
-      break;
+
     case REDCAP_SERVER:
       String apiKey;
       try {
@@ -87,7 +77,9 @@ public final class RestartButton extends AggregateButton implements ClickHandler
       SecureGWT.getServicesAdminService().updateApiKeyAndRestartPublisher(publisher.getUri(),
           apiKey, new ReportErrorsCallback());
       break;
-    default: // unknown type
+    default:
+      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
+          new ReportErrorsCallback());
       break;
     }
   }

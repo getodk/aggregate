@@ -6,7 +6,7 @@ import org.opendatakit.aggregate.client.externalserv.GmeSettings;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.externalservice.GoogleMapEngine;
+import org.opendatakit.aggregate.externalservice.GoogleMapsEngine;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -25,7 +25,7 @@ public class GenerateGoogleMapEngineSettings {
   
   public GmeSettings generate(CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException {
     try {
-     String  gmeAssetId = GoogleMapEngine.parseGmeAssetId(form, cc);
+     String  gmeAssetId = GoogleMapsEngine.parseGmeAssetId(form, cc);
       gmeSettings.setGmeAssetId(gmeAssetId);
     } catch (ODKDatastoreException e1) {
       throw e1;
