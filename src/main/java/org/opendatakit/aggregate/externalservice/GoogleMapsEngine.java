@@ -31,8 +31,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
@@ -54,7 +52,6 @@ import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.aggregate.submission.type.GeoPointSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
-import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -264,14 +261,7 @@ public class GoogleMapsEngine extends GoogleOauth2ExternalService implements Ext
     persist(cc);
 
     // upload data to external service
-    if (!fsc.getExternalServicePublicationOption().equals(
-        ExternalServicePublicationOption.STREAM_ONLY)) {
-
-      UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-      CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
-      ccDaemon.setAsDaemon(true);
-      uploadTask.createFormUploadTask(fsc, true, ccDaemon);
-    }
+    postUploadTask(cc);
 
   }
 
