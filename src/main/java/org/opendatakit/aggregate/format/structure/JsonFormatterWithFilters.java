@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
+import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
@@ -49,10 +50,10 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
   private PrintWriter output;
 
   public JsonFormatterWithFilters(PrintWriter printWriter, IForm form, FilterGroup filterGroup,
-      boolean includeBinary, boolean expandMultipleChoiceAsArray, String webServerUrl) {
+      BinaryOption binaryOption, boolean expandMultipleChoiceAsArray, String webServerUrl) {
     output = printWriter;
 
-    if (includeBinary) {
+   if(binaryOption == BinaryOption.EMBED_BINARY) {
       elemFormatter = new JsonElementFormatter(true, true, true, expandMultipleChoiceAsArray, this);
     } else {
       elemFormatter = new JsonElementFormatter(webServerUrl,true, true, true, expandMultipleChoiceAsArray, this);

@@ -38,6 +38,8 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
+import com.google.gson.JsonObject;
+
 /**
  *
  * @author wbrunette@gmail.com
@@ -140,7 +142,11 @@ public class JsonElementFormatter implements ElementFormatter {
         imageBlob = blobSubmission.getBlob(1, cc);
       }
       if (imageBlob != null && imageBlob.length > 0) {
-        addToJsonValueToRow(Base64.encodeBase64(imageBlob), true, element.getElementName(), row);
+        JsonObject obj = new JsonObject();
+        obj.addProperty("filename", blobSubmission.getUnrootedFilename(1, cc));
+        obj.addProperty("type", blobSubmission.getContentType(1, cc));
+        obj.addProperty("bytes", new String(Base64.encodeBase64(imageBlob)));
+        addToJsonValueToRow(obj, false, element.getElementName(), row);
       }
     } else {
       SubmissionKey key = blobSubmission.getValue();
@@ -167,22 +173,22 @@ public class JsonElementFormatter implements ElementFormatter {
       addToJsonValueToRow(null, true, element.getElementName(), row);
     } else {
       if ( expressMultipleChoiceListsAsArrays ) {
-        b.append("[");
+        b.append(BasicConsts.LEFT_BRACKET);
         boolean first = true;
         for (String s : choices) {
           if (!first) {
-            b.append(",");
+            b.append(BasicConsts.COMMA);
           }
           first = false;
-          b.append("\"").append(s).append("\"");
+          b.append(BasicConsts.QUOTE).append(s).append(BasicConsts.QUOTE);
         }
-        b.append("]");
+        b.append(BasicConsts.RIGHT_BRACKET);
         addToJsonValueToRow(b.toString(), false, element.getElementName(), row);
       } else {
         boolean first = true;
         for (String s : choices) {
           if (!first) {
-            b.append(" ");
+            b.append(BasicConsts.SPACE);
           }
           first = false;
           b.append(s);

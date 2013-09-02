@@ -163,28 +163,28 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
       URISyntaxException {
 
 
-    MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT, null, utf8);
+    MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT, null, UTF_CHARSET);
     // emit the configured publisher parameters if the values are non-empty...
     String value;
     value = getOhmageCampaignUrn();
     if ( value != null && value.length() != 0 ) {
-      StringBody campaignUrn = new StringBody(getOhmageCampaignUrn(), utf8);
+      StringBody campaignUrn = new StringBody(getOhmageCampaignUrn(), UTF_CHARSET);
       reqEntity.addPart("campaign_urn", campaignUrn);
     }
     value = getOhmageCampaignCreationTimestamp();
     if ( value != null && value.length() != 0 ) {
       StringBody campaignCreationTimestamp = new StringBody(getOhmageCampaignCreationTimestamp(),
-          utf8);
+          UTF_CHARSET);
       reqEntity.addPart("campaign_creation_timestamp", campaignCreationTimestamp);
     }
     value = getOhmageUsername();
     if ( value != null && value.length() != 0 ) {
-      StringBody user = new StringBody(getOhmageUsername(), utf8);
+      StringBody user = new StringBody(getOhmageUsername(), UTF_CHARSET);
       reqEntity.addPart("user", user);
     }
     value = getOhmageHashedPassword();
     if ( value != null && value.length() != 0 ) {
-      StringBody hashedPassword = new StringBody(getOhmageHashedPassword(), utf8);
+      StringBody hashedPassword = new StringBody(getOhmageHashedPassword(), UTF_CHARSET);
       reqEntity.addPart("passowrd", hashedPassword);
     }
     // emit the client identity and the json representation of the survey...
