@@ -11,8 +11,8 @@ import java.io.Serializable;
  * 
  */
 public enum BinaryOption implements Serializable {
-  PROVIDE_LINKS("Provide Links to Media"),
-  EMBED_BINARY("Include the Media Binary in Data");
+  PROVIDE_LINKS("Links(URLs) to Media"),
+  EMBED_BINARY("Embed the Media Binary");
   
   private String descriptionOfOption;
   
