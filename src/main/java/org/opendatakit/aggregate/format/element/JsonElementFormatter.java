@@ -41,10 +41,10 @@ import org.opendatakit.common.web.constants.BasicConsts;
 import com.google.gson.JsonObject;
 
 /**
- *
+ * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
 public class JsonElementFormatter implements ElementFormatter {
   private static final String JSON_NULL = "null";
@@ -77,7 +77,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   /**
    * Construct a JSON Element Formatter
-   *
+   * 
    * @param separateGpsCoordinates
    *          separate the GPS coordinates of latitude and longitude into
    *          columns
@@ -89,7 +89,8 @@ public class JsonElementFormatter implements ElementFormatter {
    *          if true, express the multiple-choice fields as arrays of strings
    */
   public JsonElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-      boolean includeGpsAccuracy, boolean expressMultipleChoiceListsAsArrays, RepeatCallbackFormatter formatter) {
+      boolean includeGpsAccuracy, boolean expressMultipleChoiceListsAsArrays,
+      RepeatCallbackFormatter formatter) {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
@@ -100,7 +101,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   /**
    * Construct a JSON Element Formatter with links
-   *
+   * 
    * @param webServerUrl
    *          base url for the web app (e.g.,
    *          localhost:8080/ODKAggregatePlatform)
@@ -118,7 +119,7 @@ public class JsonElementFormatter implements ElementFormatter {
       boolean includeGpsAltitude, boolean includeGpsAccuracy,
       boolean expressMultipleChoiceListsAsArrays, RepeatCallbackFormatter formatter) {
     this(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy,
-         expressMultipleChoiceListsAsArrays, formatter);
+        expressMultipleChoiceListsAsArrays, formatter);
     baseWebServerUrl = webServerUrl;
   }
 
@@ -136,32 +137,35 @@ public class JsonElementFormatter implements ElementFormatter {
       return;
     }
 
-    if (baseWebServerUrl == null) {
-      byte[] imageBlob = null;
-      if (blobSubmission.getAttachmentCount(cc) == 1) {
-        imageBlob = blobSubmission.getBlob(1, cc);
+    byte[] imageBlob = null;
+    if (blobSubmission.getAttachmentCount(cc) == 1) {
+      imageBlob = blobSubmission.getBlob(1, cc);
+    }
+    if (imageBlob != null && imageBlob.length > 0) {
+      JsonObject obj = new JsonObject();
+      obj.addProperty("filename", blobSubmission.getUnrootedFilename(1, cc));
+      obj.addProperty("type", blobSubmission.getContentType(1, cc));
+      if (baseWebServerUrl == null) {
+        // embed the binary
+        obj.addProperty("bytes", new String(Base64.encodeBase64(imageBlob)));       
+      } else {
+        // create a link to the binary
+        SubmissionKey key = blobSubmission.getValue();
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(ServletConsts.BLOB_KEY, key.toString());
+        String url = HtmlUtil.createLinkWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH
+            + BinaryDataServlet.ADDR, properties);        
+        obj.addProperty("url", url);
       }
-      if (imageBlob != null && imageBlob.length > 0) {
-        JsonObject obj = new JsonObject();
-        obj.addProperty("filename", blobSubmission.getUnrootedFilename(1, cc));
-        obj.addProperty("type", blobSubmission.getContentType(1, cc));
-        obj.addProperty("bytes", new String(Base64.encodeBase64(imageBlob)));
-        addToJsonValueToRow(obj, false, element.getElementName(), row);
-      }
-    } else {
-      SubmissionKey key = blobSubmission.getValue();
-      Map<String, String> properties = new HashMap<String, String>();
-      properties.put(ServletConsts.BLOB_KEY, key.toString());
-      String url = HtmlUtil.createLinkWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH
-          + BinaryDataServlet.ADDR, properties);
-      addToJsonValueToRow(url, true, element.getElementName(), row);
+      addToJsonValueToRow(obj, false, element.getElementName(), row);
     }
 
   }
 
   @Override
   public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonValueToRow(((bool == null) ? null : (bool ? JSON_TRUE : JSON_FALSE)), false, element.getElementName(), row);
+    addToJsonValueToRow(((bool == null) ? null : (bool ? JSON_TRUE : JSON_FALSE)), false,
+        element.getElementName(), row);
   }
 
   @Override
@@ -169,10 +173,10 @@ public class JsonElementFormatter implements ElementFormatter {
       Row row) {
     StringBuilder b = new StringBuilder();
 
-    if ( choices.size() == 0 ) {
+    if (choices.size() == 0) {
       addToJsonValueToRow(null, true, element.getElementName(), row);
     } else {
-      if ( expressMultipleChoiceListsAsArrays ) {
+      if (expressMultipleChoiceListsAsArrays) {
         b.append(BasicConsts.LEFT_BRACKET);
         boolean first = true;
         for (String s : choices) {
@@ -201,21 +205,24 @@ public class JsonElementFormatter implements ElementFormatter {
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
     // date in ISO8601 Javarosa format
-    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionDateOnlyString(date), true, element.getElementName(), row);
+    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionDateOnlyString(date), true,
+        element.getElementName(), row);
 
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     // dateTime in ISO8601 Javarosa format
-    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionDateTimeString(date), true, element.getElementName(), row);
+    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionDateTimeString(date), true,
+        element.getElementName(), row);
 
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     // time in ISO8601 Javarosa format
-    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionTimeOnlyString(date), true, element.getElementName(), row);
+    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionTimeOnlyString(date), true,
+        element.getElementName(), row);
   }
 
   @Override
@@ -286,11 +293,11 @@ public class JsonElementFormatter implements ElementFormatter {
     jsonString.append(BasicConsts.QUOTE + BasicConsts.COLON);
 
     if (value != null) {
-      if ( quoted ) {
+      if (quoted) {
         jsonString.append(BasicConsts.QUOTE);
       }
       jsonString.append(value.toString());
-      if ( quoted ) {
+      if (quoted) {
         jsonString.append(BasicConsts.QUOTE);
       }
     } else {

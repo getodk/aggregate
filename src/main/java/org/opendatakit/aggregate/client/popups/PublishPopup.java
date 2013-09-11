@@ -187,7 +187,7 @@ public final class PublishPopup extends AbstractPopupBase {
     jsAuthKey.setVisibleLength(45);
     jsBar.setWidget(2, 1, jsAuthKey);
     // make the options for how to handle the binary 
-    jsBar.setWidget(3, 0, new HTML("<h3>Media:</h3>"));
+    jsBar.setWidget(3, 0, new HTML("<h3>Include Media as:</h3>"));
     jsBinaryOptions = new EnumListBox<BinaryOption>(
         BinaryOption.values(), BO_TYPE_TOOLTIP,
         BO_TYPE_BALLOON);
