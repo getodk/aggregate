@@ -25,7 +25,7 @@ public class TableConstants {
   public static final String URI_ACCESS_CONTROL = "_uri_access_control";
   public static final String SYNC_TAG = "_sync_tag";
   public static final String SYNC_STATE = "_sync_state";
-  public static final String TRANSACTIONING = "_transactioning";
+  public static final String CONFLICT_TYPE = "_conflict_type";
 
   /**
    * (timestamp, saved, form_id) are the tuple written and managed by ODK Survey
@@ -75,7 +75,7 @@ public class TableConstants {
     CLIENT_ONLY_COLUMN_NAMES.add(SAVED);
     CLIENT_ONLY_COLUMN_NAMES.add(SYNC_STATE);
     CLIENT_ONLY_COLUMN_NAMES.add(SYNC_TAG);
-    CLIENT_ONLY_COLUMN_NAMES.add(TRANSACTIONING);
+    CLIENT_ONLY_COLUMN_NAMES.add(CONFLICT_TYPE);
     }
 
 }
