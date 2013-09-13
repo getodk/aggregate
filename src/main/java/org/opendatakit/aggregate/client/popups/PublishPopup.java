@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.client.widgets.GeoPointListBox;
+import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
@@ -57,7 +58,10 @@ public final class PublishPopup extends AbstractPopupBase {
   private static final String ES_SERVICEOPTIONS_BALLOON = "Choose whether you would like only old data, only new data, or all data to be published.";
   private static final String ES_TYPE_TOOLTIP = "Type of External Service Connection";
   private static final String ES_TYPE_BALLOON = "Select the application where you want your data to be published.";
-
+ 
+  private static final String BO_TYPE_TOOLTIP = "Sets how the binary data from Media should be published";
+  private static final String BO_TYPE_BALLOON = "Selects how the binary dat from Media should be published. Aggregate will provide links in the publish OR will embed the data in the publish";
+  
   // this is the main flex table for the popup
   private final FlexTable layout;
   // this is the header
@@ -82,6 +86,7 @@ public final class PublishPopup extends AbstractPopupBase {
   private final FlexTable jsBar;
   private final TextBox jsAuthKey;
   private final TextBox jsUrl;
+  private final EnumListBox<BinaryOption> jsBinaryOptions;
 
   // to hold the jsonServer only options
   private final FlexTable ohmageBar;
@@ -122,7 +127,7 @@ public final class PublishPopup extends AbstractPopupBase {
     esOptions = new EnumListBox<ExternalServicePublicationOption>(
         ExternalServicePublicationOption.values(), ES_SERVICEOPTIONS_TOOLTIP,
         ES_SERVICEOPTIONS_BALLOON);
-
+    
     // Set up the tables in the popup
     layout = new FlexTable();
 
@@ -169,20 +174,26 @@ public final class PublishPopup extends AbstractPopupBase {
     // this is only for simple json server
     jsBar = new FlexTable();
     jsBar.addStyleName("stretch_header");
+    // get the URL
     jsBar.setWidget(1, 0, new HTML("<h3>Url to publish to:</h3>"));
-    // make the name textbox an appropriate size
     jsUrl = new TextBox();
     jsUrl.setText(HTTP_LOCALHOST);
-    jsUrl.setVisibleLength(60);
+    jsUrl.setVisibleLength(60); 
     jsBar.setWidget(1, 1, jsUrl);
+    // get token
     jsBar.setWidget(2, 0, new HTML("<h3>Authorization token:</h3>"));
-    // make the name textbox an appropriate size
     jsAuthKey = new TextBox();
     jsAuthKey.setText(EMPTY_STRING);
     jsAuthKey.setVisibleLength(45);
     jsBar.setWidget(2, 1, jsAuthKey);
-
-    // this is only for simple json server
+    // make the options for how to handle the binary 
+    jsBar.setWidget(3, 0, new HTML("<h3>Include Media as:</h3>"));
+    jsBinaryOptions = new EnumListBox<BinaryOption>(
+        BinaryOption.values(), BO_TYPE_TOOLTIP,
+        BO_TYPE_BALLOON);
+    jsBar.setWidget(3, 1, jsBinaryOptions);
+    
+    // this is only for ohmage server
     ohmageBar = new FlexTable();
     ohmageBar.addStyleName("stretch_header");
     ohmageBar.setWidget(1, 0, new HTML("<h3>Url to publish to:</h3>"));
@@ -367,7 +378,7 @@ public final class PublishPopup extends AbstractPopupBase {
         break;
       case JSON_SERVER:
         SecureGWT.getServicesAdminService().createSimpleJsonServer(formId, jsAuthKey.getText(),
-            jsUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
+            jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOptions.getSelectedValue(), new ReportFailureCallback());
         break;
       case OHMAGE_JSON_SERVER:
         SecureGWT.getServicesAdminService().createOhmageJsonServer(formId,

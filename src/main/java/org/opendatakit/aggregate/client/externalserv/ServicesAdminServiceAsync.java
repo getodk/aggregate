@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.externalserv;
 
+import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
 
@@ -36,7 +37,8 @@ public interface ServicesAdminServiceAsync {
       ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
   void createSimpleJsonServer(String formId, String authKey, String url,
-      ExternalServicePublicationOption es, String ownerEmail, AsyncCallback<String> callback);
+      ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption,
+      AsyncCallback<String> callback);
 
   void createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp,
       String user, String hashedPassword, String url, ExternalServicePublicationOption es,

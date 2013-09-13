@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.externalserv.GmeSettings;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
@@ -35,6 +36,7 @@ import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.externalservice.AbstractExternalService;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
@@ -224,7 +226,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createSimpleJsonServer(String formId, String authKey, String url,
-        ExternalServicePublicationOption esOption, String ownerEmail)
+        ExternalServicePublicationOption esOption, String ownerEmail, BinaryOption binaryOption)
             throws AccessDeniedException,
             FormNotAvailableException, RequestFailureException, DatastoreFailureException {
      HttpServletRequest req = this.getThreadLocalRequest();
@@ -241,7 +243,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         if (!form.hasValidFormDefinition()) {
           throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
         }
-        JsonServer server = new JsonServer(form, authKey, url, esOption, ownerEmail, cc);
+        AbstractExternalService server = new JsonServer(form, authKey, url, esOption, ownerEmail, binaryOption,cc);
         server.initiate(cc);
         return server.getFormServiceCursor().getUri();
      } catch (ODKOverQuotaException e) {
