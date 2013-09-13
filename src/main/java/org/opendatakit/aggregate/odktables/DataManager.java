@@ -246,7 +246,7 @@ public class DataManager {
    */
   private Query buildRowsSinceQuery(String sequenceValue) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
-    query.greaterThanOrEqual(DbLogTable.SEQUENCE_VALUE, sequenceValue);
+    query.greaterThan(DbLogTable.SEQUENCE_VALUE, sequenceValue);
     query.sortAscending(DbLogTable.SEQUENCE_VALUE);
     return query;
   }
