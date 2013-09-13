@@ -44,6 +44,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -54,6 +55,7 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -63,6 +65,7 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  *
@@ -105,8 +108,7 @@ public abstract class AbstractExternalService implements ExternalService{
 
   protected static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 60000;
 
-  protected static final String UTF_8 = "UTF-8";
-  protected static final Charset utf8 = Charset.forName(UTF_8);
+  protected static final Charset UTF_CHARSET = Charset.forName(HtmlConsts.UTF8_ENCODE);
 
   protected AbstractExternalService(IForm form, FormServiceCursor formServiceCursor, ElementFormatter formatter, HeaderFormatter headerFormatter, CallingContext cc) {
     this.form = form;
@@ -200,7 +202,7 @@ public abstract class AbstractExternalService implements ExternalService{
     URI uri;
     try {
       uri = new URI( nakedUri.getScheme(), nakedUri.getUserInfo(), nakedUri.getHost(),
-          nakedUri.getPort(), nakedUri.getPath(), URLEncodedUtils.format(qparams, UTF_8), null);
+          nakedUri.getPort(), nakedUri.getPath(), URLEncodedUtils.format(qparams, HtmlConsts.UTF8_ENCODE), null);
     } catch (URISyntaxException e1) {
       e1.printStackTrace();
       throw new IllegalStateException(e1);
@@ -308,6 +310,18 @@ public abstract class AbstractExternalService implements ExternalService{
     if (fsc != null)
       hashCode += fsc.hashCode();
     return hashCode;
+  }
+
+  protected void postUploadTask(CallingContext cc) throws ODKExternalServiceException {
+    // upload data to external service
+    if (!fsc.getExternalServicePublicationOption().equals(
+        ExternalServicePublicationOption.STREAM_ONLY)) {
+  
+      UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
+      CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
+      ccDaemon.setAsDaemon(true);
+      uploadTask.createFormUploadTask(fsc, true, ccDaemon);
+    }
   }
 
   /**

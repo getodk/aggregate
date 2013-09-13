@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.task;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
@@ -71,7 +73,7 @@ public class JsonFileWorkerImpl {
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      PrintWriter pw = new PrintWriter(stream);
+      PrintWriter pw = new PrintWriter(new OutputStreamWriter(stream, HtmlConsts.UTF8_ENCODE));
 
       PersistentResults r = new PersistentResults(persistentResultsKey, cc);
       String filterGroupUri = r.getFilterGroupUri();
@@ -94,7 +96,7 @@ public class JsonFileWorkerImpl {
       filterGroup.setQueryFetchLimit(ServletConsts.EXPORT_CURSOR_CHUNK_SIZE);
 
       query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-      formatter = new JsonFormatterWithFilters(pw, form, filterGroup, false, true, cc.getServerURL());
+      formatter = new JsonFormatterWithFilters(pw, form, filterGroup, BinaryOption.PROVIDE_LINKS, true, cc.getServerURL());
 
       logger.info("after setup of JSON file generation for " + form.getFormId());
       formatter.beforeProcessSubmissions(cc);
