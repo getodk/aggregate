@@ -466,6 +466,8 @@ public class DataManager {
                                   columns, sequencer, cc);
 
       // update db
+      // This is where a user-defined table actually gets created for the first
+      // time.
       Relation.putEntities(logEntities, cc);
       Relation.putEntities(rowEntities, cc);
       entry.put(cc);
@@ -486,11 +488,11 @@ public class DataManager {
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    */
-  public void deleteRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException,
+  public String deleteRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException {
     List<String> rowIds = new ArrayList<String>();
     rowIds.add(rowId);
-    deleteRows(rowIds);
+    return deleteRows(rowIds);
   }
 
   /**
@@ -498,18 +500,21 @@ public class DataManager {
    *
    * @param rowIds
    *          the rows to delete.
+   * @return returns the new dataEtag that is current after deleting the rows. 
+   * Returns null if something goes wrong and the lock can never be acquired.
    * @throws ODKEntityNotFoundException
    *           if one of the rowIds does not exist in the datastore
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    */
-  public void deleteRows(List<String> rowIds) throws ODKEntityNotFoundException,
+  public String deleteRows(List<String> rowIds) throws ODKEntityNotFoundException,
       ODKDatastoreException, ODKTaskLockException {
     Validate.noNullElements(rowIds);
 
     // lock table
     LockTemplate lock = new LockTemplate(tableId,
         ODKTablesTaskLockType.UPDATE_DATA, cc);
+    String dataEtag = null;
     try {
       lock.acquire();
       Sequencer sequencer = new Sequencer(cc);
@@ -518,7 +523,7 @@ public class DataManager {
       entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
 
       // get new dataEtag
-      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
+      dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
       dataEtag = Long.toString(System.currentTimeMillis());
       entry.set(DbTableEntry.DATA_ETAG, dataEtag);
 
@@ -540,5 +545,6 @@ public class DataManager {
     } finally {
       lock.release();
     }
+    return dataEtag;
   }
 }

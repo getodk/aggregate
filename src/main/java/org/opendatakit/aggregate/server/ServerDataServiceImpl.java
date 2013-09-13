@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -299,27 +300,30 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   public List<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-    try {
-      DbTableFiles blobSetRelation = new DbTableFiles(cc);
-      List<Row> rows = EntityConverter.toRowsFromFileInfo(
-          DbTableFileInfo.queryForNonMediaFiles(tableId, cc));
-      List<FileSummaryClient> nonMediaFiles =
-          new ArrayList<FileSummaryClient>();
-      for (Row row : rows) {
-        FileSummaryClient summary = ServerOdkTablesUtil
-            .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
-        nonMediaFiles.add(summary);
-      }
-      return nonMediaFiles;
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      throw new EntityNotFoundExceptionClient(e);
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      throw new DatastoreFailureException(e);
-    }
+    throw new NotImplementedException();
+// this is commented out after we changed the file around.
+// TODO: update this.
+//    HttpServletRequest req = this.getThreadLocalRequest();
+//    CallingContext cc = ContextFactory.getCallingContext(this, req);
+//    try {
+//      DbTableFiles blobSetRelation = new DbTableFiles(cc);
+//      List<Row> rows = EntityConverter.toRowsFromFileInfo(
+//          DbTableFileInfo.queryForNonMediaFiles(tableId, cc));
+//      List<FileSummaryClient> nonMediaFiles =
+//          new ArrayList<FileSummaryClient>();
+//      for (Row row : rows) {
+//        FileSummaryClient summary = ServerOdkTablesUtil
+//            .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
+//        nonMediaFiles.add(summary);
+//      }
+//      return nonMediaFiles;
+//    } catch (ODKEntityNotFoundException e) {
+//      e.printStackTrace();
+//      throw new EntityNotFoundExceptionClient(e);
+//    } catch (ODKDatastoreException e) {
+//      e.printStackTrace();
+//      throw new DatastoreFailureException(e);
+//    }
   }
 
 
@@ -327,27 +331,30 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   public List<FileSummaryClient> getMedialFilesKey(String tableId, String key)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-    try {
-      DbTableFiles blobSetRelation = new DbTableFiles(cc);
-      List<Row> rows = EntityConverter.toRowsFromFileInfo(
-          DbTableFileInfo.queryForMediaFiles(tableId, key, cc));
-      List<FileSummaryClient> mediaFiles =
-          new ArrayList<FileSummaryClient>();
-      for (Row row : rows) {
-        FileSummaryClient summary = ServerOdkTablesUtil
-            .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
-        mediaFiles.add(summary);
-      }
-      return mediaFiles;
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      throw new EntityNotFoundExceptionClient(e);
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      throw new DatastoreFailureException(e);
-    }
+    throw new NotImplementedException();
+// this is commented out after we changed the file around.
+// TODO: see if we actually need this.
+//    HttpServletRequest req = this.getThreadLocalRequest();
+//    CallingContext cc = ContextFactory.getCallingContext(this, req);
+//    try {
+//      DbTableFiles blobSetRelation = new DbTableFiles(cc);
+//      List<Row> rows = EntityConverter.toRowsFromFileInfo(
+//          DbTableFileInfo.queryForMediaFiles(tableId, key, cc));
+//      List<FileSummaryClient> mediaFiles =
+//          new ArrayList<FileSummaryClient>();
+//      for (Row row : rows) {
+//        FileSummaryClient summary = ServerOdkTablesUtil
+//            .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
+//        mediaFiles.add(summary);
+//      }
+//      return mediaFiles;
+//    } catch (ODKEntityNotFoundException e) {
+//      e.printStackTrace();
+//      throw new EntityNotFoundExceptionClient(e);
+//    } catch (ODKDatastoreException e) {
+//      e.printStackTrace();
+//      throw new DatastoreFailureException(e);
+//    }
   }
 
   // TODO make this work. atm isn't working.
@@ -522,45 +529,48 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   public void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-    try {
-      Relation tableInfo = DbTableFileInfo.getRelation(cc);
-      Entity entry = tableInfo.getEntity(rowId, cc);
-      String key = entry.getAsString(DbTableFileInfo.KEY);
-      // we also want to delete all the media files for this table. So get
-      // them.
-      List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
-      // first we want to get a new etag
-      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
-      dataEtag = Long.toString(System.currentTimeMillis());
-      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
-      entry.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
-      entry.set(DbTable.DELETED, true);
-
-      /*
-       * // get the row and mark it as deleted List<String> rowIds = new
-       * ArrayList<String>(); rowIds.add(rowId); List<Entity> rows =
-       * DbTable.query(tableInfo, rowIds, cc); // there should only be on row as
-       * currently implemented for (Entity row : rows) {
-       * row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
-       * row.set(DbTable.DELETED, true); }
-       */
-
-      // TODO log rows for deleting files
-
-      // update db
-      // Relation.putEntities(rows, cc);
-      entry.put(cc);
-      // and now do the same for each of the media files.
-      for (FileSummaryClient sum : mediaFiles) {
-        deleteTableFile(sum.getTableId(), sum.getId());
-      }
-
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      throw new DatastoreFailureException(e);
-    }
+    throw new NotImplementedException();
+// commented out when we changed the file loading.
+// TODO: re-envision, fix.
+//    HttpServletRequest req = this.getThreadLocalRequest();
+//    CallingContext cc = ContextFactory.getCallingContext(this, req);
+//    try {
+//      Relation tableInfo = DbTableFileInfo.getRelation(cc);
+//      Entity entry = tableInfo.getEntity(rowId, cc);
+//      String key = entry.getAsString(DbTableFileInfo.KEY);
+//      // we also want to delete all the media files for this table. So get
+//      // them.
+//      List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
+//      // first we want to get a new etag
+//      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
+//      dataEtag = Long.toString(System.currentTimeMillis());
+//      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
+//      entry.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+//      entry.set(DbTable.DELETED, true);
+//
+//      /*
+//       * // get the row and mark it as deleted List<String> rowIds = new
+//       * ArrayList<String>(); rowIds.add(rowId); List<Entity> rows =
+//       * DbTable.query(tableInfo, rowIds, cc); // there should only be on row as
+//       * currently implemented for (Entity row : rows) {
+//       * row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+//       * row.set(DbTable.DELETED, true); }
+//       */
+//
+//      // TODO log rows for deleting files
+//
+//      // update db
+//      // Relation.putEntities(rows, cc);
+//      entry.put(cc);
+//      // and now do the same for each of the media files.
+//      for (FileSummaryClient sum : mediaFiles) {
+//        deleteTableFile(sum.getTableId(), sum.getId());
+//      }
+//
+//    } catch (ODKDatastoreException e) {
+//      e.printStackTrace();
+//      throw new DatastoreFailureException(e);
+//    }
 
   }
 

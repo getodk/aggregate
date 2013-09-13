@@ -71,6 +71,7 @@ public final class ServletConsts {
    * The argument for a tableId.
    */
   public static final String TABLE_ID = "tableId";
+  public static final String ODK_TABLES_SERVLET_BASE_PATH = "odktables";
 
   /**
    * For PersistentResults and MiscTasks generator gae servlets.
