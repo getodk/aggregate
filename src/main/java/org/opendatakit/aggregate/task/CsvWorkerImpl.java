@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.task;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
@@ -41,10 +42,10 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Common worker implementation for the generation of csv files.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class CsvWorkerImpl {
 
@@ -71,19 +72,19 @@ public class CsvWorkerImpl {
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      PrintWriter pw = new PrintWriter(stream);
+      PrintWriter pw = new PrintWriter(new OutputStreamWriter(stream, HtmlConsts.UTF8_ENCODE));
 
       PersistentResults r = new PersistentResults(persistentResultsKey, cc);
       String filterGroupUri = r.getFilterGroupUri();
 
       // placeholder for clean-up...
       SubmissionFilterGroup subFilterGroup = null;
-      
+
       // create CSV
       QueryBase query;
       SubmissionFormatter formatter;
       FilterGroup filterGroup;
-      
+
       // figure out the filterGroup...
       if (filterGroupUri == null) {
         filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
@@ -95,7 +96,7 @@ public class CsvWorkerImpl {
 
       query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
       formatter = new CsvFormatterWithFilters(form, cc.getServerURL(), pw, filterGroup);
-      
+
       logger.info("after setup of CSV file generation for " + form.getFormId());
       formatter.beforeProcessSubmissions(cc);
       List<Submission> submissions;

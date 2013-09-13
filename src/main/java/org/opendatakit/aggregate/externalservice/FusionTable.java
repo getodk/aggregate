@@ -33,8 +33,6 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -55,7 +53,6 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
-import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -282,15 +279,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     persist(cc);
 
     // upload data to external service
-    if (!fsc.getExternalServicePublicationOption().equals(
-        ExternalServicePublicationOption.STREAM_ONLY)) {
-
-      UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-      CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
-      ccDaemon.setAsDaemon(true);
-      uploadTask.createFormUploadTask(fsc, true, ccDaemon);
-
-    }
+    postUploadTask(cc);
   }
 
   private void sharePublishedFiles(String ownerEmail, CallingContext cc)
