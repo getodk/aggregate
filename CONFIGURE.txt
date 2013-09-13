@@ -250,8 +250,8 @@ A minimal file is:
   	  <properties>
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<temp.home>C:\\Users\\Administrator\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.7.3</gae.home>
-		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.5.1</bitrock.home>
+	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.8.0</gae.home>
+		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.5.2</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\Administrator\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
 		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.5\\bin\\mysql.exe</mysql.client.executable>
