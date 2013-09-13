@@ -13,6 +13,7 @@
  */
 package org.opendatakit.aggregate.externalservice;
 
+import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -38,6 +39,9 @@ public final class JsonServer2ParameterTable extends CommonFieldsBase {
 
   private static final DataField SERVER_URL_PROPERTY = new DataField("SERVER_URL",
       DataField.DataType.STRING, true, 4096L);
+  
+  private static final DataField BINARY_OPTION_PROPERTY = new DataField("BINARY_OPTION",
+      DataField.DataType.STRING, true, 4096L);
 
   /**
    * Construct a relation prototype. Only called via
@@ -51,6 +55,7 @@ public final class JsonServer2ParameterTable extends CommonFieldsBase {
     fieldList.add(AUTH_KEY_PROPERTY);
     fieldList.add(OWNER_EMAIL_PROPERTY);
     fieldList.add(SERVER_URL_PROPERTY);
+    fieldList.add(BINARY_OPTION_PROPERTY);
   }
 
   /**
@@ -99,6 +104,17 @@ public final class JsonServer2ParameterTable extends CommonFieldsBase {
     }
   }
 
+  public BinaryOption getBinaryOption() {
+    String type = getStringField(BINARY_OPTION_PROPERTY);
+    return BinaryOption.valueOf(type);
+  }
+  
+  public void setBinaryOption(BinaryOption value) {
+    if (!setStringField(BINARY_OPTION_PROPERTY, value.name())) {
+      throw new IllegalArgumentException("overflow BinaryOption");
+    }
+  }
+  
   private static JsonServer2ParameterTable relation = null;
 
   public static synchronized final JsonServer2ParameterTable assertRelation(CallingContext cc)
