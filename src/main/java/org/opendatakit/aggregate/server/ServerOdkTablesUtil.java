@@ -184,16 +184,16 @@ public class ServerOdkTablesUtil {
       String tableId, DbTableFiles blobSetRelation, CallingContext cc) throws
       ODKDatastoreException {
     String filename = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        row.getValues().get(DbTableFileInfo.PATH_TO_FILE), cc)
         .getUnrootedFilename(1, cc);
     Long contentLength = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        filename, cc)
         .getContentLength(1, cc);
     String contentType = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        filename, cc)
         .getContentType(1, cc);
-    String key = row.getValues().get(DbTableFileInfo.KEY);
     String id = row.getRowId();
+    String key = "this isn't implemented.";
     FileSummaryClient summary = new FileSummaryClient(
         filename, contentType, contentLength, key, 0, id, tableId);
     return summary;

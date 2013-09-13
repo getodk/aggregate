@@ -111,7 +111,7 @@ public class EntityCreator {
     entity.set(DbColumnDefinitions.ELEMENT_KEY, column.getElementKey());
     entity.set(DbColumnDefinitions.ELEMENT_NAME, column.getElementName());
     entity.set(
-        DbColumnDefinitions.ELEMENT_TYPE, column.getElementType().name());
+        DbColumnDefinitions.ELEMENT_TYPE, column.getElementType());
     entity.set(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS,
         column.getListChildElementKeys());
     entity.set(DbColumnDefinitions.IS_PERSISTED, column.getIsPersisted());
@@ -121,35 +121,28 @@ public class EntityCreator {
   }
 
   /**
-   * Create a new {@link DbTableFileInfo} entity. This should be called
-   * whenever you are adding a file to the
+   * Create a new {@link DbTableFileInfo} entity. 
+   * @param appId
    * @param tableId
-   * 			the id of the table the file is associated with
-   * @param type
-   * 			the type of the file
-   * @param key
-   *        the key associated with this file
-   * @param URI
-   * 			the URI of the blobset of size one, of which the one entry is the file
-   * @param isMedia
-   *        whether or not this is a media file.
+   * @param pathToFile
+   * @param cc
    * @return
+   * @throws ODKDatastoreException
    */
-  public Entity newTableFileInfoEntity(String tableId, String type, String key,
-      String uri, boolean isMedia, CallingContext cc)
-      throws ODKDatastoreException {
+  public Entity newTableFileInfoEntity(String appId, String tableId, 
+      String pathToFile, CallingContext cc) throws ODKDatastoreException {
 	  // first do some preliminary checks
-	  Validate.notEmpty(tableId);
-	  Validate.notEmpty(uri);
+	  Validate.notEmpty(appId);
+	  Validate.notEmpty(pathToFile);
 
 	  Entity entity = DbTableFileInfo.getRelation(cc).newEntity(cc);
+	  entity.set(DbTableFileInfo.APP_ID, appId);
 	  entity.set(DbTableFileInfo.TABLE_ID, tableId);
-	  entity.set(DbTableFileInfo.VALUE_TYPE, type);
-	  entity.set(DbTableFileInfo.KEY, key);
-	  entity.set(DbTableFileInfo.VALUE, uri);
-	  entity.set(DbTableFileInfo.IS_MEDIA, isMedia);
+	  entity.set(DbTableFileInfo.PATH_TO_FILE, pathToFile);
 
 	  // now set the universal fields
+	  // TODO: do the appropriate time stamping and include data for the other
+	  // fields.
 	  entity.set(DbTable.CREATE_USER, cc.getCurrentUser().getEmail());
 	  // TODO last update same as create? correct?
 	  entity.set(DbTable.LAST_UPDATE_USER, cc.getCurrentUser().getEmail());
