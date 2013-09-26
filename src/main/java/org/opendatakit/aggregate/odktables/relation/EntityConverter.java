@@ -21,6 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
@@ -32,7 +39,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
-import org.opendatakit.common.ermodel.simple.Entity;
+import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 
@@ -50,11 +57,11 @@ public class EntityConverter {
   /**
    * Convert a {@link DbTableEntry} entity to a {@link TableEntry}
    */
-  public TableEntry toTableEntry(Entity entity, String tableKey) {
+  public TableEntry toTableEntry(DbTableEntryEntity entity) {
     String tableId = entity.getId();
-    String dataEtag = entity.getString(DbTableEntry.DATA_ETAG);
-    String propertiesEtag =
-        entity.getString(DbTableEntry.PROPERTIES_ETAG);
+    String tableKey = entity.getTableKey();
+    String dataEtag = entity.getDataETag();
+    String propertiesEtag = entity.getPropertiesETag();
     TableEntry entry = new TableEntry(tableId, tableKey, dataEtag,
         propertiesEtag);
     return entry;
@@ -66,16 +73,13 @@ public class EntityConverter {
    *
    * @param entities
    *          the entities to convert
-   * @param tableKeys
-   *          a map of tableIds to tableKeys
    */
-  public List<TableEntry> toTableEntries(List<Entity> entities,
-      Map<String, String> tableKeys) {
+  public List<TableEntry> toTableEntries(List<DbTableEntryEntity> entities) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
-    for (int i = 0; i < entities.size(); i++) {
-      Entity entity = entities.get(i);
-      String tableKey = tableKeys.get(entity.getId());
-      entries.add(toTableEntry(entity, tableKey));
+    if ( entities != null ) {
+      for (DbTableEntryEntity entity : entities ) {
+        entries.add(toTableEntry(entity));
+      }
     }
     return entries;
   }
@@ -83,16 +87,16 @@ public class EntityConverter {
   /**
    * Convert a {@link DbColumnDefinitions} entity to a {@link Column}
    */
-  public Column toColumn(Entity entity) {
-    String tableId = entity.getString(DbColumnDefinitions.TABLE_ID);
-    String elementKey = entity.getString(DbColumnDefinitions.ELEMENT_KEY);
-    String elementName = entity.getString(DbColumnDefinitions.ELEMENT_NAME);
-    String elementTypeStr = entity.getString(DbColumnDefinitions.ELEMENT_TYPE);
+  public Column toColumn(DbColumnDefinitionsEntity entity) {
+    String tableId = entity.getTableId();
+    String elementKey = entity.getElementKey();
+    String elementName = entity.getElementName();
+    String elementTypeStr = entity.getElementType();
     String listChildElementKeys =
-        entity.getString(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS);
-    int isPersisted = entity.getInteger(DbColumnDefinitions.IS_PERSISTED);
-    String joins = entity.getString(DbColumnDefinitions.JOINS);
-    Column column = new Column(tableId, elementKey, elementName, 
+        entity.getListChildElementKeys();
+    Boolean isPersisted = entity.getIsPersisted();
+    String joins = entity.getJoins();
+    Column column = new Column(tableId, elementKey, elementName,
         elementTypeStr, listChildElementKeys, isPersisted, joins);
     return column;
   }
@@ -101,15 +105,15 @@ public class EntityConverter {
    * Convert a list of {@link DbColumnDefinitions} entities to a list of
    * {@link Column} objects.
    */
-  public List<Column> toColumns(List<Entity> entities) {
+  public List<Column> toColumns(List<DbColumnDefinitionsEntity> entities) {
     List<Column> columns = new ArrayList<Column>();
-    for (Entity entity : entities) {
+    for (DbColumnDefinitionsEntity entity : entities) {
       columns.add(toColumn(entity));
     }
     return columns;
   }
 
-  public TableProperties toTableProperties(List<Entity> kvsEntities,
+  public TableProperties toTableProperties(List<DbKeyValueStoreEntity> kvsEntities,
       String tableId, String propertiesEtag) {
     List<OdkTablesKeyValueStoreEntry> kvsEntries =
         toOdkTablesKeyValueStoreEntry(kvsEntities);
@@ -119,13 +123,13 @@ public class EntityConverter {
   }
 
   public OdkTablesKeyValueStoreEntry toOdkTablesKeyValueStoreEntry(
-      Entity entity) {
-    String tableId = entity.getString(DbKeyValueStore.TABLE_ID);
-    String partition = entity.getString(DbKeyValueStore.PARTITION);
-    String aspect = entity.getString(DbKeyValueStore.ASPECT);
-    String key = entity.getString(DbKeyValueStore.KEY);
-    String type = entity.getString(DbKeyValueStore.TYPE);
-    String value = entity.getString(DbKeyValueStore.VALUE);
+      DbKeyValueStoreEntity entity) {
+    String tableId = entity.getTableId();
+    String partition = entity.getPartition();
+    String aspect = entity.getAspect();
+    String key = entity.getKey();
+    String type = entity.getType();
+    String value = entity.getValue();
     OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
     entry.tableId = tableId;
     entry.partition = partition;
@@ -137,30 +141,28 @@ public class EntityConverter {
   }
 
   /**
-   * Return a TableDefinition based upon the {@link Entity} parameter, which
+   * Return a TableDefinition based upon the {@link DbTableDefinitionsEntity} parameter, which
    * must have been generated from the {@link DbTableDefinitions} relation.
    * All fields are from the entity except the columns, which are set to null.
    * @param definitionEntity
    * @return
    */
-  public TableDefinition toTableDefinition(Entity definitionEntity) {
-    String tableId = definitionEntity.getString(DbTableDefinitions.TABLE_ID);
-    String tableKey = definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
-    String dbTableName =
-        definitionEntity.getString(DbTableDefinitions.DB_TABLE_NAME);
-    String tableTypeStr = definitionEntity.getString(DbTableDefinitions.TYPE);
+  public TableDefinition toTableDefinition(TableEntry entryEntity, DbTableDefinitionsEntity definitionEntity) {
+    String tableId = definitionEntity.getTableId();
+    String tableKey = entryEntity.getTableKey();
+    String dbTableName = definitionEntity.getDbTableName();
+    String tableTypeStr = definitionEntity.getType();
     TableType tableType = TableType.valueOf(tableTypeStr);
-    String tableIdAccessControls = definitionEntity.getString(
-        DbTableDefinitions.TABLE_ID_ACCESS_CONTROLS);
+    String tableIdAccessControls = definitionEntity.getTableIdAccessControls();
     return new TableDefinition(tableId, null, tableKey, dbTableName, tableType,
         tableIdAccessControls);
   }
 
   public List<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
-      List<Entity> kvsEntities) {
+      List<DbKeyValueStoreEntity> kvsEntities) {
     List<OdkTablesKeyValueStoreEntry> kvsEntries =
         new ArrayList<OdkTablesKeyValueStoreEntry>();
-    for (Entity entity : kvsEntities) {
+    for (DbKeyValueStoreEntity entity : kvsEntities) {
       kvsEntries.add(toOdkTablesKeyValueStoreEntry(entity));
     }
     return kvsEntries;
@@ -169,11 +171,11 @@ public class EntityConverter {
   /**
    * Convert a {@link DbTableAcl} entity to a {@link TableAcl}
    */
-  public TableAcl toTableAcl(Entity entity) {
-    Scope.Type scopeType = Scope.Type.valueOf(entity.getString(DbTableAcl.SCOPE_TYPE));
-    String scopeValue = entity.getString(DbTableAcl.SCOPE_VALUE);
+  public TableAcl toTableAcl(DbTableAclEntity entity) {
+    Scope.Type scopeType = Scope.Type.valueOf(entity.getScopeType());
+    String scopeValue = entity.getScopeValue();
     Scope scope = new Scope(scopeType, scopeValue);
-    TableRole role = TableRole.valueOf(entity.getString(DbTableAcl.ROLE));
+    TableRole role = TableRole.valueOf(entity.getRole());
     TableAcl acl = new TableAcl();
     acl.setRole(role);
     acl.setScope(scope);
@@ -184,9 +186,9 @@ public class EntityConverter {
    * Convert a list of {@link DbTableAcl} entities to a list of {@link TableAcl}
    * .
    */
-  public List<TableAcl> toTableAcls(List<Entity> entities) {
+  public List<TableAcl> toTableAcls(List<DbTableAclEntity> entities) {
     List<TableAcl> acls = new ArrayList<TableAcl>();
-    for (Entity entity : entities) {
+    for (DbTableAclEntity entity : entities) {
       TableAcl acl = toTableAcl(entity);
       acls.add(acl);
     }
@@ -210,9 +212,9 @@ public class EntityConverter {
   /**
    * Convert a {@link DbColumnDefinitions} entity to a {@link DataField}
    */
-  public DataField toField(Entity entity) {
+  public DataField toField(DbColumnDefinitionsEntity entity) {
     // Note that here is where Aggregate is deciding that all the column types
-    // in the user-defined columns are in fact of type DataType.STRING. 
+    // in the user-defined columns are in fact of type DataType.STRING.
     // Therefore we're not allowing any sort of more fancy number searching or
     // anything like that on the server. This should eventually map more
     // intelligently. It is not being done at this point because exactly what
@@ -230,9 +232,9 @@ public class EntityConverter {
   /**
    * Convert a list of {@link DbColumnDefinitions} entities to a list of {@link DataField}
    */
-  public List<DataField> toFields(List<Entity> entities) {
+  public List<DataField> toFields(List<DbColumnDefinitionsEntity> entities) {
     List<DataField> fields = new ArrayList<DataField>();
-    for (Entity entity : entities)
+    for (DbColumnDefinitionsEntity entity : entities)
       fields.add(toField(entity));
     return fields;
   }
@@ -248,7 +250,7 @@ public class EntityConverter {
    *          the {@link DbColumnDefinitions} entities of the table
    * @return the row
    */
-  public Row toRow(Entity entity, List<Entity> columns) {
+  public Row toRow(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Row row = new Row();
     row.setRowId(entity.getId());
     row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
@@ -288,20 +290,21 @@ public class EntityConverter {
    * @return
    * @author sudar.sam@gmail.com
    */
-  public static Row toRowFromFileInfo(Entity entity) {
+  public static Row toRowFromFileInfo(DbTableFileInfoEntity entity) {
 	  Row row = new Row();
 	  row.setRowId(entity.getId());
-	  row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
-	  row.setDeleted(entity.getBoolean(DbTable.DELETED));
-	  row.setCreateUser(entity.getString(DbTable.CREATE_USER));
-	  row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
-	  String filterType = entity.getString(DbTable.FILTER_TYPE);
+	  row.setRowEtag(entity.getStringField(DbTable.ROW_VERSION));
+     row.setDataEtagAtModification(entity.getStringField(DbTable.DATA_ETAG_AT_MODIFICATION));
+	  row.setDeleted(entity.getBooleanField(DbTable.DELETED));
+	  row.setCreateUser(entity.getStringField(DbTable.CREATE_USER));
+	  row.setLastUpdateUser(entity.getStringField(DbTable.LAST_UPDATE_USER));
+	  String filterType = entity.getStringField(DbTable.FILTER_TYPE);
 	  if (filterType != null) {
 	      Scope.Type type = Scope.Type.valueOf(filterType);
 	      if (filterType.equals(Scope.Type.DEFAULT)) {
 	      row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
 	        } else {
-	          String value = entity.getString(DbTable.FILTER_VALUE);
+	          String value = entity.getStringField(DbTable.FILTER_VALUE);
 	          row.setFilterScope(new Scope(type, value));
 	        }
 	      } else {
@@ -309,9 +312,10 @@ public class EntityConverter {
 	      }
 	  // this will be the actual values of the row
 	  Map<String, String> values = new HashMap<String, String>();
-	  for (String columnName : DbTableFileInfo.columnNames) {
-	    String value = entity.getAsString(columnName);
-	    values.put(columnName, value);
+	  for (DataField column : DbTableFileInfo.exposedColumnNames) {
+	    Validate.isTrue(column.getDataType() == DataType.STRING);
+	    String value = entity.getStringField(column);
+	    values.put(column.getName(), value);
 	  }
 	  row.setValues(values);
 	  return row;
@@ -325,9 +329,9 @@ public class EntityConverter {
    * @param entities
    * @return
    */
-  public static List<Row> toRowsFromFileInfo(List<Entity> entities) {
+  public static List<Row> toRowsFromFileInfo(List<DbTableFileInfoEntity> entities) {
 	  List<Row> rows = new ArrayList<Row>();
-	  for (Entity e : entities) {
+	  for (DbTableFileInfoEntity e : entities) {
 		  Row row = toRowFromFileInfo(e);
 		  if (!row.isDeleted()) {
 			  rows.add(row);
@@ -345,7 +349,7 @@ public class EntityConverter {
    *          the {@link DbColumnDefinitions} entities of the table
    * @return the row
    */
-  public Row toRowFromLogTable(Entity entity, List<Entity> columns) {
+  public Row toRowFromLogTable(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Row row = new Row();
     row.setRowId(entity.getString(DbLogTable.ROW_ID));
     row.setRowEtag(entity.getString(DbLogTable.ROW_VERSION));
@@ -371,10 +375,10 @@ public class EntityConverter {
     return row;
   }
 
-  private Map<String, String> getRowValues(Entity entity, List<Entity> columns) {
+  private Map<String, String> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Map<String, String> values = new HashMap<String, String>();
-    for (Entity column : columns) {
-      String name = column.getString(DbColumnDefinitions.ELEMENT_KEY);
+    for (DbColumnDefinitionsEntity column : columns) {
+      String name = column.getElementKey();
       String value = entity.getAsString(RUtil.convertIdentifier(column.getId()));
       values.put(name, value);
     }
@@ -393,7 +397,7 @@ public class EntityConverter {
    *          true if the rows are from the {@link DbLogTable}
    * @return the converted rows
    */
-  public List<Row> toRows(List<Entity> entities, List<Entity> columns,
+  public List<Row> toRows(List<Entity> entities, List<DbColumnDefinitionsEntity> columns,
       boolean fromLogTable) {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {

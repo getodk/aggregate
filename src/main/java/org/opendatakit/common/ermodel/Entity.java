@@ -1,16 +1,19 @@
-/**
+/*
  * Copyright (C) 2011 University of Washington
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.opendatakit.common.ermodel;
 
 import java.math.BigDecimal;
@@ -22,175 +25,126 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
-/**
- * API for the manipulation of an entity within a {@link Relation}. See
- * {@link AbstractRelation} for how to create a new entity, fetch an existing
- * one, etc. In general, a {@link Relation} should only store fairly short
- * strings. The total number of bytes that an Entity can hold is generally
- * limited by the persistence layer to less than 65000 bytes. If you need to
- * store a file, use the BinaryContentManipulator class to do that.
- * 
- * @author mitchellsundt@gmail.com
- * 
- */
 public interface Entity {
-  // primary key
-  public String getUri();
-
-  // metadata field
-  public Date getLastUpdateDate();
-
-  // metadata field; of the form: "mailto:user@uw.edu"
-  public String getLastUpdateUriUser();
-
-  // metadata field
-  public Date getCreationDate();
-
-  // metadata field; of the form: "mailto:user@uw.edu"
-  public String getCreatorUriUser();
 
   /**
-   * Type-safe setter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   * @param value
+   * @return the unique identifier of this Entity. You can later retrieve this
+   *         Entity using {@link Relation#getEntity(String)}.
    */
-  public void setBoolean(DataField fieldName, Boolean value);
+  public abstract String getId();
 
   /**
-   * Type-safe getter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
+   * @return the Date of the last time this Entity was saved to the datastore.
    */
-  public Boolean getBoolean(DataField fieldName);
+  public abstract Date getLastUpdateDate();
 
   /**
-   * Type-safe setter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   * @param value
+   * @return the Date that this Entity was first saved to the datastore.
    */
-  public void setDate(DataField fieldName, Date value);
+  public abstract Date getCreationDate();
 
   /**
-   * Type-safe getter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
+   * @return the user who created this entity, of the form
+   *         "mailto:username@domain.com"
    */
-  public Date getDate(DataField fieldName);
+  public abstract String getCreationUser();
 
   /**
-   * Type-safe setter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   * @param value
+   * @return the user who last updated this entity, of the form
+   *         "mailto:username@domain.com"
    */
-  public void setDouble(DataField fieldName, Double value);
+  public abstract String getLastUpdateUser();
+
+  // accessors for data fields
+
+  public abstract Boolean getBoolean(DataField field);
+
+  public abstract Date getDate(DataField field);
+
+  public abstract Double getDouble(DataField field);
+
+  public abstract BigDecimal getNumeric(DataField field);
+
+  public abstract Integer getInteger(DataField field);
+
+  public abstract Long getLong(DataField field);
+
+  public abstract String getString(DataField field);
+
+  // accessors for strings
+
+  public abstract Boolean getBoolean(String fieldName);
+
+  public abstract Date getDate(String fieldName);
+
+  public abstract Double getDouble(String fieldName);
+
+  public abstract BigDecimal getNumeric(String fieldName);
+
+  public abstract Integer getInteger(String fieldName);
+
+  public abstract Long getLong(String fieldName);
+
+  public abstract String getString(String fieldName);
+
+  public abstract void set(DataField field, Boolean value);
+
+  public abstract void set(DataField field, Date value);
+
+  public abstract void set(DataField field, Double value);
+
+  public abstract void set(DataField field, BigDecimal value);
+
+  public abstract void set(DataField field, Integer value);
+
+  public abstract void set(DataField field, Long value);
+
+  public abstract void set(DataField field, String value);
+
+  // setters for names only
+
+  public abstract void set(String fieldName, Boolean value);
+
+  public abstract void set(String fieldName, Date value);
+
+  public abstract void set(String fieldName, Double value);
+
+  public abstract void set(String fieldName, BigDecimal value);
+
+  public abstract void set(String fieldName, Integer value);
+
+  public abstract void set(String fieldName, Long value);
+
+  public abstract void set(String fieldName, String value);
 
   /**
-   * Type-safe getter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
+   * Retrieves the value of the given attribute and returns the value as a
+   * String.
    */
-  public Double getDouble(DataField fieldName);
+  public abstract String getAsString(String fieldName);
 
   /**
-   * Type-safe setter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   * @param value
+   * Attempts to parse 'value' to the correct type for the given attribute and
+   * then set it on this entity.
    */
-  public void setNumeric(DataField fieldName, BigDecimal value);
+  public abstract void setAsString(String fieldName, String value);
 
   /**
-   * Type-safe getter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   */
-  public BigDecimal getNumeric(DataField fieldName);
-
-  /**
-   * Type-safe setter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   * @param value
-   */
-  public void setInteger(DataField fieldName, Integer value);
-
-  /**
-   * Type-safe getter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   */
-  public Integer getInteger(DataField fieldName);
-
-  /**
-   * Type-safe setter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   * @param value
-   */
-  public void setLong(DataField fieldName, Long value);
-
-  /**
-   * Type-safe getter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   */
-  public Long getLong(DataField fieldName);
-
-  /**
-   * Type-safe setter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   * @param value
-   */
-  public void setString(DataField fieldName, String value);
-
-  /**
-   * Type-safe getter. Will throw exception if field is of the wrong type.
-   * 
-   * @param fieldName
-   */
-  public String getString(DataField fieldName);
-
-  /**
-   * Given a field name, and a string representation of the value, this
-   * interprets an UPPER_CASE name as the true field name, and otherwise
-   * attempts to convert a camelCase name to CAMEL_CASE. It then retrieves the
-   * DataField for that name and, based upon the datatype of that field, parses
-   * the value to obtain the appropriately-typed value to store into this field.
-   * 
-   * @param fieldName
-   * @param value
-   */
-  public void setField(String fieldName, String value);
-
-  /**
-   * Given a field name, this interprets an UPPER_CASE name as the true field
-   * name, and otherwise attempts to convert a camelCase name to CAMEL_CASE. It
-   * then retrieves the value of the DataField for that name and converts it to
-   * a string.
-   * 
-   * @param fieldName
-   * @return
-   */
-  public String getField(String fieldName);
-
-  /**
-   * Save this entity into the datastore.
-   * 
-   * @param cc
+   * Saves this Entity to the datastore.
+   *
    * @throws ODKEntityPersistException
+   *           if there was a problem saving the Entity.
    * @throws ODKOverQuotaException
    */
-  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
+  public abstract void put(CallingContext cc) throws ODKEntityPersistException,
+      ODKOverQuotaException;
 
   /**
-   * Remove this entity from the datastore.
-   * 
-   * @param cc
+   * Deletes this Entity from the datastore.
+   *
    * @throws ODKDatastoreException
+   *           if there was a problem deleting this Entity.
    */
-  public void remove(CallingContext cc) throws ODKDatastoreException;
+  public abstract void delete(CallingContext cc) throws ODKDatastoreException;
+
 }

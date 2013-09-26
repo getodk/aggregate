@@ -20,32 +20,41 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.ermodel.BlobEntitySet;
-import org.opendatakit.common.ermodel.simple.Entity;
-import org.opendatakit.common.ermodel.simple.Relation;
+import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.Query;
+import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
-import org.opendatakit.common.persistence.DataField.IndexType;
+import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
  * This is the table in the database that holds information about the files that
  * have been uploaded to be associated with certain ODKTables tables.
+ *
+ * We assume one ODK Aggregate per Tables App. So the AppId is something that
+ * should NOT appear in this table -- it should be in the server settings table.
  * <p>
- * Each entry is a three member tuple of (appId, tableId, pathToFile). In this
- * way all are guaranteed to be unique.
+ * Each entry is a three member tuple of (tableId, pathToFile). In this way all
+ * are guaranteed to be unique.
  * <p>
  * The files themselves are stored in {@link DbTablefiles} by their pathToFile
  * parameter. Each pathToFile points to a {@link BlobEntitySet} with a single
- * attachment. 
+ * attachment.
  *
  * @author sudar.sam@gmail.com
  *
  */
-public class DbTableFileInfo {
+public class DbTableFileInfo extends Relation {
+
+  private DbTableFileInfo(String namespace, String tableName, List<DataField> fields,
+      CallingContext cc) throws ODKDatastoreException {
+    super(namespace, tableName, fields, cc);
+  }
 
   // these are the user-friendly names that are displayed when the user
   // views the contents of this table on the server.
@@ -57,13 +66,21 @@ public class DbTableFileInfo {
   // static block.
   // Leading underscores are meant (and necessary) to indicate that these will
   // be displayed to the user on the server. The underscore will be truncated.
-  // Jul 17, 2013--kind of just playing nice with the underscore thing for now 
+  // Jul 17, 2013--kind of just playing nice with the underscore thing for now
   // as I add in proper file sync support.
-  public static final String APP_ID = "_APP_ID";
-  public static final String TABLE_ID = "_TABLE_ID";
-  public static final String PATH_TO_FILE = "_PATH_TO_FILE";
+  public static final DataField TABLE_ID = new DataField("_TABLE_ID", DataType.STRING, true);
+  public static final DataField PATH_TO_FILE = new DataField("_PATH_TO_FILE", DataType.STRING,
+      true, 20480L);
 
-  public static final List<String> columnNames;
+  // NOTE: code elsewhere depends upon all these data fields being String
+  // fields.
+  // NOTE: code elsewhere depends upon all these data fields being String
+  // fields.
+  // NOTE: code elsewhere depends upon all these data fields being String
+  // fields.
+  // NOTE: code elsewhere depends upon all these data fields being String
+  // fields.
+  public static final List<DataField> exposedColumnNames;
 
   public static final String RELATION_NAME = "TABLE_FILE_INFO";
 
@@ -71,61 +88,142 @@ public class DbTableFileInfo {
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(new DataField(APP_ID, DataType.STRING, false)
-    .setIndexable(IndexType.HASH));
-    // can be null because we're 
-    dataFields.add(new DataField(TABLE_ID, DataType.STRING, true));
-    dataFields.add(new DataField(PATH_TO_FILE, DataType.STRING, true, 
-        20480L));
+    // can be null because we're
+    dataFields.add(TABLE_ID);
+    dataFields.add(PATH_TO_FILE);
     // and add the things from DbTable
     dataFields.addAll(DbTable.getStaticFields());
     // TODO: do the appropriate time stamping and things.
     // populate the list with all the column names
-    List<String> columns = new ArrayList<String>();
-    columns.add(APP_ID);
+    List<DataField> columns = new ArrayList<DataField>();
     columns.add(TABLE_ID);
     columns.add(PATH_TO_FILE);
-    columnNames = Collections.unmodifiableList(columns);
+    exposedColumnNames = Collections.unmodifiableList(columns);
   }
 
-  private static Relation theRelation = null;
+  public static class DbTableFileInfoEntity {
+    Entity e;
 
-  public static synchronized Relation getRelation(CallingContext cc)
+    DbTableFileInfoEntity(Entity e) {
+      this.e = e;
+    }
+
+    // Primary Key
+    public String getId() {
+      return e.getId();
+    }
+
+    public void put(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
+      e.put(cc);
+    }
+
+    public void delete(CallingContext cc) throws ODKDatastoreException {
+      e.delete(cc);
+    }
+
+    // Accessors
+
+    public String getTableId() {
+      return e.getString(TABLE_ID);
+    }
+
+    public void setTableId(String value) {
+      e.set(TABLE_ID, value);
+    }
+
+    public String getPathToFile() {
+      return e.getString(PATH_TO_FILE);
+    }
+
+    public void setPathToFile(String value) {
+      e.set(PATH_TO_FILE, value);
+    }
+
+    public String getStringField(DataField field) {
+      return e.getString(field);
+    }
+
+    public void setStringField(DataField field, String value) {
+      e.set(field, value);
+    }
+
+    public Boolean getBooleanField(DataField field) {
+      return e.getBoolean(field);
+    }
+
+    public void setBooleanField(DataField field, Boolean value) {
+      e.set(field, value);
+    }
+  }
+
+  private static DbTableFileInfo theRelation = null;
+
+  private static synchronized DbTableFileInfo getRelation(CallingContext cc)
       throws ODKDatastoreException {
-    if ( theRelation == null ) {
-      Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME,
-        dataFields, cc);
+    if (theRelation == null) {
+      DbTableFileInfo relation = new DbTableFileInfo(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
       theRelation = relation;
     }
     return theRelation;
   }
 
   /**
-   * I'm pretty sure this returns the entries for the passed in table id.
+   * Create a new row in this relation. The row is not yet persisted.
+   *
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
    */
-  public static List<Entity> queryForTableId(String tableId, CallingContext cc)
+  public static DbTableFileInfoEntity createNewEntity(CallingContext cc)
       throws ODKDatastoreException {
-    return getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc)
-        .equal(TABLE_ID, tableId).execute();
-  }
-  
-  public static List<Entity> queryForAppId(String appId, CallingContext cc) 
-      throws ODKDatastoreException {
-    return getRelation(cc).query("DbTableFileInfo.queryForAppId()", cc)
-        .equal(APP_ID, appId).execute();
-  }
-  
-  public static List<Entity> queryForAppAndTable(String appId, String tableId,
-      CallingContext cc) throws ODKDatastoreException {
-    return getRelation(cc).query("DbTableFileInfo.queryForAppAndTable()", cc)
-        .equal(APP_ID, appId).equal(TABLE_ID, tableId).execute();
-  }
-  
-  public static List<Entity> queryForEntity(String appId, String tableId, 
-      String wholePath, CallingContext cc) throws ODKDatastoreException {
-    return getRelation(cc).query(
-        "DbTableFileInfo.queryForEntity()", cc).equal(APP_ID, appId)
-        .equal(TABLE_ID, tableId).equal(PATH_TO_FILE, wholePath).execute();
+    return new DbTableFileInfoEntity(getRelation(cc).newEntity(cc));
   }
 
+  /**
+   * Returns all the entries.
+   */
+  public static List<DbTableFileInfoEntity> queryForApp(CallingContext cc)
+      throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForApp()", cc);
+
+    List<Entity> list = query.execute();
+    List<DbTableFileInfoEntity> results = new ArrayList<DbTableFileInfoEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableFileInfoEntity(e));
+    }
+    return results;
+  }
+
+  /**
+   * Returns the entries for the passed in table id.
+   */
+  public static List<DbTableFileInfoEntity> queryForTableId(String tableId, CallingContext cc)
+      throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc);
+    query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
+
+    List<Entity> list = query.execute();
+    List<DbTableFileInfoEntity> results = new ArrayList<DbTableFileInfoEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableFileInfoEntity(e));
+    }
+    return results;
+  }
+
+  public static List<DbTableFileInfoEntity> queryForEntity(String tableId, String wholePath,
+      CallingContext cc) throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForEntity()", cc);
+    query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
+    query.addFilter(PATH_TO_FILE, FilterOperation.EQUAL, wholePath);
+
+    List<Entity> list = query.execute();
+    List<DbTableFileInfoEntity> results = new ArrayList<DbTableFileInfoEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableFileInfoEntity(e));
+    }
+    return results;
+  }
 }
