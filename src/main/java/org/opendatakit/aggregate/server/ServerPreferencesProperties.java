@@ -64,6 +64,9 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
 
   private static final String ODK_TABLES_SEQUENCER_BASE = "ODK_TABLES_SEQUENCER_BASE";
+  // there can be only one APP_ID per ODK Aggregate. Store the app name here.
+  // The main impact on this is validity checking on sync when the appId is checked.
+  private static final String ODK_TABLES_APP_ID = "ODK_TABLES_APP_ID";
   /**
    * Construct a relation prototype.
    *

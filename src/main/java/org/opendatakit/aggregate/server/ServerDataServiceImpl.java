@@ -21,7 +21,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -39,17 +38,11 @@ import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
-import org.opendatakit.aggregate.odktables.relation.DbTable;
-import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
-import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
-import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
-import org.opendatakit.common.ermodel.simple.Entity;
-import org.opendatakit.common.ermodel.simple.Relation;
-import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -228,7 +221,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, cc);
+      TableManager tm = new TableManager(cc);
+      TableEntry entry = tm.getTable(tableId);
+      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, entry.getPropertiesEtag(), cc);
       return columnNames;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -300,7 +295,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   public List<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient {
-    throw new NotImplementedException();
+    throw new IllegalStateException("Not implemented");
 // this is commented out after we changed the file around.
 // TODO: update this.
 //    HttpServletRequest req = this.getThreadLocalRequest();
@@ -331,7 +326,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   public List<FileSummaryClient> getMedialFilesKey(String tableId, String key)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
-    throw new NotImplementedException();
+    throw new IllegalStateException("Not implemented");
 // this is commented out after we changed the file around.
 // TODO: see if we actually need this.
 //    HttpServletRequest req = this.getThreadLocalRequest();
@@ -423,9 +418,11 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
    */
   @Override
   public List<String> getFileRowInfoColumnNames() {
-    List<String> officialColumns = DbTableFileInfo.columnNames;
+    List<DataField> exposedColumnNames = DbTableFileInfo.exposedColumnNames;
     List<String> columnNames = new ArrayList<String>();
-    columnNames.addAll(officialColumns);
+    for ( DataField f : exposedColumnNames ) {
+      columnNames.add(f.getName());
+    }
     return columnNames;
   }
 
@@ -529,7 +526,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   public void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
-    throw new NotImplementedException();
+    throw new IllegalStateException("Not implemented");
 // commented out when we changed the file loading.
 // TODO: re-envision, fix.
 //    HttpServletRequest req = this.getThreadLocalRequest();

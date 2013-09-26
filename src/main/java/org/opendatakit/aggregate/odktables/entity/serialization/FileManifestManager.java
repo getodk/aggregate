@@ -30,12 +30,12 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.impl.api.FileServiceImpl;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.common.ermodel.BlobEntitySet;
-import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.HtmlUtil;
 import org.opendatakit.common.web.CallingContext;
@@ -47,98 +47,98 @@ import org.opendatakit.common.web.constants.BasicConsts;
  *
  */
 public class FileManifestManager {
-  
+
   private static final ObjectMapper MAPPER = new ObjectMapper();
-  
+
   private String appId;
   private CallingContext cc;
   private Log log;
-  
+
   public FileManifestManager(String appId, CallingContext cc) {
     this.appId = appId;
+    // TODO: verify that appId matches what stored in ServerPreferencesProperties...
     this.cc = cc;
     this.log = LogFactory.getLog(FileManifestManager.class);
   }
-  
+
   /**
    * Get the manifest entries for all the files associated with the app.
    * @return
-   * @throws ODKDatastoreException 
-   * @throws IOException 
-   * @throws JsonMappingException 
-   * @throws JsonGenerationException 
+   * @throws ODKDatastoreException
+   * @throws IOException
+   * @throws JsonMappingException
+   * @throws JsonGenerationException
    */
-  public String getManifestForAllAppFiles() throws ODKDatastoreException, 
+  public String getManifestForAllAppFiles() throws ODKDatastoreException,
       JsonGenerationException, JsonMappingException, IOException {
     // TODO: need to handle access control
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<Entity> entities = DbTableFileInfo.queryForAppId(appId, cc);
+    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForApp(cc);
     List<OdkTablesFileManifestEntry> manifestEntries =
         getEntriesFromQuery(entities, dbTableFiles);
     String jsonManifest = MAPPER.writeValueAsString(manifestEntries);
     return jsonManifest;
   }
-  
-  
-  
+
+
+
   /**
    * Get the manifest entries for the files associated with the given table.
    * @param tableId
    * @return
-   * @throws ODKDatastoreException 
-   * @throws IOException 
-   * @throws JsonMappingException 
-   * @throws JsonGenerationException 
+   * @throws ODKDatastoreException
+   * @throws IOException
+   * @throws JsonMappingException
+   * @throws JsonGenerationException
    */
-  public String getManifestForTable(String tableId) throws 
-      ODKDatastoreException, JsonGenerationException, JsonMappingException, 
+  public String getManifestForTable(String tableId) throws
+      ODKDatastoreException, JsonGenerationException, JsonMappingException,
       IOException {
     // TODO: need to handle access control.
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<Entity> entities = DbTableFileInfo.queryForAppAndTable(appId, tableId, 
+    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(tableId,
         cc);
     List<OdkTablesFileManifestEntry> manifestEntries =
         getEntriesFromQuery(entities, dbTableFiles);
     String jsonManifest = MAPPER.writeValueAsString(manifestEntries);
     return jsonManifest;
   }
-  
+
   /**
    * Get the manifest entries for the application-level files--i.e. those that
    * are not associated with a certain table. This will return those with the
-   * {@link FileServiceImpl#DEFAULT_TABLE_ID}.
+   * {@link FileServiceImpl#NO_TABLE_ID}.
    * @return
-   * @throws ODKDatastoreException 
-   * @throws IOException 
-   * @throws JsonMappingException 
-   * @throws JsonGenerationException 
+   * @throws ODKDatastoreException
+   * @throws IOException
+   * @throws JsonMappingException
+   * @throws JsonGenerationException
    */
-  public String getManifestForAppLevelFiles() throws ODKDatastoreException, 
+  public String getManifestForAppLevelFiles() throws ODKDatastoreException,
       JsonGenerationException, JsonMappingException, IOException {
     // TODO: need to handle access control.
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<Entity> entities = DbTableFileInfo.queryForAppAndTable(appId, 
-        FileServiceImpl.DEFAULT_TABLE_ID, cc);
+    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(FileServiceImpl.NO_TABLE_ID, cc);
     List<OdkTablesFileManifestEntry> manifestEntries =
         getEntriesFromQuery(entities, dbTableFiles);
     String jsonManifest = MAPPER.writeValueAsString(manifestEntries);
-    return jsonManifest;    
+    return jsonManifest;
   }
-  
+
   /**
    * Get a list of entries from a query of {@link DbTableFileInfo}. The query
    * can be of any level--app, table, or even single entry.
    * @param entities
-   * @param DbTableFiles 
+   * @param DbTableFiles
    * @return
-   * @throws ODKDatastoreException 
+   * @throws ODKDatastoreException
    */
   private List<OdkTablesFileManifestEntry> getEntriesFromQuery(
-      List<Entity> entities, DbTableFiles dbTableFiles) throws 
+      List<DbTableFileInfoEntity> entities, DbTableFiles dbTableFiles) throws
       ODKDatastoreException {
     // TODO: need to handle access control.
     List<Row> infoRows = EntityConverter.toRowsFromFileInfo(entities);
-    List<OdkTablesFileManifestEntry> manifestEntries = 
+    List<OdkTablesFileManifestEntry> manifestEntries =
         new ArrayList<OdkTablesFileManifestEntry>();
     // A map of static url get parameters. In this case we only want to downoad
     // as an attachment.
@@ -150,7 +150,7 @@ public class FileManifestManager {
         continue;
       }
       OdkTablesFileManifestEntry entry = new OdkTablesFileManifestEntry();
-      // To retrieve the actual file we need to get the uri of the file info 
+      // To retrieve the actual file we need to get the uri of the file info
       // row, which is the top-level uri of the blob tables holding the files.
       String rowUri = row.getRowId();
       String pathToFile = row.getValues().get(DbTableFileInfo.PATH_TO_FILE);
@@ -160,24 +160,24 @@ public class FileManifestManager {
         log.error("more than one entity for appId: " + appId + ", "
              + ", pathToFile: " + pathToFile);
       } else if (blobEntitySet.getAttachmentCount(cc) < 1) {
-        log.error("file not found for: " + appId + ", pathToFile: " 
+        log.error("file not found for: " + appId + ", pathToFile: "
             + pathToFile);
         continue;
       }
       entry.filename = pathToFile;
       entry.md5hash = blobEntitySet.getContentHash(1, cc);
-      String urlPartial = cc.getServerURL() + BasicConsts.FORWARDSLASH + 
-          ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + 
-          BasicConsts.FORWARDSLASH +  FileService.SERVLET_PATH + 
+      String urlPartial = cc.getServerURL() + BasicConsts.FORWARDSLASH +
+          ServletConsts.ODK_TABLES_SERVLET_BASE_PATH +
+          BasicConsts.FORWARDSLASH +  FileService.SERVLET_PATH +
           BasicConsts.FORWARDSLASH + appId +
           BasicConsts.FORWARDSLASH + pathToFile;
-      String urlComplete = HtmlUtil.createLinkWithProperties(urlPartial, 
+      String urlComplete = HtmlUtil.createLinkWithProperties(urlPartial,
           properties);
       entry.downloadUrl = urlComplete;
       manifestEntries.add(entry);
     }
     return manifestEntries;
   }
-  
+
 
 }
