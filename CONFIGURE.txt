@@ -35,8 +35,8 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.7.3 or higher SDK defined.
-	If the default App Engine version is not 1.7.3, you may need to 
+    Be sure there is an App Engine 1.8.0 or higher SDK defined.
+	If the default App Engine version is not 1.8.0, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
@@ -288,9 +288,9 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.7.3 or higher SDK defined.
+    Be sure there is an App Engine 1.8.0 or higher SDK defined.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 1.7.3).
+	pom.xml (currently 1.8.0).
 
   Google / Web Toolkit:
   

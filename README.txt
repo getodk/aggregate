@@ -9,7 +9,7 @@ GWT Upgrade Guide
 -----------------
 
 If you are updating this project to work with something other than
-GWT 2.3, you should verify that the code in:
+GWT 2.5, you should verify that the code in:
 
 GWTAccessDeniedHandler.AccessDeniedRemoteServiceServlet.processCall()
 
