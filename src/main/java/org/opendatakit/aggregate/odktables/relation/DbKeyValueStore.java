@@ -45,7 +45,7 @@ public class DbKeyValueStore extends Relation {
   }
 
   // The name of the table/relation in the datastore.
-  private static final String RELATION_NAME = "KEY_VALUE_STORE";
+  private static final String RELATION_NAME = "KEY_VALUE_STORE2";
 
   // Column names.
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false);

@@ -20,7 +20,7 @@
 
   <xs:simpleType name="classType">
     <xs:restriction base="xs:string">
-      <xs:pattern value="B[0-8]"/>
+      <xs:pattern value="B[0-8]|B4_1G"/>
     </xs:restriction>
   </xs:simpleType>
 

@@ -82,7 +82,7 @@ public class DbTableFileInfo extends Relation {
   // fields.
   public static final List<DataField> exposedColumnNames;
 
-  public static final String RELATION_NAME = "TABLE_FILE_INFO";
+  public static final String RELATION_NAME = "TABLE_FILE_INFO2";
 
   // the list of the datafields/columns
   private static final List<DataField> dataFields;

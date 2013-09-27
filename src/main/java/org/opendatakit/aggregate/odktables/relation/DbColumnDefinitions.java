@@ -58,7 +58,7 @@ public class DbColumnDefinitions extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
-  private static final String RELATION_NAME = "COLUMN_DEFINITIONS";
+  private static final String RELATION_NAME = "COLUMN_DEFINITIONS2";
 
   // these are the column names in the COLUMN table
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
