@@ -64,16 +64,16 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   /**
    * Datastore entity specific to this type of external service
    */
-  private final JsonServer2ParameterTable objectEntity;
+  private final JsonServer3ParameterTable objectEntity;
 
-  private JsonServer(JsonServer2ParameterTable entity, FormServiceCursor formServiceCursor,
+  private JsonServer(JsonServer3ParameterTable entity, FormServiceCursor formServiceCursor,
       IForm form, CallingContext cc) {
     super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
 
-  private JsonServer(JsonServer2ParameterTable entity, IForm form,
+  private JsonServer(JsonServer3ParameterTable entity, IForm form,
       ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
     this(entity, createFormServiceCursor(form, entity, externalServiceOption,
@@ -83,14 +83,14 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
   public JsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
       throws ODKDatastoreException {
-    this(retrieveEntity(JsonServer2ParameterTable.assertRelation(cc), formServiceCursor, cc),
+    this(retrieveEntity(JsonServer3ParameterTable.assertRelation(cc), formServiceCursor, cc),
         formServiceCursor, form, cc);
   }
 
   public JsonServer(IForm form, String authKey, String serverURL,
       ExternalServicePublicationOption externalServiceOption, String ownerEmail, BinaryOption binaryOption, CallingContext cc)
       throws ODKDatastoreException {
-    this(newEntity(JsonServer2ParameterTable.assertRelation(cc), cc), form, externalServiceOption,
+    this(newEntity(JsonServer3ParameterTable.assertRelation(cc), cc), form, externalServiceOption,
         ownerEmail, cc);
 
     objectEntity.setServerUrl(serverURL);
@@ -106,7 +106,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
     fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     persist(cc);
-    
+
     // upload data to external service
     postUploadTask(cc);
   }
@@ -168,7 +168,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       throws ODKExternalServiceException {
     try {
       BinaryOption option = objectEntity.getBinaryOption();
-      
+
       ByteArrayOutputStream baStream = new ByteArrayOutputStream();
       PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(baStream, HtmlConsts.UTF8_ENCODE));
 
@@ -182,7 +182,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
 
       JsonParser parser = new JsonParser();
       JsonElement submissionJsonObj = parser.parse(baStream.toString(HtmlConsts.UTF8_ENCODE));
-      
+
       // create json object
       JsonObject entity = new JsonObject();
       entity.addProperty("token", getAuthKey());
@@ -190,7 +190,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       entity.addProperty("formId", form.getFormId());
       entity.addProperty("formVersion", form.getMajorMinorVersionString());
       entity.add("data", submissionJsonObj);
-      
+
       StringEntity postentity = new StringEntity(entity.toString());
       postentity.setContentType("application/json");
 

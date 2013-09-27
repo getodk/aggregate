@@ -37,7 +37,7 @@ public class DbTableEntry extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
-  private static final String RELATION_NAME = "TABLE_ENTRY";
+  private static final String RELATION_NAME = "TABLE_ENTRY2";
 
   public static final DataField TABLE_KEY = new DataField("TABLE_KEY", DataType.STRING, false);
   private static final DataField DATA_ETAG = new DataField("DATA_ETAG", DataType.STRING, true);
