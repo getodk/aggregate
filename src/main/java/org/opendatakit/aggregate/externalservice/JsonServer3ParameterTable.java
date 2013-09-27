@@ -27,9 +27,9 @@ import org.opendatakit.common.web.CallingContext;
  * @author mitchellsundt@gmail.com
  *
  */
-public final class JsonServer2ParameterTable extends CommonFieldsBase {
+public final class JsonServer3ParameterTable extends CommonFieldsBase {
 
-  private static final String TABLE_NAME = "_json_server2";
+  private static final String TABLE_NAME = "_json_server3";
 
   private static final DataField AUTH_KEY_PROPERTY = new DataField("AUTH_KEY",
       DataField.DataType.STRING, true, 4096L);
@@ -39,7 +39,7 @@ public final class JsonServer2ParameterTable extends CommonFieldsBase {
 
   private static final DataField SERVER_URL_PROPERTY = new DataField("SERVER_URL",
       DataField.DataType.STRING, true, 4096L);
-  
+
   private static final DataField BINARY_OPTION_PROPERTY = new DataField("BINARY_OPTION",
       DataField.DataType.STRING, true, 4096L);
 
@@ -50,7 +50,7 @@ public final class JsonServer2ParameterTable extends CommonFieldsBase {
    * @param databaseSchema
    * @param tableName
    */
-  JsonServer2ParameterTable(String schemaName) {
+  JsonServer3ParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(AUTH_KEY_PROPERTY);
     fieldList.add(OWNER_EMAIL_PROPERTY);
@@ -64,14 +64,14 @@ public final class JsonServer2ParameterTable extends CommonFieldsBase {
    * @param ref
    * @param user
    */
-  private JsonServer2ParameterTable(JsonServer2ParameterTable ref, User user) {
+  private JsonServer3ParameterTable(JsonServer3ParameterTable ref, User user) {
     super(ref, user);
   }
 
   // Only called from within the persistence layer.
   @Override
-  public JsonServer2ParameterTable getEmptyRow(User user) {
-    return new JsonServer2ParameterTable(this, user);
+  public JsonServer3ParameterTable getEmptyRow(User user) {
+    return new JsonServer3ParameterTable(this, user);
   }
 
   public String getOwnerEmail() {
@@ -108,22 +108,22 @@ public final class JsonServer2ParameterTable extends CommonFieldsBase {
     String type = getStringField(BINARY_OPTION_PROPERTY);
     return BinaryOption.valueOf(type);
   }
-  
+
   public void setBinaryOption(BinaryOption value) {
     if (!setStringField(BINARY_OPTION_PROPERTY, value.name())) {
       throw new IllegalArgumentException("overflow BinaryOption");
     }
   }
-  
-  private static JsonServer2ParameterTable relation = null;
 
-  public static synchronized final JsonServer2ParameterTable assertRelation(CallingContext cc)
+  private static JsonServer3ParameterTable relation = null;
+
+  public static synchronized final JsonServer3ParameterTable assertRelation(CallingContext cc)
       throws ODKDatastoreException {
     if (relation == null) {
-      JsonServer2ParameterTable relationPrototype;
+      JsonServer3ParameterTable relationPrototype;
       Datastore ds = cc.getDatastore();
       User user = cc.getUserService().getDaemonAccountUser();
-      relationPrototype = new JsonServer2ParameterTable(ds.getDefaultSchemaName());
+      relationPrototype = new JsonServer3ParameterTable(ds.getDefaultSchemaName());
       ds.assertRelation(relationPrototype, user); // may throw exception...
       // at this point, the prototype has become fully populated
       relation = relationPrototype; // set static variable only upon success...

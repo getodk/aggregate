@@ -52,7 +52,7 @@ public class DbTableDefinitions extends Relation {
   }
 
   // The name of the table/relation in the datastore.
-  private static final String RELATION_NAME = "TABLE_DEFINITIONS";
+  private static final String RELATION_NAME = "TABLE_DEFINITIONS2";
 
   // Column names. Based on the ODK Tables Schema google doc for the
   // non client-local columns.
