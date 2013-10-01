@@ -522,7 +522,7 @@
 		<dependency>
 		  <groupId>org.javarosa</groupId>
 		  <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>2013-08-08</version>
+		  <version>2013-09-30</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
