@@ -44,7 +44,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.9.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.9.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2013-08-08.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2013-09-30.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javassist-3.12.1.GA.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxrs-api-2.3.3.Final.jar"/>
