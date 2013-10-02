@@ -47,7 +47,7 @@ public class TableDefinition {
   @Element(name = "table_id", required = true)
   private String tableId;
 
-  @Element(name = "table_key", required = true)
+  @Element(name = "table_key", required = false)
   private String tableKey;
 
   @Element(name = "db_table_name", required = true)
