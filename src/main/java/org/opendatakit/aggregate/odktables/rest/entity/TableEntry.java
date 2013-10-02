@@ -37,7 +37,7 @@ public class TableEntry {
   @Element(required = true)
   private String tableId;
 
-  @Element(required = true)
+  @Element(required = false)
   private String tableKey;
 
   @Element(required = false)
