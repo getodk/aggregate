@@ -27,16 +27,17 @@ import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
+import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
-import org.opendatakit.common.ermodel.simple.Entity;
-import org.opendatakit.common.ermodel.simple.Query;
-import org.opendatakit.common.ermodel.simple.Relation;
+import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -57,10 +58,10 @@ public class DataManager {
   private EntityConverter converter;
   private EntityCreator creator;
   private String tableId;
-  private Entity entry;
-  private Relation table;
-  private Relation logTable;
-  private List<Entity> columns;
+  private DbTableEntryEntity entry;
+  private DbTable table;
+  private DbLogTable logTable;
+  private List<DbColumnDefinitionsEntity> columns;
 
   /**
    * Construct a new DataManager.
@@ -82,10 +83,11 @@ public class DataManager {
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
     this.tableId = tableId;
-    this.entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
-    this.table = DbTable.getRelation(tableId, cc);
-    this.logTable = DbLogTable.getRelation(tableId, cc);
-    this.columns = DbColumnDefinitions.query(tableId, cc);
+    this.entry = DbTableEntry.getTableIdEntry(tableId, cc);
+    String propertyEtag = entry.getPropertiesETag();
+    this.table = DbTable.getRelation(tableId, propertyEtag, cc);
+    this.logTable = DbLogTable.getRelation(tableId, propertyEtag, cc);
+    this.columns = DbColumnDefinitions.query(tableId, propertyEtag, cc);
   }
 
   public String getTableId() {
@@ -155,7 +157,13 @@ public class DataManager {
    * @throws ODKDatastoreException
    */
   public List<Row> getRowsSince(String dataEtag) throws ODKDatastoreException {
-    Query query = buildRowsSinceQuery(dataEtag);
+    String sequenceValue = (dataEtag == null) ? null : getSequenceValueForDataEtag(dataEtag);
+    Query query;
+    if ( sequenceValue == null ) {
+      query = buildRowsFromBeginningQuery();
+    } else {
+      query = buildRowsSinceQuery(sequenceValue);
+    }
     List<Entity> results = query.execute();
     List<Row> logRows = converter.toRows(results, columns, true);
     return computeDiff(logRows);
@@ -173,7 +181,13 @@ public class DataManager {
    * @throws ODKDatastoreException
    */
   public List<Row> getRowsSince(String dataEtag, Scope scope) throws ODKDatastoreException {
-    Query query = buildRowsSinceQuery(dataEtag);
+    String sequenceValue = (dataEtag == null) ? null : getSequenceValueForDataEtag(dataEtag);
+    Query query;
+    if ( sequenceValue == null ) {
+      query = buildRowsFromBeginningQuery();
+    } else {
+      query = buildRowsSinceQuery(sequenceValue);
+    }
     query = narrowByScope(query, scope);
     List<Entity> results = query.execute();
     List<Row> logRows = converter.toRows(results, columns, true);
@@ -192,26 +206,24 @@ public class DataManager {
    * @throws ODKDatastoreException
    */
   public List<Row> getRowsSince(String dataEtag, List<Scope> scopes) throws ODKDatastoreException {
+    String sequenceValue = (dataEtag == null) ? null : getSequenceValueForDataEtag(dataEtag);
     List<Entity> entities = new ArrayList<Entity>();
     for (Scope scope : scopes) {
-      Query query = buildRowsSinceQuery(dataEtag);
-      // TODO: don't forget to add this back in when scopes are figured out
-      //query = narrowByScope(query, scope);
+      Query query;
+      if ( sequenceValue == null ) {
+        query = buildRowsFromBeginningQuery();
+      } else {
+        query = buildRowsSinceQuery(sequenceValue);
+      }
+      query = narrowByScope(query, scope);
       List<Entity> results = query.execute();
       entities.addAll(results);
     }
-    // TODO: we need to do this differently. Likely need to query for the
-    // record containing the given ETAG then query for records with an
-    // internal server timestamp column more recent than that one.
-    //
-    // TODO: this may be broken after switching mod numbers to etag at the time
-    // of creation/update--which is what it was really doing but with just a
-    // mod number
+
     Collections.sort(entities, new Comparator<Entity>() {
       public int compare(Entity o1, Entity o2) {
-        // TODO: this is very much broken.
-        return o1.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION)
-            .compareTo(o2.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
+        return o1.getString(DbLogTable.SEQUENCE_VALUE)
+            .compareTo(o2.getString(DbLogTable.SEQUENCE_VALUE));
       }
     });
     List<Row> logRows = converter.toRows(entities, columns, true);
@@ -219,16 +231,52 @@ public class DataManager {
   }
 
   /**
+   * Perform direct query on DATA_ETAG_AT_MODIFICATION to retrieve the
+   * SEQUENCE_VALUE of that row. This is then used to construct the
+   * get-rows-since queries.
+   *
    * @param dataEtag
-   * @return the query for rows which have been changed or added since the given
-   *         dataEtag
+   * @return SEQUENCE_VALUE of that row
+   * @throws ODKDatastoreException
    */
-  private Query buildRowsSinceQuery(String dataEtag) {
-    Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
+  private String getSequenceValueForDataEtag(String dataEtag) throws ODKDatastoreException {
+    Query query = logTable.query("DataManager.getSequenceValueForDataEtag", cc);
     // TODO: did this break (if it ever worked) when converted to string etags
     // instead of flawed mod numbers?
-    query.greaterThanOrEqual(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
-    query.sortAscending(DbLogTable.DATA_ETAG_AT_MODIFICATION);
+    query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
+    List<Entity> values = query.execute();
+    if ( values == null || values.size() == 0 ) {
+      throw new ODKEntityNotFoundException("Etag " + dataEtag + " was not found in log table!");
+    } else if ( values.size() != 1 ) {
+      throw new ODKDatastoreException("Unexpected duplicate records for Etag " +
+          dataEtag + " found in log table!");
+    }
+    Entity e = values.get(0);
+    return e.getString(DbLogTable.SEQUENCE_VALUE);
+  }
+
+  /**
+   * @param dataEtag
+   * @return the query for rows which have been changed or added from the beginning
+   * @throws ODKDatastoreException
+   */
+  private Query buildRowsFromBeginningQuery() throws ODKDatastoreException {
+    Query query = logTable.query("DataManager.buildRowsBeginningFromQuery", cc);
+    query.greaterThanOrEqual(DbLogTable.SEQUENCE_VALUE, entry.getAprioriDataSequenceValue());
+    query.sortAscending(DbLogTable.SEQUENCE_VALUE);
+    return query;
+  }
+
+  /**
+   * @param dataEtag
+   * @return the query for rows which have been changed or added since the given
+   *         sequenceValue
+   * @throws ODKDatastoreException
+   */
+  private Query buildRowsSinceQuery(String sequenceValue) throws ODKDatastoreException {
+    Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
+    query.greaterThan(DbLogTable.SEQUENCE_VALUE, sequenceValue);
+    query.sortAscending(DbLogTable.SEQUENCE_VALUE);
     return query;
   }
 
@@ -422,14 +470,14 @@ public class DataManager {
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
       lock.acquire();
+      Sequencer sequencer = new Sequencer(cc);
 
       // refresh entry
-      entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
+      entry = DbTableEntry.getTableIdEntry(tableId, cc);
 
       // get new data etag
-      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
-      dataEtag = Long.toString(System.currentTimeMillis());
-      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
+      String dataEtag = CommonFieldsBase.newUri();
+      entry.setDataETag(dataEtag);
 
       // create or update entities
       if (insert) {
@@ -442,11 +490,14 @@ public class DataManager {
 
       // create log table entries
       List<Entity> logEntities =
-          creator.newLogEntities(logTable, dataEtag, rowEntities, columns, cc);
+          creator.newLogEntities(logTable, dataEtag, rowEntities,
+                                  columns, sequencer, cc);
 
       // update db
-      Relation.putEntities(logEntities, cc);
-      Relation.putEntities(rowEntities, cc);
+      // This is where a user-defined table actually gets created for the first
+      // time.
+      DbLogTable.putEntities(logEntities, cc);
+      DbTable.putEntities(rowEntities, cc);
       entry.put(cc);
     } finally {
       lock.release();
@@ -465,11 +516,11 @@ public class DataManager {
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    */
-  public void deleteRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException,
+  public String deleteRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException {
     List<String> rowIds = new ArrayList<String>();
     rowIds.add(rowId);
-    deleteRows(rowIds);
+    return deleteRows(rowIds);
   }
 
   /**
@@ -477,28 +528,31 @@ public class DataManager {
    *
    * @param rowIds
    *          the rows to delete.
+   * @return returns the new dataEtag that is current after deleting the rows.
+   * Returns null if something goes wrong and the lock can never be acquired.
    * @throws ODKEntityNotFoundException
    *           if one of the rowIds does not exist in the datastore
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    */
-  public void deleteRows(List<String> rowIds) throws ODKEntityNotFoundException,
+  public String deleteRows(List<String> rowIds) throws ODKEntityNotFoundException,
       ODKDatastoreException, ODKTaskLockException {
     Validate.noNullElements(rowIds);
 
     // lock table
     LockTemplate lock = new LockTemplate(tableId,
         ODKTablesTaskLockType.UPDATE_DATA, cc);
+    String dataEtag = null;
     try {
       lock.acquire();
+      Sequencer sequencer = new Sequencer(cc);
 
       // refresh entry
-      entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
+      entry = DbTableEntry.getTableIdEntry(tableId, cc);
 
       // get new dataEtag
-      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
-      dataEtag = Long.toString(System.currentTimeMillis());
-      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
+      dataEtag = CommonFieldsBase.newUri();
+      entry.setDataETag(dataEtag);
 
       // get entities and mark deleted
       List<Entity> rows = DbTable.query(table, rowIds, cc);
@@ -509,14 +563,15 @@ public class DataManager {
 
       // create log table entries
       List<Entity> logRows =
-          creator.newLogEntities(logTable, dataEtag, rows, columns, cc);
+          creator.newLogEntities(logTable, dataEtag, rows, columns, sequencer, cc);
 
       // update db
-      Relation.putEntities(logRows, cc);
-      Relation.putEntities(rows, cc);
+      DbLogTable.putEntities(logRows, cc);
+      DbTable.putEntities(rows, cc);
       entry.put(cc);
     } finally {
       lock.release();
     }
+    return dataEtag;
   }
 }

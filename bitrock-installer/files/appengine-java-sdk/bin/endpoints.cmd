@@ -21,11 +21,6 @@ if NOT EXIST "%JAR_FILE2%" (
 
 set CLASSPATH="%JAR_FILE1%";"%JAR_FILE2%";"%SDK_LIB%\shared\servlet-api.jar";"%SDK_LIB%\appengine-tools-api.jar";"%SDK_LIB%\opt\user\datanucleus\v1\jdo2-api-2.3-eb.jar";"%SDK_LIB%\user\*"
 
-if "%1" == "get-java-client-lib" (
-  java -cp %CLASSPATH% com.google.api.server.spi.tools.EndpointsTool ^
-      get-client-lib -cp war\WEB-INF\classes -l java -o war\WEB-INF %2 %3 %4 %5 %6 %7 %8 %9
-) else (
-  java -cp %CLASSPATH% com.google.api.server.spi.tools.EndpointsTool %*
-)
+java -cp %CLASSPATH% com.google.api.server.spi.tools.EndpointsTool %*
 
 endlocal

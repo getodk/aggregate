@@ -61,29 +61,10 @@ public class UtilTransforms {
    * Transform the object into a server-side Column object.
    */
   public static Column transform(ColumnClient client) {
-    Column.ColumnType serverColumnType = Column.ColumnType.STRING;
-    switch (client.getElementType()) {
-    case BOOLEAN:
-      serverColumnType = Column.ColumnType.BOOLEAN;
-      break;
-    case DATETIME:
-      serverColumnType = Column.ColumnType.DATETIME;
-      break;
-    case DECIMAL:
-      serverColumnType = Column.ColumnType.DECIMAL;
-      break;
-    case INTEGER:
-      serverColumnType = Column.ColumnType.INTEGER;
-      break;
-    case STRING:
-      serverColumnType = Column.ColumnType.STRING;
-      break;
-    default:
-    	log.error("unrecognized client column type: " + client.getElementType());
-    }
-    Column transformedColumn = new Column(client.getTableId(), client.getElementKey(),
-        client.getElementName(), serverColumnType, client.getListChildElementKeys(),
-        client.getIsPersisted(), client.getJoins());
+    Column transformedColumn = new Column(client.getTableId(),
+        client.getElementKey(), client.getElementName(),
+        client.getElementType(), client.getListChildElementKeys(),
+        (client.getIsPersisted() != 0), client.getJoins());
     return transformedColumn;
   }
 

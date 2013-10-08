@@ -143,10 +143,9 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
     fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     persist(cc);
-  }
-
-  @Override
-  public void sharePublishedFiles(String ownerEmail, CallingContext cc) {
+    
+    // upload data to external service
+    postUploadTask(cc);
   }
 
   private void submitPost(String actionType, HttpEntity postentity, List<NameValuePair> qparam,
@@ -163,7 +162,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
         xmlFactory.setIgnoringComments(true);
         xmlFactory.setCoalescing(true);
         DocumentBuilder builder = xmlFactory.newDocumentBuilder();
-        InputStream is = new ByteArrayInputStream(responseString.getBytes(utf8));
+        InputStream is = new ByteArrayInputStream(responseString.getBytes(UTF_CHARSET));
         Document doc;
         try {
           doc = builder.parse(is);
@@ -224,17 +223,17 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
      * work, but either resets the socket or returns a 403 error.
      */
     MultipartEntity postentity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, null,
-        utf8);
+        UTF_CHARSET);
     FormBodyPart fb;
-    fb = new FormBodyPart("token", new StringBody(getApiKey(), utf8));
+    fb = new FormBodyPart("token", new StringBody(getApiKey(), UTF_CHARSET));
     postentity.addPart(fb);
-    fb = new FormBodyPart("content", new StringBody("file", utf8));
+    fb = new FormBodyPart("content", new StringBody("file", UTF_CHARSET));
     postentity.addPart(fb);
-    fb = new FormBodyPart("action", new StringBody("import", utf8));
+    fb = new FormBodyPart("action", new StringBody("import", UTF_CHARSET));
     postentity.addPart(fb);
-    fb = new FormBodyPart("record", new StringBody(recordID, utf8));
+    fb = new FormBodyPart("record", new StringBody(recordID, UTF_CHARSET));
     postentity.addPart(fb);
-    fb = new FormBodyPart("field", new StringBody(fileField, utf8));
+    fb = new FormBodyPart("field", new StringBody(fileField, UTF_CHARSET));
     postentity.addPart(fb);
     fb = new FormBodyPart("file", new ByteArrayBody(blob_value.getBlob(1, cc), contentType,
         filename));
@@ -516,7 +515,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
       eparams.add(new BasicNameValuePair("returnContent", "ids"));
       eparams.add(new BasicNameValuePair("returnFormat", "xml"));
 
-      HttpEntity postentity = new UrlEncodedFormEntity(eparams, utf8);
+      HttpEntity postentity = new UrlEncodedFormEntity(eparams, UTF_CHARSET);
 
       submitPost("Publishing", postentity, null, cc);
 

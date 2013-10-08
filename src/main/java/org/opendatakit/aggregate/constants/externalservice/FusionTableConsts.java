@@ -42,7 +42,7 @@ public final class FusionTableConsts {
   public static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 60000;
   public static final int SERVICE_TIMEOUT_MILLISECONDS = 60000;
 
-  public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
+  public static final long BACKOFF_DELAY_MILLISECONDS = 60000L;
 
   public static final Map<ElementType, FusionTableType> typeMap = new HashMap<ElementType, FusionTableType>();
   static {

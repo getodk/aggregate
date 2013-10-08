@@ -24,10 +24,4 @@ for jar in "$SDK_LIB"/user/*.jar; do
   CLASSPATH="$CLASSPATH:$jar"
 done
 
-if [[ "$1" == 'get-java-client-lib' ]]; then
-  shift
-  java -cp "$CLASSPATH" com.google.api.server.spi.tools.EndpointsTool \
-      get-client-lib -cp war/WEB-INF/classes -l java -o war/WEB-INF "$@"
-else
-  java -cp "$CLASSPATH" com.google.api.server.spi.tools.EndpointsTool "$@"
-fi
+java -cp "$CLASSPATH" com.google.api.server.spi.tools.EndpointsTool "$@"

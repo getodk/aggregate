@@ -35,8 +35,8 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.7.3 or higher SDK defined.
-	If the default App Engine version is not 1.7.3, you may need to 
+    Be sure there is an App Engine 1.8.0 or higher SDK defined.
+	If the default App Engine version is not 1.8.0, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
@@ -90,6 +90,13 @@ toggle the App Engine SDK between the default and specific settings (to make a r
 (7) Select eclipse-aggregate-gae project.
 
 Click on the red toolbox (GWT compile) to compile the GWT Java code into javascript.
+For the Project, specify 'eclipse-gae-project'. This should auto-populate the 
+'Entry Point Modules' section and highlight 'AggregateUI'.  If not, click Add and 
+choose 'AggregateUI' as the entry point module to compile. If you ever need to browse
+to this, it is located under:
+
+  Package: org.opendatakit.aggregate
+  Filename: AggregateUI.gwt.xml
 
 (8) Running:
 
@@ -243,8 +250,8 @@ A minimal file is:
   	  <properties>
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<temp.home>C:\\Users\\Administrator\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.7.3</gae.home>
-		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.5.1</bitrock.home>
+	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.8.0</gae.home>
+		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.6.0</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\Administrator\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
 		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.5\\bin\\mysql.exe</mysql.client.executable>
@@ -281,9 +288,9 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.7.3 or higher SDK defined.
+    Be sure there is an App Engine 1.8.0 or higher SDK defined.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 1.7.3).
+	pom.xml (currently 1.8.0).
 
   Google / Web Toolkit:
   

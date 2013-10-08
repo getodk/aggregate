@@ -31,18 +31,10 @@ public class ColumnClient implements Serializable {
    */
   private static final long serialVersionUID = 668434593121197884L;
 
-  public enum ColumnType {
-    STRING,
-    INTEGER,
-    DECIMAL,
-    BOOLEAN,
-    DATETIME;
-  }
-
   private String tableId;
   private String elementKey;
   private String elementName;
-  private ColumnClient.ColumnType elementType;
+  private String elementType; // should be the string name() from Tables-side
   private String listChildElementKeys;
   private int isPersisted;
   private String joins;
@@ -60,7 +52,7 @@ public class ColumnClient implements Serializable {
    * @param type
    */
   public ColumnClient(final String tableId, final String elementKey,
-      final String elementName, final ColumnClient.ColumnType elementType,
+      final String elementName, final String elementType,
       final String listChildElementKeys, final int isPersisted,
       final String joins) {
 // ss: not sure what this was.leaving it out for now.
@@ -86,7 +78,7 @@ public class ColumnClient implements Serializable {
     return this.elementName;
   }
 
-  public ColumnClient.ColumnType getElementType() {
+  public String getElementType() {
     return this.elementType;
   }
 

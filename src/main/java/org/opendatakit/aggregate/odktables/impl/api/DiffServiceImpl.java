@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -56,12 +55,12 @@ public class DiffServiceImpl implements DiffService {
     // TODO re-do permissions stuff
     //af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
-    /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
+    /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) { */
       rows = dm.getRowsSince(dataEtag);
-    } else {*/
+    /*} else {
       List<Scope> scopes = AuthFilter.getScopes(cc);
       rows = dm.getRowsSince(dataEtag, scopes);
-    //}
+    }*/
     return getResources(rows);
   }
 

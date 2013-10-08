@@ -122,7 +122,11 @@ public final class HtmlConsts {
 	/**
 	 * Constant for "image/jpeg" content type for response message
 	 */
-	public static final String RESP_TYPE_IMAGE_JPEG = "image/jpeg";
+	public static final String RESP_TYPE_IMAGE_JPEG = "image/jpeg";	
+	  /**
+    * Constant for "image/png" content type for response message
+    */
+   public static final String RESP_TYPE_IMAGE_PNG = "image/png";	
 	/**
 	 * Constant for "text/xml" content type for response message
 	 */
