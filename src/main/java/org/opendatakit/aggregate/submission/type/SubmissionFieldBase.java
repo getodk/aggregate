@@ -55,6 +55,11 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
   }
   
   @Override
+  public final FormElementModel getFormElementModel() {
+    return element;
+  }
+  
+  @Override
   public boolean depthFirstTraversal(SubmissionVisitor visitor) {
     return visitor.traverse(this);
   }

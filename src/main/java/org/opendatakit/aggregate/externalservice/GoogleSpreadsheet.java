@@ -17,25 +17,14 @@
 
 package org.opendatakit.aggregate.externalservice;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
@@ -52,21 +41,17 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.externalservice.googleapi.GoogleCredential;
-import org.opendatakit.aggregate.externalservice.googleapi.SafeApacheHttpTransport;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.format.header.GoogleSpreadsheetHeaderFormatter;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
-import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -76,17 +61,10 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.EmailParser;
-import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.CredentialRefreshListener;
-import com.google.api.client.auth.oauth2.CredentialStore;
-import com.google.api.client.auth.oauth2.CredentialStoreRefreshListener;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.client.spreadsheet.CellQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -105,22 +83,16 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
 /**
- *
+ * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
+ * 
  */
-public class GoogleSpreadsheet extends OAuth2ExternalService implements ExternalService, CredentialStore {
-  private static final String UTF_8_ENCODING = "UTF-8";
-
+public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(GoogleSpreadsheet.class.getName());
 
-  private static final String GOOGLE_SPREADSHEET_OAUTH2_SCOPE =
-      "https://www.googleapis.com/auth/drive https://docs.google.com/feeds/ https://docs.googleusercontent.com/ https://spreadsheets.google.com/feeds/";
+  private static final String GOOGLE_SPREADSHEET_OAUTH2_SCOPE = "https://www.googleapis.com/auth/drive https://docs.google.com/feeds/ https://docs.googleusercontent.com/ https://spreadsheets.google.com/feeds/";
 
-  private static final JsonFactory jsonFactory = new JacksonFactory();
-
-  private static SafeApacheHttpTransport safeApacheHttpTransport = null;
   /**
    * Datastore entity specific to this type of external service
    */
@@ -133,64 +105,44 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
   private final SpreadsheetService spreadsheetService;
 
-  // ccSaved Needed by CredentialStore interface -- ccSaved is only valid for a limited timeframe.
-  // DO NOT use this as a long-term value. It is present only to work around a bug in
-  // GoogleCredential
-  private CallingContext ccSaved;
-
-  /**
-   * Access token is used for granting access rights to the spreadsheet through
-   * the Google Drive API.
-   */
-  private String accessToken = null;
-  private String refreshToken = null;
-  private Long expirationTime = null;
-
   /**
    * Common base constructor that initializes final values.
-   *
+   * 
    * @param form
    * @param fpObject
    * @param cc
    * @throws ODKExternalServiceException
    */
+
   private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable gsObject,
       FormServiceCursor formServiceCursor, CallingContext cc) throws ODKExternalServiceException {
-    super(form, formServiceCursor,
-        new LinkElementFormatter(cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true, true),
-        new GoogleSpreadsheetHeaderFormatter(true, true, true),
-        cc);
+    super(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, form, formServiceCursor, new LinkElementFormatter(
+        cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true, true),
+        new GoogleSpreadsheetHeaderFormatter(true, true, true), logger, cc);
+
     spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
     objectEntity = gsObject;
-    try {
-      // TODO: REMOVE after bug is fixed
-      // http://code.google.com/p/gdata-java-client/issues/detail?id=103
-      spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V3);
-      spreadsheetService.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
-      spreadsheetService.setOAuth2Credentials(getOAuth2Credential(cc));
-    } catch (ODKExternalServiceCredentialsException e) {
-      if ( fsc.getOperationalStatus().equals(OperationalStatus.ACTIVE) ) {
-        fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
-        try {
-          persist(cc);
-        } catch (Exception e1) {
-          logger.error("Unable to persist bad credentials status" + e1.toString());
-          throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
-        }
-      }
-      throw e;
-    }
+    // TODO: REMOVE after bug is fixed
+    // http://code.google.com/p/gdata-java-client/issues/detail?id=103
+    spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V3);
+    spreadsheetService.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
+    spreadsheetService.setOAuth2Credentials(credential);
+
   }
 
   private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable entity,
-      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException {
-    this(form, entity, createFormServiceCursor(form, entity, externalServiceOption, ExternalServiceType.GOOGLE_SPREADSHEET, cc), cc);
+      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+      throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException {
+    this(form, entity, createFormServiceCursor(form, entity, externalServiceOption,
+        ExternalServiceType.GOOGLE_SPREADSHEET, cc), cc);
     objectEntity.setOwnerEmail(ownerEmail);
   }
 
   public GoogleSpreadsheet(FormServiceCursor fsc, IForm form, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException, ODKFormNotFoundException {
-    this(form, retrieveEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), fsc, cc), fsc, cc);
+      throws ODKEntityNotFoundException, ODKDatastoreException, ODKOverQuotaException,
+      ODKExternalServiceException, ODKFormNotFoundException {
+    this(form, retrieveEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), fsc, cc), fsc,
+        cc);
 
     repeatElementEntities.addAll(GoogleSpreadsheet2RepeatParameterTable.getRepeatGroupAssociations(
         objectEntity.getUri(), cc));
@@ -199,113 +151,13 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
   public GoogleSpreadsheet(IForm form, String name,
       ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
-      throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException, ODKEntityPersistException {
-    this(form, newEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), cc), externalServiceOption, ownerEmail, cc);
+      throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException,
+      ODKEntityPersistException {
+    this(form, newEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), cc),
+        externalServiceOption, ownerEmail, cc);
 
     objectEntity.setSpreadsheetName(name);
     persist(cc);
-  }
-
-  private synchronized GoogleCredential getOAuth2Credential(CallingContext cc) throws ODKExternalServiceException {
-
-    try {
-      String serviceAccountId = ServerPreferencesProperties.getServerPreferencesProperty(cc,  ServerPreferencesProperties.GOOGLE_API_CLIENT_ID);
-      String serviceAccountUser = ServerPreferencesProperties.getServerPreferencesProperty(cc,  ServerPreferencesProperties.GOOGLE_API_SERVICE_ACCOUNT_EMAIL);
-      String privateKeyString = ServerPreferencesProperties.getServerPreferencesProperty(cc, ServerPreferencesProperties.PRIVATE_KEY_FILE_CONTENTS);
-
-      this.ccSaved = cc;
-
-      if ( privateKeyString == null || serviceAccountId == null || serviceAccountUser == null ||
-           privateKeyString.trim().length() == 0 ||
-           serviceAccountId.trim().length() == 0 ||
-           serviceAccountUser.trim().length() == 0 ) {
-        throw new ODKExternalServiceCredentialsException(
-            "No OAuth2 credentials. Have you supplied any OAuth2 credentials on the Site Admin / Preferences page?");
-      }
-
-      byte[] privateKeyBytes = Base64.decodeBase64(privateKeyString);
-
-     KeyStore ks = null;
-     try {
-        ks = KeyStore.getInstance("PKCS12");
-     } catch (KeyStoreException e) {
-        e.printStackTrace();
-        throw new IllegalArgumentException("Unexpected KeyStoreException " + e.toString());
-     }
-     try {
-       ks.load(new ByteArrayInputStream(privateKeyBytes), "notasecret".toCharArray());
-     } catch (NoSuchAlgorithmException e) {
-        e.printStackTrace();
-        throw new IllegalArgumentException("Unexpected NoSuchAlgorithmException " + e.toString());
-     } catch (CertificateException e) {
-        e.printStackTrace();
-        throw new IllegalArgumentException("Unexpected CertificateException " + e.toString());
-     } catch (FileNotFoundException e) {
-        e.printStackTrace();
-        throw new IllegalArgumentException("Unexpected FileNotFoundException " + e.toString());
-     } catch (IOException e) {
-        e.printStackTrace();
-        throw new IllegalArgumentException("Unexpected IOException " + e.toString());
-     }
-
-     Enumeration<String> aliasEnum = null;
-     try {
-        aliasEnum = ks.aliases();
-     } catch (KeyStoreException e) {
-        e.printStackTrace();
-        throw new IllegalArgumentException("Unexpected KeyStoreException " + e.toString());
-     }
-
-     Key key = null;
-
-     while (aliasEnum.hasMoreElements()) {
-        String keyName = (String) aliasEnum.nextElement();
-        try {
-           key = ks.getKey(keyName, "notasecret".toCharArray());
-        } catch (UnrecoverableKeyException e) {
-           e.printStackTrace();
-           throw new IllegalArgumentException("Unexpected UnrecoverableKeyException " + e.toString());
-        } catch (KeyStoreException e) {
-           e.printStackTrace();
-           throw new IllegalArgumentException("Unexpected KeyStoreException " + e.toString());
-        } catch (NoSuchAlgorithmException e) {
-           e.printStackTrace();
-           throw new IllegalArgumentException("Unexpected NoSuchAlgorithmException " + e.toString());
-        }
-        break;
-     }
-     if ( safeApacheHttpTransport == null ) {
-       SafeApacheHttpTransport.setHttpClientFactory(cc);
-       safeApacheHttpTransport = new SafeApacheHttpTransport();
-     }
-     List<CredentialRefreshListener> l = new ArrayList<CredentialRefreshListener>();
-     l.add(new CredentialStoreRefreshListener("ignored",this));
-
-      GoogleCredential credential = new GoogleCredential.Builder()
-        .setServiceAccountId(serviceAccountId)
-        .setServiceAccountUser(serviceAccountUser)
-        .setServiceAccountPrivateKey((PrivateKey) key)
-        .setServiceAccountScopes(GOOGLE_SPREADSHEET_OAUTH2_SCOPE)
-        .setJsonFactory(jsonFactory)
-        .setTransport(safeApacheHttpTransport)
-        .setTokenServerUrl(new GenericUrl("https://accounts.google.com/o/oauth2/token"))
-        .setRefreshListeners(l)
-        .build();
-      credential.setHttpClientFactory((HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY));
-      // and get any OAuth2 token we might already have
-      load("unused", credential);
-      return credential;
-    } catch (ODKEntityNotFoundException e) {
-      String str = "Unable to set Oauth2 credentials";
-      logger.error(str + "\nReason: " + e.getMessage());
-      e.printStackTrace();
-      throw new ODKExternalServiceCredentialsException(str, e);
-    } catch (ODKOverQuotaException e) {
-      String str = "Unable to set Oauth2 credentials";
-      logger.error(str + "\nReason: " + e.getMessage());
-      e.printStackTrace();
-      throw new ODKExternalServiceCredentialsException(str, e);
-    }
   }
 
   public void initiate(CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException {
@@ -313,10 +165,10 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     // setup service
     DocsService service = new DocsService(ServletConsts.APPLICATION_NAME);
     service.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
-    service.setOAuth2Credentials(getOAuth2Credential(cc));
+    service.setOAuth2Credentials(credential);
 
     boolean newlyCreated = false;
-    if ( objectEntity.getSpreadsheetKey() == null ) {
+    if (objectEntity.getSpreadsheetKey() == null) {
       newlyCreated = true;
 
       // create spreadsheet
@@ -334,7 +186,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
           e1.printStackTrace();
           throw new ODKExternalServiceCredentialsException(e1);
         } catch (Exception e1) {
-           e1.printStackTrace();
+          e1.printStackTrace();
           throw new ODKExternalServiceException(e1);
         }
       } catch (AuthenticationException e) {
@@ -354,7 +206,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     persist(cc);
 
-    if ( newlyCreated || !getReady()) {
+    if (newlyCreated || !getReady()) {
       try {
         // create worksheet
         WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
@@ -362,7 +214,8 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
         Map<String, String> parameters = new HashMap<String, String>();
 
         parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, getSpreadsheetName());
-        parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc.getExternalServicePublicationOption().name());
+        parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc
+            .getExternalServicePublicationOption().name());
 
         MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
         m.persist(cc);
@@ -375,13 +228,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
       }
     } else {
       // upload data to external service
-      if (!fsc.getExternalServicePublicationOption().equals(ExternalServicePublicationOption.STREAM_ONLY)) {
-
-        UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-        CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
-        ccDaemon.setAsDaemon(true);
-        uploadTask.createFormUploadTask(fsc, true, ccDaemon);
-      }
+      postUploadTask(cc);
     }
   }
 
@@ -390,30 +237,9 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     return objectEntity.getOwnerEmail().substring(EmailParser.K_MAILTO.length());
   }
 
-  protected String getAccessToken(boolean forceRefresh, CallingContext cc) throws ODKExternalServiceCredentialsException {
-    try {
-      if (accessToken == null && !forceRefresh) {
-        accessToken = ServerPreferencesProperties.getServerPreferencesProperty(cc,
-          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN +
-          "|" + objectEntity.getOwnerEmail());
-      }
-
-      if (accessToken == null || forceRefresh) {
-        accessToken = getOAuth2AccessToken(GOOGLE_SPREADSHEET_OAUTH2_SCOPE,
-                                           objectEntity.getOwnerEmail(), cc);
-        ServerPreferencesProperties.setServerPreferencesProperty(cc,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN +
-            "|" + objectEntity.getOwnerEmail(), accessToken);
-      }
-      return accessToken;
-    } catch (Exception e) {
-      throw new ODKExternalServiceCredentialsException("Unable to obtain OAuth2 access token: "
-          + e.toString());
-    }
-  }
-
-  public void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException {
-    executeDrivePermission(objectEntity.getSpreadsheetKey(), ownerEmail, logger, "google spreadsheet", cc);
+  private void sharePublishedFiles(String ownerEmail, CallingContext cc)
+      throws ODKExternalServiceException {
+    executeDrivePermission(objectEntity.getSpreadsheetKey(), ownerEmail);
   }
 
   public Boolean getReady() {
@@ -421,7 +247,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   }
 
   public void updateReadyValue() {
-    boolean ready = (objectEntity.getSpreadsheetName()!= null)
+    boolean ready = (objectEntity.getSpreadsheetName() != null)
         && (objectEntity.getSpreadsheetKey() != null);
     objectEntity.setReady(ready);
   }
@@ -435,13 +261,14 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
     // retrieve pre-existing worksheets
     URL url = new URL(SpreadsheetConsts.SPREADSHEETS_FEED
-        + URLEncoder.encode(objectEntity.getSpreadsheetKey(), UTF_8_ENCODING));
+        + URLEncoder.encode(objectEntity.getSpreadsheetKey(), HtmlConsts.UTF8_ENCODE));
     com.google.gdata.data.spreadsheet.SpreadsheetEntry entry = spreadsheetService.getEntry(url,
         com.google.gdata.data.spreadsheet.SpreadsheetEntry.class);
     List<WorksheetEntry> preExistingWorksheets = entry.getWorksheets();
 
     // create top level worksheet
-    List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(), null);
+    List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(),
+        null);
     WorksheetEntry topLevelWorksheet = executeCreateWorksheet(entry, form.getFormId(), headers);
     objectEntity.setTopLevelWorksheetId(extractWorksheetId(topLevelWorksheet));
 
@@ -465,7 +292,8 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
       // add the worksheet id to the repeat element table -- NOTE: the added
       // entry is not actually persisted here
-      GoogleSpreadsheet2RepeatParameterTable t = ds.createEntityUsingRelation(repeatPrototype, user);
+      GoogleSpreadsheet2RepeatParameterTable t = ds
+          .createEntityUsingRelation(repeatPrototype, user);
       t.setUriGoogleSpreadsheet(objectEntity.getUri());
       t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
       t.setWorksheetId(extractWorksheetId(repeatWorksheet));
@@ -501,10 +329,10 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
     uncreatedWorksheet.setRowCount(2);
     uncreatedWorksheet.setColCount(headers.size());
     URL worksheetFeedUrl = entry.getWorksheetFeedUrl();
-    logger.info("WorksheetFeedUrl: " + worksheetFeedUrl.toString() );
+    logger.info("WorksheetFeedUrl: " + worksheetFeedUrl.toString());
     WorksheetEntry createdWorksheet = spreadsheetService.insert(worksheetFeedUrl,
         uncreatedWorksheet);
-    logger.info("CellFeedUrl: " + createdWorksheet.getCellFeedUrl().toString() );
+    logger.info("CellFeedUrl: " + createdWorksheet.getCellFeedUrl().toString());
 
     // update the cells of the worksheet with the proper headers
     // first query the worksheet for the cells we need to change
@@ -581,21 +409,24 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
             }
           }
         }
-      } catch ( AuthenticationException e) {
-        logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName() + " exception: " + e.getMessage());
+      } catch (AuthenticationException e) {
+        logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName()
+            + " exception: " + e.getMessage());
         e.printStackTrace();
         fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
         try {
           persist(cc);
         } catch (Exception e1) {
           e1.printStackTrace();
-          throw new ODKExternalServiceException("Unable to set OperationalStatus to Bad Credentials: " + e.toString(), e1);
+          throw new ODKExternalServiceException(
+              "Unable to set OperationalStatus to Bad Credentials: " + e.toString(), e1);
         }
         e.printStackTrace();
         throw new ODKExternalServiceCredentialsException(e);
       } catch (Exception e) {
-    	  e.printStackTrace();
-    	  logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName() + " exception: " + e.getMessage());
+        e.printStackTrace();
+        logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName()
+            + " exception: " + e.getMessage());
         throw new ODKExternalServiceException(e);
       }
     }
@@ -604,7 +435,7 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   /**
    * Inserts the data in the given submissionSet as a new entry (i.e. a new row)
    * in the given worksheet, including only the data specified by headers.
-   *
+   * 
    * @param submissionSet
    *          the set of data from a single submission
    * @param headers
@@ -645,8 +476,8 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
 
   public WorksheetEntry getWorksheet(String worksheetId) throws IOException, ServiceException {
     URL url = new URL(SpreadsheetConsts.WORKSHEETS_FEED
-        + URLEncoder.encode(objectEntity.getSpreadsheetKey(), UTF_8_ENCODING) + SpreadsheetConsts.FEED_PERMISSIONS
-        + URLEncoder.encode(worksheetId, UTF_8_ENCODING));
+        + URLEncoder.encode(objectEntity.getSpreadsheetKey(), HtmlConsts.UTF8_ENCODE)
+        + SpreadsheetConsts.FEED_PERMISSIONS + URLEncoder.encode(worksheetId, HtmlConsts.UTF8_ENCODE));
     WorksheetEntry worksheetEntry = spreadsheetService.getEntry(url, WorksheetEntry.class);
     return worksheetEntry;
   }
@@ -665,8 +496,6 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
         && (fsc == null ? (other.fsc == null) : (other.fsc != null && fsc.equals(other.fsc)));
   }
 
-
-
   @Override
   public String getDescriptiveTargetString() {
     Map<String, String> properties = new HashMap<String, String>();
@@ -675,8 +504,8 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
       return "Not yet created";
     }
     properties.put("key", id);
-    return HtmlUtil.createHrefWithProperties("https://docs.google.com/spreadsheet/ccc",
-        properties, getSpreadsheetName(), true);
+    return HtmlUtil.createHrefWithProperties("https://docs.google.com/spreadsheet/ccc", properties,
+        getSpreadsheetName(), true);
   }
 
   protected CommonFieldsBase retrieveObjectEntity() {
@@ -687,79 +516,4 @@ public class GoogleSpreadsheet extends OAuth2ExternalService implements External
   protected List<? extends CommonFieldsBase> retrieveRepeatElementEntities() {
     return repeatElementEntities;
   }
-
-  @Override
-  public boolean load(String userId, Credential credential) {
-    if ( accessToken != null ) {
-      // use cached values...
-      credential.setAccessToken(accessToken);
-      credential.setRefreshToken(refreshToken);
-      credential.setExpirationTimeMilliseconds(expirationTime);
-      return true;
-    } else {
-      // try to fetch values from server properties
-      try {
-        accessToken = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN);
-        if ( accessToken != null ) {
-          // OK -- use the values we find...
-          credential.setAccessToken(accessToken);
-          refreshToken = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
-              ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN);
-          credential.setRefreshToken(refreshToken);
-          String expirationTimestamp = ServerPreferencesProperties.getServerPreferencesProperty(ccSaved,
-              ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME);
-          expirationTime = (expirationTimestamp == null) ? null : Long.valueOf(expirationTimestamp);
-          credential.setExpirationTimeMilliseconds(expirationTime);
-          return true;
-        }
-      } catch (ODKEntityNotFoundException e) {
-        e.printStackTrace();
-      } catch (ODKOverQuotaException e) {
-        e.printStackTrace();
-      }
-    }
-    // did not find values...
-    return false;
-  }
-
-  @Override
-  public void store(String userId, Credential credential) throws IOException {
-    if ( accessToken == null || !accessToken.equals(credential.getAccessToken()) ) {
-      // values have changed -- update the cached values and flush changes to database
-      try {
-        accessToken = credential.getAccessToken();
-        ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN,
-            accessToken);
-        refreshToken = credential.getRefreshToken();
-        ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_REFRESH_TOKEN,
-            refreshToken);
-        expirationTime = credential.getExpirationTimeMilliseconds();
-        ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
-            ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_EXPIRATION_TIME,
-            (expirationTime == null) ? null : Long.toString(expirationTime));
-      } catch (ODKEntityNotFoundException e) {
-        e.printStackTrace();
-      } catch (ODKOverQuotaException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  @Override
-  public void delete(String userId, Credential credential) throws IOException {
-    try {
-      accessToken = null;
-      ServerPreferencesProperties.setServerPreferencesProperty(ccSaved,
-          ServerPreferencesProperties.GOOGLE_SPREADSHEETS_OAUTH2_ACCESS_TOKEN,
-          null);
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-    }
-  }
-
 }

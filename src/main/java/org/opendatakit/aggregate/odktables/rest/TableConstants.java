@@ -20,12 +20,12 @@ public class TableConstants {
    */
 
   // tablename is chosen by user...
-  public static final String ID = "id";
-  public static final String ROW_ID = "id";
-  public static final String URI_USER = "uri_user";
-  public static final String SYNC_TAG = "sync_tag";
-  public static final String SYNC_STATE = "sync_state";
-  public static final String TRANSACTIONING = "transactioning";
+  public static final String ID = "_id";
+  public static final String ROW_ID = "_id";
+  public static final String URI_ACCESS_CONTROL = "_uri_access_control";
+  public static final String SYNC_TAG = "_sync_tag";
+  public static final String SYNC_STATE = "_sync_state";
+  public static final String CONFLICT_TYPE = "_conflict_type";
 
   /**
    * (timestamp, saved, form_id) are the tuple written and managed by ODK Survey
@@ -36,16 +36,16 @@ public class TableConstants {
    * timestamp and last_mod_time are the same field. last_mod_time is simply
    * a well-formatted text representation of the timestamp value.
    */
-  public static final String TIMESTAMP = "timestamp";
-  public static final String SAVED = "saved";
-  public static final String FORM_ID = "form_id";
+  public static final String TIMESTAMP = "_timestamp";
+  public static final String SAVED = "_saved";
+  public static final String FORM_ID = "_form_id";
   /*
    * For ODKTables generated rows (as opposed to ODK Collect), the thought is
    * that this instance name would just be the iso86 pretty print date of
    * creation.
    */
-  public static final String INSTANCE_NAME = "instance_name";
-  public static final String LOCALE = "locale";
+  public static final String INSTANCE_NAME = "_instance_name";
+  public static final String LOCALE = "_locale";
 
 
   /**
@@ -65,7 +65,7 @@ public class TableConstants {
   static {
     SHARED_COLUMN_NAMES = new HashSet<String>();
     CLIENT_ONLY_COLUMN_NAMES = new HashSet<String>();
-    SHARED_COLUMN_NAMES.add(URI_USER);
+    SHARED_COLUMN_NAMES.add(URI_ACCESS_CONTROL);
     SHARED_COLUMN_NAMES.add(TIMESTAMP);
     SHARED_COLUMN_NAMES.add(FORM_ID);
     SHARED_COLUMN_NAMES.add(INSTANCE_NAME);
@@ -75,7 +75,7 @@ public class TableConstants {
     CLIENT_ONLY_COLUMN_NAMES.add(SAVED);
     CLIENT_ONLY_COLUMN_NAMES.add(SYNC_STATE);
     CLIENT_ONLY_COLUMN_NAMES.add(SYNC_TAG);
-    CLIENT_ONLY_COLUMN_NAMES.add(TRANSACTIONING);
+    CLIENT_ONLY_COLUMN_NAMES.add(CONFLICT_TYPE);
     }
 
 }

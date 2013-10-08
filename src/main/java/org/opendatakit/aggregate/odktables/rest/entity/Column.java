@@ -37,14 +37,6 @@ public class Column implements Serializable {
 	 */
 	private static final long serialVersionUID = -6624997293167731653L;
 
-	public enum ColumnType {
-	  STRING,
-	  INTEGER,
-	  DECIMAL,
-	  BOOLEAN,
-	  DATETIME;
-	}
-
   @Attribute(required = true)
   private String tableId;
 
@@ -54,8 +46,11 @@ public class Column implements Serializable {
   @Attribute(required = true)
   private String elementName;
 
+  /**
+   * This must be a name() of one of Tables's ColumnTypes.
+   */
   @Attribute(required = false)
-  private ColumnType elementType;
+  private String elementType;
 
   @Attribute(required = false)
   private String listChildElementKeys;
@@ -86,15 +81,15 @@ public class Column implements Serializable {
    * @param joins
    */
   public Column(final String tableId, final String elementKey,
-      final String elementName, final ColumnType elementType,
-      final String listChildElementKeys, final int isPersisted,
+      final String elementName, final String elementType,
+      final String listChildElementKeys, final Boolean isPersisted,
       final String joins) {
     this.tableId = tableId;
     this.elementKey = elementKey;
     this.elementName = elementName;
     this.elementType = elementType;
     this.listChildElementKeys = listChildElementKeys;
-    this.isPersisted = isPersisted;
+    this.isPersisted = isPersisted ? 1 : 0;
     this.joins = joins;
   }
 
@@ -110,7 +105,10 @@ public class Column implements Serializable {
     return this.elementName;
   }
 
-  public ColumnType getElementType() {
+  /**
+   * Returns the string name of an ODKTables column type.
+   */
+  public String getElementType() {
     return this.elementType;
   }
 
@@ -131,7 +129,7 @@ public class Column implements Serializable {
     return "Column(tableId=" + getTableId()
         + ", elementKey=" + this.getElementKey()
         + ", elementName=" + this.getElementName()
-        + ", elementType= " + this.getElementType().name()
+        + ", elementType= " + this.getElementType()
         + ", listChildElementKeys=" + this.getListChildElementKeys()
         + ", isPersisted=" + this.getIsPersisted()
         + ", joins=" + this.getJoins()

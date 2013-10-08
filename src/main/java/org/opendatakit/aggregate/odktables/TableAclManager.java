@@ -20,13 +20,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
+import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
+import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -65,7 +66,10 @@ public class TableAclManager {
     this.creator = new EntityCreator();
     this.tableId = tableId;
     // check table exists
-    DbTableEntry.getRelation(cc).getEntity(tableId, cc);
+    DbTableEntryEntity e = DbTableEntry.getTableIdEntry(tableId, cc);
+    if (e == null) {
+      throw new IllegalArgumentException("tableId does not exist!");
+    }
   }
 
   /**
@@ -82,7 +86,7 @@ public class TableAclManager {
    * @throws ODKDatastoreException
    */
   public List<TableAcl> getAcls() throws ODKDatastoreException {
-    List<Entity> acls = DbTableAcl.query(tableId, cc);
+    List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
     return converter.toTableAcls(acls);
   }
 
@@ -97,7 +101,7 @@ public class TableAclManager {
   public List<TableAcl> getAcls(Scope.Type type) throws ODKDatastoreException {
     Validate.notNull(type);
 
-    List<Entity> acls = DbTableAcl.query(tableId, type.name(), cc);
+    List<DbTableAclEntity> acls = DbTableAcl.queryTableIdScopeTypeAcls(tableId, type.name(), cc);
     return converter.toTableAcls(acls);
   }
 
@@ -113,10 +117,11 @@ public class TableAclManager {
     Validate.notNull(scope);
     Validate.notNull(scope.getType());
 
-    Entity entity = DbTableAcl.getAcl(tableId, scope.getType().name(), scope.getValue(), cc);
+    DbTableAclEntity aclEntity = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId, scope.getType()
+        .name(), scope.getValue(), cc);
     TableAcl acl = null;
-    if (entity != null) {
-      acl = converter.toTableAcl(entity);
+    if (aclEntity != null) {
+      acl = converter.toTableAcl(aclEntity);
     }
     return acl;
   }
@@ -136,11 +141,12 @@ public class TableAclManager {
     Validate.notNull(scope.getType());
     Validate.notNull(role);
 
-    Entity acl = DbTableAcl.getAcl(tableId, scope.getType().name(), scope.getValue(), cc);
+    DbTableAclEntity acl = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId,
+        scope.getType().name(), scope.getValue(), cc);
     if (acl == null) {
       acl = creator.newTableAclEntity(tableId, scope, role, cc);
     } else {
-      acl.set(DbTableAcl.ROLE, role.name());
+      acl.setRole(role.name());
     }
     acl.put(cc);
 
@@ -158,7 +164,8 @@ public class TableAclManager {
     Validate.notNull(scope);
     Validate.notNull(scope.getType());
 
-    Entity acl = DbTableAcl.getAcl(tableId, scope.getType().name(), scope.getValue(), cc);
+    DbTableAclEntity acl = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId,
+        scope.getType().name(), scope.getValue(), cc);
     if (acl != null) {
       acl.delete(cc);
     }

@@ -24,16 +24,23 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
+import org.opendatakit.aggregate.client.externalserv.GmeSettings;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
+import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
+import org.opendatakit.aggregate.datamodel.FormElementKey;
+import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.externalservice.AbstractExternalService;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.externalservice.FusionTable;
+import org.opendatakit.aggregate.externalservice.GoogleMapsEngine;
 import org.opendatakit.aggregate.externalservice.GoogleSpreadsheet;
 import org.opendatakit.aggregate.externalservice.JsonServer;
 import org.opendatakit.aggregate.externalservice.OhmageJsonServer;
@@ -139,7 +146,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       throw new RequestFailureException(e);
     }
   }
-
+  
   @Override
   public String createGoogleSpreadsheet(String formId, String name,
       ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException,
@@ -219,7 +226,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createSimpleJsonServer(String formId, String authKey, String url,
-        ExternalServicePublicationOption esOption, String ownerEmail)
+        ExternalServicePublicationOption esOption, String ownerEmail, BinaryOption binaryOption)
             throws AccessDeniedException,
             FormNotAvailableException, RequestFailureException, DatastoreFailureException {
      HttpServletRequest req = this.getThreadLocalRequest();
@@ -236,7 +243,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         if (!form.hasValidFormDefinition()) {
           throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
         }
-        JsonServer server = new JsonServer(form, authKey, url, esOption, ownerEmail, cc);
+        AbstractExternalService server = new JsonServer(form, authKey, url, esOption, ownerEmail, binaryOption,cc);
         server.initiate(cc);
         return server.getFormServiceCursor().getUri();
      } catch (ODKOverQuotaException e) {
@@ -431,4 +438,89 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     }
 
   }
+
+  @Override
+  public GmeSettings getGoogleMapEngineSettings(String formId)
+      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
+      DatastoreFailureException {
+
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    
+    try {
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+      }
+       GenerateGoogleMapEngineSettings geoGenerator = new GenerateGoogleMapEngineSettings(form, false);
+       return geoGenerator.generate(cc);
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException();
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Internal error");
+    }
+  }
+
+  @Override
+  public String createMapEngine(String formId, ExternalServicePublicationOption esOption,
+      String assetId, String geopointKey, GmePhotoHostType gmePhotoHostType, String ownerEmail)
+      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
+      DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // Form is being deleted. Disallow exports.
+      if (deletionTimestamp != null) {
+        throw new RequestFailureException(
+            "Form is marked for deletion - publishing request for google map engine aborted.");
+      }
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
+      if ( ownerEmail == null || ownerEmail.length() == 0 ) {
+        throw new RequestFailureException(
+            "Owner email must be supplied.");
+      }
+      
+      FormElementModel geoPointField = null;
+      if (geopointKey != null) {
+        FormElementKey geoPointFEMKey = new FormElementKey(geopointKey);
+        geoPointField = FormElementModel.retrieveFormElementModel(form, geoPointFEMKey);
+      }
+
+      if(geoPointField == null) {
+        throw new RequestFailureException(
+            "Geo Point field must be supplied to transfer data to Google Map Engine");
+      }
+      FormElementKey geoPointFieldKey = geoPointField.constructFormElementKey(form);
+      GoogleMapsEngine gme = new GoogleMapsEngine(form, esOption, assetId, geoPointFieldKey.toString(), gmePhotoHostType, ownerEmail, cc);
+      gme.initiate(cc);
+      return gme.getFormServiceCursor().getUri();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    }
+  }
+
 }

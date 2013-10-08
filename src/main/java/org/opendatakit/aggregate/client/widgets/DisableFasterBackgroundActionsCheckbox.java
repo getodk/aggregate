@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.client.widgets;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.Preferences;
-import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;

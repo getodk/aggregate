@@ -21,22 +21,30 @@ import org.apache.http.params.HttpParams;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.http.conn.GaeClientConnectionManager;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.http.HttpTransport;
+
 /**
  * Implementation that uses the underlying GAE URLFetchService.
  * 
  * @author mitchellsundt@gmail.com
- *
+ * @author wbrunette@gmail.com
+ * 
  */
 public class GaeHttpClientFactoryImpl implements HttpClientFactory {
 
-	public GaeHttpClientFactoryImpl() {
-	}
+  public GaeHttpClientFactoryImpl() {
+  }
 
-	@Override
-	public HttpClient createHttpClient(HttpParams params) {
-		return new DefaultHttpClient(
-				new GaeClientConnectionManager( 
-						GaeClientConnectionManager.DEFAULT_SCHEME_REGISTRY), params);
-	}
+  @Override
+  public HttpClient createHttpClient(HttpParams params) {
+    return new DefaultHttpClient(new GaeClientConnectionManager(
+        GaeClientConnectionManager.DEFAULT_SCHEME_REGISTRY), params);
+  }
+
+  @Override
+  public HttpTransport getGoogleOAuth2Transport() {
+    return new UrlFetchTransport();
+  }
 
 }

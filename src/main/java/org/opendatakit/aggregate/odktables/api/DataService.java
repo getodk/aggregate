@@ -55,7 +55,8 @@ public interface DataService {
 
   @DELETE
   @Path("{rowId}")
-  public void deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
+  @Produces(MediaType.TEXT_PLAIN)
+  public String deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
       ODKTaskLockException, PermissionDeniedException;
 
 }

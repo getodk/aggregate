@@ -100,14 +100,14 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public void deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
+  public String deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
     // TODO re-do permissions stuff
     //af.checkPermission(TablePermission.DELETE_ROW);
     Row row = dm.getRowNullSafe(rowId);
     // TODO re-do permissions stuff
     //af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
-    dm.deleteRow(rowId);
+    return dm.deleteRow(rowId);
   }
 
   private RowResource getResource(Row row) {

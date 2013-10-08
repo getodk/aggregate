@@ -565,6 +565,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       // the structure of the fdmList. Repeat until no errors.
       // Very error prone!!!
       //
+      FormDefinition fd = null;
       try {
         int nAttempts = 0;
         for (;;) {
@@ -576,7 +577,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
                 + MAX_FORM_CREATION_ATTEMPTS + " attempts.");
           }
 
-          FormDefinition fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
+          fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
 
           List<CommonFieldsBase> badTables = new ArrayList<CommonFieldsBase>();
 
@@ -623,7 +624,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
               }
             } catch (Exception e1) {
               // assume it is because the table is too wide...
-              log.warn("Create failed -- assuming phantom table required " + tableKey(tbl));
+              log.warn("Create failed -- assuming phantom table required " + tableKey(tbl) + " Exception: " + e1.toString());
               // we expect the following dropRelation to fail,
               // as the most likely state of the system is
               // that the table was unable to be created.
@@ -686,20 +687,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
               ". Datastore exceptions are expected in the following stack trace; other exceptions may indicate a problem:");
           e.printStackTrace();
 
-          // scorched earth -- get all the tables and try to drop them all...
-          FormDefinition fd = new FormDefinition(sa, submissionElementDefn.formId, fdmList, cc);
-          for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
-            try {
-              ds.dropRelation(tbl, user);
-              assertedRelations.remove(tableKey(tbl));
-            } catch (Exception e3) {
-              // the above may fail because the table was never created...
-              // do nothing...
-              log.warn("If the following stack trace is not a complaint about a table not existing, it is likely a problem!");
-              e3.printStackTrace();
-            }
-          }
-
           /* if everything were OK, assertedRelations should be empty... */
           if (!assertedRelations.isEmpty()) {
             log.error("assertedRelations not fully unwound!");
@@ -722,6 +709,21 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
               // or not we were successful.
               // No point in ever trying again.
               iter.remove();
+            }
+          }
+
+          // scorched earth -- get all the tables and try to drop them all...
+          if ( fd != null ) {
+            for (CommonFieldsBase tbl : fd.getBackingTableSet()) {
+              try {
+                ds.dropRelation(tbl, user);
+                assertedRelations.remove(tableKey(tbl));
+              } catch (Exception e3) {
+                // the above may fail because the table was never created...
+                // do nothing...
+                log.warn("If the following stack trace is not a complaint about a table not existing, it is likely a problem!");
+                e3.printStackTrace();
+              }
             }
           }
         } catch (Exception e4) {

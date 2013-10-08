@@ -25,8 +25,15 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
@@ -34,8 +41,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
-import org.opendatakit.common.ermodel.simple.Entity;
-import org.opendatakit.common.ermodel.simple.Relation;
+import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -69,22 +75,29 @@ public class EntityCreator {
    *
    * @param tableId
    *          the table id. May be null to auto generate.
+   * @param tableKey
+   *          the unique Id for disambiguation purposes.
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newTableEntryEntity(String tableId, CallingContext cc)
+  public DbTableEntryEntity newTableEntryEntity(String tableId, String tableKey, String propertiesEtag, String aprioriDataSequenceValue, CallingContext cc)
       throws ODKDatastoreException {
     Validate.notNull(cc);
+    Validate.notEmpty(tableKey);
+    Validate.notNull(propertiesEtag);
+    Validate.notNull(aprioriDataSequenceValue);
 
-    if (tableId == null)
+    if (tableId == null) {
       tableId = CommonFieldsBase.newUri();
+    }
 
-    Entity entity = DbTableEntry.getRelation(cc).newEntity(tableId, cc);
-    entity.set(DbTableEntry.DATA_ETAG,
-        Long.toString(System.currentTimeMillis()));
-    entity.set(DbTableEntry.PROPERTIES_ETAG,
-        Long.toString(System.currentTimeMillis()));
+    DbTableEntryEntity entity = DbTableEntry.createNewEntity(tableId, cc);
+    String value = null;
+    entity.setTableKey(tableKey);
+    entity.setDataETag(value);
+    entity.setPropertiesETag(propertiesEtag);
+    entity.setAprioriDataSequenceValue(aprioriDataSequenceValue);
     return entity;
   }
 
@@ -99,66 +112,56 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newColumnEntity(String tableId, Column column,
+  public DbColumnDefinitionsEntity newColumnEntity(String tableId, String propertiesEtag, Column column,
       CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
+    Validate.notEmpty(propertiesEtag);
     Validate.notNull(column);
     Validate.notNull(cc);
 
-    Entity entity = DbColumnDefinitions.getRelation(cc).newEntity(cc);
-    entity.set(DbColumnDefinitions.TABLE_ID, tableId);
-    entity.set(DbColumnDefinitions.ELEMENT_KEY, column.getElementKey());
-    entity.set(DbColumnDefinitions.ELEMENT_NAME, column.getElementName());
-    entity.set(
-        DbColumnDefinitions.ELEMENT_TYPE, column.getElementType().name());
-    entity.set(DbColumnDefinitions.LIST_CHILD_ELEMENT_KEYS,
-        column.getListChildElementKeys());
-    entity.set(DbColumnDefinitions.IS_PERSISTED, column.getIsPersisted());
-    entity.set(DbColumnDefinitions.JOINS, column.getJoins());
+    DbColumnDefinitionsEntity entity = DbColumnDefinitions.createNewEntity(cc);
+    entity.setTableId(tableId);
+    entity.setPropertiesETag(propertiesEtag);
+    entity.setElementKey(column.getElementKey());
+    entity.setElementName(column.getElementName());
+    entity.setElementType(column.getElementType());
+    entity.setListChildElementKeys(column.getListChildElementKeys());
+    entity.setIsPersisted(column.getIsPersisted() != 0);
+    entity.setJoins(column.getJoins());
 
     return entity;
   }
 
   /**
-   * Create a new {@link DbTableFileInfo} entity. This should be called
-   * whenever you are adding a file to the
+   * Create a new {@link DbTableFileInfo} entity.
    * @param tableId
-   * 			the id of the table the file is associated with
-   * @param type
-   * 			the type of the file
-   * @param key
-   *        the key associated with this file
-   * @param URI
-   * 			the URI of the blobset of size one, of which the one entry is the file
-   * @param isMedia
-   *        whether or not this is a media file.
+   * @param pathToFile
+   * @param cc
    * @return
+   * @throws ODKDatastoreException
    */
-  public Entity newTableFileInfoEntity(String tableId, String type, String key,
-      String uri, boolean isMedia, CallingContext cc)
-      throws ODKDatastoreException {
+  public DbTableFileInfoEntity newTableFileInfoEntity(String tableId,
+      String pathToFile, CallingContext cc) throws ODKDatastoreException {
 	  // first do some preliminary checks
-	  Validate.notEmpty(tableId);
-	  Validate.notEmpty(uri);
+	  Validate.notEmpty(pathToFile);
 
-	  Entity entity = DbTableFileInfo.getRelation(cc).newEntity(cc);
-	  entity.set(DbTableFileInfo.TABLE_ID, tableId);
-	  entity.set(DbTableFileInfo.VALUE_TYPE, type);
-	  entity.set(DbTableFileInfo.KEY, key);
-	  entity.set(DbTableFileInfo.VALUE, uri);
-	  entity.set(DbTableFileInfo.IS_MEDIA, isMedia);
+	  DbTableFileInfoEntity entity = DbTableFileInfo.createNewEntity(cc);
+	  entity.setTableId(tableId);
+	  entity.setPathToFile(pathToFile);
 
 	  // now set the universal fields
-	  entity.set(DbTable.CREATE_USER, cc.getCurrentUser().getEmail());
+	  // TODO: do the appropriate time stamping and include data for the other
+	  // fields.
+	  entity.setStringField(DbTable.CREATE_USER, cc.getCurrentUser().getEmail());
 	  // TODO last update same as create? correct?
-	  entity.set(DbTable.LAST_UPDATE_USER, cc.getCurrentUser().getEmail());
-	  entity.set(DbTable.DATA_ETAG_AT_MODIFICATION,
-	      Long.toString(System.currentTimeMillis()));
-	  entity.set(DbTable.DELETED, false);
-	  entity.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+	  entity.setStringField(DbTable.LAST_UPDATE_USER, cc.getCurrentUser().getEmail());
+	  // TODO: should DATA_ETAG_AT_MODIFICATION also be from the TableEntry record? Or tracked?
+	  entity.setStringField(DbTable.DATA_ETAG_AT_MODIFICATION, CommonFieldsBase.newUri());
+	  entity.setBooleanField(DbTable.DELETED, false);
+	  entity.setStringField(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
 	  // TODO is this the right kind of scope to be setting? one wonders...
-	  entity.set(DbTable.FILTER_VALUE, (String) null);
-	  entity.set(DbTable.FILTER_TYPE, (String) null);
+	  entity.setStringField(DbTable.FILTER_VALUE, (String) null);
+	  entity.setStringField(DbTable.FILTER_TYPE, (String) null);
 
 	  return entity;
   }
@@ -174,26 +177,23 @@ public class EntityCreator {
    * @return
    * @throws ODKDatastoreException
    */
-  public Entity newTableDefinitionEntity(String tableId, String tableKey,
+  public DbTableDefinitionsEntity newTableDefinitionEntity(String tableId, String propertiesEtag,
       String dbTableName, TableType type, String tableIdAccessControls,
       CallingContext cc) throws ODKDatastoreException {
     // Validate those parameters defined as non-null in the ODK Tables Schema
     // Google doc.
     Validate.notEmpty(tableId);
-    Validate.notEmpty(tableKey);
+    Validate.notEmpty(propertiesEtag);
     Validate.notEmpty(dbTableName);
     Validate.notNull(type);
     // tableIdAccessControls can be null.
     Validate.notNull(cc);
-    Entity definition = DbTableDefinitions.getRelation(cc).newEntity(cc);
-    definition.set(DbTableDefinitions.TABLE_ID, tableId);
-    definition.set(DbTableDefinitions.TABLE_KEY, tableKey);
-    definition.set(DbTableDefinitions.DB_TABLE_NAME, dbTableName);
-    definition.set(DbTableDefinitions.TYPE, type.name());
-    if (tableIdAccessControls != null) {
-      definition.set(DbTableDefinitions.TABLE_ID_ACCESS_CONTROLS,
-          tableIdAccessControls);
-    }
+    DbTableDefinitionsEntity definition = DbTableDefinitions.createNewEntity(cc);
+    definition.setTableId(tableId);
+    definition.setPropertiesETag(propertiesEtag);
+    definition.setDbTableName(dbTableName);
+    definition.setType(type.name());
+    definition.setTableIdAccessControls(tableIdAccessControls);
     return definition;
   }
 
@@ -209,34 +209,42 @@ public class EntityCreator {
    * @return
    * @throws ODKDatastoreException
    */
-  public Entity newKeyValueStoreEntity(String tableId, String partition,
+  public DbKeyValueStoreEntity newKeyValueStoreEntity(String tableId, String propertiesEtag,
+      String partition,
       String aspect, String key, String type, String value,
       CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
+    Validate.notEmpty(propertiesEtag);
     Validate.notEmpty(partition);
     Validate.notEmpty(aspect);
     Validate.notEmpty(key);
     Validate.notEmpty(type);
     Validate.notNull(cc);
-    Entity entry = DbKeyValueStore.getRelation(cc).newEntity(cc);
-    entry.set(DbKeyValueStore.TABLE_ID, tableId);
-    entry.set(DbKeyValueStore.PARTITION, partition);
-    entry.set(DbKeyValueStore.ASPECT, aspect);
-    entry.set(DbKeyValueStore.KEY, key);
-    entry.set(DbKeyValueStore.TYPE, type);
-    entry.set(DbKeyValueStore.VALUE, value);
+
+    DbKeyValueStoreEntity entry = DbKeyValueStore.createNewEntity(cc);
+    entry.setTableId(tableId);
+    entry.setPropertiesETag(propertiesEtag);
+    entry.setPartition(partition);
+    entry.setAspect(aspect);
+    entry.setKey(key);
+    entry.setType(type);
+    entry.setValue(value);
     return entry;
   }
 
-  public Entity newKeyValueStoreEntity(OdkTablesKeyValueStoreEntry entry,
+  public DbKeyValueStoreEntity newKeyValueStoreEntity(OdkTablesKeyValueStoreEntry entry, String propertiesEtag,
       CallingContext cc) throws ODKDatastoreException {
+    Validate.notNull(entry);
+    Validate.notEmpty(propertiesEtag);
+    Validate.notNull(cc);
+
     String tableId = entry.tableId;
     String partition = entry.partition;
     String aspect = entry.aspect;
     String key = entry.key;
     String type = entry.type;
     String value = entry.value;
-    return newKeyValueStoreEntity(tableId, partition, aspect, key, type,
+    return newKeyValueStoreEntity(tableId, propertiesEtag, partition, aspect, key, type,
         value, cc);
   }
 
@@ -253,7 +261,7 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newTableAclEntity(String tableId, Scope scope, TableRole role, CallingContext cc)
+  public DbTableAclEntity newTableAclEntity(String tableId, Scope scope, TableRole role, CallingContext cc)
       throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(scope);
@@ -262,11 +270,11 @@ public class EntityCreator {
     Validate.notNull(role);
     Validate.notNull(cc);
 
-    Entity tableAcl = DbTableAcl.getRelation(cc).newEntity(cc);
-    tableAcl.set(DbTableAcl.TABLE_ID, tableId);
-    tableAcl.set(DbTableAcl.SCOPE_TYPE, scope.getType().name());
-    tableAcl.set(DbTableAcl.SCOPE_VALUE, scope.getValue());
-    tableAcl.set(DbTableAcl.ROLE, role.name());
+    DbTableAclEntity tableAcl = DbTableAcl.createNewEntity(cc);
+    tableAcl.setTableId(tableId);
+    tableAcl.setScopeType(scope.getType().name());
+    tableAcl.setScopeValue(scope.getValue());
+    tableAcl.setRole(role.name());
 
     return tableAcl;
   }
@@ -291,9 +299,9 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public Entity newRowEntity(Relation table, String rowId, String dataEtag,
+  public Entity newRowEntity(DbTable table, String rowId, String dataEtag,
       Scope filter,
-      Map<String, String> values, List<Entity> columns, CallingContext cc)
+      Map<String, String> values, List<DbColumnDefinitionsEntity> columns, CallingContext cc)
       throws ODKDatastoreException, BadColumnNameException {
     Validate.notNull(table);
     Validate.notEmpty(dataEtag);
@@ -340,8 +348,8 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public List<Entity> newRowEntities(Relation table, List<Row> rows,
-      String dataEtag, List<Entity> columns, CallingContext cc)
+  public List<Entity> newRowEntities(DbTable table, List<Row> rows,
+      String dataEtag, List<DbColumnDefinitionsEntity> columns, CallingContext cc)
           throws ODKDatastoreException, BadColumnNameException {
     Validate.notNull(table);
     Validate.noNullElements(rows);
@@ -384,9 +392,9 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public Entity updateRowEntity(Relation table, String dataEtag, String rowId,
+  public Entity updateRowEntity(DbTable table, String dataEtag, String rowId,
       String currentEtag, Map<String, String> values, Scope filter,
-      List<Entity> columns, CallingContext cc) throws
+      List<DbColumnDefinitionsEntity> columns, CallingContext cc) throws
       ODKEntityNotFoundException, ODKDatastoreException,
       EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
@@ -411,7 +419,7 @@ public class EntityCreator {
   }
 
   private void setRowFields(Entity row, String dataEtag, User lastUpdatedUser,
-      Scope filterScope, boolean deleted, Map<String, String> values, List<Entity> columns)
+      Scope filterScope, boolean deleted, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
@@ -461,7 +469,7 @@ public class EntityCreator {
         }
       } else {
         // 3) --add it to the user-defined column
-        Entity column = findColumn(name, columns);
+        DbColumnDefinitionsEntity column = findColumn(name, columns);
         if (column == null) {
           // If we don't have a colum in the aggregate db, it's ok if it's one
           // of the Tables-only columns. Otherwise it's an error.
@@ -473,9 +481,9 @@ public class EntityCreator {
     }
   }
 
-  private Entity findColumn(String elementKey, List<Entity> columns) {
-    for (Entity entity : columns) {
-      String colName = entity.getString(DbColumnDefinitions.ELEMENT_KEY);
+  private DbColumnDefinitionsEntity findColumn(String elementKey, List<DbColumnDefinitionsEntity> columns) {
+    for (DbColumnDefinitionsEntity entity : columns) {
+      String colName = entity.getElementKey();
       if (elementKey.equals(colName))
         return entity;
     }
@@ -502,8 +510,8 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    * @throws BadColumnNameException
    */
-  public List<Entity> updateRowEntities(Relation table, String dataEtag,
-      List<Row> rows, List<Entity> columns, CallingContext cc)
+  public List<Entity> updateRowEntities(DbTable table, String dataEtag,
+      List<Row> rows, List<DbColumnDefinitionsEntity> columns, CallingContext cc)
           throws ODKEntityNotFoundException,
       ODKDatastoreException, EtagMismatchException, BadColumnNameException {
     Validate.notNull(table);
@@ -529,12 +537,14 @@ public class EntityCreator {
    *          the row
    * @param columns
    *          the {@link DbColumnDefinitions} entities for the log table
+   * @param sequencer
+   *          the sequencer for ordering the log entries
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newLogEntity(Relation logTable, String dataEtag, Entity row,
-      List<Entity> columns, CallingContext cc) throws ODKDatastoreException {
+  public Entity newLogEntity(DbLogTable logTable, String dataEtag, Entity row,
+      List<DbColumnDefinitionsEntity> columns, Sequencer sequencer, CallingContext cc) throws ODKDatastoreException {
     Validate.notNull(logTable);
     Validate.notEmpty(dataEtag);
     Validate.notNull(row);
@@ -545,13 +555,14 @@ public class EntityCreator {
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
     entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
+    entity.set(DbLogTable.SEQUENCE_VALUE, sequencer.getNextSequenceValue());
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
     entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
     entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
     entity.set(DbLogTable.FILTER_VALUE, row.getString(DbTable.FILTER_VALUE));
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
 
-    for (Entity column : columns) {
+    for (DbColumnDefinitionsEntity column : columns) {
       String idName = RUtil.convertIdentifier(column.getId());
       String value = row.getAsString(idName);
       entity.setAsString(idName, value);
@@ -569,12 +580,14 @@ public class EntityCreator {
    *          the rows
    * @param columns
    *          the {@link DbColumnDefinitions} entities for the table
+   * @param sequencer
+   *          the sequencer for ordering the log entries
    * @param cc
    * @return the created entities, not yet persisted
    * @throws ODKDatastoreException
    */
-  public List<Entity> newLogEntities(Relation logTable, String dataEtag,
-      List<Entity> rows, List<Entity> columns, CallingContext cc)
+  public List<Entity> newLogEntities(DbLogTable logTable, String dataEtag,
+      List<Entity> rows, List<DbColumnDefinitionsEntity> columns, Sequencer sequencer, CallingContext cc)
           throws ODKDatastoreException {
     Validate.notNull(logTable);
     Validate.notEmpty(dataEtag);
@@ -583,7 +596,7 @@ public class EntityCreator {
     Validate.notNull(cc);
     List<Entity> entities = new ArrayList<Entity>();
     for (Entity row : rows) {
-      Entity entity = newLogEntity(logTable, dataEtag, row, columns, cc);
+      Entity entity = newLogEntity(logTable, dataEtag, row, columns, sequencer, cc);
       entities.add(entity);
     }
     return entities;

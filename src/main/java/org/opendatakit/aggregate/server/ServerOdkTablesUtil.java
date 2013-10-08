@@ -46,8 +46,8 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -184,16 +184,16 @@ public class ServerOdkTablesUtil {
       String tableId, DbTableFiles blobSetRelation, CallingContext cc) throws
       ODKDatastoreException {
     String filename = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        row.getValues().get(DbTableFileInfo.PATH_TO_FILE), cc)
         .getUnrootedFilename(1, cc);
     Long contentLength = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        filename, cc)
         .getContentLength(1, cc);
     String contentType = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.VALUE), cc)
+        filename, cc)
         .getContentType(1, cc);
-    String key = row.getValues().get(DbTableFileInfo.KEY);
     String id = row.getRowId();
+    String key = "this isn't implemented.";
     FileSummaryClient summary = new FileSummaryClient(
         filename, contentType, contentLength, key, 0, id, tableId);
     return summary;

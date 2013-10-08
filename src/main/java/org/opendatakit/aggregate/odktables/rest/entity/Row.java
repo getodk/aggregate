@@ -35,6 +35,9 @@ public class Row {
 
   @Element(name = "etag", required = false)
   private String rowEtag;
+  
+  @Element(name = "dataEtagAtModification", required=false)
+  private String dataEtagAtModification;
 
   @Element(required = false)
   private boolean deleted;
@@ -113,6 +116,7 @@ public class Row {
   public Row() {
     this.rowId = null;
     this.rowEtag = null;
+    this.dataEtagAtModification = null;
     this.deleted = false;
     this.createUser = null;
     this.lastUpdateUser = null;
@@ -131,6 +135,10 @@ public class Row {
 
   public String getRowEtag() {
     return this.rowEtag;
+  }
+  
+  public String getDataEtagAtModification() {
+    return this.dataEtagAtModification;
   }
 
   public boolean isDeleted() {
@@ -159,6 +167,10 @@ public class Row {
 
   public void setRowEtag(final String rowEtag) {
     this.rowEtag = rowEtag;
+  }
+  
+  public void setDataEtagAtModification(final String dataEtagAtModification) {
+    this.dataEtagAtModification = dataEtagAtModification;
   }
 
   public void setDeleted(final boolean deleted) {
@@ -247,6 +259,8 @@ public class Row {
     int result = 1;
     result = prime * result + ((rowId == null) ? 0 : rowId.hashCode());
     result = prime * result + ((rowEtag == null) ? 0 : rowEtag.hashCode());
+    result = prime * result + ((dataEtagAtModification == null) ? 
+        0 : dataEtagAtModification.hashCode());
     result = prime * result + ((deleted) ? 0 : 1);
     result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
     result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
@@ -274,6 +288,8 @@ public class Row {
     Row other = (Row) obj;
     return (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (rowEtag == null ? other.rowEtag == null : rowEtag.equals(other.rowEtag))
+        && (dataEtagAtModification == null ? other.dataEtagAtModification == null :
+            dataEtagAtModification.equals(dataEtagAtModification))
         && (deleted == other.deleted)
         && (createUser == null ? other.createUser == null : createUser.equals(other.createUser))
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
@@ -300,6 +316,8 @@ public class Row {
     builder.append(rowId);
     builder.append(", rowEtag=");
     builder.append(rowEtag);
+    builder.append(", dataEtagAtModification=");
+    builder.append(dataEtagAtModification);
     builder.append(", deleted=");
     builder.append(deleted);
     builder.append(", createUser=");
