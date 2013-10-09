@@ -133,13 +133,10 @@ public class T {
   public static final TableType tableType = TableType.DATA;
   public static final String propertiesEtag = "propertiesEtag";
 
-  @SuppressWarnings("serial")
   public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
-  @SuppressWarnings("serial")
   public static final List<Column> columns = new ArrayList<Column>();
 
-  @SuppressWarnings("serial")
   public static final List<Row> rows = new ArrayList<Row>();
 
   static {

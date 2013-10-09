@@ -264,6 +264,7 @@ public class BaseFormParserForJavaRosa {
   }
 
   private static class XFormParserWithBindEnhancements extends XFormParser {
+    @SuppressWarnings("unused")
     private Document xmldoc;
     private BaseFormParserForJavaRosa parser;
 
@@ -276,6 +277,7 @@ public class BaseFormParserForJavaRosa {
     protected void parseBind(Element e) {
       // remember raw bindings in case we want to compare parsed XForms later
       parser.bindElements.addElement(copyBindingElement(e));
+      @SuppressWarnings("rawtypes")
       Vector usedAtts = new Vector();
 
       DataBinding binding = processStandardBindAttributes(usedAtts, e);
@@ -1022,6 +1024,7 @@ public class BaseFormParserForJavaRosa {
     // Otherwise, if you have specified the jr:template attribute,
     // it appears only as an INDEX_TEMPLATE element.
 
+    @SuppressWarnings("unused")
     int template1DropCount = 0;
     // get non-template entries for treeElement1
     List<TreeElement> element1ExcludingRepeatIndex0Children = new ArrayList<TreeElement>();
@@ -1039,6 +1042,7 @@ public class BaseFormParserForJavaRosa {
       element1ExcludingRepeatIndex0Children.add(child);
     }
 
+    @SuppressWarnings("unused")
     int template2DropCount = 0;
     // get non-template entries for treeElement2
     Map<String, TreeElement> element2ExcludingRepeatIndex0Children = new HashMap<String, TreeElement>();
