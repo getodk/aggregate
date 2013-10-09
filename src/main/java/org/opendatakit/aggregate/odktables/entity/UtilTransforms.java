@@ -64,7 +64,7 @@ public class UtilTransforms {
     Column transformedColumn = new Column(client.getTableId(),
         client.getElementKey(), client.getElementName(),
         client.getElementType(), client.getListChildElementKeys(),
-        (client.getIsPersisted() != 0), client.getJoins());
+        (client.getIsPersisted() != 0));
     return transformedColumn;
   }
 

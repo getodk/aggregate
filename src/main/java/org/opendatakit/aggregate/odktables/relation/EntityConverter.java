@@ -95,9 +95,8 @@ public class EntityConverter {
     String listChildElementKeys =
         entity.getListChildElementKeys();
     Boolean isPersisted = entity.getIsPersisted();
-    String joins = entity.getJoins();
     Column column = new Column(tableId, elementKey, elementName,
-        elementTypeStr, listChildElementKeys, isPersisted, joins);
+        elementTypeStr, listChildElementKeys, isPersisted);
     return column;
   }
 
