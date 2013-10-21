@@ -31,6 +31,11 @@ import java.io.Serializable;
 public class TableAclResourceClient extends TableAclClient
     implements Serializable {
 
+  /**
+   *
+   */
+  private static final long serialVersionUID = 7456564501408206546L;
+
   private String selfUri;
   private String aclUri;
   private String tableUri;
