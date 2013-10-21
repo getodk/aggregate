@@ -47,9 +47,8 @@ public class RowResource extends Row {
     setValues(row.getValues());
     setUriUser(row.getUriUser());
     setFormId(row.getFormId());
-    setInstanceName(row.getInstanceName());
     setLocale(row.getLocale());
-    setTimestamp(row.getTimestamp());
+    setSavepointTimestamp(row.getSavepointTimestamp());
   }
 
   public String getSelfUri() {

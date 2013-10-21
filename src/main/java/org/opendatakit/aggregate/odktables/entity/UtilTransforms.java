@@ -168,9 +168,8 @@ public class UtilTransforms {
     serverRow.setValues(client.getValues());
     serverRow.setUriUser(client.getUriUser());
     serverRow.setFormId(client.getFormId());
-    serverRow.setInstanceName(client.getInstanceName());
     serverRow.setLocale(client.getLocale());
-    serverRow.setTimestamp(client.getTimestamp());
+    serverRow.setSavepointTimestamp(client.getSavepointTimestamp());
     return serverRow;
   }
 
@@ -293,9 +292,8 @@ public class UtilTransforms {
     row.setValues(serverRow.getValues());
     row.setUriUser(serverRow.getUriUser());
     row.setFormId(serverRow.getFormId());
-    row.setInstanceName(serverRow.getInstanceName());
     row.setLocale(serverRow.getLocale());
-    row.setTimestamp(serverRow.getTimestamp());
+    row.setSavepointTimestamp(serverRow.getSavepointTimestamp());
     if (serverRow.getFilterScope().getType() == null) {
       row.setFilterScope(ScopeClient.EMPTY_SCOPE);
     } else {
@@ -331,9 +329,8 @@ public class UtilTransforms {
     rowClient.setValues(serverResource.getValues());
     rowClient.setUriUser(serverResource.getUriUser());
     rowClient.setFormId(serverResource.getFormId());
-    rowClient.setInstanceName(serverResource.getInstanceName());
     rowClient.setLocale(serverResource.getLocale());
-    rowClient.setTimestamp(serverResource.getTimestamp());
+    rowClient.setSavepointTimestamp(serverResource.getSavepointTimestamp());
 
     RowResourceClient resource = new RowResourceClient(rowClient);
     resource.setSelfUri(serverResource.getSelfUri());
