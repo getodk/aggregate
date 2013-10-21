@@ -33,6 +33,9 @@ public class T {
   public static class OdkTablesKeyValueStoreEntries {
     public static final OdkTablesKeyValueStoreEntry entryOne;
     public static final OdkTablesKeyValueStoreEntry entryTwo;
+    public static final OdkTablesKeyValueStoreEntry tableType;
+    public static final OdkTablesKeyValueStoreEntry tableAccessControls;
+
     public static final String entryOnePartition = "tablePartition";
     public static final String entryOneAspect = "tableAspect";
     public static final String entryOneKey = "theKey";
@@ -43,6 +46,17 @@ public class T {
     public static final String entryTwoKey = "laClave";
     public static final String entryTwoType = "text";
     public static final String entryTwoValue = "thereIsNoPassword";
+
+    public static final String tablePartition = "Table";
+    public static final String tableAspect = "default";
+
+    public static final String tableTypeKey = "tableType";
+    public static final String tableTypeType = "text";
+    public static final String tableTypeValue = TableType.DATA.name();
+
+    public static final String tableAccessControlTableIdKey = "accessControlTableId";
+    public static final String tableAccessControlTableIdType = "text";
+    public static final String tableAccessControlTableIdValue = "someId";
     static {
       entryOne = new OdkTablesKeyValueStoreEntry();
       entryOne.tableId = T.tableId;
@@ -51,6 +65,7 @@ public class T {
       entryOne.key = entryOneKey;
       entryOne.type = entryOneType;
       entryOne.value = entryOneValue;
+
       entryTwo = new OdkTablesKeyValueStoreEntry();
       entryTwo.tableId = T.tableId;
       entryTwo.partition = entryTwoPartition;
@@ -58,6 +73,23 @@ public class T {
       entryTwo.key = entryTwoKey;
       entryTwo.type = entryTwoType;
       entryTwo.value = entryTwoValue;
+
+      tableType = new OdkTablesKeyValueStoreEntry();
+      tableType.tableId = T.tableId;
+      tableType.partition = tablePartition;
+      tableType.aspect = tableAspect;
+      tableType.key = tableTypeKey;
+      tableType.type = tableTypeType;
+      tableType.value = tableTypeValue;
+
+      tableAccessControls = new OdkTablesKeyValueStoreEntry();
+      tableAccessControls.tableId = T.tableId;
+      tableAccessControls.partition = tablePartition;
+      tableAccessControls.aspect = tableAspect;
+      tableAccessControls.key = tableAccessControlTableIdKey;
+      tableAccessControls.type = tableAccessControlTableIdType;
+      tableAccessControls.value = tableAccessControlTableIdValue;
+
     }
   }
 
@@ -127,10 +159,8 @@ public class T {
   public static final String tableId = "people";
   public static final String tableKey = "peopleKey";
   public static final String dbTableName = "peopleDbTableName";
-  public static final String tableIdAccessControls = "someId";
   public static final String tableName = "people";
   public static final String tableMetadata = null;
-  public static final TableType tableType = TableType.DATA;
   public static final String propertiesEtag = "propertiesEtag";
 
   public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
@@ -142,6 +172,8 @@ public class T {
   static {
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableType);
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableAccessControls);
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);
     columns.add(T.Columns.column_weight);

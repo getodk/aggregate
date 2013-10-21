@@ -57,8 +57,7 @@ public class AuthFilterTest {
     this.tm = new TableManager(cc);
 
     tm.createTable(tableId, T.tableKey, T.dbTableName,
-        T.tableType, T.tableIdAccessControls, T.columns,
-        T.kvsEntries);
+        T.columns, T.kvsEntries);
 
     this.am = new TableAclManager(tableId, cc);
     this.af = new AuthFilter(tableId, cc);

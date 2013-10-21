@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -147,9 +146,7 @@ public class PropertiesManager {
       EntityCreator creator = new EntityCreator();
 
       DbTableDefinitionsEntity newDefinitionEntity = creator.newTableDefinitionEntity(tableId, propertiesEtag,
-          definitionEntity.getDbTableName(),
-          TableType.valueOf(definitionEntity.getType()),
-          definitionEntity.getTableIdAccessControls(), cc);
+          definitionEntity.getDbTableName(), cc);
       List<DbKeyValueStoreEntity> newKvsEntities = new ArrayList<DbKeyValueStoreEntity>();
       try {
         // TODO: we should probably be diff'ing somehow, so we don't have to
