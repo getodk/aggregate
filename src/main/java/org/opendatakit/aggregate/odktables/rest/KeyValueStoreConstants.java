@@ -9,9 +9,12 @@ package org.opendatakit.aggregate.odktables.rest;
 public class KeyValueStoreConstants {
 
 
+  // special well-known partitions
   public static final String TABLE_PARTITION = "Table";
   public static final String COLUMN_PARTITION = "Column";
+  // others should use their class names as the partition name
 
+  // default aspect
   public static final String DEFAULT_ASPECT = "default";
 
   // Keys for:
