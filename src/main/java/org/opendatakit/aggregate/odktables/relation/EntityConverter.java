@@ -38,7 +38,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -150,11 +149,7 @@ public class EntityConverter {
     String tableId = definitionEntity.getTableId();
     String tableKey = entryEntity.getTableKey();
     String dbTableName = definitionEntity.getDbTableName();
-    String tableTypeStr = definitionEntity.getType();
-    TableType tableType = TableType.valueOf(tableTypeStr);
-    String tableIdAccessControls = definitionEntity.getTableIdAccessControls();
-    return new TableDefinition(tableId, null, tableKey, dbTableName, tableType,
-        tableIdAccessControls);
+    return new TableDefinition(tableId, null, tableKey, dbTableName);
   }
 
   public List<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(

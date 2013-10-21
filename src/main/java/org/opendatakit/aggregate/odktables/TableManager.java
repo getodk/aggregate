@@ -42,7 +42,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -195,8 +194,8 @@ public class TableManager {
    *          a human readable name for the table
    * @param columns
    *          the columns the table should have
-   * @param metadata
-   *          application defined metadata to store with the table (may be null)
+   * @param kvs
+   *          key-value store properties of this table (may be empty)
    * @return a table entry representing the newly created table
    * @throws TableAlreadyExistsException
    *           if a table with the given table id already exists
@@ -204,8 +203,7 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public TableEntry createTable(String tableId, String tableKey, String dbTableName,
-      TableType type, String tableIdAccessControls, List<Column> columns,
-      List<OdkTablesKeyValueStoreEntry> kvsEntries) throws ODKEntityPersistException,
+      List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries) throws ODKEntityPersistException,
       ODKDatastoreException, TableAlreadyExistsException {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
@@ -213,8 +211,6 @@ public class TableManager {
     Validate.notEmpty(tableKey);
     Validate.notNull(dbTableName);
     Validate.notEmpty(dbTableName);
-    Validate.notNull(type);
-    // tableIdAccessControls can be null.
     Validate.noNullElements(columns);
 
     // the hope here is that it creates an empty table in the db after a single
@@ -245,7 +241,7 @@ public class TableManager {
         aprioriDataSequenceValue, cc);
 
     DbTableDefinitionsEntity tableDefinition = creator.newTableDefinitionEntity(tableId,
-        propertiesEtag, dbTableName, type, tableIdAccessControls, cc);
+        propertiesEtag, dbTableName, cc);
 
     List<DbColumnDefinitionsEntity> colDefs = new ArrayList<DbColumnDefinitionsEntity>();
     for (Column column : columns) {

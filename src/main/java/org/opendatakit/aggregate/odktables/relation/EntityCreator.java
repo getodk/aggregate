@@ -40,7 +40,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEnt
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -170,29 +169,22 @@ public class EntityCreator {
    * @param tableId cannot be null
    * @param tableKey cannot be null
    * @param dbTableName cannot be null
-   * @param type cannot be null
-   * @param tableIdAccessControls if null, not set.
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
   public DbTableDefinitionsEntity newTableDefinitionEntity(String tableId, String propertiesEtag,
-      String dbTableName, TableType type, String tableIdAccessControls,
-      CallingContext cc) throws ODKDatastoreException {
+      String dbTableName, CallingContext cc) throws ODKDatastoreException {
     // Validate those parameters defined as non-null in the ODK Tables Schema
     // Google doc.
     Validate.notEmpty(tableId);
     Validate.notEmpty(propertiesEtag);
     Validate.notEmpty(dbTableName);
-    Validate.notNull(type);
-    // tableIdAccessControls can be null.
     Validate.notNull(cc);
     DbTableDefinitionsEntity definition = DbTableDefinitions.createNewEntity(cc);
     definition.setTableId(tableId);
     definition.setPropertiesETag(propertiesEtag);
     definition.setDbTableName(dbTableName);
-    definition.setType(type.name());
-    definition.setTableIdAccessControls(tableIdAccessControls);
     return definition;
   }
 

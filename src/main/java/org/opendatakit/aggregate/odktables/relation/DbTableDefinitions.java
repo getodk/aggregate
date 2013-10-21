@@ -62,9 +62,6 @@ public class DbTableDefinitions extends Relation {
       false);
   public static final DataField DB_TABLE_NAME = new DataField("DB_TABLE_NAME", DataType.STRING,
       false);
-  public static final DataField TYPE = new DataField("TYPE", DataType.STRING, false);
-  public static final DataField TABLE_ID_ACCESS_CONTROLS = new DataField(
-      "TABLE_ID_ACCESS_CONTROLS", DataType.STRING, true);
 
   private static final List<DataField> dataFields;
   static {
@@ -72,8 +69,6 @@ public class DbTableDefinitions extends Relation {
     dataFields.add(TABLE_ID);
     dataFields.add(PROPERTIES_ETAG);
     dataFields.add(DB_TABLE_NAME);
-    dataFields.add(TYPE);
-    dataFields.add(TABLE_ID_ACCESS_CONTROLS);
   }
 
   public static class DbTableDefinitionsEntity {
@@ -120,22 +115,6 @@ public class DbTableDefinitions extends Relation {
 
     public void setDbTableName(String value) {
       e.set(DB_TABLE_NAME, value);
-    }
-
-    public String getType() {
-      return e.getString(TYPE);
-    }
-
-    public void setType(String value) {
-      e.set(TYPE, value);
-    }
-
-    public String getTableIdAccessControls() {
-      return e.getString(TABLE_ID_ACCESS_CONTROLS);
-    }
-
-    public void setTableIdAccessControls(String value) {
-      e.set(TABLE_ID_ACCESS_CONTROLS, value);
     }
   }
 
