@@ -21,32 +21,39 @@ public class TableConstants {
 
   // tablename is chosen by user...
   public static final String ID = "_id";
-  public static final String ROW_ID = "_id";
   public static final String URI_ACCESS_CONTROL = "_uri_access_control";
   public static final String SYNC_TAG = "_sync_tag";
   public static final String SYNC_STATE = "_sync_state";
   public static final String CONFLICT_TYPE = "_conflict_type";
 
   /**
-   * (timestamp, saved, form_id) are the tuple written and managed by ODK Survey
-   * when a record is updated. ODK Tables needs to update these appropriately
-   * when a cell is directly edited based upon whether or not the table is
-   * 'form-managed' or not.
+   * (savepoint_timestamp, savepoint_type, form_id, locale) are the tuple written
+   * and managed by ODK Survey when a record is updated. ODK Tables needs to update
+   * these appropriately when a cell is directly edited based upon whether or not
+   * the table is 'form-managed' or not. If form-managed, and direct cell editing
+   * is allowed, it should set 'savepoint_type' to 'INCOMPLETE' and should leave
+   * form_id unchanged. Otherwise, it can set 'savepoint_type' to 'COMPLETE' and
+   * set form_id to null.
    *
-   * timestamp and last_mod_time are the same field. last_mod_time is simply
-   * a well-formatted text representation of the timestamp value.
+   * Note that the value of 'savepoint_type' must be 'COMPLETE' in order for
+   * ODK Tables to sync the values up to the server, otherwise there is a
+   * conflict resolution step that is enforced on the device.  I.e., this is a
+   * requirement before a data row can move off of a device. Hence, we do
+   * not need to record the value of 'savepoint_type' on the server, because it will
+   * always be 'COMPLETE'.
+   *
+   * In contrast, the row security management, savepoint, form, locale, sync state,
+   * and conflict resolution fields are metadata and are not directly exposed to
+   * the user.
    */
-  public static final String TIMESTAMP = "_timestamp";
-  public static final String SAVED = "_saved";
+  public static final String SAVEPOINT_TIMESTAMP = "_savepoint_timestamp";
   public static final String FORM_ID = "_form_id";
-  /*
-   * For ODKTables generated rows (as opposed to ODK Collect), the thought is
-   * that this instance name would just be the iso86 pretty print date of
-   * creation.
-   */
-  public static final String INSTANCE_NAME = "_instance_name";
   public static final String LOCALE = "_locale";
 
+  /*
+   * savepoint_type is never sent to the server since it should always be 'COMPLETE'
+   */
+  public static final String SAVEPOINT_TYPE = "_savepoint_type";
 
   /**
    * This set contains the names of the  metadata columns that are present in
@@ -66,13 +73,11 @@ public class TableConstants {
     SHARED_COLUMN_NAMES = new HashSet<String>();
     CLIENT_ONLY_COLUMN_NAMES = new HashSet<String>();
     SHARED_COLUMN_NAMES.add(URI_ACCESS_CONTROL);
-    SHARED_COLUMN_NAMES.add(TIMESTAMP);
+    SHARED_COLUMN_NAMES.add(SAVEPOINT_TIMESTAMP);
     SHARED_COLUMN_NAMES.add(FORM_ID);
-    SHARED_COLUMN_NAMES.add(INSTANCE_NAME);
     SHARED_COLUMN_NAMES.add(LOCALE);
     CLIENT_ONLY_COLUMN_NAMES.add(ID);
-    CLIENT_ONLY_COLUMN_NAMES.add(ROW_ID);
-    CLIENT_ONLY_COLUMN_NAMES.add(SAVED);
+    CLIENT_ONLY_COLUMN_NAMES.add(SAVEPOINT_TYPE);
     CLIENT_ONLY_COLUMN_NAMES.add(SYNC_STATE);
     CLIENT_ONLY_COLUMN_NAMES.add(SYNC_TAG);
     CLIENT_ONLY_COLUMN_NAMES.add(CONFLICT_TYPE);

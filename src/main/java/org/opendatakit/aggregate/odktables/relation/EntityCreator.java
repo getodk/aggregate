@@ -462,7 +462,7 @@ public class EntityCreator {
         if (name.equals("last_mod_time")) {//name.equals(TablesConstants.TIMESTAMP)) {
           // Then we have to parse the string to a date.
           Date date = WebUtils.parseDate(value);
-          row.set(TableConstants.TIMESTAMP.toUpperCase(), date);
+          row.set(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), date);
         } else {
           row.set(name.toUpperCase(), value);
         }

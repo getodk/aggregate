@@ -40,9 +40,23 @@ public class Column implements Serializable {
   @Attribute(required = true)
   private String tableId;
 
+  /**
+   * The fully qualified key for this element. If this is
+   * a persisted field, then this is the element's database
+   * column name. For composite types whose elements are
+   * individually persisted (e.g., geopoint), this would be
+   * the elementName of the geopoint (e.g., 'myLocation'
+   * concatenated with '_' and this elementName (e.g.,
+   * 'myLocation_latitude').
+   */
   @Attribute(required = true)
   private String elementKey;
 
+  /**
+   * The name by which this element is referred. For composite
+   * types whose elements are individually persisted (e.g., geopoint),
+   * this would be simply 'latitude'
+   */
   @Attribute(required = true)
   private String elementName;
 
