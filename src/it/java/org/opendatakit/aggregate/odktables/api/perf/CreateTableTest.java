@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer.InvalidAuthTokenException;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -50,7 +49,7 @@ public class CreateTableTest implements PerfTest {
       // create table
       List<Column> columns = new ArrayList<Column>();
       for (int i = 0; i < numCols; i++) {
-        columns.add(new Column(tableId, colName(i), colName(i), ColumnType.STRING, null, 1, null));
+        columns.add(new Column(tableId, colName(i), colName(i), "STRING", null, true, null));
       }
       synchronizer.createTable(tableId, tableName, columns, null);
 

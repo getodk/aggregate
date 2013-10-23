@@ -17,19 +17,22 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
+import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
+import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
+import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
@@ -41,9 +44,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.BlobEntitySet;
-import org.opendatakit.common.ermodel.simple.Entity;
-import org.opendatakit.common.ermodel.simple.Query;
-import org.opendatakit.common.ermodel.simple.Relation;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -76,12 +76,7 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public List<TableEntry> getTables() throws ODKDatastoreException {
-    // get table entries
-    Query query =
-        DbTableEntry.getRelation(cc).query("TableManager.getTables", cc);
-    List<Entity> entries = query.execute();
-
-    return getTableEntries(entries);
+    return converter.toTableEntries(DbTableEntry.query(cc));
   }
 
   /**
@@ -94,61 +89,30 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public List<TableEntry> getTables(List<Scope> scopes) throws ODKDatastoreException {
+    // TODO: rework to use getTables() to get everything, then filter out
+    // the non-accessible tables. Eliminate the queryNotEqual() what we
+    // want to do is get the full ACL of each table, and see if the scope
+    // list it has matches against one of the scopes in our list.
+
     // Oct15--changing this just to point to get ALL the tables. This is to
     // avoid the permissions issue we have for now, as everything should be
     // getting tables through this class.
     // TODO fix this to again get things to point at scopes.
     /*
-    // get table ids for entries that the given scopes can see
-    List<Entity> aclEntities = DbTableAcl.queryNotEqual(TableRole.NONE, cc);
-    List<String> tableIds = new ArrayList<String>();
-
-    for (Entity aclEntity : aclEntities) {
-      TableAcl acl = converter.toTableAcl(aclEntity);
-      if (scopes.contains(acl.getScope())) {
-        tableIds.add(aclEntity.getString(DbTableAcl.TABLE_ID));
-      }
-    }
-
-    Query query = DbTableEntry.getRelation(cc).query("TableManager.getTables(List<Scope>)", cc);
-    query.include(CommonFieldsBase.URI_COLUMN_NAME, tableIds);
-    List<Entity> entries = query.execute();
-    return getTableEntries(entries);
-
-  */
+     * // get table ids for entries that the given scopes can see List<Entity>
+     * aclEntities = DbTableAcl.queryNotEqual(TableRole.NONE, cc); List<String>
+     * tableIds = new ArrayList<String>();
+     *
+     * for (Entity aclEntity : aclEntities) { TableAcl acl =
+     * converter.toTableAcl(aclEntity); if (scopes.contains(acl.getScope())) {
+     * tableIds.add(aclEntity.getString(DbTableAcl.TABLE_ID)); } }
+     *
+     * Query query =
+     * DbTableEntry.getRelation(cc).query("TableManager.getTables(List<Scope>)",
+     * cc); query.include(CommonFieldsBase.URI_COLUMN_NAME, tableIds);
+     * List<Entity> entries = query.execute(); return getTableEntries(entries);
+     */
     return getTables();
-  }
-
-  /**
-   * Retrieve a list of {@link TableEntry} objects from a list of
-   * {@link Entity} objects retrieved from {@link DbTableEntry}.
-   * @param entries
-   * @return
-   * @throws ODKDatastoreException
-   */
-  private List<TableEntry> getTableEntries(List<Entity> entries)
-      throws ODKDatastoreException {
-    if ( entries == null || entries.size() == 0 ) {
-      List<TableEntry> fetchedEntries = new ArrayList<TableEntry>();
-      return fetchedEntries;
-    }
-    // get table names
-    List<String> tableIds = new ArrayList<String>();
-    for (Entity entry : entries) {
-      tableIds.add(entry.getId());
-    }
-    // Will map ID to tableKey. To get the tableKey we need the TableDefinition
-    Map<String, String> tableKeys = new HashMap<String, String>();
-    Query definitionsQuery =
-        DbTableDefinitions.getRelation(cc).query("TableManager.getTables", cc);
-    definitionsQuery.include(DbTableDefinitions.TABLE_ID, tableIds);
-    List<Entity> definitionEntities = definitionsQuery.execute();
-    for (Entity properties : definitionEntities) {
-      String tableId = properties.getString(DbTableDefinitions.TABLE_ID);
-      String tableKey = properties.getString(DbTableDefinitions.TABLE_KEY);
-      tableKeys.put(tableId, tableKey);
-    }
-    return converter.toTableEntries(entries, tableKeys);
   }
 
   /**
@@ -164,17 +128,16 @@ public class TableManager {
     Validate.notEmpty(tableId);
 
     // get table entry
-    Query query =
-        DbTableEntry.getRelation(cc).query("TableManager.getTable", cc);
-    query.equal(CommonFieldsBase.URI_COLUMN_NAME, tableId);
-    Entity entryEntity = query.get();
+    // refresh entry
+    DbTableEntryEntity entryEntity = null;
+    try {
+      entryEntity = DbTableEntry.getTableIdEntry(tableId, cc);
+    } catch (ODKEntityNotFoundException e) {
+      return null;
+    }
 
-    // get table key
-    Entity definition = DbTableDefinitions.getDefinition(tableId, cc);
-
-    if (entryEntity != null && definition != null) {
-      String tableKey = definition.getString(DbTableDefinitions.TABLE_KEY);
-      return converter.toTableEntry(entryEntity, tableKey);
+    if (entryEntity != null) {
+      return converter.toTableEntry(entryEntity);
     } else {
       return null;
     }
@@ -182,16 +145,22 @@ public class TableManager {
 
   /**
    * Retrieve the TableDefinition for the table with the given id.
+   *
    * @param tableId
    * @return
    * @throws ODKDatastoreException
    */
-  public TableDefinition getTableDefinition(String tableId)
-      throws ODKDatastoreException {
+  public TableDefinition getTableDefinition(String tableId) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
-    Entity definitionEntity = DbTableDefinitions.getDefinition(tableId, cc);
-    TableDefinition definition = converter.toTableDefinition(definitionEntity);
-    List<Entity> columnEntities = DbColumnDefinitions.query(tableId, cc);
+    TableEntry entry = getTable(tableId);
+    if (entry == null) {
+      return null;
+    }
+    DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
+        entry.getPropertiesEtag(), cc);
+    TableDefinition definition = converter.toTableDefinition(entry, definitionEntity);
+    List<DbColumnDefinitionsEntity> columnEntities = DbColumnDefinitions.query(tableId,
+        entry.getPropertiesEtag(), cc);
     List<Column> columns = converter.toColumns(columnEntities);
     definition.setColumns(columns);
     return definition;
@@ -213,11 +182,8 @@ public class TableManager {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
     // get table entry entity
-    Entity entryEntity = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
-    // get tableKey
-    Entity definitionEntity = DbTableDefinitions.getDefinition(tableId, cc);
-    String tableKey = definitionEntity.getString(DbTableDefinitions.TABLE_KEY);
-    return converter.toTableEntry(entryEntity, tableKey);
+    DbTableEntryEntity entryEntity = DbTableEntry.getTableIdEntry(tableId, cc);
+    return converter.toTableEntry(entryEntity);
   }
 
   /**
@@ -237,16 +203,15 @@ public class TableManager {
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    */
-  public TableEntry createTable(String tableId, String tableKey,
-      String dbTableName, TableType type, String tableIdAccessControls,
-      List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries)
-          throws ODKEntityPersistException,
+  public TableEntry createTable(String tableId, String tableKey, String dbTableName,
+      TableType type, String tableIdAccessControls, List<Column> columns,
+      List<OdkTablesKeyValueStoreEntry> kvsEntries) throws ODKEntityPersistException,
       ODKDatastoreException, TableAlreadyExistsException {
-	Validate.notNull(tableId);
+    Validate.notNull(tableId);
     Validate.notEmpty(tableId);
-	Validate.notNull(tableKey);
+    Validate.notNull(tableKey);
     Validate.notEmpty(tableKey);
-	Validate.notNull(dbTableName);
+    Validate.notNull(dbTableName);
     Validate.notEmpty(dbTableName);
     Validate.notNull(type);
     // tableIdAccessControls can be null.
@@ -268,42 +233,58 @@ public class TableManager {
     // db, if any.
 
     // TODO do appropriate checking for metadata issues. We need to worry about
-    // dbName and  the displayName.
+    // dbName and the displayName.
 
     // create table. "entities" will store all of the things we will need to
     // persist into the datastore for the table to truly be created.
-    List<Entity> entities = new ArrayList<Entity>();
+    Sequencer sequencer = new Sequencer(cc);
 
-    Entity entry = creator.newTableEntryEntity(tableId, cc);
-    entities.add(entry);
+    String propertiesEtag = CommonFieldsBase.newUri();
+    String aprioriDataSequenceValue = sequencer.getNextSequenceValue();
+    DbTableEntryEntity tableEntry = creator.newTableEntryEntity(tableId, tableKey, propertiesEtag,
+        aprioriDataSequenceValue, cc);
 
-    Entity tableDefinition = creator.newTableDefinitionEntity(tableId,
-        tableKey, dbTableName, type, tableIdAccessControls, cc);
-    entities.add(tableDefinition);
+    DbTableDefinitionsEntity tableDefinition = creator.newTableDefinitionEntity(tableId,
+        propertiesEtag, dbTableName, type, tableIdAccessControls, cc);
 
+    List<DbColumnDefinitionsEntity> colDefs = new ArrayList<DbColumnDefinitionsEntity>();
     for (Column column : columns) {
-      entities.add(creator.newColumnEntity(tableId, column, cc));
+      colDefs.add(creator.newColumnEntity(tableId, propertiesEtag, column, cc));
     }
 
     // SS: I think the DbTableProperties table should be phased out.
-    //Entity properties = creator.newTablePropertiesEntity(tableId, tableName, metadata, cc);
-    //entities.add(properties);
+    // Entity properties = creator.newTablePropertiesEntity(tableId, tableName,
+    // metadata, cc);
+    // entities.add(properties);
 
     if (kvsEntries == null) {
       kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     }
+
+    List<DbKeyValueStoreEntity> kvs = new ArrayList<DbKeyValueStoreEntity>();
     for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
-      entities.add(creator.newKeyValueStoreEntity(kvsEntry, cc));
+      kvs.add(creator.newKeyValueStoreEntity(kvsEntry, propertiesEtag, cc));
     }
 
-    Entity ownerAcl = creator.newTableAclEntity(tableId,
-        new Scope(Scope.Type.USER, cc.getCurrentUser().getEmail()),
-        TableRole.OWNER, cc);
-    entities.add(ownerAcl);
+    DbTableAclEntity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER, cc
+        .getCurrentUser().getEmail()), TableRole.OWNER, cc);
 
-    Relation.putEntities(entities, cc);
+    // write the table and column definitions and kvs values
+    tableDefinition.put(cc);
+    for (DbColumnDefinitionsEntity e : colDefs) {
+      e.put(cc);
+    }
+    for (DbKeyValueStoreEntity e : kvs) {
+      e.put(cc);
+    }
 
-    return converter.toTableEntry(entry, tableKey);
+    // write the initial ACL
+    ownerAcl.put(cc);
+
+    // write the table entry record so everything is discoverable
+    tableEntry.put(cc);
+
+    return converter.toTableEntry(tableEntry);
   }
 
   /**
@@ -321,34 +302,46 @@ public class TableManager {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
-    List<Entity> entities = new ArrayList<Entity>();
+    DbTableEntryEntity tableEntry = DbTableEntry.getTableIdEntry(tableId, cc);
 
-    Entity entry = DbTableEntry.getRelation(cc).getEntity(tableId, cc);
-    entities.add(entry);
+    String propertiesEtag = tableEntry.getPropertiesETag();
 
-    List<Entity> columns = DbColumnDefinitions.query(tableId, cc);
-    entities.addAll(columns);
+    List<DbColumnDefinitionsEntity> columns = DbColumnDefinitions
+        .query(tableId, propertiesEtag, cc);
 
-    Entity definitionEntity = DbTableDefinitions.getDefinition(tableId, cc);
-    entities.add(definitionEntity);
+    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag,
+        cc);
 
-    List<Entity> acls = DbTableAcl.query(tableId, cc);
-    entities.addAll(acls);
+    DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
+        propertiesEtag, cc);
 
-    Relation table = DbTable.getRelation(tableId, cc);
-    Relation logTable = DbLogTable.getRelation(tableId, cc);
+    List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
 
-    LockTemplate dataLock =
-        new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
-    LockTemplate propsLock =
-        new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    DbTable table = DbTable.getRelation(tableId, propertiesEtag, cc);
+    DbLogTable logTable = DbLogTable.getRelation(tableId, propertiesEtag, cc);
+
+    LockTemplate dataLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
     try {
       dataLock.acquire();
       propsLock.acquire();
-      Relation.deleteEntities(entities, cc);
+      // TODO: this is problematic -- should ensure only owner ACL is retained
+      // and all others are removed, then remove the table entry???
+      for (DbTableAclEntity acl : acls) {
+        acl.delete(cc);
+      }
+      // removal makes table id no longer visible.
+      tableEntry.delete(cc);
+      // Everything else is keyed off of table id
+      for (DbColumnDefinitionsEntity colDef : columns) {
+        colDef.delete(cc);
+      }
+      for (DbKeyValueStoreEntity kvs : kvsEntries) {
+        kvs.delete(cc);
+      }
+      definitionEntity.delete(cc);
       table.dropRelation(cc);
       logTable.dropRelation(cc);
-      DbKeyValueStore.clearAllEntries(tableId, cc);
     } finally {
       propsLock.release();
       dataLock.release();

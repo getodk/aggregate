@@ -50,7 +50,7 @@ public class Column implements Serializable {
    * This must be a name() of one of Tables's ColumnTypes.
    */
   @Attribute(required = false)
-  private String elementType; 
+  private String elementType;
 
   @Attribute(required = false)
   private String listChildElementKeys;
@@ -82,14 +82,14 @@ public class Column implements Serializable {
    */
   public Column(final String tableId, final String elementKey,
       final String elementName, final String elementType,
-      final String listChildElementKeys, final int isPersisted,
+      final String listChildElementKeys, final Boolean isPersisted,
       final String joins) {
     this.tableId = tableId;
     this.elementKey = elementKey;
     this.elementName = elementName;
     this.elementType = elementType;
     this.listChildElementKeys = listChildElementKeys;
-    this.isPersisted = isPersisted;
+    this.isPersisted = isPersisted ? 1 : 0;
     this.joins = joins;
   }
 

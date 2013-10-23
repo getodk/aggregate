@@ -36,6 +36,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -98,6 +99,7 @@ public class DataManagerTest {
       Row expected = rows.get(i);
       Row actual = actualRows.get(i);
       expected.setRowEtag(actual.getRowEtag());
+      expected.setDataEtagAtModification(actual.getDataEtagAtModification());
       expected.setCreateUser(actual.getCreateUser());
       expected.setLastUpdateUser(actual.getLastUpdateUser());
     }
@@ -188,6 +190,7 @@ public class DataManagerTest {
     Row actual = dm.updateRow(expected);
     assertFalse(expected.getRowEtag().equals(actual.getRowEtag()));
     expected.setRowEtag(actual.getRowEtag());
+    expected.setDataEtagAtModification(actual.getDataEtagAtModification());
     assertEquals(expected, actual);
   }
 
@@ -196,7 +199,7 @@ public class DataManagerTest {
       ODKDatastoreException, ODKTaskLockException, EtagMismatchException, BadColumnNameException {
     rows = dm.insertRows(rows);
     Row row = rows.get(0);
-    row.setRowEtag(Long.toString(System.currentTimeMillis()));
+    row.setRowEtag(CommonFieldsBase.newUri());
     dm.updateRow(row);
   }
 
@@ -204,7 +207,7 @@ public class DataManagerTest {
   public void testUpdateRowDoesNotExist() throws ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException, EtagMismatchException, BadColumnNameException {
     Row row = rows.get(0);
-    row.setRowEtag(Long.toString(System.currentTimeMillis()));
+    row.setRowEtag(CommonFieldsBase.newUri());
     dm.updateRow(row);
   }
 
@@ -218,6 +221,7 @@ public class DataManagerTest {
         Maps.<String, String> newHashMap());
     actual = dm.updateRow(actual);
     expected.setRowEtag(actual.getRowEtag());
+    expected.setDataEtagAtModification(actual.getDataEtagAtModification());
     assertEquals(expected.getFilterScope(), actual.getFilterScope());
   }
 
@@ -232,6 +236,7 @@ public class DataManagerTest {
     actual.setFilterScope(Scope.EMPTY_SCOPE);
     actual = dm.updateRow(actual);
     row.setRowEtag(actual.getRowEtag());
+    row.setDataEtagAtModification(actual.getDataEtagAtModification());
     assertEquals(Scope.EMPTY_SCOPE, actual.getFilterScope());
   }
 
