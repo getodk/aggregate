@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Ignore;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.Column.ColumnType;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 
 @Ignore
@@ -37,9 +36,9 @@ public class T {
     public static final String name = "name";
     public static final String age = "age";
     public static final String weight = "weight";
-    public static final Column column_name = new Column(tableId, name, name, ColumnType.STRING, null, 1, null);
-    public static final Column column_age = new Column(tableId, age, age, ColumnType.INTEGER, null, 1, null);
-    public static final Column column_weight = new Column(tableId, weight, weight, ColumnType.INTEGER, null, 1, null);
+    public static final Column column_name = new Column(tableId, name, name, "STRING", null, true, null);
+    public static final Column column_age = new Column(tableId, age, age, "INTEGER", null, true, null);
+    public static final Column column_weight = new Column(tableId, weight, weight, "INTEGER", null, true, null);
   }
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"),

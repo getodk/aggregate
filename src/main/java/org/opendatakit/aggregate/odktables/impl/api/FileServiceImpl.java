@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.UUID;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -38,28 +37,28 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.common.ermodel.BlobEntitySet;
-import org.opendatakit.common.ermodel.simple.Entity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 public class FileServiceImpl implements FileService {
-  
+
   private static final Log LOGGER = LogFactory.getLog(FileServiceImpl.class);
-  
-  /** 
-   * String to stand in for those things in the app's root directory. 
+
+  /**
+   * String to stand in for those things in the app's root directory.
    */
-  public static final String DEFAULT_TABLE_ID = null;
-  
+  public static final String NO_TABLE_ID = null;
+
   private static final String PATH_DELIMITER = "/";
-  
-  /** 
+
+  /**
    * The name of the folder that contains the files associated with a table in
-   * an app. 
+   * an app.
    * @see #getTableIdFromPathSegments(List)
    */
   private static final String TABLES_FOLDER = "tables";
@@ -67,18 +66,18 @@ public class FileServiceImpl implements FileService {
   @Override
   @GET
   @Path("{filePath:.*}") // because we want to get the whole path
-  public void getFile(@Context ServletContext servletContext, 
+  public void getFile(@Context ServletContext servletContext,
       @PathParam("filePath") List<PathSegment> segments,
-      @Context HttpServletRequest req, @Context HttpServletResponse resp) 
+      @Context HttpServletRequest req, @Context HttpServletResponse resp)
       throws IOException {
     // Basing this off of OdkTablesTableFileDownloadServlet, which in turn was
     // based off of XFormsDownloadServlet.
-    
-    // First we need to get the app id and the table id from the path. We're 
+
+    // First we need to get the app id and the table id from the path. We're
     // going to be assuming that you're passing the entire path of the file you
     // want to get. By convention, this is: appid/tableid/the/rest/of/path.
     // So we'll reclaim the tidbits and then reconstruct the entire path.
-    // Note that even if you're getting general files, like perhaps the jquery 
+    // Note that even if you're getting general files, like perhaps the jquery
     // library, you will be sure to have an appid and the table name, so these
     // calls should never fail. Try to enforce this, however.
     if (segments.size() <= 1) {
@@ -90,29 +89,29 @@ public class FileServiceImpl implements FileService {
     String tableId = getTableIdFromPathSegments(segments);
     // Now construct the whole path.
     String wholePath = constructPathFromSegments(segments);
-    
+
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
-    String downloadAsAttachmentString = 
+    String downloadAsAttachmentString =
         req.getParameter(FileService.PARAM_AS_ATTACHMENT);
     byte[] fileBlob;
     String contentType;
     Long contentLength;
     try {
-      List<Entity> entities = DbTableFileInfo.queryForEntity(appId, tableId, 
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(tableId,
           wholePath, cc);
       if (entities.size() > 1) {
         Log log = LogFactory.getLog(DbTableFileInfo.class);
-        log.error("more than one entity for appId: " + appId + ", tableId: " 
+        log.error("more than one entity for appId: " + appId + ", tableId: "
             + tableId + ", pathToFile: " + wholePath);
       } else if (entities.size() < 1) {
-        resp.sendError(HttpServletResponse.SC_NOT_FOUND, 
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND,
             "no file found for: " + wholePath);
         return;
       }
-      Entity dbTableFileInfoRow = entities.get(0);
+      DbTableFileInfoEntity dbTableFileInfoRow = entities.get(0);
       String uri = dbTableFileInfoRow.getId();
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
-      BlobEntitySet blobEntitySet = 
+      BlobEntitySet blobEntitySet =
           dbTableFiles.getBlobEntitySet(uri, cc);
       // We should only ever have one, as wholePath is the primary key.
       if (blobEntitySet.getAttachmentCount(cc) > 1) {
@@ -143,7 +142,7 @@ public class FileServiceImpl implements FileService {
       if (contentLength != null) {
         resp.setContentType(contentType);
       }
-      if (downloadAsAttachmentString != null 
+      if (downloadAsAttachmentString != null
           && !"".equals(downloadAsAttachmentString)) {
         // Set the filename we're downloading to the disk.
         resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; " +
@@ -161,15 +160,15 @@ public class FileServiceImpl implements FileService {
   @POST
   @Path("{filePath:.*}") // because we want to get the whole path
   public void putFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, 
-      @Context HttpServletRequest req, @Context HttpServletResponse resp) 
+      @PathParam("filePath") List<PathSegment> segments,
+      @Context HttpServletRequest req, @Context HttpServletResponse resp)
       throws IOException {
     if (segments.size() <= 1) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
           FileService.ERROR_MSG_INSUFFICIENT_PATH);
       return;
     }
-    // TODO This stuff all needs to be handled in the log table somehow, and 
+    // TODO This stuff all needs to be handled in the log table somehow, and
     // it currently isn't.
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
     // First parse the url to get the correct app and table ids.
@@ -179,7 +178,7 @@ public class FileServiceImpl implements FileService {
       // For now we'll just do tables. eventually we want all apps.
       // TODO: incorporate checking for apps
       // TODO: incorporate checking for access control
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
           FileService.ERROR_MSG_UNRECOGNIZED_APP_ID + appId);
     }
     String wholePath = constructPathFromSegments(segments);
@@ -190,47 +189,50 @@ public class FileServiceImpl implements FileService {
       byte[] fileBlob = IOUtils.toByteArray(is);
       // We are going to store the file in two tables: 1) a user-friendly table
       // that relates an app and table id to the name of a file; 2) a table
-      // that holds the actual blob. 
+      // that holds the actual blob.
       //
-      // Table 1 is represented by DbTableFileInfo. Each row of this table 
+      // Table 1 is represented by DbTableFileInfo. Each row of this table
       // contains a uri, appid, tableid, and pathToFile.
       // Table 2 is a BlobEntitySet. The top level URI of this blob entity set
       // is the uri from table 1. Each blob set here has a single attachment
-      // count of 1--the blob of the file itself. The pathToFile of this 
-      // attachment is null. 
+      // count of 1--the blob of the file itself. The pathToFile of this
+      // attachment is null.
       //
-      // So, now that we have retrieved the file from the request, we have two 
+      // So, now that we have retrieved the file from the request, we have two
       // things to do: 1) create an entry in the user-friendly table so we can
       // bet a uri. 2) add the file to the blob entity set, using the top level
       // uri as the row uri from table 1.
       //
       // 1) Create an entry in the user friendly table.
       EntityCreator ec = new EntityCreator();
-      Entity tableFileInfoRow = ec.newTableFileInfoEntity(appId, tableId, 
+      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(tableId,
           wholePath, cc);
       String rowUri = tableFileInfoRow.getId();
-      tableFileInfoRow.put(cc);
-      // 2) Put the blob in the datastore. 
+
+      // 2) Put the blob in the datastore.
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
-      // Although this is called an entity set, it in fact represents a single 
-      // file, because we have chosen to use it this way in this case. For more 
-      // information see the docs in DbTableFiles. We'll use the uri of the 
+      // Although this is called an entity set, it in fact represents a single
+      // file, because we have chosen to use it this way in this case. For more
+      // information see the docs in DbTableFiles. We'll use the uri of the
       // corresponding row in the DbTableFileInfo table.
       BlobEntitySet instance = dbTableFiles.newBlobEntitySet(rowUri, cc);
       // TODO: this being set to true is probably where some sort of versioning
       // should happen.
       instance.addBlob(fileBlob, contentType, null, true, cc);
 
+      // 3) persist the user-friendly table entry about the blob
+      tableFileInfoRow.put(cc);
+
       resp.setStatus(HttpServletResponse.SC_CREATED);
       resp.addHeader("Location", wholePath);
     } catch (ODKDatastoreException e) {
-      LOGGER.error(("ODKTables file upload persistence error: " 
+      LOGGER.error(("ODKTables file upload persistence error: "
           + e.getMessage()));
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
     }
   }
-  
+
   /**
    * Construct the path for the file. This is the entire path excluding the app
    * id.
@@ -240,8 +242,8 @@ public class FileServiceImpl implements FileService {
   private String constructPathFromSegments(List<PathSegment> segments) {
     // Now construct up the path from the segments.
     // We are NOT going to include the app id. Therefore if you upload a file
-    // with a path of appid/myDir/myFile.html, the path will be stored as 
-    // myDir/myFile.html. This is so that when you get the filename on the 
+    // with a path of appid/myDir/myFile.html, the path will be stored as
+    // myDir/myFile.html. This is so that when you get the filename on the
     // manifest, it won't matter what is the root directory of your app on your
     // device. Otherwise you might have to strip the first path segment or do
     // something similar.
@@ -261,15 +263,15 @@ public class FileServiceImpl implements FileService {
     String wholePath = sb.toString();
     return wholePath;
   }
-  
+
   /**
-   * Retrieve the table id given the path. The first segment (position 0) is 
+   * Retrieve the table id given the path. The first segment (position 0) is
    * known to be the app id, as all files must be associated with an app id.
-   * Not all files must be associated with a table, however, so it parses 
+   * Not all files must be associated with a table, however, so it parses
    * to find the table id. Otherwise it returns the {@link DEFAULT_TABLE_ID}.
    * <p>
    * The convention is that any table id must be of the form:
-   * /appid/tables/tableid. So the 2nd position (0 indexed) will be the table 
+   * /appid/tables/tableid. So the 2nd position (0 indexed) will be the table
    * idea if the first position is "tables".
    * @param segments
    * @return
@@ -277,15 +279,15 @@ public class FileServiceImpl implements FileService {
   private String getTableIdFromPathSegments(List<PathSegment> segments) {
     String tableId;
     if (segments.size() < 4) {
-      // Then we aren't a file name, b/c we're assuming it must be 
+      // Then we aren't a file name, b/c we're assuming it must be
       // appid/tables/tableid/file
-      tableId = DEFAULT_TABLE_ID;
+      tableId = NO_TABLE_ID;
     } else if (segments.get(1).toString().equals(TABLES_FOLDER)){
       // We have to see if it could be a tableId. If it can, then we assume it
       // is a table id. Otherwise we give it the default tableId.
       tableId = segments.get(2).toString();
     } else {
-      tableId = DEFAULT_TABLE_ID;
+      tableId = NO_TABLE_ID;
     }
     return tableId;
   }

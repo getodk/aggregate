@@ -19,64 +19,156 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.common.ermodel.simple.Entity;
-import org.opendatakit.common.ermodel.simple.Query;
-import org.opendatakit.common.ermodel.simple.Relation;
+import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.Query;
+import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
-public class DbTableAcl {
+/**
+ * Unlike the other tables, this is not updated atomically through the use of
+ * the propertiesEtag.
+ *
+ * Instead, all changes are immediate and apply to all propertiesEtag and
+ * dataEtag versions of the table and its data.
+ *
+ * If we eventually do bulk updates from the UI, e.g., setAcls( List&lt;Acl&gt;
+ * ) then we will need to craft the updates to first add privileges then to
+ * remove the old privileges so that we never make an object inaccessible.
+ *
+ * @author mitchellsundt@gmail.com
+ *
+ */
+public class DbTableAcl extends Relation {
 
-  public static final String TABLE_ID = "TABLE_ID";
-  public static final String SCOPE_TYPE = "SCOPE_TYPE";
-  public static final String SCOPE_VALUE = "SCOPE_VALUE";
-  public static final String ROLE = "ROLE";
+  private DbTableAcl(String namespace, String tableName, List<DataField> fields, CallingContext cc)
+      throws ODKDatastoreException {
+    super(namespace, tableName, fields, cc);
+  }
+
+  private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false).setIndexable(IndexType.HASH);
+  private static final DataField SCOPE_TYPE = new DataField("SCOPE_TYPE", DataType.STRING, false);
+  private static final DataField SCOPE_VALUE = new DataField("SCOPE_VALUE", DataType.STRING, true);
+  private static final DataField ROLE = new DataField("ROLE", DataType.STRING, false);
 
   private static final String RELATION_NAME = "TABLE_ACL";
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(new DataField(TABLE_ID, DataType.STRING, false).setIndexable(IndexType.HASH));
-    dataFields.add(new DataField(SCOPE_TYPE, DataType.STRING, false));
-    dataFields.add(new DataField(SCOPE_VALUE, DataType.STRING, true));
-    dataFields.add(new DataField(ROLE, DataType.STRING, false));
+    dataFields.add(TABLE_ID);
+    dataFields.add(SCOPE_TYPE);
+    dataFields.add(SCOPE_VALUE);
+    dataFields.add(ROLE);
   }
 
-  private static Relation theRelation = null;
+  public static class DbTableAclEntity {
+    Entity e;
 
-  public static synchronized Relation getRelation(CallingContext cc) throws ODKDatastoreException {
-    if ( theRelation == null) {
-      Relation relation = new Relation(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
+    DbTableAclEntity(Entity e) {
+      this.e = e;
+    }
+
+    // Primary Key
+    public String getId() {
+      return e.getId();
+    }
+
+    public void put(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
+      e.put(cc);
+    }
+
+    public void delete(CallingContext cc) throws ODKDatastoreException {
+      e.delete(cc);
+    }
+
+    // Accessors
+
+    public String getTableId() {
+      return e.getString(TABLE_ID);
+    }
+
+    public void setTableId(String value) {
+      e.set(TABLE_ID, value);
+    }
+
+    public String getScopeType() {
+      return e.getString(SCOPE_TYPE);
+    }
+
+    public void setScopeType(String value) {
+      e.set(SCOPE_TYPE, value);
+    }
+
+    public String getScopeValue() {
+      return e.getString(SCOPE_VALUE);
+    }
+
+    public void setScopeValue(String value) {
+      e.set(SCOPE_VALUE, value);
+    }
+
+    public String getRole() {
+      return e.getString(ROLE);
+    }
+
+    public void setRole(String value) {
+      e.set(ROLE, value);
+    }
+  }
+
+  private static DbTableAcl theRelation = null;
+
+  private static synchronized DbTableAcl getRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (theRelation == null) {
+      DbTableAcl relation = new DbTableAcl(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
       theRelation = relation;
     }
     return theRelation;
   }
 
-  public static List<Entity> query(String tableId, CallingContext cc) throws ODKDatastoreException {
-    Query query = getRelation(cc).query("DbTableAcl.query()", cc);
-    query.equal(DbTableAcl.TABLE_ID, tableId);
-    return query.execute();
+  /**
+   * Create a new row in this relation. The row is not yet persisted.
+   *
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static DbTableAclEntity createNewEntity(CallingContext cc) throws ODKDatastoreException {
+    return new DbTableAclEntity(getRelation(cc).newEntity(cc));
   }
 
-  public static List<Entity> query(String tableId, String scopeType, CallingContext cc)
+  public static List<DbTableAclEntity> queryTableIdAcls(String tableId, CallingContext cc)
       throws ODKDatastoreException {
+    Query query = getRelation(cc).query("DbTableAcl.query()", cc);
+    query.equal(DbTableAcl.TABLE_ID, tableId);
+
+    List<Entity> list = query.execute();
+    List<DbTableAclEntity> results = new ArrayList<DbTableAclEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableAclEntity(e));
+    }
+    return results;
+  }
+
+  public static List<DbTableAclEntity> queryTableIdScopeTypeAcls(String tableId, String scopeType,
+      CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbTableAcl.query()", cc);
     query.equal(DbTableAcl.TABLE_ID, tableId);
     query.equal(DbTableAcl.SCOPE_TYPE, scopeType);
-    return query.execute();
-  }
 
-  public static List<Entity> queryNotEqual(TableRole role, CallingContext cc)
-      throws ODKDatastoreException {
-    Query query = getRelation(cc).query("DbTableAcl.query(TableRole)", cc);
-    query.notEqual(ROLE, role.name());
-
-    return query.execute();
+    List<Entity> list = query.execute();
+    List<DbTableAclEntity> results = new ArrayList<DbTableAclEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableAclEntity(e));
+    }
+    return results;
   }
 
   /**
@@ -89,14 +181,14 @@ public class DbTableAcl {
    * @return the acl entity, or null if none exists
    * @throws ODKDatastoreException
    */
-  public static Entity getAcl(String tableId, String scopeType, String scopeValue, CallingContext cc)
-      throws ODKDatastoreException {
+  public static DbTableAclEntity queryTableIdScopeTypeValueAcl(String tableId, String scopeType,
+      String scopeValue, CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbTableAcl.getAcl()", cc);
     query.equal(DbTableAcl.TABLE_ID, tableId);
     query.equal(DbTableAcl.SCOPE_TYPE, scopeType);
     query.equal(DbTableAcl.SCOPE_VALUE, scopeValue);
     Entity acl = query.get();
 
-    return acl;
+    return (acl == null) ? null : new DbTableAclEntity(acl);
   }
 }

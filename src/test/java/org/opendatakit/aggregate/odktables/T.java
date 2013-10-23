@@ -71,11 +71,11 @@ public class T {
     public static final String columnType_String = "colTypeString";
     public static final String columnType_Int = "colTypeInt";
     public static final Column column_name = new Column(name, name + elementKey_suffix, name
-        + elementName_suffix, "NONE", null, 1, null);
+        + elementName_suffix, "NONE", null, true, null);
     public static final Column column_age = new Column(age, age + elementKey_suffix, age
-        + elementName_suffix, "NONE", null, 1, null);
+        + elementName_suffix, "NONE", null, true, null);
     public static final Column column_weight = new Column(weight, weight + elementKey_suffix,
-        weight + elementName_suffix, "NONE", null, 1, null);
+        weight + elementName_suffix, "NONE", null, true, null);
   }
 
   public static enum Data {

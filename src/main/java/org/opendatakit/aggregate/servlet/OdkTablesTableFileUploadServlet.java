@@ -18,44 +18,21 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
-import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
-import org.opendatakit.aggregate.odktables.relation.EntityConverter;
-import org.opendatakit.aggregate.odktables.relation.EntityCreator;
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.parser.MultiPartFormData;
-import org.opendatakit.aggregate.parser.MultiPartFormItem;
-import org.opendatakit.common.ermodel.BlobEntitySet;
-import org.opendatakit.common.ermodel.simple.Entity;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.utils.HtmlUtil;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
-import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * This is the servlet that handles the uploading of files that are

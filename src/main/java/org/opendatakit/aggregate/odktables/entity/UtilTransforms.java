@@ -61,10 +61,10 @@ public class UtilTransforms {
    * Transform the object into a server-side Column object.
    */
   public static Column transform(ColumnClient client) {
-    Column transformedColumn = new Column(client.getTableId(), 
-        client.getElementKey(), client.getElementName(), 
+    Column transformedColumn = new Column(client.getTableId(),
+        client.getElementKey(), client.getElementName(),
         client.getElementType(), client.getListChildElementKeys(),
-        client.getIsPersisted(), client.getJoins());
+        (client.getIsPersisted() != 0), client.getJoins());
     return transformedColumn;
   }
 
