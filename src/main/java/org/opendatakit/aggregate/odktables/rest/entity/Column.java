@@ -40,9 +40,23 @@ public class Column implements Serializable {
   @Attribute(required = true)
   private String tableId;
 
+  /**
+   * The fully qualified key for this element. If this is
+   * a persisted field, then this is the element's database
+   * column name. For composite types whose elements are
+   * individually persisted (e.g., geopoint), this would be
+   * the elementName of the geopoint (e.g., 'myLocation'
+   * concatenated with '_' and this elementName (e.g.,
+   * 'myLocation_latitude').
+   */
   @Attribute(required = true)
   private String elementKey;
 
+  /**
+   * The name by which this element is referred. For composite
+   * types whose elements are individually persisted (e.g., geopoint),
+   * this would be simply 'latitude'
+   */
   @Attribute(required = true)
   private String elementName;
 
@@ -57,9 +71,6 @@ public class Column implements Serializable {
 
   @Attribute(required = true)
   private int isPersisted;
-
-  @Attribute(required = false)
-  private String joins;
 
   @SuppressWarnings("unused")
   private Column() {}
@@ -78,19 +89,16 @@ public class Column implements Serializable {
    * @param elementType
    * @param listChildElementKeys
    * @param isPersisted
-   * @param joins
    */
   public Column(final String tableId, final String elementKey,
       final String elementName, final String elementType,
-      final String listChildElementKeys, final Boolean isPersisted,
-      final String joins) {
+      final String listChildElementKeys, final Boolean isPersisted) {
     this.tableId = tableId;
     this.elementKey = elementKey;
     this.elementName = elementName;
     this.elementType = elementType;
     this.listChildElementKeys = listChildElementKeys;
     this.isPersisted = isPersisted ? 1 : 0;
-    this.joins = joins;
   }
 
   public String getTableId() {
@@ -120,10 +128,6 @@ public class Column implements Serializable {
     return this.isPersisted;
   }
 
-  public String getJoins() {
-    return this.joins;
-  }
-
   @Override
   public String toString() {
     return "Column(tableId=" + getTableId()
@@ -132,7 +136,6 @@ public class Column implements Serializable {
         + ", elementType= " + this.getElementType()
         + ", listChildElementKeys=" + this.getListChildElementKeys()
         + ", isPersisted=" + this.getIsPersisted()
-        + ", joins=" + this.getJoins()
         + ")";
   }
 
@@ -146,7 +149,6 @@ public class Column implements Serializable {
     result = prime * result + ((elementType == null) ? 0 : elementType.hashCode());
     result = prime * result + ((listChildElementKeys == null) ? 0 : listChildElementKeys.hashCode());
     result = prime * result + isPersisted;
-    result = prime * result + ((joins == null) ? 0 : joins.hashCode());
     return result;
   }
 
@@ -167,7 +169,6 @@ public class Column implements Serializable {
         && (elementName == null ? other.elementName == null : elementName.equals(other.elementName))
         && (elementType == null ? other.elementType == null : elementType.equals(other.elementType))
         && (listChildElementKeys == null ? other.listChildElementKeys == null : listChildElementKeys.equals(other.listChildElementKeys))
-        && (isPersisted == other.isPersisted)
-        && (joins == null ? other.joins == null : joins.equals(other.joins));
+        && (isPersisted == other.isPersisted);
   }
 }

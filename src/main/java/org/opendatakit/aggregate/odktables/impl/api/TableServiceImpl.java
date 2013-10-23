@@ -47,7 +47,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -95,14 +94,12 @@ public class TableServiceImpl implements TableService {
     // TODO: add access control stuff
     String tableKey = definition.getTableKey();
     String dbTableName = definition.getDbTableName();
-    TableType type = definition.getType();
-    String tableIdAccessControls = definition.getTableIdAccessControls();
     List<Column> columns = definition.getColumns();
     // TODO: need a method to init a default minimal list of kvs entries.
     List<OdkTablesKeyValueStoreEntry> kvsEntries =
         new ArrayList<OdkTablesKeyValueStoreEntry>();
-    TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
-        tableIdAccessControls, columns, kvsEntries);
+    TableEntry entry = tm.createTable(tableId, tableKey, dbTableName,
+        columns, kvsEntries);
     TableResource resource = getResource(entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return resource;

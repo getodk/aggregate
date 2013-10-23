@@ -73,7 +73,6 @@ public class DbColumnDefinitions extends Relation {
       DataType.STRING, true, 4096L);
   private static final DataField IS_PERSISTED = new DataField("IS_PERSISTED", DataType.BOOLEAN,
       false);
-  private static final DataField JOINS = new DataField("JOINS", DataType.STRING, true, 12288L);
 
   private static final List<DataField> dataFields;
   static {
@@ -85,7 +84,6 @@ public class DbColumnDefinitions extends Relation {
     dataFields.add(ELEMENT_TYPE);
     dataFields.add(LIST_CHILD_ELEMENT_KEYS);
     dataFields.add(IS_PERSISTED);
-    dataFields.add(JOINS);
   }
 
   public static class DbColumnDefinitionsEntity {
@@ -166,13 +164,6 @@ public class DbColumnDefinitions extends Relation {
       e.set(IS_PERSISTED, value);
     }
 
-    public String getJoins() {
-      return e.getString(JOINS);
-    }
-
-    public void setJoins(String value) {
-      e.set(JOINS, value);
-    }
   }
 
   private static DbColumnDefinitions relation = null;

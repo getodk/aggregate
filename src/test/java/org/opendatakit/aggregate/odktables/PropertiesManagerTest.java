@@ -51,8 +51,7 @@ public class PropertiesManagerTest {
     this.tm = new TableManager(cc);
 
     TableEntry te = tm.createTable(tableId, T.tableKey, T.dbTableName,
-        T.tableType, T.tableIdAccessControls, T.columns,
-        T.kvsEntries);
+        T.columns, T.kvsEntries);
     this.ePropertiesTag = te.getPropertiesEtag();
 
     this.pm = new PropertiesManager(tableId, cc);
