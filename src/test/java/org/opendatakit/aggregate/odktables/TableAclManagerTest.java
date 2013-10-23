@@ -52,8 +52,7 @@ public class TableAclManagerTest {
     this.tm = new TableManager(cc);
 
     tm.createTable(tableId, T.tableKey, T.dbTableName,
-        T.tableType, T.tableIdAccessControls, T.columns,
-        T.kvsEntries);
+        T.columns, T.kvsEntries);
 
     this.scope = new Scope(Scope.Type.USER, T.user);
     this.role = TableRole.FILTERED_READER;

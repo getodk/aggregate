@@ -96,13 +96,34 @@ public class ServerOdkTablesUtil {
       // from the server.
       List<OdkTablesKeyValueStoreEntry> kvsEntries =
           new ArrayList<OdkTablesKeyValueStoreEntry>();
+      OdkTablesKeyValueStoreEntry tt;
+      tt = new OdkTablesKeyValueStoreEntry();
+      tt.tableId = tableId;
+      tt.partition = "Table";
+      tt.aspect = "default";
+      tt.key = "tableType";
+      tt.type = "text";
+      tt.value = type.name();
+      kvsEntries.add(tt);
+
+      if ( tableIdAccessControls != null ) {
+        tt = new OdkTablesKeyValueStoreEntry();
+        tt.tableId = tableId;
+        tt.partition = "Table";
+        tt.aspect = "default";
+        tt.key = "accessControlTableId";
+        tt.type = "text";
+        tt.value = tableIdAccessControls;
+        kvsEntries.add(tt);
+      }
+
       List<ColumnClient> columns = definition.getColumns();
       List<Column> columnsServer = new ArrayList<Column>();
       for (ColumnClient column : columns) {
         columnsServer.add(UtilTransforms.transform(column));
       }
-      TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
-          tableIdAccessControls, columnsServer, kvsEntries);
+      TableEntry entry = tm.createTable(tableId, tableKey, dbTableName,
+          columnsServer, kvsEntries);
       TableEntryClient entryClient = UtilTransforms.transform(entry);
       logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
       return entryClient;

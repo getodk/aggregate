@@ -53,12 +53,6 @@ public class TableDefinition {
   @Element(name = "db_table_name", required = true)
   private String dbTableName;
 
-  @Element(name = "type", required = true)
-  private TableType type;
-
-  @Element(name = "table_id_access_controls", required = false)
-  private String tableIdAccessControls;
-
   /*
    * While not defined in DbTableDefinitions, this was originally how column
    * information was uploaded to the server, and will remain this way for now.
@@ -93,13 +87,11 @@ public class TableDefinition {
    *          id of the table holding access controls
    */
   public TableDefinition(final String tableId, final List<Column> columns, final String tableKey,
-      final String dbTableName, final TableType type, final String tableIdAccessControls) {
+      final String dbTableName) {
     this.tableId = tableId;
     this.columns = columns;
     this.tableKey = tableKey;
     this.dbTableName = dbTableName;
-    this.type = type;
-    this.tableIdAccessControls = tableIdAccessControls;
   }
 
   public String getTableId() {
@@ -114,14 +106,6 @@ public class TableDefinition {
     return this.columns;
   }
 
-  public TableType getType() {
-    return this.type;
-  }
-
-  public String getTableIdAccessControls() {
-    return this.tableIdAccessControls;
-  }
-
   public String getDbTableName() {
     return this.dbTableName;
   }
@@ -133,8 +117,7 @@ public class TableDefinition {
   @Override
   public String toString() {
     return "TableDefinition [tableId=" + tableId + ", columns=" + columns + ", tableKey="
-        + tableKey + ", dbTableName=" + dbTableName + ", type=" + type + ", tableIdAccessControls="
-        + tableIdAccessControls + "]";
+        + tableKey + ", dbTableName=" + dbTableName + "]";
   }
 
   @Override
@@ -144,9 +127,6 @@ public class TableDefinition {
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
     result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
     result = prime * result + ((dbTableName == null) ? 0 : dbTableName.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    result = prime * result
-        + ((tableIdAccessControls == null) ? 0 : tableIdAccessControls.hashCode());
     result = prime * result + ((columns == null) ? 0 : columns.hashCode());
     return result;
   }
@@ -166,9 +146,6 @@ public class TableDefinition {
     return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
         && (tableKey == null ? other.tableKey == null : tableKey.equals(other.tableKey))
         && (dbTableName == null ? other.dbTableName == null : dbTableName.equals(other.dbTableName))
-        && (type == null ? other.type == null : type.equals(other.type))
-        && (tableIdAccessControls == null ? other.tableIdAccessControls == null
-            : tableIdAccessControls.equals(other.tableIdAccessControls))
         && (columns == null ? other.columns == null : columns.equals(other.columns));
   }
 

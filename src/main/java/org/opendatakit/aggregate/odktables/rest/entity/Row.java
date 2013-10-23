@@ -35,7 +35,7 @@ public class Row {
 
   @Element(name = "etag", required = false)
   private String rowEtag;
-  
+
   @Element(name = "dataEtagAtModification", required=false)
   private String dataEtagAtModification;
 
@@ -67,19 +67,13 @@ public class Row {
    * OdkTables metadata column.
    */
   @Element(required = false)
-  private String instanceName;
-
-  /**
-   * OdkTables metadata column.
-   */
-  @Element(required = false)
   private String locale;
 
   /**
    * OdkTables metadata column.
    */
   @Element(required = false)
-  private String timestamp;
+  private String savepointTimestamp;
 
   @ElementMap(entry = "entry", key = "column", attribute = true, inline = true)
   private Map<String, String> values;
@@ -124,9 +118,8 @@ public class Row {
     this.values = new HashMap<String, String>();
     this.uriUser = null;
     this.formId = null;
-    this.instanceName = null;
     this.locale = null;
-    this.timestamp = null;
+    this.savepointTimestamp = null;
   }
 
   public String getRowId() {
@@ -136,7 +129,7 @@ public class Row {
   public String getRowEtag() {
     return this.rowEtag;
   }
-  
+
   public String getDataEtagAtModification() {
     return this.dataEtagAtModification;
   }
@@ -168,7 +161,7 @@ public class Row {
   public void setRowEtag(final String rowEtag) {
     this.rowEtag = rowEtag;
   }
-  
+
   public void setDataEtagAtModification(final String dataEtagAtModification) {
     this.dataEtagAtModification = dataEtagAtModification;
   }
@@ -201,16 +194,12 @@ public class Row {
     return this.formId;
   }
 
-  public String getInstanceName() {
-    return this.instanceName;
-  }
-
   public String getLocale() {
     return this.locale;
   }
 
-  public String getTimestamp() {
-    return this.timestamp;
+  public String getSavepointTimestamp() {
+    return this.savepointTimestamp;
   }
 
   public void setUriUser(String uriUser) {
@@ -219,10 +208,6 @@ public class Row {
 
   public void setFormId(String formId) {
     this.formId = formId;
-  }
-
-  public void setInstanceName(String instanceName) {
-    this.instanceName = instanceName;
   }
 
   public void setLocale(String locale) {
@@ -234,8 +219,8 @@ public class Row {
    *
    * @param timestamp
    */
-  public void setTimestamp(String timestamp) {
-    this.timestamp = timestamp;
+  public void setSavepointTimestamp(String savepointTimestamp) {
+    this.savepointTimestamp = savepointTimestamp;
   }
 
   /**
@@ -243,13 +228,13 @@ public class Row {
    *
    * @param timestamp
    */
-  public void setTimestamp(Date timestamp) {
+  public void setSavepointTimestamp(Date timestamp) {
     if ( timestamp == null ) {
-      this.timestamp = null;
+      this.savepointTimestamp = null;
     } else {
       DateTime dt = new DateTime(timestamp);
       DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-      this.timestamp = fmt.print(dt);
+      this.savepointTimestamp = fmt.print(dt);
     }
   }
 
@@ -259,7 +244,7 @@ public class Row {
     int result = 1;
     result = prime * result + ((rowId == null) ? 0 : rowId.hashCode());
     result = prime * result + ((rowEtag == null) ? 0 : rowEtag.hashCode());
-    result = prime * result + ((dataEtagAtModification == null) ? 
+    result = prime * result + ((dataEtagAtModification == null) ?
         0 : dataEtagAtModification.hashCode());
     result = prime * result + ((deleted) ? 0 : 1);
     result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
@@ -267,9 +252,8 @@ public class Row {
     result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
     result = prime * result + ((uriUser == null) ? 0 : uriUser.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
-    result = prime * result + ((instanceName == null) ? 0 : instanceName.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
-    result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+    result = prime * result + ((savepointTimestamp == null) ? 0 : savepointTimestamp.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
     return result;
   }
@@ -297,10 +281,8 @@ public class Row {
         && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
         && (uriUser == null ? other.uriUser == null : uriUser.equals(other.uriUser))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
-        && (instanceName == null ? other.instanceName == null : instanceName
-            .equals(other.instanceName))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
-        && (timestamp == null ? other.timestamp == null : timestamp.equals(other.timestamp))
+        && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp.equals(other.savepointTimestamp))
         && (values == null ? other.values == null : values.equals(other.values));
   }
 

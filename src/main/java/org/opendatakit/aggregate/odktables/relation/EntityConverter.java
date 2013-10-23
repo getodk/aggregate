@@ -38,7 +38,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -95,9 +94,8 @@ public class EntityConverter {
     String listChildElementKeys =
         entity.getListChildElementKeys();
     Boolean isPersisted = entity.getIsPersisted();
-    String joins = entity.getJoins();
     Column column = new Column(tableId, elementKey, elementName,
-        elementTypeStr, listChildElementKeys, isPersisted, joins);
+        elementTypeStr, listChildElementKeys, isPersisted);
     return column;
   }
 
@@ -151,11 +149,7 @@ public class EntityConverter {
     String tableId = definitionEntity.getTableId();
     String tableKey = entryEntity.getTableKey();
     String dbTableName = definitionEntity.getDbTableName();
-    String tableTypeStr = definitionEntity.getType();
-    TableType tableType = TableType.valueOf(tableTypeStr);
-    String tableIdAccessControls = definitionEntity.getTableIdAccessControls();
-    return new TableDefinition(tableId, null, tableKey, dbTableName, tableType,
-        tableIdAccessControls);
+    return new TableDefinition(tableId, null, tableKey, dbTableName);
   }
 
   public List<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
@@ -241,8 +235,8 @@ public class EntityConverter {
 
   /**
    * Convert a {@link DbTable} entity into a {@link Row}. The returned row
-   * will have the {@link DbTable} metadata columns such as timestamp and
-   * row_version set.
+   * will have the {@link DbTable} metadata columns such as
+   * _savepoint_timestamp and row_version set.
    *
    * @param entity
    *          the {@link DbTable} entity.
@@ -261,10 +255,8 @@ public class EntityConverter {
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
     row.setUriUser(entity.getString(TableConstants.URI_ACCESS_CONTROL.toUpperCase()));
     row.setFormId(entity.getString(TableConstants.FORM_ID.toUpperCase()));
-    row.setInstanceName(
-        entity.getString(TableConstants.INSTANCE_NAME.toUpperCase()));
     row.setLocale(entity.getString(TableConstants.LOCALE.toUpperCase()));
-    row.setTimestamp(entity.getDate(TableConstants.TIMESTAMP.toUpperCase()));
+    row.setSavepointTimestamp(entity.getDate(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase()));
     String filterType = entity.getString(DbTable.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);
