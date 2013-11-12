@@ -93,9 +93,9 @@ public class EntityConverter {
     String elementTypeStr = entity.getElementType();
     String listChildElementKeys =
         entity.getListChildElementKeys();
-    Boolean isPersisted = entity.getIsPersisted();
+    Boolean isUnitOfRetention = entity.getIsUnitOfRetention();
     Column column = new Column(tableId, elementKey, elementName,
-        elementTypeStr, listChildElementKeys, isPersisted);
+        elementTypeStr, listChildElementKeys, isUnitOfRetention);
     return column;
   }
 
