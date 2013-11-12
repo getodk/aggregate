@@ -125,7 +125,7 @@ public class EntityCreator {
     entity.setElementName(column.getElementName());
     entity.setElementType(column.getElementType());
     entity.setListChildElementKeys(column.getListChildElementKeys());
-    entity.setIsPersisted(column.getIsPersisted() != 0);
+    entity.setIsUnitOfRetention(column.getIsUnitOfRetention() != 0);
 
     return entity;
   }

@@ -71,7 +71,7 @@ public class DbColumnDefinitions extends Relation {
   private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataType.STRING, true);
   private static final DataField LIST_CHILD_ELEMENT_KEYS = new DataField("LIST_CHILD_ELEMENT_KEYS",
       DataType.STRING, true, 4096L);
-  private static final DataField IS_PERSISTED = new DataField("IS_PERSISTED", DataType.BOOLEAN,
+  private static final DataField IS_UNIT_OF_RETENTION = new DataField("IS_UNIT_OF_RETENTION", DataType.BOOLEAN,
       false);
 
   private static final List<DataField> dataFields;
@@ -83,7 +83,7 @@ public class DbColumnDefinitions extends Relation {
     dataFields.add(ELEMENT_NAME);
     dataFields.add(ELEMENT_TYPE);
     dataFields.add(LIST_CHILD_ELEMENT_KEYS);
-    dataFields.add(IS_PERSISTED);
+    dataFields.add(IS_UNIT_OF_RETENTION);
   }
 
   public static class DbColumnDefinitionsEntity {
@@ -156,12 +156,12 @@ public class DbColumnDefinitions extends Relation {
       e.set(LIST_CHILD_ELEMENT_KEYS, value);
     }
 
-    public Boolean getIsPersisted() {
-      return e.getBoolean(IS_PERSISTED);
+    public Boolean getIsUnitOfRetention() {
+      return e.getBoolean(IS_UNIT_OF_RETENTION);
     }
 
-    public void setIsPersisted(Boolean value) {
-      e.set(IS_PERSISTED, value);
+    public void setIsUnitOfRetention(Boolean value) {
+      e.set(IS_UNIT_OF_RETENTION, value);
     }
 
   }
@@ -215,7 +215,7 @@ public class DbColumnDefinitions extends Relation {
 
   /**
    * Return the ELEMENT_NAMEs for the given table. Currently returns all, even
-   * the non-persisted ones.
+   * the non-unit-of-retention ones.
    *
    * @param tableId
    * @param propertiesEtag
