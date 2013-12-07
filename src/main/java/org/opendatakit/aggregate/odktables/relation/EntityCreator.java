@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,7 +45,6 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -80,11 +78,10 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public DbTableEntryEntity newTableEntryEntity(String tableId, String tableKey, String propertiesEtag, String aprioriDataSequenceValue, CallingContext cc)
+  public DbTableEntryEntity newTableEntryEntity(String tableId, String schemaEtag, String aprioriDataSequenceValue, CallingContext cc)
       throws ODKDatastoreException {
     Validate.notNull(cc);
-    Validate.notEmpty(tableKey);
-    Validate.notNull(propertiesEtag);
+    Validate.notNull(schemaEtag);
     Validate.notNull(aprioriDataSequenceValue);
 
     if (tableId == null) {
@@ -93,9 +90,8 @@ public class EntityCreator {
 
     DbTableEntryEntity entity = DbTableEntry.createNewEntity(tableId, cc);
     String value = null;
-    entity.setTableKey(tableKey);
     entity.setDataETag(value);
-    entity.setPropertiesETag(propertiesEtag);
+    entity.setSchemaETag(schemaEtag);
     entity.setAprioriDataSequenceValue(aprioriDataSequenceValue);
     return entity;
   }
@@ -111,16 +107,16 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public DbColumnDefinitionsEntity newColumnEntity(String tableId, String propertiesEtag, Column column,
+  public DbColumnDefinitionsEntity newColumnEntity(String tableId, String schemaEtag, Column column,
       CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
-    Validate.notEmpty(propertiesEtag);
+    Validate.notEmpty(schemaEtag);
     Validate.notNull(column);
     Validate.notNull(cc);
 
     DbColumnDefinitionsEntity entity = DbColumnDefinitions.createNewEntity(cc);
     entity.setTableId(tableId);
-    entity.setPropertiesETag(propertiesEtag);
+    entity.setschemaETag(schemaEtag);
     entity.setElementKey(column.getElementKey());
     entity.setElementName(column.getElementName());
     entity.setElementType(column.getElementType());
@@ -156,7 +152,7 @@ public class EntityCreator {
 	  // TODO: should DATA_ETAG_AT_MODIFICATION also be from the TableEntry record? Or tracked?
 	  entity.setStringField(DbTable.DATA_ETAG_AT_MODIFICATION, CommonFieldsBase.newUri());
 	  entity.setBooleanField(DbTable.DELETED, false);
-	  entity.setStringField(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+	  entity.setStringField(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
 	  // TODO is this the right kind of scope to be setting? one wonders...
 	  entity.setStringField(DbTable.FILTER_VALUE, (String) null);
 	  entity.setStringField(DbTable.FILTER_TYPE, (String) null);
@@ -173,17 +169,17 @@ public class EntityCreator {
    * @return
    * @throws ODKDatastoreException
    */
-  public DbTableDefinitionsEntity newTableDefinitionEntity(String tableId, String propertiesEtag,
+  public DbTableDefinitionsEntity newTableDefinitionEntity(String tableId, String schemaEtag,
       String dbTableName, CallingContext cc) throws ODKDatastoreException {
     // Validate those parameters defined as non-null in the ODK Tables Schema
     // Google doc.
     Validate.notEmpty(tableId);
-    Validate.notEmpty(propertiesEtag);
+    Validate.notEmpty(schemaEtag);
     Validate.notEmpty(dbTableName);
     Validate.notNull(cc);
     DbTableDefinitionsEntity definition = DbTableDefinitions.createNewEntity(cc);
     definition.setTableId(tableId);
-    definition.setPropertiesETag(propertiesEtag);
+    definition.setSchemaETag(schemaEtag);
     definition.setDbTableName(dbTableName);
     return definition;
   }
@@ -398,7 +394,7 @@ public class EntityCreator {
     Validate.notNull(cc);
 
     Entity row = table.getEntity(rowId, cc);
-    String rowEtag = row.getString(DbTable.ROW_VERSION);
+    String rowEtag = row.getString(DbTable.ROW_ETAG);
     if (currentEtag == null || !currentEtag.equals(rowEtag)) {
       throw new EtagMismatchException(String.format("%s does not match %s " +
       		"for rowId %s", currentEtag, rowEtag, row.getId()));
@@ -412,7 +408,7 @@ public class EntityCreator {
   private void setRowFields(Entity row, String dataEtag, User lastUpdatedUser,
       Scope filterScope, boolean deleted, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
-    row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+    row.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
     row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getEmail());
 
@@ -447,17 +443,9 @@ public class EntityCreator {
       if (TableConstants.CLIENT_ONLY_COLUMN_NAMES.contains(name)) {
         // 1) --no need to do anything here.
         continue;
-      } else if (TableConstants.SHARED_COLUMN_NAMES.contains(name)
-            || name.equals("last_mod_time")) {
+      } else if (TableConstants.SHARED_COLUMN_NAMES.contains(name)) {
         // 2) --save the data
-        // used to search for timestamp, but that's apparently incorrect?
-        if (name.equals("last_mod_time")) {//name.equals(TablesConstants.TIMESTAMP)) {
-          // Then we have to parse the string to a date.
-          Date date = WebUtils.parseDate(value);
-          row.set(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), date);
-        } else {
-          row.set(name.toUpperCase(), value);
-        }
+        row.set(name, value);
       } else {
         // 3) --add it to the user-defined column
         DbColumnDefinitionsEntity column = findColumn(name, columns);
@@ -467,7 +455,7 @@ public class EntityCreator {
           log.error("bad column name: " + name);
           throw new BadColumnNameException("Bad column name " + name);
         }
-        row.setAsString(RUtil.convertIdentifier(column.getId()), value);
+        row.setAsString(column.getElementKey(), value);
       }
     }
   }
@@ -544,19 +532,25 @@ public class EntityCreator {
 
     Entity entity = logTable.newEntity(cc);
     entity.set(DbLogTable.ROW_ID, row.getId());
-    entity.set(DbLogTable.ROW_VERSION, row.getString(DbTable.ROW_VERSION));
-    entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
     entity.set(DbLogTable.SEQUENCE_VALUE, sequencer.getNextSequenceValue());
+
+    entity.set(DbLogTable.ROW_ETAG, row.getString(DbTable.ROW_ETAG));
+    entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataEtag);
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
     entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
     entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
     entity.set(DbLogTable.FILTER_VALUE, row.getString(DbTable.FILTER_VALUE));
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
 
+    // common metadata
+    entity.set(DbLogTable.URI_ACCESS_CONTROL, row.getString(DbTable.URI_ACCESS_CONTROL));
+    entity.set(DbLogTable.FORM_ID, row.getString(DbTable.FORM_ID));
+    entity.set(DbLogTable.LOCALE, row.getString(DbTable.LOCALE));
+    entity.set(DbLogTable.SAVEPOINT_TIMESTAMP, row.getString(DbTable.SAVEPOINT_TIMESTAMP));
+
     for (DbColumnDefinitionsEntity column : columns) {
-      String idName = RUtil.convertIdentifier(column.getId());
-      String value = row.getAsString(idName);
-      entity.setAsString(idName, value);
+      String value = row.getAsString(column.getElementKey());
+      entity.setAsString(column.getElementKey(), value);
     }
     return entity;
   }

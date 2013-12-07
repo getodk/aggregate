@@ -166,7 +166,7 @@ public class UtilTransforms {
     serverRow.setRowEtag(client.getRowEtag());
     serverRow.setRowId(client.getRowId());
     serverRow.setValues(client.getValues());
-    serverRow.setUriUser(client.getUriUser());
+    serverRow.setUriAccessControl(client.getUriAccessControl());
     serverRow.setFormId(client.getFormId());
     serverRow.setLocale(client.getLocale());
     serverRow.setSavepointTimestamp(client.getSavepointTimestamp());
@@ -233,9 +233,9 @@ public class UtilTransforms {
   /**
    * Transforms the object into client-side TableEntryClient object.
    */
-  public static TableEntryClient transform(TableEntry serverEntry) {
-    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(),
-        serverEntry.getTableKey(), serverEntry.getDataEtag(), serverEntry.getPropertiesEtag());
+  public static TableEntryClient transform(TableEntry serverEntry, String displayName) {
+    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(), displayName,
+        serverEntry.getDataEtag(), serverEntry.getPropertiesEtag(), serverEntry.getSchemaEtag());
     return clientEntry;
   }
 
@@ -243,10 +243,10 @@ public class UtilTransforms {
    * This method transforms the TableResource into a client-side
    * TableResourceClient object.
    */
-  public static TableResourceClient transform(TableResource serverResource) {
+  public static TableResourceClient transform(TableResource serverResource, String displayName) {
     TableResourceClient clientResource = new TableResourceClient(new TableEntryClient(
-        serverResource.getTableId(), serverResource.getTableKey(), serverResource.getDataEtag(),
-        serverResource.getPropertiesEtag()));
+        serverResource.getTableId(), displayName, serverResource.getDataEtag(),
+        serverResource.getPropertiesEtag(), serverResource.getSchemaEtag()));
     clientResource.setAclUri(serverResource.getAclUri());
     clientResource.setDataUri(serverResource.getDataUri());
     clientResource.setDiffUri(serverResource.getDiffUri());
@@ -290,7 +290,7 @@ public class UtilTransforms {
     row.setRowEtag(serverRow.getRowEtag());
     row.setRowId(serverRow.getRowId());
     row.setValues(serverRow.getValues());
-    row.setUriUser(serverRow.getUriUser());
+    row.setUriAccessControl(serverRow.getUriAccessControl());
     row.setFormId(serverRow.getFormId());
     row.setLocale(serverRow.getLocale());
     row.setSavepointTimestamp(serverRow.getSavepointTimestamp());
@@ -327,7 +327,7 @@ public class UtilTransforms {
     rowClient.setRowEtag(serverResource.getRowEtag());
     rowClient.setRowId(serverResource.getRowId());
     rowClient.setValues(serverResource.getValues());
-    rowClient.setUriUser(serverResource.getUriUser());
+    rowClient.setUriAccessControl(serverResource.getUriAccessControl());
     rowClient.setFormId(serverResource.getFormId());
     rowClient.setLocale(serverResource.getLocale());
     rowClient.setSavepointTimestamp(serverResource.getSavepointTimestamp());

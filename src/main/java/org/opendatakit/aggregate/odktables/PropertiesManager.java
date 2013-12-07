@@ -77,9 +77,10 @@ public class PropertiesManager {
     this.cc = cc;
     this.tableId = tableId;
     this.entry = DbTableEntry.getTableIdEntry(tableId, cc);
-    String propertiesEtag = entry.getPropertiesETag();
-    this.definitionEntity = DbTableDefinitions.getDefinition(tableId, propertiesEtag, cc);
-    this.kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag, cc);
+    String schemaETag = entry.getSchemaETag();
+    this.definitionEntity = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+    String propertiesETag = entry.getPropertiesETag();
+    this.kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesETag, cc);
     this.converter = new EntityConverter();
   }
 
@@ -99,10 +100,11 @@ public class PropertiesManager {
   public TableProperties getProperties() throws ODKDatastoreException {
     // refresh entities
     entry = DbTableEntry.getTableIdEntry(tableId, cc);
-    String propertiesEtag = entry.getPropertiesETag();
+    String schemaEtag = entry.getSchemaETag();
+    definitionEntity = DbTableDefinitions.getDefinition(tableId, schemaEtag, cc);
 
+    String propertiesEtag = entry.getPropertiesETag();
     kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag, cc);
-    definitionEntity = DbTableDefinitions.getDefinition(tableId, propertiesEtag, cc);
     return converter.toTableProperties(kvsEntities, tableId, propertiesEtag);
   }
 
@@ -145,8 +147,6 @@ public class PropertiesManager {
 
       EntityCreator creator = new EntityCreator();
 
-      DbTableDefinitionsEntity newDefinitionEntity = creator.newTableDefinitionEntity(tableId, propertiesEtag,
-          definitionEntity.getDbTableName(), cc);
       List<DbKeyValueStoreEntity> newKvsEntities = new ArrayList<DbKeyValueStoreEntity>();
       try {
         // TODO: we should probably be diff'ing somehow, so we don't have to
@@ -182,7 +182,6 @@ public class PropertiesManager {
         // not done transactionally, so you could end up in a rough spot if your
         // pursuant call to add all the new entities fails.
         log.info("setProperties Made it past add all to lists");
-        newDefinitionEntity.put(cc);
         // Now put all the entries.
         for ( DbKeyValueStoreEntity e : newKvsEntities ) {
           e.put(cc);
@@ -195,7 +194,6 @@ public class PropertiesManager {
         // write the entry out...
         entry.put(cc);
 
-        definitionEntity = newDefinitionEntity;
         kvsEntities = newKvsEntities;
         log.info("setProperties made it past update to propertiesEtag");
 

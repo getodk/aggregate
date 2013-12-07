@@ -84,10 +84,10 @@ public class DataManager {
     this.creator = new EntityCreator();
     this.tableId = tableId;
     this.entry = DbTableEntry.getTableIdEntry(tableId, cc);
-    String propertyEtag = entry.getPropertiesETag();
-    this.table = DbTable.getRelation(tableId, propertyEtag, cc);
-    this.logTable = DbLogTable.getRelation(tableId, propertyEtag, cc);
-    this.columns = DbColumnDefinitions.query(tableId, propertyEtag, cc);
+    String schemaEtag = entry.getSchemaETag();
+    this.table = DbTable.getRelation(tableId, schemaEtag, cc);
+    this.logTable = DbLogTable.getRelation(tableId, schemaEtag, cc);
+    this.columns = DbColumnDefinitions.query(tableId, schemaEtag, cc);
   }
 
   public String getTableId() {
@@ -557,7 +557,7 @@ public class DataManager {
       // get entities and mark deleted
       List<Entity> rows = DbTable.query(table, rowIds, cc);
       for (Entity row : rows) {
-        row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
+        row.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
         row.set(DbTable.DELETED, true);
       }
 

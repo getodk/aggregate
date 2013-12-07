@@ -42,6 +42,7 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -87,10 +88,8 @@ public class ServerOdkTablesUtil {
     // column resource or something, in which case the transform() method is not
     // altering all of the requisite fields.
     try {
-      String tableKey = definition.getTableKey();
-      String dbTableName = definition.getDbTableName();
+      String displayName = definition.getDisplayName();
       TableType type = UtilTransforms.transform(definition.getType());
-      String tableIdAccessControls = definition.getTableIdAccessControls();
       // TODO: find a way to, for creation, generate a minimal list of
       // kvs entries. for now just putting in blank if you create a table
       // from the server.
@@ -99,32 +98,29 @@ public class ServerOdkTablesUtil {
       OdkTablesKeyValueStoreEntry tt;
       tt = new OdkTablesKeyValueStoreEntry();
       tt.tableId = tableId;
-      tt.partition = "Table";
-      tt.aspect = "default";
-      tt.key = "tableType";
-      tt.type = "text";
+      tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
+      tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+      tt.key = KeyValueStoreConstants.TABLE_TYPE;
+      tt.type = "string";
       tt.value = type.name();
       kvsEntries.add(tt);
 
-      if ( tableIdAccessControls != null ) {
-        tt = new OdkTablesKeyValueStoreEntry();
-        tt.tableId = tableId;
-        tt.partition = "Table";
-        tt.aspect = "default";
-        tt.key = "accessControlTableId";
-        tt.type = "text";
-        tt.value = tableIdAccessControls;
-        kvsEntries.add(tt);
-      }
+      tt = new OdkTablesKeyValueStoreEntry();
+      tt.tableId = tableId;
+      tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
+      tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+      tt.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
+      tt.type = "object";
+      tt.value = "\"" + displayName + "\"";
+      kvsEntries.add(tt);
 
       List<ColumnClient> columns = definition.getColumns();
       List<Column> columnsServer = new ArrayList<Column>();
       for (ColumnClient column : columns) {
         columnsServer.add(UtilTransforms.transform(column));
       }
-      TableEntry entry = tm.createTable(tableId, tableKey, dbTableName,
-          columnsServer, kvsEntries);
-      TableEntryClient entryClient = UtilTransforms.transform(entry);
+      TableEntry entry = tm.createTable(tableId, columnsServer, kvsEntries);
+      TableEntryClient entryClient = UtilTransforms.transform(entry, displayName);
       logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
       return entryClient;
     } catch (ODKDatastoreException e) {

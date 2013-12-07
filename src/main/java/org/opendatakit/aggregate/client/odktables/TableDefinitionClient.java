@@ -37,10 +37,8 @@ public class TableDefinitionClient implements Serializable {
 	private static final long serialVersionUID = -1413634509888543150L;
 
   private String tableId;
-  private String tableKey;
-  private String dbTableName;
+  private String displayName;
   private TableTypeClient type;
-  private String tableIdAccessControls;
   private List<ColumnClient> columns;
 
   @SuppressWarnings("unused")
@@ -49,15 +47,12 @@ public class TableDefinitionClient implements Serializable {
   }
 
   public TableDefinitionClient(final String tableId,
-      final List<ColumnClient> columns, final String tableKey,
-      final String dbTableName, final TableTypeClient type,
-      final String tableIdAccessControls) {
+      final List<ColumnClient> columns,
+      final String displayName, final TableTypeClient type) {
     this.tableId = tableId;
     this.columns = columns;
-    this.tableKey = tableKey;
-    this.dbTableName = dbTableName;
+    this.displayName = displayName;
     this.type = type;
-    this.tableIdAccessControls = tableIdAccessControls;
   }
 
   public String getTableId() {
@@ -68,20 +63,12 @@ public class TableDefinitionClient implements Serializable {
     return this.columns;
   }
 
-  public String getTableKey() {
-    return this.tableKey;
-  }
-
-  public String getDbTableName() {
-    return this.dbTableName;
+  public String getDisplayName() {
+    return this.displayName;
   }
 
   public TableTypeClient getType() {
     return this.type;
-  }
-
-  public String getTableIdAccessControls() {
-    return this.tableIdAccessControls;
   }
 
   public void setColumns(final List<ColumnClient> columns) {
@@ -92,10 +79,8 @@ public class TableDefinitionClient implements Serializable {
   public String toString() {
     return "TableDefinitionClient[tableId=" + getTableId()
         + ", columns=" + getColumns().toString()
-        + ", tableKey=" + getTableKey()
-        + ", dbTableName=" + getDbTableName()
+        + ", displayName=" + getDisplayName()
         + ", type=" + getType()
-        + ", tableIdAccessControls=" + getTableIdAccessControls()
         + "]";
   }
 }

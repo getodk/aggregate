@@ -38,13 +38,12 @@ public class TableDefinitionResource extends TableDefinition {
   }
 
   public TableDefinitionResource(TableDefinition definition) {
-    this(definition.getTableId(), definition.getColumns(),
-        definition.getTableKey(), definition.getDbTableName());
+    this(definition.getTableId(), definition.getColumns(), definition.getDisplayName());
   }
 
-  public TableDefinitionResource(String tableId, List<Column> columns,
-      String tableKey, String dbTableName) {
-    super(tableId, columns, tableKey, dbTableName);
+  public TableDefinitionResource(String tableId, List<Column> columns, String displayName) {
+    super(tableId, columns);
+    setDisplayName(displayName);
   }
 
   public String getSelfUri() {

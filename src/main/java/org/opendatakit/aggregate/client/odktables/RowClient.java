@@ -49,7 +49,7 @@ public class RowClient implements Serializable {
 
   private ScopeClient filterScope;
 
-  private String uriUser;
+  private String uriAccessControl;
 
   private String formId;
 
@@ -97,7 +97,7 @@ public class RowClient implements Serializable {
     this.lastUpdateUser = null;
     this.filterScope = null;
     this.values = new HashMap<String, String>();
-    this.uriUser = null;
+    this.uriAccessControl = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestamp = null;
@@ -159,8 +159,8 @@ public class RowClient implements Serializable {
     this.values = values;
   }
 
-  public String getUriUser() {
-    return this.uriUser;
+  public String getUriAccessControl() {
+    return this.uriAccessControl;
   }
 
   public String getFormId() {
@@ -175,8 +175,8 @@ public class RowClient implements Serializable {
     return this.savepointTimestamp;
   }
 
-  public void setUriUser(String uriUser) {
-    this.uriUser = uriUser;
+  public void setUriAccessControl(String uriAccessControl) {
+    this.uriAccessControl = uriAccessControl;
   }
 
   public void setFormId(String formId) {

@@ -48,7 +48,7 @@ public class DbTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
-  public static final DataField ROW_VERSION = new DataField("_ROW_VERSION", DataType.STRING, false);
+  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
   /**
    * This should hold the data etag at the time the row was modified/created.
    */
@@ -60,6 +60,7 @@ public class DbTable extends Relation {
   public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
                         .setIndexable(IndexType.HASH);
   public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
+
   public static final DataField URI_ACCESS_CONTROL = new DataField(TableConstants.URI_ACCESS_CONTROL.toUpperCase(),
       DataType.STRING, true);
   public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
@@ -73,7 +74,7 @@ public class DbTable extends Relation {
   static {
     dataFields = new ArrayList<DataField>();
     // server-side metadata
-    dataFields.add(ROW_VERSION);
+    dataFields.add(ROW_ETAG);
     dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(CREATE_USER);
     dataFields.add(LAST_UPDATE_USER);
@@ -90,9 +91,9 @@ public class DbTable extends Relation {
 
   private static final EntityConverter converter = new EntityConverter();
 
-  public static DbTable getRelation(String tableId, String propertiesEtag, CallingContext cc)
+  public static DbTable getRelation(String tableId, String schemaEtag, CallingContext cc)
       throws ODKDatastoreException {
-    List<DataField> fields = getDynamicFields(tableId, propertiesEtag, cc);
+    List<DataField> fields = getDynamicFields(tableId, schemaEtag, cc);
     fields.addAll(getStaticFields());
     return getRelation(tableId, fields, cc);
   }
@@ -105,10 +106,10 @@ public class DbTable extends Relation {
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, String propertiesEtag,
+  private static List<DataField> getDynamicFields(String tableId, String schemaEtag,
       CallingContext cc)
       throws ODKDatastoreException {
-    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, propertiesEtag, cc);
+    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaEtag, cc);
     return converter.toFields(entities);
   }
 

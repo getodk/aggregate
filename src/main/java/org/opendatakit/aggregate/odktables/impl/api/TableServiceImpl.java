@@ -39,6 +39,7 @@ import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
@@ -46,6 +47,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -92,14 +94,32 @@ public class TableServiceImpl implements TableService {
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
     // TODO: add access control stuff
-    String tableKey = definition.getTableKey();
-    String dbTableName = definition.getDbTableName();
+    String displayName = definition.getDisplayName();
     List<Column> columns = definition.getColumns();
     // TODO: need a method to init a default minimal list of kvs entries.
     List<OdkTablesKeyValueStoreEntry> kvsEntries =
         new ArrayList<OdkTablesKeyValueStoreEntry>();
-    TableEntry entry = tm.createTable(tableId, tableKey, dbTableName,
-        columns, kvsEntries);
+
+    OdkTablesKeyValueStoreEntry tt;
+    tt = new OdkTablesKeyValueStoreEntry();
+    tt.tableId = tableId;
+    tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
+    tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+    tt.key = KeyValueStoreConstants.TABLE_TYPE;
+    tt.type = "string";
+    tt.value = TableType.DATA.name();
+    kvsEntries.add(tt);
+
+    tt = new OdkTablesKeyValueStoreEntry();
+    tt.tableId = tableId;
+    tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
+    tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+    tt.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
+    tt.type = "object";
+    tt.value = displayName;
+    kvsEntries.add(tt);
+
+    TableEntry entry = tm.createTable(tableId, columns, kvsEntries);
     TableResource resource = getResource(entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return resource;
