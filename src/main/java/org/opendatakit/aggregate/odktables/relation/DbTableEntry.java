@@ -30,6 +30,13 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
+/**
+ * Tracks the ETags associated with a given TableId.
+ * The TableId is the PK for this table.
+ *
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public class DbTableEntry extends Relation {
 
   private DbTableEntry(String namespace, String tableName, List<DataField> fields, CallingContext cc)
@@ -39,19 +46,18 @@ public class DbTableEntry extends Relation {
 
   private static final String RELATION_NAME = "TABLE_ENTRY2";
 
-  public static final DataField TABLE_KEY = new DataField("TABLE_KEY", DataType.STRING, false);
   private static final DataField DATA_ETAG = new DataField("DATA_ETAG", DataType.STRING, true);
-  private static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG",
-      DataType.STRING, false);
+  private static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG", DataType.STRING, true);
+  private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, false);
   private static final DataField APRIORI_DATA_SEQUENCE_VALUE = new DataField(
       "APRIORI_DATA_SEQUENCE_VALUE", DataType.STRING, false);
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(TABLE_KEY);
     dataFields.add(DATA_ETAG);
     dataFields.add(PROPERTIES_ETAG);
+    dataFields.add(SCHEMA_ETAG);
     dataFields.add(APRIORI_DATA_SEQUENCE_VALUE);
   }
 
@@ -77,14 +83,6 @@ public class DbTableEntry extends Relation {
 
     // Accessors
 
-    public String getTableKey() {
-      return e.getString(TABLE_KEY);
-    }
-
-    public void setTableKey(String value) {
-      e.set(TABLE_KEY, value);
-    }
-
     public String getDataETag() {
       return e.getString(DATA_ETAG);
     }
@@ -99,6 +97,14 @@ public class DbTableEntry extends Relation {
 
     public void setPropertiesETag(String value) {
       e.set(PROPERTIES_ETAG, value);
+    }
+
+    public String getSchemaETag() {
+      return e.getString(SCHEMA_ETAG);
+    }
+
+    public void setSchemaETag(String value) {
+      e.set(SCHEMA_ETAG, value);
     }
 
     public String getAprioriDataSequenceValue() {

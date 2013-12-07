@@ -9,6 +9,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.api.AbstractServiceTest;
+import org.opendatakit.aggregate.odktables.api.T;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
@@ -36,7 +39,7 @@ public class PropertiesServiceTest extends AbstractServiceTest {
   // TODO: fix this -- once we straighten out TableKey and TableId
   @Ignore
   public void testSetTableName() {
-    String expected = T.tableName + " a different name";
+    String expected = T.displayName + " a different name";
 
     PropertiesResource resource = rt.getForObject(baseUri, PropertiesResource.class);
     TableProperties properties = resource;
@@ -53,7 +56,7 @@ public class PropertiesServiceTest extends AbstractServiceTest {
     String expected = T.tableMetadata + "some metadata here";
     List<OdkTablesKeyValueStoreEntry> list = new ArrayList<OdkTablesKeyValueStoreEntry>();
     OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
-    entry.partition = "Table";
+    entry.partition = KeyValueStoreConstants.PARTITION_TABLE;
     entry.aspect = "testing";
     entry.key = "value";
     entry.type = "text";

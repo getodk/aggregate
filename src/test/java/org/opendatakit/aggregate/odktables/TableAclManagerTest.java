@@ -47,11 +47,10 @@ public class TableAclManagerTest {
     this.cc = TestContextFactory.getCallingContext();
 
     this.tableId = T.tableId;
-    String tableName = T.tableName;
     String tableProperties = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, T.tableKey, T.dbTableName,
+    tm.createTable(tableId,
         T.columns, T.kvsEntries);
 
     this.scope = new Scope(Scope.Type.USER, T.user);

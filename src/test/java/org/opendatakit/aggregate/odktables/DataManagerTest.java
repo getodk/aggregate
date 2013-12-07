@@ -51,7 +51,6 @@ public class DataManagerTest {
 
   private CallingContext cc;
   private String tableId;
-  private String tableName;
   private String tableProperties;
   private TableManager tm;
   private DataManager dm;
@@ -61,12 +60,10 @@ public class DataManagerTest {
   public void setUp() throws Exception {
     this.cc = TestContextFactory.getCallingContext();
 
-    this.tableId = T.tableId;
-    this.tableName = T.tableName;
     this.tableProperties = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, T.tableKey, T.dbTableName,
+    tm.createTable(tableId,
         T.columns, T.kvsEntries);
 
     this.dm = new DataManager(tableId, cc);

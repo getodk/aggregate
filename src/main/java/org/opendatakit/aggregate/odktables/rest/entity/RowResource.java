@@ -45,7 +45,7 @@ public class RowResource extends Row {
     setLastUpdateUser(row.getLastUpdateUser());
     setFilterScope(row.getFilterScope());
     setValues(row.getValues());
-    setUriUser(row.getUriUser());
+    setUriAccessControl(row.getUriAccessControl());
     setFormId(row.getFormId());
     setLocale(row.getLocale());
     setSavepointTimestamp(row.getSavepointTimestamp());

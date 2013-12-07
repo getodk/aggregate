@@ -44,7 +44,7 @@ public class TableResource extends TableEntry {
   private String aclUri;
 
   public TableResource(TableEntry entry) {
-    super(entry.getTableId(), entry.getTableKey(), entry.getDataEtag(), entry.getPropertiesEtag());
+    super(entry.getTableId(), entry.getDataEtag(), entry.getPropertiesEtag(), entry.getSchemaEtag());
   }
 
   @SuppressWarnings("unused")

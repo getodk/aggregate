@@ -36,6 +36,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEnt
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
@@ -155,13 +156,27 @@ public class TableManager {
     if (entry == null) {
       return null;
     }
+    String schemaEtag = entry.getSchemaEtag();
     DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
-        entry.getPropertiesEtag(), cc);
+        schemaEtag, cc);
     TableDefinition definition = converter.toTableDefinition(entry, definitionEntity);
     List<DbColumnDefinitionsEntity> columnEntities = DbColumnDefinitions.query(tableId,
-        entry.getPropertiesEtag(), cc);
+        schemaEtag, cc);
     List<Column> columns = converter.toColumns(columnEntities);
     definition.setColumns(columns);
+
+    String propertiesEtag = entry.getPropertiesEtag();
+    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag,
+        cc);
+    String displayString = null;
+    for ( DbKeyValueStoreEntity kvs : kvsEntries ) {
+      if ( kvs.getKey().equals(KeyValueStoreConstants.TABLE_DISPLAY_NAME) &&
+           kvs.getPartition().equals(KeyValueStoreConstants.PARTITION_TABLE) &&
+           kvs.getAspect().equals(KeyValueStoreConstants.ASPECT_DEFAULT) ) {
+        displayString = kvs.getValue();
+      }
+    }
+    definition.setDisplayName(displayString);
     return definition;
   }
 
@@ -202,15 +217,11 @@ public class TableManager {
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    */
-  public TableEntry createTable(String tableId, String tableKey, String dbTableName,
+  public TableEntry createTable(String tableId,
       List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries) throws ODKEntityPersistException,
       ODKDatastoreException, TableAlreadyExistsException {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
-    Validate.notNull(tableKey);
-    Validate.notEmpty(tableKey);
-    Validate.notNull(dbTableName);
-    Validate.notEmpty(dbTableName);
     Validate.noNullElements(columns);
 
     // the hope here is that it creates an empty table in the db after a single
@@ -235,24 +246,37 @@ public class TableManager {
     // persist into the datastore for the table to truly be created.
     Sequencer sequencer = new Sequencer(cc);
 
-    String propertiesEtag = CommonFieldsBase.newUri();
+    String schemaEtag = CommonFieldsBase.newUri();
     String aprioriDataSequenceValue = sequencer.getNextSequenceValue();
-    DbTableEntryEntity tableEntry = creator.newTableEntryEntity(tableId, tableKey, propertiesEtag,
+    DbTableEntryEntity tableEntry = creator.newTableEntryEntity(tableId, schemaEtag,
         aprioriDataSequenceValue, cc);
 
+    /**
+     * TODO: guess that tableId works as dbTableName...
+     */
     DbTableDefinitionsEntity tableDefinition = creator.newTableDefinitionEntity(tableId,
-        propertiesEtag, dbTableName, cc);
+        schemaEtag, tableId, cc);
 
     List<DbColumnDefinitionsEntity> colDefs = new ArrayList<DbColumnDefinitionsEntity>();
     for (Column column : columns) {
-      colDefs.add(creator.newColumnEntity(tableId, propertiesEtag, column, cc));
+      colDefs.add(creator.newColumnEntity(tableId, schemaEtag, column, cc));
     }
 
-    // SS: I think the DbTableProperties table should be phased out.
-    // Entity properties = creator.newTablePropertiesEntity(tableId, tableName,
-    // metadata, cc);
-    // entities.add(properties);
+    // write the table and column definitions
+    tableDefinition.put(cc);
+    for (DbColumnDefinitionsEntity e : colDefs) {
+      e.put(cc);
+    }
+    // write the initial ACL
+    DbTableAclEntity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER, cc
+        .getCurrentUser().getEmail()), TableRole.OWNER, cc);
+    ownerAcl.put(cc);
 
+    // Do NOT write the entry yet -- we need to have a valid displayName first!!!
+    // tableEntry.put(cc);
+
+    // Now update the properties...
+    String propertiesEtag = CommonFieldsBase.newUri();
     if (kvsEntries == null) {
       kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     }
@@ -262,22 +286,12 @@ public class TableManager {
       kvs.add(creator.newKeyValueStoreEntity(kvsEntry, propertiesEtag, cc));
     }
 
-    DbTableAclEntity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER, cc
-        .getCurrentUser().getEmail()), TableRole.OWNER, cc);
-
-    // write the table and column definitions and kvs values
-    tableDefinition.put(cc);
-    for (DbColumnDefinitionsEntity e : colDefs) {
-      e.put(cc);
-    }
     for (DbKeyValueStoreEntity e : kvs) {
       e.put(cc);
     }
 
-    // write the initial ACL
-    ownerAcl.put(cc);
-
-    // write the table entry record so everything is discoverable
+    // write the updated table entry record so everything is discover-able
+    tableEntry.setPropertiesETag(propertiesEtag);
     tableEntry.put(cc);
 
     return converter.toTableEntry(tableEntry);
@@ -300,21 +314,22 @@ public class TableManager {
 
     DbTableEntryEntity tableEntry = DbTableEntry.getTableIdEntry(tableId, cc);
 
-    String propertiesEtag = tableEntry.getPropertiesETag();
+    String schemaEtag = tableEntry.getSchemaETag();
 
     List<DbColumnDefinitionsEntity> columns = DbColumnDefinitions
-        .query(tableId, propertiesEtag, cc);
-
-    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag,
-        cc);
+        .query(tableId, schemaEtag, cc);
 
     DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
-        propertiesEtag, cc);
+        schemaEtag, cc);
 
     List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
 
-    DbTable table = DbTable.getRelation(tableId, propertiesEtag, cc);
-    DbLogTable logTable = DbLogTable.getRelation(tableId, propertiesEtag, cc);
+    String propertiesEtag = tableEntry.getPropertiesETag();
+    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag,
+        cc);
+
+    DbTable table = DbTable.getRelation(tableId, schemaEtag, cc);
+    DbLogTable logTable = DbLogTable.getRelation(tableId, schemaEtag, cc);
 
     LockTemplate dataLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);

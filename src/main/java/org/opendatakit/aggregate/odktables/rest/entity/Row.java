@@ -55,7 +55,7 @@ public class Row {
    * OdkTables metadata column.
    */
   @Element(required = false)
-  private String uriUser;
+  private String uriAccessControl;
 
   /**
    * OdkTables metadata column.
@@ -116,7 +116,7 @@ public class Row {
     this.lastUpdateUser = null;
     this.filterScope = null;
     this.values = new HashMap<String, String>();
-    this.uriUser = null;
+    this.uriAccessControl = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestamp = null;
@@ -186,8 +186,8 @@ public class Row {
     this.values = values;
   }
 
-  public String getUriUser() {
-    return this.uriUser;
+  public String getUriAccessControl() {
+    return this.uriAccessControl;
   }
 
   public String getFormId() {
@@ -202,8 +202,8 @@ public class Row {
     return this.savepointTimestamp;
   }
 
-  public void setUriUser(String uriUser) {
-    this.uriUser = uriUser;
+  public void setUriAccessControl(String uriAccessControl) {
+    this.uriAccessControl = uriAccessControl;
   }
 
   public void setFormId(String formId) {
@@ -250,7 +250,7 @@ public class Row {
     result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
     result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
     result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
-    result = prime * result + ((uriUser == null) ? 0 : uriUser.hashCode());
+    result = prime * result + ((uriAccessControl == null) ? 0 : uriAccessControl.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
     result = prime * result + ((savepointTimestamp == null) ? 0 : savepointTimestamp.hashCode());
@@ -279,7 +279,7 @@ public class Row {
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
             .equals(other.lastUpdateUser))
         && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
-        && (uriUser == null ? other.uriUser == null : uriUser.equals(other.uriUser))
+        && (uriAccessControl == null ? other.uriAccessControl == null : uriAccessControl.equals(other.uriAccessControl))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp.equals(other.savepointTimestamp))

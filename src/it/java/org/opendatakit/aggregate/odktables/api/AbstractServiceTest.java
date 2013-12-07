@@ -12,7 +12,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
 import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXmlHttpMessageConverter;
 import org.simpleframework.xml.Serializer;
@@ -72,7 +71,7 @@ public abstract class AbstractServiceTest {
   protected TableResource createTable() {
     URI uri = baseUri.resolve(T.tableId);
 
-    TableDefinition definition = new TableDefinition(T.tableName, T.columns, T.tableName, T.tableName, TableType.DATA, null);
+    TableDefinition definition = new TableDefinition(T.tableId, T.columns);
     HttpEntity<TableDefinition> entity = entity(definition);
 
     ResponseEntity<TableResource> resp = rt.exchange(uri, HttpMethod.PUT, entity,

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Ignore;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -34,6 +35,7 @@ public class T {
     public static final OdkTablesKeyValueStoreEntry entryOne;
     public static final OdkTablesKeyValueStoreEntry entryTwo;
     public static final OdkTablesKeyValueStoreEntry tableType;
+    public static final OdkTablesKeyValueStoreEntry displayName;
     public static final OdkTablesKeyValueStoreEntry tableAccessControls;
 
     public static final String entryOnePartition = "tablePartition";
@@ -44,18 +46,22 @@ public class T {
     public static final String entryTwoPartition = "customPartition";
     public static final String entryTwoAspect = "customAspect";
     public static final String entryTwoKey = "laClave";
-    public static final String entryTwoType = "text";
+    public static final String entryTwoType = "string";
     public static final String entryTwoValue = "thereIsNoPassword";
 
-    public static final String tablePartition = "Table";
-    public static final String tableAspect = "default";
+    public static final String tablePartition = KeyValueStoreConstants.PARTITION_TABLE;
+    public static final String tableAspect = KeyValueStoreConstants.ASPECT_DEFAULT;
 
-    public static final String tableTypeKey = "tableType";
-    public static final String tableTypeType = "text";
+    public static final String displayNameKey = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
+    public static final String displayNameType = "object";
+    public static final String displayNameValue = "\"People\"";
+
+    public static final String tableTypeKey = KeyValueStoreConstants.TABLE_TYPE;
+    public static final String tableTypeType = "string";
     public static final String tableTypeValue = TableType.DATA.name();
 
-    public static final String tableAccessControlTableIdKey = "accessControlTableId";
-    public static final String tableAccessControlTableIdType = "text";
+    public static final String tableAccessControlTableIdKey = KeyValueStoreConstants.TABLE_ACCESS_CONTROL_TABLE_ID;
+    public static final String tableAccessControlTableIdType = "string";
     public static final String tableAccessControlTableIdValue = "someId";
     static {
       entryOne = new OdkTablesKeyValueStoreEntry();
@@ -81,6 +87,14 @@ public class T {
       tableType.key = tableTypeKey;
       tableType.type = tableTypeType;
       tableType.value = tableTypeValue;
+
+      displayName = new OdkTablesKeyValueStoreEntry();
+      displayName.tableId = T.tableId;
+      displayName.partition = tablePartition;
+      displayName.aspect = tableAspect;
+      displayName.key = displayNameKey;
+      displayName.type = displayNameType;
+      displayName.value = displayNameValue;
 
       tableAccessControls = new OdkTablesKeyValueStoreEntry();
       tableAccessControls.tableId = T.tableId;
@@ -157,9 +171,6 @@ public class T {
   public static final String user = "someone@gmail.com";
   public static final String group = "somegroup";
   public static final String tableId = "people";
-  public static final String tableKey = "peopleKey";
-  public static final String dbTableName = "peopleDbTableName";
-  public static final String tableName = "people";
   public static final String tableMetadata = null;
   public static final String propertiesEtag = "propertiesEtag";
 
@@ -173,6 +184,7 @@ public class T {
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableType);
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.displayName);
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableAccessControls);
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);

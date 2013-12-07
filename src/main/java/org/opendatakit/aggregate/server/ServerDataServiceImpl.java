@@ -223,7 +223,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     try {
       TableManager tm = new TableManager(cc);
       TableEntry entry = tm.getTable(tableId);
-      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, entry.getPropertiesEtag(), cc);
+      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, entry.getSchemaEtag(), cc);
       return columnNames;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -450,7 +450,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     tcc.columnNames.add(DbTableFileInfo.UI_ONLY_FILENAME_HEADING);
     tcc.columnNames.add(DbTableFileInfo.UI_ONLY_TABLENAME_HEADING);
     //tcc.rows = getNonMediaFiles(tableId);
-    List<FileSummaryClient> nonMediaSummaries = getNonMediaFiles(tableId);
+    List<FileSummaryClient> nonMediaSummaries = new ArrayList<FileSummaryClient>();
+    // TODO: fix this
+    // nonMediaSummaries = getNonMediaFiles(tableId);
     // add in the user friendly filename
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
