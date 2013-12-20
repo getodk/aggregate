@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.format.element;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
@@ -38,18 +42,18 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-import com.google.gson.JsonObject;
-
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class JsonElementFormatter implements ElementFormatter {
   private static final String JSON_NULL = "null";
   private static final String JSON_TRUE = "true";
   private static final String JSON_FALSE = "false";
+
+  private static ObjectMapper mapper = new ObjectMapper();
 
   private RepeatCallbackFormatter callbackFormatter;
 
@@ -77,7 +81,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   /**
    * Construct a JSON Element Formatter
-   * 
+   *
    * @param separateGpsCoordinates
    *          separate the GPS coordinates of latitude and longitude into
    *          columns
@@ -101,7 +105,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   /**
    * Construct a JSON Element Formatter with links
-   * 
+   *
    * @param webServerUrl
    *          base url for the web app (e.g.,
    *          localhost:8080/ODKAggregatePlatform)
@@ -142,22 +146,32 @@ public class JsonElementFormatter implements ElementFormatter {
       imageBlob = blobSubmission.getBlob(1, cc);
     }
     if (imageBlob != null && imageBlob.length > 0) {
-      JsonObject obj = new JsonObject();
-      obj.addProperty("filename", blobSubmission.getUnrootedFilename(1, cc));
-      obj.addProperty("type", blobSubmission.getContentType(1, cc));
+      Map<String,String> obj = new HashMap<String,String>();
+      obj.put("filename", blobSubmission.getUnrootedFilename(1, cc));
+      obj.put("type", blobSubmission.getContentType(1, cc));
       if (baseWebServerUrl == null) {
         // embed the binary
-        obj.addProperty("bytes", new String(Base64.encodeBase64(imageBlob)));       
+        obj.put("bytes", new String(Base64.encodeBase64(imageBlob)));
       } else {
         // create a link to the binary
         SubmissionKey key = blobSubmission.getValue();
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(ServletConsts.BLOB_KEY, key.toString());
         String url = HtmlUtil.createLinkWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH
-            + BinaryDataServlet.ADDR, properties);        
-        obj.addProperty("url", url);
+            + BinaryDataServlet.ADDR, properties);
+        obj.put("url", url);
       }
-      addToJsonValueToRow(obj, false, element.getElementName(), row);
+      String serialized = null;
+      try {
+        serialized = mapper.writeValueAsString(obj);
+      } catch (JsonGenerationException e) {
+        e.printStackTrace();
+      } catch (JsonMappingException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      addToJsonValueToRow(serialized, false, element.getElementName(), row);
     }
 
   }
@@ -184,7 +198,15 @@ public class JsonElementFormatter implements ElementFormatter {
             b.append(BasicConsts.COMMA);
           }
           first = false;
-          b.append(BasicConsts.QUOTE).append(s).append(BasicConsts.QUOTE);
+          try {
+            b.append(mapper.writeValueAsString(s));
+          } catch (JsonGenerationException e) {
+            e.printStackTrace();
+          } catch (JsonMappingException e) {
+            e.printStackTrace();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         }
         b.append(BasicConsts.RIGHT_BRACKET);
         addToJsonValueToRow(b.toString(), false, element.getElementName(), row);
@@ -294,11 +316,17 @@ public class JsonElementFormatter implements ElementFormatter {
 
     if (value != null) {
       if (quoted) {
-        jsonString.append(BasicConsts.QUOTE);
-      }
-      jsonString.append(value.toString());
-      if (quoted) {
-        jsonString.append(BasicConsts.QUOTE);
+        try {
+          jsonString.append(mapper.writeValueAsString(value.toString()));
+        } catch (JsonGenerationException e) {
+          e.printStackTrace();
+        } catch (JsonMappingException e) {
+          e.printStackTrace();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      } else {
+        jsonString.append(value.toString());
       }
     } else {
       jsonString.append(JSON_NULL);
