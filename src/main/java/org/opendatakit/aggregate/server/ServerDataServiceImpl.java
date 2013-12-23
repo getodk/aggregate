@@ -112,7 +112,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       AuthFilter af = new AuthFilter(tableId, cc);
       af.checkPermission(TablePermission.READ_ROW);
       Row row = dm.getRowNullSafe(rowId);
-      af.checkFilter(TablePermission.UNFILTERED_READ, row);
+      af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
 
       TableContentsClient tcc = new TableContentsClient();
       tcc.columnNames = this.getColumnNames(tableId);
@@ -191,7 +191,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 
       af.checkPermission(TablePermission.DELETE_ROW);
       Row row = dm.getRowNullSafe(rowId);
-      af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
+      af.checkFilter(TablePermission.UNFILTERED_DELETE, row.getRowId(), row.getFilterScope());
       dm.deleteRow(rowId);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
