@@ -115,7 +115,7 @@ public class TableServiceImpl implements TableService {
     tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
     tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
     tt.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
-    tt.type = "object";
+    tt.type = "json";
     tt.value = displayName;
     kvsEntries.add(tt);
 

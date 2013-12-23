@@ -81,6 +81,7 @@ public class DbColumnDefinitions extends Relation {
   }
 
   public static class DbColumnDefinitionsEntity {
+
     Entity e;
 
     DbColumnDefinitionsEntity(Entity e) {
@@ -156,6 +157,31 @@ public class DbColumnDefinitions extends Relation {
 
     public void setIsUnitOfRetention(Boolean value) {
       e.set(IS_UNIT_OF_RETENTION, value);
+    }
+
+    /**
+     * Tests whether the semantically meaningful fields are equivalent.
+     *
+     * @param e
+     * @return true if these are matching column definitions
+     */
+    public boolean matchingColumnDefinition(DbColumnDefinitionsEntity e) {
+      if ( !this.getElementKey().equals(e.getElementKey()) ) {
+        return false;
+      }
+      if ( !this.getElementName().equals(e.getElementName()) ) {
+        return false;
+      }
+      if ( !this.getElementType().equals(e.getElementType()) ) {
+        return false;
+      }
+      if ( !this.getIsUnitOfRetention().equals(e.getIsUnitOfRetention()) ) {
+        return false;
+      }
+      if ( !this.getListChildElementKeys().equals(e.getListChildElementKeys()) ) {
+        return false;
+      }
+      return true;
     }
 
   }
