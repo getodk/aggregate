@@ -230,11 +230,37 @@ public class TableManager {
     BlobEntitySet blobEntitySet = blobRelationSet.newBlobEntitySet(cc);
     blobRelationSet.putBlobEntitySet(blobEntitySet, cc);
 
+    TableEntry existing = getTable(tableId);
     // check if table exists
-    if (getTable(tableId) != null) {
-      throw new TableAlreadyExistsException(String.format(
-          "Table with tableId '%s' already exists.", tableId));
+    if (existing != null) {
+      DbTableDefinitionsEntity defn = DbTableDefinitions.getDefinition(tableId, existing.getSchemaEtag(), cc);
+      if ( defn == null ) {
+        throw new TableAlreadyExistsException(String.format(
+            "Table with tableId '%s' already exists with incompatible schema (null TableDefinition).", tableId));
+      }
+      List<DbColumnDefinitionsEntity> cols = DbColumnDefinitions.query(tableId, existing.getSchemaEtag(), cc);
+
+      for (DbColumnDefinitionsEntity cde : cols ) {
+        boolean found = false;
+        for (Column column : columns) {
+          if ( column.getElementKey().equals(cde.getElementKey()) ) {
+            found = true;
+            DbColumnDefinitionsEntity ce = creator.newColumnEntity(tableId, existing.getSchemaEtag(), column, cc);
+            if ( !ce.matchingColumnDefinition(cde) ) {
+              throw new TableAlreadyExistsException(String.format(
+                  "Table with tableId '%s' already exists with incompatible schema.", tableId));
+            }
+          }
+        }
+        if ( !found ) {
+          throw new TableAlreadyExistsException(String.format(
+              "Table with tableId '%s' already exists with incompatible schema (missing Column).", tableId));
+        }
+      }
+      // Don't care about displayName...
+      return existing;
     }
+
     // TODO: do this for each of the necessary tableKey and dbTableName things.
     // Also need to figure out which of these actually need to be unique in the
     // db, if any.
