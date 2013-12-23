@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
@@ -349,119 +350,36 @@ public class DataManager {
   }
 
   /**
-   * Insert a single row into the table. This is equivalent to calling
-   * {@link #insertRows(List)} with a list of size 1.
+   * Inserts or Updates a list of rows.  If inserting, the row must not already exist
+   * or the eTag for the row being inserted must exactly match that on the server.
    *
-   * @param row
-   *          the row to insert. See {@link Row#forInsert(String, String, Map)}.
-   *          {@link Row#getRowEtag()}, {@link Row#isDeleted()},
-   *          {@link Row#getCreateUser()}, and {@link Row#getLastUpdateUser()}
-   *          will be ignored if they are set.
-   * @return the row with rowEtag populated. If the passed in row had a null
-   *         rowId, then the generated rowId will also be populated.
-   * @throws ODKEntityPersistException
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   * @throws BadColumnNameException
-   *           if the passed in row set a value for a column which doesn't exist
-   *           in the table
-   */
-  public Row insertRow(Row row) throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, BadColumnNameException {
-    List<Row> rows = new ArrayList<Row>();
-    rows.add(row);
-    rows = insertRows(rows);
-    assert rows.size() == 1;
-    return rows.get(0);
-  }
-
-  /**
-   * Insert a list of rows.
-   *
-   * @param rows
-   *          the list of rows. See
-   *          {@link Row#forInsert(String, String, java.util.Map)}.
-   *          {@link Row#getRowEtag()}, {@link Row#isDeleted()},
-   *          {@link Row#getCreateUser()}, and {@link Row#getLastUpdateUser()}
-   *          will be ignored if they are set.
-   * @return the list of inserted rows, with each row's rowEtag populated. For
-   *         each row, if the original passed in row had a null rowId, the row
-   *         will contain the generated rowId.
-   * @throws ODKEntityPersistException
-   *           if the passed in rows contained a row that already exists.
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   * @throws BadColumnNameException
-   *           if one of the passed in rows set a value for a column which
-   *           doesn't exist in the table
-   */
-  public List<Row> insertRows(List<Row> rows) throws ODKEntityPersistException,
-      ODKDatastoreException, ODKTaskLockException, BadColumnNameException {
-    try {
-      return insertOrUpdateRows(rows, true);
-    } catch (EtagMismatchException e) {
-      throw new RuntimeException("RowVersionMismatch happened on insert!", e);
-    }
-  }
-
-  /**
-   * Updates a row. This is equivalent to calling {@link #updateRows(List)}.
-   *
-   * @param row
-   *          the row to update. See {@link Row#forUpdate(String, String, Map)}.
-   *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
-   *          {@link Row#getLastUpdateUser()} will be ignored if they are set.
-   * @return the row that was updated, with a new rowEtag.
-   * @throws ODKEntityNotFoundException
-   *           if the row does not exist
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   * @throws EtagMismatchException
-   *           if the passed in row has a different rowEtag from the row in the
-   *           datastore
-   * @throws BadColumnNameException
-   *           if the passed in row set a value for a column which doesn't exist
-   *           in the table
-   */
-  public Row updateRow(Row row) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException, BadColumnNameException {
-    List<Row> rows = new ArrayList<Row>();
-    rows.add(row);
-    rows = updateRows(rows);
-    assert rows.size() == 1;
-    return rows.get(0);
-  }
-
-  /**
-   * Updates a list of rows.
-   *
+   * @param af -- authentication filter to be applied to this action
    * @param rows
    *          the rows to update. See
+   *          {@link Row#forInsert(String, String, java.util.Map)}.
    *          {@link Row#forUpdate(String, String, java.util.Map)}
    *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
    *          {@link Row#getLastUpdateUser()} will be ignored if they are set.
-   * @return the rows that were updated, with each row's rowEtag populated with
-   *         the new rowEtag.
+   * @return the rows that were inserted or updated, with each row's rowEtag populated with
+   *         the new rowEtag. If the original passed in row had a null rowId, the row
+   *         will contain the generated rowId.
    * @throws ODKEntityNotFoundException
    *           if one of the passed in rows does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    * @throws EtagMismatchException
    *           if one of the passed in rows has a different rowEtag from the row
-   *           in the datastore
+   *           in the datastore (e.g., on insert, the row already exists, or on
+   *           update, there is conflict that needs to be resolved).
    * @throws BadColumnNameException
    *           if one of the passed in rows set a value for a column which
    *           doesn't exist in the table
+   * @throws PermissionDeniedException
    *
    */
-  public List<Row> updateRows(List<Row> rows) throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKTaskLockException, EtagMismatchException, BadColumnNameException {
-    return insertOrUpdateRows(rows, false);
-  }
-
-  private List<Row> insertOrUpdateRows(List<Row> rows, boolean insert)
+  public List<Row> insertOrUpdateRows(AuthFilter af, List<Row> rows)
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException, BadColumnNameException {
+      ODKTaskLockException, EtagMismatchException, BadColumnNameException, PermissionDeniedException {
     Validate.noNullElements(rows);
 
     List<Entity> rowEntities;
@@ -480,13 +398,7 @@ public class DataManager {
       entry.setDataETag(dataEtag);
 
       // create or update entities
-      if (insert) {
-        rowEntities =
-            creator.newRowEntities(table, rows, dataEtag, columns, cc);
-      } else {
-        rowEntities =
-            creator.updateRowEntities(table, dataEtag, rows, columns, cc);
-      }
+      rowEntities = creator.insertOrUpdateRowEntities(af, table, dataEtag, rows, columns, cc);
 
       // create log table entries
       List<Entity> logEntities =

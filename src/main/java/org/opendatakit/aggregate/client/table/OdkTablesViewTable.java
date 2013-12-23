@@ -93,6 +93,7 @@ public class OdkTablesViewTable extends FlexTable {
    * This updates the display to show the contents of the table.
    */
   public void updateDisplay(TableEntryClient table) {
+    @SuppressWarnings("unused")
     TableEntryClient oldTable = this.currentTable;
 
     // for testing timing

@@ -240,6 +240,21 @@ public class EntityConverter {
     return fields;
   }
 
+  public Scope getFilterScope(Entity entity) {
+    String filterType = entity.getString(DbTable.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        return new Scope(Scope.Type.DEFAULT, null);
+      } else {
+        String value = entity.getString(DbTable.FILTER_VALUE);
+        return new Scope(type, value);
+      }
+    } else {
+      return Scope.EMPTY_SCOPE;
+    }
+  }
+
   /**
    * Convert a {@link DbTable} entity into a {@link Row}. The returned row will
    * have the {@link DbTable} metadata columns such as _savepoint_timestamp and

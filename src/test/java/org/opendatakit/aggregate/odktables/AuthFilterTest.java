@@ -111,7 +111,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.DEFAULT, null));
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test(expected = PermissionDeniedException.class)
@@ -121,7 +121,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(Scope.EMPTY_SCOPE);
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test
@@ -131,7 +131,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(currentUserScope);
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test(expected = PermissionDeniedException.class)
@@ -141,7 +141,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.USER, currentUserScope.getValue() + "diff"));
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test

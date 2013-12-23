@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -47,7 +48,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -157,15 +157,10 @@ public class ServerOdkTablesUtil {
       Row serverRow = UtilTransforms.transform(row);
       DataManager dm = new DataManager(tableId, cc);
       AuthFilter af = new AuthFilter(tableId, cc);
-      af.checkPermission(TablePermission.WRITE_ROW);
       row.setRowId(rowId);
-      Row dbRow = dm.getRow(rowId);
-      if (dbRow == null) {
-        serverRow = dm.insertRow(serverRow);
-      } else {
-        af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
-        serverRow = dm.updateRow(serverRow);
-      }
+
+      List<Row> rows = dm.insertOrUpdateRows(af, Collections.singletonList(serverRow));
+      serverRow = rows.get(0);
       return UtilTransforms.transform(serverRow);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
