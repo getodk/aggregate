@@ -388,6 +388,7 @@ public class DataManager {
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     try {
       lock.acquire();
+      // TODO: CRITICAL need to start a transaction here!!!
       Sequencer sequencer = new Sequencer(cc);
 
       // refresh entry
@@ -411,7 +412,9 @@ public class DataManager {
       DbLogTable.putEntities(logEntities, cc);
       DbTable.putEntities(rowEntities, cc);
       entry.put(cc);
+      // TODO: CRITICAL need to commit a transaction here!!!
     } finally {
+      // TODO: CRITICAL if failure then need to rollback a transaction!!!
       lock.release();
     }
     return converter.toRows(rowEntities, columns, false);

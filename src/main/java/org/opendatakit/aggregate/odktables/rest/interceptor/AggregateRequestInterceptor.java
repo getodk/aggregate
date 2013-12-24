@@ -16,13 +16,11 @@
 package org.opendatakit.aggregate.odktables.rest.interceptor;
 
 import java.io.IOException;
-import java.net.URI;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.support.HttpRequestWrapper;
 
 public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor {
 
@@ -35,29 +33,10 @@ public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,
       ClientHttpRequestExecution execution) throws IOException {
-    HttpRequest wrappedRequest = new AddAccessTokenHttpRequestWrapper(request);
-    return execution.execute(wrappedRequest, body);
-  }
-
-  private class AddAccessTokenHttpRequestWrapper extends HttpRequestWrapper {
-
-    public AddAccessTokenHttpRequestWrapper(HttpRequest request) {
-      super(request);
+    if ( accessToken != null ) {
+      request.getHeaders().set("Authorization", "Bearer " + accessToken);
     }
-
-    @Override
-    public URI getURI() {
-      String uriString = super.getURI().toString();
-      String accessTokenQuery = "access_token=" + accessToken;
-      if (super.getURI().getQuery() == null) {
-        accessTokenQuery = "?" + accessTokenQuery;
-      } else {
-        accessTokenQuery = "&" + accessTokenQuery;
-      }
-      URI uri = URI.create(uriString + accessTokenQuery);
-      return uri;
-    }
-
+    return execution.execute(request, body);
   }
 
 }

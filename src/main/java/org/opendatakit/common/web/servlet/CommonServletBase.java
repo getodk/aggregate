@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -45,7 +45,7 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 
 /**
  * Base class for Servlets that contain useful utilities
- * 
+ *
  */
 @SuppressWarnings("serial")
 public abstract class CommonServletBase extends HttpServlet {
@@ -58,11 +58,11 @@ public abstract class CommonServletBase extends HttpServlet {
   protected static final String HOST_HEADER = "Host";
 
   private final String applicationName;
-  
+
   protected CommonServletBase(String applicationName) {
      this.applicationName = applicationName;
   }
-  
+
   protected Map<String,String> parseParameterMap(HttpServletRequest request, Log logger) {
 
     Map<String, String> parameters = new HashMap<String,String>();
@@ -99,7 +99,7 @@ public abstract class CommonServletBase extends HttpServlet {
     }
     return parameters;
   }
-  
+
   protected String getRedirectUrl(HttpServletRequest request) {
     HttpSession session = request.getSession(false);
     if(session != null) {
@@ -111,14 +111,14 @@ public abstract class CommonServletBase extends HttpServlet {
     return null;
   }
 
-  
+
   protected String getRedirectUrl(HttpServletRequest request, String defaultUrl) {
     String redirectParamString = getRedirectUrl(request);
     if ( redirectParamString == null ) {
       // use the redirect query parameter if present...
       redirectParamString = request.getParameter("redirect");
       if (redirectParamString == null || redirectParamString.length() == 0) {
-        // otherwise, redirect to defaultUrl 
+        // otherwise, redirect to defaultUrl
         // and preserve query string (for GWT debugging)
         redirectParamString = defaultUrl;
         String query = request.getQueryString();
@@ -132,7 +132,7 @@ public abstract class CommonServletBase extends HttpServlet {
 
   /**
    * Takes the request and displays request in plain text in the response
-   * 
+   *
    * @param req The HTTP request received at the server
    * @param resp The HTTP response to be sent to client
    * @throws IOException
@@ -157,7 +157,7 @@ public abstract class CommonServletBase extends HttpServlet {
    * beginBasicHtmlResponse should be called first before adding other
    * information to the http response. When response is finished
    * finishBasicHtmlResponse should be called.
-   * 
+   *
    * @param pageName name that should appear on the top of the page
    * @param resp http response to have the information appended to
    * @param req request
@@ -187,7 +187,7 @@ public abstract class CommonServletBase extends HttpServlet {
    * beginBasicHtmlResponse should be called first before adding other
    * information to the http response. When response is finished
    * finishBasicHtmlResponse should be called.
-   * 
+   *
    * @param pageName name that should appear on the top of the page
    * @param headContent additional head content emitted before title
    * @param resp http response to have the information appended to
@@ -201,7 +201,7 @@ public abstract class CommonServletBase extends HttpServlet {
     out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
     out.write(HtmlStrUtil.createEndTag(HtmlConsts.DIV));
   }
-  
+
   /**
    * Determine the OpenRosa version number on this request.
    * @param req
@@ -213,20 +213,28 @@ public abstract class CommonServletBase extends HttpServlet {
    Double d = Double.valueOf(value);
    return d;
   }
-  
+
   protected final void addOpenRosaHeaders(HttpServletResponse resp) {
    resp.setHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER, ServletConsts.OPEN_ROSA_VERSION );
     GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
     g.setTime(new Date());
     SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
     formatter.setCalendar(g);
-    resp.setHeader(ServletConsts.OPEN_ROSA_DATE_HEADER,  formatter.format(new Date()));
+    resp.setHeader(ServletConsts.DATE_HEADER,  formatter.format(new Date()));
     resp.setHeader(ServletConsts.OPEN_ROSA_ACCEPT_CONTENT_LENGTH_HEADER, "10485760"); // 10MB
   }
-  
+
+  protected final void addOpenDataKitHeaders(HttpServletResponse resp) {
+    resp.setHeader(ServletConsts.OPEN_DATA_KIT_VERSION_HEADER, ServletConsts.OPEN_DATA_KIT_VERSION);
+    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    g.setTime(new Date());
+    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
+    formatter.setCalendar(g);
+    resp.setHeader(ServletConsts.DATE_HEADER,  formatter.format(new Date()));
+  }
   /**
    * Generate HTML footer string for web responses
-   * 
+   *
    * @param resp http response to have the information appended to
    * @throws IOException
    */
@@ -236,7 +244,7 @@ public abstract class CommonServletBase extends HttpServlet {
 
   /**
    * Generate error response for missing parameters in request
-   * 
+   *
    * @param resp The HTTP response to be sent to client
    * @throws IOException caused by problems writing error information to
    *         response
@@ -248,24 +256,24 @@ public abstract class CommonServletBase extends HttpServlet {
   /**
    * Extract the parameter from HTTP request and return the decoded value.
    * Returns null if parameter not present
-   * 
+   *
    * @param req HTTP request that contains the parameter
    * @param parameterName the name of the parameter to be retrieved
    * @return Parameter's decoded value or null if not found
-   * 
+   *
    * @throws UnsupportedEncodingException
    */
   protected final String getParameter(HttpServletRequest req, String parameterName)
       throws UnsupportedEncodingException {
     String parameter = req.getParameter(parameterName);
-    
+
     // TODO: consider if aggregate should really be passing nulls in parameters
     // TODO: FIX!!! as null happens when parameter not present, but what about passing nulls?
     if(parameter != null) {
       if(parameter.equals(BasicConsts.NULL)) {
         return null;
       }
-    } 
+    }
     return parameter;
   }
 

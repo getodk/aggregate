@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * This is the servlet that handles the uploading of files that are
@@ -165,10 +166,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		  CallingContext cc = ContextFactory.getCallingContext(this, req);
 		  logger.info("Inside doHead");
-		  //TODO add openrosa stuff?
-		  String serverUrl = cc.getServerURL();
-		  String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
-		  resp.setHeader("Location", url);
+		  addOpenDataKitHeaders(resp);
 		  resp.setStatus(204); // no content...
 	  }
 
@@ -217,8 +215,10 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 //			  String pathPrefix = uploadedFormItems
 //			      .getSimpleFormField("path_prefix");
 //
+//         addOpenDataKitHeaders(resp);
 //			  resp.setStatus(HttpServletResponse.SC_CREATED);
-//			  resp.setHeader("Location", cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR);
+//         resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
+//         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 //
 //			  // first we need to get the id of the table.
 //			  String tableId = getTableId(tableName, cc);

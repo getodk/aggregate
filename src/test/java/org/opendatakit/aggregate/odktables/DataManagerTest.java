@@ -275,7 +275,6 @@ public class DataManagerTest {
     try {
       Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
     } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     List<Row> rows = dm.getRows();

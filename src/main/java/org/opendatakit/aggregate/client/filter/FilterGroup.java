@@ -34,22 +34,22 @@ public final class FilterGroup implements Serializable {
   private ArrayList<Filter> filters;
 
   private Boolean includeMetadata;
-  
+
   private int queryFetchLimit;
 
   private UIQueryResumePoint cursor;
 
   public FilterGroup() {
-    
+
   }
-  
+
   public FilterGroup(String groupName, String formId, ArrayList<Filter> filtersToApply) {
     this.uri = UIConsts.URI_DEFAULT;
     this.name = groupName;
     this.formId = formId;
     this.includeMetadata = false;
     this.queryFetchLimit = DEFAULT_FETCH_LIMIT;
-    
+
     if(filtersToApply == null) {
       this.filters = new ArrayList<Filter>();
     } else {
@@ -59,9 +59,9 @@ public final class FilterGroup implements Serializable {
 
   /**
    * This constructor should only be used by the server
-   * 
+   *
    * @param uri
-   * @param metadata TODO
+   * @param metadata -- whether or not to include metadata in the output
    */
   public FilterGroup(String uri, boolean metadata) {
     this.uri = uri;
@@ -80,11 +80,11 @@ public final class FilterGroup implements Serializable {
       filter.resetUriToDefault();
     }
   }
-  
+
   public String getName() {
     return name;
   }
-  
+
   public String getFormId() {
     return formId;
   }
@@ -116,10 +116,10 @@ public final class FilterGroup implements Serializable {
   public void setUri(String uri) {
     this.uri = uri;
   }
-  
+
   /**
    * This should add the filter to the group
-   * 
+   *
    * @param filter
    *          the filter to be added
    */
@@ -129,7 +129,7 @@ public final class FilterGroup implements Serializable {
 
   /**
    * This should remove the filter from the group
-   * 
+   *
    * @param filter
    *          the filter to be removed
    */
@@ -140,11 +140,11 @@ public final class FilterGroup implements Serializable {
   public int getQueryFetchLimit() {
     return queryFetchLimit;
   }
-  
+
   public void setQueryFetchLimit(int fetchLimit) {
     queryFetchLimit = fetchLimit;
   }
-  
+
   public UIQueryResumePoint getCursor() {
     return cursor;
   }
