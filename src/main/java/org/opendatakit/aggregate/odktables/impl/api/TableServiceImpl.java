@@ -31,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
@@ -47,8 +46,8 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -136,12 +135,6 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public ColumnService getColumns(String tableId) throws ODKDatastoreException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public DataService getData(String tableId) throws ODKDatastoreException {
     return new DataServiceImpl(tableId, info, cc);
   }
@@ -160,7 +153,6 @@ public class TableServiceImpl implements TableService {
   public TableAclService getAcl(String tableId) throws ODKDatastoreException {
     return new TableAclServiceImpl(tableId, info, cc);
   }
-
 
   @Override
   public TableDefinitionResource getDefinition(String tableId)

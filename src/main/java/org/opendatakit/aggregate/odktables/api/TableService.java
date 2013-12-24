@@ -59,10 +59,6 @@ public interface TableService {
       throws ODKDatastoreException,
       ODKTaskLockException, PermissionDeniedException;
 
-  @Path("{tableId}/columns")
-  public ColumnService getColumns(@PathParam("tableId") String tableId)
-      throws ODKDatastoreException;
-
   @Path("{tableId}/rows")
   public DataService getData(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;

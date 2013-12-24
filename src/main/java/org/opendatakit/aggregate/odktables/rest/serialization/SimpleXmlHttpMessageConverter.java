@@ -19,10 +19,17 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
+import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -40,7 +47,7 @@ import org.springframework.util.Assert;
  * By default, this converter supports {@code text/xml} and
  * {@code application/xml}. This can be overridden by setting the
  * {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
- * 
+ *
  * @author Roy Clarkson
  * @since 1.0.0
  */
@@ -90,7 +97,16 @@ public class SimpleXmlHttpMessageConverter extends AbstractHttpMessageConverter<
   protected void writeInternal(Object o, HttpOutputMessage outputMessage) throws IOException {
     Assert.notNull(this.serializer, "Property 'serializer' is required");
     try {
-      Writer writer = new OutputStreamWriter(outputMessage.getBody(), DEFAULT_CHARSET.name());
+      HttpHeaders headers = outputMessage.getHeaders();
+      headers.add(ServletConsts.OPEN_DATA_KIT_VERSION_HEADER, ServletConsts.OPEN_DATA_KIT_VERSION);
+      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+      g.setTime(new Date());
+      SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
+      formatter.setCalendar(g);
+      headers.add(ServletConsts.DATE_HEADER,  formatter.format(new Date()));
+      headers.setContentType(new MediaType("text", "xml", Charset.forName(HtmlConsts.UTF8_ENCODE)));
+
+      Writer writer = new OutputStreamWriter(outputMessage.getBody(), HtmlConsts.UTF8_ENCODE);
       this.serializer.write(o, writer);
     } catch (Exception ex) {
       throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
