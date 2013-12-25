@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 
@@ -40,32 +42,55 @@ public class Preferences {
 
   private static Boolean fasterBackgroundActionsDisabled;
 
-  public static void updatePreferences(final PreferencesCompletionCallback callback) {
-    SecureGWT.getPreferenceService().getPreferences(new AsyncCallback<PreferenceSummary>() {
-      public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-          if (callback != null) {
-            callback.failedRefresh();
-          }
-      }
+  private static int nesting = 0;
+  private static ArrayList<PreferencesCompletionCallback> userCallbacks = new ArrayList<PreferencesCompletionCallback>();
 
-      public void onSuccess(PreferenceSummary summary) {
-        if(summary == null) {
-          GWT.log(NULL_PREFERENCES_ERROR);
-          AggregateUI.getUI().reportError(new Throwable(NULL_PREFERENCES_ERROR));
-        }
-
-        googleSimpleApiKey = summary.getGoogleSimpleApiKey();
-        googleApiClientId = summary.getGoogleApiClientId();
-        odkTablesEnabled = summary.getOdkTablesEnabled();
-        fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
-
-        if (callback != null) {
-        	callback.refreshFromUpdatedPreferences();
+  private static AsyncCallback<PreferenceSummary> callback = new AsyncCallback<PreferenceSummary>() {
+    @Override
+    public void onFailure(Throwable caught) {
+      AggregateUI.getUI().reportError(caught);
+      --nesting;
+      if ( nesting <= 0 ) {
+        nesting = 0;
+        ArrayList<PreferencesCompletionCallback> local = userCallbacks;
+        userCallbacks = new ArrayList<PreferencesCompletionCallback>();
+        for ( PreferencesCompletionCallback uc : local ) {
+          uc.failedRefresh();
         }
       }
-    });
+    }
 
+    @Override
+    public void onSuccess(PreferenceSummary summary) {
+      if(summary == null) {
+        GWT.log(NULL_PREFERENCES_ERROR);
+        AggregateUI.getUI().reportError(new Throwable(NULL_PREFERENCES_ERROR));
+      }
+
+      googleSimpleApiKey = summary.getGoogleSimpleApiKey();
+      googleApiClientId = summary.getGoogleApiClientId();
+      Boolean oldTablesValue = odkTablesEnabled;
+      odkTablesEnabled = summary.getOdkTablesEnabled();
+      fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
+
+      --nesting;
+      if ( nesting <= 0 ) {
+        nesting = 0;
+        ArrayList<PreferencesCompletionCallback> local = userCallbacks;
+        userCallbacks = new ArrayList<PreferencesCompletionCallback>();
+        for ( PreferencesCompletionCallback uc : local ) {
+          uc.refreshFromUpdatedPreferences();
+        }
+      }
+
+      AggregateUI.getUI().updateOdkTablesFeatureVisibility();
+    }
+  };
+
+  public static void updatePreferences(final PreferencesCompletionCallback userCallback) {
+    userCallbacks.add(userCallback);
+    ++nesting;
+    SecureGWT.getPreferenceService().getPreferences(callback);
   }
 
   public static String getGoogleSimpleApiKey() {
@@ -89,37 +114,11 @@ public class Preferences {
     return Boolean.FALSE;
   }
 
-  public static void setOdkTablesBoolean(Boolean enabled) {
-    SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-      }
-
-      public void onSuccess(Void void1) {
-        // do nothing
-      }
-    });
-    odkTablesEnabled = enabled;
-  }
-
   public static Boolean getFasterBackgroundActionsDisabled() {
     if(fasterBackgroundActionsDisabled != null) {
       return fasterBackgroundActionsDisabled;
     }
     return Boolean.FALSE;
-  }
-
-  public static void setFasterBackgroundActionsDisabledBoolean(Boolean disabled) {
-    SecureGWT.getPreferenceService().setFasterBackgroundActionsDisabled(disabled, new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-      }
-
-      public void onSuccess(Void void1) {
-        // do nothing
-      }
-    });
-    fasterBackgroundActionsDisabled = disabled;
   }
 
 

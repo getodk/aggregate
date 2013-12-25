@@ -26,8 +26,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.common.web.constants.HtmlConsts;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -66,15 +65,15 @@ public class JsonObjectHttpMessageConverter extends AbstractHttpMessageConverter
   protected void writeInternal(JsonObject object, HttpOutputMessage outputMessage) throws IOException,
       HttpMessageNotWritableException {
     HttpHeaders headers = outputMessage.getHeaders();
-    headers.add(ServletConsts.OPEN_DATA_KIT_VERSION_HEADER, ServletConsts.OPEN_DATA_KIT_VERSION);
+    headers.add(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
     GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
     g.setTime(new Date());
     SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
     formatter.setCalendar(g);
-    headers.add(ServletConsts.DATE_HEADER,  formatter.format(new Date()));
-    headers.setContentType(new MediaType("application", "json", Charset.forName(HtmlConsts.UTF8_ENCODE)));
+    headers.add(ApiConstants.DATE_HEADER,  formatter.format(new Date()));
+    headers.setContentType(new MediaType("application", "json", Charset.forName(ApiConstants.UTF8_ENCODE)));
 
-    Writer writer = new OutputStreamWriter(outputMessage.getBody(), HtmlConsts.UTF8_ENCODE);
+    Writer writer = new OutputStreamWriter(outputMessage.getBody(), ApiConstants.UTF8_ENCODE);
     gson.toJson(object, writer);
   }
 

@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.security.spring.SpringInternals;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -202,36 +201,6 @@ public abstract class CommonServletBase extends HttpServlet {
     out.write(HtmlStrUtil.createEndTag(HtmlConsts.DIV));
   }
 
-  /**
-   * Determine the OpenRosa version number on this request.
-   * @param req
-   * @return null if unspecified (1.1.5 and earlier); otherwise, e.g., "1.0"
-   */
-  protected final Double getOpenRosaVersion(HttpServletRequest req) {
-   String value = req.getHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER);
-   if ( value == null || value.length() == 0 ) return null;
-   Double d = Double.valueOf(value);
-   return d;
-  }
-
-  protected final void addOpenRosaHeaders(HttpServletResponse resp) {
-   resp.setHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER, ServletConsts.OPEN_ROSA_VERSION );
-    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-    g.setTime(new Date());
-    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
-    formatter.setCalendar(g);
-    resp.setHeader(ServletConsts.DATE_HEADER,  formatter.format(new Date()));
-    resp.setHeader(ServletConsts.OPEN_ROSA_ACCEPT_CONTENT_LENGTH_HEADER, "10485760"); // 10MB
-  }
-
-  protected final void addOpenDataKitHeaders(HttpServletResponse resp) {
-    resp.setHeader(ServletConsts.OPEN_DATA_KIT_VERSION_HEADER, ServletConsts.OPEN_DATA_KIT_VERSION);
-    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-    g.setTime(new Date());
-    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
-    formatter.setCalendar(g);
-    resp.setHeader(ServletConsts.DATE_HEADER,  formatter.format(new Date()));
-  }
   /**
    * Generate HTML footer string for web responses
    *
