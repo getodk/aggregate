@@ -24,8 +24,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.common.web.constants.HtmlConsts;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.springframework.beans.TypeMismatchException;
@@ -98,15 +97,15 @@ public class SimpleXmlHttpMessageConverter extends AbstractHttpMessageConverter<
     Assert.notNull(this.serializer, "Property 'serializer' is required");
     try {
       HttpHeaders headers = outputMessage.getHeaders();
-      headers.add(ServletConsts.OPEN_DATA_KIT_VERSION_HEADER, ServletConsts.OPEN_DATA_KIT_VERSION);
+      headers.add(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
       GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
       g.setTime(new Date());
       SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
       formatter.setCalendar(g);
-      headers.add(ServletConsts.DATE_HEADER,  formatter.format(new Date()));
-      headers.setContentType(new MediaType("text", "xml", Charset.forName(HtmlConsts.UTF8_ENCODE)));
+      headers.add(ApiConstants.DATE_HEADER,  formatter.format(new Date()));
+      headers.setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
 
-      Writer writer = new OutputStreamWriter(outputMessage.getBody(), HtmlConsts.UTF8_ENCODE);
+      Writer writer = new OutputStreamWriter(outputMessage.getBody(), ApiConstants.UTF8_ENCODE);
       this.serializer.write(o, writer);
     } catch (Exception ex) {
       throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);

@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.odktables.rest.interceptor;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -24,17 +25,22 @@ import org.springframework.http.client.ClientHttpResponse;
 
 public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor {
 
+  private URI uriBase;
   private String accessToken;
 
-  public AggregateRequestInterceptor(String accessToken) {
+  public AggregateRequestInterceptor(URI uriBase, String accessToken) {
+    this.uriBase = uriBase;
     this.accessToken = accessToken;
   }
 
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,
       ClientHttpRequestExecution execution) throws IOException {
-    if ( accessToken != null ) {
-      request.getHeaders().set("Authorization", "Bearer " + accessToken);
+    if ( accessToken != null && uriBase != null ) {
+      if (request.getURI().getHost().equals(uriBase.getHost()) &&
+          request.getURI().getPort() == uriBase.getPort() ) {
+        request.getHeaders().set("Authorization", "Bearer " + accessToken);
+      }
     }
     return execution.execute(request, body);
   }

@@ -25,11 +25,11 @@ import com.google.gwt.user.client.Window;
 public class PermissionsSubTab extends AggregateSubTabBase {
 
   private AccessConfigurationSheet accessConfig;
-  
+
   public PermissionsSubTab() {
     // vertical
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
-    
+
   }
 
   @Override
@@ -44,7 +44,13 @@ public class PermissionsSubTab extends AggregateSubTabBase {
 	  }
 	  return true;
   }
-  
+
+  public void changeTablesPrivilegesVisibility(boolean visible) {
+    if ( accessConfig != null ) {
+      accessConfig.changeTablesPrivilegesVisibility(visible);
+    }
+  }
+
   @Override
   public void update() {
 

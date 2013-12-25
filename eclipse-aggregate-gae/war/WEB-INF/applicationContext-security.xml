@@ -101,15 +101,14 @@
 		<intercept-url pattern="/remote_api" access="true" />
 
 		<!-- ODK Tables API -->
-		<intercept-url pattern="/odktables/**" access="true" />
-		<intercept-url pattern="/odktablesui*" access="true" />
+		<intercept-url pattern="/odktables/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
 		<!-- odk tables file upload and download stuff -->
-		<intercept-url pattern="/tableFileUpload/**" access="true" />
-		<intercept-url pattern="/tableFileDownload/**" access="true" />
-		<intercept-url pattern="/tableKeyValueManifest/**" access="true" />
+		<intercept-url pattern="/tableFileUpload/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />
+		<intercept-url pattern="/tableFileDownload/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />
+		<intercept-url pattern="/tableKeyValueManifest/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />
 		<!-- odk tables upload file from CSV -->
-		<intercept-url pattern="/uploadTableFromCSV/**" access="true" />
-		
+		<intercept-url pattern="/uploadTableFromCSV/**" access="hasRole('ROLE_ADMINISTER_TABLES')" />
+
 		<!-- in case we forgot to mention something... -->
 		<intercept-url pattern="/**" access="isAnonymous()" />
 	</filter-security-metadata-source>

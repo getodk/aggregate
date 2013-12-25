@@ -41,13 +41,6 @@ public final class ServletConsts {
 
   public static final String OPEN_ROSA_ACCEPT_CONTENT_LENGTH_HEADER = "X-OpenRosa-Accept-Content-Length";
 
-
-  public static final String OPEN_DATA_KIT_VERSION_HEADER = "X-OpenDataKit-Version";
-
-  public static final String OPEN_DATA_KIT_VERSION = "2.0";
-
-  public static final String DATE_HEADER = "Date";
-
   /**
    * Flag on submissions and form uploads indicating that this is
    * a partial submission or form upload.
