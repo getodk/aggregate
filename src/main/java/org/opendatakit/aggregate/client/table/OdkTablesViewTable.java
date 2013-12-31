@@ -265,10 +265,8 @@ public class OdkTablesViewTable extends FlexTable {
               currentTable.getTableId(), row.getRowId()));
           int j = 1;
           for (String column : columnNames) {
-            if (column.substring(0, 1).equalsIgnoreCase("_")) {
-              setWidget(currentRow, j, new HTML(row.getValues().get(column)));
-              j++;
-            }
+            setWidget(currentRow, j, new HTML(row.getValues().get(column)));
+            j++;
 
             if (currentRow % 2 == 0) {
               getRowFormatter().addStyleName(currentRow, "evenTableRow");

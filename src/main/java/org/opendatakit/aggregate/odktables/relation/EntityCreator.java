@@ -377,7 +377,7 @@ public class EntityCreator {
         continue;
       } else if (TableConstants.SHARED_COLUMN_NAMES.contains(name)) {
         // 2) --save the data
-        row.set(name, value);
+        row.setAsString(name.toUpperCase(), value);
       } else {
         // 3) --add it to the user-defined column
         DbColumnDefinitionsEntity column = findColumn(name, columns);
@@ -386,8 +386,9 @@ public class EntityCreator {
           // of the Tables-only columns. Otherwise it's an error.
           log.error("bad column name: " + name);
           throw new BadColumnNameException("Bad column name " + name);
+        } else if ( column.getIsUnitOfRetention() ) {
+          row.setAsString(column.getElementKey().toUpperCase(), value);
         }
-        row.setAsString(column.getElementKey(), value);
       }
     }
   }
@@ -441,11 +442,13 @@ public class EntityCreator {
     entity.set(DbLogTable.URI_ACCESS_CONTROL, row.getString(DbTable.URI_ACCESS_CONTROL));
     entity.set(DbLogTable.FORM_ID, row.getString(DbTable.FORM_ID));
     entity.set(DbLogTable.LOCALE, row.getString(DbTable.LOCALE));
-    entity.set(DbLogTable.SAVEPOINT_TIMESTAMP, row.getString(DbTable.SAVEPOINT_TIMESTAMP));
+    entity.set(DbLogTable.SAVEPOINT_TIMESTAMP, row.getLong(DbTable.SAVEPOINT_TIMESTAMP));
 
     for (DbColumnDefinitionsEntity column : columns) {
-      String value = row.getAsString(column.getElementKey());
-      entity.setAsString(column.getElementKey(), value);
+      if ( column.getIsUnitOfRetention() ) {
+        String value = row.getAsString(column.getElementKey().toUpperCase());
+        entity.setAsString(column.getElementKey().toUpperCase(), value);
+      }
     }
     return entity;
   }

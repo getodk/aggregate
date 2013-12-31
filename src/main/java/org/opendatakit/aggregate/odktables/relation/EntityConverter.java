@@ -187,19 +187,6 @@ public class EntityConverter {
   }
 
   /**
-   * Convert a {@link Column} to a {@link DataField}
-   */
-  public DataField toField(Column column) {
-    // ss: exactly what the point of this method is eludes me. However, I
-    // believe that the "type" of an ODK Tables Column on the aggregate side
-    // is always a string. Tables permits more complicated types like image,
-    // location, etc, and therefore there is no way/reason to map each level
-    // to the aggregate side.
-    DataField field = new DataField(column.getElementKey(), DataType.STRING, true);
-    return field;
-  }
-
-  /**
    * Convert a {@link DbColumnDefinitions} entity to a {@link DataField}
    * <p>
    * We create fields on the server with boolean, integer, numeric and string
@@ -217,15 +204,18 @@ public class EntityConverter {
    * with some rework on the server, could become mutable).
    */
   public DataField toField(DbColumnDefinitionsEntity entity) {
+    if ( !entity.getIsUnitOfRetention() ) {
+      throw new IllegalArgumentException("Attempt to get DataField for a non-persisted elementKey (" + entity.getElementKey() + ")");
+    }
     String type = entity.getElementType();
     if (type.equals("boolean")) {
-      return new DataField(entity.getElementKey(), DataType.BOOLEAN, true);
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.BOOLEAN, true);
     } else if (type.equals("integer")) {
-      return new DataField(entity.getElementKey(), DataType.INTEGER, true);
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.INTEGER, true);
     } else if (type.equals("number")) {
-      return new DataField(entity.getElementKey(), DataType.DECIMAL, true);
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.DECIMAL, true);
     } else {
-      return new DataField(entity.getElementKey(), DataType.STRING, true);
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true);
     }
   }
 
@@ -236,7 +226,9 @@ public class EntityConverter {
   public List<DataField> toFields(List<DbColumnDefinitionsEntity> entities) {
     List<DataField> fields = new ArrayList<DataField>();
     for (DbColumnDefinitionsEntity entity : entities)
-      fields.add(toField(entity));
+      if ( entity.getIsUnitOfRetention() ) {
+        fields.add(toField(entity));
+      }
     return fields;
   }
 
@@ -290,7 +282,7 @@ public class EntityConverter {
     row.setUriAccessControl(entity.getString(DbTable.URI_ACCESS_CONTROL));
     row.setFormId(entity.getString(DbTable.FORM_ID));
     row.setLocale(entity.getString(DbTable.LOCALE));
-    row.setSavepointTimestamp(entity.getString(DbTable.SAVEPOINT_TIMESTAMP));
+    row.setSavepointTimestamp(entity.getLong(DbTable.SAVEPOINT_TIMESTAMP));
 
     row.setValues(getRowValues(entity, columns));
     return row;
@@ -388,7 +380,7 @@ public class EntityConverter {
     row.setUriAccessControl(entity.getString(DbLogTable.URI_ACCESS_CONTROL));
     row.setFormId(entity.getString(DbLogTable.FORM_ID));
     row.setLocale(entity.getString(DbLogTable.LOCALE));
-    row.setSavepointTimestamp(entity.getString(DbLogTable.SAVEPOINT_TIMESTAMP));
+    row.setSavepointTimestamp(entity.getLong(DbLogTable.SAVEPOINT_TIMESTAMP));
 
     row.setValues(getRowValues(entity, columns));
     return row;
@@ -397,9 +389,11 @@ public class EntityConverter {
   private Map<String, String> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Map<String, String> values = new HashMap<String, String>();
     for (DbColumnDefinitionsEntity column : columns) {
-      String name = column.getElementKey();
-      String value = entity.getAsString(name);
-      values.put(name, value);
+      if ( column.getIsUnitOfRetention() ) {
+        String name = column.getElementKey();
+        String value = entity.getAsString(name.toUpperCase());
+        values.put(name, value);
+      }
     }
     return values;
   }

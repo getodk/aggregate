@@ -22,16 +22,11 @@ import java.util.Comparator;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.AggregateListBox;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.client.widgets.EnumListBox;
-import org.opendatakit.aggregate.constants.common.ExternalServiceType;
-import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-import org.springframework.security.core.authority.GrantedAuthoritiesContainer;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -39,7 +34,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextBox;
 
 public final class NewTablesAdminPopup extends AbstractPopupBase {
 

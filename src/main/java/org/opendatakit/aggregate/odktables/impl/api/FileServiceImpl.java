@@ -51,8 +51,10 @@ public class FileServiceImpl implements FileService {
 
   /**
    * String to stand in for those things in the app's root directory.
+   *
+   * NOTE: This cannot be null -- GAE doesn't like that!
    */
-  public static final String NO_TABLE_ID = null;
+  public static final String NO_TABLE_ID = "";
 
   private static final String PATH_DELIMITER = "/";
 
