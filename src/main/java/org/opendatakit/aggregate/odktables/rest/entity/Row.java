@@ -73,7 +73,7 @@ public class Row {
    * OdkTables metadata column.
    */
   @Element(required = false)
-  private String savepointTimestamp;
+  private Long savepointTimestamp;
 
   @ElementMap(entry = "entry", key = "column", attribute = true, inline = true)
   private Map<String, String> values;
@@ -198,7 +198,7 @@ public class Row {
     return this.locale;
   }
 
-  public String getSavepointTimestamp() {
+  public Long getSavepointTimestamp() {
     return this.savepointTimestamp;
   }
 
@@ -219,7 +219,7 @@ public class Row {
    *
    * @param timestamp
    */
-  public void setSavepointTimestamp(String savepointTimestamp) {
+  public void setSavepointTimestamp(Long savepointTimestamp) {
     this.savepointTimestamp = savepointTimestamp;
   }
 
@@ -232,9 +232,7 @@ public class Row {
     if ( timestamp == null ) {
       this.savepointTimestamp = null;
     } else {
-      DateTime dt = new DateTime(timestamp);
-      DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-      this.savepointTimestamp = fmt.print(dt);
+      this.savepointTimestamp = timestamp.getTime();
     }
   }
 

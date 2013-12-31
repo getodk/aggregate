@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +48,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.common.utils.WebUtils;
 
 /**
  * Various methods for transforming objects from client to server code.
@@ -169,7 +171,10 @@ public class UtilTransforms {
     serverRow.setUriAccessControl(client.getUriAccessControl());
     serverRow.setFormId(client.getFormId());
     serverRow.setLocale(client.getLocale());
-    serverRow.setSavepointTimestamp(client.getSavepointTimestamp());
+    String isoDateStr = client.getSavepointTimestampIso8601Date();
+    Date isoDate = WebUtils.parseDate(isoDateStr);
+    Long time = (isoDate == null) ? null : isoDate.getTime();
+    serverRow.setSavepointTimestamp(time);
     return serverRow;
   }
 
@@ -293,7 +298,8 @@ public class UtilTransforms {
     row.setUriAccessControl(serverRow.getUriAccessControl());
     row.setFormId(serverRow.getFormId());
     row.setLocale(serverRow.getLocale());
-    row.setSavepointTimestamp(serverRow.getSavepointTimestamp());
+    Long time = serverRow.getSavepointTimestamp();
+    row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
     if (serverRow.getFilterScope().getType() == null) {
       row.setFilterScope(ScopeClient.EMPTY_SCOPE);
     } else {
@@ -330,7 +336,8 @@ public class UtilTransforms {
     rowClient.setUriAccessControl(serverResource.getUriAccessControl());
     rowClient.setFormId(serverResource.getFormId());
     rowClient.setLocale(serverResource.getLocale());
-    rowClient.setSavepointTimestamp(serverResource.getSavepointTimestamp());
+    Long time = serverResource.getSavepointTimestamp();
+    rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
 
     RowResourceClient resource = new RowResourceClient(rowClient);
     resource.setSelfUri(serverResource.getSelfUri());

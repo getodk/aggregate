@@ -60,8 +60,9 @@ public class DbLogTable extends Relation {
       DataType.STRING, true);
   public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
       DataType.STRING, true);
+  // milliseconds
   public static final DataField SAVEPOINT_TIMESTAMP = new DataField(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(),
-      DataType.DATETIME, true);
+      DataType.INTEGER, true);
 
 
   private static final List<DataField> dataFields;
