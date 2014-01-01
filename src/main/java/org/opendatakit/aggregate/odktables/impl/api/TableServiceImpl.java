@@ -38,6 +38,7 @@ import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
@@ -73,7 +74,12 @@ public class TableServiceImpl implements TableService {
     List<TableEntry> entries = tm.getTables(scopes);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
-      resources.add(getResource(entry));
+      TableResource resource = getResource(entry);
+      if ( entry.getPropertiesEtag() != null ) {
+        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesEtag(), cc);
+        resource.setDisplayName(displayName);
+      }
+      resources.add(resource);
     }
     return resources;
   }
