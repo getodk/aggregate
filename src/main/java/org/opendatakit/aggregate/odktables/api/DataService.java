@@ -28,7 +28,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
@@ -50,7 +50,7 @@ public interface DataService {
   @Path("{rowId}")
   @Consumes(MediaType.TEXT_XML)
   public RowResource createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
-      throws ODKTaskLockException, ODKDatastoreException, EtagMismatchException,
+      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
       PermissionDeniedException, BadColumnNameException;
 
   @DELETE

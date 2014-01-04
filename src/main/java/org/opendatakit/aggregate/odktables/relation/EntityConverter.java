@@ -57,10 +57,10 @@ public class EntityConverter {
    */
   public TableEntry toTableEntry(DbTableEntryEntity entity) {
     String tableId = entity.getId();
-    String dataEtag = entity.getDataETag();
-    String propertiesEtag = entity.getPropertiesETag();
-    String schemaEtag = entity.getSchemaETag();
-    TableEntry entry = new TableEntry(tableId, dataEtag, propertiesEtag, schemaEtag);
+    String dataETag = entity.getDataETag();
+    String propertiesETag = entity.getPropertiesETag();
+    String schemaETag = entity.getSchemaETag();
+    TableEntry entry = new TableEntry(tableId, dataETag, propertiesETag, schemaETag);
     return entry;
   }
 
@@ -109,9 +109,9 @@ public class EntityConverter {
   }
 
   public TableProperties toTableProperties(List<DbKeyValueStoreEntity> kvsEntities, String tableId,
-      String propertiesEtag) {
+      String propertiesETag) {
     List<OdkTablesKeyValueStoreEntry> kvsEntries = toOdkTablesKeyValueStoreEntry(kvsEntities);
-    TableProperties properties = new TableProperties(propertiesEtag, tableId, kvsEntries);
+    TableProperties properties = new TableProperties(propertiesETag, tableId, kvsEntries);
     return properties;
   }
 
@@ -145,8 +145,8 @@ public class EntityConverter {
       DbTableDefinitionsEntity schemaEntity) {
     String tableId = schemaEntity.getTableId();
     String displayName = schemaEntity.getDbTableName();
-    TableDefinition td = new TableDefinition(tableId, null);
-    td.setDisplayName(displayName);
+    String schemaETag = schemaEntity.getSchemaETag();
+    TableDefinition td = new TableDefinition(tableId, schemaETag, null, displayName);
     return td;
   }
 
@@ -200,7 +200,7 @@ public class EntityConverter {
    * object's properties is ill-defined.
    * </p>
    * <p>
-   * Schema changes are now governed by a schemaEtag, which is immutable (though
+   * Schema changes are now governed by a schemaETag, which is immutable (though
    * with some rework on the server, could become mutable).
    */
   public DataField toField(DbColumnDefinitionsEntity entity) {
@@ -261,8 +261,8 @@ public class EntityConverter {
   public Row toRow(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Row row = new Row();
     row.setRowId(entity.getId());
-    row.setRowEtag(entity.getString(DbTable.ROW_ETAG));
-    row.setDataEtagAtModification(entity.getString(DbTable.DATA_ETAG_AT_MODIFICATION));
+    row.setRowETag(entity.getString(DbTable.ROW_ETAG));
+    row.setDataETagAtModification(entity.getString(DbTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
     String filterType = entity.getString(DbTable.FILTER_TYPE);
@@ -300,8 +300,8 @@ public class EntityConverter {
   public static Row toRowFromFileInfo(DbTableFileInfoEntity entity) {
     Row row = new Row();
     row.setRowId(entity.getId());
-    row.setRowEtag(entity.getStringField(DbTable.ROW_ETAG));
-    row.setDataEtagAtModification(entity.getStringField(DbTable.DATA_ETAG_AT_MODIFICATION));
+    row.setRowETag(entity.getStringField(DbTable.ROW_ETAG));
+    row.setDataETagAtModification(entity.getStringField(DbTable.DATA_ETAG_AT_MODIFICATION));
     row.setDeleted(entity.getBooleanField(DbTable.DELETED));
     row.setCreateUser(entity.getStringField(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getStringField(DbTable.LAST_UPDATE_USER));
@@ -359,8 +359,8 @@ public class EntityConverter {
   public Row toRowFromLogTable(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Row row = new Row();
     row.setRowId(entity.getString(DbLogTable.ROW_ID));
-    row.setRowEtag(entity.getString(DbLogTable.ROW_ETAG));
-    row.setDataEtagAtModification(entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
+    row.setRowETag(entity.getString(DbLogTable.ROW_ETAG));
+    row.setDataETagAtModification(entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbLogTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));
     String filterType = entity.getString(DbLogTable.FILTER_TYPE);

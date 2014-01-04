@@ -46,7 +46,7 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 	private static final long serialVersionUID = -5472352346806984818L;
 
 	@Override
-	public List<RowClient> getRowsSince(String dataEtag, String tableId)
+	public List<RowClient> getRowsSince(String dataETag, String tableId)
 			throws AccessDeniedException, RequestFailureException,
 			DatastoreFailureException, PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
@@ -58,10 +58,10 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements
 //		    af.checkPermission(TablePermission.READ_ROW);
 		    List<Row> rows;
 //		    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
-		      rows = dm.getRowsSince(dataEtag);
+		      rows = dm.getRowsSince(dataETag);
 //		    } else {
 //		      List<Scope> scopes = AuthFilter.getScopes(cc);
-//		      rows = dm.getRowsSince(dataEtag, scopes);
+//		      rows = dm.getRowsSince(dataETag, scopes);
 //		    }
 		    return transformRows(rows);
 	    } catch (ODKDatastoreException e) {

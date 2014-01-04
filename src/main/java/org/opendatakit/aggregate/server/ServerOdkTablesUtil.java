@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.exception.TableAlreadyExistsExceptionClient;
@@ -38,7 +38,7 @@ import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
@@ -142,7 +142,7 @@ public class ServerOdkTablesUtil {
    * @throws AccessDeniedException
    * @throws RequestFailureException
    * @throws DatastoreFailureException
-   * @throws EtagMismatchExceptionClient
+   * @throws ETagMismatchExceptionClient
    * @throws PermissionDeniedExceptionClient
    * @throws BadColumnNameExceptionClient
    * @throws EntityNotFoundExceptionClient
@@ -150,7 +150,7 @@ public class ServerOdkTablesUtil {
   public static RowClient createOrUpdateRow(String tableId, String rowId,
       RowClient row, CallingContext cc) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException,
-      EtagMismatchExceptionClient, PermissionDeniedExceptionClient,
+      ETagMismatchExceptionClient, PermissionDeniedExceptionClient,
       BadColumnNameExceptionClient, EntityNotFoundExceptionClient {
     try {
       // first transform row into a server-side row
@@ -177,9 +177,9 @@ public class ServerOdkTablesUtil {
     } catch (BadColumnNameException e) {
       e.printStackTrace();
       throw new BadColumnNameExceptionClient(e);
-    } catch (EtagMismatchException e) {
+    } catch (ETagMismatchException e) {
       e.printStackTrace();
-      throw new EtagMismatchExceptionClient(e);
+      throw new ETagMismatchExceptionClient(e);
     }
   }
 
