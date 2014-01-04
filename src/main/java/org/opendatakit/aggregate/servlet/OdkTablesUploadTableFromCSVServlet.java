@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.ImportFromCSVExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -191,7 +191,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PARSING_PROBLEM);
-    } catch (EtagMismatchExceptionClient e) {
+    } catch (ETagMismatchExceptionClient e) {
       logger.error("etag mismatch while importing: " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,

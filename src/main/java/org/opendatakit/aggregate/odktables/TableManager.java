@@ -156,17 +156,17 @@ public class TableManager {
     if (entry == null) {
       return null;
     }
-    String schemaEtag = entry.getSchemaEtag();
+    String schemaETag = entry.getSchemaETag();
     DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
-        schemaEtag, cc);
+        schemaETag, cc);
     TableDefinition definition = converter.toTableDefinition(entry, definitionEntity);
     List<DbColumnDefinitionsEntity> columnEntities = DbColumnDefinitions.query(tableId,
-        schemaEtag, cc);
+        schemaETag, cc);
     List<Column> columns = converter.toColumns(columnEntities);
     definition.setColumns(columns);
 
-    String propertiesEtag = entry.getPropertiesEtag();
-    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag,
+    String propertiesETag = entry.getPropertiesETag();
+    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesETag,
         cc);
     String displayString = null;
     for ( DbKeyValueStoreEntity kvs : kvsEntries ) {
@@ -233,19 +233,19 @@ public class TableManager {
     TableEntry existing = getTable(tableId);
     // check if table exists
     if (existing != null) {
-      DbTableDefinitionsEntity defn = DbTableDefinitions.getDefinition(tableId, existing.getSchemaEtag(), cc);
+      DbTableDefinitionsEntity defn = DbTableDefinitions.getDefinition(tableId, existing.getSchemaETag(), cc);
       if ( defn == null ) {
         throw new TableAlreadyExistsException(String.format(
             "Table with tableId '%s' already exists with incompatible schema (null TableDefinition).", tableId));
       }
-      List<DbColumnDefinitionsEntity> cols = DbColumnDefinitions.query(tableId, existing.getSchemaEtag(), cc);
+      List<DbColumnDefinitionsEntity> cols = DbColumnDefinitions.query(tableId, existing.getSchemaETag(), cc);
 
       for (DbColumnDefinitionsEntity cde : cols ) {
         boolean found = false;
         for (Column column : columns) {
           if ( column.getElementKey().equals(cde.getElementKey()) ) {
             found = true;
-            DbColumnDefinitionsEntity ce = creator.newColumnEntity(tableId, existing.getSchemaEtag(), column, cc);
+            DbColumnDefinitionsEntity ce = creator.newColumnEntity(tableId, existing.getSchemaETag(), column, cc);
             if ( !ce.matchingColumnDefinition(cde) ) {
               throw new TableAlreadyExistsException(String.format(
                   "Table with tableId '%s' already exists with incompatible schema.", tableId));
@@ -272,20 +272,20 @@ public class TableManager {
     // persist into the datastore for the table to truly be created.
     Sequencer sequencer = new Sequencer(cc);
 
-    String schemaEtag = CommonFieldsBase.newUri();
+    String schemaETag = CommonFieldsBase.newUri();
     String aprioriDataSequenceValue = sequencer.getNextSequenceValue();
-    DbTableEntryEntity tableEntry = creator.newTableEntryEntity(tableId, schemaEtag,
+    DbTableEntryEntity tableEntry = creator.newTableEntryEntity(tableId, schemaETag,
         aprioriDataSequenceValue, cc);
 
     /**
      * TODO: guess that tableId works as dbTableName...
      */
     DbTableDefinitionsEntity tableDefinition = creator.newTableDefinitionEntity(tableId,
-        schemaEtag, tableId, cc);
+        schemaETag, tableId, cc);
 
     List<DbColumnDefinitionsEntity> colDefs = new ArrayList<DbColumnDefinitionsEntity>();
     for (Column column : columns) {
-      colDefs.add(creator.newColumnEntity(tableId, schemaEtag, column, cc));
+      colDefs.add(creator.newColumnEntity(tableId, schemaETag, column, cc));
     }
 
     // write the table and column definitions
@@ -302,14 +302,14 @@ public class TableManager {
     // tableEntry.put(cc);
 
     // Now update the properties...
-    String propertiesEtag = CommonFieldsBase.newUri();
+    String propertiesETag = CommonFieldsBase.newUri();
     if (kvsEntries == null) {
       kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     }
 
     List<DbKeyValueStoreEntity> kvs = new ArrayList<DbKeyValueStoreEntity>();
     for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
-      kvs.add(creator.newKeyValueStoreEntity(kvsEntry, propertiesEtag, cc));
+      kvs.add(creator.newKeyValueStoreEntity(kvsEntry, propertiesETag, cc));
     }
 
     for (DbKeyValueStoreEntity e : kvs) {
@@ -317,7 +317,7 @@ public class TableManager {
     }
 
     // write the updated table entry record so everything is discover-able
-    tableEntry.setPropertiesETag(propertiesEtag);
+    tableEntry.setPropertiesETag(propertiesETag);
     tableEntry.put(cc);
 
     return converter.toTableEntry(tableEntry);
@@ -340,22 +340,22 @@ public class TableManager {
 
     DbTableEntryEntity tableEntry = DbTableEntry.getTableIdEntry(tableId, cc);
 
-    String schemaEtag = tableEntry.getSchemaETag();
+    String schemaETag = tableEntry.getSchemaETag();
 
     List<DbColumnDefinitionsEntity> columns = DbColumnDefinitions
-        .query(tableId, schemaEtag, cc);
+        .query(tableId, schemaETag, cc);
 
     DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
-        schemaEtag, cc);
+        schemaETag, cc);
 
     List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
 
-    String propertiesEtag = tableEntry.getPropertiesETag();
-    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag,
+    String propertiesETag = tableEntry.getPropertiesETag();
+    List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesETag,
         cc);
 
-    DbTable table = DbTable.getRelation(tableId, schemaEtag, cc);
-    DbLogTable logTable = DbLogTable.getRelation(tableId, schemaEtag, cc);
+    DbTable table = DbTable.getRelation(tableId, schemaETag, cc);
+    DbLogTable logTable = DbLogTable.getRelation(tableId, schemaETag, cc);
 
     LockTemplate dataLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);

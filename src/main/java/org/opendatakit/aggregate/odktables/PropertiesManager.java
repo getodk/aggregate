@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
@@ -100,12 +100,12 @@ public class PropertiesManager {
   public TableProperties getProperties() throws ODKDatastoreException {
     // refresh entities
     entry = DbTableEntry.getTableIdEntry(tableId, cc);
-    String schemaEtag = entry.getSchemaETag();
-    definitionEntity = DbTableDefinitions.getDefinition(tableId, schemaEtag, cc);
+    String schemaETag = entry.getSchemaETag();
+    definitionEntity = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
 
-    String propertiesEtag = entry.getPropertiesETag();
-    kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesEtag, cc);
-    return converter.toTableProperties(kvsEntities, tableId, propertiesEtag);
+    String propertiesETag = entry.getPropertiesETag();
+    kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesETag, cc);
+    return converter.toTableProperties(kvsEntities, tableId, propertiesETag);
   }
 
   /**
@@ -114,17 +114,17 @@ public class PropertiesManager {
    * @param tableProperties
    *          the table properties to set
    * @return
-   * @throws EtagMismatchException
+   * @throws ETagMismatchException
    *           if the given tableProperties' etag does not match the current
    *           properties etag.
    * @throws ODKTaskLockException
    * @throws ODKDatastoreException
    */
   public TableProperties setProperties(TableProperties tableProperties)
-      throws ODKTaskLockException, ODKDatastoreException, EtagMismatchException {
+      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException {
 
     // create new eTag
-    String propertiesEtag = CommonFieldsBase.newUri();
+    String propertiesETag = CommonFieldsBase.newUri();
 
     // lock table
     LockTemplate lock = new LockTemplate(tableId,
@@ -135,14 +135,14 @@ public class PropertiesManager {
       // refresh entry
       entry = DbTableEntry.getTableIdEntry(tableId, cc);
 
-      String oldPropertiesEtag = entry.getPropertiesETag();
+      String oldPropertiesETag = entry.getPropertiesETag();
 
       // check etags
-      String currentEtag = tableProperties.getPropertiesEtag();
-      if (currentEtag == null || !currentEtag.equals(oldPropertiesEtag)) {
-        throw new EtagMismatchException(String.format(
+      String currentETag = tableProperties.getPropertiesETag();
+      if (currentETag == null || !currentETag.equals(oldPropertiesETag)) {
+        throw new ETagMismatchException(String.format(
             "%s does not match %s for properties for table with tableId %s",
-            currentEtag, oldPropertiesEtag, tableId));
+            currentETag, oldPropertiesETag, tableId));
       }
 
       EntityCreator creator = new EntityCreator();
@@ -165,7 +165,7 @@ public class PropertiesManager {
         try {
         for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
           holderEntry = kvsEntry;
-          DbKeyValueStoreEntity kvsEntity = creator.newKeyValueStoreEntity(kvsEntry, propertiesEtag, cc);
+          DbKeyValueStoreEntity kvsEntity = creator.newKeyValueStoreEntity(kvsEntry, propertiesETag, cc);
           newKvsEntities.add(kvsEntity);
         }
         } catch (Exception e) {
@@ -190,15 +190,15 @@ public class PropertiesManager {
         // set properties entity
 
         // update tableEntry with new properties eTag
-        entry.setPropertiesETag(propertiesEtag);
+        entry.setPropertiesETag(propertiesETag);
         // write the entry out...
         entry.put(cc);
 
         kvsEntities = newKvsEntities;
-        log.info("setProperties made it past update to propertiesEtag");
+        log.info("setProperties made it past update to propertiesETag");
 
         // everything was successfully committed -- we can now delete the old values...
-        DbKeyValueStore.clearAllEntries(tableId, oldPropertiesEtag, cc);
+        DbKeyValueStore.clearAllEntries(tableId, oldPropertiesETag, cc);
         log.info("setProperties made it past clear");
 
       } catch ( ODKEntityPersistException e ) {
@@ -214,6 +214,6 @@ public class PropertiesManager {
       lock.release();
     }
 
-    return converter.toTableProperties(kvsEntities, tableId, propertiesEtag );
+    return converter.toTableProperties(kvsEntities, tableId, propertiesETag );
   }
 }

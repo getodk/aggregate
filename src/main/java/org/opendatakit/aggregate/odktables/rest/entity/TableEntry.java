@@ -23,8 +23,8 @@ import org.simpleframework.xml.Root;
 
 /**
  * A TableEntry defines very only the tableId, the tableKey (for now), and
- * etags for the data and the properties. This stands in as a quick point of
- * reference for clients to access properties and data etags to see if changes
+ * ETags for the data and the properties. This stands in as a quick point of
+ * reference for clients to access properties and data ETags to see if changes
  * have been made.
  * @author dylan price?
  * @author sudar.sam@gmail.com
@@ -38,65 +38,65 @@ public class TableEntry {
   private String tableId;
 
   @Element(required = false)
-  private String dataEtag;
+  private String dataETag;
 
   @Element(required = false)
-  private String schemaEtag;
+  private String propertiesETag;
 
   @Element(required = false)
-  private String propertiesEtag;
+  private String schemaETag;
 
   protected TableEntry() {
   }
 
   public TableEntry(final String tableId,
-      final String dataEtag, final String propertiesEtag, final String schemaEtag) {
+      final String dataETag, final String propertiesETag, final String schemaETag) {
     this.tableId = tableId;
-    this.dataEtag = dataEtag;
-    this.schemaEtag = schemaEtag;
-    this.propertiesEtag = propertiesEtag;
+    this.dataETag = dataETag;
+    this.propertiesETag = propertiesETag;
+    this.schemaETag = schemaETag;
   }
 
   public String getTableId() {
     return this.tableId;
   }
 
-  public String getDataEtag() {
-    return this.dataEtag;
-  }
-
   public void setTableId(final String tableId) {
     this.tableId = tableId;
   }
 
-  public void setDataEtag(final String dataEtag) {
-    this.dataEtag = dataEtag;
+  public String getDataETag() {
+    return this.dataETag;
   }
 
-  public String getPropertiesEtag() {
-    return propertiesEtag;
+  public void setDataETag(final String dataETag) {
+    this.dataETag = dataETag;
   }
 
-  public void setPropertiesEtag(String propertiesEtag) {
-    this.propertiesEtag = propertiesEtag;
+  public String getPropertiesETag() {
+    return propertiesETag;
   }
 
-  public String getSchemaEtag() {
-    return schemaEtag;
+  public void setPropertiesETag(String propertiesETag) {
+    this.propertiesETag = propertiesETag;
   }
 
-  public void setSchemaEtag(String schemaEtag) {
-    this.schemaEtag = schemaEtag;
+  public String getSchemaETag() {
+    return schemaETag;
+  }
+
+  public void setSchemaETag(String schemaETag) {
+    this.schemaETag = schemaETag;
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
-    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
-    result = prime * result + ((schemaEtag == null) ? 0 : schemaEtag.hashCode());
+    result = prime * result + ((tableId == null) ? 1 : tableId.hashCode());
+    result = prime * result + ((dataETag == null) ? 1 : dataETag.hashCode());
+    result = prime * result + ((propertiesETag == null) ? 1 : propertiesETag.hashCode());
+    result = prime * result + ((schemaETag == null) ? 1 : schemaETag.hashCode());
     return result;
   }
 
@@ -113,17 +113,17 @@ public class TableEntry {
     }
     TableEntry other = (TableEntry) obj;
     return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (dataEtag == null ? other.dataEtag == null : dataEtag.equals(other.dataEtag))
-        && (propertiesEtag == null ? other.propertiesEtag == null : propertiesEtag.equals(other.propertiesEtag))
-        && (schemaEtag == null ? other.schemaEtag == null : schemaEtag.equals(other.schemaEtag));
+        && (dataETag == null ? other.dataETag == null : dataETag.equals(other.dataETag))
+        && (propertiesETag == null ? other.propertiesETag == null : propertiesETag.equals(other.propertiesETag))
+        && (schemaETag == null ? other.schemaETag == null : schemaETag.equals(other.schemaETag));
   }
 
   @Override
   public String toString() {
     return "TableEntry [tableId=" + tableId
-        + ", dataEtag=" + dataEtag
-        + ", propertiesEtag=" + propertiesEtag
-        + ", schemaEtag=" + schemaEtag
+        + ", dataETag=" + dataETag
+        + ", propertiesETag=" + propertiesETag
+        + ", schemaETag=" + schemaETag
         + "]";
   }
 }

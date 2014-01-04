@@ -39,7 +39,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface ServerDiffService extends RemoteService {
 
 
-	List<RowClient> getRowsSince(String dataEtag, String tableId) throws AccessDeniedException,
+	List<RowClient> getRowsSince(String dataETag, String tableId) throws AccessDeniedException,
 	RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 
 

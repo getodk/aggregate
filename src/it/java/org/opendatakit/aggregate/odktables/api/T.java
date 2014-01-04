@@ -13,7 +13,17 @@ public class T {
 
   public static final String tableId = "people";
   public static final String displayName = "\"people\"";
-  public static final String tableMetadata = null;
+
+  public static final String uri_access_control_1 = null;
+  public static final String form_id_1 = null;
+  public static final String locale_1 = "default";
+  public static final Long savepoint_timestamp_1 = System.currentTimeMillis()-1000;
+
+  public static final String uri_access_control_2 = "fred";
+  public static final String form_id_2 = "ralph";
+  public static final String locale_2 = "default";
+  public static final Long savepoint_timestamp_2 = System.currentTimeMillis()-2000;
+
   @SuppressWarnings("serial")
   public static final List<Column> columns = new ArrayList<Column>() {
     {
@@ -25,8 +35,8 @@ public class T {
   @SuppressWarnings("serial")
   public static final List<Row> rows = new ArrayList<Row>() {
     {
-      add(Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues()));
-      add(Row.forInsert(T.Data.JOHN.getId(), T.Data.JOHN.getValues()));
+      add(Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues()));
+      add(Row.forInsert(T.Data.JOHN.getId(), T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.Data.JOHN.getValues()));
     }
   };
 

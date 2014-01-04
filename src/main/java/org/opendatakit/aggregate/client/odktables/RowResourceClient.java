@@ -43,7 +43,7 @@ public class RowResourceClient extends RowClient implements Serializable {
   public RowResourceClient(RowClient row) {
     super();
     setRowId(row.getRowId());
-    setRowEtag(row.getRowEtag());
+    setRowETag(row.getRowETag());
     setDeleted(row.isDeleted());
     setCreateUser(row.getCreateUser());
     setLastUpdateUser(row.getLastUpdateUser());

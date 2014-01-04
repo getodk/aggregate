@@ -32,7 +32,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
@@ -93,14 +93,14 @@ public class DataManagerTest {
 
   @Test
   public void testInsertRows() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, BadColumnNameException, EtagMismatchException, PermissionDeniedException {
+      ODKTaskLockException, BadColumnNameException, ETagMismatchException, PermissionDeniedException {
     List<Row> actualRows = dm.insertOrUpdateRows(af, rows);
     assertEquals(2, actualRows.size());
     for (int i = 0; i < rows.size(); i++) {
       Row expected = rows.get(i);
       Row actual = actualRows.get(i);
-      expected.setRowEtag(actual.getRowEtag());
-      expected.setDataEtagAtModification(actual.getDataEtagAtModification());
+      expected.setRowETag(actual.getRowETag());
+      expected.setDataETagAtModification(actual.getDataETagAtModification());
       expected.setCreateUser(actual.getCreateUser());
       expected.setLastUpdateUser(actual.getLastUpdateUser());
     }
@@ -108,16 +108,16 @@ public class DataManagerTest {
     assertEquals(rows.get(1), actualRows.get(1));
   }
 
-  @Test(expected = EtagMismatchException.class)
+  @Test(expected = ETagMismatchException.class)
   public void testInsertRowsAlreadyExist() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, BadColumnNameException, EtagMismatchException, PermissionDeniedException {
+      ODKTaskLockException, BadColumnNameException, ETagMismatchException, PermissionDeniedException {
     dm.insertOrUpdateRows(af, rows);
     dm.insertOrUpdateRows(af, rows);
   }
 
   @Test
   public void testGetRows() throws ODKDatastoreException, ODKTaskLockException,
-      BadColumnNameException, EtagMismatchException, PermissionDeniedException {
+      BadColumnNameException, ETagMismatchException, PermissionDeniedException {
     dm.insertOrUpdateRows(af, rows);
     List<Row> actualRows = dm.getRows();
     for (int i = 0; i < rows.size(); i++) {
@@ -130,7 +130,7 @@ public class DataManagerTest {
 
   @Test
   public void testGetRowsByScope() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException, BadColumnNameException, PermissionDeniedException {
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException {
     List<Row> rows = setupTestRows();
     Row expected = rows.get(0);
     List<Row> actualRows = dm.getRows(expected.getFilterScope());
@@ -140,7 +140,7 @@ public class DataManagerTest {
   }
 
   @Test
-  public void testGetRowsByScopes() throws ODKEntityPersistException, EtagMismatchException,
+  public void testGetRowsByScopes() throws ODKEntityPersistException, ETagMismatchException,
       BadColumnNameException, ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
     List<Row> rows = setupTestRows();
     Row row1 = rows.get(0);
@@ -154,8 +154,8 @@ public class DataManagerTest {
 
   @Test
   public void testGetRow() throws ODKDatastoreException, ODKTaskLockException,
-      BadColumnNameException, EtagMismatchException, PermissionDeniedException {
-    Row expected = Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues());
+      BadColumnNameException, ETagMismatchException, PermissionDeniedException {
+    Row expected = Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues());
     List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(expected));
     expected = changes.get(0);
     Row actual = dm.getRow(T.Data.DYLAN.getId());
@@ -170,8 +170,8 @@ public class DataManagerTest {
 
   @Test
   public void testGetRowNullSafe() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, BadColumnNameException, EtagMismatchException, PermissionDeniedException {
-    Row expected = Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues());
+      ODKTaskLockException, BadColumnNameException, ETagMismatchException, PermissionDeniedException {
+    Row expected = Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues());
     List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(expected));
     expected = changes.get(0);
     Row actual = dm.getRowNullSafe(T.Data.DYLAN.getId());
@@ -186,88 +186,91 @@ public class DataManagerTest {
 
   @Test
   public void testUpdateRow() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException, BadColumnNameException, PermissionDeniedException {
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException {
     List<Row> expectedChanges = dm.insertOrUpdateRows(af, rows);
     Row expected = expectedChanges.get(0);
     expected.getValues().put(T.Columns.column_age.getElementKey(), "24");
     List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(expected));
     Row actual = changes.get(0);
-    assertFalse(expected.getRowEtag().equals(actual.getRowEtag()));
-    expected.setRowEtag(actual.getRowEtag());
-    expected.setDataEtagAtModification(actual.getDataEtagAtModification());
+    assertFalse(expected.getRowETag().equals(actual.getRowETag()));
+    expected.setRowETag(actual.getRowETag());
+    expected.setDataETagAtModification(actual.getDataETagAtModification());
     assertEquals(expected, actual);
   }
 
-  @Test(expected = EtagMismatchException.class)
+  @Test(expected = ETagMismatchException.class)
   public void testUpdateRowVersionMismatch() throws ODKEntityPersistException,
-      ODKDatastoreException, ODKTaskLockException, EtagMismatchException,
+      ODKDatastoreException, ODKTaskLockException, ETagMismatchException,
       BadColumnNameException, PermissionDeniedException {
     rows = dm.insertOrUpdateRows(af, rows);
     Row row = rows.get(0);
-    row.setRowEtag(CommonFieldsBase.newUri());
+    row.setRowETag(CommonFieldsBase.newUri());
     dm.insertOrUpdateRows(af, Collections.singletonList(row));
   }
 
   @Test(expected = ODKEntityNotFoundException.class)
   public void testUpdateRowDoesNotExist() throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException, BadColumnNameException, PermissionDeniedException {
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException {
     Row row = rows.get(0);
-    row.setRowEtag(CommonFieldsBase.newUri());
+    row.setRowETag(CommonFieldsBase.newUri());
     dm.insertOrUpdateRows(af, Collections.singletonList(row));
   }
 
   @Test
   public void testUpdateRowDoesNotChangeFilter() throws ODKEntityPersistException,
-      ODKDatastoreException, ODKTaskLockException, EtagMismatchException,
+      ODKDatastoreException, ODKTaskLockException, ETagMismatchException,
       BadColumnNameException, PermissionDeniedException {
     Row expected = rows.get(0);
     expected.setFilterScope(new Scope(Type.USER, T.user));
     List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(expected));
     expected = changes.get(0);
-    Row actual = Row.forUpdate(expected.getRowId(), expected.getRowEtag(),
+    Row actual = Row.forUpdate(expected.getRowId(), expected.getRowETag(),
+        T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1,
         Maps.<String, String> newHashMap());
     List<Row> actuals = dm.insertOrUpdateRows(af, Collections.singletonList(actual));
     actual = actuals.get(0);
-    expected.setRowEtag(actual.getRowEtag());
-    expected.setDataEtagAtModification(actual.getDataEtagAtModification());
+    expected.setRowETag(actual.getRowETag());
+    expected.setDataETagAtModification(actual.getDataETagAtModification());
     assertEquals(expected.getFilterScope(), actual.getFilterScope());
   }
 
   @Test
   public void testUpdateRowDoesChangeFilter() throws ODKEntityNotFoundException,
-      EtagMismatchException, ODKDatastoreException, ODKTaskLockException,
+      ETagMismatchException, ODKDatastoreException, ODKTaskLockException,
       BadColumnNameException, PermissionDeniedException {
     Row row = rows.get(0);
     row.setFilterScope(new Scope(Type.USER, T.user));
     List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(row));
     row = changes.get(0);
     Row actual = Row
-        .forUpdate(row.getRowId(), row.getRowEtag(), Maps.<String, String> newHashMap());
+        .forUpdate(row.getRowId(), row.getRowETag(),
+            T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1,
+            Maps.<String, String> newHashMap());
     actual.setFilterScope(Scope.EMPTY_SCOPE);
     List<Row> actualChanges = dm.insertOrUpdateRows(af, Collections.singletonList(actual));
     actual = actualChanges.get(0);
-    row.setRowEtag(actual.getRowEtag());
-    row.setDataEtagAtModification(actual.getDataEtagAtModification());
+    row.setRowETag(actual.getRowETag());
+    row.setDataETagAtModification(actual.getDataETagAtModification());
     assertEquals(Scope.EMPTY_SCOPE, actual.getFilterScope());
   }
 
   @Test(expected = BadColumnNameException.class)
   public void testUpdateRowBadColumnName() throws ODKEntityPersistException,
       BadColumnNameException, ODKDatastoreException, ODKTaskLockException,
-      EtagMismatchException, PermissionDeniedException {
+      ETagMismatchException, PermissionDeniedException {
     Row row = rows.get(0);
     List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(row));
     row = changes.get(0);
     Map<String, String> values = Maps.newHashMap();
     values.put(T.Columns.name + "diff", "value");
-    row = Row.forUpdate(row.getRowId(), row.getRowEtag(), values);
+    row = Row.forUpdate(row.getRowId(), row.getRowETag(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
     List<Row> actualChanges = dm.insertOrUpdateRows(af, Collections.singletonList(row));
     Row actual = actualChanges.get(0);
   }
 
   @Test
   public void testDeleteRows() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, BadColumnNameException, EtagMismatchException, PermissionDeniedException {
+      ODKTaskLockException, BadColumnNameException, ETagMismatchException, PermissionDeniedException {
     List<Row> changes = dm.insertOrUpdateRows(af, rows);
     dm.deleteRows(Util.list(T.Data.DYLAN.getId(), T.Data.JOHN.getId()));
     // this may actually require accessing the task lock to force a flush of the delete
@@ -283,9 +286,9 @@ public class DataManagerTest {
 
   @Test
   public void testGetRowsSince() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException, BadColumnNameException, PermissionDeniedException {
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException {
     TableEntry entry = tm.getTableNullSafe(tableId);
-    String beginEtag = entry.getDataEtag();
+    String beginETag = entry.getDataETag();
     List<Row> changes = dm.insertOrUpdateRows(af, rows);
 
     Map<String, Row> expected = new HashMap<String, Row>();
@@ -307,28 +310,28 @@ public class DataManagerTest {
     row = round3changes.get(0);
     expected.put(row.getRowId(), row);
 
-    List<Row> actual = dm.getRowsSince(beginEtag);
+    List<Row> actual = dm.getRowsSince(beginETag);
     Util.assertCollectionSameElements(expected.values(), actual);
   }
 
   @Test
-  public void testGetRowsSinceByScope() throws ODKEntityPersistException, EtagMismatchException,
+  public void testGetRowsSinceByScope() throws ODKEntityPersistException, ETagMismatchException,
       BadColumnNameException, ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
     TableEntry entry = tm.getTableNullSafe(tableId);
-    String beginEtag = entry.getDataEtag();
+    String beginETag = entry.getDataETag();
     List<Row> rows = setupTestRows();
     Scope scope = rows.get(0).getFilterScope();
     List<Row> expected = dm.getRows(scope);
-    List<Row> actual = dm.getRowsSince(beginEtag, scope);
+    List<Row> actual = dm.getRowsSince(beginETag, scope);
     Util.assertCollectionSameElements(expected, actual);
   }
 
   // TODO: fix this -- since-last-change is BROKEN!!!
   @Ignore
-  public void testGetRowsSinceByScopes() throws ODKDatastoreException, EtagMismatchException,
+  public void testGetRowsSinceByScopes() throws ODKDatastoreException, ETagMismatchException,
       BadColumnNameException, ODKTaskLockException, PermissionDeniedException {
     TableEntry entry = tm.getTableNullSafe(tableId);
-    String beginEtag = entry.getDataEtag();
+    String beginETag = entry.getDataETag();
     List<Row> rows = setupTestRows();
     Row row2 = rows.get(1);
     Row row3 = rows.get(2);
@@ -336,7 +339,7 @@ public class DataManagerTest {
     scopes.add(row2.getFilterScope());
     scopes.add(row3.getFilterScope());
     List<Row> expected = dm.getRows(scopes);
-    List<Row> actual = dm.getRowsSince(beginEtag, scopes);
+    List<Row> actual = dm.getRowsSince(beginETag, scopes);
     Util.assertCollectionSameElements(expected, actual);
   }
 
@@ -350,24 +353,24 @@ public class DataManagerTest {
 
   @Ignore
   private List<Row> setupTestRows() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException, BadColumnNameException, PermissionDeniedException {
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException {
     clearRows();
     Map<String, String> values = Maps.newHashMap();
     List<Row> rows = new ArrayList<Row>();
 
-    Row row = Row.forInsert("1", values);
+    Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
     row.setFilterScope(new Scope(Type.DEFAULT, null));
     rows.add(row);
 
-    row = Row.forInsert("2", values);
+    row = Row.forInsert("2", T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, values);
     row.setFilterScope(new Scope(Type.USER, T.user));
     rows.add(row);
 
-    row = Row.forInsert("3", values);
+    row = Row.forInsert("3", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
     row.setFilterScope(new Scope(Type.GROUP, T.group));
     rows.add(row);
 
-    row = Row.forInsert("4", values);
+    row = Row.forInsert("4", T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, values);
     row.setFilterScope(Scope.EMPTY_SCOPE);
     rows.add(row);
 

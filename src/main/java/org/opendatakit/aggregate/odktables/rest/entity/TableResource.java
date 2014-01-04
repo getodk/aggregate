@@ -47,7 +47,7 @@ public class TableResource extends TableEntry {
   private String displayName;
 
   public TableResource(TableEntry entry) {
-    super(entry.getTableId(), entry.getDataEtag(), entry.getPropertiesEtag(), entry.getSchemaEtag());
+    super(entry.getTableId(), entry.getDataETag(), entry.getPropertiesETag(), entry.getSchemaETag());
   }
 
   @SuppressWarnings("unused")

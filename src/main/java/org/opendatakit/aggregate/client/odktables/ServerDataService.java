@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -53,7 +53,7 @@ public interface ServerDataService extends RemoteService {
   RowClient createOrUpdateRow(String tableId, String rowId, RowClient row)
       throws AccessDeniedException, RequestFailureException,
       DatastoreFailureException, PermissionDeniedExceptionClient,
-      EtagMismatchExceptionClient, BadColumnNameExceptionClient,
+      ETagMismatchExceptionClient, BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient;
 
   void deleteRow(String tableId, String rowId) throws AccessDeniedException,

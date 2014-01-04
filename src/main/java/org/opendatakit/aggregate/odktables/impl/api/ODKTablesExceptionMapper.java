@@ -23,7 +23,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
@@ -35,7 +35,7 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
 
   @Override
   public Response toResponse(ODKTablesException e) {
-    if (e instanceof EtagMismatchException) {
+    if (e instanceof ETagMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
           .entity(new Error(ErrorType.ETAG_MISMATCH, e.getMessage())).type(MediaType.TEXT_XML)
           .build();
