@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.preferences;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -25,9 +26,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class Preferences {
 
   public static interface PreferencesCompletionCallback {
-	  public void refreshFromUpdatedPreferences();
+    public void refreshFromUpdatedPreferences();
 
-	  public void failedRefresh();
+    public void failedRefresh();
   }
 
   private static final String NULL_PREFERENCES_ERROR = "ERROR: somehow got a null preference summary";
@@ -36,6 +37,10 @@ public class Preferences {
 
   private static String googleApiClientId;
 
+  private static String enketoApiUrl;
+
+  private static String enketoApiToken;
+
   private static Boolean odkTablesEnabled;
 
   private static Boolean fasterBackgroundActionsDisabled;
@@ -43,25 +48,27 @@ public class Preferences {
   public static void updatePreferences(final PreferencesCompletionCallback callback) {
     SecureGWT.getPreferenceService().getPreferences(new AsyncCallback<PreferenceSummary>() {
       public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-          if (callback != null) {
-            callback.failedRefresh();
-          }
+        AggregateUI.getUI().reportError(caught);
+        if (callback != null) {
+          callback.failedRefresh();
+        }
       }
 
       public void onSuccess(PreferenceSummary summary) {
-        if(summary == null) {
+        if (summary == null) {
           GWT.log(NULL_PREFERENCES_ERROR);
           AggregateUI.getUI().reportError(new Throwable(NULL_PREFERENCES_ERROR));
         }
 
         googleSimpleApiKey = summary.getGoogleSimpleApiKey();
         googleApiClientId = summary.getGoogleApiClientId();
+        enketoApiUrl = summary.getEnketoApiUrl();
+        enketoApiToken = summary.getEnketoApiToken();
         odkTablesEnabled = summary.getOdkTablesEnabled();
         fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
 
         if (callback != null) {
-        	callback.refreshFromUpdatedPreferences();
+          callback.refreshFromUpdatedPreferences();
         }
       }
     });
@@ -69,21 +76,45 @@ public class Preferences {
   }
 
   public static String getGoogleSimpleApiKey() {
-    if(googleSimpleApiKey != null) {
+    if (googleSimpleApiKey != null) {
       return googleSimpleApiKey;
     }
     return "";
   }
 
   public static String getGoogleApiClientId() {
-    if(googleApiClientId != null) {
+    if (googleApiClientId != null) {
       return googleApiClientId;
     }
     return "";
   }
 
+  public static boolean showEnketoIntegration() {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_DATA_COLLECTOR)) {
+      if (getEnketoApiUrl() != null && !getEnketoApiUrl().equals("")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static String getEnketoApiUrl() {
+    if (enketoApiUrl != null) {
+      return enketoApiUrl;
+    }
+    return "";
+  }
+
+  public static String getEnketoApiToken() {
+    if (enketoApiToken != null) {
+      return enketoApiToken;
+    }
+    return "";
+  }
+
   public static Boolean getOdkTablesEnabled() {
-    if(odkTablesEnabled != null) {
+    if (odkTablesEnabled != null) {
       return odkTablesEnabled;
     }
     return Boolean.FALSE;
@@ -92,7 +123,7 @@ public class Preferences {
   public static void setOdkTablesBoolean(Boolean enabled) {
     SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
       public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
+        AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(Void void1) {
@@ -103,24 +134,24 @@ public class Preferences {
   }
 
   public static Boolean getFasterBackgroundActionsDisabled() {
-    if(fasterBackgroundActionsDisabled != null) {
+    if (fasterBackgroundActionsDisabled != null) {
       return fasterBackgroundActionsDisabled;
     }
     return Boolean.FALSE;
   }
 
   public static void setFasterBackgroundActionsDisabledBoolean(Boolean disabled) {
-    SecureGWT.getPreferenceService().setFasterBackgroundActionsDisabled(disabled, new AsyncCallback<Void>() {
-      public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-      }
+    SecureGWT.getPreferenceService().setFasterBackgroundActionsDisabled(disabled,
+        new AsyncCallback<Void>() {
+          public void onFailure(Throwable caught) {
+            AggregateUI.getUI().reportError(caught);
+          }
 
-      public void onSuccess(Void void1) {
-        // do nothing
-      }
-    });
+          public void onSuccess(Void void1) {
+            // do nothing
+          }
+        });
     fasterBackgroundActionsDisabled = disabled;
   }
-
 
 }
