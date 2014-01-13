@@ -39,7 +39,7 @@ public class EnketoApiHandlerServlet extends ServletUtilBase {
   private static final long serialVersionUID = 5811797423869654357L;
   private static final Log logger = LogFactory.getLog(AggregateHtmlServlet.class);
 
-  public static final String ADDR = UIConsts.ENKETO_UI_GENERATE;
+  public static final String ADDR = UIConsts.ENKETO_API_HANDLER_ADDR;
   private final String USER_AGENT = "Mozilla/5.0";
   private static final String RESPONSE_ERROR = "Please check the enketo credentials in the Prefernces tab and try again.";
 
