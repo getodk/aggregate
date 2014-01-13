@@ -23,7 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -36,8 +36,6 @@ public class PropertiesManagerTest {
   private CallingContext cc;
   private String ePropertiesTag;
   private String tableId;
-  private String tableName;
-  private String tableMetadata;
   private TableManager tm;
   private PropertiesManager pm;
 
@@ -46,14 +44,11 @@ public class PropertiesManagerTest {
     this.cc = TestContextFactory.getCallingContext();
 
     this.tableId = T.tableId;
-    this.tableName = T.tableName;
-    this.tableMetadata = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    TableEntry te = tm.createTable(tableId, T.tableKey, T.dbTableName,
-        T.tableType, T.tableIdAccessControls, T.columns,
-        T.kvsEntries);
-    this.ePropertiesTag = te.getPropertiesEtag();
+    TableEntry te = tm.createTable(tableId,
+        T.columns, T.kvsEntries);
+    this.ePropertiesTag = te.getPropertiesETag();
 
     this.pm = new PropertiesManager(tableId, cc);
   }
@@ -80,7 +75,7 @@ public class PropertiesManagerTest {
   // TODO: fix this when tableId and tableKey get sorted out...
   @Ignore
   public void testSetTableName() throws ODKTaskLockException, ODKDatastoreException,
-      EtagMismatchException {
+      ETagMismatchException {
     TableProperties expected = pm.getProperties();
     expected.setTableId("a new name"); // don't see how this would work...
 
@@ -89,7 +84,7 @@ public class PropertiesManagerTest {
 
   @Test
   public void testSetTableMetadata() throws ODKTaskLockException, ODKDatastoreException,
-      EtagMismatchException {
+      ETagMismatchException {
     TableProperties expected = pm.getProperties();
     expected.setKeyValueStoreEntries(T.kvsEntries);
 
@@ -97,7 +92,7 @@ public class PropertiesManagerTest {
   }
 
   private void doTestSetProperties(TableProperties expected)
-      throws EtagMismatchException, ODKTaskLockException,
+      throws ETagMismatchException, ODKTaskLockException,
       ODKDatastoreException {
     pm.setProperties(expected);
 
@@ -110,7 +105,7 @@ public class PropertiesManagerTest {
 
   @Test
   public void testSetTableNameChangesPropertiesModNum() throws ODKDatastoreException,
-      ODKTaskLockException, EtagMismatchException {
+      ODKTaskLockException, ETagMismatchException {
     TableProperties properties = pm.getProperties();
     properties.setTableId("a new table name"); // don't see how this would work
 
@@ -119,7 +114,7 @@ public class PropertiesManagerTest {
 
   @Test
   public void testSetTableMetadataChangesPropertiesModNum() throws ODKTaskLockException,
-      ODKDatastoreException, EtagMismatchException {
+      ODKDatastoreException, ETagMismatchException {
     TableProperties properties = pm.getProperties();
     properties.setKeyValueStoreEntries(T.kvsEntries);
 
@@ -127,24 +122,24 @@ public class PropertiesManagerTest {
   }
 
   private void doTestSetPropertiesChangesModNum(TableProperties properties)
-      throws ODKDatastoreException, EtagMismatchException, ODKTaskLockException {
-    String startingPropertiesEtag = tm.getTable(tableId).getPropertiesEtag();
-    String startingPropertiesEtagTwo = properties.getPropertiesEtag();
-    assertEquals(startingPropertiesEtag, startingPropertiesEtagTwo);
+      throws ODKDatastoreException, ETagMismatchException, ODKTaskLockException {
+    String startingPropertiesETag = tm.getTable(tableId).getPropertiesETag();
+    String startingPropertiesETagTwo = properties.getPropertiesETag();
+    assertEquals(startingPropertiesETag, startingPropertiesETagTwo);
 
     properties = pm.setProperties(properties);
 
-    String endingPropertiesEtag = tm.getTable(tableId).getPropertiesEtag();
-    String endingPropertiesEtagTwo = properties.getPropertiesEtag();
-    assertEquals(endingPropertiesEtag, endingPropertiesEtagTwo);
+    String endingPropertiesETag = tm.getTable(tableId).getPropertiesETag();
+    String endingPropertiesETagTwo = properties.getPropertiesETag();
+    assertEquals(endingPropertiesETag, endingPropertiesETagTwo);
 
-    assertFalse(startingPropertiesEtag.equals(endingPropertiesEtag));
-    assertFalse(startingPropertiesEtagTwo.equals(endingPropertiesEtagTwo));
+    assertFalse(startingPropertiesETag.equals(endingPropertiesETag));
+    assertFalse(startingPropertiesETagTwo.equals(endingPropertiesETagTwo));
   }
 
-  @Test(expected = EtagMismatchException.class)
-  public void testCantChangePropertiesWithOldEtag() throws ODKDatastoreException,
-      EtagMismatchException, ODKTaskLockException {
+  @Test(expected = ETagMismatchException.class)
+  public void testCantChangePropertiesWithOldETag() throws ODKDatastoreException,
+      ETagMismatchException, ODKTaskLockException {
     TableProperties properties = pm.getProperties();
     properties.setTableId("new name");
     pm.setProperties(properties);

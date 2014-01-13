@@ -18,10 +18,10 @@ package org.opendatakit.aggregate.client.exception;
 
 import java.io.Serializable;
 
-public class EtagMismatchExceptionClient extends Exception implements Serializable {
+public class ETagMismatchExceptionClient extends Exception implements Serializable {
 
   private static final String ETAG_MISMATCH_EXCEPTION_CLIENT =
-      "Etag mismatch";
+      "ETag mismatch";
 
   /**
 	 *
@@ -30,23 +30,23 @@ public class EtagMismatchExceptionClient extends Exception implements Serializab
 
   private String message;
 
-  public EtagMismatchExceptionClient() {
+  public ETagMismatchExceptionClient() {
     super();
     message = ETAG_MISMATCH_EXCEPTION_CLIENT;
   }
 
-  public EtagMismatchExceptionClient(String message) {
+  public ETagMismatchExceptionClient(String message) {
     super(message);
     this.message = message;
   }
 
-  public EtagMismatchExceptionClient(Throwable cause) {
+  public ETagMismatchExceptionClient(Throwable cause) {
     super(cause);
     this.message = ETAG_MISMATCH_EXCEPTION_CLIENT + " (" +
         cause.getMessage() + ")";
   }
 
-  public EtagMismatchExceptionClient(String message, Throwable cause) {
+  public ETagMismatchExceptionClient(String message, Throwable cause) {
     super(message, cause);
   }
 

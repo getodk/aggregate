@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.core.UriBuilder;
@@ -28,7 +29,7 @@ import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
@@ -82,19 +83,11 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public RowResource createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
-      ODKDatastoreException, EtagMismatchException, PermissionDeniedException,
+      ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
       BadColumnNameException {
-    // TODO re-do permissions stuff
-    //af.checkPermission(TablePermission.WRITE_ROW);
     row.setRowId(rowId);
-    Row dbRow = dm.getRow(rowId);
-    if (dbRow == null) {
-      row = dm.insertRow(row);
-    } else {
-      // TODO re-do permissions stuff
-      //af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
-      row = dm.updateRow(row);
-    }
+    List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(row));
+    row = changes.get(0);
     RowResource resource = getResource(row);
     return resource;
   }

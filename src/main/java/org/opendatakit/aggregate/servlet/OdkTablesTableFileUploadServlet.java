@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,11 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * This is the servlet that handles the uploading of files that are
@@ -169,10 +164,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		  CallingContext cc = ContextFactory.getCallingContext(this, req);
 		  logger.info("Inside doHead");
-		  //TODO add openrosa stuff?
-		  String serverUrl = cc.getServerURL();
-		  String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
-		  resp.setHeader("Location", url);
+		  addOpenDataKitHeaders(resp);
 		  resp.setStatus(204); // no content...
 	  }
 
@@ -221,8 +213,10 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 //			  String pathPrefix = uploadedFormItems
 //			      .getSimpleFormField("path_prefix");
 //
+//         addOpenDataKitHeaders(resp);
 //			  resp.setStatus(HttpServletResponse.SC_CREATED);
-//			  resp.setHeader("Location", cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR);
+//         resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
+//         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 //
 //			  // first we need to get the id of the table.
 //			  String tableId = getTableId(tableName, cc);
@@ -384,22 +378,6 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 //              ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
 //        }
 
-	  }
-
-	  /*
-	   * Takes in the table name and returns the tableId.
-	   */
-	  private String getTableId(String tableName, CallingContext cc) throws ODKDatastoreException {
-		  TableManager tm = new TableManager(cc);
-		  List<TableEntry> tables = tm.getTables();
-		  for (TableEntry table : tables) {
-			  if (table.getTableKey().equals(tableName)) {
-				  return table.getTableId();
-			  }
-		  }
-		  // if you're here, you need to return something
-		  // this will throw an error later.
-		  return "";
 	  }
 
 //  /**

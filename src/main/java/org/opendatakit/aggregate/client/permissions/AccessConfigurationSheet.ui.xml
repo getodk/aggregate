@@ -18,7 +18,9 @@
    csv or kml files for download.</li>
    <li>Form Manager - all the capabilities of a Data Viewer plus the abilities to upload a form definition,
    delete a form and its data, and upload submissions manually through the ODK Aggregate website.</li>
-   <li>Site Administrator - all the capabilities of a Form Manager plus the ability to add users, 
+   <li>Synchronize Tables - able to download, upload and alter data records within ODK Tables as restricted by table-access privileges granted to the user.</li>
+   <li>Administer Tables - able to administer tables and table-access privileges from the ODK Tables website.</li>
+   <li>Site Administrator - all the capabilities of a Form Manager plus the ability to add users,
    set passwords, and grant these capabilities to other users.</li></ul>
 <h3>Edit Users</h3>
 <p>Change usernames, delete usernames, grant capabilities and set passwords for ODK accounts below.</p>
@@ -39,4 +41,4 @@ list of users in the above table</p>
 <hr/>
 <br/>
 </g:HTMLPanel>
-</ui:UiBinder> 
+</ui:UiBinder>

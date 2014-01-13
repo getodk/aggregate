@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
@@ -98,28 +97,27 @@ public class AuthFilter {
    *           if the current user does not have the given permission and is not
    *           within the scope of the filter on the row
    */
-  public void checkFilter(TablePermission permission, Row row) throws ODKDatastoreException,
+  public void checkFilter(TablePermission permission, String rowId, Scope filter) throws ODKDatastoreException,
       PermissionDeniedException {
     Validate.notNull(permission);
-    Validate.notNull(row);
+    Validate.notNull(rowId);
 
     String userUri = cc.getCurrentUser().getEmail();
 
     Set<TablePermission> permissions = getPermissions(userUri);
 
     if (!permissions.contains(permission)) {
-      Scope filter = row.getFilterScope();
       if (filter == null || filter.equals(Scope.EMPTY_SCOPE)) {
         // empty scope, no one allowed
-        throwPermissionDenied(row.getRowId(), userUri);
+        throwPermissionDenied(rowId, userUri);
       }
       switch (filter.getType()) {
       case USER:
         String filterUser = filter.getValue();
         if (userUri == null && filterUser != null) {
-          throwPermissionDenied(row.getRowId(), userUri);
+          throwPermissionDenied(rowId, userUri);
         } else if (userUri != null && !userUri.equals(filter.getValue())) {
-          throwPermissionDenied(row.getRowId(), userUri);
+          throwPermissionDenied(rowId, userUri);
         }
         break;
       case GROUP:

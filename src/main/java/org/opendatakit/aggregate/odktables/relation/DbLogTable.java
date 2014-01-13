@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -35,42 +36,61 @@ public class DbLogTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
-  public static final DataField ROW_ID = new DataField("ROW_ID", DataType.STRING, false)
+  public static final DataField ROW_ID = new DataField("_ROW_ID", DataType.STRING, false)
   .setIndexable(IndexType.HASH);
-  public static final DataField ROW_VERSION = new DataField("ROW_VERSION", DataType.STRING, false);
+  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
   public static final DataField DATA_ETAG_AT_MODIFICATION =
-      new DataField("DATA_ETAG_AT_MODIFICATION", DataType.STRING, false)
+      new DataField("_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false)
       .setIndexable(IndexType.HASH);
   // we need to maintain a global sequence value within the log table
   public static final DataField SEQUENCE_VALUE =
-      new DataField("SEQUENCE_VALUE", DataType.STRING, false)
+      new DataField("_SEQUENCE_VALUE", DataType.STRING, false)
       .setIndexable(IndexType.ORDERED);
-  public static final DataField CREATE_USER = new DataField("CREATE_USER", DataType.STRING, true);
-  public static final DataField LAST_UPDATE_USER = new DataField("LAST_UPDATE_USER", DataType.STRING, true);
-  public static final DataField FILTER_TYPE = new DataField("FILTER_TYPE", DataType.STRING, true);
-  public static final DataField FILTER_VALUE = new DataField("FILTER_VALUE", DataType.STRING, true)
+  public static final DataField CREATE_USER = new DataField("_CREATE_USER", DataType.STRING, true);
+  public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER", DataType.STRING, true);
+  public static final DataField FILTER_TYPE = new DataField("_FILTER_TYPE", DataType.STRING, true);
+  public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
       .setIndexable(IndexType.HASH);
-  public static final DataField DELETED = new DataField("DELETED", DataType.BOOLEAN, false);
+  public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
+
+
+  public static final DataField URI_ACCESS_CONTROL = new DataField(TableConstants.URI_ACCESS_CONTROL.toUpperCase(),
+      DataType.STRING, true);
+  public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
+      DataType.STRING, true);
+  public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
+      DataType.STRING, true);
+  // milliseconds
+  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(),
+      DataType.INTEGER, true);
+
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(ROW_ID);
-    dataFields.add(ROW_VERSION);
-    dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(SEQUENCE_VALUE);
+
+    dataFields.add(ROW_ETAG);
+    dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(CREATE_USER);
     dataFields.add(LAST_UPDATE_USER);
     dataFields.add(FILTER_TYPE);
     dataFields.add(FILTER_VALUE);
     dataFields.add(DELETED);
+
+    // common metadata
+    dataFields.add(URI_ACCESS_CONTROL);
+    dataFields.add(FORM_ID);
+    dataFields.add(LOCALE);
+    dataFields.add(SAVEPOINT_TIMESTAMP);
   }
 
   private static final EntityConverter converter = new EntityConverter();
 
-  public static DbLogTable getRelation(String tableId, String propertiesEtag, CallingContext cc)
+  public static DbLogTable getRelation(String tableId, String schemaETag, CallingContext cc)
       throws ODKDatastoreException {
-    List<DataField> fields = getDynamicFields(tableId, propertiesEtag, cc);
+    List<DataField> fields = getDynamicFields(tableId, schemaETag, cc);
     fields.addAll(getStaticFields());
     return getRelation(tableId, fields, cc);
   }
@@ -84,10 +104,10 @@ public class DbLogTable extends Relation {
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, String propertiesEtag,
+  private static List<DataField> getDynamicFields(String tableId, String schemaETag,
       CallingContext cc)
       throws ODKDatastoreException {
-    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, propertiesEtag, cc);
+    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaETag, cc);
     return converter.toFields(entities);
   }
 

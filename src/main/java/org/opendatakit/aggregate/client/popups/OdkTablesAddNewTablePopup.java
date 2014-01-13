@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesAddTableButton;
+import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdBox;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableNameBox;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -46,8 +47,10 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 
 	  private TableDefinitionClient tableDef;
 
-	  // the textbox for the table name
-	  private OdkTablesTableNameBox nameBox;
+	  // textbox for the tableid
+	  private OdkTablesTableIdBox idBox;
+	  // the textbox for the display name
+	  private OdkTablesTableNameBox displayNameBox;
 
 	  public OdkTablesAddNewTablePopup() {
 	    super();
@@ -55,15 +58,19 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	    AggregateButton addTableButton = new OdkTablesAddTableButton();
 	    addTableButton.addClickHandler(new ExecuteAdd());
 
-	    nameBox = new OdkTablesTableNameBox(this);
+	    idBox = new OdkTablesTableIdBox(this);
+	    displayNameBox = new OdkTablesTableNameBox(this);
 
 	    FlexTable layout = new FlexTable();
 
 	    HTML message = new HTML("You are adding a new table.");
 	    layout.setWidget(0, 0, message);
-	    layout.setWidget(0, 1, nameBox);
-	    layout.setWidget(0, 2, addTableButton);
-	    layout.setWidget(0, 3, new ClosePopupButton(this));
+	    layout.setWidget(1, 0, new HTML("TableId:"));
+       layout.setWidget(1, 1, idBox);
+       layout.setWidget(2, 0, new HTML("Display Name:"));
+	    layout.setWidget(2, 1, displayNameBox);
+	    layout.setWidget(3, 1, addTableButton);
+	    layout.setWidget(3, 2, new ClosePopupButton(this));
 
 	    setWidget(layout);
 	  }
@@ -73,14 +80,15 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	    @Override
 	    public void onClick(ClickEvent event) {
 
-          String tableName = nameBox.getValue();
-          // TODO: for now, just add the tableKey and dbTableName to be the
-          // same as the tableName. The correct workflow and checks need to
-          // be performed.
-          List<ColumnClient> columns = new ArrayList<ColumnClient>(0);
-          tableDef = new TableDefinitionClient(null, columns, tableName,
-              tableName, TableTypeClient.DATA,
-              null);
+	      String tableId = idBox.getValue();
+         String displayName = displayNameBox.getValue();
+
+         // TODO: for now, just add the tableId and displayName, with the
+         // tableId also being the dbTableName. The correct workflow and checks need to
+         // be performed.
+         List<ColumnClient> columns = new ArrayList<ColumnClient>(0);
+         tableDef = new TableDefinitionClient(tableId, columns, displayName,
+             TableTypeClient.DATA);
 
 	      // Set up the callback object.
 	      AsyncCallback<TableEntryClient> callback = new AsyncCallback<TableEntryClient>() {

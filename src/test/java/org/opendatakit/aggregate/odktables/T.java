@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Ignore;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -33,6 +34,10 @@ public class T {
   public static class OdkTablesKeyValueStoreEntries {
     public static final OdkTablesKeyValueStoreEntry entryOne;
     public static final OdkTablesKeyValueStoreEntry entryTwo;
+    public static final OdkTablesKeyValueStoreEntry tableType;
+    public static final OdkTablesKeyValueStoreEntry displayName;
+    public static final OdkTablesKeyValueStoreEntry tableAccessControls;
+
     public static final String entryOnePartition = "tablePartition";
     public static final String entryOneAspect = "tableAspect";
     public static final String entryOneKey = "theKey";
@@ -41,8 +46,23 @@ public class T {
     public static final String entryTwoPartition = "customPartition";
     public static final String entryTwoAspect = "customAspect";
     public static final String entryTwoKey = "laClave";
-    public static final String entryTwoType = "text";
+    public static final String entryTwoType = "string";
     public static final String entryTwoValue = "thereIsNoPassword";
+
+    public static final String tablePartition = KeyValueStoreConstants.PARTITION_TABLE;
+    public static final String tableAspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+
+    public static final String displayNameKey = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
+    public static final String displayNameType = "object";
+    public static final String displayNameValue = "\"People\"";
+
+    public static final String tableTypeKey = KeyValueStoreConstants.TABLE_TYPE;
+    public static final String tableTypeType = "string";
+    public static final String tableTypeValue = TableType.DATA.name();
+
+    public static final String tableAccessControlTableIdKey = KeyValueStoreConstants.TABLE_ACCESS_CONTROL_TABLE_ID;
+    public static final String tableAccessControlTableIdType = "string";
+    public static final String tableAccessControlTableIdValue = "someId";
     static {
       entryOne = new OdkTablesKeyValueStoreEntry();
       entryOne.tableId = T.tableId;
@@ -51,6 +71,7 @@ public class T {
       entryOne.key = entryOneKey;
       entryOne.type = entryOneType;
       entryOne.value = entryOneValue;
+
       entryTwo = new OdkTablesKeyValueStoreEntry();
       entryTwo.tableId = T.tableId;
       entryTwo.partition = entryTwoPartition;
@@ -58,6 +79,31 @@ public class T {
       entryTwo.key = entryTwoKey;
       entryTwo.type = entryTwoType;
       entryTwo.value = entryTwoValue;
+
+      tableType = new OdkTablesKeyValueStoreEntry();
+      tableType.tableId = T.tableId;
+      tableType.partition = tablePartition;
+      tableType.aspect = tableAspect;
+      tableType.key = tableTypeKey;
+      tableType.type = tableTypeType;
+      tableType.value = tableTypeValue;
+
+      displayName = new OdkTablesKeyValueStoreEntry();
+      displayName.tableId = T.tableId;
+      displayName.partition = tablePartition;
+      displayName.aspect = tableAspect;
+      displayName.key = displayNameKey;
+      displayName.type = displayNameType;
+      displayName.value = displayNameValue;
+
+      tableAccessControls = new OdkTablesKeyValueStoreEntry();
+      tableAccessControls.tableId = T.tableId;
+      tableAccessControls.partition = tablePartition;
+      tableAccessControls.aspect = tableAspect;
+      tableAccessControls.key = tableAccessControlTableIdKey;
+      tableAccessControls.type = tableAccessControlTableIdType;
+      tableAccessControls.value = tableAccessControlTableIdValue;
+
     }
   }
 
@@ -71,12 +117,22 @@ public class T {
     public static final String columnType_String = "colTypeString";
     public static final String columnType_Int = "colTypeInt";
     public static final Column column_name = new Column(name, name + elementKey_suffix, name
-        + elementName_suffix, "NONE", null, true, null);
+        + elementName_suffix, "NONE", null, true);
     public static final Column column_age = new Column(age, age + elementKey_suffix, age
-        + elementName_suffix, "NONE", null, true, null);
+        + elementName_suffix, "NONE", null, true);
     public static final Column column_weight = new Column(weight, weight + elementKey_suffix,
-        weight + elementName_suffix, "NONE", null, true, null);
+        weight + elementName_suffix, "NONE", null, true);
   }
+
+  public static final String uri_access_control_1 = null;
+  public static final String form_id_1 = null;
+  public static final String locale_1 = "default";
+  public static final Long savepoint_timestamp_1 = System.currentTimeMillis()-1000;
+
+  public static final String uri_access_control_2 = "fred";
+  public static final String form_id_2 = "ralph";
+  public static final String locale_2 = "default";
+  public static final Long savepoint_timestamp_2 = System.currentTimeMillis()-2000;
 
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"), JOHN("2", "john", "58", "200");
@@ -125,30 +181,25 @@ public class T {
   public static final String user = "someone@gmail.com";
   public static final String group = "somegroup";
   public static final String tableId = "people";
-  public static final String tableKey = "peopleKey";
-  public static final String dbTableName = "peopleDbTableName";
-  public static final String tableIdAccessControls = "someId";
-  public static final String tableName = "people";
   public static final String tableMetadata = null;
-  public static final TableType tableType = TableType.DATA;
-  public static final String propertiesEtag = "propertiesEtag";
+  public static final String propertiesETag = "propertiesETag";
 
-  @SuppressWarnings("serial")
   public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
-  @SuppressWarnings("serial")
   public static final List<Column> columns = new ArrayList<Column>();
 
-  @SuppressWarnings("serial")
   public static final List<Row> rows = new ArrayList<Row>();
 
   static {
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableType);
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.displayName);
+    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableAccessControls);
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);
     columns.add(T.Columns.column_weight);
-    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.Data.DYLAN.getValues()));
-    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.Data.JOHN.getValues()));
+    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues()));
+    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.Data.JOHN.getValues()));
   };
 }

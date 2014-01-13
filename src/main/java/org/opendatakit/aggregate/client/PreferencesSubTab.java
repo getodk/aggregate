@@ -70,6 +70,20 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private EnableOdkTablesCheckbox odkTablesEnable;
   private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
 
+  private PreferencesCompletionCallback settingsChange = new PreferencesCompletionCallback() {
+    @Override
+    public void refreshFromUpdatedPreferences() {
+      setCredentialValues();
+      disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
+      odkTablesEnable.updateValue(Preferences.getOdkTablesEnabled());
+    }
+
+    @Override
+    public void failedRefresh() {
+      // Error message is displayed. Leave everything as-is.
+    }
+  };
+
   public PreferencesSubTab() {
     // vertical
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
@@ -165,13 +179,13 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     add(features);
 
     disableFasterBackgroundActions = new DisableFasterBackgroundActionsCheckbox(
-        Preferences.getFasterBackgroundActionsDisabled());
+        Preferences.getFasterBackgroundActionsDisabled(), settingsChange);
     add(disableFasterBackgroundActions);
 
     HTML br = new HTML("<br>");
     add(br);
 
-    odkTablesEnable = new EnableOdkTablesCheckbox(Preferences.getOdkTablesEnabled());
+    odkTablesEnable = new EnableOdkTablesCheckbox(Preferences.getOdkTablesEnabled(), settingsChange);
     add(odkTablesEnable);
   }
 
@@ -235,22 +249,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   @Override
   public void update() {
-    Preferences.updatePreferences(new PreferencesCompletionCallback() {
-      @Override
-      public void refreshFromUpdatedPreferences() {
-        setCredentialValues();
-        disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
-        boolean enabled = Preferences.getOdkTablesEnabled();
-        odkTablesEnable.updateValue(enabled);
-        AggregateUI.getUI().updateOdkTablesFeatureVisibility();
-      }
-
-      @Override
-      public void failedRefresh() {
-        // Error message is displayed. Leave everything as-is.
-        AggregateUI.getUI().updateOdkTablesFeatureVisibility();
-      }
-    });
+    Preferences.updatePreferences(settingsChange);
   }
 
 }

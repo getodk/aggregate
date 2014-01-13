@@ -72,7 +72,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
     // format headers
     appendCsvRow(headers.iterator());
   }
-  
+
   @Override
   public final void processSubmissionSegment(List<Submission> submissions,
         CallingContext cc) throws ODKDatastoreException {
@@ -82,7 +82,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
       appendCsvRow(row.getFormattedValues().iterator());
     }
   }
-  
+
   @Override
   public final void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
   }
@@ -93,18 +93,23 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
     processSubmissionSegment(submissions, cc);
     afterProcessSubmissions(cc);
   }
-  
+
   /**
    * Helper function used to append the comma separated value row
-   * 
+   *
    * @param itr
    *          string values to be separated by commas
-   * 
+   *
    */
   private void appendCsvRow(Iterator<String> itr) {
     output.append(BasicConsts.EMPTY_STRING);
     while (itr.hasNext()) {
-      output.append(BasicConsts.QUOTE + itr.next() + BasicConsts.QUOTE);
+      String value = itr.next();
+      if ( value != null) {
+        // escape double quotes with another double quote per RFC 4180
+        value = value.replaceAll(BasicConsts.QUOTE, BasicConsts.QUOTE_QUOTE);
+        output.append(BasicConsts.QUOTE).append(value).append(BasicConsts.QUOTE);
+      }
       if (itr.hasNext()) {
         output.append(FormatConsts.CSV_DELIMITER);
       } else {

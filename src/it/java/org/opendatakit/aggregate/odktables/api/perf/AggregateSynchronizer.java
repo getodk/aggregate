@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
@@ -31,7 +32,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.rest.interceptor.AggregateRequestInterceptor;
 import org.opendatakit.aggregate.odktables.rest.serialization.JsonObjectHttpMessageConverter;
 import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
@@ -70,7 +70,7 @@ public class AggregateSynchronizer {
     this.baseUri = uri;
 
     List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
-    interceptors.add(new AggregateRequestInterceptor(accessToken));
+    interceptors.add(new AggregateRequestInterceptor(uri,accessToken));
 
     this.rt = new RestTemplate();
 //    this.rt.setInterceptors(interceptors);
@@ -118,17 +118,18 @@ public class AggregateSynchronizer {
     }
 
     for (TableResource tableResource : tableResources)
-      tables.put(tableResource.getTableId(), tableResource.getTableKey());
+      tables.put(tableResource.getTableId(), tableResource.getSchemaETag());
 
     return tables;
   }
 
-  public TableResource createTable(String tableId, String tableName, List<Column> columns,
+  public TableResource createTable(String tableId, List<Column> columns, String displayName,
       String tableProperties) throws IOException {
 
     // build request
     URI uri = baseUri.resolve(tableId);
-    TableDefinition definition = new TableDefinition(tableName, columns, tableName, tableName, TableType.DATA, tableProperties);
+    TableDefinition definition = new TableDefinition(tableId, columns);
+    definition.setDisplayName(displayName);
     HttpEntity<TableDefinition> requestEntity = new HttpEntity<TableDefinition>(definition,
         requestHeaders);
     // create table
@@ -172,7 +173,7 @@ public class AggregateSynchronizer {
 
   public RowResource putRow(String tableId, Row row) throws IOException {
     TableResource resource = getResource(tableId);
-    Map<String, String> rowEtags = new HashMap<String, String>();
+    Map<String, String> rowETags = new HashMap<String, String>();
 
     URI url = URI.create(resource.getDataUri() + "/" + row.getRowId()).normalize();
     HttpEntity<Row> requestEntity = new HttpEntity<Row>(row, requestHeaders);
@@ -183,7 +184,7 @@ public class AggregateSynchronizer {
       throw new IOException(e.getMessage());
     }
     RowResource putRow = insertedEntity.getBody();
-    rowEtags.put(putRow.getRowId(), putRow.getRowEtag());
+    rowETags.put(putRow.getRowId(), putRow.getRowETag());
 
     return putRow;
   }
@@ -199,20 +200,20 @@ public class AggregateSynchronizer {
     }
   }
 
-  public PropertiesResource setTableProperties(String tableId, String propertiesEtag,
+  public PropertiesResource setTableProperties(String tableId, String propertiesETag,
       String tableName, String tableProperties) throws IOException {
     TableResource resource = getResource(tableId);
 
     List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
-    entry.partition = "table";
+    entry.partition = KeyValueStoreConstants.PARTITION_TABLE;
     entry.aspect = "metadata";
     entry.key = "my_value";
     entry.type = "text";
     entry.value = tableProperties;
     keyValueStoreEntries.add(entry);
     // put new properties
-    TableProperties properties = new TableProperties(propertiesEtag, tableName, keyValueStoreEntries);
+    TableProperties properties = new TableProperties(propertiesETag, tableName, keyValueStoreEntries);
     HttpEntity<TableProperties> entity = new HttpEntity<TableProperties>(properties, requestHeaders);
     ResponseEntity<PropertiesResource> updatedEntity;
     try {
