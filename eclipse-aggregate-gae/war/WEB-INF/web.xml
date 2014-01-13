@@ -255,7 +255,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>enketoui</servlet-name>
-		<url-pattern>/enk/generateEnketoui</url-pattern>
+		<url-pattern>/enk/enketoApiHandler</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
