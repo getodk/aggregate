@@ -22,42 +22,27 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.support.HttpRequestWrapper;
 
 public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor {
 
+  private URI uriBase;
   private String accessToken;
 
-  public AggregateRequestInterceptor(String accessToken) {
+  public AggregateRequestInterceptor(URI uriBase, String accessToken) {
+    this.uriBase = uriBase;
     this.accessToken = accessToken;
   }
 
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,
       ClientHttpRequestExecution execution) throws IOException {
-    HttpRequest wrappedRequest = new AddAccessTokenHttpRequestWrapper(request);
-    return execution.execute(wrappedRequest, body);
-  }
-
-  private class AddAccessTokenHttpRequestWrapper extends HttpRequestWrapper {
-
-    public AddAccessTokenHttpRequestWrapper(HttpRequest request) {
-      super(request);
-    }
-
-    @Override
-    public URI getURI() {
-      String uriString = super.getURI().toString();
-      String accessTokenQuery = "access_token=" + accessToken;
-      if (super.getURI().getQuery() == null) {
-        accessTokenQuery = "?" + accessTokenQuery;
-      } else {
-        accessTokenQuery = "&" + accessTokenQuery;
+    if ( accessToken != null && uriBase != null ) {
+      if (request.getURI().getHost().equals(uriBase.getHost()) &&
+          request.getURI().getPort() == uriBase.getPort() ) {
+        request.getHeaders().set("Authorization", "Bearer " + accessToken);
       }
-      URI uri = URI.create(uriString + accessTokenQuery);
-      return uri;
     }
-
+    return execution.execute(request, body);
   }
 
 }

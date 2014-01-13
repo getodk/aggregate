@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +48,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.common.utils.WebUtils;
 
 /**
  * Various methods for transforming objects from client to server code.
@@ -64,7 +66,7 @@ public class UtilTransforms {
     Column transformedColumn = new Column(client.getTableId(),
         client.getElementKey(), client.getElementName(),
         client.getElementType(), client.getListChildElementKeys(),
-        (client.getIsPersisted() != 0), client.getJoins());
+        (client.getIsPersisted() != 0));
     return transformedColumn;
   }
 
@@ -163,14 +165,16 @@ public class UtilTransforms {
     serverRow.setDeleted(client.isDeleted());
     serverRow.setFilterScope(transform(client.getFilterScope()));
     serverRow.setLastUpdateUser(client.getLastUpdateUser());
-    serverRow.setRowEtag(client.getRowEtag());
+    serverRow.setRowETag(client.getRowETag());
     serverRow.setRowId(client.getRowId());
     serverRow.setValues(client.getValues());
-    serverRow.setUriUser(client.getUriUser());
+    serverRow.setUriAccessControl(client.getUriAccessControl());
     serverRow.setFormId(client.getFormId());
-    serverRow.setInstanceName(client.getInstanceName());
     serverRow.setLocale(client.getLocale());
-    serverRow.setTimestamp(client.getTimestamp());
+    String isoDateStr = client.getSavepointTimestampIso8601Date();
+    Date isoDate = WebUtils.parseDate(isoDateStr);
+    Long time = (isoDate == null) ? null : isoDate.getTime();
+    serverRow.setSavepointTimestamp(time);
     return serverRow;
   }
 
@@ -234,9 +238,9 @@ public class UtilTransforms {
   /**
    * Transforms the object into client-side TableEntryClient object.
    */
-  public static TableEntryClient transform(TableEntry serverEntry) {
-    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(),
-        serverEntry.getTableKey(), serverEntry.getDataEtag(), serverEntry.getPropertiesEtag());
+  public static TableEntryClient transform(TableEntry serverEntry, String displayName) {
+    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(), displayName,
+        serverEntry.getDataETag(), serverEntry.getPropertiesETag(), serverEntry.getSchemaETag());
     return clientEntry;
   }
 
@@ -244,10 +248,10 @@ public class UtilTransforms {
    * This method transforms the TableResource into a client-side
    * TableResourceClient object.
    */
-  public static TableResourceClient transform(TableResource serverResource) {
+  public static TableResourceClient transform(TableResource serverResource, String displayName) {
     TableResourceClient clientResource = new TableResourceClient(new TableEntryClient(
-        serverResource.getTableId(), serverResource.getTableKey(), serverResource.getDataEtag(),
-        serverResource.getPropertiesEtag()));
+        serverResource.getTableId(), displayName, serverResource.getDataETag(),
+        serverResource.getPropertiesETag(), serverResource.getSchemaETag()));
     clientResource.setAclUri(serverResource.getAclUri());
     clientResource.setDataUri(serverResource.getDataUri());
     clientResource.setDiffUri(serverResource.getDiffUri());
@@ -258,7 +262,7 @@ public class UtilTransforms {
   }
 
   public static PropertiesResourceClient transform(PropertiesResource serverResource) {
-    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getPropertiesEtag(),
+    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getPropertiesETag(),
         serverResource.getTableId(), UtilTransforms.transform(serverResource
             .getKeyValueStoreEntries()));
     PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
@@ -276,7 +280,7 @@ public class UtilTransforms {
       clientEntries.add(UtilTransforms.transform(serverEntry));
     }
     TablePropertiesClient tpClient = new TablePropertiesClient(
-        serverProperties.getPropertiesEtag(), serverProperties.getTableId(), clientEntries);
+        serverProperties.getPropertiesETag(), serverProperties.getTableId(), clientEntries);
     return tpClient;
   }
 
@@ -288,14 +292,8 @@ public class UtilTransforms {
     row.setCreateUser(serverRow.getCreateUser());
     row.setDeleted(serverRow.isDeleted());
     row.setLastUpdateUser(serverRow.getLastUpdateUser());
-    row.setRowEtag(serverRow.getRowEtag());
+    row.setRowETag(serverRow.getRowETag());
     row.setRowId(serverRow.getRowId());
-    row.setValues(serverRow.getValues());
-    row.setUriUser(serverRow.getUriUser());
-    row.setFormId(serverRow.getFormId());
-    row.setInstanceName(serverRow.getInstanceName());
-    row.setLocale(serverRow.getLocale());
-    row.setTimestamp(serverRow.getTimestamp());
     if (serverRow.getFilterScope().getType() == null) {
       row.setFilterScope(ScopeClient.EMPTY_SCOPE);
     } else {
@@ -316,6 +314,16 @@ public class UtilTransforms {
         row.setFilterScope(ScopeClient.EMPTY_SCOPE);
       }
     }
+
+    // sync'd metadata
+    row.setUriAccessControl(serverRow.getUriAccessControl());
+    row.setFormId(serverRow.getFormId());
+    row.setLocale(serverRow.getLocale());
+    Long time = serverRow.getSavepointTimestamp();
+    row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
+
+    // data
+    row.setValues(serverRow.getValues());
     return row;
   }
 
@@ -326,15 +334,20 @@ public class UtilTransforms {
     rowClient.setDeleted(serverResource.isDeleted());
     rowClient.setFilterScope(UtilTransforms.transform(serverResource.getFilterScope()));
     rowClient.setLastUpdateUser(serverResource.getLastUpdateUser());
-    rowClient.setRowEtag(serverResource.getRowEtag());
+    rowClient.setRowETag(serverResource.getRowETag());
     rowClient.setRowId(serverResource.getRowId());
-    rowClient.setValues(serverResource.getValues());
-    rowClient.setUriUser(serverResource.getUriUser());
-    rowClient.setFormId(serverResource.getFormId());
-    rowClient.setInstanceName(serverResource.getInstanceName());
-    rowClient.setLocale(serverResource.getLocale());
-    rowClient.setTimestamp(serverResource.getTimestamp());
 
+    // sync'd metadata
+    rowClient.setUriAccessControl(serverResource.getUriAccessControl());
+    rowClient.setFormId(serverResource.getFormId());
+    rowClient.setLocale(serverResource.getLocale());
+    Long time = serverResource.getSavepointTimestamp();
+    rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
+
+    // data
+    rowClient.setValues(serverResource.getValues());
+
+    // manipulator URIs
     RowResourceClient resource = new RowResourceClient(rowClient);
     resource.setSelfUri(serverResource.getSelfUri());
     resource.setTableUri(serverResource.getTableUri());

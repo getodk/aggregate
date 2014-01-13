@@ -1,3 +1,4 @@
+
 package org.opendatakit.aggregate.odktables.api.perf;
 
 import java.io.IOException;
@@ -14,6 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.odktables.api.T;
+import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer;
+import org.opendatakit.aggregate.odktables.api.perf.PerfTest;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
@@ -32,7 +36,7 @@ public class MultipleUsersTest implements PerfTest {
   private int numCols;
   private int numRows;
   private String tableId;
-  private String tableName;
+  private String displayName;
   private Serializer serializer;
 
   public MultipleUsersTest(AggregateSynchronizer synchronizer, int numUsers, int numCols,
@@ -41,8 +45,8 @@ public class MultipleUsersTest implements PerfTest {
     this.numUsers = numUsers;
     this.numCols = numCols;
     this.numRows = numRows;
-    this.tableId = UUID.randomUUID().toString();
-    this.tableName = "test_users_" + numUsers + "_cols_" + numCols + "_rows_" + numRows;
+    this.tableId = "test_users_" + numUsers + "_cols_" + numCols + "_rows_" + numRows;
+    this.displayName = "\"Display_test_users_" + numUsers + "_cols_" + numCols + "_rows_" + numRows + "\"";
     this.serializer = SimpleXMLSerializerForAggregate.getSerializer();
   }
 
@@ -60,7 +64,7 @@ public class MultipleUsersTest implements PerfTest {
               for (int j = 0; j < numCols; j++) {
                 values.put(colName(j), "value_" + j);
               }
-              Row row = Row.forInsert(UUID.randomUUID().toString(), values);
+              Row row = Row.forInsert(UUID.randomUUID().toString(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
               synchronizer.putRow(tableId, row);
               tryAgain = false;
             } catch (HttpStatusCodeException e) {
@@ -100,9 +104,9 @@ public class MultipleUsersTest implements PerfTest {
     // create table
     List<Column> columns = new ArrayList<Column>();
     for (int i = 0; i < numCols; i++) {
-      columns.add(new Column(tableId, colName(i), colName(i), "STRING", null, true, null));
+      columns.add(new Column(tableId, colName(i), colName(i), "STRING", null, true));
     }
-    synchronizer.createTable(tableId, tableName, columns, null);
+    synchronizer.createTable(tableId, columns, displayName, null);
     return true;
   }
 
@@ -156,7 +160,7 @@ public class MultipleUsersTest implements PerfTest {
     parameters.put(Key.numUsers, numUsers);
     parameters.put(Key.numCols, numCols);
     parameters.put(Key.numRows, numRows);
-    return new TestInfo(this.getClass().getSimpleName(), tableId, tableName, parameters);
+    return new TestInfo(this.getClass().getSimpleName(), tableId, displayName, parameters);
   }
 
   public class Key {

@@ -38,16 +38,11 @@ public class TableDefinitionResource extends TableDefinition {
   }
 
   public TableDefinitionResource(TableDefinition definition) {
-    this(definition.getTableId(), definition.getColumns(),
-        definition.getTableKey(), definition.getDbTableName(),
-        definition.getType(), definition.getTableIdAccessControls());
+    this(definition.getTableId(), definition.getSchemaETag(), definition.getColumns(), definition.getDisplayName());
   }
 
-  public TableDefinitionResource(String tableId, List<Column> columns,
-      String tableKey, String dbTableName, TableType type,
-      String tableIdAccessControls) {
-    super(tableId, columns, tableKey, dbTableName, type,
-        tableIdAccessControls);
+  public TableDefinitionResource(String tableId, String schemaETag, List<Column> columns, String displayName) {
+    super(tableId, schemaETag, columns, displayName);
   }
 
   public String getSelfUri() {

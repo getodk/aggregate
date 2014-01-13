@@ -50,16 +50,16 @@ public class DiffServiceImpl implements DiffService {
   }
 
   @Override
-  public List<RowResource> getRowsSince(String dataEtag) throws ODKDatastoreException,
+  public List<RowResource> getRowsSince(String dataETag) throws ODKDatastoreException,
       PermissionDeniedException {
     // TODO re-do permissions stuff
     //af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
     /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) { */
-      rows = dm.getRowsSince(dataEtag);
+      rows = dm.getRowsSince(dataETag);
     /*} else {
       List<Scope> scopes = AuthFilter.getScopes(cc);
-      rows = dm.getRowsSince(dataEtag, scopes);
+      rows = dm.getRowsSince(dataETag, scopes);
     }*/
     return getResources(rows);
   }

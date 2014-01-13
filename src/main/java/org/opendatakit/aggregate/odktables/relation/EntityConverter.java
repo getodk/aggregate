@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
-import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -38,7 +37,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -59,11 +57,10 @@ public class EntityConverter {
    */
   public TableEntry toTableEntry(DbTableEntryEntity entity) {
     String tableId = entity.getId();
-    String tableKey = entity.getTableKey();
-    String dataEtag = entity.getDataETag();
-    String propertiesEtag = entity.getPropertiesETag();
-    TableEntry entry = new TableEntry(tableId, tableKey, dataEtag,
-        propertiesEtag);
+    String dataETag = entity.getDataETag();
+    String propertiesETag = entity.getPropertiesETag();
+    String schemaETag = entity.getSchemaETag();
+    TableEntry entry = new TableEntry(tableId, dataETag, propertiesETag, schemaETag);
     return entry;
   }
 
@@ -76,8 +73,8 @@ public class EntityConverter {
    */
   public List<TableEntry> toTableEntries(List<DbTableEntryEntity> entities) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
-    if ( entities != null ) {
-      for (DbTableEntryEntity entity : entities ) {
+    if (entities != null) {
+      for (DbTableEntryEntity entity : entities) {
         entries.add(toTableEntry(entity));
       }
     }
@@ -92,12 +89,10 @@ public class EntityConverter {
     String elementKey = entity.getElementKey();
     String elementName = entity.getElementName();
     String elementTypeStr = entity.getElementType();
-    String listChildElementKeys =
-        entity.getListChildElementKeys();
-    Boolean isPersisted = entity.getIsPersisted();
-    String joins = entity.getJoins();
-    Column column = new Column(tableId, elementKey, elementName,
-        elementTypeStr, listChildElementKeys, isPersisted, joins);
+    String listChildElementKeys = entity.getListChildElementKeys();
+    Boolean isUnitOfRetention = entity.getIsUnitOfRetention();
+    Column column = new Column(tableId, elementKey, elementName, elementTypeStr,
+        listChildElementKeys, isUnitOfRetention);
     return column;
   }
 
@@ -113,17 +108,14 @@ public class EntityConverter {
     return columns;
   }
 
-  public TableProperties toTableProperties(List<DbKeyValueStoreEntity> kvsEntities,
-      String tableId, String propertiesEtag) {
-    List<OdkTablesKeyValueStoreEntry> kvsEntries =
-        toOdkTablesKeyValueStoreEntry(kvsEntities);
-    TableProperties properties = new TableProperties(propertiesEtag, tableId,
-        kvsEntries);
+  public TableProperties toTableProperties(List<DbKeyValueStoreEntity> kvsEntities, String tableId,
+      String propertiesETag) {
+    List<OdkTablesKeyValueStoreEntry> kvsEntries = toOdkTablesKeyValueStoreEntry(kvsEntities);
+    TableProperties properties = new TableProperties(propertiesETag, tableId, kvsEntries);
     return properties;
   }
 
-  public OdkTablesKeyValueStoreEntry toOdkTablesKeyValueStoreEntry(
-      DbKeyValueStoreEntity entity) {
+  public OdkTablesKeyValueStoreEntry toOdkTablesKeyValueStoreEntry(DbKeyValueStoreEntity entity) {
     String tableId = entity.getTableId();
     String partition = entity.getPartition();
     String aspect = entity.getAspect();
@@ -141,27 +133,26 @@ public class EntityConverter {
   }
 
   /**
-   * Return a TableDefinition based upon the {@link DbTableDefinitionsEntity} parameter, which
-   * must have been generated from the {@link DbTableDefinitions} relation.
-   * All fields are from the entity except the columns, which are set to null.
-   * @param definitionEntity
+   * Return a TableDefinition based upon the {@link DbTableDefinitionsEntity}
+   * parameter, which must have been generated from the
+   * {@link DbTableDefinitions} relation. All fields are from the entity except
+   * the columns, which are set to null.
+   *
+   * @param schemaEntity
    * @return
    */
-  public TableDefinition toTableDefinition(TableEntry entryEntity, DbTableDefinitionsEntity definitionEntity) {
-    String tableId = definitionEntity.getTableId();
-    String tableKey = entryEntity.getTableKey();
-    String dbTableName = definitionEntity.getDbTableName();
-    String tableTypeStr = definitionEntity.getType();
-    TableType tableType = TableType.valueOf(tableTypeStr);
-    String tableIdAccessControls = definitionEntity.getTableIdAccessControls();
-    return new TableDefinition(tableId, null, tableKey, dbTableName, tableType,
-        tableIdAccessControls);
+  public TableDefinition toTableDefinition(TableEntry entryEntity,
+      DbTableDefinitionsEntity schemaEntity) {
+    String tableId = schemaEntity.getTableId();
+    String displayName = schemaEntity.getDbTableName();
+    String schemaETag = schemaEntity.getSchemaETag();
+    TableDefinition td = new TableDefinition(tableId, schemaETag, null, displayName);
+    return td;
   }
 
   public List<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
       List<DbKeyValueStoreEntity> kvsEntities) {
-    List<OdkTablesKeyValueStoreEntry> kvsEntries =
-        new ArrayList<OdkTablesKeyValueStoreEntry>();
+    List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     for (DbKeyValueStoreEntity entity : kvsEntities) {
       kvsEntries.add(toOdkTablesKeyValueStoreEntry(entity));
     }
@@ -196,52 +187,69 @@ public class EntityConverter {
   }
 
   /**
-   * Convert a {@link Column} to a {@link DataField}
-   */
-  public DataField toField(Column column) {
-    // ss: exactly what the point of this method is eludes me. However, I
-    // believe that the "type" of an ODK Tables Column on the aggregate side
-    // is always a string. Tables permits more complicated types like image,
-    // location, etc, and therefore there is no way/reason to map each level
-    // to the aggregate side.
-    DataField field = new DataField(RUtil.convertIdentifier(column.getElementKey()),
-        DataType.STRING, true);
-    return field;
-  }
-
-  /**
    * Convert a {@link DbColumnDefinitions} entity to a {@link DataField}
+   * <p>
+   * We create fields on the server with boolean, integer, numeric and string
+   * data types. Everything else is preserved as a string data type. This
+   * includes dates and times, as thier representation varies across databases.
+   * Dates are stored as yyyy-mm-ddThh:mm:ss.ssszzz and should sort in a
+   * predictable way even though they remain strings. Similarly, times are
+   * stored as hh:mm:ss.ssszzz and should also sort predictably.
+   * <p>
+   * JSON objects may sort unpredictably since the serialization order of an
+   * object's properties is ill-defined.
+   * </p>
+   * <p>
+   * Schema changes are now governed by a schemaETag, which is immutable (though
+   * with some rework on the server, could become mutable).
    */
   public DataField toField(DbColumnDefinitionsEntity entity) {
-    // Note that here is where Aggregate is deciding that all the column types
-    // in the user-defined columns are in fact of type DataType.STRING.
-    // Therefore we're not allowing any sort of more fancy number searching or
-    // anything like that on the server. This should eventually map more
-    // intelligently. It is not being done at this point because exactly what
-    // we do in the case of changing table properties is not defined. Therefore
-    // if someone was to start out with a number, and aggregate had the column
-    // type as a number, and they decided to change it, there could be issues.
-    // This whole process needs to be more thought out. But for now, they're
-    // remaining all types as a String.
-    // TODO: make map ODKTables column types to the appropriate aggregate type.
-    DataField field = new DataField(RUtil.convertIdentifier(entity.getId()),
-        DataType.STRING, true);
-    return field;
+    if ( !entity.getIsUnitOfRetention() ) {
+      throw new IllegalArgumentException("Attempt to get DataField for a non-persisted elementKey (" + entity.getElementKey() + ")");
+    }
+    String type = entity.getElementType();
+    if (type.equals("boolean")) {
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.BOOLEAN, true);
+    } else if (type.equals("integer")) {
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.INTEGER, true);
+    } else if (type.equals("number")) {
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.DECIMAL, true);
+    } else {
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true);
+    }
   }
 
   /**
-   * Convert a list of {@link DbColumnDefinitions} entities to a list of {@link DataField}
+   * Convert a list of {@link DbColumnDefinitions} entities to a list of
+   * {@link DataField}
    */
   public List<DataField> toFields(List<DbColumnDefinitionsEntity> entities) {
     List<DataField> fields = new ArrayList<DataField>();
     for (DbColumnDefinitionsEntity entity : entities)
-      fields.add(toField(entity));
+      if ( entity.getIsUnitOfRetention() ) {
+        fields.add(toField(entity));
+      }
     return fields;
   }
 
+  public Scope getFilterScope(Entity entity) {
+    String filterType = entity.getString(DbTable.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        return new Scope(Scope.Type.DEFAULT, null);
+      } else {
+        String value = entity.getString(DbTable.FILTER_VALUE);
+        return new Scope(type, value);
+      }
+    } else {
+      return Scope.EMPTY_SCOPE;
+    }
+  }
+
   /**
-   * Convert a {@link DbTable} entity into a {@link Row}. The returned row
-   * will have the {@link DbTable} metadata columns such as timestamp and
+   * Convert a {@link DbTable} entity into a {@link Row}. The returned row will
+   * have the {@link DbTable} metadata columns such as _savepoint_timestamp and
    * row_version set.
    *
    * @param entity
@@ -253,18 +261,10 @@ public class EntityConverter {
   public Row toRow(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Row row = new Row();
     row.setRowId(entity.getId());
-    row.setRowEtag(entity.getString(DbTable.ROW_VERSION));
-    row.setDataEtagAtModification(
-        entity.getString(DbTable.DATA_ETAG_AT_MODIFICATION));
-    row.setDeleted(entity.getBoolean(DbTable.DELETED));
+    row.setRowETag(entity.getString(DbTable.ROW_ETAG));
+    row.setDataETagAtModification(entity.getString(DbTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
-    row.setUriUser(entity.getString(TableConstants.URI_ACCESS_CONTROL.toUpperCase()));
-    row.setFormId(entity.getString(TableConstants.FORM_ID.toUpperCase()));
-    row.setInstanceName(
-        entity.getString(TableConstants.INSTANCE_NAME.toUpperCase()));
-    row.setLocale(entity.getString(TableConstants.LOCALE.toUpperCase()));
-    row.setTimestamp(entity.getDate(TableConstants.TIMESTAMP.toUpperCase()));
     String filterType = entity.getString(DbTable.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);
@@ -277,67 +277,74 @@ public class EntityConverter {
     } else {
       row.setFilterScope(Scope.EMPTY_SCOPE);
     }
+    row.setDeleted(entity.getBoolean(DbTable.DELETED));
+
+    row.setUriAccessControl(entity.getString(DbTable.URI_ACCESS_CONTROL));
+    row.setFormId(entity.getString(DbTable.FORM_ID));
+    row.setLocale(entity.getString(DbTable.LOCALE));
+    row.setSavepointTimestamp(entity.getLong(DbTable.SAVEPOINT_TIMESTAMP));
 
     row.setValues(getRowValues(entity, columns));
     return row;
   }
 
   /**
-   * This method creates a row from an entity retrieved from the
-   * DbTableFileInfo table. It makes use of the static List of
-   * String column names in that class.
+   * This method creates a row from an entity retrieved from the DbTableFileInfo
+   * table. It makes use of the static List of String column names in that
+   * class.
+   *
    * @param entity
    * @return
    * @author sudar.sam@gmail.com
    */
   public static Row toRowFromFileInfo(DbTableFileInfoEntity entity) {
-	  Row row = new Row();
-	  row.setRowId(entity.getId());
-	  row.setRowEtag(entity.getStringField(DbTable.ROW_VERSION));
-     row.setDataEtagAtModification(entity.getStringField(DbTable.DATA_ETAG_AT_MODIFICATION));
-	  row.setDeleted(entity.getBooleanField(DbTable.DELETED));
-	  row.setCreateUser(entity.getStringField(DbTable.CREATE_USER));
-	  row.setLastUpdateUser(entity.getStringField(DbTable.LAST_UPDATE_USER));
-	  String filterType = entity.getStringField(DbTable.FILTER_TYPE);
-	  if (filterType != null) {
-	      Scope.Type type = Scope.Type.valueOf(filterType);
-	      if (filterType.equals(Scope.Type.DEFAULT)) {
-	      row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
-	        } else {
-	          String value = entity.getStringField(DbTable.FILTER_VALUE);
-	          row.setFilterScope(new Scope(type, value));
-	        }
-	      } else {
-	        row.setFilterScope(Scope.EMPTY_SCOPE);
-	      }
-	  // this will be the actual values of the row
-	  Map<String, String> values = new HashMap<String, String>();
-	  for (DataField column : DbTableFileInfo.exposedColumnNames) {
-	    Validate.isTrue(column.getDataType() == DataType.STRING);
-	    String value = entity.getStringField(column);
-	    values.put(column.getName(), value);
-	  }
-	  row.setValues(values);
-	  return row;
+    Row row = new Row();
+    row.setRowId(entity.getId());
+    row.setRowETag(entity.getStringField(DbTable.ROW_ETAG));
+    row.setDataETagAtModification(entity.getStringField(DbTable.DATA_ETAG_AT_MODIFICATION));
+    row.setDeleted(entity.getBooleanField(DbTable.DELETED));
+    row.setCreateUser(entity.getStringField(DbTable.CREATE_USER));
+    row.setLastUpdateUser(entity.getStringField(DbTable.LAST_UPDATE_USER));
+    String filterType = entity.getStringField(DbTable.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
+      } else {
+        String value = entity.getStringField(DbTable.FILTER_VALUE);
+        row.setFilterScope(new Scope(type, value));
+      }
+    } else {
+      row.setFilterScope(Scope.EMPTY_SCOPE);
+    }
+    // this will be the actual values of the row
+    Map<String, String> values = new HashMap<String, String>();
+    for (DataField column : DbTableFileInfo.exposedColumnNames) {
+      Validate.isTrue(column.getDataType() == DataType.STRING);
+      String value = entity.getStringField(column);
+      values.put(column.getName(), value);
+    }
+    row.setValues(values);
+    return row;
   }
 
   /**
    * Return a list of rows from a list of entities queried from the
-   * DbTableFileInfo table. Just calls {@link toRowFromFileInfo()}
-   * for every entity in the list. However, it does NOT include
-   * deleted rows.
+   * DbTableFileInfo table. Just calls {@link toRowFromFileInfo()} for every
+   * entity in the list. However, it does NOT include deleted rows.
+   *
    * @param entities
    * @return
    */
   public static List<Row> toRowsFromFileInfo(List<DbTableFileInfoEntity> entities) {
-	  List<Row> rows = new ArrayList<Row>();
-	  for (DbTableFileInfoEntity e : entities) {
-		  Row row = toRowFromFileInfo(e);
-		  if (!row.isDeleted()) {
-			  rows.add(row);
-		  }
-	  }
-	  return rows;
+    List<Row> rows = new ArrayList<Row>();
+    for (DbTableFileInfoEntity e : entities) {
+      Row row = toRowFromFileInfo(e);
+      if (!row.isDeleted()) {
+        rows.add(row);
+      }
+    }
+    return rows;
   }
 
   /**
@@ -352,10 +359,8 @@ public class EntityConverter {
   public Row toRowFromLogTable(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Row row = new Row();
     row.setRowId(entity.getString(DbLogTable.ROW_ID));
-    row.setRowEtag(entity.getString(DbLogTable.ROW_VERSION));
-    row.setDataEtagAtModification(
-        entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
-    row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
+    row.setRowETag(entity.getString(DbLogTable.ROW_ETAG));
+    row.setDataETagAtModification(entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbLogTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));
     String filterType = entity.getString(DbLogTable.FILTER_TYPE);
@@ -370,6 +375,12 @@ public class EntityConverter {
     } else {
       row.setFilterScope(Scope.EMPTY_SCOPE);
     }
+    row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
+
+    row.setUriAccessControl(entity.getString(DbLogTable.URI_ACCESS_CONTROL));
+    row.setFormId(entity.getString(DbLogTable.FORM_ID));
+    row.setLocale(entity.getString(DbLogTable.LOCALE));
+    row.setSavepointTimestamp(entity.getLong(DbLogTable.SAVEPOINT_TIMESTAMP));
 
     row.setValues(getRowValues(entity, columns));
     return row;
@@ -378,9 +389,11 @@ public class EntityConverter {
   private Map<String, String> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Map<String, String> values = new HashMap<String, String>();
     for (DbColumnDefinitionsEntity column : columns) {
-      String name = column.getElementKey();
-      String value = entity.getAsString(RUtil.convertIdentifier(column.getId()));
-      values.put(name, value);
+      if ( column.getIsUnitOfRetention() ) {
+        String name = column.getElementKey();
+        String value = entity.getAsString(name.toUpperCase());
+        values.put(name, value);
+      }
     }
     return values;
   }

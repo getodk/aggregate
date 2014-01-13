@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
@@ -112,7 +112,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
       AuthFilter af = new AuthFilter(tableId, cc);
       af.checkPermission(TablePermission.READ_ROW);
       Row row = dm.getRowNullSafe(rowId);
-      af.checkFilter(TablePermission.UNFILTERED_READ, row);
+      af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
 
       TableContentsClient tcc = new TableContentsClient();
       tcc.columnNames = this.getColumnNames(tableId);
@@ -135,7 +135,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   @Override
   public RowClient createOrUpdateRow(String tableId, String rowId,
       RowClient row) throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException, EtagMismatchExceptionClient,
+      DatastoreFailureException, ETagMismatchExceptionClient,
       PermissionDeniedExceptionClient, BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -172,9 +172,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 //    } catch (BadColumnNameException e) {
 //      e.printStackTrace();
 //      throw new BadColumnNameExceptionClient(e);
-//    } catch (EtagMismatchException e) {
+//    } catch (ETagMismatchException e) {
 //      e.printStackTrace();
-//      throw new EtagMismatchExceptionClient(e);
+//      throw new ETagMismatchExceptionClient(e);
 //    }
   }
 
@@ -191,7 +191,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 
       af.checkPermission(TablePermission.DELETE_ROW);
       Row row = dm.getRowNullSafe(rowId);
-      af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
+      af.checkFilter(TablePermission.UNFILTERED_DELETE, row.getRowId(), row.getFilterScope());
       dm.deleteRow(rowId);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -223,7 +223,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     try {
       TableManager tm = new TableManager(cc);
       TableEntry entry = tm.getTable(tableId);
-      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, entry.getPropertiesEtag(), cc);
+      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, entry.getSchemaETag(), cc);
       return columnNames;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -450,7 +450,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     tcc.columnNames.add(DbTableFileInfo.UI_ONLY_FILENAME_HEADING);
     tcc.columnNames.add(DbTableFileInfo.UI_ONLY_TABLENAME_HEADING);
     //tcc.rows = getNonMediaFiles(tableId);
-    List<FileSummaryClient> nonMediaSummaries = getNonMediaFiles(tableId);
+    List<FileSummaryClient> nonMediaSummaries = new ArrayList<FileSummaryClient>();
+    // TODO: fix this
+    // nonMediaSummaries = getNonMediaFiles(tableId);
     // add in the user friendly filename
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -539,9 +541,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 //      // them.
 //      List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
 //      // first we want to get a new etag
-//      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
-//      dataEtag = Long.toString(System.currentTimeMillis());
-//      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
+//      String dataETag = entry.getString(DbTableEntry.DATA_ETAG);
+//      dataETag = Long.toString(System.currentTimeMillis());
+//      entry.set(DbTableEntry.DATA_ETAG, dataETag);
 //      entry.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
 //      entry.set(DbTable.DELETED, true);
 //

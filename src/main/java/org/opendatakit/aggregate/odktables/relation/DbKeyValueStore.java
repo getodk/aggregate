@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Relation;
@@ -176,17 +177,17 @@ public class DbKeyValueStore extends Relation {
    * Delete all the key value store entities for the given table.
    * <p>
    * NB: No logging is performed! Currently no notion of transactions, so if
-   * this method is called and a pursuant add of new entities fails, there will
+   * this method is called and a subsequent add of new entities fails, there will
    * be no recourse to restore the state.
    *
    * @param tableId
-   * @param propertyEtag
+   * @param propertiesETag
    * @param cc
    * @throws ODKDatastoreException
    */
-  public static void clearAllEntries(String tableId, String propertyEtag, CallingContext cc)
+  public static void clearAllEntries(String tableId, String propertiesETag, CallingContext cc)
       throws ODKDatastoreException {
-    List<DbKeyValueStoreEntity> kvsEntities = getKVSEntries(tableId, propertyEtag, cc);
+    List<DbKeyValueStoreEntity> kvsEntities = getKVSEntries(tableId, propertiesETag, cc);
     for (DbKeyValueStoreEntity entity : kvsEntities) {
       entity.delete(cc);
     }
@@ -197,17 +198,17 @@ public class DbKeyValueStore extends Relation {
    * store for the given table.
    *
    * @param tableId
-   * @param propertiesEtag
+   * @param propertiesETag
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<DbKeyValueStoreEntity> getKVSEntries(String tableId, String propertiesEtag,
+  public static List<DbKeyValueStoreEntity> getKVSEntries(String tableId, String propertiesETag,
       CallingContext cc) throws ODKDatastoreException {
 
     Query query = getRelation(cc).query("DbKeyValueStore.getKVSEntries", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(PROPERTIES_ETAG, FilterOperation.EQUAL, propertiesEtag);
+    query.addFilter(PROPERTIES_ETAG, FilterOperation.EQUAL, propertiesETag);
 
     List<Entity> list = query.execute();
     List<DbKeyValueStoreEntity> results = new ArrayList<DbKeyValueStoreEntity>();
@@ -215,5 +216,33 @@ public class DbKeyValueStore extends Relation {
       results.add(new DbKeyValueStoreEntity(e));
     }
     return results;
+  }
+
+  /**
+   * Get the displayName of a given tableId
+   *
+   * @param tableId
+   * @param propertiesETag
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static String getDisplayName(String tableId, String propertiesETag,
+      CallingContext cc) throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbKeyValueStore.getDisplayName", cc);
+    query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
+    query.addFilter(PROPERTIES_ETAG, FilterOperation.EQUAL, propertiesETag);
+    query.addFilter(PARTITION, FilterOperation.EQUAL, KeyValueStoreConstants.PARTITION_TABLE);
+    query.addFilter(ASPECT, FilterOperation.EQUAL, KeyValueStoreConstants.ASPECT_DEFAULT);
+    query.addFilter(KEY, FilterOperation.EQUAL, KeyValueStoreConstants.TABLE_DISPLAY_NAME);
+
+    List<Entity> list = query.execute();
+    if ( list.size() != 1 ) {
+      return "Ill-defined";
+    } else {
+      Entity e = list.get(0);
+      return e.getString(VALUE);
+    }
   }
 }

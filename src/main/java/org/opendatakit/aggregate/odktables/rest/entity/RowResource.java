@@ -38,18 +38,19 @@ public class RowResource extends Row {
   public RowResource(Row row) {
     super();
     setRowId(row.getRowId());
-    setRowEtag(row.getRowEtag());
-    setDataEtagAtModification(row.getDataEtagAtModification());
+    setRowETag(row.getRowETag());
+    setDataETagAtModification(row.getDataETagAtModification());
     setDeleted(row.isDeleted());
     setCreateUser(row.getCreateUser());
     setLastUpdateUser(row.getLastUpdateUser());
     setFilterScope(row.getFilterScope());
-    setValues(row.getValues());
-    setUriUser(row.getUriUser());
+    // sync'd metadata
+    setUriAccessControl(row.getUriAccessControl());
     setFormId(row.getFormId());
-    setInstanceName(row.getInstanceName());
     setLocale(row.getLocale());
-    setTimestamp(row.getTimestamp());
+    setSavepointTimestamp(row.getSavepointTimestamp());
+    // data
+    setValues(row.getValues());
   }
 
   public String getSelfUri() {

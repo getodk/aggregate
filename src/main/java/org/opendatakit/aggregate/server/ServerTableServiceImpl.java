@@ -36,7 +36,7 @@ import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.impl.api.TableServiceImpl;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -56,7 +56,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
 	 *
 	 */
   private static final long serialVersionUID = 3291707708959185034L;
-  private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
+  private static final Log logger = LogFactory.getLog(ServerTableServiceImpl.class);
 
   @Override
   public List<TableEntryClient> getTables() throws AccessDeniedException, RequestFailureException,
@@ -69,12 +69,13 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       List<TableEntry> entries = tm.getTables(scopes);
       ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
       for (TableEntry entry : entries) {
-        clientEntries.add(UtilTransforms.transform(entry));
+        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesETag(), cc);
+        clientEntries.add(UtilTransforms.transform(entry, displayName));
       }
       Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
         @Override
         public int compare(TableEntryClient o1, TableEntryClient o2) {
-          return o1.getTableKey().compareToIgnoreCase(o2.getTableKey());
+          return o1.getDisplayName().compareToIgnoreCase(o2.getDisplayName());
         }});
 
       return clientEntries;
@@ -93,7 +94,8 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     try {
       new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
       TableEntry entry = tm.getTableNullSafe(tableId);
-      TableEntryClient resource = UtilTransforms.transform(entry);
+      String displayName = DbKeyValueStore.getDisplayName(tableId, entry.getPropertiesETag(), cc);
+      TableEntryClient resource = UtilTransforms.transform(entry, displayName);
       return resource;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
