@@ -94,6 +94,7 @@
         <intercept-url pattern="/auth/**" access="hasRole('ROLE_DATA_OWNER')" />
 
         <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
+        <intercept-url pattern="/enk/**" access="hasRole('ROLE_DATA_COLLECTOR') or hasRole('ROLE_DATA_VIEWER') or hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
 		<!--	GAE access is controlled in web.xml -->
 		<intercept-url pattern="/gae/**" access="true" />
