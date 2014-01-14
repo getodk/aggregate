@@ -69,7 +69,7 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
       + "<tr>\n   <td colspan=\"2\"><h2>Enketo API token</h2></td></tr>"
       + "<tr><td colspan=\"2\"><p>Neccessary for authentication with the Enketo service. Obtain this form the Enketo service</p></td></tr>"
       + "      <tr>"
-      + "         <td><input id=\"enketo_api_token\" type=\"password\" size=\"80\" name=\"enketo_api_token\" value=\"";
+      + "         <td><input id=\"enketo_api_token\" type=\"text\" size=\"80\" name=\"enketo_api_token\" value=\"";
   private static final String UPLOAD_PAGE_BODY_MIDDLE_TOKEN_ONWARD = "\"/></td>"
       + "      </tr>"
       + "      <tr>\n"
