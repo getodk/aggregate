@@ -49,9 +49,12 @@ public class FilterNavigationTable extends FlexTable {
 
   // state
   private FormSummary selectedForm;
+  private boolean showEnketoIntegration;
 
   public FilterNavigationTable(FilterSubTab filterSubTab) {
     this.filterSubTab = filterSubTab;
+    // invert this because we have not yet initialized the actionTable...
+    showEnketoIntegration = !Preferences.showEnketoIntegration();
 
     formsBox = new FormListBox(new FormChangeDropDownHandler());
     filtersBox = new FilterListBox(new FilterChangeDropDownHandler());
@@ -88,8 +91,11 @@ public class FilterNavigationTable extends FlexTable {
     PublishButton publishButton = new PublishButton(filterGroup.getFormId());
     actionTable.setWidget(0, columnIndex, publishButton);
 
-    setWidget(0, columnIndex, actionTable);
+    if ( getCellCount(0) == 2 ) {
+      removeCell(0, 1);
+    }
 
+    setWidget(0, 1, actionTable);
   }
 
   public void updateNavAfterSave(FilterGroup filterGroup) {
@@ -183,6 +189,12 @@ public class FilterNavigationTable extends FlexTable {
     // verify a form and filter group exist
     if (form == null || filterGroup == null) {
       return;
+    }
+
+    boolean newShowEnketoIntegration = Preferences.showEnketoIntegration();
+    if ( newShowEnketoIntegration != showEnketoIntegration ) {
+      showEnketoIntegration = newShowEnketoIntegration;
+      updateNavTable(filterGroup);
     }
 
     filterSubTab.switchFilterGroup(filterGroup);

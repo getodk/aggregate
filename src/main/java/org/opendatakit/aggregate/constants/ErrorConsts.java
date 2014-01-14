@@ -47,7 +47,7 @@ public final class ErrorConsts {
   /**
    * Error message if responseURL returns null
    */
-  public static final String ENKETOAPI_RETURN_NULL_RESPONSE = "Problem accessing Enketo. Please verify the settings for Enketo Webform Integration and try again.";
+  public static final String ENKETOAPI_RETURN_NULL_RESPONSE = "Problem accessing Enketo. Please verify the Enketo Webform Integration settings on the Preferences tab and try again.";
 
   public static final String FORM_INVALID_SUBMISSION_ELEMENT = "Attributes of submission element do not match form attributes";
   /**

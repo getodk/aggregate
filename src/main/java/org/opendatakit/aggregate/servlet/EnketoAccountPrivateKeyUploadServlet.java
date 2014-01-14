@@ -56,23 +56,25 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
   private static final String UPLOAD_PAGE_BODY_START = "<form id=\"service_account_form\""
       + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
       + " action=\"";// emit the ADDR
-  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_TO_URL = "\">"
       + "<div style=\"overflow: auto;\">"
       + "<p>See <a href=\"https://accounts.enketo.org/support/aggregate/\" target=\"_blank\">instructions</a> on how to obtain the Enketo API URL and Token</p>"
       + "<h2>Enketo API URL</h2>"
       + "<p>The URL of the Enketo service's API</p>"
       + "	  <table id=\"uploadTableEnketo\">"
       + "	  	<tr>"
-      + "	  		<td><input id=\"enketo_api_url\" type=\"text\" size=\"80\" name=\"enketo_api_url\" /></td>"
-      + "	  	</tr>\n"
-      + "<tr>\n	<td colspan=\"2\"><h2>Enketo API token</h2></td></tr>"
+      + "	  		<td><input id=\"enketo_api_url\" type=\"text\" size=\"80\" name=\"enketo_api_url\" value=\"";
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_URL_TO_TOKEN = "\"/></td>"
+      + "      </tr>\n"
+      + "<tr>\n   <td colspan=\"2\"><h2>Enketo API token</h2></td></tr>"
       + "<tr><td colspan=\"2\"><p>Neccessary for authentication with the Enketo service. Obtain this form the Enketo service</p></td></tr>"
-      + "	  	<tr>"
-      + "	  		<td><input id=\"enketo_api_token\" type=\"text\" size=\"80\" name=\"enketo_api_token\" /></td>"
-      + "	  	</tr>"
-      + "	  	<tr>\n"
-      + "	  		<td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Save\" /></td>"
-      + "	  		<td />" + "	  	</tr>" + "	  </table>\n" + "	  </form>" + "<br></div>\n";
+      + "      <tr>"
+      + "         <td><input id=\"enketo_api_token\" type=\"password\" size=\"80\" name=\"enketo_api_token\" value=\"";
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_TOKEN_ONWARD = "\"/></td>"
+      + "      </tr>"
+      + "      <tr>\n"
+      + "         <td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Save\" /></td>"
+      + "         <td />" + "    </tr>" + "    </table>\n" + "   </form>" + "<br></div>\n";
 
   private static final Log logger = LogFactory.getLog(ServiceAccountPrivateKeyUploadServlet.class);
 
@@ -100,12 +102,44 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
     headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
     headerString.append("\" />");
 
+    String enketoApiUrl = "";
+    String enketoApiToken = "";
+    try {
+      enketoApiUrl = ServerPreferencesProperties.getEnketoApiUrl(cc);
+    } catch (ODKEntityNotFoundException e) {
+      // treat this as non-existence...
+      e.printStackTrace();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    }
+    try {
+      enketoApiToken = ServerPreferencesProperties.getEnketoApiToken(cc);
+    } catch (ODKEntityNotFoundException e) {
+      // treat this as non-existence...
+      e.printStackTrace();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      quotaExceededError(resp);
+      return;
+    }
+
+    // emit everything...
     // header info
     beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
     PrintWriter out = resp.getWriter();
     out.write(UPLOAD_PAGE_BODY_START);
     out.write(cc.getWebApplicationURL(ADDR));
-    out.write(UPLOAD_PAGE_BODY_MIDDLE);
+    out.write(UPLOAD_PAGE_BODY_MIDDLE_TO_URL);
+    if ( enketoApiUrl != null ) {
+      out.write(enketoApiUrl);
+    }
+    out.write(UPLOAD_PAGE_BODY_MIDDLE_URL_TO_TOKEN);
+    if ( enketoApiToken != null ) {
+      out.write(enketoApiToken);
+    }
+    out.write(UPLOAD_PAGE_BODY_MIDDLE_TOKEN_ONWARD);
     finishBasicHtmlResponse(resp);
   }
 
@@ -155,20 +189,20 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
         PrintWriter out = resp.getWriter();
         out.write(HtmlConsts.HTML_OPEN);
         out.write(HtmlConsts.BODY_OPEN);
-        out.write("<p>Successful private key information upload.</p>");
+        out.write("<p>Successful change of Enketo Webform Integration settings.</p>");
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
       } catch (ODKEntityNotFoundException e) {
-        logger.warn("Set private key information error: " + e.getMessage());
+        logger.warn("Enketo Webform Integration settings-change error: " + e.getMessage());
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
       } catch (ODKOverQuotaException e) {
-        logger.error("Set private key information error: " + e.getMessage());
+        logger.error("Enketo Webform Integration settings-change error: " + e.getMessage());
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.QUOTA_EXCEEDED
             + "\n" + e.getMessage());
       }
     } catch (FileUploadException e) {
-      logger.error("Set private key information error: " + e.getMessage());
+      logger.error("Enketo Webform Integration settings-change error: " + e.getMessage());
       e.printStackTrace(resp.getWriter());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.UPLOAD_PROBLEM);
     }
