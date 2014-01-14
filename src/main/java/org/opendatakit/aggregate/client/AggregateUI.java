@@ -164,7 +164,7 @@ public class AggregateUI implements EntryPoint {
     RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
     RootPanel.get("dynamic_content").add(settingsBar);
     RootPanel.get("dynamic_content").add(
-        new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" />"));
+        new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" class=\"gwt-Image\" />"));
   }
 
   private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
