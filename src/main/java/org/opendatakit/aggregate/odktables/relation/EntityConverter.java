@@ -204,8 +204,10 @@ public class EntityConverter {
    * with some rework on the server, could become mutable).
    */
   public DataField toField(DbColumnDefinitionsEntity entity) {
-    if ( !entity.getIsUnitOfRetention() ) {
-      throw new IllegalArgumentException("Attempt to get DataField for a non-persisted elementKey (" + entity.getElementKey() + ")");
+    if (!entity.getIsUnitOfRetention()) {
+      throw new IllegalArgumentException(
+          "Attempt to get DataField for a non-persisted elementKey (" + entity.getElementKey()
+              + ")");
     }
     String type = entity.getElementType();
     if (type.equals("boolean")) {
@@ -226,7 +228,7 @@ public class EntityConverter {
   public List<DataField> toFields(List<DbColumnDefinitionsEntity> entities) {
     List<DataField> fields = new ArrayList<DataField>();
     for (DbColumnDefinitionsEntity entity : entities)
-      if ( entity.getIsUnitOfRetention() ) {
+      if (entity.getIsUnitOfRetention()) {
         fields.add(toField(entity));
       }
     return fields;
@@ -389,7 +391,7 @@ public class EntityConverter {
   private Map<String, String> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Map<String, String> values = new HashMap<String, String>();
     for (DbColumnDefinitionsEntity column : columns) {
-      if ( column.getIsUnitOfRetention() ) {
+      if (column.getIsUnitOfRetention()) {
         String name = column.getElementKey();
         String value = entity.getAsString(name.toUpperCase());
         values.put(name, value);

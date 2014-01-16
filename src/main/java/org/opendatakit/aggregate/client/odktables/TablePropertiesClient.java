@@ -21,12 +21,12 @@ import java.util.List;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.TableProperties.java.
- * <br>
+ * org.opendatakit.aggregate.odktables.entity.TableProperties.java. <br>
  * The idea is that this will do the same thing, but for the server. The common
- * caveats apply for all of these objects, in that it is not yet clear how
- * they will work, and if there will need to be similar objects that are NOT
- * the original for-the-phone objects on the server.
+ * caveats apply for all of these objects, in that it is not yet clear how they
+ * will work, and if there will need to be similar objects that are NOT the
+ * original for-the-phone objects on the server.
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -35,7 +35,7 @@ public class TablePropertiesClient implements Serializable {
   /**
 	 *
 	 */
-	private static final long serialVersionUID = 197746211663068997L;
+  private static final long serialVersionUID = 197746211663068997L;
 
   private String propertiesETag;
   private String tableId;
@@ -71,17 +71,14 @@ public class TablePropertiesClient implements Serializable {
     return this.kvsEntries;
   }
 
-  public void setKeyValueStoreEntries(
-      List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+  public void setKeyValueStoreEntries(List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
     this.kvsEntries = kvsEntries;
   }
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesETag=" + propertiesETag
-        + ", tableId=" + tableId
-        + ", kvsEntries=" + kvsEntries.toString()
-        + "]";
+    return "TableProperties [propertiesETag=" + propertiesETag + ", tableId=" + tableId
+        + ", kvsEntries=" + kvsEntries.toString() + "]";
   }
 
 }

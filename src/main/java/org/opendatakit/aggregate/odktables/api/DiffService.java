@@ -27,7 +27,7 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
-@Produces(MediaType.TEXT_XML)
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 public interface DiffService {
 
   public static final String QUERY_DATA_ETAG = "data_etag";

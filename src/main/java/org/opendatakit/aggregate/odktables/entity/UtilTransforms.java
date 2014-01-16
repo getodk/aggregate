@@ -57,15 +57,14 @@ import org.opendatakit.common.utils.WebUtils;
  *
  */
 public class UtilTransforms {
-	private static final Log log = LogFactory.getLog(UtilTransforms.class);
+  private static final Log log = LogFactory.getLog(UtilTransforms.class);
 
   /**
    * Transform the object into a server-side Column object.
    */
   public static Column transform(ColumnClient client) {
-    Column transformedColumn = new Column(client.getTableId(),
-        client.getElementKey(), client.getElementName(),
-        client.getElementType(), client.getListChildElementKeys(),
+    Column transformedColumn = new Column(client.getTableId(), client.getElementKey(),
+        client.getElementName(), client.getElementType(), client.getListChildElementKeys(),
         (client.getIsPersisted() != 0));
     return transformedColumn;
   }
@@ -342,7 +341,8 @@ public class UtilTransforms {
     rowClient.setFormId(serverResource.getFormId());
     rowClient.setLocale(serverResource.getLocale());
     Long time = serverResource.getSavepointTimestamp();
-    rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
+    rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(
+        time)));
 
     // data
     rowClient.setValues(serverResource.getValues());

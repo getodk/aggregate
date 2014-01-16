@@ -38,10 +38,12 @@ public class TableDefinitionResource extends TableDefinition {
   }
 
   public TableDefinitionResource(TableDefinition definition) {
-    this(definition.getTableId(), definition.getSchemaETag(), definition.getColumns(), definition.getDisplayName());
+    this(definition.getTableId(), definition.getSchemaETag(), definition.getColumns(), definition
+        .getDisplayName());
   }
 
-  public TableDefinitionResource(String tableId, String schemaETag, List<Column> columns, String displayName) {
+  public TableDefinitionResource(String tableId, String schemaETag, List<Column> columns,
+      String displayName) {
     super(tableId, schemaETag, columns, displayName);
   }
 

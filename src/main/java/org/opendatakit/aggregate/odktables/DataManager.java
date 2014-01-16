@@ -159,16 +159,16 @@ public class DataManager {
    */
   public List<Row> getRowsSince(String dataETag) throws ODKDatastoreException {
     String sequenceValue = null;
-    if ( dataETag != null ) {
+    if (dataETag != null) {
       try {
         sequenceValue = getSequenceValueForDataETag(dataETag);
-      } catch ( ODKEntityNotFoundException e ) {
+      } catch (ODKEntityNotFoundException e) {
         // TODO: log this as a warning -- may be returning a very large set
         sequenceValue = null;
       }
     }
     Query query;
-    if ( sequenceValue == null ) {
+    if (sequenceValue == null) {
       query = buildRowsFromBeginningQuery();
     } else {
       query = buildRowsSinceQuery(sequenceValue);
@@ -192,7 +192,7 @@ public class DataManager {
   public List<Row> getRowsSince(String dataETag, Scope scope) throws ODKDatastoreException {
     String sequenceValue = (dataETag == null) ? null : getSequenceValueForDataETag(dataETag);
     Query query;
-    if ( sequenceValue == null ) {
+    if (sequenceValue == null) {
       query = buildRowsFromBeginningQuery();
     } else {
       query = buildRowsSinceQuery(sequenceValue);
@@ -219,7 +219,7 @@ public class DataManager {
     List<Entity> entities = new ArrayList<Entity>();
     for (Scope scope : scopes) {
       Query query;
-      if ( sequenceValue == null ) {
+      if (sequenceValue == null) {
         query = buildRowsFromBeginningQuery();
       } else {
         query = buildRowsSinceQuery(sequenceValue);
@@ -231,8 +231,8 @@ public class DataManager {
 
     Collections.sort(entities, new Comparator<Entity>() {
       public int compare(Entity o1, Entity o2) {
-        return o1.getString(DbLogTable.SEQUENCE_VALUE)
-            .compareTo(o2.getString(DbLogTable.SEQUENCE_VALUE));
+        return o1.getString(DbLogTable.SEQUENCE_VALUE).compareTo(
+            o2.getString(DbLogTable.SEQUENCE_VALUE));
       }
     });
     List<Row> logRows = converter.toRows(entities, columns, true);
@@ -254,18 +254,19 @@ public class DataManager {
     // instead of flawed mod numbers?
     query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
     List<Entity> values = query.execute();
-    if ( values == null || values.size() == 0 ) {
+    if (values == null || values.size() == 0) {
       throw new ODKEntityNotFoundException("ETag " + dataETag + " was not found in log table!");
-    } else if ( values.size() != 1 ) {
-      throw new ODKDatastoreException("Unexpected duplicate records for ETag " +
-          dataETag + " found in log table!");
+    } else if (values.size() != 1) {
+      throw new ODKDatastoreException("Unexpected duplicate records for ETag " + dataETag
+          + " found in log table!");
     }
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
   }
 
   /**
-   * @return the query for rows which have been changed or added from the beginning
+   * @return the query for rows which have been changed or added from the
+   *         beginning
    * @throws ODKDatastoreException
    */
   private Query buildRowsFromBeginningQuery() throws ODKDatastoreException {
@@ -357,27 +358,29 @@ public class DataManager {
   }
 
   /**
-   * Inserts or Updates a list of rows.  If inserting, the row must not already exist
-   * or the eTag for the row being inserted must exactly match that on the server.
+   * Inserts or Updates a list of rows. If inserting, the row must not already
+   * exist or the eTag for the row being inserted must exactly match that on the
+   * server.
    *
-   * @param af -- authentication filter to be applied to this action
+   * @param af
+   *          -- authentication filter to be applied to this action
    * @param rows
    *          the rows to update. See
    *          {@link Row#forInsert(String, String, java.util.Map)}.
    *          {@link Row#forUpdate(String, String, java.util.Map)}
    *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
    *          {@link Row#getLastUpdateUser()} will be ignored if they are set.
-   * @return the rows that were inserted or updated, with each row's rowETtag populated with
-   *         the new rowETtag. If the original passed in row had a null rowId, the row
-   *         will contain the generated rowId.
+   * @return the rows that were inserted or updated, with each row's rowETtag
+   *         populated with the new rowETtag. If the original passed in row had
+   *         a null rowId, the row will contain the generated rowId.
    * @throws ODKEntityNotFoundException
    *           if one of the passed in rows does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    * @throws ETagMismatchException
-   *           if one of the passed in rows has a different rowETtag from the row
-   *           in the datastore (e.g., on insert, the row already exists, or on
-   *           update, there is conflict that needs to be resolved).
+   *           if one of the passed in rows has a different rowETtag from the
+   *           row in the datastore (e.g., on insert, the row already exists, or
+   *           on update, there is conflict that needs to be resolved).
    * @throws BadColumnNameException
    *           if one of the passed in rows set a value for a column which
    *           doesn't exist in the table
@@ -386,7 +389,8 @@ public class DataManager {
    */
   public List<Row> insertOrUpdateRows(AuthFilter af, List<Row> rows)
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException {
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException,
+      PermissionDeniedException {
     Validate.noNullElements(rows);
 
     List<Entity> rowEntities;
@@ -409,9 +413,8 @@ public class DataManager {
       rowEntities = creator.insertOrUpdateRowEntities(af, table, dataETag, rows, columns, cc);
 
       // create log table entries
-      List<Entity> logEntities =
-          creator.newLogEntities(logTable, dataETag, rowEntities,
-                                  columns, sequencer, cc);
+      List<Entity> logEntities = creator.newLogEntities(logTable, dataETag, rowEntities, columns,
+          sequencer, cc);
 
       // update db
       // This is where a user-defined table actually gets created for the first
@@ -451,7 +454,8 @@ public class DataManager {
    * @param rowIds
    *          the rows to delete.
    * @return returns the new dataETag that is current after deleting the rows.
-   * Returns null if something goes wrong and the lock can never be acquired.
+   *         Returns null if something goes wrong and the lock can never be
+   *         acquired.
    * @throws ODKEntityNotFoundException
    *           if one of the rowIds does not exist in the datastore
    * @throws ODKDatastoreException
@@ -462,8 +466,7 @@ public class DataManager {
     Validate.noNullElements(rowIds);
 
     // lock table
-    LockTemplate lock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.UPDATE_DATA, cc);
+    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
     String dataETag = null;
     try {
       lock.acquire();
@@ -484,8 +487,8 @@ public class DataManager {
       }
 
       // create log table entries
-      List<Entity> logRows =
-          creator.newLogEntities(logTable, dataETag, rows, columns, sequencer, cc);
+      List<Entity> logRows = creator.newLogEntities(logTable, dataETag, rows, columns, sequencer,
+          cc);
 
       // update db
       DbLogTable.putEntities(logRows, cc);

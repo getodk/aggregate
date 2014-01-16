@@ -20,17 +20,16 @@ import java.io.Serializable;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.api.PropertiesResource.java.
- * <br>
+ * org.opendatakit.aggregate.odktables.entity.api.PropertiesResource.java. <br>
  * The idea is that this will serve the same function as the server-side object,
  * but for the client. It is possible that a similar object might have to be
- * created on the server-side to handle the non-phone requests, but this
- * will hopefully become apparent.
+ * created on the server-side to handle the non-phone requests, but this will
+ * hopefully become apparent.
+ *
  * @author sudar.sam@gmail.com
  *
  */
-public class PropertiesResourceClient extends TablePropertiesClient
-  implements Serializable {
+public class PropertiesResourceClient extends TablePropertiesClient implements Serializable {
 
   /**
    *
@@ -107,4 +106,3 @@ public class PropertiesResourceClient extends TablePropertiesClient
   }
 
 }
-

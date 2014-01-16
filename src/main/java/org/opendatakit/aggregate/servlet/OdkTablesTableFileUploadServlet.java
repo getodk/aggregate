@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -120,6 +121,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 
 	  @Override
 	  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	    ServiceUtils.examineRequest(getServletContext(), req);
 
 		  CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -141,6 +143,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 
 		    // header info
 		    beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
+  	       addOpenDataKitHeaders(resp);
 		    PrintWriter out = resp.getWriter();
 		    out.write(UPLOAD_PAGE_BODY_START);
 		    out.write(cc.getWebApplicationURL(ADDR));
@@ -162,6 +165,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	   */
 	  @Override
 	  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	    ServiceUtils.examineRequest(getServletContext(), req);
 		  CallingContext cc = ContextFactory.getCallingContext(this, req);
 		  logger.info("Inside doHead");
 		  addOpenDataKitHeaders(resp);
@@ -174,6 +178,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 	   */
 	  @Override
 	  public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	    ServiceUtils.examineRequest(getServletContext(), req);
 //		  //TODO handle the logging stuff in the friendlytable_log table, that I need to
 //		  // create. it also apparently matters which of the tables is written first, so
 //		  // be sure to look how Dylan does it first.

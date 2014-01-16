@@ -31,7 +31,7 @@ public class SimpleXMLSerializerForAggregate {
     Registry registry = new Registry();
     Strategy strategy = new RegistryStrategy(registry);
     Serializer serializer = new Persister(strategy);
-    ListConverter converter = new ListConverter(serializer);
+    XMLListConverter converter = new XMLListConverter(serializer);
     try {
       registry.bind(List.class, converter);
       registry.bind(ArrayList.class, converter);

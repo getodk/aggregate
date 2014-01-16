@@ -16,39 +16,37 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-
 import java.io.Serializable;
 
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.simpleframework.xml.Element;
 
 /**
- * This is the client-side version of org.opendatakit.aggregate.odktables.entity.Scope.java
- * <br>
- * It might be possible that this isn't necessary. At this point I am just copying exactly
- * the entities that exist in that package, in the hopes of translating almost directly
- * the code implemented in the services there.
+ * This is the client-side version of
+ * org.opendatakit.aggregate.odktables.entity.Scope.java <br>
+ * It might be possible that this isn't necessary. At this point I am just
+ * copying exactly the entities that exist in that package, in the hopes of
+ * translating almost directly the code implemented in the services there.
+ *
  * @author sudar.sam@gmail.com
  *
  */
 public class ScopeClient implements Serializable {
 
-    /**
+  /**
 	 *
 	 */
-	private static final long serialVersionUID = -7603521544860371942L;
+  private static final long serialVersionUID = -7603521544860371942L;
 
-	public static final ScopeClient EMPTY_SCOPE;
+  public static final ScopeClient EMPTY_SCOPE;
 
-	static {
-	  EMPTY_SCOPE = new ScopeClient();
-	  EMPTY_SCOPE.initFields(null, null);
-	}
+  static {
+    EMPTY_SCOPE = new ScopeClient();
+    EMPTY_SCOPE.initFields(null, null);
+  }
 
   public enum Type {
-    DEFAULT,
-    USER,
-    GROUP,
+    DEFAULT, USER, GROUP,
   }
 
   @Element(required = false)
@@ -69,10 +67,10 @@ public class ScopeClient implements Serializable {
    *          ignored (set to null).
    */
   public ScopeClient(Type type, String value) {
-	// TODO make sure these validate things are compensated for somehow
-    //Validate.notNull(type);
+    // TODO make sure these validate things are compensated for somehow
+    // Validate.notNull(type);
     if (type.equals(Type.GROUP)) {
-      //Validate.notEmpty(value);
+      // Validate.notEmpty(value);
     } else if (type.equals(Type.DEFAULT)) {
       value = null;
     }

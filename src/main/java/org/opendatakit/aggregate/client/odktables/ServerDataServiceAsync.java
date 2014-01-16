@@ -30,8 +30,7 @@ public interface ServerDataServiceAsync {
 
   void getRows(String tableId, AsyncCallback<List<RowClient>> callback);
 
-  void getRow(String tableId, String rowId,
-      AsyncCallback<TableContentsClient> callback);
+  void getRow(String tableId, String rowId, AsyncCallback<TableContentsClient> callback);
 
   void createOrUpdateRow(String tableId, String rowId, RowClient row,
       AsyncCallback<RowClient> callback);
@@ -40,21 +39,16 @@ public interface ServerDataServiceAsync {
 
   void getColumnNames(String tableId, AsyncCallback<List<String>> callback);
 
-  void getNonMediaFiles(String tableId,
-      AsyncCallback<List<FileSummaryClient>> callback);
+  void getNonMediaFiles(String tableId, AsyncCallback<List<FileSummaryClient>> callback);
 
   void getFileRowInfoColumnNames(AsyncCallback<List<String>> callback);
 
-  void getTableContents(String tableId,
-      AsyncCallback<TableContentsClient> callback);
+  void getTableContents(String tableId, AsyncCallback<TableContentsClient> callback);
 
-  void getFileInfoContents(String tableId,
-      AsyncCallback<TableContentsForFilesClient> callback);
+  void getFileInfoContents(String tableId, AsyncCallback<TableContentsForFilesClient> callback);
 
-  void deleteTableFile(String tableId, String rowId,
-      AsyncCallback<Void> callback);
+  void deleteTableFile(String tableId, String rowId, AsyncCallback<Void> callback);
 
-  void getMedialFilesKey(String tableId, String key,
-      AsyncCallback<List<FileSummaryClient>> callback);
+  void getMedialFilesKey(String tableId, String key, AsyncCallback<List<FileSummaryClient>> callback);
 
 }

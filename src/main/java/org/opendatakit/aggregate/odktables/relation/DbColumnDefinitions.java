@@ -32,10 +32,9 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * This defines the columns in a given schemaETag storage representation
- * of that tableId. The table defines the abstract objects (e.g., geopoint)
- * and underlying database fields (e.g., latitude, longitude, etc.) for the
- * table.
+ * This defines the columns in a given schemaETag storage representation of that
+ * tableId. The table defines the abstract objects (e.g., geopoint) and
+ * underlying database fields (e.g., latitude, longitude, etc.) for the table.
  * <p>
  * This table stores the immutable definitions of each column in the datastore.
  * It is based on the ColumnDefinitions table in ODK Tables; there should be a
@@ -57,16 +56,15 @@ public class DbColumnDefinitions extends Relation {
   // these are the column names in the COLUMN table
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
       .setIndexable(IndexType.HASH);
-  private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG",
-      DataType.STRING, false);
+  private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, false);
   private static final DataField ELEMENT_KEY = new DataField("ELEMENT_KEY", DataType.STRING, false);
   private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataType.STRING,
       false);
   private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataType.STRING, true);
   private static final DataField LIST_CHILD_ELEMENT_KEYS = new DataField("LIST_CHILD_ELEMENT_KEYS",
       DataType.STRING, true, 4096L);
-  private static final DataField IS_UNIT_OF_RETENTION = new DataField("IS_UNIT_OF_RETENTION", DataType.BOOLEAN,
-      false);
+  private static final DataField IS_UNIT_OF_RETENTION = new DataField("IS_UNIT_OF_RETENTION",
+      DataType.BOOLEAN, false);
 
   private static final List<DataField> dataFields;
   static {
@@ -166,19 +164,19 @@ public class DbColumnDefinitions extends Relation {
      * @return true if these are matching column definitions
      */
     public boolean matchingColumnDefinition(DbColumnDefinitionsEntity e) {
-      if ( !this.getElementKey().equals(e.getElementKey()) ) {
+      if (!this.getElementKey().equals(e.getElementKey())) {
         return false;
       }
-      if ( !this.getElementName().equals(e.getElementName()) ) {
+      if (!this.getElementName().equals(e.getElementName())) {
         return false;
       }
-      if ( !this.getElementType().equals(e.getElementType()) ) {
+      if (!this.getElementType().equals(e.getElementType())) {
         return false;
       }
-      if ( !this.getIsUnitOfRetention().equals(e.getIsUnitOfRetention()) ) {
+      if (!this.getIsUnitOfRetention().equals(e.getIsUnitOfRetention())) {
         return false;
       }
-      if ( !this.getListChildElementKeys().equals(e.getListChildElementKeys()) ) {
+      if (!this.getListChildElementKeys().equals(e.getListChildElementKeys())) {
         return false;
       }
       return true;
@@ -210,8 +208,8 @@ public class DbColumnDefinitions extends Relation {
 
   /**
    * Gets all of the columns in the column definitions table. This will not
-   * include metadata columns present in the data tables, like _savepoint_timestamp or
-   * rowid.
+   * include metadata columns present in the data tables, like
+   * _savepoint_timestamp or rowid.
    *
    * @param tableId
    * @param schemaETag

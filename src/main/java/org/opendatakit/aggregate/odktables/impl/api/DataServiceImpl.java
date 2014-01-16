@@ -55,28 +55,26 @@ public class DataServiceImpl implements DataService {
   @Override
   public List<RowResource> getRows() throws ODKDatastoreException, PermissionDeniedException {
     // TODO remove comments and do permissions.
-    //af.checkPermission(TablePermission.READ_ROW);
+    // af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
     rows = dm.getRows();
-    /* Oct15--changing this to avoid scopes
-     //TODO fix the above so it uses permissions.
-    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
-      rows = dm.getRows();
-    } else {
-      List<Scope> scopes = AuthFilter.getScopes(cc);
-      rows = dm.getRows(scopes);
-    }*/
+    /*
+     * Oct15--changing this to avoid scopes //TODO fix the above so it uses
+     * permissions. if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
+     * rows = dm.getRows(); } else { List<Scope> scopes =
+     * AuthFilter.getScopes(cc); rows = dm.getRows(scopes); }
+     */
     return getResources(rows);
   }
 
   @Override
   public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException {
     // TODO remove comments and do permissions
-    //af.checkPermission(TablePermission.READ_ROW);
+    // af.checkPermission(TablePermission.READ_ROW);
     Row row = dm.getRowNullSafe(rowId);
     // Oct15--removing this
     // TODO fix the filters.
-    //af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    // af.checkFilter(TablePermission.UNFILTERED_READ, row);
     RowResource resource = getResource(row);
     return resource;
   }
@@ -96,10 +94,10 @@ public class DataServiceImpl implements DataService {
   public String deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
     // TODO re-do permissions stuff
-    //af.checkPermission(TablePermission.DELETE_ROW);
+    // af.checkPermission(TablePermission.DELETE_ROW);
     Row row = dm.getRowNullSafe(rowId);
     // TODO re-do permissions stuff
-    //af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
+    // af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
     return dm.deleteRow(rowId);
   }
 

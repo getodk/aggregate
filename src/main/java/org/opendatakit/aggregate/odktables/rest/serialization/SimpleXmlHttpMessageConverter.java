@@ -102,7 +102,7 @@ public class SimpleXmlHttpMessageConverter extends AbstractHttpMessageConverter<
       g.setTime(new Date());
       SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
       formatter.setCalendar(g);
-      headers.add(ApiConstants.DATE_HEADER,  formatter.format(new Date()));
+      headers.add(ApiConstants.DATE_HEADER, formatter.format(new Date()));
       headers.setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
 
       Writer writer = new OutputStreamWriter(outputMessage.getBody(), ApiConstants.UTF8_ENCODE);

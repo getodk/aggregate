@@ -31,8 +31,8 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Tracks the ETags associated with a given TableId.
- * The TableId is the PK for this table.
+ * Tracks the ETags associated with a given TableId. The TableId is the PK for
+ * this table.
  *
  * @author mitchellsundt@gmail.com
  *
@@ -47,7 +47,8 @@ public class DbTableEntry extends Relation {
   private static final String RELATION_NAME = "TABLE_ENTRY2";
 
   private static final DataField DATA_ETAG = new DataField("DATA_ETAG", DataType.STRING, true);
-  private static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG", DataType.STRING, true);
+  private static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG",
+      DataType.STRING, true);
   private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, false);
   private static final DataField APRIORI_DATA_SEQUENCE_VALUE = new DataField(
       "APRIORI_DATA_SEQUENCE_VALUE", DataType.STRING, false);

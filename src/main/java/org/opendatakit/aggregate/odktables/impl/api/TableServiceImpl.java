@@ -63,6 +63,7 @@ public class TableServiceImpl implements TableService {
 
   public TableServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
       @Context UriInfo info) {
+    ServiceUtils.examineRequest(sc, req);
     this.cc = ContextFactory.getCallingContext(sc, req);
     this.tm = new TableManager(cc);
     this.info = info;
@@ -75,8 +76,9 @@ public class TableServiceImpl implements TableService {
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
       TableResource resource = getResource(entry);
-      if ( entry.getPropertiesETag() != null ) {
-        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesETag(), cc);
+      if (entry.getPropertiesETag() != null) {
+        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(),
+            entry.getPropertiesETag(), cc);
         resource.setDisplayName(displayName);
       }
       resources.add(resource);
@@ -89,7 +91,8 @@ public class TableServiceImpl implements TableService {
       PermissionDeniedException {
     // Oct15 removing permissions stuff
     // TODO fix the above
-    //new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
+    // new AuthFilter(tableId,
+    // cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
     TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
     return resource;
@@ -103,8 +106,7 @@ public class TableServiceImpl implements TableService {
     String displayName = definition.getDisplayName();
     List<Column> columns = definition.getColumns();
     // TODO: need a method to init a default minimal list of kvs entries.
-    List<OdkTablesKeyValueStoreEntry> kvsEntries =
-        new ArrayList<OdkTablesKeyValueStoreEntry>();
+    List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
     OdkTablesKeyValueStoreEntry tt;
     tt = new OdkTablesKeyValueStoreEntry();
@@ -162,18 +164,14 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public TableDefinitionResource getDefinition(String tableId)
-      throws ODKDatastoreException{
+  public TableDefinitionResource getDefinition(String tableId) throws ODKDatastoreException {
     // TODO: permissions stuff for a table, perhaps? or just at the row level?
     TableDefinition definition = tm.getTableDefinition(tableId);
-    TableDefinitionResource definitionResource =
-        new TableDefinitionResource(definition);
+    TableDefinitionResource definitionResource = new TableDefinitionResource(definition);
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI selfUri = ub.clone().path(TableService.class, "getDefinition")
-        .build(tableId);
-    URI tableUri = ub.clone().path(TableService.class, "getTable")
-        .build(tableId);
+    URI selfUri = ub.clone().path(TableService.class, "getDefinition").build(tableId);
+    URI tableUri = ub.clone().path(TableService.class, "getTable").build(tableId);
     definitionResource.setSelfUri(selfUri.toASCIIString());
     definitionResource.setTableUri(tableUri.toASCIIString());
     return definitionResource;
@@ -189,8 +187,7 @@ public class TableServiceImpl implements TableService {
     URI data = ub.clone().path(TableService.class, "getData").build(tableId);
     URI diff = ub.clone().path(TableService.class, "getDiff").build(tableId);
     URI acl = ub.clone().path(TableService.class, "getAcl").build(tableId);
-    URI definition = ub.clone().path(TableService.class, "getDefinition")
-        .build(tableId);
+    URI definition = ub.clone().path(TableService.class, "getDefinition").build(tableId);
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());

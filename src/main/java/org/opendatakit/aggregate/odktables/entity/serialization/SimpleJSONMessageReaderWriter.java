@@ -18,9 +18,7 @@ package org.opendatakit.aggregate.odktables.entity.serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
@@ -33,31 +31,29 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
-import org.simpleframework.xml.Serializer;
+import org.codehaus.jackson.map.ObjectMapper;
 
-@Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
-@Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+@Produces("application/json")
+@Consumes("application/json")
 @Provider
-public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
+public class SimpleJSONMessageReaderWriter implements MessageBodyReader<Object>,
     MessageBodyWriter<Object> {
 
-  private static final Serializer serializer;
-  static {
-    serializer = SimpleXMLSerializerForAggregate.getSerializer();
-  }
+  private static final ObjectMapper mapper = new ObjectMapper();
   private static final String DEFAULT_ENCODING = "utf-8";
 
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation annotations[],
       MediaType mediaType) {
-    return MediaType.TEXT_XML_TYPE.equals(mediaType) || MediaType.APPLICATION_XML_TYPE.equals(mediaType);
+    return mediaType.getType().equals(MediaType.APPLICATION_JSON_TYPE.getType())
+        && mediaType.getSubtype().equals(MediaType.APPLICATION_JSON_TYPE.getSubtype());
   }
 
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation annotations[],
       MediaType mediaType) {
-    return MediaType.TEXT_XML_TYPE.equals(mediaType) || MediaType.APPLICATION_XML_TYPE.equals(mediaType);
+    return mediaType.getType().equals(MediaType.APPLICATION_JSON_TYPE.getType())
+        && mediaType.getSubtype().equals(MediaType.APPLICATION_JSON_TYPE.getSubtype());
   }
 
   @Override
@@ -66,7 +62,10 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
       throws IOException, WebApplicationException {
     String encoding = getCharsetAsString(mediaType);
     try {
-      return serializer.read(aClass, new InputStreamReader(stream, encoding));
+      if (!encoding.equals(DEFAULT_ENCODING)) {
+        throw new IllegalArgumentException("charset for the request is not utf-8");
+      }
+      return mapper.readValue(stream, aClass);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -78,7 +77,10 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
       throws IOException, WebApplicationException {
     String encoding = getCharsetAsString(mediaType);
     try {
-      serializer.write(o, new OutputStreamWriter(stream, encoding));
+      if (!encoding.equals(DEFAULT_ENCODING)) {
+        throw new IllegalArgumentException("charset for the response is not utf-8");
+      }
+      mapper.writeValue(stream, o);
     } catch (Exception e) {
       throw new IOException(e);
     }

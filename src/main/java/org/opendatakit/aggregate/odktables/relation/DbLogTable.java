@@ -37,33 +37,30 @@ public class DbLogTable extends Relation {
   }
 
   public static final DataField ROW_ID = new DataField("_ROW_ID", DataType.STRING, false)
-  .setIndexable(IndexType.HASH);
-  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
-  public static final DataField DATA_ETAG_AT_MODIFICATION =
-      new DataField("_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false)
       .setIndexable(IndexType.HASH);
+  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
+  public static final DataField DATA_ETAG_AT_MODIFICATION = new DataField(
+      "_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false).setIndexable(IndexType.HASH);
   // we need to maintain a global sequence value within the log table
-  public static final DataField SEQUENCE_VALUE =
-      new DataField("_SEQUENCE_VALUE", DataType.STRING, false)
-      .setIndexable(IndexType.ORDERED);
+  public static final DataField SEQUENCE_VALUE = new DataField("_SEQUENCE_VALUE", DataType.STRING,
+      false).setIndexable(IndexType.ORDERED);
   public static final DataField CREATE_USER = new DataField("_CREATE_USER", DataType.STRING, true);
-  public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER", DataType.STRING, true);
+  public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER",
+      DataType.STRING, true);
   public static final DataField FILTER_TYPE = new DataField("_FILTER_TYPE", DataType.STRING, true);
   public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
       .setIndexable(IndexType.HASH);
   public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
 
-
-  public static final DataField URI_ACCESS_CONTROL = new DataField(TableConstants.URI_ACCESS_CONTROL.toUpperCase(),
-      DataType.STRING, true);
+  public static final DataField URI_ACCESS_CONTROL = new DataField(
+      TableConstants.URI_ACCESS_CONTROL.toUpperCase(), DataType.STRING, true);
   public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
       DataType.STRING, true);
   public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
       DataType.STRING, true);
   // milliseconds
-  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(),
-      DataType.INTEGER, true);
-
+  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.INTEGER, true);
 
   private static final List<DataField> dataFields;
   static {
@@ -96,17 +93,15 @@ public class DbLogTable extends Relation {
   }
 
   private static synchronized DbLogTable getRelation(String tableId, List<DataField> fields,
-      CallingContext cc)
-      throws ODKDatastoreException {
+      CallingContext cc) throws ODKDatastoreException {
     tableId += "_LOG";
-    DbLogTable relation = new DbLogTable(RUtil.NAMESPACE,
-        RUtil.convertIdentifier(tableId), fields, cc);
+    DbLogTable relation = new DbLogTable(RUtil.NAMESPACE, RUtil.convertIdentifier(tableId), fields,
+        cc);
     return relation;
   }
 
   private static List<DataField> getDynamicFields(String tableId, String schemaETag,
-      CallingContext cc)
-      throws ODKDatastoreException {
+      CallingContext cc) throws ODKDatastoreException {
     List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaETag, cc);
     return converter.toFields(entities);
   }
