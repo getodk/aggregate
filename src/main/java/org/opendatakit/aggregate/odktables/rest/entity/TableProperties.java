@@ -24,11 +24,13 @@ import org.simpleframework.xml.Root;
 
 /**
  * Per Dylan's thesis, a TableProperties object represents only the metadata.
- * The structural layout of the table is stored in the (keep these fully qualified!)
+ * The structural layout of the table is stored in the (keep these fully
+ * qualified!)
  * {@link org.opendatakit.aggregate.odktables.relation.DbTableDefinitions} and
  * {@link org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions}
  * tables. The metadata stored in this {@link TableProperties} object consists
  * of a list of key value store entries.
+ *
  * @author dylan price?
  * @author sudar.sam@gmail.com
  *
@@ -51,7 +53,8 @@ public class TableProperties {
   /**
    *
    * @param propertiesETag
-   * @param tableKey the tableKey field from {@link DbTableDefinition}
+   * @param tableKey
+   *          the tableKey field from {@link DbTableDefinition}
    * @param keyValueStoreEntries
    */
   public TableProperties(String propertiesETag, String tableId,
@@ -77,8 +80,7 @@ public class TableProperties {
     this.tableId = tableId;
   }
 
-  public void setKeyValueStoreEntries(
-      List<OdkTablesKeyValueStoreEntry> kvsEntries) {
+  public void setKeyValueStoreEntries(List<OdkTablesKeyValueStoreEntry> kvsEntries) {
     this.kvsEntries = kvsEntries;
   }
 
@@ -98,27 +100,26 @@ public class TableProperties {
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
     if (!(obj instanceof TableProperties)) {
       return false;
     }
     TableProperties other = (TableProperties) obj;
-    return (propertiesETag == null ? other.propertiesETag == null : propertiesETag.equals(other.propertiesETag))
+    return (propertiesETag == null ? other.propertiesETag == null : propertiesETag
+        .equals(other.propertiesETag))
         && (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
         && (kvsEntries == null ? other.kvsEntries == null : kvsEntries.equals(other.kvsEntries));
   }
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesETag=" + propertiesETag
-        + ", tableId=" + tableId
-        + ", kvsEntries=" + this.kvsEntries.toString()
-        + "]";
+    return "TableProperties [propertiesETag=" + propertiesETag + ", tableId=" + tableId
+        + ", kvsEntries=" + this.kvsEntries.toString() + "]";
   }
 
 }

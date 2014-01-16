@@ -16,8 +16,14 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Attribute;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.simpleframework.xml.Default;
+import org.simpleframework.xml.DefaultType;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
+
 
 /**
  * This represents information about a file so that a phone running ODKTables
@@ -30,53 +36,63 @@ import org.simpleframework.xml.Root;
  *
  */
 @Root
-public class OdkTablesFileManifestEntry {
+@Default(value = DefaultType.FIELD, required = false)
+public class OdkTablesFileManifest {
 
   /**
-   * This is the name of the file.
+   * The entries in the manifest.
    */
-  @Attribute(required = true)
-  public String filename;
+  @ElementList(inline = true)
+  private List<OdkTablesFileManifestEntry> entries;
 
   /**
-   * This is the md5hash of the file, which will be used for checking whether or
-   * not the version of the file on the phone is current.
+   * Constructor used by Jackson
    */
-  @Attribute(required = true)
-  public String md5hash;
+  public OdkTablesFileManifest() {
+    this.entries = new ArrayList<OdkTablesFileManifestEntry>();
+  }
 
   /**
-   * This is the url from which the current version of the file can be
-   * downloaded.
+   * Constructor used by our Java code
+   *
+   * @param entries
    */
-  @Attribute(required = true)
-  public String downloadUrl;
+  public OdkTablesFileManifest(List<OdkTablesFileManifestEntry> entries) {
+    this.entries = entries;
+  }
+
+  public List<OdkTablesFileManifestEntry> getEntries() {
+    return entries;
+  }
+
+  public void setEntries(List<OdkTablesFileManifestEntry> entries) {
+    this.entries = entries;
+  }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((filename == null) ? 0 : filename.hashCode());
-    result = prime * result + ((md5hash == null) ? 0 : md5hash.hashCode());
-    result = prime * result + ((downloadUrl == null) ? 0 : downloadUrl.hashCode());
+    result = prime * result + ((entries == null) ? 0 : entries.hashCode());
     return result;
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null) {
+    if ( obj == null ) {
       return false;
     }
-    if (obj == this) {
+    if ( obj == this ) {
       return true;
     }
-    if (!(obj instanceof OdkTablesFileManifestEntry)) {
+    if (!(obj instanceof OdkTablesFileManifest)) {
       return false;
     }
-    OdkTablesFileManifestEntry other = (OdkTablesFileManifestEntry) obj;
-    return (filename == null ? other.filename == null : filename.equals(other.filename))
-        && (md5hash == null ? other.md5hash == null : md5hash.equals(other.md5hash))
-        && (downloadUrl == null ? other.downloadUrl == null : downloadUrl.equals(other.downloadUrl));
+    OdkTablesFileManifest other = (OdkTablesFileManifest) obj;
+    return (entries == null ? other.entries == null :
+      ( entries.size() == other.entries.size() &&
+        entries.containsAll(other.entries) &&
+        other.entries.containsAll(entries)));
   }
 
 }

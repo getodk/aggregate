@@ -35,7 +35,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-@Produces(MediaType.TEXT_XML)
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 public interface DataService {
 
   @GET
@@ -48,14 +48,14 @@ public interface DataService {
 
   @PUT
   @Path("{rowId}")
-  @Consumes(MediaType.TEXT_XML)
+  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
   public RowResource createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
       PermissionDeniedException, BadColumnNameException;
 
   @DELETE
   @Path("{rowId}")
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
   public String deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
       ODKTaskLockException, PermissionDeniedException;
 

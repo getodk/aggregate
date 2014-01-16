@@ -22,7 +22,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerDiffServiceAsync {
 
-	void getRowsSince(String dataETag, String tableId, AsyncCallback<List<RowClient>> callback);
-
+  void getRowsSince(String dataETag, String tableId, AsyncCallback<List<RowClient>> callback);
 
 }

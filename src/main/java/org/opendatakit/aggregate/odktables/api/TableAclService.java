@@ -32,7 +32,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
-@Produces(MediaType.TEXT_XML)
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 public interface TableAclService {
 
   @GET
@@ -64,19 +64,19 @@ public interface TableAclService {
 
   @PUT
   @Path("default")
-  @Consumes(MediaType.TEXT_XML)
+  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
   public TableAclResource setDefaultAcl(TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException;
 
   @PUT
   @Path("user/{userId}")
-  @Consumes(MediaType.TEXT_XML)
+  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
   public TableAclResource setUserAcl(@PathParam("userId") String userId, TableAcl acl)
       throws ODKDatastoreException, PermissionDeniedException;
 
   @PUT
   @Path("group/{groupId}")
-  @Consumes(MediaType.TEXT_XML)
+  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
   public TableAclResource setGroupAcl(@PathParam("groupId") String groupId, TableAcl acl)
       throws ODKDatastoreException, PermissionDeniedException;
 

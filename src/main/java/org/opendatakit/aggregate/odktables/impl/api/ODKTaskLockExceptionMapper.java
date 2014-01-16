@@ -35,7 +35,7 @@ public class ODKTaskLockExceptionMapper implements ExceptionMapper<ODKTaskLockEx
         .status(Status.INTERNAL_SERVER_ERROR)
         .entity(
             new Error(ErrorType.LOCK_TIMEOUT, "Please try again later. "
-                + "Timed out waiting for lock: " + e.getMessage())).type(MediaType.TEXT_XML)
-        .build();
+                + "Timed out waiting for lock: " + e.getMessage()))
+        .type(MediaType.APPLICATION_JSON).build();
   }
 }

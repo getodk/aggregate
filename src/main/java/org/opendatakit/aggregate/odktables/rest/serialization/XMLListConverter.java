@@ -24,11 +24,11 @@ import org.simpleframework.xml.convert.Converter;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 
-public class ListConverter implements Converter<List<?>> {
+public class XMLListConverter implements Converter<List<?>> {
 
   private Serializer serializer;
 
-  public ListConverter(Serializer serializer) {
+  public XMLListConverter(Serializer serializer) {
     this.serializer = serializer;
   }
 

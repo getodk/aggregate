@@ -42,48 +42,45 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("serverdataservice")
 public interface ServerDataService extends RemoteService {
 
-  List<RowClient> getRows(String tableId) throws AccessDeniedException,
-    RequestFailureException, DatastoreFailureException,
-    PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+  List<RowClient> getRows(String tableId) throws AccessDeniedException, RequestFailureException,
+      DatastoreFailureException, PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
 
   TableContentsClient getRow(String tableId, String rowId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
 
   RowClient createOrUpdateRow(String tableId, String rowId, RowClient row)
-      throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException, PermissionDeniedExceptionClient,
-      ETagMismatchExceptionClient, BadColumnNameExceptionClient,
+      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
+      PermissionDeniedExceptionClient, ETagMismatchExceptionClient, BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient;
 
   void deleteRow(String tableId, String rowId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
 
   List<String> getColumnNames(String tableId) throws DatastoreFailureException,
-    EntityNotFoundExceptionClient;
+      EntityNotFoundExceptionClient;
 
   List<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
 
-  List<FileSummaryClient> getMedialFilesKey(String tableId, String key) throws
-    AccessDeniedException, RequestFailureException, DatastoreFailureException,
-    PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+  List<FileSummaryClient> getMedialFilesKey(String tableId, String key)
+      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
+      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
 
   List<String> getFileRowInfoColumnNames();
 
   TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
 
-  TableContentsForFilesClient getFileInfoContents(String tableId) throws
-      AccessDeniedException, RequestFailureException,
-      DatastoreFailureException, PermissionDeniedExceptionClient,
+  TableContentsForFilesClient getFileInfoContents(String tableId) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient;
 
   void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
 
 }

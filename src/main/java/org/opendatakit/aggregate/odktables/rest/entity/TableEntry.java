@@ -22,10 +22,11 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 /**
- * A TableEntry defines very only the tableId, the tableKey (for now), and
- * ETags for the data and the properties. This stands in as a quick point of
- * reference for clients to access properties and data ETags to see if changes
- * have been made.
+ * A TableEntry defines very only the tableId, the tableKey (for now), and ETags
+ * for the data and the properties. This stands in as a quick point of reference
+ * for clients to access properties and data ETags to see if changes have been
+ * made.
+ *
  * @author dylan price?
  * @author sudar.sam@gmail.com
  *
@@ -49,8 +50,8 @@ public class TableEntry {
   protected TableEntry() {
   }
 
-  public TableEntry(final String tableId,
-      final String dataETag, final String propertiesETag, final String schemaETag) {
+  public TableEntry(final String tableId, final String dataETag, final String propertiesETag,
+      final String schemaETag) {
     this.tableId = tableId;
     this.dataETag = dataETag;
     this.propertiesETag = propertiesETag;
@@ -102,10 +103,10 @@ public class TableEntry {
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
     if (!(obj instanceof TableEntry)) {
@@ -114,16 +115,14 @@ public class TableEntry {
     TableEntry other = (TableEntry) obj;
     return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
         && (dataETag == null ? other.dataETag == null : dataETag.equals(other.dataETag))
-        && (propertiesETag == null ? other.propertiesETag == null : propertiesETag.equals(other.propertiesETag))
+        && (propertiesETag == null ? other.propertiesETag == null : propertiesETag
+            .equals(other.propertiesETag))
         && (schemaETag == null ? other.schemaETag == null : schemaETag.equals(other.schemaETag));
   }
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId
-        + ", dataETag=" + dataETag
-        + ", propertiesETag=" + propertiesETag
-        + ", schemaETag=" + schemaETag
-        + "]";
+    return "TableEntry [tableId=" + tableId + ", dataETag=" + dataETag + ", propertiesETag="
+        + propertiesETag + ", schemaETag=" + schemaETag + "]";
   }
 }

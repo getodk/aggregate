@@ -22,23 +22,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 /**
  * Servlet for downloading a manifest of files to the phone for the correct app
  * and the correct table.
+ *
  * @author sudar.sam@gmail.com
  *
  */
 @Path("filemanifest")
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
 public interface FileManifestService {
-    
+
   /** URL parameter specifying the app. Always required. */
   public static final String PARAM_APP_ID = "app_id";
-  /** 
-   * URL parameter specifying the tableId. Optional. If not present, will 
-   * return all the files for the application.
+  /**
+   * URL parameter specifying the tableId. Optional. If not present, will return
+   * all the files for the application.
    */
   public static final String PARAM_TABLE_ID = "table_id";
   /**
@@ -48,10 +52,9 @@ public interface FileManifestService {
   public static final String PARAM_APP_LEVEL_FILES = "app_level_files";
 
   @GET
-  public String getFileManifest(@Context ServletContext servletContext, 
+  public String getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
-      @QueryParam (PARAM_APP_ID) String appId,
-      @QueryParam (PARAM_TABLE_ID) String tableId, 
-      @QueryParam (PARAM_APP_LEVEL_FILES) String appLevel) throws IOException;
-  
+      @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
+      @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) throws IOException;
+
 }

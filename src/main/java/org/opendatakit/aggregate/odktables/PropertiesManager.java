@@ -127,8 +127,7 @@ public class PropertiesManager {
     String propertiesETag = CommonFieldsBase.newUri();
 
     // lock table
-    LockTemplate lock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
     try {
       lock.acquire();
 
@@ -141,8 +140,8 @@ public class PropertiesManager {
       String currentETag = tableProperties.getPropertiesETag();
       if (currentETag == null || !currentETag.equals(oldPropertiesETag)) {
         throw new ETagMismatchException(String.format(
-            "%s does not match %s for properties for table with tableId %s",
-            currentETag, oldPropertiesETag, tableId));
+            "%s does not match %s for properties for table with tableId %s", currentETag,
+            oldPropertiesETag, tableId));
       }
 
       EntityCreator creator = new EntityCreator();
@@ -159,23 +158,22 @@ public class PropertiesManager {
         // for now and assume that once you've synched to the server, the
         // definition is static and immutable.
         log.info("setProperties: before kvs stuff in set properties");
-        List<OdkTablesKeyValueStoreEntry> kvsEntries =
-            tableProperties.getKeyValueStoreEntries();
+        List<OdkTablesKeyValueStoreEntry> kvsEntries = tableProperties.getKeyValueStoreEntries();
         OdkTablesKeyValueStoreEntry holderEntry = null;
         try {
-        for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
-          holderEntry = kvsEntry;
-          DbKeyValueStoreEntity kvsEntity = creator.newKeyValueStoreEntity(kvsEntry, propertiesETag, cc);
-          newKvsEntities.add(kvsEntity);
-        }
+          for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
+            holderEntry = kvsEntry;
+            DbKeyValueStoreEntity kvsEntity = creator.newKeyValueStoreEntity(kvsEntry,
+                propertiesETag, cc);
+            newKvsEntities.add(kvsEntity);
+          }
         } catch (Exception e) {
           e.printStackTrace();
           // what is the deal.
-          log.error("setProperties (" + holderEntry.partition + ", " +
-                    holderEntry.aspect + ", " + holderEntry.key + ") failed: " + e.toString());
-          throw new ODKDatastoreException("Something went wrong in creating " +
-          		"key value " +
-          		"store entries: " + e.toString());
+          log.error("setProperties (" + holderEntry.partition + ", " + holderEntry.aspect + ", "
+              + holderEntry.key + ") failed: " + e.toString());
+          throw new ODKDatastoreException("Something went wrong in creating " + "key value "
+              + "store entries: " + e.toString());
         }
         // Wipe the existing kvsEntries.
         // Caution! See javadoc of {@link clearAllEntries} and note that this is
@@ -183,7 +181,7 @@ public class PropertiesManager {
         // pursuant call to add all the new entities fails.
         log.info("setProperties Made it past add all to lists");
         // Now put all the entries.
-        for ( DbKeyValueStoreEntity e : newKvsEntities ) {
+        for (DbKeyValueStoreEntity e : newKvsEntities) {
           e.put(cc);
         }
         log.info("setProperties made it past persist of kvsEntities");
@@ -197,15 +195,16 @@ public class PropertiesManager {
         kvsEntities = newKvsEntities;
         log.info("setProperties made it past update to propertiesETag");
 
-        // everything was successfully committed -- we can now delete the old values...
+        // everything was successfully committed -- we can now delete the old
+        // values...
         DbKeyValueStore.clearAllEntries(tableId, oldPropertiesETag, cc);
         log.info("setProperties made it past clear");
 
-      } catch ( ODKEntityPersistException e ) {
+      } catch (ODKEntityPersistException e) {
         // on failure, restore from the database (likely fails...)...
         getProperties();
         throw e;
-      } catch ( ODKOverQuotaException e ) {
+      } catch (ODKOverQuotaException e) {
         // on failure, restore from the database (likely fails...)...
         getProperties();
         throw e;
@@ -214,6 +213,6 @@ public class PropertiesManager {
       lock.release();
     }
 
-    return converter.toTableProperties(kvsEntities, tableId, propertiesETag );
+    return converter.toTableProperties(kvsEntities, tableId, propertiesETag);
   }
 }

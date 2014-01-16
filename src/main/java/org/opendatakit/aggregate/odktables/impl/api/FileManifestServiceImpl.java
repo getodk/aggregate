@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2012-2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
@@ -21,6 +36,7 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * The implementation of the file manifest service. Handles the actual requests
  * and spits back out the manifests.
+ *
  * @author sudar.sam@gmail.com
  */
 public class FileManifestServiceImpl implements FileManifestService {
@@ -28,24 +44,24 @@ public class FileManifestServiceImpl implements FileManifestService {
   @Override
   @GET
   @Produces("application/json")
-  public String getFileManifest(@Context ServletContext servletContext, 
+  public String getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
-      @QueryParam (PARAM_APP_ID) String appId,
-      @QueryParam (PARAM_TABLE_ID) String tableId, 
-      @QueryParam (PARAM_APP_LEVEL_FILES) String appLevel) throws IOException {
+      @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
+      @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) throws IOException {
+    ServiceUtils.examineRequest(servletContext, req);
     // First we need to get the calling context.
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
     // Now make sure we have an app id.
     if (appId == null || "".equals(appId)) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, 
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
           "Invalid request. App id must be present and valid.");
       return "";
     }
     FileManifestManager manifestManager = new FileManifestManager(appId, cc);
     String manifest = null;
     try {
-      // Now we need to decide what level on this app we're going to use. We 
-      // can do table-level, all files, or app-level. The app-level param 
+      // Now we need to decide what level on this app we're going to use. We
+      // can do table-level, all files, or app-level. The app-level param
       // trumps the table-level.
       if (appLevel != null && !"".equals(appLevel)) {
         // we want just the app-level files.
@@ -63,8 +79,7 @@ public class FileManifestServiceImpl implements FileManifestService {
       e.printStackTrace();
     }
     if (manifest == null) {
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-          "Unable to retrieve manifest.");
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to retrieve manifest.");
       // TODO: is this what I should be sending?
       return null;
     } else {

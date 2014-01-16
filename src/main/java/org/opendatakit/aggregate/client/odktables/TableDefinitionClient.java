@@ -21,11 +21,11 @@ import java.util.List;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.api.
- * <br>
- * The idea is that it will do the same thing, but on the client side.
- * Usual caveat that it is not yet clear if this is needed or if another
- * thing needs be created for the server to do non-phone things.
+ * org.opendatakit.aggregate.odktables.entity.api. <br>
+ * The idea is that it will do the same thing, but on the client side. Usual
+ * caveat that it is not yet clear if this is needed or if another thing needs
+ * be created for the server to do non-phone things.
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -34,7 +34,7 @@ public class TableDefinitionClient implements Serializable {
   /**
 	 *
 	 */
-	private static final long serialVersionUID = -1413634509888543150L;
+  private static final long serialVersionUID = -1413634509888543150L;
 
   private String tableId;
   private String displayName;
@@ -46,8 +46,7 @@ public class TableDefinitionClient implements Serializable {
     // necessary for gwt serialization
   }
 
-  public TableDefinitionClient(final String tableId,
-      final List<ColumnClient> columns,
+  public TableDefinitionClient(final String tableId, final List<ColumnClient> columns,
       final String displayName, final TableTypeClient type) {
     this.tableId = tableId;
     this.columns = columns;
@@ -77,10 +76,7 @@ public class TableDefinitionClient implements Serializable {
 
   @Override
   public String toString() {
-    return "TableDefinitionClient[tableId=" + getTableId()
-        + ", columns=" + getColumns().toString()
-        + ", displayName=" + getDisplayName()
-        + ", type=" + getType()
-        + "]";
+    return "TableDefinitionClient[tableId=" + getTableId() + ", columns=" + getColumns().toString()
+        + ", displayName=" + getDisplayName() + ", type=" + getType() + "]";
   }
 }

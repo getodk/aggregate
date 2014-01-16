@@ -53,14 +53,14 @@ public class DiffServiceImpl implements DiffService {
   public List<RowResource> getRowsSince(String dataETag) throws ODKDatastoreException,
       PermissionDeniedException {
     // TODO re-do permissions stuff
-    //af.checkPermission(TablePermission.READ_ROW);
+    // af.checkPermission(TablePermission.READ_ROW);
     List<Row> rows;
-    /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) { */
-      rows = dm.getRowsSince(dataETag);
-    /*} else {
-      List<Scope> scopes = AuthFilter.getScopes(cc);
-      rows = dm.getRowsSince(dataETag, scopes);
-    }*/
+    /* if (af.hasPermission(TablePermission.UNFILTERED_READ)) { */
+    rows = dm.getRowsSince(dataETag);
+    /*
+     * } else { List<Scope> scopes = AuthFilter.getScopes(cc); rows =
+     * dm.getRowsSince(dataETag, scopes); }
+     */
     return getResources(rows);
   }
 

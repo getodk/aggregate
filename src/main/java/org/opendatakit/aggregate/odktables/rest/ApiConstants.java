@@ -18,7 +18,8 @@ package org.opendatakit.aggregate.odktables.rest;
 
 public final class ApiConstants {
 
-  private ApiConstants() {};
+  private ApiConstants() {
+  };
 
   public static final String OPEN_DATA_KIT_VERSION_HEADER = "X-OpenDataKit-Version";
 

@@ -160,8 +160,8 @@ public class TableManager {
     DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
         schemaETag, cc);
     TableDefinition definition = converter.toTableDefinition(entry, definitionEntity);
-    List<DbColumnDefinitionsEntity> columnEntities = DbColumnDefinitions.query(tableId,
-        schemaETag, cc);
+    List<DbColumnDefinitionsEntity> columnEntities = DbColumnDefinitions.query(tableId, schemaETag,
+        cc);
     List<Column> columns = converter.toColumns(columnEntities);
     definition.setColumns(columns);
 
@@ -169,10 +169,10 @@ public class TableManager {
     List<DbKeyValueStoreEntity> kvsEntries = DbKeyValueStore.getKVSEntries(tableId, propertiesETag,
         cc);
     String displayString = null;
-    for ( DbKeyValueStoreEntity kvs : kvsEntries ) {
-      if ( kvs.getKey().equals(KeyValueStoreConstants.TABLE_DISPLAY_NAME) &&
-           kvs.getPartition().equals(KeyValueStoreConstants.PARTITION_TABLE) &&
-           kvs.getAspect().equals(KeyValueStoreConstants.ASPECT_DEFAULT) ) {
+    for (DbKeyValueStoreEntity kvs : kvsEntries) {
+      if (kvs.getKey().equals(KeyValueStoreConstants.TABLE_DISPLAY_NAME)
+          && kvs.getPartition().equals(KeyValueStoreConstants.PARTITION_TABLE)
+          && kvs.getAspect().equals(KeyValueStoreConstants.ASPECT_DEFAULT)) {
         displayString = kvs.getValue();
       }
     }
@@ -217,8 +217,8 @@ public class TableManager {
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
    */
-  public TableEntry createTable(String tableId,
-      List<Column> columns, List<OdkTablesKeyValueStoreEntry> kvsEntries) throws ODKEntityPersistException,
+  public TableEntry createTable(String tableId, List<Column> columns,
+      List<OdkTablesKeyValueStoreEntry> kvsEntries) throws ODKEntityPersistException,
       ODKDatastoreException, TableAlreadyExistsException {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
@@ -233,28 +233,35 @@ public class TableManager {
     TableEntry existing = getTable(tableId);
     // check if table exists
     if (existing != null) {
-      DbTableDefinitionsEntity defn = DbTableDefinitions.getDefinition(tableId, existing.getSchemaETag(), cc);
-      if ( defn == null ) {
-        throw new TableAlreadyExistsException(String.format(
-            "Table with tableId '%s' already exists with incompatible schema (null TableDefinition).", tableId));
+      DbTableDefinitionsEntity defn = DbTableDefinitions.getDefinition(tableId,
+          existing.getSchemaETag(), cc);
+      if (defn == null) {
+        throw new TableAlreadyExistsException(
+            String
+                .format(
+                    "Table with tableId '%s' already exists with incompatible schema (null TableDefinition).",
+                    tableId));
       }
-      List<DbColumnDefinitionsEntity> cols = DbColumnDefinitions.query(tableId, existing.getSchemaETag(), cc);
+      List<DbColumnDefinitionsEntity> cols = DbColumnDefinitions.query(tableId,
+          existing.getSchemaETag(), cc);
 
-      for (DbColumnDefinitionsEntity cde : cols ) {
+      for (DbColumnDefinitionsEntity cde : cols) {
         boolean found = false;
         for (Column column : columns) {
-          if ( column.getElementKey().equals(cde.getElementKey()) ) {
+          if (column.getElementKey().equals(cde.getElementKey())) {
             found = true;
-            DbColumnDefinitionsEntity ce = creator.newColumnEntity(tableId, existing.getSchemaETag(), column, cc);
-            if ( !ce.matchingColumnDefinition(cde) ) {
+            DbColumnDefinitionsEntity ce = creator.newColumnEntity(tableId,
+                existing.getSchemaETag(), column, cc);
+            if (!ce.matchingColumnDefinition(cde)) {
               throw new TableAlreadyExistsException(String.format(
                   "Table with tableId '%s' already exists with incompatible schema.", tableId));
             }
           }
         }
-        if ( !found ) {
+        if (!found) {
           throw new TableAlreadyExistsException(String.format(
-              "Table with tableId '%s' already exists with incompatible schema (missing Column).", tableId));
+              "Table with tableId '%s' already exists with incompatible schema (missing Column).",
+              tableId));
         }
       }
       // Don't care about displayName...
@@ -298,7 +305,8 @@ public class TableManager {
         .getCurrentUser().getEmail()), TableRole.OWNER, cc);
     ownerAcl.put(cc);
 
-    // Do NOT write the entry yet -- we need to have a valid displayName first!!!
+    // Do NOT write the entry yet -- we need to have a valid displayName
+    // first!!!
     // tableEntry.put(cc);
 
     // Now update the properties...
@@ -342,8 +350,7 @@ public class TableManager {
 
     String schemaETag = tableEntry.getSchemaETag();
 
-    List<DbColumnDefinitionsEntity> columns = DbColumnDefinitions
-        .query(tableId, schemaETag, cc);
+    List<DbColumnDefinitionsEntity> columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
 
     DbTableDefinitionsEntity definitionEntity = DbTableDefinitions.getDefinition(tableId,
         schemaETag, cc);

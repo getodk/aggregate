@@ -36,9 +36,9 @@ public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,
       ClientHttpRequestExecution execution) throws IOException {
-    if ( accessToken != null && uriBase != null ) {
-      if (request.getURI().getHost().equals(uriBase.getHost()) &&
-          request.getURI().getPort() == uriBase.getPort() ) {
+    if (accessToken != null && uriBase != null) {
+      if (request.getURI().getHost().equals(uriBase.getHost())
+          && request.getURI().getPort() == uriBase.getPort()) {
         request.getHeaders().set("Authorization", "Bearer " + accessToken);
       }
     }

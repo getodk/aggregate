@@ -97,8 +97,8 @@ public class AuthFilter {
    *           if the current user does not have the given permission and is not
    *           within the scope of the filter on the row
    */
-  public void checkFilter(TablePermission permission, String rowId, Scope filter) throws ODKDatastoreException,
-      PermissionDeniedException {
+  public void checkFilter(TablePermission permission, String rowId, Scope filter)
+      throws ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(permission);
     Validate.notNull(rowId);
 
