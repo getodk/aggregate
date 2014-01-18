@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.server;
 
 import java.util.List;
@@ -16,33 +32,34 @@ public class GenerateGoogleMapEngineSettings {
   private GmeSettings gmeSettings;
   private IForm form;
   private boolean ignoreRepeats;
-  
+
   public GenerateGoogleMapEngineSettings(IForm form, boolean ignoreRepeats) {
     this.form = form;
     this.ignoreRepeats = ignoreRepeats;
     this.gmeSettings = new GmeSettings();
   }
-  
-  public GmeSettings generate(CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException {
+
+  public GmeSettings generate(CallingContext cc) throws ODKExternalServiceException,
+      ODKDatastoreException {
     try {
-     String  gmeAssetId = GoogleMapsEngine.parseGmeAssetId(form, cc);
+      String gmeAssetId = GoogleMapsEngine.parseGmeAssetId(form, cc);
       gmeSettings.setGmeAssetId(gmeAssetId);
     } catch (ODKDatastoreException e1) {
       throw e1;
-    }  catch (Exception e) {
+    } catch (Exception e) {
       throw new ODKExternalServiceException(e);
-    }    
-    
+    }
+
     // get rid of old list and recalculate
     FormElementModel root = form.getTopLevelGroupElement();
     processElementForColumnHead(form, root, root);
     return gmeSettings;
   }
-  
+
   /**
    * Helper function to recursively go through the element tree and create the
    * FormElementKeys
-   * 
+   *
    */
   private void processElementForColumnHead(IForm form, FormElementModel node, FormElementModel root) {
     if (node == null)
@@ -55,9 +72,9 @@ public class GenerateGoogleMapEngineSettings {
       gmeSettings.addGeoPoint(nodeName, key.toString());
       break;
     case REPEAT:
-      if(ignoreRepeats) {
+      if (ignoreRepeats) {
         return;
-      }      
+      }
     default:
       break; // should not be in any list
     }

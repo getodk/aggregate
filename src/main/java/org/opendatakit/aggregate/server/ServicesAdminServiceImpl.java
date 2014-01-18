@@ -107,9 +107,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail)
-      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
-      DatastoreFailureException {
+  public String createFusionTable(String formId, ExternalServicePublicationOption esOption,
+      String ownerEmail) throws AccessDeniedException, FormNotAvailableException,
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -125,9 +125,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }
-      if ( ownerEmail == null || ownerEmail.length() == 0 ) {
-        throw new RequestFailureException(
-            "Owner email must be supplied.");
+      if (ownerEmail == null || ownerEmail.length() == 0) {
+        throw new RequestFailureException("Owner email must be supplied.");
       }
       FusionTable fusion = new FusionTable(form, esOption, ownerEmail, cc);
       fusion.initiate(cc);
@@ -146,7 +145,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       throw new RequestFailureException(e);
     }
   }
-  
+
   @Override
   public String createGoogleSpreadsheet(String formId, String name,
       ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException,
@@ -166,13 +165,11 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }
-      if ( ownerEmail == null || ownerEmail.length() == 0 ) {
-        throw new RequestFailureException(
-            "Owner email must be supplied.");
+      if (ownerEmail == null || ownerEmail.length() == 0) {
+        throw new RequestFailureException("Owner email must be supplied.");
       }
-      if ( name == null || name.length() == 0 ) {
-        throw new RequestFailureException(
-            "Spreadsheet name must be supplied.");
+      if (name == null || name.length() == 0) {
+        throw new RequestFailureException("Spreadsheet name must be supplied.");
       }
       GoogleSpreadsheet spreadsheet = new GoogleSpreadsheet(form, name, esOption, ownerEmail, cc);
       spreadsheet.initiate(cc);
@@ -194,14 +191,18 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createRedCapServer(String formId, String apiKey, String url,
-      ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+      ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException,
+      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      FormActionStatusTimestamp deletionTimestamp = MiscTasks.getFormDeletionStatusTimestampOfFormId(formId, cc);
-      // TODO: better error reporting -- form is being deleted. Disallow creation of publishers.
-      if ( deletionTimestamp != null ) return null;
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      // TODO: better error reporting -- form is being deleted. Disallow
+      // creation of publishers.
+      if (deletionTimestamp != null)
+        return null;
       IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
@@ -226,77 +227,77 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createSimpleJsonServer(String formId, String authKey, String url,
-        ExternalServicePublicationOption esOption, String ownerEmail, BinaryOption binaryOption)
-            throws AccessDeniedException,
-            FormNotAvailableException, RequestFailureException, DatastoreFailureException {
-     HttpServletRequest req = this.getThreadLocalRequest();
-     CallingContext cc = ContextFactory.getCallingContext(this, req);
+      ExternalServicePublicationOption esOption, String ownerEmail, BinaryOption binaryOption)
+      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
+      DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-     try {
-        FormActionStatusTimestamp deletionTimestamp = MiscTasks
-              .getFormDeletionStatusTimestampOfFormId(formId, cc);
-        if (deletionTimestamp != null) {
-          throw new RequestFailureException(
-              "Form is marked for deletion - publishing request for Simple JSON server aborted.");
-        }
-        IForm form = FormFactory.retrieveFormByFormId(formId, cc);
-        if (!form.hasValidFormDefinition()) {
-          throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
-        }
-        AbstractExternalService server = new JsonServer(form, authKey, url, esOption, ownerEmail, binaryOption,cc);
-        server.initiate(cc);
-        return server.getFormServiceCursor().getUri();
-     } catch (ODKOverQuotaException e) {
-       e.printStackTrace();
-       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-     } catch (ODKFormNotFoundException e) {
-       e.printStackTrace();
-       throw new FormNotAvailableException(e);
-     } catch (ODKDatastoreException e) {
-       e.printStackTrace();
-       throw new DatastoreFailureException(e);
-     } catch (ODKExternalServiceException e) {
-       e.printStackTrace();
-       throw new RequestFailureException(e);
+    try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      if (deletionTimestamp != null) {
+        throw new RequestFailureException(
+            "Form is marked for deletion - publishing request for Simple JSON server aborted.");
+      }
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
+      AbstractExternalService server = new JsonServer(form, authKey, url, esOption, ownerEmail,
+          binaryOption, cc);
+      server.initiate(cc);
+      return server.getFormServiceCursor().getUri();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
   }
 
   @Override
-  public String createOhmageJsonServer(String formId, String campaignUrn,
-        String campaignTimestamp, String user, String hashedPassword, String url,
-        ExternalServicePublicationOption esOption, String ownerEmail)
-            throws AccessDeniedException,
-            FormNotAvailableException, RequestFailureException, DatastoreFailureException {
-     HttpServletRequest req = this.getThreadLocalRequest();
-     CallingContext cc = ContextFactory.getCallingContext(this, req);
+  public String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp,
+      String user, String hashedPassword, String url, ExternalServicePublicationOption esOption,
+      String ownerEmail) throws AccessDeniedException, FormNotAvailableException,
+      RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-     try {
-        FormActionStatusTimestamp deletionTimestamp = MiscTasks
-              .getFormDeletionStatusTimestampOfFormId(formId, cc);
-        if (deletionTimestamp != null) {
-          throw new RequestFailureException(
-              "Form is marked for deletion - publishing request for Ohmage JSON server aborted.");
-        }
-        IForm form = FormFactory.retrieveFormByFormId(formId, cc);
-        if (!form.hasValidFormDefinition()) {
-          throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
-        }
-        OhmageJsonServer server = new OhmageJsonServer(form, campaignUrn, campaignTimestamp,
-                                          user, hashedPassword, url, esOption, ownerEmail, cc);
-        server.initiate(cc);
-        return server.getFormServiceCursor().getUri();
-     } catch (ODKOverQuotaException e) {
-       e.printStackTrace();
-       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-     } catch (ODKFormNotFoundException e) {
-       e.printStackTrace();
-       throw new FormNotAvailableException(e);
-     } catch (ODKDatastoreException e) {
-       e.printStackTrace();
-       throw new DatastoreFailureException(e);
-     } catch (ODKExternalServiceException e) {
-       e.printStackTrace();
-       throw new RequestFailureException(e);
+    try {
+      FormActionStatusTimestamp deletionTimestamp = MiscTasks
+          .getFormDeletionStatusTimestampOfFormId(formId, cc);
+      if (deletionTimestamp != null) {
+        throw new RequestFailureException(
+            "Form is marked for deletion - publishing request for Ohmage JSON server aborted.");
+      }
+      IForm form = FormFactory.retrieveFormByFormId(formId, cc);
+      if (!form.hasValidFormDefinition()) {
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
+      }
+      OhmageJsonServer server = new OhmageJsonServer(form, campaignUrn, campaignTimestamp, user,
+          hashedPassword, url, esOption, ownerEmail, cc);
+      server.initiate(cc);
+      return server.getFormServiceCursor().getUri();
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    } catch (ODKFormNotFoundException e) {
+      e.printStackTrace();
+      throw new FormNotAvailableException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKExternalServiceException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
   }
 
@@ -319,10 +320,10 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    } catch ( ODKEntityNotFoundException e) {
+    } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException("Publisher not found");
-    } catch ( ODKDatastoreException e) {
+    } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
     }
@@ -340,7 +341,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       } catch (ODKOverQuotaException e) {
         e.printStackTrace();
         throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-      } catch ( ODKDatastoreException e) {
+      } catch (ODKDatastoreException e) {
         e.printStackTrace();
         throw new DatastoreFailureException(e);
       }
@@ -349,8 +350,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void restartPublisher(String uri) throws AccessDeniedException,
-      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public void restartPublisher(String uri) throws AccessDeniedException, FormNotAvailableException,
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -364,7 +365,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       if (es == null) {
         throw new RequestFailureException("Service description not found for this publisher");
       }
-      if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
+      if (fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS) {
         throw new RequestFailureException(
             "Credentials have not failed for this publisher -- rejecting change request");
       }
@@ -377,10 +378,10 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    } catch ( ODKEntityNotFoundException e) {
+    } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException("Publisher not found");
-    } catch ( ODKDatastoreException e) {
+    } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
     } catch (ODKExternalServiceException e) {
@@ -391,8 +392,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws AccessDeniedException,
-      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public void updateApiKeyAndRestartPublisher(String uri, String apiKey)
+      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
+      DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -406,13 +408,12 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       if (es == null) {
         throw new RequestFailureException("Service description not found for this publisher");
       }
-      if ( fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS ) {
+      if (fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS) {
         throw new RequestFailureException(
             "Credentials have not failed for this publisher -- rejecting change request");
       }
-      if ( fsc.getExternalServiceType() != ExternalServiceType.REDCAP_SERVER ) {
-        throw new RequestFailureException(
-            "This publisher is not a REDCap publisher");
+      if (fsc.getExternalServiceType() != ExternalServiceType.REDCAP_SERVER) {
+        throw new RequestFailureException("This publisher is not a REDCap publisher");
       }
       REDCapServer rc = (REDCapServer) es;
       rc.setApiKey(apiKey);
@@ -426,10 +427,10 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    } catch ( ODKEntityNotFoundException e) {
+    } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new RequestFailureException("Publisher not found");
-    } catch ( ODKDatastoreException e) {
+    } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
     } catch (ODKExternalServiceException e) {
@@ -440,20 +441,21 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public GmeSettings getGoogleMapEngineSettings(String formId)
-      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
-      DatastoreFailureException {
+  public GmeSettings getGoogleMapEngineSettings(String formId) throws AccessDeniedException,
+      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
 
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    
+
     try {
       IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
-        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed
+                                                                                // definition
       }
-       GenerateGoogleMapEngineSettings geoGenerator = new GenerateGoogleMapEngineSettings(form, false);
-       return geoGenerator.generate(cc);
+      GenerateGoogleMapEngineSettings geoGenerator = new GenerateGoogleMapEngineSettings(form,
+          false);
+      return geoGenerator.generate(cc);
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
       throw new FormNotAvailableException(e);
@@ -489,23 +491,23 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID);
       }
-      if ( ownerEmail == null || ownerEmail.length() == 0 ) {
-        throw new RequestFailureException(
-            "Owner email must be supplied.");
+      if (ownerEmail == null || ownerEmail.length() == 0) {
+        throw new RequestFailureException("Owner email must be supplied.");
       }
-      
+
       FormElementModel geoPointField = null;
       if (geopointKey != null) {
         FormElementKey geoPointFEMKey = new FormElementKey(geopointKey);
         geoPointField = FormElementModel.retrieveFormElementModel(form, geoPointFEMKey);
       }
 
-      if(geoPointField == null) {
+      if (geoPointField == null) {
         throw new RequestFailureException(
             "Geo Point field must be supplied to transfer data to Google Map Engine");
       }
       FormElementKey geoPointFieldKey = geoPointField.constructFormElementKey(form);
-      GoogleMapsEngine gme = new GoogleMapsEngine(form, esOption, assetId, geoPointFieldKey.toString(), gmePhotoHostType, ownerEmail, cc);
+      GoogleMapsEngine gme = new GoogleMapsEngine(form, esOption, assetId,
+          geoPointFieldKey.toString(), gmePhotoHostType, ownerEmail, cc);
       gme.initiate(cc);
       return gme.getFormServiceCursor().getUri();
     } catch (ODKOverQuotaException e) {
