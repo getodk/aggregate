@@ -16,10 +16,6 @@
 
 package org.opendatakit.aggregate.odktables.rest.serialization;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.convert.Registry;
 import org.simpleframework.xml.convert.RegistryStrategy;
@@ -31,14 +27,6 @@ public class SimpleXMLSerializerForAggregate {
     Registry registry = new Registry();
     Strategy strategy = new RegistryStrategy(registry);
     Serializer serializer = new Persister(strategy);
-    XMLListConverter converter = new XMLListConverter(serializer);
-    try {
-      registry.bind(List.class, converter);
-      registry.bind(ArrayList.class, converter);
-      registry.bind(LinkedList.class, converter);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to register list converters!", e);
-    }
     return serializer;
   }
 }

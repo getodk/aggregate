@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.util.Enumeration;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;

@@ -52,6 +52,7 @@ import com.google.common.collect.Maps;
 public class DataManagerTest {
 
   private CallingContext cc;
+  private OdkTablesUserInfoTable userInfo;
   private String tableId;
   private String tableProperties;
   private AuthFilter af;
@@ -63,14 +64,18 @@ public class DataManagerTest {
   public void setUp() throws Exception {
     this.cc = TestContextFactory.getCallingContext();
 
+    userInfo = cc.getDatastore().createEntityUsingRelation(OdkTablesUserInfoTable.assertRelation(cc), cc.getCurrentUser());
+    userInfo.setOdkTablesUserId("myId");
+    userInfo.setUriUser(cc.getCurrentUser().getUriUser());
+
     this.tableProperties = T.tableMetadata;
-    this.tm = new TableManager(cc);
+    this.tm = new TableManager(userInfo, cc);
 
     tm.createTable(tableId,
         T.columns, T.kvsEntries);
 
-    this.dm = new DataManager(tableId, cc);
-    this.af = new AuthFilter(tableId, cc);
+    this.dm = new DataManager(tableId, userInfo, cc);
+    this.af = new AuthFilter(tableId, userInfo, cc);
 
     this.rows = T.rows;
     clearRows();

@@ -36,6 +36,7 @@ import org.opendatakit.common.web.TestContextFactory;
 public class TableAclManagerTest {
 
   private CallingContext cc;
+  private OdkTablesUserInfoTable userInfo;
   private String tableId;
   private TableManager tm;
   private Scope scope;
@@ -46,9 +47,13 @@ public class TableAclManagerTest {
   public void setUp() throws Exception {
     this.cc = TestContextFactory.getCallingContext();
 
+    userInfo = cc.getDatastore().createEntityUsingRelation(OdkTablesUserInfoTable.assertRelation(cc), cc.getCurrentUser());
+    userInfo.setOdkTablesUserId("myId");
+    userInfo.setUriUser(cc.getCurrentUser().getUriUser());
+
     this.tableId = T.tableId;
     String tableProperties = T.tableMetadata;
-    this.tm = new TableManager(cc);
+    this.tm = new TableManager(userInfo, cc);
 
     tm.createTable(tableId,
         T.columns, T.kvsEntries);

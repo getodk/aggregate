@@ -56,6 +56,7 @@ import org.opendatakit.common.web.CallingContext;
 
 public class DataManager {
   private CallingContext cc;
+  private OdkTablesUserInfoTable userInfo;
   private EntityConverter converter;
   private EntityCreator creator;
   private String tableId;
@@ -76,11 +77,12 @@ public class DataManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public DataManager(String tableId, CallingContext cc) throws ODKEntityNotFoundException,
+  public DataManager(String tableId, OdkTablesUserInfoTable userInfo, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
     this.cc = cc;
+    this.userInfo = userInfo;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
     this.tableId = tableId;
@@ -410,7 +412,7 @@ public class DataManager {
       entry.setDataETag(dataETag);
 
       // create or update entities
-      rowEntities = creator.insertOrUpdateRowEntities(af, table, dataETag, rows, columns, cc);
+      rowEntities = creator.insertOrUpdateRowEntities(af, table, dataETag, rows, columns, userInfo, cc);
 
       // create log table entries
       List<Entity> logEntities = creator.newLogEntities(logTable, dataETag, rowEntities, columns,

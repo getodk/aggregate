@@ -25,12 +25,13 @@ import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface PropertiesService {
 
   @GET
@@ -39,7 +40,7 @@ public interface PropertiesService {
 
   @PUT
   @Path("")
-  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public PropertiesResource setProperties(TableProperties properties) throws ODKDatastoreException,
       ODKTaskLockException, ETagMismatchException, PermissionDeniedException;
 

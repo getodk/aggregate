@@ -22,6 +22,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.odktables.AuthFilter;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;
@@ -40,11 +41,11 @@ public class PropertiesServiceImpl implements PropertiesService {
   private UriInfo info;
   private AuthFilter af;
 
-  public PropertiesServiceImpl(String tableId, UriInfo info, CallingContext cc)
+  public PropertiesServiceImpl(String tableId, UriInfo info, OdkTablesUserInfoTable userInfo, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     this.pm = new PropertiesManager(tableId, cc);
     this.info = info;
-    this.af = new AuthFilter(tableId, cc);
+    this.af = new AuthFilter(tableId, userInfo, cc);
   }
 
   @Override

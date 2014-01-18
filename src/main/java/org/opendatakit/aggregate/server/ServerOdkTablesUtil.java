@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
@@ -61,6 +62,7 @@ import org.opendatakit.common.web.CallingContext;
  * the Server.*Impl methods but that also need to be called not via gwt, eg
  * through a servlet. In this case various things like getting CallingContext
  * change, and this will be the home for that level of indirection.
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -68,6 +70,7 @@ public class ServerOdkTablesUtil {
 
   /**
    * Create a table in the datastore.
+   *
    * @param tableId
    * @param definition
    * @param cc
@@ -75,11 +78,9 @@ public class ServerOdkTablesUtil {
    * @throws DatastoreFailureException
    * @throws TableAlreadyExistsExceptionClient
    */
-  public static TableEntryClient createTable(String tableId,
-      TableDefinitionClient definition,
-      CallingContext cc) throws DatastoreFailureException,
+  public static TableEntryClient createTable(String tableId, TableDefinitionClient definition,
+      OdkTablesUserInfoTable userInfo, CallingContext cc) throws DatastoreFailureException,
       TableAlreadyExistsExceptionClient {
-    TableManager tm = new TableManager(cc);
     Log logger = LogFactory.getLog(ServerOdkTablesUtil.class);
     // TODO: add access control stuff
     // Have to be careful of all the transforms going on here.
@@ -88,13 +89,13 @@ public class ServerOdkTablesUtil {
     // column resource or something, in which case the transform() method is not
     // altering all of the requisite fields.
     try {
+      TableManager tm = new TableManager(userInfo, cc);
       String displayName = definition.getDisplayName();
       TableType type = UtilTransforms.transform(definition.getType());
       // TODO: find a way to, for creation, generate a minimal list of
       // kvs entries. for now just putting in blank if you create a table
       // from the server.
-      List<OdkTablesKeyValueStoreEntry> kvsEntries =
-          new ArrayList<OdkTablesKeyValueStoreEntry>();
+      List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
       OdkTablesKeyValueStoreEntry tt;
       tt = new OdkTablesKeyValueStoreEntry();
       tt.tableId = tableId;
@@ -134,6 +135,7 @@ public class ServerOdkTablesUtil {
 
   /**
    * Create or update a row in the datastore.
+   *
    * @param tableId
    * @param rowId
    * @param row
@@ -147,16 +149,15 @@ public class ServerOdkTablesUtil {
    * @throws BadColumnNameExceptionClient
    * @throws EntityNotFoundExceptionClient
    */
-  public static RowClient createOrUpdateRow(String tableId, String rowId,
-      RowClient row, CallingContext cc) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException,
-      ETagMismatchExceptionClient, PermissionDeniedExceptionClient,
-      BadColumnNameExceptionClient, EntityNotFoundExceptionClient {
+  public static RowClient createOrUpdateRow(String tableId, String rowId, RowClient row,
+      OdkTablesUserInfoTable userInfo, CallingContext cc) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, ETagMismatchExceptionClient,
+      PermissionDeniedExceptionClient, BadColumnNameExceptionClient, EntityNotFoundExceptionClient {
     try {
       // first transform row into a server-side row
       Row serverRow = UtilTransforms.transform(row);
-      DataManager dm = new DataManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, cc);
+      DataManager dm = new DataManager(tableId, userInfo, cc);
+      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
       row.setRowId(rowId);
 
       List<Row> rows = dm.insertOrUpdateRows(af, Collections.singletonList(serverRow));
@@ -186,28 +187,23 @@ public class ServerOdkTablesUtil {
   /**
    * Create a FileSummaryClient object from a row that originated from
    * EntityConverter.
+   *
    * @param row
    * @param blobSetRelation
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public static FileSummaryClient getFileSummaryClientFromRow(Row row,
-      String tableId, DbTableFiles blobSetRelation, CallingContext cc) throws
-      ODKDatastoreException {
+  public static FileSummaryClient getFileSummaryClientFromRow(Row row, String tableId,
+      DbTableFiles blobSetRelation, CallingContext cc) throws ODKDatastoreException {
     String filename = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.PATH_TO_FILE), cc)
-        .getUnrootedFilename(1, cc);
-    Long contentLength = blobSetRelation.getBlobEntitySet(
-        filename, cc)
-        .getContentLength(1, cc);
-    String contentType = blobSetRelation.getBlobEntitySet(
-        filename, cc)
-        .getContentType(1, cc);
+        row.getValues().get(DbTableFileInfo.PATH_TO_FILE), cc).getUnrootedFilename(1, cc);
+    Long contentLength = blobSetRelation.getBlobEntitySet(filename, cc).getContentLength(1, cc);
+    String contentType = blobSetRelation.getBlobEntitySet(filename, cc).getContentType(1, cc);
     String id = row.getRowId();
     String key = "this isn't implemented.";
-    FileSummaryClient summary = new FileSummaryClient(
-        filename, contentType, contentLength, key, 0, id, tableId);
+    FileSummaryClient summary = new FileSummaryClient(filename, contentType, contentLength, key, 0,
+        id, tableId);
     return summary;
   }
 }

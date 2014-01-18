@@ -46,6 +46,7 @@ import com.google.common.collect.Lists;
 public class TableManagerTest {
 
   private CallingContext cc;
+  private OdkTablesUserInfoTable userInfo;
   private TableManager tm;
   private String tableId;
   private String tableId2;
@@ -55,7 +56,12 @@ public class TableManagerTest {
   @Before
   public void setUp() throws Exception {
     this.cc = TestContextFactory.getCallingContext();
-    this.tm = new TableManager(cc);
+
+    userInfo = cc.getDatastore().createEntityUsingRelation(OdkTablesUserInfoTable.assertRelation(cc), cc.getCurrentUser());
+    userInfo.setOdkTablesUserId("myId");
+    userInfo.setUriUser(cc.getCurrentUser().getUriUser());
+
+    this.tm = new TableManager(userInfo, cc);
     this.tableId = T.tableId;
     this.tableId2 = T.tableId + "2";
     this.columns = T.columns;

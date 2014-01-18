@@ -51,13 +51,15 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation annotations[],
       MediaType mediaType) {
-    return MediaType.TEXT_XML_TYPE.equals(mediaType) || MediaType.APPLICATION_XML_TYPE.equals(mediaType);
+    return (mediaType.getType().equals("text") || mediaType.getType().equals("application")) &&
+        mediaType.getSubtype().equals("xml");
   }
 
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation annotations[],
       MediaType mediaType) {
-    return MediaType.TEXT_XML_TYPE.equals(mediaType) || MediaType.APPLICATION_XML_TYPE.equals(mediaType);
+    return (mediaType.getType().equals("text") || mediaType.getType().equals("application")) &&
+        mediaType.getSubtype().equals("xml");
   }
 
   @Override

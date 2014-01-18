@@ -25,12 +25,14 @@ import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -40,17 +42,19 @@ public class DiffServiceImpl implements DiffService {
   private DataManager dm;
   private UriInfo info;
   private AuthFilter af;
+  private OdkTablesUserInfoTable userInfo;
 
-  public DiffServiceImpl(String tableId, UriInfo info, CallingContext cc)
+  public DiffServiceImpl(String tableId, UriInfo info, OdkTablesUserInfoTable userInfo, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     this.cc = cc;
-    this.dm = new DataManager(tableId, cc);
+    this.userInfo = userInfo;
+    this.dm = new DataManager(tableId, userInfo, cc);
     this.info = info;
-    this.af = new AuthFilter(tableId, cc);
+    this.af = new AuthFilter(tableId, userInfo, cc);
   }
 
   @Override
-  public List<RowResource> getRowsSince(String dataETag) throws ODKDatastoreException,
+  public RowResourceList getRowsSince(String dataETag) throws ODKDatastoreException,
       PermissionDeniedException {
     // TODO re-do permissions stuff
     // af.checkPermission(TablePermission.READ_ROW);
@@ -61,7 +65,7 @@ public class DiffServiceImpl implements DiffService {
      * } else { List<Scope> scopes = AuthFilter.getScopes(cc); rows =
      * dm.getRowsSince(dataETag, scopes); }
      */
-    return getResources(rows);
+    return new RowResourceList(getResources(rows));
   }
 
   private RowResource getResource(Row row) {

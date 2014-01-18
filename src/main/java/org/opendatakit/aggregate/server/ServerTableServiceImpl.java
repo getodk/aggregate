@@ -33,6 +33,7 @@ import org.opendatakit.aggregate.client.odktables.ServerTableService;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.odktables.AuthFilter;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -63,20 +64,24 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       DatastoreFailureException, PermissionDeniedExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    TableManager tm = new TableManager(cc);
     try {
-      List<Scope> scopes = AuthFilter.getScopes(cc);
+      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+          .getUriUser(), cc);
+      TableManager tm = new TableManager(userInfo, cc);
+      List<Scope> scopes = tm.getScopes(cc);
       List<TableEntry> entries = tm.getTables(scopes);
       ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
       for (TableEntry entry : entries) {
-        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesETag(), cc);
+        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(),
+            entry.getPropertiesETag(), cc);
         clientEntries.add(UtilTransforms.transform(entry, displayName));
       }
       Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
         @Override
         public int compare(TableEntryClient o1, TableEntryClient o2) {
           return o1.getDisplayName().compareToIgnoreCase(o2.getDisplayName());
-        }});
+        }
+      });
 
       return clientEntries;
     } catch (ODKDatastoreException e) {
@@ -90,9 +95,11 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    TableManager tm = new TableManager(cc);
     try {
-      new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
+      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+          .getUriUser(), cc);
+      TableManager tm = new TableManager(userInfo, cc);
+      new AuthFilter(tableId, userInfo, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
       TableEntry entry = tm.getTableNullSafe(tableId);
       String displayName = DbKeyValueStore.getDisplayName(tableId, entry.getPropertiesETag(), cc);
       TableEntryClient resource = UtilTransforms.transform(entry, displayName);
@@ -111,45 +118,55 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
    * CommonfieldsBase.
    */
   @Override
-  public TableEntryClient createTable(String tableId,
-      TableDefinitionClient definition) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException,
+  public TableEntryClient createTable(String tableId, TableDefinitionClient definition)
+      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, TableAlreadyExistsExceptionClient {
     // check for null UUID, assign random if true.
     if (tableId == null) {
       tableId = CommonFieldsBase.newUri();
     }
-   HttpServletRequest req = this.getThreadLocalRequest();
+    HttpServletRequest req = this.getThreadLocalRequest();
     // trying this method to try and not get null from a servlet
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    return ServerOdkTablesUtil.createTable(tableId, definition, cc);
-    //TableManager tm = new TableManager(cc);
+
+    OdkTablesUserInfoTable userInfo;
+    try {
+      userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser().getUriUser(), cc);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    }
+
+    return ServerOdkTablesUtil.createTable(tableId, definition, userInfo, cc);
+    // TableManager tm = new TableManager(cc);
     // TODO: add access control stuff
     // Have to be careful of all the transforms going on here.
     // Make sure they actually work as expected!
     // also have to be sure that I am passing in an actual column and not a
     // column resource or something, in which case the transform() method is not
     // altering all of the requisite fields.
-// moved this to ServerOdkTablesUtil
-//    try {
-//      String tableName = definition.getTableName();
-//      List<ColumnClient> columns = definition.getColumns();
-//      List<Column> columnsServer = new ArrayList<Column>();
-//      for (ColumnClient column : columns) {
-//        columnsServer.add(UtilTransforms.transform(column));
-//      }
-//      String metadata = definition.getMetadata();
-//      TableEntry entry = tm.createTable(tableId, tableName, columnsServer, metadata);
-//      TableEntryClient entryClient = entry.transform();
-//      logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
-//      return entryClient;
-//    } catch (ODKDatastoreException e) {
-//      e.printStackTrace();
-//      throw new DatastoreFailureException(e);
-//    } catch (TableAlreadyExistsException e) {
-//      e.printStackTrace();
-//      throw new TableAlreadyExistsExceptionClient(e);
-//    }
+    // moved this to ServerOdkTablesUtil
+    // try {
+    // String tableName = definition.getTableName();
+    // List<ColumnClient> columns = definition.getColumns();
+    // List<Column> columnsServer = new ArrayList<Column>();
+    // for (ColumnClient column : columns) {
+    // columnsServer.add(UtilTransforms.transform(column));
+    // }
+    // String metadata = definition.getMetadata();
+    // TableEntry entry = tm.createTable(tableId, tableName, columnsServer,
+    // metadata);
+    // TableEntryClient entryClient = entry.transform();
+    // logger.info(String.format("tableId: %s, definition: %s", tableId,
+    // definition));
+    // return entryClient;
+    // } catch (ODKDatastoreException e) {
+    // e.printStackTrace();
+    // throw new DatastoreFailureException(e);
+    // } catch (TableAlreadyExistsException e) {
+    // e.printStackTrace();
+    // throw new TableAlreadyExistsExceptionClient(e);
+    // }
   }
 
   @Override
@@ -157,9 +174,11 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       DatastoreFailureException, PermissionDeniedExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    TableManager tm = new TableManager(cc);
     try {
-      new AuthFilter(tableId, cc).checkPermission(TablePermission.DELETE_TABLE);
+      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+          .getUriUser(), cc);
+      TableManager tm = new TableManager(userInfo, cc);
+      new AuthFilter(tableId, userInfo, cc).checkPermission(TablePermission.DELETE_TABLE);
       tm.deleteTable(tableId);
       logger.info("tableId: " + tableId);
       DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();

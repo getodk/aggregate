@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.odktables.entity.serialization;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +22,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.impl.api.FileServiceImpl;
@@ -50,8 +46,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 public class FileManifestManager {
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
   private String appId;
   private CallingContext cc;
   private Log log;
@@ -69,19 +63,14 @@ public class FileManifestManager {
    *
    * @return
    * @throws ODKDatastoreException
-   * @throws IOException
-   * @throws JsonMappingException
-   * @throws JsonGenerationException
    */
-  public String getManifestForAllAppFiles() throws ODKDatastoreException, JsonGenerationException,
-      JsonMappingException, IOException {
+  public OdkTablesFileManifest getManifestForAllAppFiles() throws ODKDatastoreException {
     // TODO: need to handle access control
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForApp(cc);
     List<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-    String jsonManifest = MAPPER.writeValueAsString(manifest);
-    return jsonManifest;
+    return manifest;
   }
 
   /**
@@ -90,19 +79,14 @@ public class FileManifestManager {
    * @param tableId
    * @return
    * @throws ODKDatastoreException
-   * @throws IOException
-   * @throws JsonMappingException
-   * @throws JsonGenerationException
    */
-  public String getManifestForTable(String tableId) throws ODKDatastoreException,
-      JsonGenerationException, JsonMappingException, IOException {
+  public OdkTablesFileManifest getManifestForTable(String tableId) throws ODKDatastoreException {
     // TODO: need to handle access control.
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(tableId, cc);
     List<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-    String jsonManifest = MAPPER.writeValueAsString(manifest);
-    return jsonManifest;
+    return manifest;
   }
 
   /**
@@ -112,20 +96,15 @@ public class FileManifestManager {
    *
    * @return
    * @throws ODKDatastoreException
-   * @throws IOException
-   * @throws JsonMappingException
-   * @throws JsonGenerationException
    */
-  public String getManifestForAppLevelFiles() throws ODKDatastoreException,
-      JsonGenerationException, JsonMappingException, IOException {
+  public OdkTablesFileManifest getManifestForAppLevelFiles() throws ODKDatastoreException {
     // TODO: need to handle access control.
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(
         FileServiceImpl.NO_TABLE_ID, cc);
     List<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-    String jsonManifest = MAPPER.writeValueAsString(manifest);
-    return jsonManifest;
+    return manifest;
   }
 
   /**

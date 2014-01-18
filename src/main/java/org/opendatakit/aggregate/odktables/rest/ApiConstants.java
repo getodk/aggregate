@@ -28,4 +28,8 @@ public final class ApiConstants {
   public static final String DATE_HEADER = "Date";
 
   public static final String UTF8_ENCODE = "UTF-8";
+
+  public static final String MEDIA_TEXT_XML_UTF8 = "text/xml;charset=UTF-8";
+
+  public static final String MEDIA_APPLICATION_XML_UTF8 = "application/xml;charset=UTF-8";
 }

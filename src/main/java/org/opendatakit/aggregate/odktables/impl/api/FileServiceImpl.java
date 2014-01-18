@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
@@ -166,6 +167,7 @@ public class FileServiceImpl implements FileService {
     // TODO This stuff all needs to be handled in the log table somehow, and
     // it currently isn't.
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
+
     // First parse the url to get the correct app and table ids.
     String appId = segments.get(0).toString();
     String tableId = getTableIdFromPathSegments(segments);
@@ -179,6 +181,8 @@ public class FileServiceImpl implements FileService {
     String wholePath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
     try {
+      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser().getUriUser(), cc);
+
       // Process the file.
       InputStream is = req.getInputStream();
       byte[] fileBlob = IOUtils.toByteArray(is);
@@ -200,7 +204,7 @@ public class FileServiceImpl implements FileService {
       //
       // 1) Create an entry in the user friendly table.
       EntityCreator ec = new EntityCreator();
-      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(tableId, wholePath, cc);
+      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(tableId, wholePath, userInfo, cc);
       String rowUri = tableFileInfoRow.getId();
 
       // 2) Put the blob in the datastore.

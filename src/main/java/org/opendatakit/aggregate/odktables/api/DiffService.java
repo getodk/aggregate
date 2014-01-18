@@ -16,23 +16,22 @@
 
 package org.opendatakit.aggregate.odktables.api;
 
-import java.util.List;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
-@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DiffService {
 
   public static final String QUERY_DATA_ETAG = "data_etag";
 
   @GET
-  public List<RowResource> getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
+  public RowResourceList getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
       throws ODKDatastoreException, PermissionDeniedException;
 }

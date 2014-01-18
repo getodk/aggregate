@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
@@ -30,14 +29,13 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.common.collect.Lists;
-
 public class AuthFilter {
 
   private CallingContext cc;
   private TableAclManager am;
+  private OdkTablesUserInfoTable userInfo;
 
-  public AuthFilter(String tableId, CallingContext cc) throws ODKEntityNotFoundException,
+  public AuthFilter(String tableId, OdkTablesUserInfoTable userInfo, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     this.cc = cc;
     this.am = new TableAclManager(tableId, cc);
@@ -55,9 +53,8 @@ public class AuthFilter {
   public void checkPermission(TablePermission permission) throws ODKDatastoreException,
       PermissionDeniedException {
     if (!hasPermission(permission)) {
-      String userUri = cc.getCurrentUser().getEmail();
       throw new PermissionDeniedException(String.format("Denied permission %s to user %s",
-          permission, userUri));
+          permission, userInfo.getOdkTablesUserId()));
     }
   }
 
@@ -71,8 +68,7 @@ public class AuthFilter {
    * @throws ODKDatastoreException
    */
   public boolean hasPermission(TablePermission permission) throws ODKDatastoreException {
-    String userUri = cc.getCurrentUser().getEmail();
-    Set<TablePermission> permissions = getPermissions(userUri);
+    Set<TablePermission> permissions = getPermissions(userInfo.getOdkTablesUserId());
     return permissions.contains(permission);
   }
 
@@ -102,22 +98,20 @@ public class AuthFilter {
     Validate.notNull(permission);
     Validate.notNull(rowId);
 
-    String userUri = cc.getCurrentUser().getEmail();
-
-    Set<TablePermission> permissions = getPermissions(userUri);
+    Set<TablePermission> permissions = getPermissions(userInfo.getOdkTablesUserId());
 
     if (!permissions.contains(permission)) {
       if (filter == null || filter.equals(Scope.EMPTY_SCOPE)) {
         // empty scope, no one allowed
-        throwPermissionDenied(rowId, userUri);
+        throwPermissionDenied(rowId, userInfo);
       }
       switch (filter.getType()) {
       case USER:
         String filterUser = filter.getValue();
-        if (userUri == null && filterUser != null) {
-          throwPermissionDenied(rowId, userUri);
-        } else if (userUri != null && !userUri.equals(filter.getValue())) {
-          throwPermissionDenied(rowId, userUri);
+        if (userInfo == null && filterUser != null) {
+          throwPermissionDenied(rowId, userInfo);
+        } else if (userInfo != null && !userInfo.getOdkTablesUserId().equals(filter.getValue())) {
+          throwPermissionDenied(rowId, userInfo);
         }
         break;
       case GROUP:
@@ -136,32 +130,12 @@ public class AuthFilter {
     }
   }
 
-  private void throwPermissionDenied(String rowId, String userUri) throws PermissionDeniedException {
+  private void throwPermissionDenied(String rowId, OdkTablesUserInfoTable userInfo) throws PermissionDeniedException {
     throw new PermissionDeniedException(String.format(
-        "Denied permission to access row %s to user %s", rowId, userUri));
+        "Denied permission to access row %s to user %s", rowId, userInfo.getOdkTablesUserId()));
   }
 
-  /**
-   * @return a list of all scopes which the current user is within
-   */
-  public static List<Scope> getScopes(CallingContext cc) {
-    String userUri = cc.getCurrentUser().getEmail();
-
-    List<Scope> scopes = Lists.newArrayList();
-    scopes.add(new Scope(Type.DEFAULT, null));
-    scopes.add(new Scope(Type.USER, userUri));
-
-    // TODO: add this
-    // List<String> groups = getGroupNames(userUri);
-    // for (String group : groups)
-    // {
-    // scopes.add(new Scope(Type.GROUP, group));
-    // }
-
-    return scopes;
-  }
-
-  private Set<TablePermission> getPermissions(String userUri) throws ODKDatastoreException {
+  private Set<TablePermission> getPermissions(String odkTablesUserId) throws ODKDatastoreException {
     Set<TablePermission> permissions = new HashSet<TablePermission>();
 
     // get default permissions
@@ -171,7 +145,7 @@ public class AuthFilter {
     }
 
     // get user's permissions
-    TableAcl user = am.getAcl(new Scope(Type.USER, userUri));
+    TableAcl user = am.getAcl(new Scope(Type.USER, odkTablesUserId));
     if (user != null) {
       permissions.addAll(user.getRole().getPermissions());
     }

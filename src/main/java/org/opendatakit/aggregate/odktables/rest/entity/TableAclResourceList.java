@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 University of Washington
+ * Copyright (C) 2014 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,9 +22,8 @@ import java.util.List;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
-
 /**
- * This holds a list of {@link OdkTablesFileManifestEntry}.
+ * This holds a list of {@link TableAclResource}.
  * Proper XML documents can contain only one root node.
  * This wrapping class provides that root node.
  *
@@ -32,19 +31,19 @@ import org.simpleframework.xml.Root;
  *
  */
 @Root
-public class OdkTablesFileManifest {
+public class TableAclResourceList {
 
   /**
    * The entries in the manifest.
    */
   @ElementList(inline = true)
-  private List<OdkTablesFileManifestEntry> entries;
+  private List<TableAclResource> entries;
 
   /**
    * Constructor used by Jackson
    */
-  public OdkTablesFileManifest() {
-    this.entries = new ArrayList<OdkTablesFileManifestEntry>();
+  public TableAclResourceList() {
+    this.entries = new ArrayList<TableAclResource>();
   }
 
   /**
@@ -52,15 +51,15 @@ public class OdkTablesFileManifest {
    *
    * @param entries
    */
-  public OdkTablesFileManifest(List<OdkTablesFileManifestEntry> entries) {
+  public TableAclResourceList(List<TableAclResource> entries) {
     this.entries = entries;
   }
 
-  public List<OdkTablesFileManifestEntry> getEntries() {
+  public List<TableAclResource> getEntries() {
     return entries;
   }
 
-  public void setEntries(List<OdkTablesFileManifestEntry> entries) {
+  public void setEntries(List<TableAclResource> entries) {
     this.entries = entries;
   }
 
@@ -74,20 +73,18 @@ public class OdkTablesFileManifest {
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
-    if (!(obj instanceof OdkTablesFileManifest)) {
+    if (!(obj instanceof TableAclResourceList)) {
       return false;
     }
-    OdkTablesFileManifest other = (OdkTablesFileManifest) obj;
-    return (entries == null ? other.entries == null :
-      ( entries.size() == other.entries.size() &&
-        entries.containsAll(other.entries) &&
-        other.entries.containsAll(entries)));
+    TableAclResourceList other = (TableAclResourceList) obj;
+    return (entries == null ? other.entries == null : (entries.size() == other.entries.size()
+        && entries.containsAll(other.entries) && other.entries.containsAll(entries)));
   }
 
 }
