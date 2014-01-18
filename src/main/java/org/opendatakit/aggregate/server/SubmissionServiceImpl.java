@@ -61,7 +61,8 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public SubmissionUISummary getSubmissions(FilterGroup filterGroup)
-      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException, AccessDeniedException {
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException,
+      AccessDeniedException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -69,9 +70,11 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       String formId = filterGroup.getFormId();
       IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
-        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed
+                                                                                // definition
       }
-      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
+      QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup,
+          CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
 
       SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
@@ -97,14 +100,12 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
   }
 
-
-
   @Override
   public SubmissionUISummary getRepeatSubmissions(String keyString)
-      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException, AccessDeniedException {
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException,
+      AccessDeniedException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-
 
     if (keyString == null) {
       return null;
@@ -115,7 +116,8 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       List<SubmissionKeyPart> parts = key.splitSubmissionKey();
       IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       if (!form.hasValidFormDefinition()) {
-        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
+        throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed
+                                                                                // definition
       }
       Submission sub = Submission.fetchSubmission(parts, cc);
 
