@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -27,13 +28,18 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * This table holds the ODK Tables-specific settings for a user.
@@ -188,9 +194,13 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase {
       User user = cc.getCurrentUser();
       if (user.getUriUser().equals(uriUser)) {
         // we can add this user silently if they have permissions...
-        Set<GrantedAuthority> auths = user.getGroups();
-        if (auths.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name()))
-            || auths.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name())) ) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication auth = context.getAuthentication();
+        Collection<? extends GrantedAuthority> grants = auth.getAuthorities();
+        RoleHierarchy rh = (RoleHierarchy) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
+        Collection<? extends GrantedAuthority> roles = rh.getReachableGrantedAuthorities(grants);
+        if (roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name()))
+            || roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name())) ) {
           // create a record
           OdkTablesUserInfoTable odkTablesUserInfo = ds.createEntityUsingRelation(prototype,
               cc.getCurrentUser());

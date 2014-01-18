@@ -65,12 +65,15 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
+      ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
       OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
           .getUriUser(), cc);
+      if ( userInfo == null ) {
+        return clientEntries;
+      }
       TableManager tm = new TableManager(userInfo, cc);
       List<Scope> scopes = tm.getScopes(cc);
       List<TableEntry> entries = tm.getTables(scopes);
-      ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
       for (TableEntry entry : entries) {
         String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(),
             entry.getPropertiesETag(), cc);
