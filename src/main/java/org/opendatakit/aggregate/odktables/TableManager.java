@@ -43,6 +43,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -50,6 +51,8 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
+
+import com.google.common.collect.Lists;
 
 /**
  * Manages creating, deleting, and getting tables.
@@ -62,11 +65,31 @@ public class TableManager {
   private CallingContext cc;
   private EntityConverter converter;
   private EntityCreator creator;
+  private OdkTablesUserInfoTable userInfo;
 
-  public TableManager(CallingContext cc) {
+  public TableManager(OdkTablesUserInfoTable userInfo, CallingContext cc) throws ODKDatastoreException {
     this.cc = cc;
+    this.userInfo = userInfo;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
+  }
+
+  /**
+   * @return a list of all scopes which the current user is within
+   */
+  public List<Scope> getScopes(CallingContext cc) {
+    List<Scope> scopes = Lists.newArrayList();
+    scopes.add(new Scope(Type.DEFAULT, null));
+    scopes.add(new Scope(Type.USER, userInfo.getOdkTablesUserId()));
+
+    // TODO: add this
+    // List<String> groups = getGroupNames(userUri);
+    // for (String group : groups)
+    // {
+    // scopes.add(new Scope(Type.GROUP, group));
+    // }
+
+    return scopes;
   }
 
   /**
@@ -301,8 +324,8 @@ public class TableManager {
       e.put(cc);
     }
     // write the initial ACL
-    DbTableAclEntity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER, cc
-        .getCurrentUser().getEmail()), TableRole.OWNER, cc);
+    DbTableAclEntity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER,
+        userInfo.getOdkTablesUserId()), TableRole.OWNER, cc);
     ownerAcl.put(cc);
 
     // Do NOT write the entry yet -- we need to have a valid displayName

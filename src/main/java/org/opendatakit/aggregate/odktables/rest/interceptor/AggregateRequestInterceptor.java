@@ -17,8 +17,10 @@ package org.opendatakit.aggregate.odktables.rest.interceptor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -27,10 +29,16 @@ public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor
 
   private URI uriBase;
   private String accessToken;
+  private List<MediaType> mediaTypes;
 
   public AggregateRequestInterceptor(URI uriBase, String accessToken) {
+    this(uriBase, accessToken, null);
+  }
+
+  public AggregateRequestInterceptor(URI uriBase, String accessToken, List<MediaType> mediaTypes) {
     this.uriBase = uriBase;
     this.accessToken = accessToken;
+    this.mediaTypes = mediaTypes;
   }
 
   @Override
@@ -41,6 +49,9 @@ public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor
           && request.getURI().getPort() == uriBase.getPort()) {
         request.getHeaders().set("Authorization", "Bearer " + accessToken);
       }
+    }
+    if (mediaTypes != null && mediaTypes.size() != 0) {
+      request.getHeaders().setAccept(mediaTypes);
     }
     return execution.execute(request, body);
   }

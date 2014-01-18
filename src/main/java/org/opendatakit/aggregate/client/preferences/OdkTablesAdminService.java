@@ -16,8 +16,11 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
+import java.util.ArrayList;
+
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -29,8 +32,8 @@ public interface OdkTablesAdminService extends RemoteService {
 
   Boolean deleteAdmin(String aggregateUid) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  Boolean addAdmin(OdkTablesAdmin admin) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-
   Boolean updateAdmin(OdkTablesAdmin admin) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+
+  Boolean setAdmins(ArrayList<UserSecurityInfo> admins) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }
 

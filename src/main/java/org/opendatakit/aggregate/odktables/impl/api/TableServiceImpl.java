@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.AuthFilter;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
@@ -47,6 +48,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
@@ -58,20 +60,22 @@ public class TableServiceImpl implements TableService {
   private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
 
   private CallingContext cc;
+  private OdkTablesUserInfoTable userInfo;
   private TableManager tm;
   private UriInfo info;
 
   public TableServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
-      @Context UriInfo info) {
+      @Context UriInfo info) throws ODKDatastoreException {
     ServiceUtils.examineRequest(sc, req);
     this.cc = ContextFactory.getCallingContext(sc, req);
-    this.tm = new TableManager(cc);
+    this.userInfo = OdkTablesUserInfoTable.getUserData(this.cc.getCurrentUser().getUriUser(), cc);
+    this.tm = new TableManager(userInfo, cc);
     this.info = info;
   }
 
   @Override
-  public List<TableResource> getTables() throws ODKDatastoreException {
-    List<Scope> scopes = AuthFilter.getScopes(cc);
+  public TableResourceList getTables() throws ODKDatastoreException {
+    List<Scope> scopes = tm.getScopes(cc);
     List<TableEntry> entries = tm.getTables(scopes);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
@@ -83,7 +87,7 @@ public class TableServiceImpl implements TableService {
       }
       resources.add(resource);
     }
-    return resources;
+    return new TableResourceList(resources);
   }
 
   @Override
@@ -136,7 +140,7 @@ public class TableServiceImpl implements TableService {
   @Override
   public void deleteTable(String tableId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
-    new AuthFilter(tableId, cc).checkPermission(TablePermission.DELETE_TABLE);
+    new AuthFilter(tableId, userInfo, cc).checkPermission(TablePermission.DELETE_TABLE);
     tm.deleteTable(tableId);
     logger.info("tableId: " + tableId);
     DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
@@ -145,22 +149,22 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public DataService getData(String tableId) throws ODKDatastoreException {
-    return new DataServiceImpl(tableId, info, cc);
+    return new DataServiceImpl(tableId, info, userInfo, cc);
   }
 
   @Override
   public PropertiesService getProperties(String tableId) throws ODKDatastoreException {
-    return new PropertiesServiceImpl(tableId, info, cc);
+    return new PropertiesServiceImpl(tableId, info, userInfo, cc);
   }
 
   @Override
   public DiffService getDiff(String tableId) throws ODKDatastoreException {
-    return new DiffServiceImpl(tableId, info, cc);
+    return new DiffServiceImpl(tableId, info, userInfo, cc);
   }
 
   @Override
   public TableAclService getAcl(String tableId) throws ODKDatastoreException {
-    return new TableAclServiceImpl(tableId, info, cc);
+    return new TableAclServiceImpl(tableId, info, userInfo, cc);
   }
 
   @Override

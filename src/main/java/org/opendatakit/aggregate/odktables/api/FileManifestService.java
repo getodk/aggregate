@@ -27,6 +27,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
+
 /**
  * Servlet for downloading a manifest of files to the phone for the correct app
  * and the correct table.
@@ -35,7 +38,7 @@ import javax.ws.rs.core.MediaType;
  *
  */
 @Path("filemanifest")
-@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface FileManifestService {
 
   /** URL parameter specifying the app. Always required. */
@@ -52,7 +55,7 @@ public interface FileManifestService {
   public static final String PARAM_APP_LEVEL_FILES = "app_level_files";
 
   @GET
-  public String getFileManifest(@Context ServletContext servletContext,
+  public OdkTablesFileManifest getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
       @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
       @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) throws IOException;

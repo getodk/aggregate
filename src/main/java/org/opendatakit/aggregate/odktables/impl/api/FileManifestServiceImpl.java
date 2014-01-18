@@ -21,7 +21,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -30,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.api.FileManifestService;
 import org.opendatakit.aggregate.odktables.entity.serialization.FileManifestManager;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -43,8 +43,7 @@ public class FileManifestServiceImpl implements FileManifestService {
 
   @Override
   @GET
-  @Produces("application/json")
-  public String getFileManifest(@Context ServletContext servletContext,
+  public OdkTablesFileManifest getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
       @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
       @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) throws IOException {
@@ -55,10 +54,10 @@ public class FileManifestServiceImpl implements FileManifestService {
     if (appId == null || "".equals(appId)) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
           "Invalid request. App id must be present and valid.");
-      return "";
+      return null;
     }
     FileManifestManager manifestManager = new FileManifestManager(appId, cc);
-    String manifest = null;
+    OdkTablesFileManifest manifest = null;
     try {
       // Now we need to decide what level on this app we're going to use. We
       // can do table-level, all files, or app-level. The app-level param

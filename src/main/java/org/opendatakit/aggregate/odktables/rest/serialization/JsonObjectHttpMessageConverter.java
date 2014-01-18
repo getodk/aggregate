@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -71,8 +70,7 @@ public class JsonObjectHttpMessageConverter extends AbstractHttpMessageConverter
     SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
     formatter.setCalendar(g);
     headers.add(ApiConstants.DATE_HEADER, formatter.format(new Date()));
-    headers.setContentType(new MediaType("application", "json", Charset
-        .forName(ApiConstants.UTF8_ENCODE)));
+    headers.setContentType(new MediaType("application", "json")); // assumes UTF-8
 
     Writer writer = new OutputStreamWriter(outputMessage.getBody(), ApiConstants.UTF8_ENCODE);
     gson.toJson(object, writer);

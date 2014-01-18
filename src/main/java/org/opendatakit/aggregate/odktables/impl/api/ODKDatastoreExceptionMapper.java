@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -32,24 +34,31 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 @Provider
 public class ODKDatastoreExceptionMapper implements ExceptionMapper<ODKDatastoreException> {
 
+  @Context
+  private HttpHeaders headers;
+
   @Override
   public Response toResponse(ODKDatastoreException e) {
+    MediaType type;
+    type = (headers.getAcceptableMediaTypes().size() != 0) ?
+        headers.getAcceptableMediaTypes().get(0) : MediaType.APPLICATION_JSON_TYPE;
+
     if (e instanceof ODKEntityNotFoundException) {
       return Response.status(Status.NOT_FOUND)
           .entity(new Error(ErrorType.RESOURCE_NOT_FOUND, e.getMessage()))
-          .type(MediaType.APPLICATION_JSON).build();
+          .type(type).build();
     } else if (e instanceof ODKEntityPersistException) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(new Error(ErrorType.INTERNAL_ERROR, "Could not save: " + e.getMessage()))
-          .type(MediaType.APPLICATION_JSON).build();
+          .type(type).build();
     } else if (e instanceof ODKOverQuotaException) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(new Error(ErrorType.INTERNAL_ERROR, "Over quota: " + e.getMessage()))
-          .type(MediaType.APPLICATION_JSON).build();
+          .type(type).build();
     } else {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(new Error(ErrorType.INTERNAL_ERROR, e.getMessage()))
-          .type(MediaType.APPLICATION_JSON).build();
+          .type(type).build();
     }
   }
 

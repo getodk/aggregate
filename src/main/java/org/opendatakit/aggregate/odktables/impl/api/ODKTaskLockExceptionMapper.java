@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -29,13 +31,20 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 @Provider
 public class ODKTaskLockExceptionMapper implements ExceptionMapper<ODKTaskLockException> {
 
+  @Context
+  private HttpHeaders headers;
+
   @Override
   public Response toResponse(ODKTaskLockException e) {
+    MediaType type;
+    type = (headers.getAcceptableMediaTypes().size() != 0) ?
+        headers.getAcceptableMediaTypes().get(0) : MediaType.APPLICATION_JSON_TYPE;
+
     return Response
         .status(Status.INTERNAL_SERVER_ERROR)
         .entity(
             new Error(ErrorType.LOCK_TIMEOUT, "Please try again later. "
                 + "Timed out waiting for lock: " + e.getMessage()))
-        .type(MediaType.APPLICATION_JSON).build();
+        .type(type).build();
   }
 }

@@ -28,6 +28,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
@@ -62,14 +63,17 @@ public class OdkTablesKeyValueManifestManager {
 
   private CallingContext cc;
 
+  private OdkTablesUserInfoTable userInfo;
+
   private String manifest = null;
 
   /**
    * Get the manifest ready for a specific table.
    */
-  public OdkTablesKeyValueManifestManager(String tableId, CallingContext cc) {
+  public OdkTablesKeyValueManifestManager(String tableId, OdkTablesUserInfoTable userInfo, CallingContext cc) {
     this.tableId = tableId;
     this.cc = cc;
+    this.userInfo = userInfo;
     mapper = new ObjectMapper();
   }
 
@@ -117,7 +121,7 @@ public class OdkTablesKeyValueManifestManager {
     try {
       List<Row> infoRows = EntityConverter.toRowsFromFileInfo(DbTableFileInfo.queryForTableId(
           tableId, cc));
-      TableManager tm = new TableManager(cc);
+      TableManager tm = new TableManager(userInfo, cc);
       TableEntry table = tm.getTable(tableId);
       DbTableFiles blobSetRelation = new DbTableFiles(cc);
       List<OdkTablesKeyValueStoreEntry> entries = new ArrayList<OdkTablesKeyValueStoreEntry>();

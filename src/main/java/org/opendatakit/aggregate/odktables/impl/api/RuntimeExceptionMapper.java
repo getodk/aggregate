@@ -16,6 +16,9 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -27,14 +30,21 @@ import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 @Provider
 public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
 
+  @Context
+  private HttpHeaders headers;
+
   @Override
   public Response toResponse(RuntimeException e) {
+    MediaType type;
+    type = (headers.getAcceptableMediaTypes().size() != 0) ?
+        headers.getAcceptableMediaTypes().get(0) : MediaType.APPLICATION_JSON_TYPE;
+
     if (e instanceof IllegalArgumentException) {
       return Response.status(Status.BAD_REQUEST)
-          .entity(new Error(ErrorType.BAD_REQUEST, "Bad arguments: " + e.getMessage())).build();
+          .entity(new Error(ErrorType.BAD_REQUEST, "Bad arguments: " + e.getMessage())).type(type).build();
     } else {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, e.getMessage())).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, e.getMessage())).type(type).build();
     }
   }
 

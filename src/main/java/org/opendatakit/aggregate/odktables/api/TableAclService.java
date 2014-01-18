@@ -16,8 +16,6 @@
 
 package org.opendatakit.aggregate.odktables.api;
 
-import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -28,24 +26,26 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableAclResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
-@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface TableAclService {
 
   @GET
-  public List<TableAclResource> getAcls() throws ODKDatastoreException, PermissionDeniedException;
+  public TableAclResourceList getAcls() throws ODKDatastoreException, PermissionDeniedException;
 
   @GET
   @Path("user")
-  public List<TableAclResource> getUserAcls() throws ODKDatastoreException,
+  public TableAclResourceList getUserAcls() throws ODKDatastoreException,
       PermissionDeniedException;
 
   @GET
   @Path("group")
-  public List<TableAclResource> getGroupAcls() throws ODKDatastoreException,
+  public TableAclResourceList getGroupAcls() throws ODKDatastoreException,
       PermissionDeniedException;
 
   @GET
@@ -64,19 +64,19 @@ public interface TableAclService {
 
   @PUT
   @Path("default")
-  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public TableAclResource setDefaultAcl(TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException;
 
   @PUT
   @Path("user/{userId}")
-  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public TableAclResource setUserAcl(@PathParam("userId") String userId, TableAcl acl)
       throws ODKDatastoreException, PermissionDeniedException;
 
   @PUT
   @Path("group/{groupId}")
-  @Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public TableAclResource setGroupAcl(@PathParam("groupId") String groupId, TableAcl acl)
       throws ODKDatastoreException, PermissionDeniedException;
 

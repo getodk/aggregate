@@ -26,9 +26,11 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
 import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -55,7 +57,6 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     ServiceUtils.examineRequest(getServletContext(), req);
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-
     // reclaim the parameters, which in this case is just the
     // tableId
     String tableId = getParameter(req, ServletConsts.TABLE_ID);
@@ -63,8 +64,16 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
       errorMissingKeyParam(resp);
       return;
     }
+    OdkTablesUserInfoTable userInfo;
+    try {
+      userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser().getUriUser(), cc);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      datastoreError(resp);
+      return;
+    }
 
-    OdkTablesKeyValueManifestManager mm = new OdkTablesKeyValueManifestManager(tableId, cc);
+    OdkTablesKeyValueManifestManager mm = new OdkTablesKeyValueManifestManager(tableId, userInfo, cc);
 
     String manifest;
     try {

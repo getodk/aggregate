@@ -46,19 +46,25 @@ public class AuthFilterTest {
   private TableAclManager am;
   private AuthFilter af;
   private Scope currentUserScope;
+  private OdkTablesUserInfoTable userInfo;
 
   @Before
   public void setUp() throws Exception {
     this.cc = TestContextFactory.getCallingContext();
     this.tableId = T.tableId;
-    this.tm = new TableManager(cc);
+
+    userInfo = cc.getDatastore().createEntityUsingRelation(OdkTablesUserInfoTable.assertRelation(cc), cc.getCurrentUser());
+    userInfo.setOdkTablesUserId("myId");
+    userInfo.setUriUser(cc.getCurrentUser().getUriUser());
+
+    this.tm = new TableManager(userInfo, cc);
 
     tm.createTable(tableId,
         T.columns, T.kvsEntries);
 
     this.am = new TableAclManager(tableId, cc);
-    this.af = new AuthFilter(tableId, cc);
-    this.currentUserScope = new Scope(Type.USER, cc.getCurrentUser().getEmail());
+    this.af = new AuthFilter(tableId, userInfo, cc);
+    this.currentUserScope = new Scope(Type.USER, userInfo.getOdkTablesUserId());
   }
 
   @After
@@ -146,7 +152,7 @@ public class AuthFilterTest {
 
   @Test
   public void testGetScopes() {
-    List<Scope> scopes = AuthFilter.getScopes(cc);
+    List<Scope> scopes = tm.getScopes(cc);
     assertTrue(scopes.contains(new Scope(Type.DEFAULT, null)));
     assertTrue(scopes.contains(currentUserScope));
     // TODO: assert group scopes
