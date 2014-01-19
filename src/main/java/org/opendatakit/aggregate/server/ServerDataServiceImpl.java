@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
-import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
@@ -32,9 +32,7 @@ import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ServerDataService;
 import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
-import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -42,7 +40,8 @@ import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -73,21 +72,10 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      DataManager dm = new DataManager(tableId, userInfo, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      // TODO: auth stuff
-      // af.checkPermission(TablePermission.READ_ROW);
-      List<Row> rows;
-      rows = dm.getRows();
-      // if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
-      // rows = dm.getRows();
-      // } else {
-      // List<Scope> scopes = AuthFilter.getScopes(cc);
-      // rows = dm.getRows(scopes);
-      // // rows = dm.getRows();
-      // }
+      DataManager dm = new DataManager(tableId, userPermissions, cc);
+      List<Row> rows = dm.getRows();
       return transformRows(rows);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -95,12 +83,10 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
     }
-    // TODO: auth stuff.
-    // } catch (PermissionDeniedException e) {
-    // e.printStackTrace();
-    // throw new PermissionDeniedExceptionClient(e);
-    // }
   }
 
   @Override
@@ -110,13 +96,10 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     try {
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      DataManager dm = new DataManager(tableId, userInfo, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.READ_ROW);
+      DataManager dm = new DataManager(tableId, userPermissions, cc);
       Row row = dm.getRowNullSafe(rowId);
-      af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
 
       TableContentsClient tcc = new TableContentsClient();
       tcc.columnNames = this.getColumnNames(tableId);
@@ -143,50 +126,19 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
-    OdkTablesUserInfoTable userInfo;
+    TablesUserPermissions userPermissions;
     try {
-      userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser().getUriUser(), cc);
+      userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
+          .getUriUser(), cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
     }
 
-    return ServerOdkTablesUtil.createOrUpdateRow(tableId, rowId, row, userInfo, cc);
-    // moved the below to ServerOdkTablesUtil
-    // try {
-    // // first transform row into a server-side row
-    // Row serverRow = UtilTransforms.transform(row);
-    // DataManager dm = new DataManager(tableId, cc);
-    // AuthFilter af = new AuthFilter(tableId, cc);
-    // af.checkPermission(TablePermission.WRITE_ROW);
-    // row.setRowId(rowId);
-    // Row dbRow = dm.getRow(rowId);
-    // if (dbRow == null) {
-    // serverRow = dm.insertRow(serverRow);
-    // } else {
-    // af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
-    // serverRow = dm.updateRow(serverRow);
-    // }
-    // return serverRow.transform();
-    // } catch (ODKEntityNotFoundException e) {
-    // e.printStackTrace();
-    // throw new EntityNotFoundExceptionClient(e);
-    // } catch (ODKDatastoreException e) {
-    // e.printStackTrace();
-    // throw new DatastoreFailureException(e);
-    // } catch (ODKTaskLockException e) {
-    // e.printStackTrace();
-    // throw new DatastoreFailureException(e);
-    // } catch (PermissionDeniedException e) {
-    // e.printStackTrace();
-    // throw new PermissionDeniedExceptionClient(e);
-    // } catch (BadColumnNameException e) {
-    // e.printStackTrace();
-    // throw new BadColumnNameExceptionClient(e);
-    // } catch (ETagMismatchException e) {
-    // e.printStackTrace();
-    // throw new ETagMismatchExceptionClient(e);
-    // }
+    return ServerOdkTablesUtil.createOrUpdateRow(tableId, rowId, row, userPermissions, cc);
   }
 
   @Override
@@ -196,14 +148,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      DataManager dm = new DataManager(tableId, userInfo, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-
-      af.checkPermission(TablePermission.DELETE_ROW);
-      Row row = dm.getRowNullSafe(rowId);
-      af.checkFilter(TablePermission.UNFILTERED_DELETE, row.getRowId(), row.getFilterScope());
+      DataManager dm = new DataManager(tableId, userPermissions, cc);
       dm.deleteRow(rowId);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -225,17 +172,18 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    * Gets the element_names of the columns.
    *
    * @return List<String> of the column names
+   * @throws PermissionDeniedExceptionClient
    */
   @Override
   public List<String> getColumnNames(String tableId) throws DatastoreFailureException,
-      EntityNotFoundExceptionClient {
+      EntityNotFoundExceptionClient, PermissionDeniedExceptionClient {
 
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableManager tm = new TableManager(userInfo, cc);
+      TableManager tm = new TableManager(userPermissions, cc);
       TableEntry entry = tm.getTable(tableId);
       List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId,
           entry.getSchemaETag(), cc);
@@ -246,6 +194,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
     }
   }
 
@@ -474,9 +425,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableManager tm = new TableManager(userInfo, cc);
+      TableManager tm = new TableManager(userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
       if (table == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
@@ -532,6 +483,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
     }
   }
 

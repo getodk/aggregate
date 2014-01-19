@@ -24,8 +24,6 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.odktables.AuthFilter;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
@@ -39,10 +37,10 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileI
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -67,8 +65,6 @@ public class EntityCreator {
   public static final Log log = LogFactory.getLog(EntityCreator.class);
 
   public static final int INITIAL_MODIFICATION_NUMBER = 1;
-
-  private static final EntityConverter converter = new EntityConverter();
 
   /**
    * Create a new {@link DbTableEntry} entity.
@@ -139,11 +135,11 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public DbTableFileInfoEntity newTableFileInfoEntity(String tableId, String pathToFile,
-      OdkTablesUserInfoTable userInfo,
+      TablesUserPermissionsImpl userPermissions,
       CallingContext cc) throws ODKDatastoreException {
     // first do some preliminary checks
     Validate.notEmpty(pathToFile);
-
+    // TODO: check permissions to create a file...
     DbTableFileInfoEntity entity = DbTableFileInfo.createNewEntity(cc);
     entity.setTableId(tableId);
     entity.setPathToFile(pathToFile);
@@ -151,9 +147,9 @@ public class EntityCreator {
     // now set the universal fields
     // TODO: do the appropriate time stamping and include data for the other
     // fields.
-    entity.setStringField(DbTable.CREATE_USER, userInfo.getOdkTablesUserId());
+    entity.setStringField(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
     // TODO last update same as create? correct?
-    entity.setStringField(DbTable.LAST_UPDATE_USER, userInfo.getOdkTablesUserId());
+    entity.setStringField(DbTable.LAST_UPDATE_USER, userPermissions.getOdkTablesUserId());
     // TODO: should DATA_ETAG_AT_MODIFICATION also be from the TableEntry
     // record? Or tracked?
     entity.setStringField(DbTable.DATA_ETAG_AT_MODIFICATION, CommonFieldsBase.newUri());
@@ -274,43 +270,23 @@ public class EntityCreator {
     return tableAcl;
   }
 
-  public Entity insertOrUpdateRowEntity(AuthFilter af, DbTable table, String rowId,
+  public Entity insertOrUpdateRowEntity(DbTable table, Entity row, boolean found, String rowId,
       String dataETag, String currentETag, Scope filter, String uriAccessControl, String formId,
       String locale, Long savepointTimestamp, Map<String, String> values,
-      List<DbColumnDefinitionsEntity> columns, OdkTablesUserInfoTable userInfo, CallingContext cc)
+      List<DbColumnDefinitionsEntity> columns, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ETagMismatchException,
       BadColumnNameException, PermissionDeniedException {
     Validate.notNull(table);
     Validate.notEmpty(dataETag);
-    if (rowId == null) {
-      rowId = CommonFieldsBase.newUri();
-    }
     Validate.notEmpty(rowId);
-    if (filter == null) {
-      filter = Scope.EMPTY_SCOPE;
-    }
     // if currentETag is null we will catch it later
     Validate.noNullElements(values.keySet());
     // filter may be null
     Validate.noNullElements(columns);
     Validate.notNull(cc);
 
-    boolean found = false;
-    Entity row = null;
-    try {
-      row = table.getEntity(rowId, cc);
-      Scope filterScope = converter.getFilterScope(row);
-      // TODO: might need to pass in additional fields
-      af.checkFilter(TablePermission.UNFILTERED_WRITE, rowId, filterScope);
-      found = true;
-    } catch (ODKEntityNotFoundException e) {
-      af.checkPermission(TablePermission.WRITE_ROW);
-      // initialization for insert...
-      row = table.newEntity(rowId, cc);
-    }
-
     if (!found) {
-      row.set(DbTable.CREATE_USER, userInfo.getOdkTablesUserId());
+      row.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
     } else {
       String rowETag = row.getString(DbTable.ROW_ETAG);
       if (currentETag == null || !currentETag.equals(rowETag)) {
@@ -320,36 +296,18 @@ public class EntityCreator {
       }
     }
 
-    setRowFields(row, dataETag, userInfo, filter, false, uriAccessControl, formId, locale,
+    setRowFields(row, dataETag, userPermissions, filter, false, uriAccessControl, formId, locale,
         savepointTimestamp, values, columns);
     return row;
   }
 
-  public List<Entity> insertOrUpdateRowEntities(AuthFilter af, DbTable table, String dataETag,
-      List<Row> rows, List<DbColumnDefinitionsEntity> columns, OdkTablesUserInfoTable userInfo, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException, ETagMismatchException,
-      BadColumnNameException, PermissionDeniedException {
-    Validate.notNull(table);
-    Validate.notEmpty(dataETag);
-    Validate.noNullElements(rows);
-    Validate.noNullElements(columns);
-    Validate.notNull(cc);
-    List<Entity> entities = new ArrayList<Entity>();
-    for (Row row : rows) {
-      entities.add(insertOrUpdateRowEntity(af, table, row.getRowId(), dataETag, row.getRowETag(),
-          row.getFilterScope(), row.getUriAccessControl(), row.getFormId(), row.getLocale(),
-          row.getSavepointTimestamp(), row.getValues(), columns, userInfo, cc));
-    }
-    return entities;
-  }
-
-  private void setRowFields(Entity row, String dataETag, OdkTablesUserInfoTable lastUpdatedUser, Scope filterScope,
+  private void setRowFields(Entity row, String dataETag, TablesUserPermissions userPermissions, Scope filterScope,
       boolean deleted, String uriAccessControl, String formId, String locale,
       Long savepointTimestamp, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETag);
-    row.set(DbTable.LAST_UPDATE_USER, lastUpdatedUser.getOdkTablesUserId());
+    row.set(DbTable.LAST_UPDATE_USER, userPermissions.getOdkTablesUserId());
 
     // if filterScope is null, don't change the value
     // if filterScope is the empty scope, set both filter type and value to null

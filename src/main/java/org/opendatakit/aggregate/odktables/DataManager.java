@@ -37,6 +37,8 @@ import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -56,7 +58,7 @@ import org.opendatakit.common.web.CallingContext;
 
 public class DataManager {
   private CallingContext cc;
-  private OdkTablesUserInfoTable userInfo;
+  private TablesUserPermissions userPermissions;
   private EntityConverter converter;
   private EntityCreator creator;
   private String tableId;
@@ -70,6 +72,8 @@ public class DataManager {
    *
    * @param tableId
    *          the unique identifier of the table
+   * @param userPermissions
+   *          the requesting user's permissions
    * @param cc
    *          the calling context
    * @throws ODKEntityNotFoundException
@@ -77,12 +81,12 @@ public class DataManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public DataManager(String tableId, OdkTablesUserInfoTable userInfo, CallingContext cc) throws ODKEntityNotFoundException,
+  public DataManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
     this.cc = cc;
-    this.userInfo = userInfo;
+    this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
     this.tableId = tableId;
@@ -102,44 +106,22 @@ public class DataManager {
    *
    * @return all the rows of the table.
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public List<Row> getRows() throws ODKDatastoreException {
+  public List<Row> getRows() throws ODKDatastoreException, PermissionDeniedException {
+    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
     Query query = buildRowsQuery();
-    List<Entity> rows = query.execute();
-    return converter.toRows(rows, columns, false);
-  }
-
-  /**
-   * Retrieve all current rows of the table, filtered by the given scope.
-   *
-   * @param scope
-   *          the scope to filter by
-   * @return all the rows of the table, filtered by the given scope
-   * @throws ODKDatastoreException
-   */
-  public List<Row> getRows(Scope scope) throws ODKDatastoreException {
-    Query query = buildRowsQuery();
-    query.equal(DbTable.FILTER_TYPE, scope.getType().name());
-    query.equal(DbTable.FILTER_VALUE, scope.getValue());
-    List<Entity> rows = query.execute();
-    return converter.toRows(rows, columns, false);
-  }
-
-  /**
-   * Retrieve all current rows of the table, filtered by rows that match any of
-   * the given scopes.
-   *
-   * @param scopes
-   *          the scopes to filter by
-   * @return all the rows of the table, filtered by the given scopes
-   * @throws ODKDatastoreException
-   */
-  public List<Row> getRows(List<Scope> scopes) throws ODKDatastoreException {
-    List<Row> rows = new ArrayList<Row>();
-    for (Scope scope : scopes) {
-      rows.addAll(getRows(scope));
+    List<Entity> entities = query.execute();
+    ArrayList<Row> rows = new ArrayList<Row>();
+    for (Entity entity : entities) {
+      Row row = converter.toRow(entity, columns);
+      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+        rows.add(row);
+      } else if ( userPermissions.hasFilterScope(tableId, row.getFilterScope())) {
+        rows.add(row);
+      }
     }
-    return computeDiff(rows);
+    return rows;
   }
 
   /**
@@ -175,6 +157,9 @@ public class DataManager {
     } else {
       query = buildRowsSinceQuery(sequenceValue);
     }
+    // We need to do an OR sub-expression to select all scopes that the
+    // user has access to.
+    // query = narrowByScopes(query);
     List<Entity> results = query.execute();
     List<Row> logRows = converter.toRows(results, columns, true);
     return computeDiff(logRows);
@@ -333,8 +318,9 @@ public class DataManager {
    *          the id of the row
    * @return the row, or null if no such row exists
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public Row getRow(String rowId) throws ODKDatastoreException {
+  public Row getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notEmpty(rowId);
     try {
       return getRowNullSafe(rowId);
@@ -352,11 +338,20 @@ public class DataManager {
    * @throws ODKEntityNotFoundException
    *           if the row with the given id does not exist
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public Row getRowNullSafe(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException {
+  public Row getRowNullSafe(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException {
     Validate.notEmpty(rowId);
-    Entity row = table.getEntity(rowId, cc);
-    return converter.toRow(row, columns);
+    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
+    Entity entity = table.getEntity(rowId, cc);
+    Row row = converter.toRow(entity, columns);
+    if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+      return row;
+    } else if ( userPermissions.hasFilterScope(tableId, row.getFilterScope())) {
+      return row;
+    }
+    throw new PermissionDeniedException(String.format("Denied table %s row %s access to user %s",
+        tableId, rowId, userPermissions.getOdkTablesUserId()));
   }
 
   /**
@@ -389,13 +384,20 @@ public class DataManager {
    * @throws PermissionDeniedException
    *
    */
-  public List<Row> insertOrUpdateRows(AuthFilter af, List<Row> rows)
+  public List<Row> insertOrUpdateRows(List<Row> rows)
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException, ETagMismatchException, BadColumnNameException,
       PermissionDeniedException {
     Validate.noNullElements(rows);
 
     List<Entity> rowEntities;
+    // TODO: double check that we don't duplicate inserts of a row
+    // just because the user no longer has access to it. Also should
+    // remove row on device during sync.
+
+    userPermissions.checkPermission(tableId, TablePermission.WRITE_ROW);
+    // TODO: verify that user has permission to update the specific row (via Scope)
+    userPermissions.checkPermission(tableId, TablePermission.UNFILTERED_WRITE);
 
     // lock table
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
@@ -412,7 +414,36 @@ public class DataManager {
       entry.setDataETag(dataETag);
 
       // create or update entities
-      rowEntities = creator.insertOrUpdateRowEntities(af, table, dataETag, rows, columns, userInfo, cc);
+      Validate.notNull(table);
+      Validate.notEmpty(dataETag);
+      Validate.noNullElements(rows);
+      Validate.noNullElements(columns);
+      Validate.notNull(cc);
+      rowEntities = new ArrayList<Entity>();
+      for (Row row : rows) {
+        String rowId = row.getRowId();
+        if (rowId == null) {
+          rowId = CommonFieldsBase.newUri();
+        }
+        Scope filter = row.getFilterScope();
+        if (filter == null) {
+          filter = Scope.EMPTY_SCOPE;
+        }
+        boolean found = false;
+        Entity entity = null;
+        try {
+          entity = table.getEntity(rowId, cc);
+          found = true;
+        } catch (ODKEntityNotFoundException e) {
+          // initialization for insert...
+          entity = table.newEntity(rowId, cc);
+        }
+        // TODO: verify that filter scope of existing row allows us to write it...
+        creator.insertOrUpdateRowEntity(table, entity, found, rowId, dataETag, row.getRowETag(),
+            filter, row.getUriAccessControl(), row.getFormId(), row.getLocale(),
+            row.getSavepointTimestamp(), row.getValues(), columns, userPermissions, cc);
+        rowEntities.add(entity);
+      }
 
       // create log table entries
       List<Entity> logEntities = creator.newLogEntities(logTable, dataETag, rowEntities, columns,
@@ -442,9 +473,10 @@ public class DataManager {
    *           if there is no row with the given id in the datastore
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
    */
   public String deleteRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException {
+      ODKTaskLockException, PermissionDeniedException {
     List<String> rowIds = new ArrayList<String>();
     rowIds.add(rowId);
     return deleteRows(rowIds);
@@ -462,10 +494,16 @@ public class DataManager {
    *           if one of the rowIds does not exist in the datastore
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
    */
   public String deleteRows(List<String> rowIds) throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKTaskLockException {
+      ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
     Validate.noNullElements(rowIds);
+
+    userPermissions.checkPermission(tableId, TablePermission.DELETE_ROW);
+
+    // TODO: verify that user has permission to delete the specific row (via Scope)
+    userPermissions.checkPermission(tableId, TablePermission.UNFILTERED_DELETE);
 
     // lock table
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
@@ -485,6 +523,7 @@ public class DataManager {
       List<Entity> rows = DbTable.query(table, rowIds, cc);
       for (Entity row : rows) {
         row.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
+        // TODO: verify that Scope allows for deletion
         row.set(DbTable.DELETED, true);
       }
 

@@ -31,8 +31,6 @@ import org.opendatakit.aggregate.client.odktables.ServerTableACLService;
 import org.opendatakit.aggregate.client.odktables.TableAclClient;
 import org.opendatakit.aggregate.client.odktables.TableAclResourceClient;
 import org.opendatakit.aggregate.client.odktables.TableRoleClient;
-import org.opendatakit.aggregate.odktables.AuthFilter;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableAclManager;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
@@ -42,7 +40,8 @@ import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -64,12 +63,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-
-      af.checkPermission(TablePermission.READ_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls();
       return transformTableAclList(acls);
     } catch (ODKDatastoreException e) {
@@ -87,11 +83,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.READ_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls(Scope.Type.USER);
       return transformTableAclList(acls);
     } catch (ODKDatastoreException e) {
@@ -109,11 +103,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.READ_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
       return transformTableAclList(acls);
     } catch (ODKDatastoreException e) {
@@ -131,11 +123,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.READ_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
       return UtilTransforms.transform(acl);
     } catch (ODKDatastoreException e) {
@@ -154,11 +144,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.READ_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
         odkTablesUserId = null;
       TableAcl acl = am.getAcl(new Scope(Scope.Type.USER, odkTablesUserId));
@@ -178,11 +166,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.READ_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
       return UtilTransforms.transform(acl);
     } catch (ODKDatastoreException e) {
@@ -201,11 +187,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.WRITE_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.DEFAULT, null),
           this.transformTableRoleClient(acl.getRole())));
       // Need to be careful here. A lot of transforming going on,
@@ -229,11 +213,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.WRITE_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
         odkTablesUserId = null;
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.USER, odkTablesUserId),
@@ -259,11 +241,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.WRITE_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.GROUP, groupId),
           this.transformTableRoleClient(acl.getRole())));
       // Need to be careful here. A lot of transforming going on,
@@ -286,11 +266,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.DELETE_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.DEFAULT, null));
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
@@ -307,11 +285,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.DELETE_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, odkTablesUserId));
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
@@ -328,11 +304,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.DELETE_ACL);
+      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, groupId));
     } catch (ODKDatastoreException e) {
       e.printStackTrace();

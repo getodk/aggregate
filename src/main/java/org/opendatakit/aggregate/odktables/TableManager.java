@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
@@ -43,7 +44,8 @@ import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -51,8 +53,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
-
-import com.google.common.collect.Lists;
 
 /**
  * Manages creating, deleting, and getting tables.
@@ -65,31 +65,13 @@ public class TableManager {
   private CallingContext cc;
   private EntityConverter converter;
   private EntityCreator creator;
-  private OdkTablesUserInfoTable userInfo;
+  private TablesUserPermissions userPermissions;
 
-  public TableManager(OdkTablesUserInfoTable userInfo, CallingContext cc) throws ODKDatastoreException {
+  public TableManager(TablesUserPermissions userPermissions, CallingContext cc) throws ODKDatastoreException {
     this.cc = cc;
-    this.userInfo = userInfo;
+    this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
-  }
-
-  /**
-   * @return a list of all scopes which the current user is within
-   */
-  public List<Scope> getScopes(CallingContext cc) {
-    List<Scope> scopes = Lists.newArrayList();
-    scopes.add(new Scope(Type.DEFAULT, null));
-    scopes.add(new Scope(Type.USER, userInfo.getOdkTablesUserId()));
-
-    // TODO: add this
-    // List<String> groups = getGroupNames(userUri);
-    // for (String group : groups)
-    // {
-    // scopes.add(new Scope(Type.GROUP, group));
-    // }
-
-    return scopes;
   }
 
   /**
@@ -99,7 +81,15 @@ public class TableManager {
    * @throws ODKDatastoreException
    */
   public List<TableEntry> getTables() throws ODKDatastoreException {
-    return converter.toTableEntries(DbTableEntry.query(cc));
+    // TODO: this should apply the user's scope restrictions
+    List<TableEntry> tables = converter.toTableEntries(DbTableEntry.query(cc));
+    List<TableEntry> filteredList = new ArrayList<TableEntry>();
+    for ( TableEntry e : tables ) {
+      if ( userPermissions.hasPermission(e.getTableId(), TablePermission.READ_TABLE_ENTRY)) {
+        filteredList.add(e);
+      }
+    }
+    return filteredList;
   }
 
   /**
@@ -135,6 +125,7 @@ public class TableManager {
      * cc); query.include(CommonFieldsBase.URI_COLUMN_NAME, tableIds);
      * List<Entity> entries = query.execute(); return getTableEntries(entries);
      */
+    List<TableEntry> tables = getTables();
     return getTables();
   }
 
@@ -145,8 +136,11 @@ public class TableManager {
    *          the id of a table
    * @return the table entry, or null if no such table exists
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public TableEntry getTable(String tableId) throws ODKDatastoreException {
+  public TableEntry getTable(String tableId) throws ODKDatastoreException, PermissionDeniedException {
+    userPermissions.checkPermission(tableId, TablePermission.READ_TABLE_ENTRY);
+
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
@@ -172,8 +166,9 @@ public class TableManager {
    * @param tableId
    * @return
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public TableDefinition getTableDefinition(String tableId) throws ODKDatastoreException {
+  public TableDefinition getTableDefinition(String tableId) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notEmpty(tableId);
     TableEntry entry = getTable(tableId);
     if (entry == null) {
@@ -213,11 +208,13 @@ public class TableManager {
    * @throws ODKEntityNotFoundException
    *           if no table with the given table id was found
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
   public TableEntry getTableNullSafe(String tableId) throws ODKEntityNotFoundException,
-      ODKDatastoreException {
+      ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
+    userPermissions.checkPermission(tableId, TablePermission.READ_TABLE_ENTRY);
     // get table entry entity
     DbTableEntryEntity entryEntity = DbTableEntry.getTableIdEntry(tableId, cc);
     return converter.toTableEntry(entryEntity);
@@ -239,10 +236,11 @@ public class TableManager {
    *           if a table with the given table id already exists
    * @throws ODKEntityPersistException
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
   public TableEntry createTable(String tableId, List<Column> columns,
       List<OdkTablesKeyValueStoreEntry> kvsEntries) throws ODKEntityPersistException,
-      ODKDatastoreException, TableAlreadyExistsException {
+      ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
     Validate.noNullElements(columns);
@@ -325,7 +323,7 @@ public class TableManager {
     }
     // write the initial ACL
     DbTableAclEntity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER,
-        userInfo.getOdkTablesUserId()), TableRole.OWNER, cc);
+        userPermissions.getOdkTablesUserId()), TableRole.OWNER, cc);
     ownerAcl.put(cc);
 
     // Do NOT write the entry yet -- we need to have a valid displayName
@@ -363,11 +361,14 @@ public class TableManager {
    *           if no table with the given table id was found
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
    */
   public void deleteTable(String tableId) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException {
+      ODKTaskLockException, PermissionDeniedException {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
+
+    userPermissions.checkPermission(tableId, TablePermission.DELETE_TABLE);
 
     DbTableEntryEntity tableEntry = DbTableEntry.getTableIdEntry(tableId, cc);
 

@@ -167,6 +167,37 @@ public class SecurityServiceUtil {
 		return users;
 	}
 
+	public static HashMap<String,UserSecurityInfo> getUriUserSecurityInfoMap(boolean withAuthorities, CallingContext cc ) throws AccessDeniedException, DatastoreFailureException {
+
+	  HashMap<String,UserSecurityInfo> users = new HashMap<String,UserSecurityInfo>();
+     try {
+       Query q = RegisteredUsersTable.createQuery(cc.getDatastore(), "SecurityServiceUtil.getAllUsers", cc.getCurrentUser());
+       RegisteredUsersTable.applyNaturalOrdering(q, cc);
+
+       List<? extends CommonFieldsBase> l = q.executeQuery();
+
+       for ( CommonFieldsBase cb : l ) {
+          RegisteredUsersTable t = (RegisteredUsersTable) cb;
+          UserSecurityInfo i = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(),
+                                           UserSecurityInfo.UserType.REGISTERED);
+          if ( withAuthorities ) {
+             SecurityServiceUtil.setAuthenticationLists(i, t.getUri(), cc);
+          }
+          users.put(t.getUri(), i);
+       }
+       // TODO: why doesn't this work?
+        UserSecurityInfo anonymous = new UserSecurityInfo(User.ANONYMOUS_USER, User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS);
+        if ( withAuthorities ) {
+          SecurityServiceUtil.setAuthenticationListsForSpecialUser(anonymous, GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
+        }
+        users.put(User.ANONYMOUS_USER, anonymous);
+    } catch (ODKDatastoreException e) {
+       e.printStackTrace();
+       throw new DatastoreFailureException(e);
+    }
+    return users;
+ }
+
 	static GrantedAuthorityName mapName(GrantedAuthority auth, Set<GrantedAuthority> badGrants) {
 		GrantedAuthorityName name = null;
 		try {

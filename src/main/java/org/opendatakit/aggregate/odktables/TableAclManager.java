@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.odktables;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
@@ -28,6 +29,8 @@ import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -40,6 +43,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class TableAclManager {
   private CallingContext cc;
+  private TablesUserPermissions userPermissions;
   private EntityConverter converter;
   private EntityCreator creator;
   private String tableId;
@@ -56,12 +60,13 @@ public class TableAclManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public TableAclManager(String tableId, CallingContext cc) throws ODKEntityNotFoundException,
+  public TableAclManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
 
     this.cc = cc;
+    this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
     this.tableId = tableId;
@@ -84,8 +89,10 @@ public class TableAclManager {
    *
    * @return a list of TableAcl
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public List<TableAcl> getAcls() throws ODKDatastoreException {
+  public List<TableAcl> getAcls() throws ODKDatastoreException, PermissionDeniedException {
+    userPermissions.checkPermission(tableId, TablePermission.READ_ACL);
     List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
     return converter.toTableAcls(acls);
   }
@@ -97,9 +104,11 @@ public class TableAclManager {
    *          the type of acls to retrieve
    * @return a list of TableAcl
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public List<TableAcl> getAcls(Scope.Type type) throws ODKDatastoreException {
+  public List<TableAcl> getAcls(Scope.Type type) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(type);
+    userPermissions.checkPermission(tableId, TablePermission.READ_ACL);
 
     List<DbTableAclEntity> acls = DbTableAcl.queryTableIdScopeTypeAcls(tableId, type.name(), cc);
     return converter.toTableAcls(acls);
@@ -112,10 +121,12 @@ public class TableAclManager {
    *          the scope of the list
    * @return the acl, or null if none exists
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public TableAcl getAcl(Scope scope) throws ODKDatastoreException {
+  public TableAcl getAcl(Scope scope) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(scope);
     Validate.notNull(scope.getType());
+    userPermissions.checkPermission(tableId, TablePermission.READ_ACL);
 
     DbTableAclEntity aclEntity = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId, scope.getType()
         .name(), scope.getValue(), cc);
@@ -135,11 +146,13 @@ public class TableAclManager {
    *          the role of the acl
    * @return the modified acl (created if none already exists)
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public TableAcl setAcl(Scope scope, TableRole role) throws ODKDatastoreException {
+  public TableAcl setAcl(Scope scope, TableRole role) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(scope);
     Validate.notNull(scope.getType());
     Validate.notNull(role);
+    userPermissions.checkPermission(tableId, TablePermission.WRITE_ACL);
 
     DbTableAclEntity acl = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId,
         scope.getType().name(), scope.getValue(), cc);
@@ -159,10 +172,12 @@ public class TableAclManager {
    * @param scope
    *          the scope of the acl
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public void deleteAcl(Scope scope) throws ODKDatastoreException {
+  public void deleteAcl(Scope scope) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(scope);
     Validate.notNull(scope.getType());
+    userPermissions.checkPermission(tableId, TablePermission.DELETE_ACL);
 
     DbTableAclEntity acl = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId,
         scope.getType().name(), scope.getValue(), cc);
