@@ -25,11 +25,10 @@ import java.util.Map;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
@@ -37,6 +36,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntr
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.servlet.OdkTablesTableFileDownloadServlet;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -63,25 +63,17 @@ public class OdkTablesKeyValueManifestManager {
 
   private CallingContext cc;
 
-  private OdkTablesUserInfoTable userInfo;
+  private TablesUserPermissions userPermissions;
 
   private String manifest = null;
 
   /**
    * Get the manifest ready for a specific table.
    */
-  public OdkTablesKeyValueManifestManager(String tableId, OdkTablesUserInfoTable userInfo, CallingContext cc) {
+  public OdkTablesKeyValueManifestManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) {
     this.tableId = tableId;
     this.cc = cc;
-    this.userInfo = userInfo;
-    mapper = new ObjectMapper();
-  }
-
-  /**
-   * Generic constructor. Used mostly for testing the json serialization, not
-   * for use in actual manifest generation for tables.
-   */
-  public OdkTablesKeyValueManifestManager() {
+    this.userPermissions = userPermissions;
     mapper = new ObjectMapper();
     entries = new ArrayList<OdkTablesKeyValueStoreEntry>();
   }
@@ -99,11 +91,11 @@ public class OdkTablesKeyValueManifestManager {
    * @throws AccessDeniedException
    * @throws RequestFailureException
    * @throws DatastoreFailureException
-   * @throws PermissionDeniedExceptionClient
+   * @throws PermissionDeniedException
    */
   public String getManifest() throws JsonGenerationException, JsonMappingException, IOException,
-      PermissionDeniedExceptionClient, DatastoreFailureException, RequestFailureException,
-      AccessDeniedException {
+      DatastoreFailureException, RequestFailureException,
+      AccessDeniedException, PermissionDeniedException {
     if (manifest == null) {
       entries = getEntries();
       manifest = mapper.writeValueAsString(entries);
@@ -113,15 +105,16 @@ public class OdkTablesKeyValueManifestManager {
 
   /**
    * Gets the entries in the manifest for the tableId.
+   * @throws PermissionDeniedException
    */
-  public List<OdkTablesKeyValueStoreEntry> getEntries() throws PermissionDeniedExceptionClient,
+  public List<OdkTablesKeyValueStoreEntry> getEntries() throws
       DatastoreFailureException, RequestFailureException, AccessDeniedException,
-      JsonGenerationException, IOException {
+      JsonGenerationException, IOException, PermissionDeniedException {
 
     try {
       List<Row> infoRows = EntityConverter.toRowsFromFileInfo(DbTableFileInfo.queryForTableId(
           tableId, cc));
-      TableManager tm = new TableManager(userInfo, cc);
+      TableManager tm = new TableManager(userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
       DbTableFiles blobSetRelation = new DbTableFiles(cc);
       List<OdkTablesKeyValueStoreEntry> entries = new ArrayList<OdkTablesKeyValueStoreEntry>();

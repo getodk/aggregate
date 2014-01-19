@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.server;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -25,15 +25,14 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdminService;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
-import org.opendatakit.common.persistence.CommonFieldsBase;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.Query;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
 
@@ -57,45 +56,33 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
   public OdkTablesAdmin[] listAdmin() throws AccessDeniedException, DatastoreFailureException {
     try {
       CallingContext cc = this.getCC();
-      // get the datastore from which you will get the user info
-      Datastore ds = cc.getDatastore();
-      OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
-      // query for the users
-      Query query = ds.createQuery(prototype, "OdkTablesAdminServiceImpl.listAdmin",
-          cc.getCurrentUser());
-      List<? extends CommonFieldsBase> results = query.executeQuery();
+      Map<String, UserSecurityInfo> uriUSImap = SecurityServiceUtil.getUriUserSecurityInfoMap(
+          false, cc);
+      ArrayList<OdkTablesAdmin> results = new ArrayList<OdkTablesAdmin>();
+      for (String uri : uriUSImap.keySet()) {
+        try {
+          TablesUserPermissions tablesUser = new TablesUserPermissionsImpl(uri, cc);
+          UserSecurityInfo info = uriUSImap.get(uri);
 
-      // at this point results should be a list of DataStoreUserData objects
-      if (!results.isEmpty()) {
-        // make a new array of OdkAdmins to returns
-        OdkTablesAdmin[] listOfAdmins = new OdkTablesAdmin[results.size()];
-        for (int i = 0; i < results.size(); i++) {
-          // make a temporary Admin object to fill with data.
-          // cast like crazy to get the info, fill it, and then set it to
-          // the array.
           OdkTablesAdmin holder = new OdkTablesAdmin();
-          OdkTablesUserInfoTable result = (OdkTablesUserInfoTable) results.get(i);
-          holder.setUriUser(result.getUriUser());
-          holder.setOdkTablesUserId(result.getOdkTablesUserId());
-          holder.setPhoneNumber(result.getPhoneNumber());
-          holder.setXBearerCode(result.getXBearerCode());
 
-          RegisteredUsersTable t = RegisteredUsersTable.getUserByUri(result.getUriUser(), ds,
-              cc.getCurrentUser());
-          UserSecurityInfo info = new UserSecurityInfo(t.getUsername(), t.getFullName(),
-              t.getEmail(), UserSecurityInfo.UserType.REGISTERED);
+          holder.setUriUser(uri);
+          holder.setOdkTablesUserId(tablesUser.getOdkTablesUserId());
+          holder.setPhoneNumber(tablesUser.getPhoneNumber());
+          holder.setXBearerCode(tablesUser.getXBearerCode());
           holder.setName(info.getCanonicalName());
-          listOfAdmins[i] = holder;
+
+          results.add(holder);
+        } catch (PermissionDeniedException e) {
+          // ignore -- this user is not an odkTables user...
         }
-        return listOfAdmins;
       }
+      return results.toArray(new OdkTablesAdmin[results.size()]);
 
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
     }
-
-    return new OdkTablesAdmin[0];
   }
 
   /**
@@ -109,8 +96,7 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
     CallingContext cc = this.getCC();
     try {
       // First turn the string ID into an EntityKey so it can be deleted
-      OdkTablesUserInfoTable userToDelete = OdkTablesUserInfoTable.getUserData(uriUser, cc);
-      cc.getDatastore().deleteEntity(userToDelete.getEntityKey(), cc.getCurrentUser());
+      TablesUserPermissionsImpl.deleteUser(uriUser, cc);
     } catch (ODKDatastoreException e) {
       // If you've gotten here there was a datastore problem
       e.printStackTrace();
@@ -135,44 +121,30 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
       RequestFailureException, DatastoreFailureException {
     CallingContext cc = this.getCC();
     boolean failure = false;
-    try {
-      OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
-      for (UserSecurityInfo info : admins) {
-        try {
-          RegisteredUsersTable theUser = null;
-          String odkTablesUserId = null;
-          if (info.getEmail() != null) {
-            odkTablesUserId = info.getEmail();
-            theUser = RegisteredUsersTable.getUserByEmail(info.getEmail(), cc.getUserService(),
-                cc.getDatastore());
-          } else if (info.getUsername() != null) {
-            odkTablesUserId = SecurityUtils.USERNAME_COLON + info.getUsername();
-            theUser = RegisteredUsersTable.getUserByUsername(info.getUsername(),
-                cc.getUserService(), cc.getDatastore());
-          }
-          if (theUser == null) {
-            failure = true;
-            continue;
-          }
-          OdkTablesUserInfoTable odkTablesUserInfo = OdkTablesUserInfoTable.getUserData(
-              theUser.getUri(), cc);
-          if (odkTablesUserInfo == null) {
-            odkTablesUserInfo = cc.getDatastore().createEntityUsingRelation(prototype,
-                cc.getCurrentUser());
-            odkTablesUserInfo.setUriUser(theUser.getUri());
-          }
-          odkTablesUserInfo.setOdkTablesUserId(odkTablesUserId);
-          odkTablesUserInfo.persist(cc);
-        } catch (ODKDatastoreException e) {
-          // If you've gotten here there was a datastore problem
-          e.printStackTrace();
-          failure = true;
+    for (UserSecurityInfo info : admins) {
+      try {
+        RegisteredUsersTable theUser = null;
+        if (info.getEmail() != null) {
+          theUser = RegisteredUsersTable.getUserByEmail(info.getEmail(), cc.getUserService(),
+              cc.getDatastore());
+        } else if (info.getUsername() != null) {
+          theUser = RegisteredUsersTable.getUserByUsername(info.getUsername(), cc.getUserService(),
+              cc.getDatastore());
         }
+        if (theUser == null) {
+          failure = true;
+          continue;
+        }
+        @SuppressWarnings("unused")
+        TablesUserPermissionsImpl usePermissions = new TablesUserPermissionsImpl(theUser.getUri(), cc);
+      } catch (ODKDatastoreException e) {
+        // If you've gotten here there was a datastore problem
+        e.printStackTrace();
+        failure = true;
+      } catch (PermissionDeniedException e) {
+        e.printStackTrace();
+        failure = true;
       }
-    } catch (ODKDatastoreException e) {
-      // If you've gotten here there was a datastore problem
-      e.printStackTrace();
-      failure = true;
     }
     return !failure;
   }

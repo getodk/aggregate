@@ -68,7 +68,7 @@ public interface TableService {
   @GET
   @Path("{tableId}/definition")
   public TableDefinitionResource getDefinition(@PathParam("tableId") String tableId)
-      throws ODKDatastoreException;
+      throws ODKDatastoreException, PermissionDeniedException;
 
   @Path("{tableId}/diff")
   public DiffService getDiff(@PathParam("tableId") String tableId) throws ODKDatastoreException;

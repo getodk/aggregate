@@ -14,12 +14,13 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables;
+package org.opendatakit.aggregate.odktables.security;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
+import org.opendatakit.aggregate.odktables.TableAclManager;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
@@ -33,13 +34,13 @@ public class AuthFilter {
 
   private CallingContext cc;
   private TableAclManager am;
-  private OdkTablesUserInfoTable userInfo;
+  private TablesUserPermissions userPermissions;
 
-  public AuthFilter(String tableId, OdkTablesUserInfoTable userInfo, CallingContext cc) throws ODKEntityNotFoundException,
+  public AuthFilter(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     this.cc = cc;
-    this.userInfo = userInfo;
-    this.am = new TableAclManager(tableId, cc);
+    this.userPermissions = userPermissions;
+    this.am = new TableAclManager(tableId, userPermissions, cc);
   }
 
   /**
@@ -55,7 +56,7 @@ public class AuthFilter {
       PermissionDeniedException {
     if (!hasPermission(permission)) {
       throw new PermissionDeniedException(String.format("Denied permission %s to user %s",
-          permission, userInfo.getOdkTablesUserId()));
+          permission, userPermissions.getOdkTablesUserId()));
     }
   }
 
@@ -67,9 +68,10 @@ public class AuthFilter {
    *          the permission to check
    * @return true if the user has the given permission, false otherwise
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public boolean hasPermission(TablePermission permission) throws ODKDatastoreException {
-    Set<TablePermission> permissions = getPermissions(userInfo.getOdkTablesUserId());
+  public boolean hasPermission(TablePermission permission) throws ODKDatastoreException, PermissionDeniedException {
+    Set<TablePermission> permissions = getPermissions(userPermissions.getOdkTablesUserId());
     return true;
 //    return permissions.contains(permission);
   }
@@ -100,20 +102,20 @@ public class AuthFilter {
     Validate.notNull(permission);
     Validate.notNull(rowId);
 
-    Set<TablePermission> permissions = getPermissions(userInfo.getOdkTablesUserId());
+    Set<TablePermission> permissions = getPermissions(userPermissions.getOdkTablesUserId());
 
     if (!permissions.contains(permission)) {
       if (filter == null || filter.equals(Scope.EMPTY_SCOPE)) {
         // empty scope, no one allowed
-        throwPermissionDenied(rowId, userInfo);
+        throwPermissionDenied(rowId, userPermissions);
       }
       switch (filter.getType()) {
       case USER:
         String filterUser = filter.getValue();
-        if (userInfo == null && filterUser != null) {
-          throwPermissionDenied(rowId, userInfo);
-        } else if (userInfo != null && !userInfo.getOdkTablesUserId().equals(filter.getValue())) {
-          throwPermissionDenied(rowId, userInfo);
+        if (userPermissions == null && filterUser != null) {
+          throwPermissionDenied(rowId, userPermissions);
+        } else if (userPermissions != null && !userPermissions.getOdkTablesUserId().equals(filter.getValue())) {
+          throwPermissionDenied(rowId, userPermissions);
         }
         break;
       case GROUP:
@@ -132,12 +134,12 @@ public class AuthFilter {
     }
   }
 
-  private void throwPermissionDenied(String rowId, OdkTablesUserInfoTable userInfo) throws PermissionDeniedException {
+  private void throwPermissionDenied(String rowId, TablesUserPermissions userPermissions) throws PermissionDeniedException {
     throw new PermissionDeniedException(String.format(
-        "Denied permission to access row %s to user %s", rowId, userInfo.getOdkTablesUserId()));
+        "Denied permission to access row %s to user %s", rowId, userPermissions.getOdkTablesUserId()));
   }
 
-  private Set<TablePermission> getPermissions(String odkTablesUserId) throws ODKDatastoreException {
+  private Set<TablePermission> getPermissions(String odkTablesUserId) throws ODKDatastoreException, PermissionDeniedException {
     Set<TablePermission> permissions = new HashSet<TablePermission>();
 
     // get default permissions

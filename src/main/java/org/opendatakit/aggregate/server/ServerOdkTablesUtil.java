@@ -23,8 +23,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
-import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.exception.TableAlreadyExistsExceptionClient;
@@ -33,9 +33,7 @@ import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
@@ -50,6 +48,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEnt
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -77,10 +76,11 @@ public class ServerOdkTablesUtil {
    * @return
    * @throws DatastoreFailureException
    * @throws TableAlreadyExistsExceptionClient
+   * @throws PermissionDeniedExceptionClient
    */
   public static TableEntryClient createTable(String tableId, TableDefinitionClient definition,
-      OdkTablesUserInfoTable userInfo, CallingContext cc) throws DatastoreFailureException,
-      TableAlreadyExistsExceptionClient {
+      TablesUserPermissions userPermissions, CallingContext cc) throws DatastoreFailureException,
+      TableAlreadyExistsExceptionClient, PermissionDeniedExceptionClient {
     Log logger = LogFactory.getLog(ServerOdkTablesUtil.class);
     // TODO: add access control stuff
     // Have to be careful of all the transforms going on here.
@@ -89,7 +89,7 @@ public class ServerOdkTablesUtil {
     // column resource or something, in which case the transform() method is not
     // altering all of the requisite fields.
     try {
-      TableManager tm = new TableManager(userInfo, cc);
+      TableManager tm = new TableManager(userPermissions, cc);
       String displayName = definition.getDisplayName();
       TableType type = UtilTransforms.transform(definition.getType());
       // TODO: find a way to, for creation, generate a minimal list of
@@ -130,6 +130,9 @@ public class ServerOdkTablesUtil {
     } catch (TableAlreadyExistsException e) {
       e.printStackTrace();
       throw new TableAlreadyExistsExceptionClient(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
     }
   }
 
@@ -150,17 +153,16 @@ public class ServerOdkTablesUtil {
    * @throws EntityNotFoundExceptionClient
    */
   public static RowClient createOrUpdateRow(String tableId, String rowId, RowClient row,
-      OdkTablesUserInfoTable userInfo, CallingContext cc) throws AccessDeniedException,
+      TablesUserPermissions userPermissions, CallingContext cc) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, ETagMismatchExceptionClient,
       PermissionDeniedExceptionClient, BadColumnNameExceptionClient, EntityNotFoundExceptionClient {
     try {
       // first transform row into a server-side row
       Row serverRow = UtilTransforms.transform(row);
-      DataManager dm = new DataManager(tableId, userInfo, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
+      DataManager dm = new DataManager(tableId, userPermissions, cc);
       row.setRowId(rowId);
 
-      List<Row> rows = dm.insertOrUpdateRows(af, Collections.singletonList(serverRow));
+      List<Row> rows = dm.insertOrUpdateRows(Collections.singletonList(serverRow));
       serverRow = rows.get(0);
       return UtilTransforms.transform(serverRow);
     } catch (ODKEntityNotFoundException e) {

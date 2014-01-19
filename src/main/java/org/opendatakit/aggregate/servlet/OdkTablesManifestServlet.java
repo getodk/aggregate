@@ -23,12 +23,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -64,16 +64,20 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
       errorMissingKeyParam(resp);
       return;
     }
-    OdkTablesUserInfoTable userInfo;
+    TablesUserPermissionsImpl userPermissions;
     try {
-      userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser().getUriUser(), cc);
+      userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser().getUriUser(), cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       datastoreError(resp);
       return;
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      errorRetreivingData(resp);
+      return;
     }
 
-    OdkTablesKeyValueManifestManager mm = new OdkTablesKeyValueManifestManager(tableId, userInfo, cc);
+    OdkTablesKeyValueManifestManager mm = new OdkTablesKeyValueManifestManager(tableId, userPermissions, cc);
 
     String manifest;
     try {
@@ -86,13 +90,13 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
       e.printStackTrace();
       errorRetreivingData(resp);
       return;
-    } catch (PermissionDeniedExceptionClient e) {
-      e.printStackTrace();
-      errorRetreivingData(resp);
-      return;
     } catch (DatastoreFailureException e) {
       e.printStackTrace();
       datastoreError(resp);
+      return;
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      errorRetreivingData(resp);
       return;
     }
 

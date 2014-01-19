@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 University of Washington
+ * Copyright (C) 2014 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,11 +14,9 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables;
+package org.opendatakit.aggregate.odktables.security;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -28,18 +26,9 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
-import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * This table holds the ODK Tables-specific settings for a user.
@@ -50,7 +39,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * @author mitchellsundt@gmail.com
  *
  */
-public class OdkTablesUserInfoTable extends CommonFieldsBase {
+class OdkTablesUserInfoTable extends CommonFieldsBase {
 
   /**
    * The name of the table into which this data is persisted.
@@ -180,7 +169,7 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase {
     return relation;
   }
 
-  public static final OdkTablesUserInfoTable getUserData(String uriUser, CallingContext cc)
+  public static final OdkTablesUserInfoTable getCurrentUserInfo(String uriUser, CallingContext cc)
       throws ODKDatastoreException {
     OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
     Datastore ds = cc.getDatastore();
@@ -191,33 +180,6 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase {
     List<? extends CommonFieldsBase> results = query.executeQuery();
 
     if (results.size() == 0) {
-      User user = cc.getCurrentUser();
-      if (user.getUriUser().equals(uriUser)) {
-        // we can add this user silently if they have permissions...
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication auth = context.getAuthentication();
-        Collection<? extends GrantedAuthority> grants = auth.getAuthorities();
-        RoleHierarchy rh = (RoleHierarchy) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
-        Collection<? extends GrantedAuthority> roles = rh.getReachableGrantedAuthorities(grants);
-        if (roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name()))
-            || roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name())) ) {
-          // create a record
-          OdkTablesUserInfoTable odkTablesUserInfo = ds.createEntityUsingRelation(prototype,
-              cc.getCurrentUser());
-          RegisteredUsersTable t;
-          t = RegisteredUsersTable.getUserByUri(user.getUriUser(), ds, user);
-          odkTablesUserInfo.setUriUser(user.getUriUser());
-          String externalUID = null;
-          if (user.getEmail() != null) {
-            externalUID = user.getEmail();
-          } else if (t.getUsername() != null) {
-            externalUID = SecurityUtils.USERNAME_COLON + t.getUsername();
-          }
-          odkTablesUserInfo.setOdkTablesUserId(externalUID);
-          odkTablesUserInfo.persist(cc);
-          return odkTablesUserInfo;
-        }
-      }
       return null;
     }
     if (results.size() == 1) {

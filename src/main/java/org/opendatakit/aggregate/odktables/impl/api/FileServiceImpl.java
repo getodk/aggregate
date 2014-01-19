@@ -35,12 +35,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.api.FileService;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -181,7 +182,8 @@ public class FileServiceImpl implements FileService {
     String wholePath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser().getUriUser(), cc);
+      TablesUserPermissionsImpl userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
+          .getUriUser(), cc);
 
       // Process the file.
       InputStream is = req.getInputStream();
@@ -204,7 +206,8 @@ public class FileServiceImpl implements FileService {
       //
       // 1) Create an entry in the user friendly table.
       EntityCreator ec = new EntityCreator();
-      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(tableId, wholePath, userInfo, cc);
+      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(tableId, wholePath,
+          userPermissions, cc);
       String rowUri = tableFileInfoRow.getId();
 
       // 2) Put the blob in the datastore.
@@ -227,6 +230,9 @@ public class FileServiceImpl implements FileService {
       LOGGER.error(("ODKTables file upload persistence error: " + e.getMessage()));
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
+    } catch (PermissionDeniedException e) {
+      LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
+      resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Permission denied");
     }
   }
 

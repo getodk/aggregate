@@ -477,11 +477,10 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
 //   * @param cc
 //   * @return
 //   */
-//  private String getSelectTableHtml(CallingContext cc)
+//  private String getSelectTableHtml(CurrentUserPermissions userPermissions, CallingContext cc)
 //       throws ODKDatastoreException {
-//    TableManager tm = new TableManager(cc);
-//    List<Scope> scopes = AuthFilter.getScopes(cc);
-//    List<TableEntry> entries = tm.getTables(scopes);
+//    TableManager tm = new TableManager(userPermissions, cc);
+//    List<TableEntry> entries = tm.getTables();
 //    String html = "<select name=\"table_name\" id=\"table_name\">";
 //    for (TableEntry table : entries) {
 //      html = html + "<option value=\"" + table.getTableKey() + "\">"

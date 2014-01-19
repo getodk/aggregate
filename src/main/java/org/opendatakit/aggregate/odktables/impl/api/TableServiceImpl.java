@@ -29,8 +29,6 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.odktables.AuthFilter;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
@@ -43,14 +41,14 @@ import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
-import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -60,23 +58,22 @@ public class TableServiceImpl implements TableService {
   private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
 
   private CallingContext cc;
-  private OdkTablesUserInfoTable userInfo;
+  private TablesUserPermissions userPermissions;
   private TableManager tm;
   private UriInfo info;
 
   public TableServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
-      @Context UriInfo info) throws ODKDatastoreException {
+      @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException {
     ServiceUtils.examineRequest(sc, req);
     this.cc = ContextFactory.getCallingContext(sc, req);
-    this.userInfo = OdkTablesUserInfoTable.getUserData(this.cc.getCurrentUser().getUriUser(), cc);
-    this.tm = new TableManager(userInfo, cc);
+    this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
+    this.tm = new TableManager(userPermissions, cc);
     this.info = info;
   }
 
   @Override
   public TableResourceList getTables() throws ODKDatastoreException {
-    List<Scope> scopes = tm.getScopes(cc);
-    List<TableEntry> entries = tm.getTables(scopes);
+    List<TableEntry> entries = tm.getTables();
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
       TableResource resource = getResource(entry);
@@ -93,10 +90,6 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableResource getTable(String tableId) throws ODKDatastoreException,
       PermissionDeniedException {
-    // Oct15 removing permissions stuff
-    // TODO fix the above
-    // new AuthFilter(tableId,
-    // cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
     TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
     return resource;
@@ -104,7 +97,7 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public TableResource createTable(String tableId, TableDefinition definition)
-      throws ODKDatastoreException, TableAlreadyExistsException {
+      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException {
     // TODO: what if schemaETag is specified??? or if table already exists????
     // TODO: add access control stuff
     String displayName = definition.getDisplayName();
@@ -140,7 +133,6 @@ public class TableServiceImpl implements TableService {
   @Override
   public void deleteTable(String tableId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
-    new AuthFilter(tableId, userInfo, cc).checkPermission(TablePermission.DELETE_TABLE);
     tm.deleteTable(tableId);
     logger.info("tableId: " + tableId);
     DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
@@ -149,26 +141,26 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public DataService getData(String tableId) throws ODKDatastoreException {
-    return new DataServiceImpl(tableId, info, userInfo, cc);
+    return new DataServiceImpl(tableId, info, userPermissions, cc);
   }
 
   @Override
   public PropertiesService getProperties(String tableId) throws ODKDatastoreException {
-    return new PropertiesServiceImpl(tableId, info, userInfo, cc);
+    return new PropertiesServiceImpl(tableId, info, userPermissions, cc);
   }
 
   @Override
   public DiffService getDiff(String tableId) throws ODKDatastoreException {
-    return new DiffServiceImpl(tableId, info, userInfo, cc);
+    return new DiffServiceImpl(tableId, info, userPermissions, cc);
   }
 
   @Override
   public TableAclService getAcl(String tableId) throws ODKDatastoreException {
-    return new TableAclServiceImpl(tableId, info, userInfo, cc);
+    return new TableAclServiceImpl(tableId, info, userPermissions, cc);
   }
 
   @Override
-  public TableDefinitionResource getDefinition(String tableId) throws ODKDatastoreException {
+  public TableDefinitionResource getDefinition(String tableId) throws ODKDatastoreException, PermissionDeniedException {
     // TODO: permissions stuff for a table, perhaps? or just at the row level?
     TableDefinition definition = tm.getTableDefinition(tableId);
     TableDefinitionResource definitionResource = new TableDefinitionResource(definition);

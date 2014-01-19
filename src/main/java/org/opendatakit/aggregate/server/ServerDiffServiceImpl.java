@@ -26,11 +26,12 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ServerDiffService;
-import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -52,26 +53,18 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      DataManager dm = new DataManager(tableId, userInfo, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      // TODO: fix this once permissions are working...
-      // af.checkPermission(TablePermission.READ_ROW);
+      DataManager dm = new DataManager(tableId, userPermissions, cc);
       List<Row> rows;
-      // if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
       rows = dm.getRowsSince(dataETag);
-      // } else {
-      // List<Scope> scopes = AuthFilter.getScopes(cc);
-      // rows = dm.getRowsSince(dataETag, scopes);
-      // }
       return transformRows(rows);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
-      // } catch (PermissionDeniedException e) {
-      // e.printStackTrace();
-      // throw new PermissionDeniedExceptionClient(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
     }
   }
 

@@ -24,14 +24,13 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.ServerPropertiesService;
 import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
-import org.opendatakit.aggregate.odktables.AuthFilter;
-import org.opendatakit.aggregate.odktables.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
-import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -54,11 +53,9 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      PropertiesManager pm = new PropertiesManager(tableId, cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      af.checkPermission(TablePermission.READ_PROPERTIES);
+      PropertiesManager pm = new PropertiesManager(tableId, userPermissions, cc);
       TableProperties properties = pm.getProperties();
       return UtilTransforms.transform(properties);
     } catch (ODKDatastoreException e) {
@@ -77,11 +74,9 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      OdkTablesUserInfoTable userInfo = OdkTablesUserInfoTable.getUserData(cc.getCurrentUser()
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      AuthFilter af = new AuthFilter(tableId, userInfo, cc);
-      PropertiesManager pm = new PropertiesManager(tableId, cc);
-      af.checkPermission(TablePermission.WRITE_PROPERTIES);
+      PropertiesManager pm = new PropertiesManager(tableId, userPermissions, cc);
       // this seems fishy. Originally was passing in the parameter of type
       // TablePropertiesClient, but it isn't clear why I need to, when
       // nothing is being explicitly set. Fixed by changing the type of

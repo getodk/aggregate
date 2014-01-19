@@ -23,6 +23,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
@@ -33,6 +34,8 @@ import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -52,6 +55,7 @@ public class PropertiesManager {
   private static final Log log = LogFactory.getLog(PropertiesManager.class);
 
   private CallingContext cc;
+  private TablesUserPermissions userPermissions;
   private String tableId;
   private DbTableEntryEntity entry;
   private DbTableDefinitionsEntity definitionEntity;
@@ -70,11 +74,12 @@ public class PropertiesManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public PropertiesManager(String tableId, CallingContext cc) throws ODKEntityNotFoundException,
+  public PropertiesManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
     this.cc = cc;
+    this.userPermissions = userPermissions;
     this.tableId = tableId;
     this.entry = DbTableEntry.getTableIdEntry(tableId, cc);
     String schemaETag = entry.getSchemaETag();
@@ -96,8 +101,10 @@ public class PropertiesManager {
    *
    * @return the current table properties.
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
-  public TableProperties getProperties() throws ODKDatastoreException {
+  public TableProperties getProperties() throws ODKDatastoreException, PermissionDeniedException {
+    userPermissions.checkPermission(tableId, TablePermission.READ_PROPERTIES);
     // refresh entities
     entry = DbTableEntry.getTableIdEntry(tableId, cc);
     String schemaETag = entry.getSchemaETag();
@@ -119,10 +126,12 @@ public class PropertiesManager {
    *           properties etag.
    * @throws ODKTaskLockException
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
   public TableProperties setProperties(TableProperties tableProperties)
-      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException {
+      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException, PermissionDeniedException {
 
+    userPermissions.checkPermission(tableId, TablePermission.WRITE_PROPERTIES);
     // create new eTag
     String propertiesETag = CommonFieldsBase.newUri();
 
