@@ -290,6 +290,8 @@ public class EntityCreator {
     } else {
       String rowETag = row.getString(DbTable.ROW_ETAG);
       if (currentETag == null || !currentETag.equals(rowETag)) {
+        // TODO: make this more intelligent?
+        // the rows may be identical, but leave that to the client to determine
         // trigger client-side conflict resolution
         throw new ETagMismatchException(String.format("%s does not match %s " + "for rowId %s",
             currentETag, rowETag, row.getId()));
