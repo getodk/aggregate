@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -41,6 +42,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface ServerDiffService extends RemoteService {
 
   ArrayList<RowClient> getRowsSince(String dataETag, String tableId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient, InconsistentStateException, ODKTaskLockException;
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
 }

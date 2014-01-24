@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.TableService;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -50,7 +51,7 @@ public class DiffServiceImpl implements DiffService {
 
   @Override
   public RowResourceList getRowsSince(String dataETag) throws ODKDatastoreException,
-      PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
+      PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRowsSince(dataETag);
     return new RowResourceList(getResources(rows));

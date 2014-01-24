@@ -384,7 +384,7 @@ public class EntityConverter {
     return row;
   }
 
-  private Map<String, String> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
+  public Map<String, String> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Map<String, String> values = new HashMap<String, String>();
     for (DbColumnDefinitionsEntity column : columns) {
       if (column.getIsUnitOfRetention()) {

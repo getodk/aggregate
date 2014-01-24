@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
@@ -69,7 +70,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public ArrayList<RowClient> getRows(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException {
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
@@ -93,7 +94,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public TableContentsClient getRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException {
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     try {
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -145,7 +146,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public void deleteRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException {
+      EntityNotFoundExceptionClient, InconsistentStateException, BadColumnNameException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
@@ -399,7 +400,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException {
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     TableContentsClient tcc = new TableContentsClient();
     tcc.rows = getRows(tableId);
     tcc.columnNames = getColumnNames(tableId);

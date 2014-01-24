@@ -25,8 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
-import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
@@ -38,12 +36,10 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -268,46 +264,14 @@ public class EntityCreator {
     return tableAcl;
   }
 
-  public Entity insertOrUpdateRowEntity(DbTable table, Entity row, boolean found, String rowId,
-      String dataETag, String currentETag, Scope filter, String uriAccessControl, String formId,
-      String locale, Long savepointTimestamp, Map<String, String> values,
-      List<DbColumnDefinitionsEntity> columns, TablesUserPermissions userPermissions, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException, ETagMismatchException,
-      BadColumnNameException, PermissionDeniedException {
-    Validate.notNull(table);
-    Validate.notEmpty(dataETag);
-    Validate.notEmpty(rowId);
-    // if currentETag is null we will catch it later
-    Validate.noNullElements(values.keySet());
-    // filter may be null
-    Validate.noNullElements(columns);
-    Validate.notNull(cc);
-
-    if (!found) {
-      row.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
-    } else {
-      String rowETag = row.getString(DbTable.ROW_ETAG);
-      if (currentETag == null || !currentETag.equals(rowETag)) {
-        // TODO: make this more intelligent?
-        // the rows may be identical, but leave that to the client to determine
-        // trigger client-side conflict resolution
-        throw new ETagMismatchException(String.format("%s does not match %s " + "for rowId %s",
-            currentETag, rowETag, row.getId()));
-      }
-    }
-
-    setRowFields(row, dataETag, userPermissions, filter, false, uriAccessControl, formId, locale,
-        savepointTimestamp, values, columns);
-    return row;
-  }
-
-  private void setRowFields(Entity row, String dataETag, TablesUserPermissions userPermissions, Scope filterScope,
+  public void setRowFields(Entity row, String rowETag, String dataETagAtModification,
+      String lastUpdateUser, Scope filterScope,
       boolean deleted, String uriAccessControl, String formId, String locale,
       Long savepointTimestamp, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
-    row.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
-    row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETag);
-    row.set(DbTable.LAST_UPDATE_USER, userPermissions.getOdkTablesUserId());
+    row.set(DbTable.ROW_ETAG, rowETag);
+    row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
+    row.set(DbTable.LAST_UPDATE_USER, lastUpdateUser);
 
     // if filterScope is null, don't change the value
     // if filterScope is the empty scope, set both filter type and value to null
@@ -384,7 +348,7 @@ public class EntityCreator {
    *
    * @param logTable
    *          the {@link DbLogTable} relation.
-   * @param dataETag
+   * @param dataETagAtModification
    *          the data etag at the time of creation
    * @param row
    *          the row
@@ -396,11 +360,12 @@ public class EntityCreator {
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public Entity newLogEntity(DbLogTable logTable, String dataETag, Entity row,
+  public Entity newLogEntity(DbLogTable logTable, String dataETagAtModification,
+      String previousRowETag, Entity row,
       List<DbColumnDefinitionsEntity> columns, Sequencer sequencer, CallingContext cc)
       throws ODKDatastoreException {
     Validate.notNull(logTable);
-    Validate.notEmpty(dataETag);
+    Validate.notEmpty(dataETagAtModification);
     Validate.notNull(row);
     Validate.noNullElements(columns);
     Validate.notNull(cc);
@@ -410,7 +375,8 @@ public class EntityCreator {
     entity.set(DbLogTable.SEQUENCE_VALUE, sequencer.getNextSequenceValue());
 
     entity.set(DbLogTable.ROW_ETAG, row.getString(DbTable.ROW_ETAG));
-    entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
+    entity.set(DbLogTable.PREVIOUS_ROW_ETAG, previousRowETag);
+    entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
     entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
     entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
