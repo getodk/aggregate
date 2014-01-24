@@ -21,6 +21,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
@@ -35,5 +36,5 @@ public interface DiffService {
 
   @GET
   public RowResourceList getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
-      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException;
+      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 }

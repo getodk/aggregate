@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ServerDiffService;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -51,7 +52,7 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public ArrayList<RowClient> getRowsSince(String dataETag, String tableId)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, InconsistentStateException, ODKTaskLockException {
+      PermissionDeniedExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {

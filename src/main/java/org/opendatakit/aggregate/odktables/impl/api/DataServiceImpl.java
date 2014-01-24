@@ -50,14 +50,14 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
+  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRows();
     return new RowResourceList(getResources(rows));
   }
 
   @Override
-  public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
+  public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
     return resource;
@@ -75,7 +75,7 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public String deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
-      PermissionDeniedException, InconsistentStateException {
+      PermissionDeniedException, InconsistentStateException, BadColumnNameException {
     return dm.deleteRow(rowId);
   }
 

@@ -40,12 +40,12 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 public interface DataService {
 
   @GET
-  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException;
+  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
   @GET
   @Path("{rowId}")
   public RowResource getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      PermissionDeniedException, InconsistentStateException, ODKTaskLockException;
+      PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
   @PUT
   @Path("{rowId}")
@@ -58,6 +58,6 @@ public interface DataService {
   @Path("{rowId}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public String deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException, InconsistentStateException;
+      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException;
 
 }

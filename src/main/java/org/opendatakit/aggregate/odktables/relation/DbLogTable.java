@@ -37,31 +37,49 @@ public class DbLogTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
+  /**
+   * NOTE: the PK of this table is the ROW_ETAG.
+   */
+
+  // RowID of the DbTable row corresponding to this log entry
   public static final DataField ROW_ID = new DataField("_ROW_ID", DataType.STRING, false)
       .setIndexable(IndexType.HASH);
-  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
-  public static final DataField DATA_ETAG_AT_MODIFICATION = new DataField(
-      "_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false).setIndexable(IndexType.HASH);
-  // we need to maintain a global sequence value within the log table
+  // Global sequence value that monotonically increased -- for change ordering
   public static final DataField SEQUENCE_VALUE = new DataField("_SEQUENCE_VALUE", DataType.STRING,
       false).setIndexable(IndexType.ORDERED);
+
+  // ETag of the DbTable Row's state matching this log entry
+  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
+  // ETag of the DbTable Row's state prior to this one (may be null if the row did not exist)
+  public static final DataField PREVIOUS_ROW_ETAG = new DataField("_PREVIOUS_ROW_ETAG", DataType.STRING, true);
+  // ETag in the TableEntry that tracks this modification (for eventual bulk updates)
+  public static final DataField DATA_ETAG_AT_MODIFICATION = new DataField(
+      "_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false).setIndexable(IndexType.HASH);
+  // UriUser that originally created the record
   public static final DataField CREATE_USER = new DataField("_CREATE_USER", DataType.STRING, true);
+  // UriUser that last modified the record
   public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER",
       DataType.STRING, true);
+  // Whether or not this DbTable Row is deleted.
+  public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
+
+  // The FormId of the form that was in use when this record was last saved.
+  public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
+      DataType.STRING, true);
+  // The locale that was active when this record was last saved.
+  public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
+      DataType.STRING, true);
+  // milliseconds at the time the form was saved (on client).
+  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.INTEGER, true);
+
+  // Access control filters accessible only on server (these may be useless)
   public static final DataField FILTER_TYPE = new DataField("_FILTER_TYPE", DataType.STRING, true);
   public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
       .setIndexable(IndexType.HASH);
-  public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
-
+  // Access control tag sent down to the device (unclear whether this is useful)
   public static final DataField URI_ACCESS_CONTROL = new DataField(
       TableConstants.URI_ACCESS_CONTROL.toUpperCase(), DataType.STRING, true);
-  public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
-      DataType.STRING, true);
-  public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
-      DataType.STRING, true);
-  // milliseconds
-  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
-      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.INTEGER, true);
 
   private static final List<DataField> dataFields;
   static {
@@ -69,19 +87,24 @@ public class DbLogTable extends Relation {
     dataFields.add(ROW_ID);
     dataFields.add(SEQUENCE_VALUE);
 
+    // metadata held only up at server
     dataFields.add(ROW_ETAG);
+    dataFields.add(PREVIOUS_ROW_ETAG);
     dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(CREATE_USER);
     dataFields.add(LAST_UPDATE_USER);
-    dataFields.add(FILTER_TYPE);
-    dataFields.add(FILTER_VALUE);
     dataFields.add(DELETED);
 
-    // common metadata
-    dataFields.add(URI_ACCESS_CONTROL);
+    // common metadata transmitted between server and device
     dataFields.add(FORM_ID);
     dataFields.add(LOCALE);
     dataFields.add(SAVEPOINT_TIMESTAMP);
+
+    // Access control filters accessible only on server (these may be useless)
+    dataFields.add(FILTER_TYPE);
+    dataFields.add(FILTER_VALUE);
+    // Access control tag sent down to the device (unclear whether this is useful)
+    dataFields.add(URI_ACCESS_CONTROL);
   }
 
   private static final EntityConverter converter = new EntityConverter();

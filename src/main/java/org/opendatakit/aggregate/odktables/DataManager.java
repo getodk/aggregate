@@ -93,17 +93,68 @@ public class DataManager {
     return tableId;
   }
 
-  public void revertPendingChanges(DbTableEntryEntity entry, DbTable table, DbLogTable logTable) {
+  private void revertPendingChanges(DbTableEntryEntity entry, List<DbColumnDefinitionsEntity> columns,
+        DbTable table, DbLogTable logTable) throws ODKDatastoreException, BadColumnNameException {
+
     // we have nothing to do if the pending dataETag is null...
-    if ( entry.getPendingDataETag() == null ) {
+    String dataETag = entry.getPendingDataETag();
+    if ( dataETag == null ) {
       return;
     }
 
-    // Otherwise:
-    // (1) fetch all changes for that dataETag from the log table
-    // (2)
+    // search for log entries matching the TableEntry dataETag
+    // log entries are written first, so these should exist, and the
+    // row entries may or may not reflect the log contents.
 
+    Query query = logTable.query("DataManager.revertPendingChanges", cc);
+    query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
+    List<Entity> logEntries = query.execute();
+
+    for ( Entity logEntity : logEntries ) {
+      // Log entries maintain the history of previous rowETags
+      // Chain back through that to get the previous log record.
+      // If the previous rowETag is null, it means that the rowId
+      // did not exist prior to this log entry.
+      String priorETag = logEntity.getString(DbLogTable.PREVIOUS_ROW_ETAG);
+      if ( priorETag == null ) {
+        // no prior state -- so rowId may not exist now...
+        try {
+          // try to retrieve the rowId from the DbTable
+          Entity rowEntity = table.getEntity(logEntity.getString(DbLogTable.ROW_ID), cc);
+          // if found, delete it
+          rowEntity.delete(cc);
+        } catch ( ODKEntityNotFoundException e ) {
+          // ignore... it was never created, which is OK!
+        }
+        // remove the entry in DbLogTable for the pending state
+        logEntity.delete(cc);
+      } else {
+        // there is prior state, so the rowId should exist
+        Entity rowEntity = table.getEntity(logEntity.getString(DbLogTable.ROW_ID), cc);
+        // and the prior state should exist in the log...
+        Entity priorLogEntity = logTable.getEntity(logEntity.getString(DbLogTable.PREVIOUS_ROW_ETAG), cc);
+
+        // reset the row to the prior row state
+        creator.setRowFields(rowEntity,
+            priorLogEntity.getString(DbLogTable.ROW_ETAG),
+            priorLogEntity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION),
+            priorLogEntity.getString(DbLogTable.LAST_UPDATE_USER),
+            converter.getDbLogTableFilterScope(priorLogEntity),
+            priorLogEntity.getBoolean(DbLogTable.DELETED),
+            priorLogEntity.getString(DbLogTable.URI_ACCESS_CONTROL),
+            priorLogEntity.getString(DbLogTable.FORM_ID),
+            priorLogEntity.getString(DbLogTable.LOCALE),
+            priorLogEntity.getLong(DbLogTable.SAVEPOINT_TIMESTAMP),
+            converter.getRowValues(priorLogEntity, columns), columns);
+
+        // revert DbTable to the prior row state
+        rowEntity.put(cc);
+        // remove the entry in DbLogTable for the pending state
+        logEntity.delete(cc);
+      }
+    }
   }
+
   /**
    * Retrieve all current rows of the table.
    *
@@ -112,8 +163,9 @@ public class DataManager {
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
    * @throws InconsistentStateException
+   * @throws BadColumnNameException
    */
-  public List<Row> getRows() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, InconsistentStateException {
+  public List<Row> getRows() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, InconsistentStateException, BadColumnNameException {
 
     userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
 
@@ -136,7 +188,7 @@ public class DataManager {
       DbTable table = DbTable.getRelation(tableDefn, columns, cc);
       DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
-      revertPendingChanges( entry, table, logTable);
+      revertPendingChanges( entry, columns, table, logTable);
 
       Query query = buildRowsQuery(table);
       entities = query.execute();
@@ -180,8 +232,9 @@ public class DataManager {
    * @throws ODKTaskLockException
    * @throws InconsistentStateException
    * @throws PermissionDeniedException
+   * @throws BadColumnNameException
    */
-  public List<Row> getRowsSince(String dataETag) throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException, PermissionDeniedException {
+  public List<Row> getRowsSince(String dataETag) throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException, PermissionDeniedException, BadColumnNameException {
 
     userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
 
@@ -204,7 +257,7 @@ public class DataManager {
       DbTable table = DbTable.getRelation(tableDefn, columns, cc);
       DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
-      revertPendingChanges( entry, table, logTable);
+      revertPendingChanges( entry, columns, table, logTable);
 
       String sequenceValue = null;
       if (dataETag != null) {
@@ -257,13 +310,12 @@ public class DataManager {
    */
   private String getSequenceValueForDataETag(DbLogTable logTable, String dataETag) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.getSequenceValueForDataETag", cc);
-    // TODO: did this break (if it ever worked) when converted to string etags
-    // instead of flawed mod numbers?
     query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
     List<Entity> values = query.execute();
     if (values == null || values.size() == 0) {
       throw new ODKEntityNotFoundException("ETag " + dataETag + " was not found in log table!");
     } else if (values.size() != 1) {
+      // TODO: at least for now, we only have one update per change event...
       throw new ODKDatastoreException("Unexpected duplicate records for ETag " + dataETag
           + " found in log table!");
     }
@@ -326,8 +378,9 @@ public class DataManager {
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
    * @throws ODKTaskLockException
+   * @throws BadColumnNameException
    */
-  public Row getRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
+  public Row getRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     Validate.notEmpty(rowId);
 
     userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
@@ -351,7 +404,7 @@ public class DataManager {
       DbTable table = DbTable.getRelation(tableDefn, columns, cc);
       DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
-      revertPendingChanges( entry, table, logTable);
+      revertPendingChanges( entry, columns, table, logTable);
 
       entity = table.getEntity(rowId, cc);
 
@@ -432,7 +485,7 @@ public class DataManager {
       DbTable table = DbTable.getRelation(tableDefn, columns, cc);
       DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
-      revertPendingChanges( entry, table, logTable);
+      revertPendingChanges( entry, columns, table, logTable);
 
       String rowId = row.getRowId();
       boolean newRowId = false;
@@ -482,6 +535,19 @@ public class DataManager {
           throw new PermissionDeniedException(String.format("Denied table %s row %s read access to user %s",
               tableId, rowId, userPermissions.getOdkTablesUserId()));
         }
+
+        String rowETag = entity.getString(DbTable.ROW_ETAG);
+        String currentETag = row.getRowETag();
+        if (currentETag == null || !currentETag.equals(rowETag)) {
+          // if null, then the client thinks they are creating a new row.
+          // The rows may be identical, but leave that to the client to determine
+          // trigger client-side conflict resolution.
+          // Otherwise, if there is a mis-match, then the client needs to pull and
+          // perform client-side conflict resolution on the changes already up on the server.
+          throw new ETagMismatchException(String.format("%s does not match %s " + "for rowId %s",
+              currentETag, rowETag, rowId));
+        }
+
       } catch ( ODKEntityNotFoundException e ) {
 
         // require unfiltered write permissions to create a new record
@@ -490,22 +556,26 @@ public class DataManager {
         newRowId = true;
         // initialization for insert...
         entity = table.newEntity(rowId, cc);
+        entity.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
       }
 
       // OK we are able to update or insert the record -- mark as pending change.
 
       // get new dataETag
-      String dataETag = CommonFieldsBase.newUri();
-      entry.setPendingDataETag(dataETag);
+      String dataETagAtModification = CommonFieldsBase.newUri();
+      entry.setPendingDataETag(dataETagAtModification);
       entry.put(cc);
 
-      // OK we need to update the entity...
-      creator.insertOrUpdateRowEntity(table, entity, !newRowId, rowId, dataETag, row.getRowETag(),
-          scope, row.getUriAccessControl(), row.getFormId(), row.getLocale(),
-          row.getSavepointTimestamp(), row.getValues(), columns, userPermissions, cc);
+      // this will be null of the entity is newly created...
+      String previousRowETag = row.getRowETag();
+
+      // update the fields in the DbTable entity...
+      creator.setRowFields(entity, CommonFieldsBase.newUri(), dataETagAtModification,
+          userPermissions.getOdkTablesUserId(), scope, false, row.getUriAccessControl(), row.getFormId(), row.getLocale(),
+          row.getSavepointTimestamp(), row.getValues(), columns);
 
       // create log table entry
-      Entity logEntity = creator.newLogEntity(logTable, dataETag, entity, columns, sequencer, cc);
+      Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);
 
       // update db
       DbLogTable.putEntity(logEntity, cc);
@@ -540,14 +610,15 @@ public class DataManager {
    * @throws ODKTaskLockException
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
+   * @throws BadColumnNameException
    */
   public String deleteRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException, InconsistentStateException {
+      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException {
     Validate.notNull(rowId);
     Validate.notBlank(rowId);
 
     userPermissions.checkPermission(tableId, TablePermission.DELETE_ROW);
-    String dataETag = null;
+    String dataETagAtModification = null;
     LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
     try {
       propsLock.acquire();
@@ -566,7 +637,7 @@ public class DataManager {
       DbTable table = DbTable.getRelation(tableDefn, columns, cc);
       DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
-      revertPendingChanges( entry, table, logTable);
+      revertPendingChanges( entry, columns, table, logTable);
 
       Entity entity = table.getEntity(rowId, cc);
 
@@ -599,21 +670,26 @@ public class DataManager {
       }
 
       // get new dataETag
-      dataETag = CommonFieldsBase.newUri();
-      entry.setPendingDataETag(dataETag);
+      dataETagAtModification = CommonFieldsBase.newUri();
+      entry.setPendingDataETag(dataETagAtModification);
       entry.put(cc);
 
+      // remember the previous row ETag so we can chain revisions in the DbLogTable
+      String previousRowETag = entity.getString(DbTable.ROW_ETAG);
+
+      // update the row ETag and deletion status
       entity.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
       entity.set(DbTable.DELETED, true);
 
       // create log table entry
-      Entity logEntity = creator.newLogEntity(logTable, dataETag, entity, columns, sequencer, cc);
+      Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);
 
-      // update db
+      // commit the log change to the database (must be done first!)
       DbLogTable.putEntity(logEntity, cc);
+      // commit the row change
       DbTable.putEntity(entity, cc);
 
-      // commit change
+      // update the TableEntry to reflect the completion of the change
       entry.setDataETag(entry.getPendingDataETag());
       entry.setPendingDataETag(null);
       entry.put(cc);
@@ -622,6 +698,6 @@ public class DataManager {
       propsLock.release();
     }
 
-    return dataETag;
+    return dataETagAtModification;
   }
 }

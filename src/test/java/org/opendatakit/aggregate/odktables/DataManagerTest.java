@@ -125,7 +125,7 @@ public class DataManagerTest {
   }
 
   @Test
-  public void testGetRowsEmpty() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
+  public void testGetRowsEmpty() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows = dm.getRows();
     assertTrue(rows.isEmpty());
   }
@@ -214,7 +214,7 @@ public class DataManagerTest {
 
   @Test(expected = ODKEntityNotFoundException.class)
   public void testGetRowNullSafeDoesNotExist() throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKTaskLockException, PermissionDeniedException, InconsistentStateException {
+      ODKDatastoreException, ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException {
     dm.getRow(T.Data.DYLAN.getId());
   }
 
@@ -398,7 +398,7 @@ public class DataManagerTest {
 //  }
 
   @Ignore
-  private void clearRows() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException, InconsistentStateException {
+  private void clearRows() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException {
     List<Row> rows = dm.getRows();
     for ( Row old : rows ) {
       dm.deleteRow(old.getRowId());
