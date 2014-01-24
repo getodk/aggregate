@@ -50,9 +50,14 @@ public class DbTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
+  /**
+   * NOTE: the PK of this table is the ROW_ID of the DbLogTable entry
+   * who's state matches this row.
+   */
+
   public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
   /**
-   * This should hold the data etag at the time the row was modified/created.
+   * This should hold the TableEntry's data ETag at the time the row was modified/created.
    */
   public static final DataField DATA_ETAG_AT_MODIFICATION = new DataField(
       "_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false);
@@ -77,20 +82,24 @@ public class DbTable extends Relation {
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    // server-side metadata
+
+    // metadata held only up at server
     dataFields.add(ROW_ETAG);
     dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(CREATE_USER);
     dataFields.add(LAST_UPDATE_USER);
-    dataFields.add(FILTER_TYPE);
-    dataFields.add(FILTER_VALUE);
     dataFields.add(DELETED);
 
-    // common metadata
-    dataFields.add(URI_ACCESS_CONTROL);
+    // common metadata transmitted between server and device
     dataFields.add(FORM_ID);
     dataFields.add(LOCALE);
     dataFields.add(SAVEPOINT_TIMESTAMP);
+
+    // Access control filters accessible only on server (these may be useless)
+    dataFields.add(FILTER_TYPE);
+    dataFields.add(FILTER_VALUE);
+    // Access control tag sent down to the device (unclear whether this is useful)
+    dataFields.add(URI_ACCESS_CONTROL);
   }
 
   private static final EntityConverter converter = new EntityConverter();

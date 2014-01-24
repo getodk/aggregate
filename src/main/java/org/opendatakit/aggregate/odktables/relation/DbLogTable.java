@@ -38,7 +38,8 @@ public class DbLogTable extends Relation {
   }
 
   /**
-   * NOTE: the PK of this table is the ROW_ETAG.
+   * NOTE: the PK of this table is the ROW_ETAG of the DbTable Row
+   * who's state matches this log entry.
    */
 
   // RowID of the DbTable row corresponding to this log entry
@@ -48,8 +49,6 @@ public class DbLogTable extends Relation {
   public static final DataField SEQUENCE_VALUE = new DataField("_SEQUENCE_VALUE", DataType.STRING,
       false).setIndexable(IndexType.ORDERED);
 
-  // ETag of the DbTable Row's state matching this log entry
-  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
   // ETag of the DbTable Row's state prior to this one (may be null if the row did not exist)
   public static final DataField PREVIOUS_ROW_ETAG = new DataField("_PREVIOUS_ROW_ETAG", DataType.STRING, true);
   // ETag in the TableEntry that tracks this modification (for eventual bulk updates)
@@ -88,7 +87,6 @@ public class DbLogTable extends Relation {
     dataFields.add(SEQUENCE_VALUE);
 
     // metadata held only up at server
-    dataFields.add(ROW_ETAG);
     dataFields.add(PREVIOUS_ROW_ETAG);
     dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(CREATE_USER);
