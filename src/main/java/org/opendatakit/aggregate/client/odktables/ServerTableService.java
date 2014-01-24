@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -39,7 +39,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("servertableservice")
 public interface ServerTableService extends RemoteService {
 
-  List<TableEntryClient> getTables() throws AccessDeniedException, RequestFailureException,
+  ArrayList<TableEntryClient> getTables() throws AccessDeniedException, RequestFailureException,
       DatastoreFailureException, PermissionDeniedExceptionClient;
 
   TableEntryClient getTable(String tableId) throws AccessDeniedException, RequestFailureException,

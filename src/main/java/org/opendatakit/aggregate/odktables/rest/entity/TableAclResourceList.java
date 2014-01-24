@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -36,8 +35,8 @@ public class TableAclResourceList {
   /**
    * The entries in the manifest.
    */
-  @ElementList(inline = true)
-  private List<TableAclResource> entries;
+  @ElementList(inline = true, required = false)
+  private ArrayList<TableAclResource> entries;
 
   /**
    * Constructor used by Jackson
@@ -51,15 +50,19 @@ public class TableAclResourceList {
    *
    * @param entries
    */
-  public TableAclResourceList(List<TableAclResource> entries) {
-    this.entries = entries;
+  public TableAclResourceList(ArrayList<TableAclResource> entries) {
+    if ( entries == null ) {
+      this.entries = new ArrayList<TableAclResource>();
+    } else {
+      this.entries = entries;
+    }
   }
 
-  public List<TableAclResource> getEntries() {
+  public ArrayList<TableAclResource> getEntries() {
     return entries;
   }
 
-  public void setEntries(List<TableAclResource> entries) {
+  public void setEntries(ArrayList<TableAclResource> entries) {
     this.entries = entries;
   }
 

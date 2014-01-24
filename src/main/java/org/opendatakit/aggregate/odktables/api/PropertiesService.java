@@ -36,7 +36,7 @@ public interface PropertiesService {
 
   @GET
   @Path("")
-  public PropertiesResource getProperties() throws ODKDatastoreException, PermissionDeniedException;
+  public PropertiesResource getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
 
   @PUT
   @Path("")

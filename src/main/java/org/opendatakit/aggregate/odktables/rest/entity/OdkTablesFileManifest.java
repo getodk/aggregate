@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -37,8 +36,8 @@ public class OdkTablesFileManifest {
   /**
    * The entries in the manifest.
    */
-  @ElementList(inline = true)
-  private List<OdkTablesFileManifestEntry> entries;
+  @ElementList(inline = true, required = false)
+  private ArrayList<OdkTablesFileManifestEntry> entries;
 
   /**
    * Constructor used by Jackson
@@ -52,15 +51,19 @@ public class OdkTablesFileManifest {
    *
    * @param entries
    */
-  public OdkTablesFileManifest(List<OdkTablesFileManifestEntry> entries) {
-    this.entries = entries;
+  public OdkTablesFileManifest(ArrayList<OdkTablesFileManifestEntry> entries) {
+    if ( entries == null ) {
+      this.entries = new ArrayList<OdkTablesFileManifestEntry>();
+    } else {
+      this.entries = entries;
+    }
   }
 
-  public List<OdkTablesFileManifestEntry> getEntries() {
+  public ArrayList<OdkTablesFileManifestEntry> getEntries() {
     return entries;
   }
 
-  public void setEntries(List<OdkTablesFileManifestEntry> entries) {
+  public void setEntries(ArrayList<OdkTablesFileManifestEntry> entries) {
     this.entries = entries;
   }
 

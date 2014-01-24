@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
@@ -81,12 +80,13 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	    public void onClick(ClickEvent event) {
 
 	      String tableId = idBox.getValue();
+	      // displayName should be a JSON encoding of the data entered by the user
          String displayName = displayNameBox.getValue();
+         if (!(displayName != null && (displayName.startsWith("{") || displayName.startsWith("\""))) ) {
+           displayName = "\"" + displayName + "\"";
+         }
 
-         // TODO: for now, just add the tableId and displayName, with the
-         // tableId also being the dbTableName. The correct workflow and checks need to
-         // be performed.
-         List<ColumnClient> columns = new ArrayList<ColumnClient>(0);
+         ArrayList<ColumnClient> columns = new ArrayList<ColumnClient>(0);
          tableDef = new TableDefinitionClient(tableId, columns, displayName,
              TableTypeClient.DATA);
 

@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.table.OdkAdminListTable;
 import org.opendatakit.aggregate.client.widgets.AddTablesAdminButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -54,7 +55,14 @@ public class OdkTablesAdminSubTab extends AggregateSubTabBase {
     AsyncCallback<OdkTablesAdmin[]> callback = new AsyncCallback<OdkTablesAdmin[]>() {
       @Override
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
+        if ( caught instanceof AccessDeniedException ) {
+          // swallow it...
+          AggregateUI.getUI().clearError();
+          OdkTablesAdmin[] admins = new OdkTablesAdmin[0];
+          listOfAdmins.updateAdmin(admins);
+        } else {
+          AggregateUI.getUI().reportError(caught);
+        }
       }
 
       @Override

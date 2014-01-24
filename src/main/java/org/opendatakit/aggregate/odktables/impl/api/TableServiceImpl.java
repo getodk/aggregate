@@ -38,17 +38,14 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
-import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -97,34 +94,12 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public TableResource createTable(String tableId, TableDefinition definition)
-      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException {
+      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
     // TODO: what if schemaETag is specified??? or if table already exists????
     // TODO: add access control stuff
-    String displayName = definition.getDisplayName();
     List<Column> columns = definition.getColumns();
-    // TODO: need a method to init a default minimal list of kvs entries.
-    List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
-    OdkTablesKeyValueStoreEntry tt;
-    tt = new OdkTablesKeyValueStoreEntry();
-    tt.tableId = tableId;
-    tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
-    tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-    tt.key = KeyValueStoreConstants.TABLE_TYPE;
-    tt.type = "string";
-    tt.value = TableType.DATA.name();
-    kvsEntries.add(tt);
-
-    tt = new OdkTablesKeyValueStoreEntry();
-    tt.tableId = tableId;
-    tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
-    tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-    tt.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
-    tt.type = "json";
-    tt.value = displayName;
-    kvsEntries.add(tt);
-
-    TableEntry entry = tm.createTable(tableId, columns, kvsEntries);
+    TableEntry entry = tm.createTable(tableId, columns);
     TableResource resource = getResource(entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return resource;
@@ -160,7 +135,7 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public TableDefinitionResource getDefinition(String tableId) throws ODKDatastoreException, PermissionDeniedException {
+  public TableDefinitionResource getDefinition(String tableId) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     // TODO: permissions stuff for a table, perhaps? or just at the row level?
     TableDefinition definition = tm.getTableDefinition(tableId);
     TableDefinitionResource definitionResource = new TableDefinitionResource(definition);

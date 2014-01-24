@@ -17,13 +17,13 @@
 package org.opendatakit.aggregate.odktables.security;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.TableAclManager;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -35,12 +35,22 @@ public class AuthFilter {
   private CallingContext cc;
   private TableAclManager am;
   private TablesUserPermissions userPermissions;
+  private Set<TablePermission> permissions;
 
-  public AuthFilter(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
+  public AuthFilter(String tableId, TablesUserPermissions userPermissions, List<Scope> scopes, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     this.cc = cc;
     this.userPermissions = userPermissions;
     this.am = new TableAclManager(tableId, userPermissions, cc);
+
+    permissions = new HashSet<TablePermission>();
+
+    for ( Scope scope : scopes ) {
+      TableAcl def = am.getAclForTablesUserPermissions(scope);
+      if (def != null) {
+        permissions.addAll(def.getRole().getPermissions());
+      }
+    }
   }
 
   /**
@@ -68,10 +78,8 @@ public class AuthFilter {
    *          the permission to check
    * @return true if the user has the given permission, false otherwise
    * @throws ODKDatastoreException
-   * @throws PermissionDeniedException
    */
-  public boolean hasPermission(TablePermission permission) throws ODKDatastoreException, PermissionDeniedException {
-    Set<TablePermission> permissions = getPermissions(userPermissions.getOdkTablesUserId());
+  public boolean hasPermission(TablePermission permission) throws ODKDatastoreException {
     return true;
 //    return permissions.contains(permission);
   }
@@ -93,77 +101,45 @@ public class AuthFilter {
    * @param row
    *          the row to check
    * @throws ODKDatastoreException
-   * @throws PermissionDeniedException
-   *           if the current user does not have the given permission and is not
-   *           within the scope of the filter on the row
    */
-  public void checkFilter(TablePermission permission, String rowId, Scope filter)
-      throws ODKDatastoreException, PermissionDeniedException {
+  public boolean hasFilterScope(TablePermission permission, String rowId, Scope filter)
+      throws ODKDatastoreException {
     Validate.notNull(permission);
     Validate.notNull(rowId);
 
-    Set<TablePermission> permissions = getPermissions(userPermissions.getOdkTablesUserId());
-
-    if (!permissions.contains(permission)) {
-      if (filter == null || filter.equals(Scope.EMPTY_SCOPE)) {
-        // empty scope, no one allowed
-        throwPermissionDenied(rowId, userPermissions);
-      }
-      switch (filter.getType()) {
-      case USER:
-        String filterUser = filter.getValue();
-        if (userPermissions == null && filterUser != null) {
-          throwPermissionDenied(rowId, userPermissions);
-        } else if (userPermissions != null && !userPermissions.getOdkTablesUserId().equals(filter.getValue())) {
-          throwPermissionDenied(rowId, userPermissions);
-        }
-        break;
-      case GROUP:
-        // TODO: add this
-        // List<String> groups = getGroupNames(userUri);
-        // if (!groups.contains(filter.getValue()))
-        // {
-        // throwPermissionDenied(row.getRowId(), userUri);
-        // }
-        break;
-      default:
-      case DEFAULT:
-        // everyone is allowed to see it
-        break;
-      }
-    }
+//    if (!permissions.contains(permission)) {
+//      if (filter == null || filter.equals(Scope.EMPTY_SCOPE)) {
+//        // empty scope, no one allowed
+//        return false;
+//      }
+//      switch (filter.getType()) {
+//      case USER:
+//        String filterUser = filter.getValue();
+//        if (userPermissions == null && filterUser != null) {
+//          return false;
+//        } else if (userPermissions != null && !userPermissions.getOdkTablesUserId().equals(filter.getValue())) {
+//          return false;
+//        }
+//        break;
+//      case GROUP:
+//        // TODO: add this
+//        // List<String> groups = getGroupNames(userUri);
+//        // if (!groups.contains(filter.getValue()))
+//        // {
+//        // throwPermissionDenied(row.getRowId(), userUri);
+//        // }
+//        break;
+//      default:
+//      case DEFAULT:
+//        // everyone is allowed to see it
+//        break;
+//      }
+//    }
+    return true;
   }
 
   private void throwPermissionDenied(String rowId, TablesUserPermissions userPermissions) throws PermissionDeniedException {
     throw new PermissionDeniedException(String.format(
         "Denied permission to access row %s to user %s", rowId, userPermissions.getOdkTablesUserId()));
-  }
-
-  private Set<TablePermission> getPermissions(String odkTablesUserId) throws ODKDatastoreException, PermissionDeniedException {
-    Set<TablePermission> permissions = new HashSet<TablePermission>();
-
-    // get default permissions
-    TableAcl def = am.getAcl(new Scope(Type.DEFAULT, null));
-    if (def != null) {
-      permissions.addAll(def.getRole().getPermissions());
-    }
-
-    // get user's permissions
-    TableAcl user = am.getAcl(new Scope(Type.USER, odkTablesUserId));
-    if (user != null) {
-      permissions.addAll(user.getRole().getPermissions());
-    }
-
-    // TODO: get groups' permissions
-    // List<Group> groups = ....getGroups(userUri);
-    // for (Group group : groups) {
-    // TableAcl group = am.getAcl(new Scope(Type.GROUP, group.getName()));
-    // if (group != null)
-    // {
-    // roles.addAll(group.getRole().getPermissions());
-    // }
-    // }
-
-    return permissions;
   }
 }

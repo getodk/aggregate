@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This represents the contents of a table that will display information about
@@ -37,7 +37,7 @@ public class TableContentsForFilesClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -5644953958281330962L;
+  private static final long serialVersionUID = -5644953958281330963L;
 
   public TableContentsForFilesClient() {
     // necessary for gwt serialization
@@ -46,12 +46,12 @@ public class TableContentsForFilesClient implements Serializable {
   /**
    * The names of the table's columns.
    */
-  public List<String> columnNames;
+  public ArrayList<String> columnNames;
 
   /**
    * The non-media files for the table. Any media file associated with the file
    * will exist in the mediaFiles list for that file.
    */
-  public List<FileSummaryClient> nonMediaFiles;
+  public ArrayList<FileSummaryClient> nonMediaFiles;
 
 }

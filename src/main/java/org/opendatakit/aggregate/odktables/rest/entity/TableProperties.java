@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -45,7 +45,7 @@ public class TableProperties {
   private String tableId;
 
   @ElementList(inline = true, required = false)
-  private List<OdkTablesKeyValueStoreEntry> kvsEntries;
+  private ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries;
 
   protected TableProperties() {
   }
@@ -58,7 +58,7 @@ public class TableProperties {
    * @param keyValueStoreEntries
    */
   public TableProperties(String propertiesETag, String tableId,
-      List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries) {
+      ArrayList<OdkTablesKeyValueStoreEntry> keyValueStoreEntries) {
     this.propertiesETag = propertiesETag;
     this.tableId = tableId;
     this.kvsEntries = keyValueStoreEntries;
@@ -80,11 +80,11 @@ public class TableProperties {
     this.tableId = tableId;
   }
 
-  public void setKeyValueStoreEntries(List<OdkTablesKeyValueStoreEntry> kvsEntries) {
+  public void setKeyValueStoreEntries(ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries) {
     this.kvsEntries = kvsEntries;
   }
 
-  public List<OdkTablesKeyValueStoreEntry> getKeyValueStoreEntries() {
+  public ArrayList<OdkTablesKeyValueStoreEntry> getKeyValueStoreEntries() {
     return this.kvsEntries;
   }
 

@@ -202,7 +202,7 @@ public class SerializationTest {
 
   @Test
   public void testListOfRowResource() throws Exception {
-    List<RowResource> expected = new ArrayList<RowResource>();
+    ArrayList<RowResource> expected = new ArrayList<RowResource>();
     RowResource one = new RowResource(Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues()));
     RowResource two = new RowResource(Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.JOHN.getValues()));
     expected.add(one);

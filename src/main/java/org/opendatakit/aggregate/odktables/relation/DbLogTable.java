@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
@@ -85,25 +86,21 @@ public class DbLogTable extends Relation {
 
   private static final EntityConverter converter = new EntityConverter();
 
-  public static DbLogTable getRelation(String tableId, String schemaETag, CallingContext cc)
+  public static final String getDbLogTableName(String dataTableName) {
+    return dataTableName + "_LOG";
+  }
+
+  public static DbLogTable getRelation(DbTableDefinitionsEntity entity, List<DbColumnDefinitionsEntity> entities, CallingContext cc)
       throws ODKDatastoreException {
-    List<DataField> fields = getDynamicFields(tableId, schemaETag, cc);
+    List<DataField> fields = converter.toFields(entities);
     fields.addAll(getStaticFields());
-    return getRelation(tableId, fields, cc);
+    return getRelation(getDbLogTableName(entity.getDbTableName()), fields, cc);
   }
 
-  private static synchronized DbLogTable getRelation(String tableId, List<DataField> fields,
+  private static synchronized DbLogTable getRelation(String tableName, List<DataField> fields,
       CallingContext cc) throws ODKDatastoreException {
-    tableId += "_LOG";
-    DbLogTable relation = new DbLogTable(RUtil.NAMESPACE, RUtil.convertIdentifier(tableId), fields,
-        cc);
+    DbLogTable relation = new DbLogTable(RUtil.NAMESPACE, tableName, fields, cc);
     return relation;
-  }
-
-  private static List<DataField> getDynamicFields(String tableId, String schemaETag,
-      CallingContext cc) throws ODKDatastoreException {
-    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaETag, cc);
-    return converter.toFields(entities);
   }
 
   private static List<DataField> getStaticFields() {

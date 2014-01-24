@@ -16,12 +16,12 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerDiffServiceAsync {
 
-  void getRowsSince(String dataETag, String tableId, AsyncCallback<List<RowClient>> callback);
+  void getRowsSince(String dataETag, String tableId, AsyncCallback<ArrayList<RowClient>> callback);
 
 }

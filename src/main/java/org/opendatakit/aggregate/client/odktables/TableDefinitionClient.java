@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This is the client-side version of
@@ -39,14 +39,14 @@ public class TableDefinitionClient implements Serializable {
   private String tableId;
   private String displayName;
   private TableTypeClient type;
-  private List<ColumnClient> columns;
+  private ArrayList<ColumnClient> columns;
 
   @SuppressWarnings("unused")
   private TableDefinitionClient() {
     // necessary for gwt serialization
   }
 
-  public TableDefinitionClient(final String tableId, final List<ColumnClient> columns,
+  public TableDefinitionClient(final String tableId, final ArrayList<ColumnClient> columns,
       final String displayName, final TableTypeClient type) {
     this.tableId = tableId;
     this.columns = columns;
@@ -58,7 +58,7 @@ public class TableDefinitionClient implements Serializable {
     return this.tableId;
   }
 
-  public List<ColumnClient> getColumns() {
+  public ArrayList<ColumnClient> getColumns() {
     return this.columns;
   }
 
@@ -70,7 +70,7 @@ public class TableDefinitionClient implements Serializable {
     return this.type;
   }
 
-  public void setColumns(final List<ColumnClient> columns) {
+  public void setColumns(final ArrayList<ColumnClient> columns) {
     this.columns = columns;
   }
 

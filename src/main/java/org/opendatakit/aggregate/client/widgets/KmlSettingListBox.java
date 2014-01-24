@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.KmlSettingOption;
 
@@ -26,7 +26,7 @@ public final class KmlSettingListBox extends AggregateListBox {
     super(tooltipText, false, balloonText);
   }
 
-  public void updateValues(List<KmlSettingOption> options) {
+  public void updateValues(ArrayList<KmlSettingOption> options) {
     clear();
     for (KmlSettingOption kSO : options) {
       addItem(kSO.getDisplayName(), kSO.getElementKey());
@@ -38,7 +38,7 @@ public final class KmlSettingListBox extends AggregateListBox {
     int size = getItemCount();
 
     String geoPointValue = null;
-    if(size > index && size > 0) {
+    if (size > index && size > 0) {
       geoPointValue = getValue(index);
     }
     return geoPointValue;

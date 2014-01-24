@@ -31,6 +31,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.security.spring.UserGrantedAuthority;
@@ -61,6 +62,9 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
       PermissionDeniedException {
     this.cc = cc;
     Datastore ds = cc.getDatastore();
+    if ( uriUser.equals(User.ANONYMOUS_USER) ) {
+      throw new PermissionDeniedException("User does not have access to ODK Tables");
+    }
     user = RegisteredUsersTable.getUserByUri(uriUser, ds, cc.getCurrentUser());
     OdkTablesUserInfoTable odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser,
         cc);
@@ -91,7 +95,7 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
         throw new PermissionDeniedException("User does not have access to ODK Tables");
       }
     } else {
-      throw new PermissionDeniedException("User does not have access to ODK Tables");
+      userInfo = odkTablesUserInfo;
     }
   }
 
@@ -141,7 +145,7 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
     }
     AuthFilter auth = authFilters.get(tableId);
     if (auth == null) {
-      auth = new AuthFilter(tableId, this, cc);
+      auth = new AuthFilter(tableId, this, getScopes(), cc);
       authFilters.put(tableId, auth);
     }
     return auth;
@@ -160,6 +164,7 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
     AuthFilter authFilter = getAuthFilter(tableId);
     if (authFilter != null) {
       authFilter.checkPermission(permission);
+      return;
     }
     throw new PermissionDeniedException(String.format("Denied table %s permission %s to user %s",
         tableId, permission, userInfo.getOdkTablesUserId()));
@@ -175,47 +180,19 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
   @Override
   public boolean hasPermission(String tableId, TablePermission permission)
       throws ODKDatastoreException {
-    try {
-      AuthFilter filter = getAuthFilter(tableId);
-      if (filter != null) {
-        return filter.hasPermission(permission);
-      }
-    } catch (PermissionDeniedException e) {
-      return false;
+    AuthFilter filter = getAuthFilter(tableId);
+    if (filter != null) {
+      return filter.hasPermission(permission);
     }
     return false;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.opendatakit.aggregate.odktables.security.CurrentUserPermissionsIf#
-   * hasFilterScope(java.lang.String,
-   * org.opendatakit.aggregate.odktables.rest.entity.Scope)
-   */
   @Override
-  public boolean hasFilterScope(String tableId, Scope filterScope) {
-    return true;
-    // List<Scope> scopes = getScopes();
-    // return scopes.contains(filterScope);
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.opendatakit.aggregate.odktables.security.CurrentUserPermissionsIf#
-   * checkFilter(java.lang.String,
-   * org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission,
-   * java.lang.String, org.opendatakit.aggregate.odktables.rest.entity.Scope)
-   */
-  @Override
-  public void checkFilter(String tableId, TablePermission permission, String rowId, Scope filter)
-      throws ODKDatastoreException, PermissionDeniedException {
+  public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException {
     AuthFilter authFilter = getAuthFilter(tableId);
     if (authFilter != null) {
-      authFilter.checkFilter(permission, rowId, filter);
+      return authFilter.hasFilterScope(permission, rowId, filterScope);
     }
-    throw new PermissionDeniedException(String.format("Denied table %s permission %s to user %s",
-        tableId, permission, userInfo.getOdkTablesUserId()));
+    return false;
   }
 }

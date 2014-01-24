@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -38,13 +38,13 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("servertableaclservice")
 public interface ServerTableACLService extends RemoteService {
 
-  List<TableAclClient> getAcls(String tableId) throws AccessDeniedException,
+  ArrayList<TableAclClient> getAcls(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 
-  List<TableAclClient> getUserAcls(String tableId) throws AccessDeniedException,
+  ArrayList<TableAclClient> getUserAcls(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 
-  List<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException,
+  ArrayList<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
 
   TableAclClient getDefaultAcl(String tableId) throws AccessDeniedException,

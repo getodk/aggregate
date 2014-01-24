@@ -17,8 +17,13 @@ package org.opendatakit.aggregate.odktables.rest.interceptor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -44,6 +49,14 @@ public class AggregateRequestInterceptor implements ClientHttpRequestInterceptor
   @Override
   public ClientHttpResponse intercept(HttpRequest request, byte[] body,
       ClientHttpRequestExecution execution) throws IOException {
+    request.getHeaders().set(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
+    request.getHeaders().set(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
+    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    g.setTime(new Date());
+    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
+    formatter.setCalendar(g);
+    request.getHeaders().set(ApiConstants.DATE_HEADER, formatter.format(new Date()));
+
     if (accessToken != null && uriBase != null) {
       if (request.getURI().getHost().equals(uriBase.getHost())
           && request.getURI().getPort() == uriBase.getPort()) {

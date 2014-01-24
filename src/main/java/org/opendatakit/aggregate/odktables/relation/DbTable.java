@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
@@ -94,23 +95,17 @@ public class DbTable extends Relation {
 
   private static final EntityConverter converter = new EntityConverter();
 
-  public static DbTable getRelation(String tableId, String schemaETag, CallingContext cc)
+  public static DbTable getRelation(DbTableDefinitionsEntity entity, List<DbColumnDefinitionsEntity> entities, CallingContext cc)
       throws ODKDatastoreException {
-    List<DataField> fields = getDynamicFields(tableId, schemaETag, cc);
+    List<DataField> fields = converter.toFields(entities);
     fields.addAll(getStaticFields());
-    return getRelation(tableId, fields, cc);
+    return getRelation(entity.getDbTableName(), fields, cc);
   }
 
-  private static synchronized DbTable getRelation(String tableId, List<DataField> fields,
+  private static synchronized DbTable getRelation(String dbTableName, List<DataField> fields,
       CallingContext cc) throws ODKDatastoreException {
-    DbTable relation = new DbTable(RUtil.NAMESPACE, RUtil.convertIdentifier(tableId), fields, cc);
+    DbTable relation = new DbTable(RUtil.NAMESPACE, dbTableName, fields, cc);
     return relation;
-  }
-
-  private static List<DataField> getDynamicFields(String tableId, String schemaETag,
-      CallingContext cc) throws ODKDatastoreException {
-    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaETag, cc);
-    return converter.toFields(entities);
   }
 
   /**

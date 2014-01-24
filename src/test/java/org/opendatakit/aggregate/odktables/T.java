@@ -58,7 +58,8 @@ public class T {
 
     public static final String tableTypeKey = KeyValueStoreConstants.TABLE_TYPE;
     public static final String tableTypeType = "string";
-    public static final String tableTypeValue = TableType.DATA.name();
+    public static final TableType tableTypeValueAsTableType = TableType.DATA;
+    public static final String tableTypeValue = tableTypeValueAsTableType.name();
 
     public static final String tableAccessControlTableIdKey = KeyValueStoreConstants.TABLE_ACCESS_CONTROL_TABLE_ID;
     public static final String tableAccessControlTableIdType = "string";
@@ -184,9 +185,10 @@ public class T {
   public static final String tableMetadata = null;
   public static final String propertiesETag = "propertiesETag";
 
-  public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+  public static final ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
   public static final List<Column> columns = new ArrayList<Column>();
+  public static final List<Column> columns2 = new ArrayList<Column>();
 
   public static final List<Row> rows = new ArrayList<Row>();
 
@@ -199,6 +201,8 @@ public class T {
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);
     columns.add(T.Columns.column_weight);
+    columns2.add(T.Columns.column_name);
+    columns2.add(T.Columns.column_age);
     rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues()));
     rows.add(Row.forInsert(T.Data.JOHN.getId(), T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.Data.JOHN.getValues()));
   };

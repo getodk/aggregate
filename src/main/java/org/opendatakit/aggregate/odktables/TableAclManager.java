@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
@@ -91,7 +92,7 @@ public class TableAclManager {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    */
-  public List<TableAcl> getAcls() throws ODKDatastoreException, PermissionDeniedException {
+  public ArrayList<TableAcl> getAcls() throws ODKDatastoreException, PermissionDeniedException {
     userPermissions.checkPermission(tableId, TablePermission.READ_ACL);
     List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
     return converter.toTableAcls(acls);
@@ -106,7 +107,7 @@ public class TableAclManager {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    */
-  public List<TableAcl> getAcls(Scope.Type type) throws ODKDatastoreException, PermissionDeniedException {
+  public ArrayList<TableAcl> getAcls(Scope.Type type) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(type);
     userPermissions.checkPermission(tableId, TablePermission.READ_ACL);
 
@@ -127,6 +128,26 @@ public class TableAclManager {
     Validate.notNull(scope);
     Validate.notNull(scope.getType());
     userPermissions.checkPermission(tableId, TablePermission.READ_ACL);
+
+    DbTableAclEntity aclEntity = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId, scope.getType()
+        .name(), scope.getValue(), cc);
+    TableAcl acl = null;
+    if (aclEntity != null) {
+      acl = converter.toTableAcl(aclEntity);
+    }
+    return acl;
+  }
+
+  /**
+   * This is a private API for the TablesUserPermissions object. Not to be called by anyone else!
+   *
+   * @param scope
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public TableAcl getAclForTablesUserPermissions(Scope scope) throws ODKDatastoreException {
+    Validate.notNull(scope);
+    Validate.notNull(scope.getType());
 
     DbTableAclEntity aclEntity = DbTableAcl.queryTableIdScopeTypeValueAcl(tableId, scope.getType()
         .name(), scope.getValue(), cc);

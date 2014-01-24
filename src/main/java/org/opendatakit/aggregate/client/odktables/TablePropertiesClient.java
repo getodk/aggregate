@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This is the client-side version of
@@ -35,17 +35,17 @@ public class TablePropertiesClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = 197746211663068997L;
+  private static final long serialVersionUID = 197746211663068996L;
 
   private String propertiesETag;
   private String tableId;
-  private List<OdkTablesKeyValueStoreEntryClient> kvsEntries;
+  private ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries;
 
   protected TablePropertiesClient() {
   }
 
   public TablePropertiesClient(String propertiesETag, String tableId,
-      List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+      ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
     this.propertiesETag = propertiesETag;
     this.tableId = tableId;
     this.kvsEntries = kvsEntries;
@@ -67,11 +67,11 @@ public class TablePropertiesClient implements Serializable {
     this.tableId = tableId;
   }
 
-  public List<OdkTablesKeyValueStoreEntryClient> getKeyValueStoreEntries() {
+  public ArrayList<OdkTablesKeyValueStoreEntryClient> getKeyValueStoreEntries() {
     return this.kvsEntries;
   }
 
-  public void setKeyValueStoreEntries(List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+  public void setKeyValueStoreEntries(ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
     this.kvsEntries = kvsEntries;
   }
 

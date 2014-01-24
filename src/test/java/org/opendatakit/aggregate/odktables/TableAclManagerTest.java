@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -76,14 +77,8 @@ public class TableAclManagerTest {
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, Scope filterScope) {
+    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
-    }
-
-    @Override
-    public void checkFilter(String tableId, TablePermission permission, String rowId, Scope filter)
-        throws ODKDatastoreException, PermissionDeniedException {
-      return;
     }
 
   }
@@ -95,11 +90,12 @@ public class TableAclManagerTest {
     userPermissions = new MockCurrentUserPermissions();
 
     this.tableId = T.tableId;
-    String tableProperties = T.tableMetadata;
     this.tm = new TableManager(userPermissions, cc);
 
-    tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+    tm.createTable(tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    pm.setProperties(tableProperties);
 
     this.scope = new Scope(Scope.Type.USER, T.user);
     this.role = TableRole.FILTERED_READER;

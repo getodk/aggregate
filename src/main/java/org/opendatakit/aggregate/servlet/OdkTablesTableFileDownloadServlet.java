@@ -49,6 +49,7 @@ public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
 	 */
   private static final long serialVersionUID = -4681728139240108291L;
 
+  @SuppressWarnings("unused")
   private static final Log logger = LogFactory.getLog(OdkTablesTableFileDownloadServlet.class);
 
   /**

@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.server;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -34,10 +33,12 @@ import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.odktables.DataManager;
+import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
@@ -47,6 +48,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -77,10 +79,11 @@ public class ServerOdkTablesUtil {
    * @throws DatastoreFailureException
    * @throws TableAlreadyExistsExceptionClient
    * @throws PermissionDeniedExceptionClient
+   * @throws ETagMismatchException
    */
   public static TableEntryClient createTable(String tableId, TableDefinitionClient definition,
       TablesUserPermissions userPermissions, CallingContext cc) throws DatastoreFailureException,
-      TableAlreadyExistsExceptionClient, PermissionDeniedExceptionClient {
+      TableAlreadyExistsExceptionClient, PermissionDeniedExceptionClient, ETagMismatchException {
     Log logger = LogFactory.getLog(ServerOdkTablesUtil.class);
     // TODO: add access control stuff
     // Have to be careful of all the transforms going on here.
@@ -92,10 +95,19 @@ public class ServerOdkTablesUtil {
       TableManager tm = new TableManager(userPermissions, cc);
       String displayName = definition.getDisplayName();
       TableType type = UtilTransforms.transform(definition.getType());
-      // TODO: find a way to, for creation, generate a minimal list of
-      // kvs entries. for now just putting in blank if you create a table
-      // from the server.
-      List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+
+      List<ColumnClient> columns = definition.getColumns();
+      List<Column> columnsServer = new ArrayList<Column>();
+      for (ColumnClient column : columns) {
+        columnsServer.add(UtilTransforms.transform(column));
+      }
+      TableEntry entry = tm.createTable(tableId, columnsServer);
+      PropertiesManager pm = new PropertiesManager(tableId, userPermissions, cc);
+      TableProperties tableProperties = pm.getProperties();
+      // TODO:
+      // (1) add table type (Data)
+      // (2) add displayName (displayName)
+      //
       OdkTablesKeyValueStoreEntry tt;
       tt = new OdkTablesKeyValueStoreEntry();
       tt.tableId = tableId;
@@ -104,23 +116,52 @@ public class ServerOdkTablesUtil {
       tt.key = KeyValueStoreConstants.TABLE_TYPE;
       tt.type = "string";
       tt.value = type.name();
-      kvsEntries.add(tt);
 
-      tt = new OdkTablesKeyValueStoreEntry();
-      tt.tableId = tableId;
-      tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
-      tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-      tt.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
-      tt.type = "object";
-      tt.value = "\"" + displayName + "\"";
-      kvsEntries.add(tt);
+      OdkTablesKeyValueStoreEntry tn;
+      tn = new OdkTablesKeyValueStoreEntry();
+      tn.tableId = tableId;
+      tn.partition = KeyValueStoreConstants.PARTITION_TABLE;
+      tn.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+      tn.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
+      tn.type = "json";
+      tn.value = displayName;
 
-      List<ColumnClient> columns = definition.getColumns();
-      List<Column> columnsServer = new ArrayList<Column>();
-      for (ColumnClient column : columns) {
-        columnsServer.add(UtilTransforms.transform(column));
+      boolean foundTT = false;
+      boolean foundTN = false;
+      boolean changedTT = false;
+      boolean changedTN = false;
+      ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = tableProperties.getKeyValueStoreEntries();
+      for ( OdkTablesKeyValueStoreEntry kvs : kvsEntries ) {
+        if ( kvs.key == tt.key && kvs.aspect == tt.aspect && kvs.partition == tt.partition ) {
+          foundTT = true;
+          if ( tt.type.equals(kvs.type) && type.name().equals(kvs.value) ) {
+            changedTT = false;
+          } else {
+            kvs.type = tt.type;
+            kvs.value = type.name();
+            changedTT = true;
+          }
+        } else if ( kvs.key == tn.key && kvs.aspect == tn.aspect && kvs.partition == tn.partition ) {
+          foundTN = true;
+          if ( tn.type.equals(kvs.type) && displayName.equals(kvs.value) ) {
+            changedTN = false;
+          } else {
+            kvs.type = tn.type;
+            kvs.value = displayName;
+            changedTN = true;
+          }
+        }
       }
-      TableEntry entry = tm.createTable(tableId, columnsServer, kvsEntries);
+      if ( !foundTT ) {
+        kvsEntries.add(tt);
+      }
+      if ( !foundTN ) {
+        kvsEntries.add(tn);
+      }
+      if ( !foundTT || !foundTN || changedTT || changedTN ) {
+        tableProperties.setKeyValueStoreEntries(kvsEntries);
+        pm.setProperties(tableProperties);
+      }
       TableEntryClient entryClient = UtilTransforms.transform(entry, displayName);
       logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
       return entryClient;
@@ -133,6 +174,9 @@ public class ServerOdkTablesUtil {
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
     }
   }
 
@@ -151,20 +195,20 @@ public class ServerOdkTablesUtil {
    * @throws PermissionDeniedExceptionClient
    * @throws BadColumnNameExceptionClient
    * @throws EntityNotFoundExceptionClient
+   * @throws InconsistentStateException
    */
   public static RowClient createOrUpdateRow(String tableId, String rowId, RowClient row,
       TablesUserPermissions userPermissions, CallingContext cc) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, ETagMismatchExceptionClient,
-      PermissionDeniedExceptionClient, BadColumnNameExceptionClient, EntityNotFoundExceptionClient {
+      PermissionDeniedExceptionClient, BadColumnNameExceptionClient, EntityNotFoundExceptionClient, InconsistentStateException {
     try {
       // first transform row into a server-side row
       Row serverRow = UtilTransforms.transform(row);
       DataManager dm = new DataManager(tableId, userPermissions, cc);
       row.setRowId(rowId);
 
-      List<Row> rows = dm.insertOrUpdateRows(Collections.singletonList(serverRow));
-      serverRow = rows.get(0);
-      return UtilTransforms.transform(serverRow);
+      Row newServerRow = dm.insertOrUpdateRow(serverRow);
+      return UtilTransforms.transform(newServerRow);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new EntityNotFoundExceptionClient(e);

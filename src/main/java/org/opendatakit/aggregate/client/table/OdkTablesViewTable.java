@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -46,10 +46,10 @@ public class OdkTablesViewTable extends FlexTable {
   private TableEntryClient currentTable;
 
   // that table's rows
-  private List<RowClient> rows;
+  private ArrayList<RowClient> rows;
 
   // that table's column names
-  private List<String> columnNames;
+  private ArrayList<String> columnNames;
 
   // this is the heading for the delete row button.
   private static final String DELETE_ROW_HEADING = "Delete";
@@ -201,7 +201,7 @@ public class OdkTablesViewTable extends FlexTable {
    * If the code is AFTER the call to SecureGWT, as it was at first, you can
    * get null pointer exceptions, as the async callback may have not returned.
    */
-  private void setColumnHeadings(List<String> columns) {
+  private void setColumnHeadings(ArrayList<String> columns) {
     this.removeAllRows();
 
     // If there are no user-defined columns display the message.
@@ -228,7 +228,7 @@ public class OdkTablesViewTable extends FlexTable {
   /*
    * This will set the row values in the listbox.
    */
-  private void setRows(List<RowClient> rows) {
+  private void setRows(ArrayList<RowClient> rows) {
     int start = 1; // b/c the 0 row is the headings.
 
     int currentRow = start;

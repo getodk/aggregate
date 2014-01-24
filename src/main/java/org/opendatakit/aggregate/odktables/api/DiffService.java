@@ -21,10 +21,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DiffService {
@@ -33,5 +35,5 @@ public interface DiffService {
 
   @GET
   public RowResourceList getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
-      throws ODKDatastoreException, PermissionDeniedException;
+      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException;
 }
