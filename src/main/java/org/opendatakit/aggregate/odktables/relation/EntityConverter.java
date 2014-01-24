@@ -368,7 +368,7 @@ public class EntityConverter {
   public Row toRowFromLogTable(Entity entity, List<DbColumnDefinitionsEntity> columns) {
     Row row = new Row();
     row.setRowId(entity.getString(DbLogTable.ROW_ID));
-    row.setRowETag(entity.getString(DbLogTable.ROW_ETAG));
+    row.setRowETag(entity.getId());
     row.setDataETagAtModification(entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbLogTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));

@@ -374,7 +374,6 @@ public class EntityCreator {
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.SEQUENCE_VALUE, sequencer.getNextSequenceValue());
 
-    entity.set(DbLogTable.ROW_ETAG, row.getString(DbTable.ROW_ETAG));
     entity.set(DbLogTable.PREVIOUS_ROW_ETAG, previousRowETag);
     entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));

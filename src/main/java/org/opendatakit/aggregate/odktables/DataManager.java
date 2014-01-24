@@ -136,7 +136,7 @@ public class DataManager {
 
         // reset the row to the prior row state
         creator.setRowFields(rowEntity,
-            priorLogEntity.getString(DbLogTable.ROW_ETAG),
+            priorLogEntity.getId(),
             priorLogEntity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION),
             priorLogEntity.getString(DbLogTable.LAST_UPDATE_USER),
             converter.getDbLogTableFilterScope(priorLogEntity),
