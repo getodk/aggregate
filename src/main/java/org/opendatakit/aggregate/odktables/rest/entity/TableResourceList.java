@@ -36,8 +36,8 @@ public class TableResourceList {
   /**
    * The entries in the manifest.
    */
-  @ElementList(inline = true)
-  private List<TableResource> entries;
+  @ElementList(inline = true, required = false)
+  private ArrayList<TableResource> entries;
 
   /**
    * Constructor used by Jackson
@@ -51,15 +51,19 @@ public class TableResourceList {
    *
    * @param entries
    */
-  public TableResourceList(List<TableResource> entries) {
-    this.entries = entries;
+  public TableResourceList(ArrayList<TableResource> entries) {
+    if ( entries == null ) {
+      this.entries = new ArrayList<TableResource>();
+    } else {
+      this.entries = entries;
+    }
   }
 
   public List<TableResource> getEntries() {
     return entries;
   }
 
-  public void setEntries(List<TableResource> entries) {
+  public void setEntries(ArrayList<TableResource> entries) {
     this.entries = entries;
   }
 

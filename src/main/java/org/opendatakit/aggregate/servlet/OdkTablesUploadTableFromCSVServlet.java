@@ -128,6 +128,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     ServiceUtils.examineRequest(getServletContext(), req);
+    @SuppressWarnings("unused")
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     logger.info("Inside doHead");
     addOpenDataKitHeaders(resp);

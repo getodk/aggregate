@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.core.UriBuilder;
@@ -29,6 +28,7 @@ import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
@@ -50,15 +50,15 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException {
+  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
     List<Row> rows;
     rows = dm.getRows();
     return new RowResourceList(getResources(rows));
   }
 
   @Override
-  public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException {
-    Row row = dm.getRowNullSafe(rowId);
+  public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
+    Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
     return resource;
   }
@@ -66,19 +66,16 @@ public class DataServiceImpl implements DataService {
   @Override
   public RowResource createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
       ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
-      BadColumnNameException {
+      BadColumnNameException, InconsistentStateException {
     row.setRowId(rowId);
-    List<Row> changes = dm.insertOrUpdateRows(Collections.singletonList(row));
-    row = changes.get(0);
-    RowResource resource = getResource(row);
+    Row newRow = dm.insertOrUpdateRow(row);
+    RowResource resource = getResource(newRow);
     return resource;
   }
 
   @Override
   public String deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
-      PermissionDeniedException {
-    @SuppressWarnings("unused")
-    Row row = dm.getRowNullSafe(rowId);
+      PermissionDeniedException, InconsistentStateException {
     return dm.deleteRow(rowId);
   }
 
@@ -96,7 +93,7 @@ public class DataServiceImpl implements DataService {
     return resource;
   }
 
-  private List<RowResource> getResources(List<Row> rows) {
+  private ArrayList<RowResource> getResources(List<Row> rows) {
     ArrayList<RowResource> resources = new ArrayList<RowResource>();
     for (Row row : rows) {
       resources.add(getResource(row));

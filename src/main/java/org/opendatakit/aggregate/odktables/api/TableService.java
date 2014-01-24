@@ -51,7 +51,7 @@ public interface TableService {
   @Path("{tableId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public TableResource createTable(@PathParam("tableId") String tableId, TableDefinition definition)
-      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException;
+      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException;
 
   @DELETE
   @Path("{tableId}")
@@ -68,7 +68,7 @@ public interface TableService {
   @GET
   @Path("{tableId}/definition")
   public TableDefinitionResource getDefinition(@PathParam("tableId") String tableId)
-      throws ODKDatastoreException, PermissionDeniedException;
+      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
 
   @Path("{tableId}/diff")
   public DiffService getDiff(@PathParam("tableId") String tableId) throws ODKDatastoreException;

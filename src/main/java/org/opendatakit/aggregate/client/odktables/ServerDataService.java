@@ -16,14 +16,16 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
-import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -42,38 +44,38 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("serverdataservice")
 public interface ServerDataService extends RemoteService {
 
-  List<RowClient> getRows(String tableId) throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException, PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
+  ArrayList<RowClient> getRows(String tableId) throws AccessDeniedException, RequestFailureException,
+      DatastoreFailureException, PermissionDeniedExceptionClient, EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException;
 
   TableContentsClient getRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient;
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException;
 
   RowClient createOrUpdateRow(String tableId, String rowId, RowClient row)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, ETagMismatchExceptionClient, BadColumnNameExceptionClient,
-      EntityNotFoundExceptionClient;
+      EntityNotFoundExceptionClient, InconsistentStateException;
 
   void deleteRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient;
+      EntityNotFoundExceptionClient, InconsistentStateException;
 
-  List<String> getColumnNames(String tableId) throws DatastoreFailureException,
+  ArrayList<String> getColumnNames(String tableId) throws DatastoreFailureException,
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient;
 
-  List<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
+  ArrayList<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient;
 
-  List<FileSummaryClient> getMedialFilesKey(String tableId, String key)
+  ArrayList<FileSummaryClient> getMedialFilesKey(String tableId, String key)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
 
-  List<String> getFileRowInfoColumnNames();
+  ArrayList<String> getFileRowInfoColumnNames();
 
   TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient;
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException;
 
   TableContentsForFilesClient getFileInfoContents(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,

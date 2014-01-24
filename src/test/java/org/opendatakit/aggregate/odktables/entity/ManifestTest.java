@@ -83,14 +83,8 @@ public class ManifestTest {
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, Scope filterScope) {
+    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
-    }
-
-    @Override
-    public void checkFilter(String tableId, TablePermission permission, String rowId, Scope filter)
-        throws ODKDatastoreException, PermissionDeniedException {
-      return;
     }
 
   }

@@ -4,6 +4,7 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 
 /**
  * A class that holds all the information about a given ODK Tables user
@@ -48,29 +49,23 @@ public interface TablesUserPermissions {
   public abstract boolean hasPermission(String tableId, TablePermission permission)
       throws ODKDatastoreException;
 
-  public abstract boolean hasFilterScope(String tableId, Scope filterScope);
-
   /**
-   * Check that the user either has the given permission or is within the scope
-   * of the filter on the given row.
+   * Check if the current user has the given filter scope on this table.
    *
-   * In other words, if the user has the given permission, then they pass the
-   * check and the method returns. However, if the user does not have the given
-   * permission, then they must fall within the scope of the filter on the given
-   * row.
-   *
+   * @param tableId
    * @param permission
    *          the permission that guards access to the row. Should be one of
-   *          {@link TablePermission#UNFILTERED_READ},
-   *          {@link TablePermission#UNFILTERED_WRITE}, or
-   *          {@link TablePermission#UNFILTERED_DELETE}.
-   * @param row
+   *          {@link TablePermission#READ_ROW},
+   *          {@link TablePermission#WRITE_ROW}, or
+   *          {@link TablePermission#DELETE_ROW}.
+   * @param rowId
    *          the row to check
+   * @param filterScope
+   *          the filter scope bound to that row
+   * @return
    * @throws ODKDatastoreException
-   * @throws PermissionDeniedException
-   *           if the current user does not have the given permission and is not
-   *           within the scope of the filter on the row
+   * @throws ODKEntityNotFoundException
    */
-  public abstract void checkFilter(String tableId, TablePermission permission, String rowId,
-      Scope filter) throws ODKDatastoreException, PermissionDeniedException;
+  public abstract boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException;
+
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.odktables.entity.serialization;
+package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class FileManifestManager {
     // TODO: need to handle access control
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForApp(cc);
-    List<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
+    ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
     return manifest;
   }
@@ -84,7 +84,7 @@ public class FileManifestManager {
     // TODO: need to handle access control.
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(tableId, cc);
-    List<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
+    ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
     return manifest;
   }
@@ -102,7 +102,7 @@ public class FileManifestManager {
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(
         FileServiceImpl.NO_TABLE_ID, cc);
-    List<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
+    ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
     return manifest;
   }
@@ -116,11 +116,11 @@ public class FileManifestManager {
    * @return
    * @throws ODKDatastoreException
    */
-  private List<OdkTablesFileManifestEntry> getEntriesFromQuery(
+  private ArrayList<OdkTablesFileManifestEntry> getEntriesFromQuery(
       List<DbTableFileInfoEntity> entities, DbTableFiles dbTableFiles) throws ODKDatastoreException {
     // TODO: need to handle access control.
     List<Row> infoRows = EntityConverter.toRowsFromFileInfo(entities);
-    List<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
+    ArrayList<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
     // A map of static url get parameters. In this case we only want to downoad
     // as an attachment.
     Map<String, String> properties = new HashMap<String, String>();

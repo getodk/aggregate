@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.TableService;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
@@ -34,6 +35,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DiffServiceImpl implements DiffService {
@@ -48,7 +50,7 @@ public class DiffServiceImpl implements DiffService {
 
   @Override
   public RowResourceList getRowsSince(String dataETag) throws ODKDatastoreException,
-      PermissionDeniedException {
+      PermissionDeniedException, InconsistentStateException, ODKTaskLockException {
     List<Row> rows;
     rows = dm.getRowsSince(dataETag);
     return new RowResourceList(getResources(rows));
@@ -68,7 +70,7 @@ public class DiffServiceImpl implements DiffService {
     return resource;
   }
 
-  private List<RowResource> getResources(List<Row> rows) {
+  private ArrayList<RowResource> getResources(List<Row> rows) {
     ArrayList<RowResource> resources = new ArrayList<RowResource>();
     for (Row row : rows) {
       resources.add(getResource(row));

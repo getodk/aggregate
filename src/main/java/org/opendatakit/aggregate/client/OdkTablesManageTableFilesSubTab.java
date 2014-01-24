@@ -17,12 +17,12 @@
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTableFileInfo;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -87,8 +87,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   public OdkTablesManageTableFilesSubTab() {
 
     addFileButton = new ServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
-        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT,
-        ADD_FILE_BALLOON_TXT);
+        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -141,8 +140,8 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   }
 
   /**
-   * Call this to remove any currently displayed data, set the selected table
-   * in the list box to zero, and generally reset this page.
+   * Call this to remove any currently displayed data, set the selected table in
+   * the list box to zero, and generally reset this page.
    */
   public void setTabToDislpayZero() {
     selectedValue = 0;
@@ -151,23 +150,31 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   }
 
   private void updateTableList() {
-    SecureGWT.getServerTableService()
-        .getTables(new AsyncCallback<List<TableEntryClient>>() {
+    SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
 
       @Override
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
+        if ( caught instanceof AccessDeniedException ) {
+          // swallow it...
+          AggregateUI.getUI().clearError();
+          ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
+          addTablesToListBox(tables);
+          tableBox.clear();
+          setTabToDislpayZero();
+        } else {
+          AggregateUI.getUI().reportError(caught);
+        }
       }
 
       @Override
-      public void onSuccess(List<TableEntryClient> tables) {
+      public void onSuccess(ArrayList<TableEntryClient> tables) {
         AggregateUI.getUI().clearError();
 
         addTablesToListBox(tables);
         tableBox.setItemSelected(selectedValue, true);
 
         // This makes the server go crazy with requests.
-        //AggregateUI.getUI().getTimer().refreshNow();
+        // AggregateUI.getUI().getTimer().refreshNow();
 
       }
     });
@@ -198,7 +205,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
     updateTableData();
   }
 
-  public void addTablesToListBox(List<TableEntryClient> tables) {
+  public void addTablesToListBox(ArrayList<TableEntryClient> tables) {
     // clear the old tables
     currentTables.clear();
     // and add the new
@@ -221,7 +228,9 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
       // we also want to have no curren table.
       currentTable = null;
       // clear the "displaying" thing
-      selectTablePanel.removeRow(2);
+      if ( selectTablePanel.getRowCount() > 2 ) {
+        selectTablePanel.removeRow(2);
+      }
     } else {
       currentTable = currentTables.get(this.selectedValue - 1);
       tableFileData.updateDisplay(currentTable);
@@ -238,8 +247,9 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   }
 
   /**
-   * Set the table to be displayed. You have to set the it in
-   * the selectedValue and update it. O(n), could be improved.
+   * Set the table to be displayed. You have to set the it in the selectedValue
+   * and update it. O(n), could be improved.
+   *
    * @param tableId
    */
   public void setCurrentTable(String tableId) {

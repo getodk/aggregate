@@ -112,9 +112,9 @@ public class UtilTransforms {
    * @param serverEntries
    * @return
    */
-  public static List<OdkTablesKeyValueStoreEntryClient> transform(
+  public static ArrayList<OdkTablesKeyValueStoreEntryClient> transform(
       List<OdkTablesKeyValueStoreEntry> serverEntries) {
-    List<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
+    ArrayList<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
     for (OdkTablesKeyValueStoreEntry serverEntry : serverEntries) {
       clientEntries.add(transform(serverEntry));
     }
@@ -146,9 +146,9 @@ public class UtilTransforms {
    * @param serverEntries
    * @return
    */
-  public static List<OdkTablesKeyValueStoreEntry> transformToServerEntries(
+  public static ArrayList<OdkTablesKeyValueStoreEntry> transformToServerEntries(
       List<OdkTablesKeyValueStoreEntryClient> clientEntries) {
-    List<OdkTablesKeyValueStoreEntry> serverEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+    ArrayList<OdkTablesKeyValueStoreEntry> serverEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     for (OdkTablesKeyValueStoreEntryClient clientEntry : clientEntries) {
       serverEntries.add(transform(clientEntry));
     }
@@ -274,7 +274,7 @@ public class UtilTransforms {
    * Transform the object into the client-side object.
    */
   public static TablePropertiesClient transform(TableProperties serverProperties) {
-    List<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
+    ArrayList<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
     for (OdkTablesKeyValueStoreEntry serverEntry : serverProperties.getKeyValueStoreEntries()) {
       clientEntries.add(UtilTransforms.transform(serverEntry));
     }

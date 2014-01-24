@@ -21,10 +21,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -32,6 +37,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
 @Produces("application/json")
 @Consumes("application/json")
@@ -41,6 +47,9 @@ public class SimpleJSONMessageReaderWriter implements MessageBodyReader<Object>,
 
   private static final ObjectMapper mapper = new ObjectMapper();
   private static final String DEFAULT_ENCODING = "utf-8";
+
+  @Context
+  HttpHeaders headers;
 
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation annotations[],
@@ -65,7 +74,18 @@ public class SimpleJSONMessageReaderWriter implements MessageBodyReader<Object>,
       if (!encoding.equals(DEFAULT_ENCODING)) {
         throw new IllegalArgumentException("charset for the request is not utf-8");
       }
-      return mapper.readValue(stream, aClass);
+      InputStream jsonStream;
+      if ( headers != null ) {
+        List<String> ce = headers.getRequestHeader(ApiConstants.CONTENT_ENCODING_HEADER);
+        if ( ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING) ) {
+          jsonStream = new GZIPInputStream(stream);
+        } else {
+          jsonStream = stream;
+        }
+      } else {
+        jsonStream = stream;
+      }
+      return mapper.readValue(jsonStream, aClass);
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -80,7 +100,22 @@ public class SimpleJSONMessageReaderWriter implements MessageBodyReader<Object>,
       if (!encoding.equals(DEFAULT_ENCODING)) {
         throw new IllegalArgumentException("charset for the response is not utf-8");
       }
-      mapper.writeValue(stream, o);
+      OutputStream jsonStream;
+      if ( headers != null ) {
+        List<String> ce = headers.getRequestHeader(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
+        if ( ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING) ) {
+          jsonStream = new GZIPOutputStream(stream);
+        } else {
+          jsonStream = stream;
+        }
+      } else {
+        jsonStream = stream;
+      }
+      mapper.writeValue(jsonStream, o);
+      jsonStream.flush();
+      stream.flush();
+      jsonStream.close();
+      stream.close();
     } catch (Exception e) {
       throw new IOException(e);
     }

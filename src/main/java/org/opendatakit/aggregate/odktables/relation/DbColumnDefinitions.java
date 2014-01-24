@@ -241,14 +241,14 @@ public class DbColumnDefinitions extends Relation {
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<String> queryForColumnNames(String tableId, String schemaETag,
+  public static ArrayList<String> queryForColumnNames(String tableId, String schemaETag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbColumnDefinitions.queryForColumnNames", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
     query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaETag);
 
     List<?> results = query.getDistinct(ELEMENT_NAME);
-    List<String> list = new ArrayList<String>();
+    ArrayList<String> list = new ArrayList<String>();
     for (Object o : results) {
       list.add((String) o);
     }

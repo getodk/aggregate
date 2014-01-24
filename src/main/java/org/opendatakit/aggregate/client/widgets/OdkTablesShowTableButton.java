@@ -51,6 +51,7 @@ public class OdkTablesShowTableButton extends AggregateButton
   /**
    * This is the parent table to which this button belongs.
    */
+  @SuppressWarnings("unused")
   private OdkTablesTableList parentTable;
 
   private String tableId;

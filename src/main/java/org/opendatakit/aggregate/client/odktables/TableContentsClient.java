@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This represents the contents of a table. Essentially it is a wrapper of a
@@ -35,7 +35,7 @@ public class TableContentsClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -6147882937837108750L;
+  private static final long serialVersionUID = -6147882937837108751L;
 
   public TableContentsClient() {
     // necessary for gwt serialization
@@ -44,11 +44,11 @@ public class TableContentsClient implements Serializable {
   /**
    * The tables rows.
    */
-  public List<RowClient> rows;
+  public ArrayList<RowClient> rows;
 
   /**
    * The names of the table's columns.
    */
-  public List<String> columnNames;
+  public ArrayList<String> columnNames;
 
 }

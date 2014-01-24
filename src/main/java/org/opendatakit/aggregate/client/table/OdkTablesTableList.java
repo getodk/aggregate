@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteTableButton;
@@ -62,7 +62,7 @@ public class OdkTablesTableList extends FlexTable {
 	 * Updates the list of tables.
 	 * @param tableList the list of tables to be displayed.
 	 */
-	public void updateTableList(List<TableEntryClient> tables) {
+	public void updateTableList(ArrayList<TableEntryClient> tables) {
 		if (tables == null) {
 			return;
 		}

@@ -19,6 +19,8 @@ package org.opendatakit.aggregate.odktables;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +28,7 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.AuthFilter;
@@ -36,6 +39,7 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class AuthFilterTest {
@@ -78,14 +82,8 @@ public class AuthFilterTest {
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, Scope filterScope) {
+    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
-    }
-
-    @Override
-    public void checkFilter(String tableId, TablePermission permission, String rowId, Scope filter)
-        throws ODKDatastoreException, PermissionDeniedException {
-      return;
     }
 
   }
@@ -99,10 +97,17 @@ public class AuthFilterTest {
 
     this.tm = new TableManager(userPermissions, cc);
 
-    tm.createTable(tableId, T.columns, T.kvsEntries);
+    tm.createTable(tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    pm.setProperties(tableProperties);
 
     this.am = new TableAclManager(tableId, userPermissions, cc);
-    this.af = new AuthFilter(tableId, userPermissions, cc);
+    List<Scope> scopes = Lists.newArrayList();
+    scopes.add(new Scope(Type.DEFAULT, null));
+    scopes.add(new Scope(Type.USER, userPermissions.getOdkTablesUserId()));
+
+    this.af = new AuthFilter(tableId, userPermissions, scopes, cc);
     this.currentUserScope = new Scope(Type.USER, userPermissions.getOdkTablesUserId());
   }
 
@@ -158,10 +163,10 @@ public class AuthFilterTest {
     Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
         T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.DEFAULT, null));
-    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
+    assertTrue(af.hasFilterScope(TablePermission.READ_ROW, row.getRowId(), row.getFilterScope()));
   }
 
-  @Test(expected = PermissionDeniedException.class)
+  @Test
   public void testCheckFilterFailsEmptyScope() throws PermissionDeniedException,
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
@@ -169,7 +174,7 @@ public class AuthFilterTest {
     Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
         T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
     row.setFilterScope(Scope.EMPTY_SCOPE);
-    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
+    assertFalse(af.hasFilterScope(TablePermission.READ_ROW, row.getRowId(), row.getFilterScope()));
   }
 
   @Test
@@ -180,10 +185,10 @@ public class AuthFilterTest {
     Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
         T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
     row.setFilterScope(currentUserScope);
-    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
+    assertTrue(af.hasFilterScope(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope()));
   }
 
-  @Test(expected = PermissionDeniedException.class)
+  @Test
   public void testCheckFilterFailsUserScope() throws PermissionDeniedException,
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
@@ -191,15 +196,6 @@ public class AuthFilterTest {
     Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
         T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.USER, currentUserScope.getValue() + "diff"));
-    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
+    assertFalse(af.hasFilterScope(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope()));
   }
-
-  // @Test
-  // public void testGetScopes() {
-  // List<Scope> scopes = tm.getScopes(cc);
-  // assertTrue(scopes.contains(new Scope(Type.DEFAULT, null)));
-  // assertTrue(scopes.contains(currentUserScope));
-  // // TODO: assert group scopes
-  // }
-
 }

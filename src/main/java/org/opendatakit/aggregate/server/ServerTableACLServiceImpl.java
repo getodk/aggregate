@@ -58,7 +58,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
   private static final long serialVersionUID = 9023285673934784466L;
 
   @Override
-  public List<TableAclClient> getAcls(String tableId) throws AccessDeniedException,
+  public ArrayList<TableAclClient> getAcls(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -78,7 +78,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public List<TableAclClient> getUserAcls(String tableId) throws AccessDeniedException,
+  public ArrayList<TableAclClient> getUserAcls(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -98,7 +98,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public List<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException,
+  public ArrayList<TableAclClient> getGroupAcls(String tableId) throws AccessDeniedException,
       RequestFailureException, PermissionDeniedExceptionClient, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -350,9 +350,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     return UtilTransforms.transform(resource);
   }
 
-  private List<TableAclResourceClient> getResources(List<TableAcl> acls, TableAclManager am,
+  private ArrayList<TableAclResourceClient> getResources(List<TableAcl> acls, TableAclManager am,
       UriInfo info) {
-    List<TableAclResourceClient> resources = new ArrayList<TableAclResourceClient>();
+    ArrayList<TableAclResourceClient> resources = new ArrayList<TableAclResourceClient>();
     for (TableAcl acl : acls) {
       resources.add(getResource(acl, am, info));
     }
@@ -387,8 +387,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
    * This transforms a list of TableAcl objects to a list of TableAclClient
    * objects.
    */
-  private List<TableAclClient> transformTableAclList(List<TableAcl> acls) {
-    List<TableAclClient> clientAcls = new ArrayList<TableAclClient>();
+  private ArrayList<TableAclClient> transformTableAclList(List<TableAcl> acls) {
+    ArrayList<TableAclClient> clientAcls = new ArrayList<TableAclClient>();
     for (TableAcl acl : acls) {
       clientAcls.add(UtilTransforms.transform(acl));
     }

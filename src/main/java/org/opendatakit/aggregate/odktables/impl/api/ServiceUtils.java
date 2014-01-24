@@ -21,6 +21,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+
 /**
  * Class to extract and format the request information coming in from ODK Tables
  * clients so that we can debug protocols more easily.
@@ -33,6 +35,7 @@ public class ServiceUtils {
   private ServiceUtils() {
   };
 
+  @SuppressWarnings({ "rawtypes", "unused" })
   public static void examineRequest(ServletContext sc, HttpServletRequest req) {
     Enumeration headers = req.getHeaderNames();
     StringBuilder b = new StringBuilder();
@@ -52,6 +55,7 @@ public class ServiceUtils {
     String ctxtPath = req.getContextPath();
     String pathInfo = req.getPathInfo();
     String query = req.getQueryString();
+    String ace = req.getHeader(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
     boolean sessionId = req.isRequestedSessionIdValid();
   }
 }

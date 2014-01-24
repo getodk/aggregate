@@ -16,17 +16,17 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServerTableACLServiceAsync {
 
-  void getAcls(String tableId, AsyncCallback<List<TableAclClient>> callback);
+  void getAcls(String tableId, AsyncCallback<ArrayList<TableAclClient>> callback);
 
-  void getUserAcls(String tableId, AsyncCallback<List<TableAclClient>> callback);
+  void getUserAcls(String tableId, AsyncCallback<ArrayList<TableAclClient>> callback);
 
-  void getGroupAcls(String tableId, AsyncCallback<List<TableAclClient>> callback);
+  void getGroupAcls(String tableId, AsyncCallback<ArrayList<TableAclClient>> callback);
 
   void getDefaultAcl(String tableId, AsyncCallback<TableAclClient> callback);
 

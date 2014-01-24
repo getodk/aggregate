@@ -77,6 +77,7 @@ public class Preferences {
       googleApiClientId = summary.getGoogleApiClientId();
       enketoApiUrl = summary.getEnketoApiUrl();
       enketoApiToken = summary.getEnketoApiToken();
+      @SuppressWarnings("unused")
       Boolean oldTablesValue = odkTablesEnabled;
       odkTablesEnabled = summary.getOdkTablesEnabled();
       fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();

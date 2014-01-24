@@ -20,6 +20,7 @@ import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -38,7 +39,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface ServerPropertiesService extends RemoteService {
 
   TablePropertiesClient getProperties(String tableId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient;
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient, ODKTaskLockException;
 
   TablePropertiesClient setProperties(TablePropertiesClient properties, String tableId)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,

@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.odktables.relation;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,8 +38,8 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -71,26 +70,25 @@ public class EntityCreator {
    *
    * @param tableId
    *          the table id. May be null to auto generate.
-   * @param tableKey
-   *          the unique Id for disambiguation purposes.
+   * @param pendingSchemaETag
+   *          the unique Id for the (new) schema.
+   * @param aprioriDataSequenceValue
+   *          the monotonically increasing sequence value
+   *          that is less than the lowest such value in
+   *          this table's DbLogTable.
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
-  public DbTableEntryEntity newTableEntryEntity(String tableId, String schemaETag,
+  public DbTableEntryEntity newTableEntryEntity(String tableId, String pendingSchemaETag,
       String aprioriDataSequenceValue, CallingContext cc) throws ODKDatastoreException {
     Validate.notNull(cc);
-    Validate.notNull(schemaETag);
+    Validate.notNull(tableId);
+    Validate.notNull(pendingSchemaETag);
     Validate.notNull(aprioriDataSequenceValue);
 
-    if (tableId == null) {
-      tableId = CommonFieldsBase.newUri();
-    }
-
     DbTableEntryEntity entity = DbTableEntry.createNewEntity(tableId, cc);
-    String value = null;
-    entity.setDataETag(value);
-    entity.setSchemaETag(schemaETag);
+    entity.setPendingSchemaETag(pendingSchemaETag);
     entity.setAprioriDataSequenceValue(aprioriDataSequenceValue);
     return entity;
   }
@@ -380,6 +378,10 @@ public class EntityCreator {
   /**
    * Create a new {@link DbLogTable} row entity.
    *
+   * NOTE: the rowETag is the primary key for this entry.
+   * This is critical!!!! Do not re-use dataETag values across
+   * rows!!!!
+   *
    * @param logTable
    *          the {@link DbLogTable} relation.
    * @param dataETag
@@ -403,7 +405,7 @@ public class EntityCreator {
     Validate.noNullElements(columns);
     Validate.notNull(cc);
 
-    Entity entity = logTable.newEntity(cc);
+    Entity entity = logTable.newEntity(row.getString(DbTable.ROW_ETAG), cc);
     entity.set(DbLogTable.ROW_ID, row.getId());
     entity.set(DbLogTable.SEQUENCE_VALUE, sequencer.getNextSequenceValue());
 
@@ -429,38 +431,4 @@ public class EntityCreator {
     }
     return entity;
   }
-
-  /**
-   * Create a collection of new {@link DbLogTable} entities
-   *
-   * @param logTable
-   *          the {@link DbLogTable} relation
-   * @param dataETag
-   *          the data etag at the time of the updates
-   * @param rows
-   *          the rows
-   * @param columns
-   *          the {@link DbColumnDefinitions} entities for the table
-   * @param sequencer
-   *          the sequencer for ordering the log entries
-   * @param cc
-   * @return the created entities, not yet persisted
-   * @throws ODKDatastoreException
-   */
-  public List<Entity> newLogEntities(DbLogTable logTable, String dataETag, List<Entity> rows,
-      List<DbColumnDefinitionsEntity> columns, Sequencer sequencer, CallingContext cc)
-      throws ODKDatastoreException {
-    Validate.notNull(logTable);
-    Validate.notEmpty(dataETag);
-    Validate.noNullElements(rows);
-    Validate.noNullElements(columns);
-    Validate.notNull(cc);
-    List<Entity> entities = new ArrayList<Entity>();
-    for (Entity row : rows) {
-      Entity entity = newLogEntity(logTable, dataETag, row, columns, sequencer, cc);
-      entities.add(entity);
-    }
-    return entities;
-  }
-
 }

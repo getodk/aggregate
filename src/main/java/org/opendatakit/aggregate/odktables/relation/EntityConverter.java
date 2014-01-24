@@ -100,8 +100,8 @@ public class EntityConverter {
    * Convert a list of {@link DbColumnDefinitions} entities to a list of
    * {@link Column} objects.
    */
-  public List<Column> toColumns(List<DbColumnDefinitionsEntity> entities) {
-    List<Column> columns = new ArrayList<Column>();
+  public ArrayList<Column> toColumns(List<DbColumnDefinitionsEntity> entities) {
+    ArrayList<Column> columns = new ArrayList<Column>();
     for (DbColumnDefinitionsEntity entity : entities) {
       columns.add(toColumn(entity));
     }
@@ -110,7 +110,7 @@ public class EntityConverter {
 
   public TableProperties toTableProperties(List<DbKeyValueStoreEntity> kvsEntities, String tableId,
       String propertiesETag) {
-    List<OdkTablesKeyValueStoreEntry> kvsEntries = toOdkTablesKeyValueStoreEntry(kvsEntities);
+    ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = toOdkTablesKeyValueStoreEntry(kvsEntities);
     TableProperties properties = new TableProperties(propertiesETag, tableId, kvsEntries);
     return properties;
   }
@@ -144,15 +144,14 @@ public class EntityConverter {
   public TableDefinition toTableDefinition(TableEntry entryEntity,
       DbTableDefinitionsEntity schemaEntity) {
     String tableId = schemaEntity.getTableId();
-    String displayName = schemaEntity.getDbTableName();
     String schemaETag = schemaEntity.getSchemaETag();
-    TableDefinition td = new TableDefinition(tableId, schemaETag, null, displayName);
+    TableDefinition td = new TableDefinition(tableId, schemaETag, null);
     return td;
   }
 
-  public List<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
+  public ArrayList<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
       List<DbKeyValueStoreEntity> kvsEntities) {
-    List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+    ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     for (DbKeyValueStoreEntity entity : kvsEntities) {
       kvsEntries.add(toOdkTablesKeyValueStoreEntry(entity));
     }
@@ -177,8 +176,8 @@ public class EntityConverter {
    * Convert a list of {@link DbTableAcl} entities to a list of {@link TableAcl}
    * .
    */
-  public List<TableAcl> toTableAcls(List<DbTableAclEntity> entities) {
-    List<TableAcl> acls = new ArrayList<TableAcl>();
+  public ArrayList<TableAcl> toTableAcls(List<DbTableAclEntity> entities) {
+    ArrayList<TableAcl> acls = new ArrayList<TableAcl>();
     for (DbTableAclEntity entity : entities) {
       TableAcl acl = toTableAcl(entity);
       acls.add(acl);
@@ -234,7 +233,22 @@ public class EntityConverter {
     return fields;
   }
 
-  public Scope getFilterScope(Entity entity) {
+  public Scope getDbLogTableFilterScope(Entity entity) {
+    String filterType = entity.getString(DbLogTable.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        return new Scope(Scope.Type.DEFAULT, null);
+      } else {
+        String value = entity.getString(DbLogTable.FILTER_VALUE);
+        return new Scope(type, value);
+      }
+    } else {
+      return Scope.EMPTY_SCOPE;
+    }
+  }
+
+  public Scope getDbTableFilterScope(Entity entity) {
     String filterType = entity.getString(DbTable.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);
@@ -242,6 +256,21 @@ public class EntityConverter {
         return new Scope(Scope.Type.DEFAULT, null);
       } else {
         String value = entity.getString(DbTable.FILTER_VALUE);
+        return new Scope(type, value);
+      }
+    } else {
+      return Scope.EMPTY_SCOPE;
+    }
+  }
+
+  public static Scope getDbTableFileInfoFilterScope(DbTableFileInfoEntity entity) {
+    String filterType = entity.getStringField(DbTable.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        return new Scope(Scope.Type.DEFAULT, null);
+      } else {
+        String value = entity.getStringField(DbTable.FILTER_VALUE);
         return new Scope(type, value);
       }
     } else {
@@ -267,18 +296,7 @@ public class EntityConverter {
     row.setDataETagAtModification(entity.getString(DbTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
-    String filterType = entity.getString(DbTable.FILTER_TYPE);
-    if (filterType != null) {
-      Scope.Type type = Scope.Type.valueOf(filterType);
-      if (filterType.equals(Scope.Type.DEFAULT)) {
-        row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
-      } else {
-        String value = entity.getString(DbTable.FILTER_VALUE);
-        row.setFilterScope(new Scope(type, value));
-      }
-    } else {
-      row.setFilterScope(Scope.EMPTY_SCOPE);
-    }
+    row.setFilterScope(getDbTableFilterScope(entity));
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
 
     row.setUriAccessControl(entity.getString(DbTable.URI_ACCESS_CONTROL));
@@ -307,18 +325,7 @@ public class EntityConverter {
     row.setDeleted(entity.getBooleanField(DbTable.DELETED));
     row.setCreateUser(entity.getStringField(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getStringField(DbTable.LAST_UPDATE_USER));
-    String filterType = entity.getStringField(DbTable.FILTER_TYPE);
-    if (filterType != null) {
-      Scope.Type type = Scope.Type.valueOf(filterType);
-      if (filterType.equals(Scope.Type.DEFAULT)) {
-        row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
-      } else {
-        String value = entity.getStringField(DbTable.FILTER_VALUE);
-        row.setFilterScope(new Scope(type, value));
-      }
-    } else {
-      row.setFilterScope(Scope.EMPTY_SCOPE);
-    }
+    row.setFilterScope(getDbTableFileInfoFilterScope(entity));
     // this will be the actual values of the row
     Map<String, String> values = new HashMap<String, String>();
     for (DataField column : DbTableFileInfo.exposedColumnNames) {
@@ -365,18 +372,7 @@ public class EntityConverter {
     row.setDataETagAtModification(entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbLogTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));
-    String filterType = entity.getString(DbLogTable.FILTER_TYPE);
-    if (filterType != null) {
-      Scope.Type type = Scope.Type.valueOf(filterType);
-      if (type.equals(Scope.Type.DEFAULT)) {
-        row.setFilterScope(new Scope(Scope.Type.DEFAULT, null));
-      } else {
-        String value = entity.getString(DbLogTable.FILTER_VALUE);
-        row.setFilterScope(new Scope(type, value));
-      }
-    } else {
-      row.setFilterScope(Scope.EMPTY_SCOPE);
-    }
+    row.setFilterScope(getDbLogTableFilterScope(entity));
     row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
 
     row.setUriAccessControl(entity.getString(DbLogTable.URI_ACCESS_CONTROL));

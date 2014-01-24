@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -39,24 +40,24 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 public interface DataService {
 
   @GET
-  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException;
+  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException;
 
   @GET
   @Path("{rowId}")
   public RowResource getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      PermissionDeniedException;
+      PermissionDeniedException, InconsistentStateException, ODKTaskLockException;
 
   @PUT
   @Path("{rowId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public RowResource createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
-      PermissionDeniedException, BadColumnNameException;
+      PermissionDeniedException, BadColumnNameException, InconsistentStateException;
 
   @DELETE
   @Path("{rowId}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public String deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException;
+      ODKTaskLockException, PermissionDeniedException, InconsistentStateException;
 
 }

@@ -74,14 +74,8 @@ public class PropertiesManagerTest {
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, Scope filterScope) {
+    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
-    }
-
-    @Override
-    public void checkFilter(String tableId, TablePermission permission, String rowId, Scope filter)
-        throws ODKDatastoreException, PermissionDeniedException {
-      return;
     }
 
   }
@@ -95,11 +89,11 @@ public class PropertiesManagerTest {
     this.tableId = T.tableId;
     this.tm = new TableManager(userPermissions, cc);
 
-    TableEntry te = tm.createTable(tableId,
-        T.columns, T.kvsEntries);
-    this.ePropertiesTag = te.getPropertiesETag();
+    TableEntry te = tm.createTable(tableId, T.columns);
 
-    this.pm = new PropertiesManager(tableId, userPermissions, cc);
+    this.pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    pm.setProperties(tableProperties);
   }
 
   @After
@@ -112,7 +106,7 @@ public class PropertiesManagerTest {
   }
 
   @Test
-  public void testGetTableProperties() throws ODKDatastoreException, PermissionDeniedException {
+  public void testGetTableProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     TableProperties expected = new TableProperties(this.ePropertiesTag,
         T.tableId, T.kvsEntries);
     TableProperties actual = pm.getProperties();

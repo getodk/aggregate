@@ -18,8 +18,6 @@ package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This is the client-side version of
@@ -57,7 +55,7 @@ public enum TableRoleClient implements Serializable {
       TablePermission.values());
 
   private final String description;
-  private final List<TablePermission> permissions;
+  private final ArrayList<TablePermission> permissions;
 
   TableRoleClient(String description, TablePermission... permissions) {
     this.description = description;
@@ -78,8 +76,10 @@ public enum TableRoleClient implements Serializable {
   /**
    * @return the permissions
    */
-  public List<TablePermission> getPermissions() {
-    return Collections.unmodifiableList(permissions);
+  public ArrayList<TablePermission> getPermissions() {
+    ArrayList<TablePermission> copy = new ArrayList<TablePermission>();
+    copy.addAll(permissions);
+    return copy;
   }
 
   /**

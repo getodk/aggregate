@@ -44,25 +44,29 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     type = (headers.getAcceptableMediaTypes().size() != 0) ?
         headers.getAcceptableMediaTypes().get(0) : MediaType.APPLICATION_JSON_TYPE;
 
+    String msg = e.getMessage();
+    if ( msg == null ) {
+      msg = e.toString();
+    }
     if (e instanceof ETagMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
-          .entity(new Error(ErrorType.ETAG_MISMATCH, e.getMessage()))
+          .entity(new Error(ErrorType.ETAG_MISMATCH, msg))
           .type(type).build();
     } else if (e instanceof TableAlreadyExistsException) {
       return Response.status(Status.CONFLICT)
-          .entity(new Error(ErrorType.TABLE_EXISTS, e.getMessage()))
+          .entity(new Error(ErrorType.TABLE_EXISTS, msg))
           .type(type).build();
     } else if (e instanceof PermissionDeniedException) {
       return Response.status(Status.FORBIDDEN)
-          .entity(new Error(ErrorType.PERMISSION_DENIED, e.getMessage()))
+          .entity(new Error(ErrorType.PERMISSION_DENIED, msg))
           .type(type).build();
     } else if (e instanceof BadColumnNameException) {
       return Response.status(Status.BAD_REQUEST)
-          .entity(new Error(ErrorType.BAD_COLUMN_NAME, e.getMessage()))
+          .entity(new Error(ErrorType.BAD_COLUMN_NAME, msg))
           .type(type).build();
     } else {
       return Response.status(Status.BAD_REQUEST)
-          .entity(new Error(ErrorType.BAD_REQUEST, e.getMessage()))
+          .entity(new Error(ErrorType.BAD_REQUEST, msg))
           .type(type).build();
     }
   }

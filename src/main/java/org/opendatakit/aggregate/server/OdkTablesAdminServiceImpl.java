@@ -26,10 +26,11 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdminService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
@@ -56,10 +57,18 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
   public OdkTablesAdmin[] listAdmin() throws AccessDeniedException, DatastoreFailureException {
     try {
       CallingContext cc = this.getCC();
+      User user = cc.getCurrentUser();
+      if ( user.isAnonymous() ) {
+        throw new AccessDeniedException("Anonymous users cannot access ODK Tables administration settings");
+      }
       Map<String, UserSecurityInfo> uriUSImap = SecurityServiceUtil.getUriUserSecurityInfoMap(
           false, cc);
       ArrayList<OdkTablesAdmin> results = new ArrayList<OdkTablesAdmin>();
       for (String uri : uriUSImap.keySet()) {
+        if ( uri.equals(User.ANONYMOUS_USER) || uri.equals(User.DAEMON_USER) ) {
+          // don't care about these...
+          continue;
+        }
         try {
           TablesUserPermissions tablesUser = new TablesUserPermissionsImpl(uri, cc);
           UserSecurityInfo info = uriUSImap.get(uri);
@@ -95,6 +104,10 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
       DatastoreFailureException {
     CallingContext cc = this.getCC();
     try {
+      User user = cc.getCurrentUser();
+      if ( user.isAnonymous() ) {
+        throw new AccessDeniedException("Anonymous users cannot alter ODK Tables administration settings");
+      }
       // First turn the string ID into an EntityKey so it can be deleted
       TablesUserPermissionsImpl.deleteUser(uriUser, cc);
     } catch (ODKDatastoreException e) {
@@ -107,6 +120,11 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public Boolean updateAdmin(OdkTablesAdmin admin) throws AccessDeniedException {
+    CallingContext cc = this.getCC();
+    User user = cc.getCurrentUser();
+    if ( user.isAnonymous() ) {
+      throw new AccessDeniedException("Anonymous users cannot alter ODK Tables administration settings");
+    }
     return true;
   }
 
@@ -120,6 +138,10 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
   public Boolean setAdmins(ArrayList<UserSecurityInfo> admins) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException {
     CallingContext cc = this.getCC();
+    User user = cc.getCurrentUser();
+    if ( user.isAnonymous() ) {
+      throw new AccessDeniedException("Anonymous users cannot alter ODK Tables administration settings");
+    }
     boolean failure = false;
     for (UserSecurityInfo info : admins) {
       try {

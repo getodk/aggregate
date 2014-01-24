@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
@@ -66,9 +67,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   private static final long serialVersionUID = -5051558217315955180L;
 
   @Override
-  public List<RowClient> getRows(String tableId) throws AccessDeniedException,
+  public ArrayList<RowClient> getRows(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient {
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
@@ -92,18 +93,18 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public TableContentsClient getRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient {
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException {
     try {
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
       DataManager dm = new DataManager(tableId, userPermissions, cc);
-      Row row = dm.getRowNullSafe(rowId);
+      Row row = dm.getRow(rowId);
 
       TableContentsClient tcc = new TableContentsClient();
       tcc.columnNames = this.getColumnNames(tableId);
-      List<RowClient> rows = new ArrayList<RowClient>();
+      ArrayList<RowClient> rows = new ArrayList<RowClient>();
       rows.add(UtilTransforms.transform(row));
       tcc.rows = rows;
       return tcc;
@@ -123,7 +124,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   public RowClient createOrUpdateRow(String tableId, String rowId, RowClient row)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       ETagMismatchExceptionClient, PermissionDeniedExceptionClient, BadColumnNameExceptionClient,
-      EntityNotFoundExceptionClient {
+      EntityNotFoundExceptionClient, InconsistentStateException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     TablesUserPermissions userPermissions;
@@ -144,7 +145,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public void deleteRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient {
+      EntityNotFoundExceptionClient, InconsistentStateException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
@@ -175,7 +176,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    * @throws PermissionDeniedExceptionClient
    */
   @Override
-  public List<String> getColumnNames(String tableId) throws DatastoreFailureException,
+  public ArrayList<String> getColumnNames(String tableId) throws DatastoreFailureException,
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient {
 
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -185,7 +186,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
           .getUriUser(), cc);
       TableManager tm = new TableManager(userPermissions, cc);
       TableEntry entry = tm.getTable(tableId);
-      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId,
+      ArrayList<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId,
           entry.getSchemaETag(), cc);
       return columnNames;
     } catch (ODKEntityNotFoundException e) {
@@ -235,8 +236,8 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    * e.printStackTrace(); throw new DatastoreFailureException(e); } }
    */
 
-  private List<RowClient> transformRows(List<Row> rows) {
-    List<RowClient> clientRows = new ArrayList<RowClient>();
+  private ArrayList<RowClient> transformRows(List<Row> rows) {
+    ArrayList<RowClient> clientRows = new ArrayList<RowClient>();
     for (Row row : rows) {
       clientRows.add(UtilTransforms.transform(row));
     }
@@ -258,7 +259,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    *          the string uid of the table whose files you want
    */
   @Override
-  public List<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
+  public ArrayList<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient {
     throw new IllegalStateException("Not implemented");
@@ -288,7 +289,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   }
 
   @Override
-  public List<FileSummaryClient> getMedialFilesKey(String tableId, String key)
+  public ArrayList<FileSummaryClient> getMedialFilesKey(String tableId, String key)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
     throw new IllegalStateException("Not implemented");
@@ -386,9 +387,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    * DatastoreExceptions.
    */
   @Override
-  public List<String> getFileRowInfoColumnNames() {
+  public ArrayList<String> getFileRowInfoColumnNames() {
     List<DataField> exposedColumnNames = DbTableFileInfo.exposedColumnNames;
-    List<String> columnNames = new ArrayList<String>();
+    ArrayList<String> columnNames = new ArrayList<String>();
     for (DataField f : exposedColumnNames) {
       columnNames.add(f.getName());
     }
@@ -398,7 +399,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient {
+      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException {
     TableContentsClient tcc = new TableContentsClient();
     tcc.rows = getRows(tableId);
     tcc.columnNames = getColumnNames(tableId);
@@ -437,7 +438,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       // List<RowClient> newRows = new ArrayList<RowClient>();
       // this will hold the summaries for all the non media files. the
       // media files are associated with entries.
-      List<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
+      ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (FileSummaryClient summary : nonMediaSummaries) {
         // first get the media files for this key.
         // String key = row.getValues().get(DbTableFileInfo.KEY)

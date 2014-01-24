@@ -49,21 +49,21 @@ public class TableAclServiceImpl implements TableAclService {
 
   @Override
   public TableAclResourceList getAcls() throws ODKDatastoreException, PermissionDeniedException {
-    List<TableAcl> acls = am.getAcls();
+    ArrayList<TableAcl> acls = am.getAcls();
     return new TableAclResourceList(getResources(acls));
   }
 
   @Override
   public TableAclResourceList getUserAcls() throws ODKDatastoreException,
       PermissionDeniedException {
-    List<TableAcl> acls = am.getAcls(Scope.Type.USER);
+    ArrayList<TableAcl> acls = am.getAcls(Scope.Type.USER);
     return new TableAclResourceList(getResources(acls));
   }
 
   @Override
   public TableAclResourceList getGroupAcls() throws ODKDatastoreException,
       PermissionDeniedException {
-    List<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
+    ArrayList<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
     return new TableAclResourceList(getResources(acls));
   }
 
@@ -162,8 +162,8 @@ public class TableAclServiceImpl implements TableAclService {
     return resource;
   }
 
-  private List<TableAclResource> getResources(List<TableAcl> acls) {
-    List<TableAclResource> resources = new ArrayList<TableAclResource>();
+  private ArrayList<TableAclResource> getResources(List<TableAcl> acls) {
+    ArrayList<TableAclResource> resources = new ArrayList<TableAclResource>();
     for (TableAcl acl : acls) {
       resources.add(getResource(acl));
     }

@@ -82,9 +82,11 @@ public class FormsSubTab extends AggregateSubTabBase {
         if ( newShowEnketoIntegration != showEnketoIntegration ) {
           resizeFormTable = true;
           FormTable t = listOfForms;
+          @SuppressWarnings("unused")
+          boolean success = true;
           if ( t != null ) {
             listOfForms = null;
-            boolean success = remove(t);
+            success = remove(t);
           }
           showEnketoIntegration = newShowEnketoIntegration;
           listOfForms = new FormTable();

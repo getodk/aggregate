@@ -28,12 +28,14 @@ import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ServerDiffService;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -47,9 +49,9 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
   private static final long serialVersionUID = -5472352346806984818L;
 
   @Override
-  public List<RowClient> getRowsSince(String dataETag, String tableId)
+  public ArrayList<RowClient> getRowsSince(String dataETag, String tableId)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient {
+      PermissionDeniedExceptionClient, InconsistentStateException, ODKTaskLockException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
@@ -69,8 +71,8 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
   }
 
   // very basic transformation method
-  private List<RowClient> transformRows(List<Row> rows) {
-    List<RowClient> clientRows = new ArrayList<RowClient>();
+  private ArrayList<RowClient> transformRows(List<Row> rows) {
+    ArrayList<RowClient> clientRows = new ArrayList<RowClient>();
     for (Row row : rows) {
       clientRows.add(UtilTransforms.transform(row));
     }
