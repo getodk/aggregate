@@ -40,8 +40,8 @@ import org.opendatakit.common.web.CallingContext;
  * <ol>
  * <li>Gain mutex</li>
  * <li>Read DbTableEntry record for tableId</li>
- * <li>If the pending ETag != ETag then we need to roll back a pending change that did not complete.</li>
- * <li>If the stale ETag != ETag then we need to remove the state corresponding to the stale ETag.</li>
+ * <li>If the pending ETag != null then we need to roll back a pending change that did not complete.</li>
+ * <li>If the stale ETag != null then we need to remove the state corresponding to the stale ETag.</li>
  * <li>Otherwise, the database state is valid and we can proceed</li>
  * <li>Release mutex</li>
  * <ol>
@@ -50,16 +50,16 @@ import org.opendatakit.common.web.CallingContext;
  * schema rollback and cleanup in the same way -- by dropping the table and deleting all records in the table
  * (in that order, as PostgreSQL and MySQL have efficient table dropping actions, while GAE does not).
  * If there is a pending schema change, the task responsible for that will either complete successfully,
- * and change the schema ETag to match the pending ETag, or enter the failed state which would be detected
- * upon the next sync request and kick off the rollback actions.</p>
+ * and change the schema ETag to match the pending ETag (and clear the pending ETag), or enter the failed
+ * state which would be detected upon the next sync request and kick off the rollback actions.</p>
  * <p>Properties roll back corresponds to deleting all properties entries with the pending ETag. Once
- * complete, the Pending properties ETag is set to the properties ETag.</p>
+ * complete, the Pending properties ETag is cleared.</p>
  * <p>Properties stale cleanup corresponds to deleting all properties entries with the stale ETag. Once
- * complete, the Stale properties ETag is set to the properties ETag.</p>
+ * complete, the Stale properties ETag is cleared.</p>
  * <p>Data roll back corresponds to finding all DbLogTable entries with the pending ETag and systematically
  * recovering the most recent delta prior to that ETag. The DbTable entry for that row is then restored to
  * that earlier delta, and the DbLogTable entry is removed. Once all DbLogTable entries have been removed,
- * the Pending Data ETag is set to the Data ETag.</p>
+ * the Pending Data ETag is set to null.</p>
  * <p>Data stale cleanup is not applicable.</p>
  *
  * @author mitchellsundt@gmail.com
@@ -81,8 +81,8 @@ public class DbTableEntry extends Relation {
   private static final DataField PENDING_DATA_ETAG = new DataField("PENDING_DATA_ETAG",
       DataType.STRING, true);
   /**
-   * Upon completion of a change, the data ETag will be assigned the value of the pending data ETag.
-   * If they do not match, the pending changes need to be rolled back.
+   * Upon completion of a change, the data ETag will be assigned the value of the pending data ETag
+   * and the pending data ETag will be set to null.
    */
   private static final DataField DATA_ETAG = new DataField("DATA_ETAG", DataType.STRING, true);
   // there is no STALE_DATA_ETAG, as we maintain a history of all changes to the data values
@@ -94,17 +94,18 @@ public class DbTableEntry extends Relation {
   private static final DataField PENDING_PROPERTIES_ETAG = new DataField("PENDING_PROPERTIES_ETAG",
       DataType.STRING, true);
   /**
-   * Upon completion of the change, the stale properties ETag gets the old properties ETag value
-   * and the properties ETag value gets the pending properties ETag value. This signals that the
-   * pending properties change is complete, but that there are stale properties that need to be
-   * cleaned up (since we do not remember the history of properties changes).
+   * Upon partial completion of the change, the stale properties ETag gets the old properties ETag value
+   * and the properties ETag value gets the pending properties ETag value, and the pending properties
+   * ETag value is set to null. This signals that the pending properties change is complete, but that there
+   * are stale properties that need to be cleaned up (since we do not remember the history of properties
+   * changes).
    */
   private static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG",
       DataType.STRING, true);
   /**
-   * If the stale properties ETag != the properties ETag, then we need to scan for all of these
+   * If the stale properties ETag != null, then we need to scan for all of these
    * records and delete them. Once everything is deleted, the stale properties ETag should be
-   * assigned the value of the properties ETag.
+   * set to null.
    */
   private static final DataField STALE_PROPERTIES_ETAG = new DataField("STALE_PROPERTIES_ETAG",
       DataType.STRING, true);
@@ -114,21 +115,20 @@ public class DbTableEntry extends Relation {
    */
   private static final DataField URI_SCHEMA_TASK = new DataField("URI_SCHEMA_TASK", DataType.STRING, true);
   /**
-   * If the pending schema ETag is different from the schema ETag, then there is a schema change
-   * in progress.
+   * If the pending schema ETag != null, then there is a schema change in progress.
    */
   private static final DataField PENDING_SCHEMA_ETAG = new DataField("PENDING_SCHEMA_ETAG",
       DataType.STRING, true);
   /**
-   * Upon completion, the stale schema ETag is given the value of the schema ETag and the schema ETag
-   * is given the value of the pending schema ETag. This signals that the schema has changed, but that
-   * the old schema needs to be cleaned up.
+   * Upon completion, the stale schema ETag is given the value of the schema ETag, the schema ETag
+   * is given the value of the pending schema ETag, and the pending schema ETag is set to null.
+   * This signals that the schema has changed, but that the old schema needs to be cleaned up.
    */
   private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, true);
   /**
-   * If the stale schema ETag != schema ETag, then all of the column definitions for it should be
+   * If the stale schema ETag != null, then all of the column definitions for it should be
    * removed, the table dropped, and the table definition record deleted. Once that is done, the
-   * stale schema ETag should be assigned the value of the schema ETag.
+   * stale schema ETag should be set to null.
    */
   private static final DataField STALE_SCHEMA_ETAG = new DataField("STALE_SCHEMA_ETAG",
       DataType.STRING, true);
@@ -141,6 +141,15 @@ public class DbTableEntry extends Relation {
    */
   private static final DataField APRIORI_DATA_SEQUENCE_VALUE = new DataField(
       "APRIORI_DATA_SEQUENCE_VALUE", DataType.STRING, false);
+
+  /**
+   * The target number of rows returned at one time by queries on this table.
+   * The actual number is moderated by the granularity of the data ETag value.
+   * If batch modifications share one data ETag, we can only break our batch
+   * when the data ETag changes.
+   */
+  private static final DataField TARGET_ROW_BATCH_SIZE = new DataField("TARGET_ROW_BATCH_SIZE",
+      DataType.INTEGER, true);
 
   private static final List<DataField> dataFields;
   static {
@@ -155,6 +164,7 @@ public class DbTableEntry extends Relation {
     dataFields.add(SCHEMA_ETAG);
     dataFields.add(STALE_SCHEMA_ETAG);
     dataFields.add(APRIORI_DATA_SEQUENCE_VALUE);
+    dataFields.add(TARGET_ROW_BATCH_SIZE);
   }
 
   public static class DbTableEntryEntity {
@@ -257,6 +267,14 @@ public class DbTableEntry extends Relation {
 
     public void setAprioriDataSequenceValue(String value) {
       e.set(APRIORI_DATA_SEQUENCE_VALUE, value);
+    }
+
+    public Long getTargetRowBatchSize() {
+      return e.getLong(TARGET_ROW_BATCH_SIZE);
+    }
+
+    public void setTargetRowBatchSize(Long value) {
+      e.set(TARGET_ROW_BATCH_SIZE, value);
     }
   }
 
