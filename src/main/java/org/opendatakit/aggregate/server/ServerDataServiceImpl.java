@@ -70,7 +70,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public ArrayList<RowClient> getRows(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+      EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
@@ -85,6 +85,15 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (BadColumnNameException e) {
+      e.printStackTrace();
+      throw new BadColumnNameExceptionClient(e);
+    } catch (InconsistentStateException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -94,7 +103,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public TableContentsClient getRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+      EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     try {
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -115,38 +124,50 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (InconsistentStateException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
+    } catch (BadColumnNameException e) {
+      e.printStackTrace();
+      throw new BadColumnNameExceptionClient(e);
     }
   }
 
   @Override
   public RowClient createOrUpdateRow(String tableId, String rowId, RowClient row)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-      ETagMismatchExceptionClient, PermissionDeniedExceptionClient, BadColumnNameExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException {
+      ETagMismatchExceptionClient, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     TablesUserPermissions userPermissions;
     try {
       userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
+
+      return ServerOdkTablesUtil.createOrUpdateRow(tableId, rowId, row, userPermissions, cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
+    } catch (InconsistentStateException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
-
-    return ServerOdkTablesUtil.createOrUpdateRow(tableId, rowId, row, userPermissions, cc);
   }
 
   @Override
   public void deleteRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException, BadColumnNameException {
+      EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
@@ -166,6 +187,12 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKTaskLockException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
+    } catch (InconsistentStateException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (BadColumnNameException e) {
+      e.printStackTrace();
+      throw new BadColumnNameExceptionClient(e);
     }
 
   }
@@ -261,7 +288,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    */
   @Override
   public ArrayList<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      RequestFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient {
     throw new IllegalStateException("Not implemented");
     // this is commented out after we changed the file around.
@@ -400,7 +427,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+      EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     TableContentsClient tcc = new TableContentsClient();
     tcc.rows = getRows(tableId);
     tcc.columnNames = getColumnNames(tableId);

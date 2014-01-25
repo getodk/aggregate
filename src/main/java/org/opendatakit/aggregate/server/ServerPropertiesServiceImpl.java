@@ -49,7 +49,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public TablePropertiesClient getProperties(String tableId) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient, ODKTaskLockException {
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
@@ -61,6 +61,9 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
