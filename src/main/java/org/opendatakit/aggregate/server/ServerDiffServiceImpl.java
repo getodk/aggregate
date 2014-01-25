@@ -22,6 +22,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.RowClient;
@@ -52,7 +53,7 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
   @Override
   public ArrayList<RowClient> getRowsSince(String dataETag, String tableId)
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+      PermissionDeniedExceptionClient, BadColumnNameExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
@@ -68,6 +69,15 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
+    } catch (InconsistentStateException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (BadColumnNameException e) {
+      e.printStackTrace();
+      throw new BadColumnNameExceptionClient(e);
     }
   }
 
