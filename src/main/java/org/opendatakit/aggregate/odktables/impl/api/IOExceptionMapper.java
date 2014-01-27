@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.io.IOException;
+
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -26,29 +28,26 @@ import javax.ws.rs.ext.Provider;
 
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
-import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 @Provider
-public class ODKTaskLockExceptionMapper implements ExceptionMapper<ODKTaskLockException> {
+public class IOExceptionMapper implements ExceptionMapper<IOException> {
 
   @Context
   private HttpHeaders headers;
 
   @Override
-  public Response toResponse(ODKTaskLockException e) {
+  public Response toResponse(IOException e) {
     MediaType type;
     type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
         0) : MediaType.APPLICATION_JSON_TYPE;
 
-    String msg = e.getMessage();
-    if (msg == null) {
-      msg = e.toString();
-    }
+        String msg = e.getMessage();
+        if (msg == null) {
+          msg = e.toString();
+        }
 
-    return Response
-        .status(Status.INTERNAL_SERVER_ERROR)
-        .entity(
-            new Error(ErrorType.LOCK_TIMEOUT, "Please try again later. "
-                + "Timed out waiting for lock: " + msg)).type(type).build();
+    return Response.status(Status.INTERNAL_SERVER_ERROR)
+        .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();
   }
+
 }

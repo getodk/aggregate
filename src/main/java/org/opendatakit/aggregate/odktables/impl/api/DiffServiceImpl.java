@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -50,11 +51,12 @@ public class DiffServiceImpl implements DiffService {
   }
 
   @Override
-  public RowResourceList getRowsSince(String dataETag) throws ODKDatastoreException,
+  public Response getRowsSince(String dataETag) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRowsSince(dataETag);
-    return new RowResourceList(getResources(rows));
+    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+    return Response.ok(rowResourceList).build();
   }
 
   private RowResource getResource(Row row) {

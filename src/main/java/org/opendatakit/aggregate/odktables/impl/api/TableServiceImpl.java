@@ -23,6 +23,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -69,7 +70,7 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public TableResourceList getTables() throws ODKDatastoreException {
+  public Response getTables() throws ODKDatastoreException {
     List<TableEntry> entries = tm.getTables();
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
@@ -81,19 +82,20 @@ public class TableServiceImpl implements TableService {
       }
       resources.add(resource);
     }
-    return new TableResourceList(resources);
+    TableResourceList tableResourceList = new TableResourceList(resources);
+    return Response.ok(tableResourceList).build();
   }
 
   @Override
-  public TableResource getTable(String tableId) throws ODKDatastoreException,
+  public Response getTable(String tableId) throws ODKDatastoreException,
       PermissionDeniedException {
     TableEntry entry = tm.getTableNullSafe(tableId);
     TableResource resource = getResource(entry);
-    return resource;
+    return Response.ok(resource).build();
   }
 
   @Override
-  public TableResource createTable(String tableId, TableDefinition definition)
+  public Response createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
     // TODO: what if schemaETag is specified??? or if table already exists????
     // TODO: add access control stuff
@@ -102,40 +104,45 @@ public class TableServiceImpl implements TableService {
     TableEntry entry = tm.createTable(tableId, columns);
     TableResource resource = getResource(entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
-    return resource;
+    return Response.ok(resource).build();
   }
 
   @Override
-  public void deleteTable(String tableId) throws ODKDatastoreException, ODKTaskLockException,
+  public Response deleteTable(String tableId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
     tm.deleteTable(tableId);
     logger.info("tableId: " + tableId);
     DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
     ds.getDam().logUsage();
+    return Response.ok().build();
   }
 
   @Override
-  public DataService getData(String tableId) throws ODKDatastoreException {
-    return new DataServiceImpl(tableId, info, userPermissions, cc);
+  public Response getData(String tableId) throws ODKDatastoreException {
+    DataService service = new DataServiceImpl(tableId, info, userPermissions, cc);
+    return Response.ok(service).build();
   }
 
   @Override
-  public PropertiesService getProperties(String tableId) throws ODKDatastoreException {
-    return new PropertiesServiceImpl(tableId, info, userPermissions, cc);
+  public Response getProperties(String tableId) throws ODKDatastoreException {
+    PropertiesService service = new PropertiesServiceImpl(tableId, info, userPermissions, cc);
+    return Response.ok(service).build();
   }
 
   @Override
-  public DiffService getDiff(String tableId) throws ODKDatastoreException {
-    return new DiffServiceImpl(tableId, info, userPermissions, cc);
+  public Response getDiff(String tableId) throws ODKDatastoreException {
+    DiffService service = new DiffServiceImpl(tableId, info, userPermissions, cc);
+    return Response.ok(service).build();
   }
 
   @Override
-  public TableAclService getAcl(String tableId) throws ODKDatastoreException {
-    return new TableAclServiceImpl(tableId, info, userPermissions, cc);
+  public Response getAcl(String tableId) throws ODKDatastoreException {
+    TableAclService service = new TableAclServiceImpl(tableId, info, userPermissions, cc);
+    return Response.ok(service).build();
   }
 
   @Override
-  public TableDefinitionResource getDefinition(String tableId) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+  public Response getDefinition(String tableId) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     // TODO: permissions stuff for a table, perhaps? or just at the row level?
     TableDefinition definition = tm.getTableDefinition(tableId);
     TableDefinitionResource definitionResource = new TableDefinitionResource(definition);
@@ -145,7 +152,7 @@ public class TableServiceImpl implements TableService {
     URI tableUri = ub.clone().path(TableService.class, "getTable").build(tableId);
     definitionResource.setSelfUri(selfUri.toASCIIString());
     definitionResource.setTableUri(tableUri.toASCIIString());
-    return definitionResource;
+    return Response.ok(definitionResource).build();
   }
 
   private TableResource getResource(TableEntry entry) {

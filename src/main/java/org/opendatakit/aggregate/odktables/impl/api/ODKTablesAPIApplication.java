@@ -37,6 +37,7 @@ public class ODKTablesAPIApplication extends Application {
     classes.add(ODKDatastoreExceptionMapper.class);
     classes.add(ODKTablesExceptionMapper.class);
     classes.add(ODKTaskLockExceptionMapper.class);
+    classes.add(IOExceptionMapper.class);
     classes.add(RuntimeExceptionMapper.class);
     return classes;
   }

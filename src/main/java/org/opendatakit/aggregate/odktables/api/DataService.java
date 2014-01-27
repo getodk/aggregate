@@ -24,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
@@ -39,25 +40,66 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DataService {
 
+  /**
+   *
+   * @return {@link RowResourceList} containing the rows being returned.
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
   @GET
-  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
+  public Response /*RowResourceList*/ getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
+  /**
+   *
+   * @param rowId
+   * @return {@link RowResource} of the row
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
   @GET
   @Path("{rowId}")
-  public RowResource getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
+  public Response /*RowResource*/ getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
+  /**
+   *
+   * @param rowId
+   * @param row
+   * @return {@link RowResource} of the newly added/inserted row.
+   * @throws ODKTaskLockException
+   * @throws ODKDatastoreException
+   * @throws ETagMismatchException
+   * @throws PermissionDeniedException
+   * @throws BadColumnNameException
+   * @throws InconsistentStateException
+   */
   @PUT
   @Path("{rowId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public RowResource createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
+  public Response /*RowResource*/ createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
       PermissionDeniedException, BadColumnNameException, InconsistentStateException;
 
+  /**
+   *
+   * @param rowId
+   * @return String dataETag on the table that marks this row as deleted.
+   * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws BadColumnNameException
+   */
   @DELETE
   @Path("{rowId}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public String deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
+  public Response /*String*/ deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
       ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException;
 
 }

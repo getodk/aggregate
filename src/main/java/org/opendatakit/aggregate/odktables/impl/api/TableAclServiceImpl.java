@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -48,85 +49,97 @@ public class TableAclServiceImpl implements TableAclService {
   }
 
   @Override
-  public TableAclResourceList getAcls() throws ODKDatastoreException, PermissionDeniedException {
+  public Response getAcls() throws ODKDatastoreException, PermissionDeniedException {
     ArrayList<TableAcl> acls = am.getAcls();
-    return new TableAclResourceList(getResources(acls));
+    TableAclResourceList list = new TableAclResourceList(getResources(acls));
+    return Response.ok(list).build();
   }
 
   @Override
-  public TableAclResourceList getUserAcls() throws ODKDatastoreException,
+  public Response getUserAcls() throws ODKDatastoreException,
       PermissionDeniedException {
     ArrayList<TableAcl> acls = am.getAcls(Scope.Type.USER);
-    return new TableAclResourceList(getResources(acls));
+    TableAclResourceList list = new TableAclResourceList(getResources(acls));
+    return Response.ok(list).build();
   }
 
   @Override
-  public TableAclResourceList getGroupAcls() throws ODKDatastoreException,
+  public Response getGroupAcls() throws ODKDatastoreException,
       PermissionDeniedException {
     ArrayList<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
-    return new TableAclResourceList(getResources(acls));
+    TableAclResourceList list = new TableAclResourceList(getResources(acls));
+    return Response.ok(list).build();
   }
 
   @Override
-  public TableAclResource getUserAcl(String odkTablesUserId) throws ODKDatastoreException,
+  public Response getUserAcl(String odkTablesUserId) throws ODKDatastoreException,
       PermissionDeniedException {
     if (odkTablesUserId.equals("null")) {
       odkTablesUserId = null;
     }
     TableAcl acl = am.getAcl(new Scope(Scope.Type.USER, odkTablesUserId));
-    return getResource(acl);
+    TableAclResource resource = getResource(acl);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public TableAclResource getGroupAcl(String groupId) throws ODKDatastoreException,
+  public Response getGroupAcl(String groupId) throws ODKDatastoreException,
       PermissionDeniedException {
     TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
-    return getResource(acl);
+    TableAclResource resource = getResource(acl);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public TableAclResource getDefaultAcl() throws ODKDatastoreException, PermissionDeniedException {
+  public Response getDefaultAcl() throws ODKDatastoreException, PermissionDeniedException {
     TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
-    return getResource(acl);
+    TableAclResource resource = getResource(acl);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public TableAclResource setUserAcl(String odkTablesUserId, TableAcl acl) throws ODKDatastoreException,
+  public Response setUserAcl(String odkTablesUserId, TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException {
     if (odkTablesUserId.equals("null"))
       odkTablesUserId = null;
     acl = am.setAcl(new Scope(Scope.Type.USER, odkTablesUserId), acl.getRole());
-    return getResource(acl);
+    TableAclResource resource = getResource(acl);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public TableAclResource setGroupAcl(String groupId, TableAcl acl) throws ODKDatastoreException,
+  public Response setGroupAcl(String groupId, TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException {
     acl = am.setAcl(new Scope(Scope.Type.GROUP, groupId), acl.getRole());
-    return getResource(acl);
+    TableAclResource resource = getResource(acl);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public TableAclResource setDefaultAcl(TableAcl acl) throws ODKDatastoreException,
+  public Response setDefaultAcl(TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException {
     acl = am.setAcl(new Scope(Scope.Type.DEFAULT, null), acl.getRole());
-    return getResource(acl);
+    TableAclResource resource = getResource(acl);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public void deleteDefaultAcl() throws ODKDatastoreException, PermissionDeniedException {
+  public Response deleteDefaultAcl() throws ODKDatastoreException, PermissionDeniedException {
     am.deleteAcl(new Scope(Scope.Type.DEFAULT, null));
+    return Response.ok().build();
   }
 
   @Override
-  public void deleteUserAcl(String odkTablesUserId) throws ODKDatastoreException, PermissionDeniedException {
+  public Response deleteUserAcl(String odkTablesUserId) throws ODKDatastoreException, PermissionDeniedException {
     am.deleteAcl(new Scope(Scope.Type.USER, odkTablesUserId));
+    return Response.ok().build();
   }
 
   @Override
-  public void deleteGroupAcl(String groupId) throws ODKDatastoreException,
+  public Response deleteGroupAcl(String groupId) throws ODKDatastoreException,
       PermissionDeniedException {
     am.deleteAcl(new Scope(Scope.Type.USER, groupId));
+    return Response.ok().build();
   }
 
   private TableAclResource getResource(TableAcl acl) {

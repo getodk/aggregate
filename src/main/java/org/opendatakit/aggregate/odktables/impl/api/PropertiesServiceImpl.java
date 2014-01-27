@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -46,16 +47,18 @@ public class PropertiesServiceImpl implements PropertiesService {
   }
 
   @Override
-  public PropertiesResource getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+  public Response getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     TableProperties properties = pm.getProperties();
-    return getResource(properties);
+    PropertiesResource resource = getResource(properties);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public PropertiesResource setProperties(TableProperties properties) throws ODKDatastoreException,
+  public Response setProperties(TableProperties properties) throws ODKDatastoreException,
       ETagMismatchException, ODKTaskLockException, PermissionDeniedException {
     properties = pm.setProperties(properties);
-    return getResource(properties);
+    PropertiesResource resource = getResource(properties);
+    return Response.ok(resource).build();
   }
 
   private PropertiesResource getResource(TableProperties properties) {
