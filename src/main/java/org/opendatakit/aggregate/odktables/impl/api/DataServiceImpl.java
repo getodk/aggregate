@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -50,33 +51,35 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public RowResourceList getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+  public Response getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRows();
-    return new RowResourceList(getResources(rows));
+    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+    return Response.ok(rowResourceList).build();
   }
 
   @Override
-  public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+  public Response getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
-    return resource;
+    return Response.ok(resource).build();
   }
 
   @Override
-  public RowResource createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
+  public Response createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
       ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
       BadColumnNameException, InconsistentStateException {
     row.setRowId(rowId);
     Row newRow = dm.insertOrUpdateRow(row);
     RowResource resource = getResource(newRow);
-    return resource;
+    return Response.ok(resource).build();
   }
 
   @Override
-  public String deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
+  public Response deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException, InconsistentStateException, BadColumnNameException {
-    return dm.deleteRow(rowId);
+    String dataETagOnTableOfModification = dm.deleteRow(rowId);
+    return Response.ok(dataETagOnTableOfModification).build();
   }
 
   private RowResource getResource(Row row) {

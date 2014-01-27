@@ -33,6 +33,7 @@ import javax.ws.rs.core.PathSegment;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
@@ -148,6 +149,7 @@ public class FileServiceImpl implements FileService {
       }
       OutputStream os = resp.getOutputStream();
       os.write(fileBlob);
+      resp.setStatus(HttpStatus.SC_OK);
     } else {
       resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
       resp.getWriter().print(ErrorConsts.NO_IMAGE_EXISTS);
@@ -178,6 +180,7 @@ public class FileServiceImpl implements FileService {
       // TODO: incorporate checking for access control
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, FileService.ERROR_MSG_UNRECOGNIZED_APP_ID
           + appId);
+      return;
     }
     String wholePath = constructPathFromSegments(segments);
     String contentType = req.getContentType();

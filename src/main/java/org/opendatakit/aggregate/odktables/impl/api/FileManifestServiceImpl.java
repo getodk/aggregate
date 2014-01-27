@@ -15,14 +15,14 @@
  */
 package org.opendatakit.aggregate.odktables.impl.api;
 
-import java.io.IOException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,18 +43,16 @@ public class FileManifestServiceImpl implements FileManifestService {
 
   @Override
   @GET
-  public OdkTablesFileManifest getFileManifest(@Context ServletContext servletContext,
+  public Response getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
       @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
-      @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) throws IOException {
+      @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) {
     ServiceUtils.examineRequest(servletContext, req);
     // First we need to get the calling context.
     CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
     // Now make sure we have an app id.
     if (appId == null || "".equals(appId)) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-          "Invalid request. App id must be present and valid.");
-      return null;
+      return Response.status(Status.BAD_REQUEST).entity("Invalid request. App id must be present and valid.").build();
     }
     FileManifestManager manifestManager = new FileManifestManager(appId, cc);
     OdkTablesFileManifest manifest = null;
@@ -78,11 +76,9 @@ public class FileManifestServiceImpl implements FileManifestService {
       e.printStackTrace();
     }
     if (manifest == null) {
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to retrieve manifest.");
-      // TODO: is this what I should be sending?
-      return null;
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
     } else {
-      return manifest;
+      return Response.ok(manifest).build();
     }
   }
 

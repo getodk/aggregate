@@ -40,25 +40,26 @@ public class ODKDatastoreExceptionMapper implements ExceptionMapper<ODKDatastore
   @Override
   public Response toResponse(ODKDatastoreException e) {
     MediaType type;
-    type = (headers.getAcceptableMediaTypes().size() != 0) ?
-        headers.getAcceptableMediaTypes().get(0) : MediaType.APPLICATION_JSON_TYPE;
+    type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
+        0) : MediaType.APPLICATION_JSON_TYPE;
+
+    String msg = e.getMessage();
+    if (msg == null) {
+      msg = e.toString();
+    }
 
     if (e instanceof ODKEntityNotFoundException) {
-      return Response.status(Status.NOT_FOUND)
-          .entity(new Error(ErrorType.RESOURCE_NOT_FOUND, e.getMessage()))
+      return Response.status(Status.NOT_FOUND).entity(new Error(ErrorType.RESOURCE_NOT_FOUND, msg))
           .type(type).build();
     } else if (e instanceof ODKEntityPersistException) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, "Could not save: " + e.getMessage()))
-          .type(type).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, "Could not save: " + msg)).type(type).build();
     } else if (e instanceof ODKOverQuotaException) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, "Over quota: " + e.getMessage()))
-          .type(type).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, "Over quota: " + msg)).type(type).build();
     } else {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, e.getMessage()))
-          .type(type).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();
     }
   }
 

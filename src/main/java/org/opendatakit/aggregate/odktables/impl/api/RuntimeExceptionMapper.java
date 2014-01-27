@@ -36,15 +36,23 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
   @Override
   public Response toResponse(RuntimeException e) {
     MediaType type;
-    type = (headers.getAcceptableMediaTypes().size() != 0) ?
-        headers.getAcceptableMediaTypes().get(0) : MediaType.APPLICATION_JSON_TYPE;
+    type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
+        0) : MediaType.APPLICATION_JSON_TYPE;
+
+    String msg = e.getMessage();
+    if (msg == null) {
+      msg = e.toString();
+    }
 
     if (e instanceof IllegalArgumentException) {
       return Response.status(Status.BAD_REQUEST)
-          .entity(new Error(ErrorType.BAD_REQUEST, "Bad arguments: " + e.getMessage())).type(type).build();
+          .entity(new Error(ErrorType.BAD_REQUEST, "Bad arguments: " + msg)).type(type).build();
+    } else if (e instanceof IllegalStateException) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity(new Error(ErrorType.INTERNAL_ERROR, "Illegal state: " + msg)).type(type).build();
     } else {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, e.getMessage())).type(type).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();
     }
   }
 

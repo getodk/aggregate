@@ -20,6 +20,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -34,7 +35,17 @@ public interface DiffService {
 
   public static final String QUERY_DATA_ETAG = "data_etag";
 
+  /**
+   *
+   * @param dataETag
+   * @return {@link RowResourceList} of row changes since the dataETag value
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
   @GET
-  public RowResourceList getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
+  public Response /*RowResourceList*/ getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
       throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 }
