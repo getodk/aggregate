@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -44,8 +45,8 @@ import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
 import org.simpleframework.xml.Serializer;
 
-@Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
-@Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML })
+@Consumes({ MediaType.TEXT_XML, MediaType.APPLICATION_XML })
 @Provider
 public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
     MessageBodyWriter<Object> {
@@ -62,27 +63,30 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation annotations[],
       MediaType mediaType) {
-    return (mediaType.getType().equals("text") || mediaType.getType().equals("application")) &&
-        mediaType.getSubtype().equals("xml");
+    return (mediaType.getType().equals("text") || mediaType.getType().equals("application"))
+        && mediaType.getSubtype().equals("xml");
   }
 
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation annotations[],
       MediaType mediaType) {
-    return (mediaType.getType().equals("text") || mediaType.getType().equals("application")) &&
-        mediaType.getSubtype().equals("xml");
+    return (mediaType.getType().equals("text") || mediaType.getType().equals("application"))
+        && mediaType.getSubtype().equals("xml");
   }
 
   @Override
   public Object readFrom(Class<Object> aClass, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, String> map, InputStream stream)
       throws IOException, WebApplicationException {
-    String encoding = getCharsetAsString(mediaType);
+    String charset = getCharsetAsString(mediaType);
+    if (!charset.equalsIgnoreCase(DEFAULT_ENCODING)) {
+      throw new IllegalArgumentException("charset for the request is not utf-8");
+    }
     try {
       InputStream jsonStream;
-      if ( headers != null ) {
+      if (headers != null) {
         List<String> ce = headers.getRequestHeader(ApiConstants.CONTENT_ENCODING_HEADER);
-        if ( ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING) ) {
+        if (ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
           jsonStream = new GZIPInputStream(stream);
         } else {
           jsonStream = stream;
@@ -90,7 +94,7 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
       } else {
         jsonStream = stream;
       }
-      Reader r = new InputStreamReader(jsonStream, encoding);
+      Reader r = new InputStreamReader(jsonStream, Charset.forName(ApiConstants.UTF8_ENCODE));
       return serializer.read(aClass, r);
     } catch (Exception e) {
       throw new IOException(e);
@@ -99,29 +103,29 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
 
   @Override
   public void writeTo(Object o, Class<?> aClass, Type type, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, Object> map, OutputStream stream)
+      MediaType mediaType, MultivaluedMap<String, Object> map, OutputStream rawStream)
       throws IOException, WebApplicationException {
     String encoding = getCharsetAsString(mediaType);
+    if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
+      throw new IllegalArgumentException("charset for the response is not utf-8");
+    }
     try {
-      OutputStream jsonStream;
-      if ( headers != null ) {
+      OutputStream stream;
+      if (headers != null) {
         List<String> ce = headers.getRequestHeader(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
-        if ( ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING) ) {
-          jsonStream = new GZIPOutputStream(stream);
+        if (ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
+          stream = new GZIPOutputStream(rawStream);
         } else {
-          jsonStream = stream;
+          stream = rawStream;
         }
       } else {
-        jsonStream = stream;
+        stream = rawStream;
       }
-      Writer writer = new OutputStreamWriter(jsonStream, encoding);
+      if (mediaType.getParameters().get("charset") == null) {
+        mediaType.getParameters().put("charset", DEFAULT_ENCODING);
+      }
+      Writer writer = new OutputStreamWriter(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
       serializer.write(o, writer);
-      writer.flush();
-      jsonStream.flush();
-      stream.flush();
-      writer.close();
-      jsonStream.close();
-      stream.close();
     } catch (Exception e) {
       throw new IOException(e);
     }

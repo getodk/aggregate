@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.odktables.rest.serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -59,7 +60,7 @@ import org.springframework.util.Assert;
  */
 public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-  public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final String DEFAULT_ENCODING = "utf-8";
 
   private Serializer serializer;
 
@@ -82,14 +83,19 @@ public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Obj
     Assert.notNull(this.serializer, "Property 'serializer' is required");
     InputStream stream;
     HttpHeaders headers = inputMessage.getHeaders();
+    String charset = getCharsetAsString(headers.getContentType());
+    if ( !charset.equalsIgnoreCase(DEFAULT_ENCODING) ) {
+      throw new IllegalArgumentException("charset for the request is not utf-8");
+    }
     List<String> encodings = headers.get(ApiConstants.CONTENT_ENCODING_HEADER);
-    if ( encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING) ) {
+    if (encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
       stream = new GZIPInputStream(inputMessage.getBody());
     } else {
       stream = inputMessage.getBody();
     }
+    InputStreamReader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
     try {
-      Object result = this.serializer.read(clazz, stream);
+      Object result = this.serializer.read(clazz, r);
       if (!clazz.isInstance(result)) {
         throw new TypeMismatchException(result, clazz);
       }
@@ -111,32 +117,41 @@ public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Obj
       formatter.setCalendar(g);
       headers.add(ApiConstants.DATE_HEADER, formatter.format(new Date()));
       headers.add(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-      headers.setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
+      headers
+          .setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
 
-      // see if we should gzip the output -- only applicable if we
+      // see if we should gzip the output
+      OutputStream rawStream = outputMessage.getBody();
       OutputStream stream;
-      if ( requestHeaders == null ) {
+      if (requestHeaders == null) {
         // always send data to the server as encoded
-//        headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-//        stream = new GZIPOutputStream(outputMessage.getBody());
-        stream = outputMessage.getBody();
+        headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
+        stream = new GZIPOutputStream(rawStream);
       } else {
         List<String> encodings = requestHeaders.get(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
-        if ( encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING) ) {
+        if (encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
           headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-          stream = new GZIPOutputStream(outputMessage.getBody());
+          stream = new GZIPOutputStream(rawStream);
         } else {
-          stream = outputMessage.getBody();
+          stream = rawStream;
         }
       }
-      Writer writer = new OutputStreamWriter(stream, ApiConstants.UTF8_ENCODE);
+      Writer writer = new OutputStreamWriter(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
       this.serializer.write(o, writer);
-      writer.flush();
-      stream.flush();
-      writer.close();
-      stream.close();
     } catch (Exception ex) {
       throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
     }
+  }
+
+  protected static String getCharsetAsString(MediaType m) {
+    if (m == null) {
+      return DEFAULT_ENCODING;
+    }
+    String result = m.getParameters().get("charset");
+    if ( result != null && result.startsWith("\"") && result.endsWith("\"") ) {
+      // work-around for parameters being wrapped in quotes in Springframework.
+      result = result.substring(1, result.length()-1);
+    }
+    return (result == null) ? DEFAULT_ENCODING : result;
   }
 }
