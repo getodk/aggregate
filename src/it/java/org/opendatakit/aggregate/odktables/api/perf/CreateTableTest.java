@@ -50,11 +50,11 @@ public class CreateTableTest implements PerfTest {
   public void run() {
     try {
       // create table
-      List<Column> columns = new ArrayList<Column>();
+      ArrayList<Column> columns = new ArrayList<Column>();
       for (int i = 0; i < numCols; i++) {
         columns.add(new Column(tableId, colName(i), colName(i), "STRING", null, true));
       }
-      synchronizer.createTable(tableId, columns, displayName, null);
+      synchronizer.createTable(tableId, null, columns);
 
       // insert rows
       List<Row> rows = Lists.newArrayList();
