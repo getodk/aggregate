@@ -102,11 +102,11 @@ public class MultipleUsersTest implements PerfTest {
   @Override
   public boolean setUp() throws IOException {
     // create table
-    List<Column> columns = new ArrayList<Column>();
+    ArrayList<Column> columns = new ArrayList<Column>();
     for (int i = 0; i < numCols; i++) {
       columns.add(new Column(tableId, colName(i), colName(i), "STRING", null, true));
     }
-    synchronizer.createTable(tableId, columns, displayName, null);
+    synchronizer.createTable(tableId, null, columns);
     return true;
   }
 

@@ -25,7 +25,7 @@ public class T {
   public static final Long savepoint_timestamp_2 = System.currentTimeMillis()-2000;
 
   @SuppressWarnings("serial")
-  public static final List<Column> columns = new ArrayList<Column>() {
+  public static final ArrayList<Column> columns = new ArrayList<Column>() {
     {
       add(T.Columns.column_name);
       add(T.Columns.column_age);
