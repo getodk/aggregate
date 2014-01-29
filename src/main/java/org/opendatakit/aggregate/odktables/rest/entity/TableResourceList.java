@@ -19,19 +19,22 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
 /**
- * This holds a list of {@link TableResource}.
- * Proper XML documents can contain only one root node.
- * This wrapping class provides that root node.
+ * This holds a list of {@link TableResource}. Proper XML documents can contain
+ * only one root node. This wrapping class provides that root node.
  *
  * @author mitchellsundt@gmail.com
  *
  */
 @Root
 public class TableResourceList {
+
+  @Element(required = false)
+  private String resumeParameter;
 
   /**
    * The entries in the manifest.
@@ -44,6 +47,7 @@ public class TableResourceList {
    */
   public TableResourceList() {
     this.entries = new ArrayList<TableResource>();
+    this.resumeParameter = null;
   }
 
   /**
@@ -51,12 +55,20 @@ public class TableResourceList {
    *
    * @param entries
    */
-  public TableResourceList(ArrayList<TableResource> entries) {
-    if ( entries == null ) {
+  public TableResourceList(ArrayList<TableResource> entries, String resumeParameter) {
+    if (entries == null) {
       this.entries = new ArrayList<TableResource>();
     } else {
       this.entries = entries;
     }
+  }
+
+  public String getResumeParameter() {
+    return resumeParameter;
+  }
+
+  public void setResumeParameter(String resumeParameter) {
+    this.resumeParameter = resumeParameter;
   }
 
   public List<TableResource> getEntries() {
@@ -71,6 +83,7 @@ public class TableResourceList {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((resumeParameter == null) ? 0 : resumeParameter.hashCode());
     result = prime * result + ((entries == null) ? 0 : entries.hashCode());
     return result;
   }
@@ -87,8 +100,9 @@ public class TableResourceList {
       return false;
     }
     TableResourceList other = (TableResourceList) obj;
-    return (entries == null ? other.entries == null : (entries.size() == other.entries.size()
-        && entries.containsAll(other.entries) && other.entries.containsAll(entries)));
+    return ((resumeParameter == null) ? other.resumeParameter == null : (resumeParameter
+        .equals(other.resumeParameter)))
+        && ((entries == null ? other.entries == null : (entries.size() == other.entries.size()
+            && entries.containsAll(other.entries) && other.entries.containsAll(entries))));
   }
-
 }
