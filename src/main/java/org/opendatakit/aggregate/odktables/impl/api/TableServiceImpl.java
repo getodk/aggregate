@@ -82,7 +82,8 @@ public class TableServiceImpl implements TableService {
       }
       resources.add(resource);
     }
-    TableResourceList tableResourceList = new TableResourceList(resources);
+    // TODO: add QueryResumePoint support
+    TableResourceList tableResourceList = new TableResourceList(resources, null);
     return Response.ok(tableResourceList).build();
   }
 
@@ -118,27 +119,27 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response getData(String tableId) throws ODKDatastoreException {
+  public DataService getData(String tableId) throws ODKDatastoreException {
     DataService service = new DataServiceImpl(tableId, info, userPermissions, cc);
-    return Response.ok(service).build();
+    return service;
   }
 
   @Override
-  public Response getProperties(String tableId) throws ODKDatastoreException {
+  public PropertiesService getProperties(String tableId) throws ODKDatastoreException {
     PropertiesService service = new PropertiesServiceImpl(tableId, info, userPermissions, cc);
-    return Response.ok(service).build();
+    return service;
   }
 
   @Override
-  public Response getDiff(String tableId) throws ODKDatastoreException {
+  public DiffService getDiff(String tableId) throws ODKDatastoreException {
     DiffService service = new DiffServiceImpl(tableId, info, userPermissions, cc);
-    return Response.ok(service).build();
+    return service;
   }
 
   @Override
-  public Response getAcl(String tableId) throws ODKDatastoreException {
+  public TableAclService getAcl(String tableId) throws ODKDatastoreException {
     TableAclService service = new TableAclServiceImpl(tableId, info, userPermissions, cc);
-    return Response.ok(service).build();
+    return service;
   }
 
   @Override

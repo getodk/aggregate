@@ -63,6 +63,19 @@ public interface TableService {
   /**
    *
    * @param tableId
+   * @return {@link TableDefinitionResource} for the schema of this table.
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws ODKTaskLockException
+   */
+  @GET
+  @Path("{tableId}/definition")
+  public Response /*TableDefinitionResource*/ getDefinition(@PathParam("tableId") String tableId)
+      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
+
+  /**
+   *
+   * @param tableId
    * @param definition
    * @return {@link TableResource} of the table. This may already exist (with identical schema) or be newly created.
    * @throws ODKDatastoreException
@@ -92,34 +105,21 @@ public interface TableService {
   /**
    *
    * @param tableId
-   * @return {@link DataService} for manipulating row data in this table.
-   * @throws ODKDatastoreException
-   */
-  @Path("{tableId}/rows")
-  public Response /*DataService*/ getData(@PathParam("tableId") String tableId) throws ODKDatastoreException;
-
-  /**
-   *
-   * @param tableId
    * @return {@link PropertiesService} for accessing table metadata
    * @throws ODKDatastoreException
    */
   @Path("{tableId}/properties")
-  public Response /*PropertiesService*/ getProperties(@PathParam("tableId") String tableId)
+  public PropertiesService getProperties(@PathParam("tableId") String tableId)
       throws ODKDatastoreException;
 
   /**
    *
    * @param tableId
-   * @return {@link TableDefinitionResource} for the schema of this table.
+   * @return {@link DataService} for manipulating row data in this table.
    * @throws ODKDatastoreException
-   * @throws PermissionDeniedException
-   * @throws ODKTaskLockException
    */
-  @GET
-  @Path("{tableId}/definition")
-  public Response /*TableDefinitionResource*/ getDefinition(@PathParam("tableId") String tableId)
-      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
+  @Path("{tableId}/rows")
+  public DataService getData(@PathParam("tableId") String tableId) throws ODKDatastoreException;
 
   /**
    *
@@ -128,7 +128,7 @@ public interface TableService {
    * @throws ODKDatastoreException
    */
   @Path("{tableId}/diff")
-  public Response /*DiffService*/ getDiff(@PathParam("tableId") String tableId) throws ODKDatastoreException;
+  public DiffService getDiff(@PathParam("tableId") String tableId) throws ODKDatastoreException;
 
   /**
    *
@@ -137,5 +137,5 @@ public interface TableService {
    * @throws ODKDatastoreException
    */
   @Path("{tableId}/acl")
-  public Response /*TableAclService*/ getAcl(@PathParam("tableId") String tableId) throws ODKDatastoreException;
+  public TableAclService getAcl(@PathParam("tableId") String tableId) throws ODKDatastoreException;
 }
