@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -70,6 +71,10 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       datastoreError(resp);
+      return;
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      errorRetreivingData(resp);
       return;
     } catch (PermissionDeniedException e) {
       e.printStackTrace();

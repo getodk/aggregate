@@ -158,6 +158,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (InconsistentStateException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
@@ -202,10 +205,11 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    *
    * @return List<String> of the column names
    * @throws PermissionDeniedExceptionClient
+   * @throws RequestFailureException
    */
   @Override
   public ArrayList<String> getColumnNames(String tableId) throws DatastoreFailureException,
-      EntityNotFoundExceptionClient, PermissionDeniedExceptionClient {
+      EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, RequestFailureException {
 
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -223,6 +227,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -512,6 +519,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);

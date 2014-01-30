@@ -96,6 +96,9 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
   }
 
@@ -122,6 +125,9 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -158,6 +164,9 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (ETagMismatchException e) {
       e.printStackTrace();
       throw new TableAlreadyExistsExceptionClient(e);

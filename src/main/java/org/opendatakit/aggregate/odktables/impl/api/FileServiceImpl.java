@@ -45,6 +45,7 @@ import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
@@ -162,7 +163,7 @@ public class FileServiceImpl implements FileService {
   // because we want to get the whole path
   public void putFile(@Context ServletContext servletContext,
       @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req,
-      @Context HttpServletResponse resp) throws IOException {
+      @Context HttpServletResponse resp) throws IOException, ODKTaskLockException {
     if (segments.size() <= 1) {
       resp.sendError(HttpServletResponse.SC_BAD_REQUEST, FileService.ERROR_MSG_INSUFFICIENT_PATH);
       return;

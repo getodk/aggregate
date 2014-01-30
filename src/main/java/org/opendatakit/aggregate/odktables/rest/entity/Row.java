@@ -283,6 +283,34 @@ public class Row {
         && (values == null ? other.values == null : values.equals(other.values));
   }
 
+  /**
+   * A reduced-function equals predicate to detect if the values significant to
+   * the end user are matched across the two data records.
+   * <p>
+   * Ignore the following fields when making this comparison:
+   * <ul><li>rowETag</li>
+   * <li>dataETagAtModification</li>
+   * <li>createUser</li>
+   * <li>lastUpdateUser</li>
+   * </ul>
+   *
+   * @param other
+   * @return
+   */
+  public boolean hasMatchingSignificantFieldValues(Row other) {
+    if ( other == null ) return false;
+    return (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
+        && (deleted == other.deleted)
+        && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
+        && (uriAccessControl == null ? other.uriAccessControl == null : uriAccessControl
+            .equals(other.uriAccessControl))
+        && (formId == null ? other.formId == null : formId.equals(other.formId))
+        && (locale == null ? other.locale == null : locale.equals(other.locale))
+        && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
+            .equals(other.savepointTimestamp))
+        && (values == null ? other.values == null : values.equals(other.values));
+  }
+
   /*
    * (non-Javadoc)
    *

@@ -61,7 +61,7 @@ public class TableServiceImpl implements TableService {
   private UriInfo info;
 
   public TableServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
-      @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException {
+      @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     ServiceUtils.examineRequest(sc, req);
     this.cc = ContextFactory.getCallingContext(sc, req);
     this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);

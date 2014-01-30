@@ -59,7 +59,7 @@ public interface ServerDataService extends RemoteService {
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient;
 
   ArrayList<String> getColumnNames(String tableId) throws DatastoreFailureException,
-      EntityNotFoundExceptionClient, PermissionDeniedExceptionClient;
+      EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, RequestFailureException;
 
   ArrayList<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
       RequestFailureException, PermissionDeniedExceptionClient,
