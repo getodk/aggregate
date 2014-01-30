@@ -91,17 +91,19 @@ public class PropertiesManager {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
+   * @throws ETagMismatchException
    */
-  public TableProperties getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+  public TableProperties getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
     userPermissions.checkPermission(tableId, TablePermission.READ_PROPERTIES);
 
+    String schemaETag = null;
     String propertiesETag = null;
     List<DbKeyValueStoreEntity> kvsEntities = new ArrayList<DbKeyValueStoreEntity>();
     LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
     try {
       lock.acquire();
       DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
-      String schemaETag = entry.getSchemaETag();
+      schemaETag = entry.getSchemaETag();
       if ( schemaETag != null ) {
         propertiesETag = entry.getPropertiesETag();
         kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesETag, cc);
@@ -109,7 +111,11 @@ public class PropertiesManager {
     } finally {
       lock.release();
     }
-    return converter.toTableProperties(kvsEntities, tableId, propertiesETag);
+    if ( schemaETag == null ) {
+      throw new ETagMismatchException(String.format(
+          "Unable to get table properties -- schema not defined for table with tableId %s", tableId));
+    }
+    return converter.toTableProperties(kvsEntities, tableId, schemaETag, propertiesETag);
   }
 
   /**
@@ -129,6 +135,7 @@ public class PropertiesManager {
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException, PermissionDeniedException {
 
     userPermissions.checkPermission(tableId, TablePermission.WRITE_PROPERTIES);
+    String schemaETag = null;
     // create new eTag
     String propertiesETag = CommonFieldsBase.newUri();
 
@@ -140,9 +147,14 @@ public class PropertiesManager {
       // refresh entry
       DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
 
-      if ( entry.getSchemaETag() == null ) {
+      schemaETag = entry.getSchemaETag();
+      if ( schemaETag == null ) {
         throw new ETagMismatchException(String.format(
             "Unable to set table properties -- schema not defined for table with tableId %s", tableId));
+      }
+      if ( !schemaETag.equals(tableProperties.getSchemaETag()) ) {
+        throw new ETagMismatchException(String.format(
+            "Unable to set table properties -- schemaETag does not match for table with tableId %s", tableId));
       }
 
       String oldPropertiesETag = entry.getPropertiesETag();
@@ -206,7 +218,7 @@ public class PropertiesManager {
       TableManager.deleteVersionedTable(entry, false, cc);
       log.info("setProperties cleaned up stale properties");
 
-      return converter.toTableProperties(kvsEntities, tableId, propertiesETag);
+      return converter.toTableProperties(kvsEntities, tableId, schemaETag, propertiesETag);
     } finally {
       lock.release();
     }

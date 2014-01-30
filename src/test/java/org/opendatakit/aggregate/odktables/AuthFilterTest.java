@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
+import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -97,9 +98,9 @@ public class AuthFilterTest {
 
     this.tm = new TableManager(userPermissions, cc);
 
-    tm.createTable(tableId, T.columns);
+    TableEntry te = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
 
     this.am = new TableAclManager(tableId, userPermissions, cc);

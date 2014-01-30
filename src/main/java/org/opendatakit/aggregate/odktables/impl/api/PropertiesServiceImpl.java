@@ -47,7 +47,7 @@ public class PropertiesServiceImpl implements PropertiesService {
   }
 
   @Override
-  public Response getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+  public Response getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
     TableProperties properties = pm.getProperties();
     PropertiesResource resource = getResource(properties);
     return Response.ok(resource).build();

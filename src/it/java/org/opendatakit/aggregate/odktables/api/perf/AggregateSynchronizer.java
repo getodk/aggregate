@@ -195,8 +195,7 @@ public class AggregateSynchronizer {
     }
   }
 
-  public PropertiesResource setTableProperties(String tableId, String propertiesETag,
-      String tableName, String tableProperties) throws IOException {
+  public PropertiesResource setTableProperties(String schemaETag, String propertiesETag, String tableId) throws IOException {
     TableResource resource = getResource(tableId);
 
     ArrayList<OdkTablesKeyValueStoreEntry> keyValueStoreEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
@@ -205,10 +204,10 @@ public class AggregateSynchronizer {
     entry.aspect = "metadata";
     entry.key = "my_value";
     entry.type = "text";
-    entry.value = tableProperties;
+    entry.value = "aValue";
     keyValueStoreEntries.add(entry);
     // put new properties
-    TableProperties properties = new TableProperties(propertiesETag, tableName, keyValueStoreEntries);
+    TableProperties properties = new TableProperties(schemaETag, propertiesETag, tableId, keyValueStoreEntries);
     HttpEntity<TableProperties> entity = new HttpEntity<TableProperties>(properties, requestHeaders);
     ResponseEntity<PropertiesResource> updatedEntity;
     try {

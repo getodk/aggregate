@@ -38,6 +38,9 @@ import org.simpleframework.xml.Root;
 @Root(strict = false)
 public class TableProperties {
 
+  @Element(name = "schemaETag", required = false)
+  private String schemaETag;
+
   @Element(name = "propertiesETag", required = false)
   private String propertiesETag;
 
@@ -52,16 +55,26 @@ public class TableProperties {
 
   /**
    *
+   * @param schemaETag
    * @param propertiesETag
    * @param tableKey
    *          the tableKey field from {@link DbTableDefinition}
    * @param keyValueStoreEntries
    */
-  public TableProperties(String propertiesETag, String tableId,
+  public TableProperties(String schemaETag, String propertiesETag, String tableId,
       ArrayList<OdkTablesKeyValueStoreEntry> keyValueStoreEntries) {
+    this.schemaETag = schemaETag;
     this.propertiesETag = propertiesETag;
     this.tableId = tableId;
     this.kvsEntries = keyValueStoreEntries;
+  }
+
+  public String getSchemaETag() {
+    return schemaETag;
+  }
+
+  public void setSchemaETag(String schemaETag) {
+    this.schemaETag = schemaETag;
   }
 
   public String getPropertiesETag() {
@@ -92,6 +105,7 @@ public class TableProperties {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((schemaETag == null) ? 1 : schemaETag.hashCode());
     result = prime * result + ((propertiesETag == null) ? 1 : propertiesETag.hashCode());
     result = prime * result + ((tableId == null) ? 1 : tableId.hashCode());
     result = prime * result + ((kvsEntries == null) ? 1 : kvsEntries.hashCode());
@@ -110,7 +124,9 @@ public class TableProperties {
       return false;
     }
     TableProperties other = (TableProperties) obj;
-    return (propertiesETag == null ? other.propertiesETag == null : propertiesETag
+    return (schemaETag == null ? other.schemaETag == null : schemaETag
+        .equals(other.schemaETag))
+        && (propertiesETag == null ? other.propertiesETag == null : propertiesETag
         .equals(other.propertiesETag))
         && (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
         && (kvsEntries == null ? other.kvsEntries == null : kvsEntries.equals(other.kvsEntries));
@@ -118,7 +134,7 @@ public class TableProperties {
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesETag=" + propertiesETag + ", tableId=" + tableId
+    return "TableProperties [schemaETag=" + schemaETag + ", propertiesETag=" + propertiesETag + ", tableId=" + tableId
         + ", kvsEntries=" + this.kvsEntries.toString() + "]";
   }
 

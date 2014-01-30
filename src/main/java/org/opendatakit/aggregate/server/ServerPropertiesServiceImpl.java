@@ -29,8 +29,8 @@ import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -61,6 +61,9 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ETagMismatchException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (ODKTaskLockException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
@@ -85,7 +88,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
       // nothing is being explicitly set. Fixed by changing the type of
       // the variable, but should be wary of this.
       // first make the type TableProperties object
-      TableProperties tableProperties = new TableProperties(properties.getPropertiesETag(),
+      TableProperties tableProperties = new TableProperties(properties.getSchemaETag(), properties.getPropertiesETag(),
           properties.getTableId(), UtilTransforms.transformToServerEntries(properties
               .getKeyValueStoreEntries()));
       tableProperties = pm.setProperties(tableProperties);

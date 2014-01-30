@@ -109,9 +109,9 @@ public class EntityConverter {
   }
 
   public TableProperties toTableProperties(List<DbKeyValueStoreEntity> kvsEntities, String tableId,
-      String propertiesETag) {
+      String schemaETag, String propertiesETag) {
     ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = toOdkTablesKeyValueStoreEntry(kvsEntities);
-    TableProperties properties = new TableProperties(propertiesETag, tableId, kvsEntries);
+    TableProperties properties = new TableProperties(schemaETag, propertiesETag, tableId, kvsEntries);
     return properties;
   }
 
