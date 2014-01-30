@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.opendatakit.aggregate.odktables.LockTemplate;
+import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
@@ -29,6 +31,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
@@ -59,15 +62,15 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
   }
 
   public TablesUserPermissionsImpl(String uriUser, CallingContext cc) throws ODKDatastoreException,
-      PermissionDeniedException {
+      PermissionDeniedException, ODKTaskLockException {
     this.cc = cc;
     Datastore ds = cc.getDatastore();
     if ( uriUser.equals(User.ANONYMOUS_USER) ) {
       throw new PermissionDeniedException("User does not have access to ODK Tables");
     }
     user = RegisteredUsersTable.getUserByUri(uriUser, ds, cc.getCurrentUser());
-    OdkTablesUserInfoTable odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser,
-        cc);
+    OdkTablesUserInfoTable odkTablesUserInfo = null;
+    odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser, cc);
     if (odkTablesUserInfo == null) {
       OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
       Set<GrantedAuthority> grants = UserGrantedAuthority.getGrantedAuthorities(uriUser, ds,
@@ -79,18 +82,32 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
           .name()))
           || roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_ADMINISTER_TABLES
               .name()))) {
-        // create a record
-        odkTablesUserInfo = ds.createEntityUsingRelation(prototype, cc.getCurrentUser());
-        odkTablesUserInfo.setUriUser(uriUser);
-        String externalUID = null;
-        if (user.getEmail() != null) {
-          externalUID = user.getEmail();
-        } else if (user.getUsername() != null) {
-          externalUID = SecurityUtils.USERNAME_COLON + user.getUsername();
+        // GAIN LOCK
+        LockTemplate tablesUserPermissions = new LockTemplate("--odk-access-lock--", ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+        try {
+          tablesUserPermissions.acquire();
+          // attempt to re-fetch the record.
+          // If this succeeds, then we had multiple suitors; the other one beat us.
+          odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser, cc);
+          if ( odkTablesUserInfo != null ) {
+            userInfo = odkTablesUserInfo;
+            return;
+          }
+          // otherwise, create a record
+          odkTablesUserInfo = ds.createEntityUsingRelation(prototype, cc.getCurrentUser());
+          odkTablesUserInfo.setUriUser(uriUser);
+          String externalUID = null;
+          if (user.getEmail() != null) {
+            externalUID = user.getEmail();
+          } else if (user.getUsername() != null) {
+            externalUID = SecurityUtils.USERNAME_COLON + user.getUsername();
+          }
+          odkTablesUserInfo.setOdkTablesUserId(externalUID);
+          odkTablesUserInfo.persist(cc);
+          userInfo = odkTablesUserInfo;
+        } finally {
+          tablesUserPermissions.release();
         }
-        odkTablesUserInfo.setOdkTablesUserId(externalUID);
-        odkTablesUserInfo.persist(cc);
-        userInfo = odkTablesUserInfo;
       } else {
         throw new PermissionDeniedException("User does not have access to ODK Tables");
       }

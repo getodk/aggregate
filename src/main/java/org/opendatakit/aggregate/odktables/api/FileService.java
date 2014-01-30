@@ -28,6 +28,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+
 /**
  * Servlet for handling the uploading and downloading of files from the phone.
  * <p>
@@ -69,6 +71,6 @@ public interface FileService {
   @Path("{filePath:.*}")
   public void putFile(@Context ServletContext servletContext,
       @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req,
-      @Context HttpServletResponse resp) throws IOException;
+      @Context HttpServletResponse resp) throws IOException, ODKTaskLockException;
 
 }

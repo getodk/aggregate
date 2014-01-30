@@ -539,6 +539,14 @@ public class DataManager {
         String rowETag = entity.getString(DbTable.ROW_ETAG);
         String currentETag = row.getRowETag();
         if (currentETag == null || !currentETag.equals(rowETag)) {
+
+          // Take the hit to convert the row we have.
+          // If the row matches everywhere except on the rowETag, return it.
+          Row currentRow = converter.toRow(entity, columns);
+          if ( row.hasMatchingSignificantFieldValues(currentRow) ) {
+            return currentRow;
+          }
+
           // if null, then the client thinks they are creating a new row.
           // The rows may be identical, but leave that to the client to determine
           // trigger client-side conflict resolution.

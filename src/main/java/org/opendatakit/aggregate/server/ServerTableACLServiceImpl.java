@@ -44,6 +44,7 @@ import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -71,6 +72,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -91,6 +95,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -111,6 +118,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -131,6 +141,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -154,6 +167,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -174,6 +190,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -200,6 +219,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -228,6 +250,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -254,6 +279,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -273,6 +301,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -292,6 +323,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
@@ -311,6 +345,9 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     } catch (PermissionDeniedException e) {
       e.printStackTrace();
       throw new PermissionDeniedExceptionClient(e);
