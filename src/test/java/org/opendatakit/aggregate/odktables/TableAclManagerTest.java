@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -92,9 +93,9 @@ public class TableAclManagerTest {
     this.tableId = T.tableId;
     this.tm = new TableManager(userPermissions, cc);
 
-    tm.createTable(tableId, T.columns);
+    TableEntry te = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
 
     this.scope = new Scope(Scope.Type.USER, T.user);

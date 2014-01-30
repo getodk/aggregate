@@ -41,10 +41,11 @@ public interface PropertiesService {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
+   * @throws ETagMismatchException
    */
   @GET
   @Path("")
-  public Response /*PropertiesResource*/ getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
+  public Response /*PropertiesResource*/ getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException;
 
   /**
    *

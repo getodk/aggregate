@@ -261,7 +261,8 @@ public class UtilTransforms {
   }
 
   public static PropertiesResourceClient transform(PropertiesResource serverResource) {
-    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getPropertiesETag(),
+    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getSchemaETag(),
+        serverResource.getPropertiesETag(),
         serverResource.getTableId(), UtilTransforms.transform(serverResource
             .getKeyValueStoreEntries()));
     PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
@@ -278,7 +279,7 @@ public class UtilTransforms {
     for (OdkTablesKeyValueStoreEntry serverEntry : serverProperties.getKeyValueStoreEntries()) {
       clientEntries.add(UtilTransforms.transform(serverEntry));
     }
-    TablePropertiesClient tpClient = new TablePropertiesClient(
+    TablePropertiesClient tpClient = new TablePropertiesClient(serverProperties.getSchemaETag(),
         serverProperties.getPropertiesETag(), serverProperties.getTableId(), clientEntries);
     return tpClient;
   }

@@ -104,9 +104,9 @@ public class DataManagerTest {
 
     this.tm = new TableManager(userPermissions, cc);
 
-    tm.createTable(tableId, T.columns);
+    TableEntry te = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
 
     this.dm = new DataManager(tableId, userPermissions, cc);

@@ -45,6 +45,7 @@ public class PropertiesResourceClient extends TablePropertiesClient implements S
 
   public PropertiesResourceClient(TablePropertiesClient tableProperties) {
     super();
+    setSchemaETag(tableProperties.getSchemaETag());
     setPropertiesETag(tableProperties.getPropertiesETag());
     setTableId(tableProperties.getTableId());
     setKeyValueStoreEntries(tableProperties.getKeyValueStoreEntries());

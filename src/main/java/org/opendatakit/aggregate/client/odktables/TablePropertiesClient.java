@@ -37,6 +37,7 @@ public class TablePropertiesClient implements Serializable {
 	 */
   private static final long serialVersionUID = 197746211663068996L;
 
+  private String schemaETag;
   private String propertiesETag;
   private String tableId;
   private ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries;
@@ -44,11 +45,20 @@ public class TablePropertiesClient implements Serializable {
   protected TablePropertiesClient() {
   }
 
-  public TablePropertiesClient(String propertiesETag, String tableId,
+  public TablePropertiesClient(String schemaETag, String propertiesETag, String tableId,
       ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+    this.schemaETag = schemaETag;
     this.propertiesETag = propertiesETag;
     this.tableId = tableId;
     this.kvsEntries = kvsEntries;
+  }
+
+  public String getSchemaETag() {
+    return schemaETag;
+  }
+
+  public void setSchemaETag(String schemaETag) {
+    this.schemaETag = schemaETag;
   }
 
   public String getPropertiesETag() {
@@ -77,7 +87,7 @@ public class TablePropertiesClient implements Serializable {
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesETag=" + propertiesETag + ", tableId=" + tableId
+    return "TableProperties [schemaETag=" + schemaETag + ", propertiesETag=" + propertiesETag + ", tableId=" + tableId
         + ", kvsEntries=" + kvsEntries.toString() + "]";
   }
 

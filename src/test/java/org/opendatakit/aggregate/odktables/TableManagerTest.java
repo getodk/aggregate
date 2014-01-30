@@ -131,7 +131,7 @@ public class TableManagerTest {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
 
     entry = tm.getTable(tableId);
@@ -203,16 +203,17 @@ public class TableManagerTest {
       ODKTaskLockException, TableAlreadyExistsException, PermissionDeniedException, ETagMismatchException {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
-    tm.createTable(tableId, T.columns);
+    TableEntry entry = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
+    TableEntry entry2 = tm.createTable(tableId2, T.columns);
+    PropertiesManager pm2 = new PropertiesManager( tableId2, userPermissions, cc);
+    TableProperties tableProperties2 = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId2, T.kvsEntries);
+    pm2.setProperties(tableProperties);
     tm.createTable(tableId2, T.columns);
-    pm = new PropertiesManager( tableId2, userPermissions, cc);
-    tableProperties = new TableProperties(T.propertiesETag, tableId2, T.kvsEntries);
-    pm.setProperties(tableProperties);
     TableEntry two = tm.getTable(tableId2);
 
     expected.add(one);
@@ -230,16 +231,17 @@ public class TableManagerTest {
       TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
-    tm.createTable(tableId, T.columns);
+    TableEntry entry = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
+    TableEntry entry2 = tm.createTable(tableId2, T.columns);
+    PropertiesManager pm2 = new PropertiesManager( tableId2, userPermissions, cc);
+    TableProperties tableProperties2 = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId2, T.kvsEntries);
+    pm2.setProperties(tableProperties);
     tm.createTable(tableId2, T.columns);
-    pm = new PropertiesManager( tableId2, userPermissions, cc);
-    tableProperties = new TableProperties(T.propertiesETag, tableId2, T.kvsEntries);
-    pm.setProperties(tableProperties);
     TableEntry two = tm.getTable(tableId2);
 
     TableAclManager am = new TableAclManager(one.getTableId(), userPermissions, cc);
@@ -258,9 +260,9 @@ public class TableManagerTest {
   public void testDeleteTable() throws ODKDatastoreException, ODKTaskLockException,
       TableAlreadyExistsException, PermissionDeniedException, ETagMismatchException {
 
-    tm.createTable(tableId, T.columns);
+    TableEntry entry = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     tm.deleteTable(tableId);
     tm.getTableNullSafe(tableId);

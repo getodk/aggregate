@@ -39,6 +39,7 @@ import org.opendatakit.common.web.TestContextFactory;
 public class PropertiesManagerTest {
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
+  private String eSchemaTag;
   private String ePropertiesTag;
   private String tableId;
   private TableManager tm;
@@ -90,10 +91,11 @@ public class PropertiesManagerTest {
     this.tm = new TableManager(userPermissions, cc);
 
     TableEntry te = tm.createTable(tableId, T.columns);
-
-    this.pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(T.propertiesETag, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tpNew = pm.setProperties(tableProperties);
+    this.eSchemaTag = tpNew.getSchemaETag();
+    this.ePropertiesTag = tpNew.getPropertiesETag();
   }
 
   @After
@@ -106,8 +108,8 @@ public class PropertiesManagerTest {
   }
 
   @Test
-  public void testGetTableProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
-    TableProperties expected = new TableProperties(this.ePropertiesTag,
+  public void testGetTableProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
+    TableProperties expected = new TableProperties(this.eSchemaTag, this.ePropertiesTag,
         T.tableId, T.kvsEntries);
     TableProperties actual = pm.getProperties();
     assertEquals(expected.getTableId(), actual.getTableId());
@@ -118,7 +120,7 @@ public class PropertiesManagerTest {
   // TODO: fix this when tableId and tableKey get sorted out...
   @Ignore
   public void testSetTableName() throws ODKTaskLockException, ODKDatastoreException,
-      ETagMismatchException, PermissionDeniedException {
+      ETagMismatchException, PermissionDeniedException, ETagMismatchException {
     TableProperties expected = pm.getProperties();
     expected.setTableId("a new name"); // don't see how this would work...
 
@@ -127,7 +129,7 @@ public class PropertiesManagerTest {
 
   @Test
   public void testSetTableMetadata() throws ODKTaskLockException, ODKDatastoreException,
-      ETagMismatchException, PermissionDeniedException {
+      ETagMismatchException, PermissionDeniedException, ETagMismatchException {
     TableProperties expected = pm.getProperties();
     expected.setKeyValueStoreEntries(T.kvsEntries);
 
@@ -136,7 +138,7 @@ public class PropertiesManagerTest {
 
   private void doTestSetProperties(TableProperties expected)
       throws ETagMismatchException, ODKTaskLockException,
-      ODKDatastoreException, PermissionDeniedException {
+      ODKDatastoreException, PermissionDeniedException, ETagMismatchException {
     pm.setProperties(expected);
 
     TableProperties actual = pm.getProperties();
@@ -148,7 +150,7 @@ public class PropertiesManagerTest {
 
   @Test
   public void testSetTableNameChangesPropertiesModNum() throws ODKDatastoreException,
-      ODKTaskLockException, ETagMismatchException, PermissionDeniedException {
+      ODKTaskLockException, ETagMismatchException, PermissionDeniedException, ETagMismatchException {
     TableProperties properties = pm.getProperties();
     properties.setTableId("a new table name"); // don't see how this would work
 
@@ -157,7 +159,7 @@ public class PropertiesManagerTest {
 
   @Test
   public void testSetTableMetadataChangesPropertiesModNum() throws ODKTaskLockException,
-      ODKDatastoreException, ETagMismatchException, PermissionDeniedException {
+      ODKDatastoreException, ETagMismatchException, PermissionDeniedException, ETagMismatchException {
     TableProperties properties = pm.getProperties();
     properties.setKeyValueStoreEntries(T.kvsEntries);
 
@@ -182,7 +184,7 @@ public class PropertiesManagerTest {
 
   @Test(expected = ETagMismatchException.class)
   public void testCantChangePropertiesWithOldETag() throws ODKDatastoreException,
-      ETagMismatchException, ODKTaskLockException, PermissionDeniedException {
+      ETagMismatchException, ODKTaskLockException, PermissionDeniedException, ETagMismatchException {
     TableProperties properties = pm.getProperties();
     properties.setTableId("new name");
     pm.setProperties(properties);
