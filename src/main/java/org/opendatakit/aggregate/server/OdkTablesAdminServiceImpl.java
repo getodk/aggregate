@@ -56,7 +56,7 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
    * @throws ODKTaskLockException
    */
   @Override
-  public OdkTablesAdmin[] listAdmin() throws AccessDeniedException, DatastoreFailureException, ODKTaskLockException {
+  public OdkTablesAdmin[] listAdmin() throws AccessDeniedException, DatastoreFailureException, RequestFailureException {
     try {
       CallingContext cc = this.getCC();
       User user = cc.getCurrentUser();
@@ -93,6 +93,9 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
   }
 
@@ -138,7 +141,7 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public Boolean setAdmins(ArrayList<UserSecurityInfo> admins) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException, ODKTaskLockException {
+      RequestFailureException, DatastoreFailureException {
     CallingContext cc = this.getCC();
     User user = cc.getCurrentUser();
     if ( user.isAnonymous() ) {
@@ -163,6 +166,9 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
         TablesUserPermissionsImpl usePermissions = new TablesUserPermissionsImpl(theUser.getUri(), cc);
       } catch (ODKDatastoreException e) {
         // If you've gotten here there was a datastore problem
+        e.printStackTrace();
+        failure = true;
+      } catch (ODKTaskLockException e) {
         e.printStackTrace();
         failure = true;
       } catch (PermissionDeniedException e) {

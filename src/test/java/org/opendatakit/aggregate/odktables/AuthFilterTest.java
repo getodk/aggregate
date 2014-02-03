@@ -161,8 +161,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.DEFAULT, null));
     assertTrue(af.hasFilterScope(TablePermission.READ_ROW, row.getRowId(), row.getFilterScope()));
   }
@@ -172,8 +172,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
     row.setFilterScope(Scope.EMPTY_SCOPE);
     assertFalse(af.hasFilterScope(TablePermission.READ_ROW, row.getRowId(), row.getFilterScope()));
   }
@@ -183,8 +183,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
     row.setFilterScope(currentUserScope);
     assertTrue(af.hasFilterScope(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope()));
   }
@@ -194,8 +194,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.USER, currentUserScope.getValue() + "diff"));
     assertFalse(af.hasFilterScope(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope()));
   }

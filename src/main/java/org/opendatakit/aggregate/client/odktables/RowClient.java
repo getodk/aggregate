@@ -50,13 +50,13 @@ public class RowClient implements Serializable {
 
   private ScopeClient filterScope;
 
-  private String uriAccessControl;
-
   private String formId;
 
   private String locale;
 
   private String savepointTimestampIso8601Date;
+
+  private String savepointCreator;
 
   private Map<String, String> values;
 
@@ -96,11 +96,11 @@ public class RowClient implements Serializable {
     this.createUser = null;
     this.lastUpdateUser = null;
     this.filterScope = null;
-    this.values = new HashMap<String, String>();
-    this.uriAccessControl = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestampIso8601Date = null;
+    this.savepointCreator = null;
+    this.values = new HashMap<String, String>();
   }
 
   public String getRowId() {
@@ -159,8 +159,8 @@ public class RowClient implements Serializable {
     this.values = values;
   }
 
-  public String getUriAccessControl() {
-    return this.uriAccessControl;
+  public String getSavepointCreator() {
+    return this.savepointCreator;
   }
 
   public String getFormId() {
@@ -175,8 +175,8 @@ public class RowClient implements Serializable {
     return this.savepointTimestampIso8601Date;
   }
 
-  public void setUriAccessControl(String uriAccessControl) {
-    this.uriAccessControl = uriAccessControl;
+  public void setSavepointCreator(String savepointCreator) {
+    this.savepointCreator = savepointCreator;
   }
 
   public void setFormId(String formId) {
@@ -205,12 +205,16 @@ public class RowClient implements Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
-    result = prime * result + (deleted ? 1231 : 1237);
-    result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
-    result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
-    result = prime * result + ((rowETag == null) ? 0 : rowETag.hashCode());
     result = prime * result + ((rowId == null) ? 0 : rowId.hashCode());
+    result = prime * result + ((rowETag == null) ? 0 : rowETag.hashCode());
+    result = prime * result + (deleted ? 1231 : 1237);
+    result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
+    result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
+    result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
+    result = prime * result + ((formId == null) ? 0 : formId.hashCode());
+    result = prime * result + ((locale == null) ? 0 : locale.hashCode());
+    result = prime * result + ((savepointTimestampIso8601Date == null) ? 0 : savepointTimestampIso8601Date.hashCode());
+    result = prime * result + ((savepointCreator == null) ? 0 : savepointCreator.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
     return result;
   }
@@ -229,33 +233,64 @@ public class RowClient implements Serializable {
     if (!(obj instanceof RowClient))
       return false;
     RowClient other = (RowClient) obj;
-    if (createUser == null) {
-      if (other.createUser != null)
-        return false;
-    } else if (!createUser.equals(other.createUser))
-      return false;
-    if (deleted != other.deleted)
-      return false;
-    if (filterScope == null) {
-      if (other.filterScope != null)
-        return false;
-    } else if (!filterScope.equals(other.filterScope))
-      return false;
-    if (lastUpdateUser == null) {
-      if (other.lastUpdateUser != null)
-        return false;
-    } else if (!lastUpdateUser.equals(other.lastUpdateUser))
-      return false;
-    if (rowETag == null) {
-      if (other.rowETag != null)
-        return false;
-    } else if (!rowETag.equals(other.rowETag))
-      return false;
+
     if (rowId == null) {
       if (other.rowId != null)
         return false;
     } else if (!rowId.equals(other.rowId))
       return false;
+
+    if (rowETag == null) {
+      if (other.rowETag != null)
+        return false;
+    } else if (!rowETag.equals(other.rowETag))
+      return false;
+
+    if (deleted != other.deleted)
+      return false;
+
+    if (createUser == null) {
+      if (other.createUser != null)
+        return false;
+    } else if (!createUser.equals(other.createUser))
+      return false;
+
+    if (lastUpdateUser == null) {
+      if (other.lastUpdateUser != null)
+        return false;
+    } else if (!lastUpdateUser.equals(other.lastUpdateUser))
+      return false;
+
+    if (filterScope == null) {
+      if (other.filterScope != null)
+        return false;
+    } else if (!filterScope.equals(other.filterScope))
+      return false;
+
+    if (formId == null) {
+      if (other.formId != null)
+        return false;
+    } else if (!formId.equals(other.formId))
+      return false;
+
+    if (locale == null) {
+      if (other.locale != null)
+        return false;
+    } else if (!locale.equals(other.locale))
+      return false;
+
+    if (savepointTimestampIso8601Date == null) {
+      if (other.savepointTimestampIso8601Date != null)
+        return false;
+    } else if (!savepointTimestampIso8601Date.equals(other.savepointTimestampIso8601Date))
+      return false;
+
+    if (savepointCreator == null) {
+      if (other.savepointCreator != null)
+        return false;
+    } else if (!savepointCreator.equals(other.savepointCreator))
+      return false;
+
     if (values == null) {
       if (other.values != null)
         return false;
@@ -284,6 +319,14 @@ public class RowClient implements Serializable {
     builder.append(lastUpdateUser);
     builder.append(", filterScope=");
     builder.append(filterScope);
+    builder.append(", formId=");
+    builder.append(formId);
+    builder.append(", locale=");
+    builder.append(locale);
+    builder.append(", savepointTimestampIso8601Date=");
+    builder.append(savepointTimestampIso8601Date);
+    builder.append(", savepointCreator=");
+    builder.append(savepointCreator);
     builder.append(", values=");
     builder.append(values);
     builder.append("]");

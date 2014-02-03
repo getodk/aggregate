@@ -63,7 +63,7 @@ public class CreateTableTest implements PerfTest {
         for (int j = 0; j < numCols; j++) {
           values.put(colName(j), "value_" + j);
         }
-        Row row = Row.forInsert(UUID.randomUUID().toString(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
+        Row row = Row.forInsert(UUID.randomUUID().toString(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, values);
         RowResource inserted = synchronizer.putRow(tableId, row);
         rows.add(inserted);
       }

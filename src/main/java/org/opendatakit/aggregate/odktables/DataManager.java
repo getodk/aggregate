@@ -141,10 +141,10 @@ public class DataManager {
             priorLogEntity.getString(DbLogTable.LAST_UPDATE_USER),
             converter.getDbLogTableFilterScope(priorLogEntity),
             priorLogEntity.getBoolean(DbLogTable.DELETED),
-            priorLogEntity.getString(DbLogTable.URI_ACCESS_CONTROL),
             priorLogEntity.getString(DbLogTable.FORM_ID),
             priorLogEntity.getString(DbLogTable.LOCALE),
-            priorLogEntity.getLong(DbLogTable.SAVEPOINT_TIMESTAMP),
+            priorLogEntity.getString(DbLogTable.SAVEPOINT_TIMESTAMP),
+            priorLogEntity.getString(DbLogTable.SAVEPOINT_CREATOR),
             converter.getRowValues(priorLogEntity, columns), columns);
 
         // revert DbTable to the prior row state
@@ -579,8 +579,8 @@ public class DataManager {
 
       // update the fields in the DbTable entity...
       creator.setRowFields(entity, CommonFieldsBase.newUri(), dataETagAtModification,
-          userPermissions.getOdkTablesUserId(), scope, false, row.getUriAccessControl(), row.getFormId(), row.getLocale(),
-          row.getSavepointTimestamp(), row.getValues(), columns);
+          userPermissions.getOdkTablesUserId(), scope, false, row.getFormId(), row.getLocale(),
+          row.getSavepointTimestamp(), row.getSavepointCreator(), row.getValues(), columns);
 
       // create log table entry
       Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);

@@ -299,10 +299,10 @@ public class EntityConverter {
     row.setFilterScope(getDbTableFilterScope(entity));
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
 
-    row.setUriAccessControl(entity.getString(DbTable.URI_ACCESS_CONTROL));
     row.setFormId(entity.getString(DbTable.FORM_ID));
     row.setLocale(entity.getString(DbTable.LOCALE));
-    row.setSavepointTimestamp(entity.getLong(DbTable.SAVEPOINT_TIMESTAMP));
+    row.setSavepointTimestamp(entity.getString(DbTable.SAVEPOINT_TIMESTAMP));
+    row.setSavepointCreator(entity.getString(DbTable.SAVEPOINT_CREATOR));
 
     row.setValues(getRowValues(entity, columns));
     return row;
@@ -375,10 +375,10 @@ public class EntityConverter {
     row.setFilterScope(getDbLogTableFilterScope(entity));
     row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
 
-    row.setUriAccessControl(entity.getString(DbLogTable.URI_ACCESS_CONTROL));
     row.setFormId(entity.getString(DbLogTable.FORM_ID));
     row.setLocale(entity.getString(DbLogTable.LOCALE));
-    row.setSavepointTimestamp(entity.getLong(DbLogTable.SAVEPOINT_TIMESTAMP));
+    row.setSavepointCreator(entity.getString(DbLogTable.SAVEPOINT_CREATOR));
+    row.setSavepointTimestamp(entity.getString(DbLogTable.SAVEPOINT_TIMESTAMP));
 
     row.setValues(getRowValues(entity, columns));
     return row;

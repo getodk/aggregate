@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Ignore;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 
@@ -14,15 +15,15 @@ public class T {
   public static final String tableId = "people";
   public static final String displayName = "\"people\"";
 
-  public static final String uri_access_control_1 = null;
+  public static final String savepoint_creator_1 = null;
   public static final String form_id_1 = null;
   public static final String locale_1 = "default";
-  public static final Long savepoint_timestamp_1 = System.currentTimeMillis()-1000;
+  public static final String savepoint_timestamp_1 = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()-1000);
 
-  public static final String uri_access_control_2 = "fred";
+  public static final String savepoint_creator_2 = "fred";
   public static final String form_id_2 = "ralph";
   public static final String locale_2 = "default";
-  public static final Long savepoint_timestamp_2 = System.currentTimeMillis()-2000;
+  public static final String savepoint_timestamp_2 = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()-2000);
 
   @SuppressWarnings("serial")
   public static final ArrayList<Column> columns = new ArrayList<Column>() {
@@ -35,8 +36,8 @@ public class T {
   @SuppressWarnings("serial")
   public static final List<Row> rows = new ArrayList<Row>() {
     {
-      add(Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues()));
-      add(Row.forInsert(T.Data.JOHN.getId(), T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.Data.JOHN.getValues()));
+      add(Row.forInsert(T.Data.DYLAN.getId(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues()));
+      add(Row.forInsert(T.Data.JOHN.getId(), T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.savepoint_creator_2, T.Data.JOHN.getValues()));
     }
   };
 

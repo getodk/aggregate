@@ -69,15 +69,15 @@ public class DbTable extends Relation {
       .setIndexable(IndexType.HASH);
   public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
 
-  public static final DataField URI_ACCESS_CONTROL = new DataField(
-      TableConstants.URI_ACCESS_CONTROL.toUpperCase(), DataType.STRING, true);
   public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
       DataType.STRING, true);
   public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
       DataType.STRING, true);
-  // milliseconds
+  // nanoseconds
   public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
-      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.INTEGER, true);
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, true);
+  public static final DataField SAVEPOINT_CREATOR = new DataField(
+      TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);
 
   private static final List<DataField> dataFields;
   static {
@@ -94,12 +94,11 @@ public class DbTable extends Relation {
     dataFields.add(FORM_ID);
     dataFields.add(LOCALE);
     dataFields.add(SAVEPOINT_TIMESTAMP);
+    dataFields.add(SAVEPOINT_CREATOR);
 
     // Access control filters accessible only on server (these may be useless)
     dataFields.add(FILTER_TYPE);
     dataFields.add(FILTER_VALUE);
-    // Access control tag sent down to the device (unclear whether this is useful)
-    dataFields.add(URI_ACCESS_CONTROL);
   }
 
   private static final EntityConverter converter = new EntityConverter();

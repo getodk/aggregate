@@ -266,8 +266,8 @@ public class EntityCreator {
 
   public void setRowFields(Entity row, String rowETag, String dataETagAtModification,
       String lastUpdateUser, Scope filterScope,
-      boolean deleted, String uriAccessControl, String formId, String locale,
-      Long savepointTimestamp, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
+      boolean deleted, String formId, String locale,
+      String savepointTimestamp, String savepointCreator, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_ETAG, rowETag);
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
@@ -294,10 +294,10 @@ public class EntityCreator {
 
     row.set(DbTable.DELETED, deleted);
 
-    row.set(DbTable.URI_ACCESS_CONTROL, uriAccessControl);
     row.set(DbTable.FORM_ID, formId);
     row.set(DbTable.LOCALE, locale);
     row.set(DbTable.SAVEPOINT_TIMESTAMP, savepointTimestamp);
+    row.set(DbTable.SAVEPOINT_CREATOR, savepointCreator);
 
     for (Entry<String, String> entry : values.entrySet()) {
       String value = entry.getValue();
@@ -383,10 +383,10 @@ public class EntityCreator {
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
 
     // common metadata
-    entity.set(DbLogTable.URI_ACCESS_CONTROL, row.getString(DbTable.URI_ACCESS_CONTROL));
+    entity.set(DbLogTable.SAVEPOINT_CREATOR, row.getString(DbTable.SAVEPOINT_CREATOR));
     entity.set(DbLogTable.FORM_ID, row.getString(DbTable.FORM_ID));
     entity.set(DbLogTable.LOCALE, row.getString(DbTable.LOCALE));
-    entity.set(DbLogTable.SAVEPOINT_TIMESTAMP, row.getLong(DbTable.SAVEPOINT_TIMESTAMP));
+    entity.set(DbLogTable.SAVEPOINT_TIMESTAMP, row.getString(DbTable.SAVEPOINT_TIMESTAMP));
 
     for (DbColumnDefinitionsEntity column : columns) {
       if (column.getIsUnitOfRetention()) {
