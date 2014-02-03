@@ -206,7 +206,7 @@ public class DataManagerTest {
   @Test
   public void testGetRowNullSafe() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException, BadColumnNameException, ETagMismatchException, PermissionDeniedException, InconsistentStateException {
-    Row added = Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues());
+    Row added = Row.forInsert(T.Data.DYLAN.getId(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues());
     Row expected = dm.insertOrUpdateRow(added);
     Row actual = dm.getRow(T.Data.DYLAN.getId());
     assertEquals(expected, actual);
@@ -263,7 +263,7 @@ public class DataManagerTest {
     expected.setFilterScope(new Scope(Type.USER, T.user));
     expected = dm.insertOrUpdateRow(expected);
     Row actual = Row.forUpdate(expected.getRowId(), expected.getRowETag(),
-        T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1,
+        T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1,
         Maps.<String, String> newHashMap());
     actual = dm.insertOrUpdateRow(actual);
     expected.setRowETag(actual.getRowETag());
@@ -280,7 +280,7 @@ public class DataManagerTest {
     row = dm.insertOrUpdateRow(row);
     Row actual = Row
         .forUpdate(row.getRowId(), row.getRowETag(),
-            T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1,
+            T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1,
             Maps.<String, String> newHashMap());
     actual.setFilterScope(Scope.EMPTY_SCOPE);
     actual = dm.insertOrUpdateRow(actual);
@@ -297,7 +297,7 @@ public class DataManagerTest {
     row = dm.insertOrUpdateRow(row);
     Map<String, String> values = Maps.newHashMap();
     values.put(T.Columns.name + "diff", "value");
-    row = Row.forUpdate(row.getRowId(), row.getRowETag(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
+    row = Row.forUpdate(row.getRowId(), row.getRowETag(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, values);
     @SuppressWarnings("unused")
     Row actual = dm.insertOrUpdateRow(row);
   }
@@ -412,19 +412,19 @@ public class DataManagerTest {
     Map<String, String> values = Maps.newHashMap();
     List<Row> rows = new ArrayList<Row>();
 
-    Row row = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, values);
     row.setFilterScope(new Scope(Type.DEFAULT, null));
     rows.add(row);
 
-    row = Row.forInsert("2", T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, values);
+    row = Row.forInsert("2", T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.savepoint_creator_2, values);
     row.setFilterScope(new Scope(Type.USER, T.user));
     rows.add(row);
 
-    row = Row.forInsert("3", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values);
+    row = Row.forInsert("3", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, values);
     row.setFilterScope(new Scope(Type.GROUP, T.group));
     rows.add(row);
 
-    row = Row.forInsert("4", T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, values);
+    row = Row.forInsert("4", T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.savepoint_creator_2, values);
     row.setFilterScope(Scope.EMPTY_SCOPE);
     rows.add(row);
 

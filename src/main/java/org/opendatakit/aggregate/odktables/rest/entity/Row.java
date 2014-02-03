@@ -30,7 +30,7 @@ public class Row {
   @Element(name = "id", required = false)
   private String rowId;
 
-  @Element(name = "ETag", required = false)
+  @Element(name = "rowETag", required = false)
   private String rowETag;
 
   @Element(name = "dataETagAtModification", required = false)
@@ -52,7 +52,7 @@ public class Row {
    * OdkTables metadata column.
    */
   @Element(required = false)
-  private String uriAccessControl;
+  private String savepointCreator;
 
   /**
    * OdkTables metadata column.
@@ -70,7 +70,7 @@ public class Row {
    * OdkTables metadata column.
    */
   @Element(required = false)
-  private Long savepointTimestamp;
+  private String savepointTimestamp;
 
   @ElementMap(entry = "entry", key = "column", attribute = true, inline = true)
   private Map<String, String> values;
@@ -82,14 +82,14 @@ public class Row {
    * @param rowId
    * @param values
    */
-  public static Row forInsert(String rowId, String uriAccessControl, String formId, String locale,
-      Long savepointTimestamp, Map<String, String> values) {
+  public static Row forInsert(String rowId, String formId, String locale,
+      String savepointTimestamp, String savepointCreator, Map<String, String> values) {
     Row row = new Row();
     row.rowId = rowId;
-    row.uriAccessControl = uriAccessControl;
     row.formId = formId;
     row.locale = locale;
     row.savepointTimestamp = savepointTimestamp;
+    row.savepointCreator = savepointCreator;
     row.values = values;
     return row;
   }
@@ -102,15 +102,15 @@ public class Row {
    * @param rowETag
    * @param values
    */
-  public static Row forUpdate(String rowId, String rowETag, String uriAccessControl, String formId,
-      String locale, Long savepointTimestamp, Map<String, String> values) {
+  public static Row forUpdate(String rowId, String rowETag, String formId,
+      String locale, String savepointTimestamp, String savepointCreator, Map<String, String> values) {
     Row row = new Row();
     row.rowId = rowId;
     row.rowETag = rowETag;
-    row.uriAccessControl = uriAccessControl;
     row.formId = formId;
     row.locale = locale;
     row.savepointTimestamp = savepointTimestamp;
+    row.savepointCreator = savepointCreator;
     row.values = values;
     return row;
   }
@@ -124,7 +124,7 @@ public class Row {
     this.lastUpdateUser = null;
     this.filterScope = null;
     // data coming up from client
-    this.uriAccessControl = null;
+    this.savepointCreator = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestamp = null;
@@ -159,8 +159,8 @@ public class Row {
     return filterScope;
   }
 
-  public String getUriAccessControl() {
-    return this.uriAccessControl;
+  public String getSavepointCreator() {
+    return this.savepointCreator;
   }
 
   public String getFormId() {
@@ -171,7 +171,7 @@ public class Row {
     return this.locale;
   }
 
-  public Long getSavepointTimestamp() {
+  public String getSavepointTimestamp() {
     return this.savepointTimestamp;
   }
 
@@ -207,8 +207,8 @@ public class Row {
     this.filterScope = filterScope;
   }
 
-  public void setUriAccessControl(String uriAccessControl) {
-    this.uriAccessControl = uriAccessControl;
+  public void setSavepointCreator(String savepointCreator) {
+    this.savepointCreator = savepointCreator;
   }
 
   public void setFormId(String formId) {
@@ -229,7 +229,7 @@ public class Row {
    *
    * @param timestamp
    */
-  public void setSavepointTimestamp(Long savepointTimestamp) {
+  public void setSavepointTimestamp(String savepointTimestamp) {
     this.savepointTimestamp = savepointTimestamp;
   }
 
@@ -245,7 +245,7 @@ public class Row {
     result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
     result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
     result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
-    result = prime * result + ((uriAccessControl == null) ? 0 : uriAccessControl.hashCode());
+    result = prime * result + ((savepointCreator == null) ? 0 : savepointCreator.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
     result = prime * result + ((savepointTimestamp == null) ? 0 : savepointTimestamp.hashCode());
@@ -274,8 +274,8 @@ public class Row {
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
             .equals(other.lastUpdateUser))
         && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
-        && (uriAccessControl == null ? other.uriAccessControl == null : uriAccessControl
-            .equals(other.uriAccessControl))
+        && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
+            .equals(other.savepointCreator))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
@@ -302,12 +302,12 @@ public class Row {
     return (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (deleted == other.deleted)
         && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
-        && (uriAccessControl == null ? other.uriAccessControl == null : uriAccessControl
-            .equals(other.uriAccessControl))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
             .equals(other.savepointTimestamp))
+        && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
+            .equals(other.savepointCreator))
         && (values == null ? other.values == null : values.equals(other.values));
   }
 
@@ -333,14 +333,14 @@ public class Row {
     builder.append(lastUpdateUser);
     builder.append(", filterScope=");
     builder.append(filterScope);
-    builder.append(", uriAccessControl=");
-    builder.append(uriAccessControl);
     builder.append(", formId=");
     builder.append(formId);
     builder.append(", locale=");
     builder.append(locale);
     builder.append(", savepointTimestamp=");
     builder.append(savepointTimestamp);
+    builder.append(", savepointCreator=");
+    builder.append(savepointCreator);
     builder.append(", values=");
     builder.append(values);
     builder.append("]");

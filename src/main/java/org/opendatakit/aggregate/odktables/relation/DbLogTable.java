@@ -68,17 +68,17 @@ public class DbLogTable extends Relation {
   // The locale that was active when this record was last saved.
   public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
       DataType.STRING, true);
-  // milliseconds at the time the form was saved (on client).
+  // nanoseconds at the time the form was saved (on client).
   public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
-      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.INTEGER, true);
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, true);
+  // the creator of this row, as reported by the device (may be a remote SMS user)
+  public static final DataField SAVEPOINT_CREATOR = new DataField(
+      TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);
 
   // Access control filters accessible only on server (these may be useless)
   public static final DataField FILTER_TYPE = new DataField("_FILTER_TYPE", DataType.STRING, true);
   public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
       .setIndexable(IndexType.HASH);
-  // Access control tag sent down to the device (unclear whether this is useful)
-  public static final DataField URI_ACCESS_CONTROL = new DataField(
-      TableConstants.URI_ACCESS_CONTROL.toUpperCase(), DataType.STRING, true);
 
   private static final List<DataField> dataFields;
   static {
@@ -97,12 +97,11 @@ public class DbLogTable extends Relation {
     dataFields.add(FORM_ID);
     dataFields.add(LOCALE);
     dataFields.add(SAVEPOINT_TIMESTAMP);
+    dataFields.add(SAVEPOINT_CREATOR);
 
     // Access control filters accessible only on server (these may be useless)
     dataFields.add(FILTER_TYPE);
     dataFields.add(FILTER_VALUE);
-    // Access control tag sent down to the device (unclear whether this is useful)
-    dataFields.add(URI_ACCESS_CONTROL);
   }
 
   private static final EntityConverter converter = new EntityConverter();

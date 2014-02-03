@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.opendatakit.aggregate.client.odktables.TableTypeClient;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
@@ -167,13 +168,14 @@ public class UtilTransforms {
     serverRow.setRowETag(client.getRowETag());
     serverRow.setRowId(client.getRowId());
     serverRow.setValues(client.getValues());
-    serverRow.setUriAccessControl(client.getUriAccessControl());
     serverRow.setFormId(client.getFormId());
     serverRow.setLocale(client.getLocale());
     String isoDateStr = client.getSavepointTimestampIso8601Date();
-    Date isoDate = WebUtils.parseDate(isoDateStr);
-    Long time = (isoDate == null) ? null : isoDate.getTime();
-    serverRow.setSavepointTimestamp(time);
+    Date isoDate = (isoDateStr == null) ? null : WebUtils.parseDate(isoDateStr);
+    String nanoTime = (isoDate == null) ? null : TableConstants.nanoSecondsFromMillis(isoDate.getTime());
+    // TODO: this truncates the nanosecond portion of a date!
+    serverRow.setSavepointTimestamp(nanoTime);
+    serverRow.setSavepointCreator(client.getSavepointCreator());
     return serverRow;
   }
 
@@ -316,11 +318,12 @@ public class UtilTransforms {
     }
 
     // sync'd metadata
-    row.setUriAccessControl(serverRow.getUriAccessControl());
     row.setFormId(serverRow.getFormId());
     row.setLocale(serverRow.getLocale());
-    Long time = serverRow.getSavepointTimestamp();
+    String savepointTimestamp = serverRow.getSavepointTimestamp();
+    Long time = TableConstants.milliSecondsFromNanos(savepointTimestamp);
     row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
+    row.setSavepointCreator(serverRow.getSavepointCreator());
 
     // data
     row.setValues(serverRow.getValues());
@@ -338,12 +341,13 @@ public class UtilTransforms {
     rowClient.setRowId(serverResource.getRowId());
 
     // sync'd metadata
-    rowClient.setUriAccessControl(serverResource.getUriAccessControl());
     rowClient.setFormId(serverResource.getFormId());
     rowClient.setLocale(serverResource.getLocale());
-    Long time = serverResource.getSavepointTimestamp();
+    String savepointTimestamp = serverResource.getSavepointTimestamp();
+    Long time = TableConstants.milliSecondsFromNanos(savepointTimestamp);
     rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(
         time)));
+    rowClient.setSavepointCreator(serverResource.getSavepointCreator());
 
     // data
     rowClient.setValues(serverResource.getValues());
