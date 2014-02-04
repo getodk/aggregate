@@ -36,8 +36,8 @@ import org.simpleframework.xml.Root;
 @Root(strict = false)
 public class TableProperties {
 
-  @Element(name = "etag", required = false)
-  private String propertiesEtag;
+  @Element(name = "propertiesETag", required = false)
+  private String propertiesETag;
 
   @Element(name = "tableId", required = true)
   private String tableId;
@@ -50,23 +50,23 @@ public class TableProperties {
 
   /**
    *
-   * @param propertiesEtag
+   * @param propertiesETag
    * @param tableKey the tableKey field from {@link DbTableDefinition}
    * @param keyValueStoreEntries
    */
-  public TableProperties(String propertiesEtag, String tableId,
+  public TableProperties(String propertiesETag, String tableId,
       List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries) {
-    this.propertiesEtag = propertiesEtag;
+    this.propertiesETag = propertiesETag;
     this.tableId = tableId;
     this.kvsEntries = keyValueStoreEntries;
   }
 
-  public String getPropertiesEtag() {
-    return propertiesEtag;
+  public String getPropertiesETag() {
+    return propertiesETag;
   }
 
-  public void setPropertiesEtag(String propertiesEtag) {
-    this.propertiesEtag = propertiesEtag;
+  public void setPropertiesETag(String propertiesETag) {
+    this.propertiesETag = propertiesETag;
   }
 
   public String getTableId() {
@@ -90,9 +90,9 @@ public class TableProperties {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
-    result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((kvsEntries == null) ? 0 : kvsEntries.hashCode());
+    result = prime * result + ((propertiesETag == null) ? 1 : propertiesETag.hashCode());
+    result = prime * result + ((tableId == null) ? 1 : tableId.hashCode());
+    result = prime * result + ((kvsEntries == null) ? 1 : kvsEntries.hashCode());
     return result;
   }
 
@@ -108,14 +108,14 @@ public class TableProperties {
       return false;
     }
     TableProperties other = (TableProperties) obj;
-    return (propertiesEtag == null ? other.propertiesEtag == null : propertiesEtag.equals(other.propertiesEtag))
+    return (propertiesETag == null ? other.propertiesETag == null : propertiesETag.equals(other.propertiesETag))
         && (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
         && (kvsEntries == null ? other.kvsEntries == null : kvsEntries.equals(other.kvsEntries));
   }
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesEtag=" + propertiesEtag
+    return "TableProperties [propertiesETag=" + propertiesETag
         + ", tableId=" + tableId
         + ", kvsEntries=" + this.kvsEntries.toString()
         + "]";

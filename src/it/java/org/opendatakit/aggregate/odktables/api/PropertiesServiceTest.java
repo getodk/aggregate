@@ -53,7 +53,6 @@ public class PropertiesServiceTest extends AbstractServiceTest {
 
   @Test
   public void testSetTableMetadata() {
-    String expected = T.tableMetadata + "some metadata here";
     List<OdkTablesKeyValueStoreEntry> list = new ArrayList<OdkTablesKeyValueStoreEntry>();
     OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
     entry.partition = KeyValueStoreConstants.PARTITION_TABLE;

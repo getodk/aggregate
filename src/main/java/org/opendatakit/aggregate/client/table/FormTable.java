@@ -20,9 +20,11 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.popups.MediaFileListPopup;
+import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.widgets.AcceptSubmissionCheckBox;
 import org.opendatakit.aggregate.client.widgets.DeleteFormButton;
 import org.opendatakit.aggregate.client.widgets.DownloadableCheckBox;
+import org.opendatakit.aggregate.client.widgets.EnketoWebformButton;
 import org.opendatakit.aggregate.client.widgets.ExportButton;
 import org.opendatakit.aggregate.client.widgets.PublishButton;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
@@ -36,7 +38,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 public class FormTable extends FlexTable {
-   
+
   private static int TITLE_COLUMN = 0;
   private static String TITLE_HEADING = "Title";
   private static int FORM_ID_COLUMN = 1;
@@ -55,9 +57,12 @@ public class FormTable extends FlexTable {
   private static String EXPORT_HEADING = "Export";
   private static int DELETE_COLUMN = 8;
   private static String DELETE_HEADING = "Delete";
-  
+  private static int ENKETO_COLUMN = 9;
+  private static String ENKETO_HEADING = "Webform";
+  private static String ENKETO_BUTTON_TEXT = "Enketo";
+
   public FormTable() {
-    
+
     // create table headers
     setText(0, TITLE_COLUMN, TITLE_HEADING);
     setText(0, FORM_ID_COLUMN, FORM_ID_HEADING);
@@ -68,32 +73,37 @@ public class FormTable extends FlexTable {
     setText(0, PUBLISH_COLUMN, PUBLISH_HEADING);
     setText(0, EXPORT_COLUMN, EXPORT_HEADING);
     setText(0, DELETE_COLUMN, DELETE_HEADING);
-    
+    if (Preferences.showEnketoIntegration()) {
+      setText(0, ENKETO_COLUMN, ENKETO_HEADING);
+    }
     // add styling
     getRowFormatter().addStyleName(0, "titleBar");
     addStyleName("dataTable");
     getElement().setId("form_management_table");
   }
-  
+
   /**
    * Update the list of forms
-   * 
+   *
    * @param formSummary
    */
   public void updateFormTable(ArrayList<FormSummary> forms) {
-	int i = 0;
+    int i = 0;
+    boolean shouldAddEnketoButton = Preferences.showEnketoIntegration();
     for (int j = 0; j < forms.size(); j++) {
       FormSummary form = forms.get(j);
       // don't show form if it has an active deletion request...
       FormActionStatusTimestamp t = form.getMostRecentDeletionRequestStatus();
-      if ( t != null && t.getStatus().isActiveRequest()) continue;
+      if (t != null && t.getStatus().isActiveRequest()) {
+        continue;
+      }
       // ok -- we should show this form...
       ++i;
       setWidget(i, TITLE_COLUMN, new HTML(form.getViewableURL()));
       setWidget(i, FORM_ID_COLUMN, new HTML(form.getId()));
-     
+
       Widget mediaCount;
-      if(form.getMediaFileCount() > 0) {
+      if (form.getMediaFileCount() > 0) {
         Anchor mediaCountLink = new Anchor(Integer.toString(form.getMediaFileCount()), true);
         mediaCountLink.addClickHandler(new MediaFileListClickHandler(form.getId()));
         mediaCount = mediaCountLink;
@@ -101,44 +111,48 @@ public class FormTable extends FlexTable {
         mediaCount = new HTML(Integer.toString(form.getMediaFileCount()));
       }
       setWidget(i, MEDIA_COUNT_COLUMN, mediaCount);
-      
+
       String user = form.getCreatedUser();
       String displayName = UserSecurityInfo.getDisplayName(user);
       setText(i, USER_COLUMN, displayName);
-      
-      setWidget(i, DOWNLOADABLE_COLUMN, 
+
+      setWidget(i, DOWNLOADABLE_COLUMN,
           new DownloadableCheckBox(form.getId(), form.isDownloadable()));
       setWidget(i, ACCEPT_SUBMISSIONS_COLUMN,
           new AcceptSubmissionCheckBox(form.getId(), form.receiveSubmissions()));
       setWidget(i, PUBLISH_COLUMN, new PublishButton(form.getId()));
       setWidget(i, EXPORT_COLUMN, new ExportButton(form.getId()));
       setWidget(i, DELETE_COLUMN, new DeleteFormButton(form.getId()));
+      if (shouldAddEnketoButton) {
+        setWidget(i, ENKETO_COLUMN, new EnketoWebformButton(null, form.getId(), ENKETO_BUTTON_TEXT));
+
+      }
 
       if (i % 2 == 0)
         getRowFormatter().addStyleName(i, "evenTableRow");
     }
-    
+
     // remove any trailing rows...
     ++i; // to get number or rows in actual table...
-    while ( getRowCount() > i ) {
-    	removeRow(getRowCount()-1);
+    while (getRowCount() > i) {
+      removeRow(getRowCount() - 1);
     }
   }
-  
+
   private class MediaFileListClickHandler implements ClickHandler {
 
     private String formId;
-    
+
     public MediaFileListClickHandler(String formId) {
       this.formId = formId;
     }
-    
+
     @Override
     public void onClick(ClickEvent event) {
       MediaFileListPopup mediaListpopup = new MediaFileListPopup(formId);
       mediaListpopup.setPopupPositionAndShow(mediaListpopup.getPositionCallBack());
     }
-    
+
   }
-  
+
 }

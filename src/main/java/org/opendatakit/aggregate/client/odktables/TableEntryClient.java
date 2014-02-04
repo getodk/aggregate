@@ -39,20 +39,20 @@ public class TableEntryClient implements Serializable {
 
   private String tableId;
   private String displayName;
-  private String dataEtag;
-  private String propertiesEtag;
-  private String schemaEtag;
+  private String dataETag;
+  private String propertiesETag;
+  private String schemaETag;
 
   protected TableEntryClient() {
   }
 
   public TableEntryClient(final String tableId, final String displayName,
-      final String dataEtag, final String propertiesEtag, final String schemaEtag) {
+      final String dataETag, final String propertiesETag, final String schemaETag) {
     this.tableId = tableId;
     this.displayName = displayName;
-    this.dataEtag = dataEtag;
-    this.propertiesEtag = propertiesEtag;
-    this.schemaEtag = schemaEtag;
+    this.dataETag = dataETag;
+    this.propertiesETag = propertiesETag;
+    this.schemaETag = schemaETag;
   }
 
   public String getTableId() {
@@ -71,28 +71,28 @@ public class TableEntryClient implements Serializable {
     this.displayName = displayName;
   }
 
-  public String getDataEtag() {
-    return this.dataEtag;
+  public String getDataETag() {
+    return this.dataETag;
   }
 
-  public void setDataEtag(final String dataEtag) {
-    this.dataEtag = dataEtag;
+  public void setDataETag(final String dataETag) {
+    this.dataETag = dataETag;
   }
 
-  public String getPropertiesEtag() {
-    return propertiesEtag;
+  public String getPropertiesETag() {
+    return propertiesETag;
   }
 
-  public void setPropertiesEtag(String propertiesEtag) {
-    this.propertiesEtag = propertiesEtag;
+  public void setPropertiesETag(String propertiesETag) {
+    this.propertiesETag = propertiesETag;
   }
 
-  public String getSchemaEtag() {
-    return schemaEtag;
+  public String getSchemaETag() {
+    return schemaETag;
   }
 
-  public void setSchemaEtag(String schemaEtag) {
-    this.schemaEtag = schemaEtag;
+  public void setSchemaETag(String schemaETag) {
+    this.schemaETag = schemaETag;
   }
 
   @Override
@@ -105,27 +105,27 @@ public class TableEntryClient implements Serializable {
       return false;
     TableEntryClient other = (TableEntryClient) obj;
 
-    if (dataEtag == null) {
-      if (other.dataEtag != null) {
+    if (dataETag == null) {
+      if (other.dataETag != null) {
         return false;
       }
-    } else if (!dataEtag.equals(other.dataEtag)) {
+    } else if (!dataETag.equals(other.dataETag)) {
       return false;
     }
 
-    if (propertiesEtag == null) {
-      if (other.propertiesEtag != null) {
+    if (propertiesETag == null) {
+      if (other.propertiesETag != null) {
         return false;
       }
-    } else if (!propertiesEtag.equals(other.propertiesEtag)) {
+    } else if (!propertiesETag.equals(other.propertiesETag)) {
       return false;
     }
 
-    if (schemaEtag == null) {
-      if (other.schemaEtag != null) {
+    if (schemaETag == null) {
+      if (other.schemaETag != null) {
         return false;
       }
-    } else if (!schemaEtag.equals(other.schemaEtag)) {
+    } else if (!schemaETag.equals(other.schemaETag)) {
       return false;
     }
 
@@ -152,9 +152,9 @@ public class TableEntryClient implements Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
-    result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
-    result = prime * result + ((schemaEtag == null) ? 0 : schemaEtag.hashCode());
+    result = prime * result + ((dataETag == null) ? 0 : dataETag.hashCode());
+    result = prime * result + ((propertiesETag == null) ? 0 : propertiesETag.hashCode());
+    result = prime * result + ((schemaETag == null) ? 0 : schemaETag.hashCode());
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
     result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
     return result;
@@ -164,8 +164,8 @@ public class TableEntryClient implements Serializable {
   public String toString() {
     return "TableEntry [tableId=" + tableId
         + ", displayName=" + displayName
-        + ", dataEtag=" + dataEtag
-        + ", propertiesEtag=" + propertiesEtag
-        + ", schemaEtag=" + schemaEtag + "]";
+        + ", dataETag=" + dataETag
+        + ", propertiesETag=" + propertiesETag
+        + ", schemaETag=" + schemaETag + "]";
   }
 }

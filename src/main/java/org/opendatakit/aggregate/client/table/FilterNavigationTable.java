@@ -25,6 +25,8 @@ import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.widgets.EnketoWebformButton;
 import org.opendatakit.aggregate.client.widgets.ExportButton;
 import org.opendatakit.aggregate.client.widgets.FilterListBox;
 import org.opendatakit.aggregate.client.widgets.FormListBox;
@@ -50,7 +52,7 @@ public class FilterNavigationTable extends FlexTable {
 
   public FilterNavigationTable(FilterSubTab filterSubTab) {
     this.filterSubTab = filterSubTab;
-    
+
     formsBox = new FormListBox(new FormChangeDropDownHandler());
     filtersBox = new FilterListBox(new FilterChangeDropDownHandler());
 
@@ -60,58 +62,66 @@ public class FilterNavigationTable extends FlexTable {
     formNFilterTable.setWidget(0, 1, formsBox);
     formNFilterTable.setHTML(0, 2, "<h2 id=\"form_name\"> Filter </h2>");
     formNFilterTable.setWidget(0, 3, filtersBox);
-    
+
     setWidget(0, 0, formNFilterTable);
   }
 
   public void updateNavTable(FilterGroup filterGroup) {
     FlexTable actionTable = new FlexTable();
     actionTable.getElement().setAttribute("align", "right");
-    
+
     // end goals vis, export, publish
+    int columnIndex = 0;
     VisualizationButton visualizeButton = new VisualizationButton(filterSubTab);
-    actionTable.setWidget(0, 0, visualizeButton);
+    actionTable.setWidget(0, columnIndex, visualizeButton);
 
+    if (Preferences.showEnketoIntegration()) {
+      columnIndex++;
+      actionTable.setWidget(0, columnIndex, new EnketoWebformButton(formsBox.getSelectedForm()
+          .getId()));
+    }
+    columnIndex++;
     ExportButton exportButton = new ExportButton(filterGroup.getFormId(), filterGroup);
-    actionTable.setWidget(0, 1, exportButton);
+    actionTable.setWidget(0, columnIndex, exportButton);
 
+    columnIndex++;
     PublishButton publishButton = new PublishButton(filterGroup.getFormId());
-    actionTable.setWidget(0, 2, publishButton);
-    
-    setWidget(0, 2, actionTable);
+    actionTable.setWidget(0, columnIndex, publishButton);
+
+    setWidget(0, columnIndex, actionTable);
 
   }
 
   public void updateNavAfterSave(FilterGroup filterGroup) {
     filtersBox.updateSelectedFilterAfterSave(filterGroup);
   }
-  
+
   public ArrayList<FilterGroup> getCurrentFilters() {
     return filtersBox.getDisplayedFilterList();
   }
-  
+
   public void update() {
-	GWT.log("inside FilterNavigationTable.update");
-	
+    GWT.log("inside FilterNavigationTable.update");
+
     // Set up the callback object.
     AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
       public void onFailure(Throwable caught) {
         // something failed...
         selectedForm = null;
-        
+
         updateFilterList();
         AggregateUI.getUI().reportError(caught);
       }
 
       public void onSuccess(ArrayList<FormSummary> formsFromService) {
         AggregateUI.getUI().clearError();
-        
+
         // setup the display with the latest updates
         formsBox.updateFormDropDown(formsFromService);
-        
+
         // update the class state with the currently displayed form
         selectedForm = formsBox.getSelectedForm();
-        
+
         updateFilterList();
       }
     };
@@ -119,24 +129,24 @@ public class FilterNavigationTable extends FlexTable {
     // Make the call to the form service.
     SecureGWT.getFormService().getForms(callback);
   }
-  
-  private synchronized void updateFilterList() {
-	GWT.log("inside FilterNavigationTable.updateFilterList");
 
-	if (selectedForm == null || selectedForm.getId().equals(BasicConsts.EMPTY_STRING)) {
+  private synchronized void updateFilterList() {
+    GWT.log("inside FilterNavigationTable.updateFilterList");
+
+    if (selectedForm == null || selectedForm.getId().equals(BasicConsts.EMPTY_STRING)) {
       // no form
-	  // therefore no filters ... update filter box
+      // therefore no filters ... update filter box
       filtersBox.updateFilterDropDown(null);
       // update the submissions display
       updateSelectedFormNFilter();
       return;
     }
 
-	// otherwise, request the filters appropriate for this form...
+    // otherwise, request the filters appropriate for this form...
     AsyncCallback<FilterSet> callback = new AsyncCallback<FilterSet>() {
       @Override
       public void onFailure(Throwable caught) {
-        if(caught instanceof FormNotAvailableException) {
+        if (caught instanceof FormNotAvailableException) {
           // the form is now not available, restart the update process
           GWT.log("form not available - restarting form/filter update FilterNavigationTable");
           update();
@@ -148,11 +158,12 @@ public class FilterNavigationTable extends FlexTable {
           AggregateUI.getUI().reportError(caught);
         }
       }
-      
+
       @Override
       public void onSuccess(FilterSet filterSet) {
         AggregateUI.getUI().clearError();
-        // updates the filter dropdown and sets the class state to the newly created filter list
+        // updates the filter dropdown and sets the class state to the newly
+        // created filter list
         filtersBox.updateFilterDropDown(filterSet);
         // update the submissions display
         updateSelectedFormNFilter();
@@ -165,46 +176,47 @@ public class FilterNavigationTable extends FlexTable {
   }
 
   private void updateSelectedFormNFilter() {
-	GWT.log("inside FilterNavigationTable.updateSelectedFormNFilter");
+    GWT.log("inside FilterNavigationTable.updateSelectedFormNFilter");
     FormSummary form = formsBox.getSelectedForm();
     FilterGroup filterGroup = filtersBox.getSelectedFilter();
-  
+
     // verify a form and filter group exist
-    if(form == null || filterGroup == null) {
+    if (form == null || filterGroup == null) {
       return;
-    }    
-  
+    }
+
     filterSubTab.switchFilterGroup(filterGroup);
   }
-  
+
   /**
    * Handler to process the change in the form drop down
-   * 
+   *
    */
   private class FormChangeDropDownHandler implements ChangeHandler {
     @Override
     public void onChange(ChangeEvent event) {
       AggregateUI.getUI().getTimer().restartTimer();
       FormSummary form = formsBox.getSelectedForm();
-      if(form != null) {
-    	if ( selectedForm == null || !selectedForm.equals(form) ) {
-    		selectedForm = form;
-    	    // update filter list based on new form
-    	    // NOTE: the filter list MUST be updated BEFORE the selected updateSelectedFormNFilter() is called
-    	    updateFilterList();
-    	}
-    	// otherwise no-op (form unchanged)...
+      if (form != null) {
+        if (selectedForm == null || !selectedForm.equals(form)) {
+          selectedForm = form;
+          // update filter list based on new form
+          // NOTE: the filter list MUST be updated BEFORE the selected
+          // updateSelectedFormNFilter() is called
+          updateFilterList();
+        }
+        // otherwise no-op (form unchanged)...
       } else {
-    	// no selected form...
-    	selectedForm = null;
-    	updateFilterList();
+        // no selected form...
+        selectedForm = null;
+        updateFilterList();
       }
     }
   }
-  
+
   /**
    * Handler to process the change in the filter drop down
-   * 
+   *
    */
   private class FilterChangeDropDownHandler implements ChangeHandler {
     @Override

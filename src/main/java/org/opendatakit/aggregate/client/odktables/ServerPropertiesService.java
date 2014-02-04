@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -43,7 +43,7 @@ public interface ServerPropertiesService extends RemoteService {
 
 	TablePropertiesClient setProperties(TablePropertiesClient properties, String tableId) throws
 		AccessDeniedException,
-		RequestFailureException, DatastoreFailureException, EtagMismatchExceptionClient,
+		RequestFailureException, DatastoreFailureException, ETagMismatchExceptionClient,
 		PermissionDeniedExceptionClient;
 
 

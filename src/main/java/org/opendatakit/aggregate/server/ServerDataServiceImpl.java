@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
@@ -135,7 +135,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
   @Override
   public RowClient createOrUpdateRow(String tableId, String rowId,
       RowClient row) throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException, EtagMismatchExceptionClient,
+      DatastoreFailureException, ETagMismatchExceptionClient,
       PermissionDeniedExceptionClient, BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -172,9 +172,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 //    } catch (BadColumnNameException e) {
 //      e.printStackTrace();
 //      throw new BadColumnNameExceptionClient(e);
-//    } catch (EtagMismatchException e) {
+//    } catch (ETagMismatchException e) {
 //      e.printStackTrace();
-//      throw new EtagMismatchExceptionClient(e);
+//      throw new ETagMismatchExceptionClient(e);
 //    }
   }
 
@@ -223,7 +223,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
     try {
       TableManager tm = new TableManager(cc);
       TableEntry entry = tm.getTable(tableId);
-      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, entry.getSchemaEtag(), cc);
+      List<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId, entry.getSchemaETag(), cc);
       return columnNames;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -541,9 +541,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet
 //      // them.
 //      List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
 //      // first we want to get a new etag
-//      String dataEtag = entry.getString(DbTableEntry.DATA_ETAG);
-//      dataEtag = Long.toString(System.currentTimeMillis());
-//      entry.set(DbTableEntry.DATA_ETAG, dataEtag);
+//      String dataETag = entry.getString(DbTableEntry.DATA_ETAG);
+//      dataETag = Long.toString(System.currentTimeMillis());
+//      entry.set(DbTableEntry.DATA_ETAG, dataETag);
 //      entry.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
 //      entry.set(DbTable.DELETED, true);
 //
