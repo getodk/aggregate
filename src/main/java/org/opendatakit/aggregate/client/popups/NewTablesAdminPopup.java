@@ -16,11 +16,17 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
+import org.opendatakit.aggregate.client.widgets.AggregateListBox;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -28,36 +34,83 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextBox;
 
 public final class NewTablesAdminPopup extends AbstractPopupBase {
 
-  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Create User";
-  private static final String TOOLTIP_TXT = "Create a new user";
-  private static final String HELP_BALLOON_TXT = "Create a new administrative user to edit data.";
+  private static final String LABEL_TXT = "Grant ODK Tables Admin Rights to User";
+  private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Grant Admin Rights";
+  private static final String TOOLTIP_TXT = "Grant administrative rights to ODK Tables data to a user with Synchronize Tables privileges";
+  private static final String HELP_BALLOON_TXT = "Enable a user with Synchronize Tables privileges to perform administrative actions on that data.";
 
+  public class UserListBox extends AggregateListBox {
 
-  private final TextBox name;
-  private final TextBox externalUid;
+    public UserListBox() {
+      super(TOOLTIP_TXT, true, HELP_BALLOON_TXT);
+    }
+
+  };
+
+  private ArrayList<UserSecurityInfo> userList;
+  private final UserListBox users;
+
+  public class ODKTablesAdminPopupCallback implements AsyncCallback<ArrayList<UserSecurityInfo>> {
+    public ODKTablesAdminPopupCallback() {
+    }
+
+    @Override
+    public void onFailure(Throwable caught) {
+      users.clear();
+      userList.clear();
+      AggregateUI.getUI().reportError(caught);
+    }
+
+    @Override
+    public void onSuccess(ArrayList<UserSecurityInfo> result) {
+      AggregateUI.getUI().clearError();
+
+      ArrayList<UserSecurityInfo> filteredResult = new ArrayList<UserSecurityInfo>();
+      for ( UserSecurityInfo user : result ) {
+        if ( user.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) ) {
+          filteredResult.add(user);
+        }
+      }
+      Collections.sort(filteredResult, new Comparator<UserSecurityInfo>(){
+
+        @Override
+        public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+          return arg0.getFullName().compareTo(arg1.getFullName());
+        }} );
+
+      users.clear();
+      userList = filteredResult;
+      for ( int i = 0 ; i < userList.size(); ++i) {
+        UserSecurityInfo user = userList.get(i);
+        String displayName = user.getFullName();
+        users.addItem(displayName, Integer.toString(i));
+        users.setItemSelected(i, user.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES));
+      }
+    }
+
+  };
 
   public NewTablesAdminPopup() {
     super();
 
-    name = new TextBox();
-    externalUid = new TextBox();
-
     AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new CreateUser());
 
+    users = new UserListBox();
+
+    UserSecurityInfo[] valuesToShow = {};
+
     FlexTable layout = new FlexTable();
     layout.setWidget(0, 0, new ClosePopupButton(this));
-    layout.setWidget(0, 1, new HTML("Create a New User"));
-    layout.setWidget(1, 0, new HTML("Name:"));
-    layout.setWidget(1, 1, name);
-    layout.setWidget(2, 0, new HTML("User ID:"));
-    layout.setWidget(2, 1, externalUid);
+    layout.setWidget(0, 1, new HTML(LABEL_TXT));
+    layout.setWidget(1, 0, new HTML("Users:"));
+    layout.setWidget(1, 1, users);
     layout.setWidget(3, 1, deleteButton);
 
+    SecureGWT.getSecurityAdminService().getAllUsers(true, new ODKTablesAdminPopupCallback());
     setWidget(layout);
   }
 
@@ -83,9 +136,15 @@ public final class NewTablesAdminPopup extends AbstractPopupBase {
         }
       };
 
+      ArrayList<UserSecurityInfo> enabledUsers = new ArrayList<UserSecurityInfo>();
+      for ( int i = 0 ; i < userList.size(); ++i ) {
+        if ( users.isItemSelected(i) ) {
+          UserSecurityInfo user = userList.get(i);
+          enabledUsers.add(user);
+        }
+      }
       // Make the call to the odk tables user admin service.
-      OdkTablesAdmin admin = new OdkTablesAdmin(name.getValue(), externalUid.getValue());
-      SecureGWT.getOdkTablesAdminService().addAdmin(admin, callback);
+      //SecureGWT.getOdkTablesAdminService().setAdmins(enabledUsers, callback);
       hide();
     }
   }

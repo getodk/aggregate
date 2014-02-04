@@ -32,3 +32,6 @@ a23f6f2307ef88b46f69e8792c41d8ef49afac5e v1.0 RC1
 0abfbf59d159ad151003ba76486db0c8e6340344 v1.3.2 Maps Private Build rev 2
 dc0ec54226946ca50e31e75371c1fae0812ff0e3 v1.3.2 Maps Private Build rev 3
 9032ce02273f8e219ce9d48fc5e0cf33d9cfe677 v1.4 Production
+42b9a35535b17cd80fbdf814ed2256d153d21948 submit_hotmobile
+017ee652784e337a9c6ce5388fc12ab716ee5456 ODK Tables REST API remove joins from Column
+509cc5475f46f103b0ea21833a2c185a63f271cc S-T-A datamodel convergence (prelim)

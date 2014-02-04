@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.widgets;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -33,12 +34,15 @@ public final class DisableFasterBackgroundActionsCheckbox extends AggregateCheck
   private static final String HELP_BALLOON_TXT = "Check this box if you need to preserve Google AppEngine quota for submissions and website activities. "
       + "Otherwise leave unchecked. If checked, exports, publishing and form deletion requests will take longer to complete.";
 
-  public DisableFasterBackgroundActionsCheckbox(Boolean enabled) {
+  private PreferencesCompletionCallback settingsChange;
+
+  public DisableFasterBackgroundActionsCheckbox(Boolean enabled, PreferencesCompletionCallback settingsChange) {
     super(LABEL, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.settingsChange = settingsChange;
     setValue(enabled);
-    boolean accessable = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+    boolean accessible = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
-    setEnabled(accessable);
+    setEnabled(accessible);
   }
 
   public void updateValue(Boolean value) {
@@ -64,7 +68,7 @@ public final class DisableFasterBackgroundActionsCheckbox extends AggregateCheck
       @Override
       public void onSuccess(Void result) {
         AggregateUI.getUI().clearError();
-        Preferences.updatePreferences(null);
+        Preferences.updatePreferences(settingsChange);
       }
     });
   }

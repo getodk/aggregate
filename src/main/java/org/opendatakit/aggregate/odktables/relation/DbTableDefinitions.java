@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.resteasy.logging.Logger;
-import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Relation;
@@ -34,10 +33,10 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Represents the TableDefinitions table in the datastore. Analogous to the
- * eponymous Table in the ODK Tables data model.
+ * This provides a concrete mapping of (tableId,schemaETag) to a database table name.
  * <p>
- * NB: This is NOT directly analogous to the {@link TableDefinition} object,
+ * NB: This is NOT directly analogous to the
+ * {@link org.opendatakit.aggregate.odktables.rest.entity.TableDefinition} object,
  * which represents the XML document defining a table by which ODKTables talks
  * to the server.
  *
@@ -52,28 +51,23 @@ public class DbTableDefinitions extends Relation {
   }
 
   // The name of the table/relation in the datastore.
-  private static final String RELATION_NAME = "TABLE_DEFINITIONS2";
+  private static final String RELATION_NAME = "TABLE_DEFINITIONS3";
 
   // Column names. Based on the ODK Tables Schema google doc for the
   // non client-local columns.
   public static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
       .setIndexable(IndexType.HASH);
-  public static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG", DataType.STRING,
+  public static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING,
       false);
   public static final DataField DB_TABLE_NAME = new DataField("DB_TABLE_NAME", DataType.STRING,
       false);
-  public static final DataField TYPE = new DataField("TYPE", DataType.STRING, false);
-  public static final DataField TABLE_ID_ACCESS_CONTROLS = new DataField(
-      "TABLE_ID_ACCESS_CONTROLS", DataType.STRING, true);
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(TABLE_ID);
-    dataFields.add(PROPERTIES_ETAG);
+    dataFields.add(SCHEMA_ETAG);
     dataFields.add(DB_TABLE_NAME);
-    dataFields.add(TYPE);
-    dataFields.add(TABLE_ID_ACCESS_CONTROLS);
   }
 
   public static class DbTableDefinitionsEntity {
@@ -106,12 +100,12 @@ public class DbTableDefinitions extends Relation {
       e.set(TABLE_ID, value);
     }
 
-    public String getPropertiesETag() {
-      return e.getString(PROPERTIES_ETAG);
+    public String getSchemaETag() {
+      return e.getString(SCHEMA_ETAG);
     }
 
-    public void setPropertiesETag(String value) {
-      e.set(PROPERTIES_ETAG, value);
+    public void setSchemaETag(String value) {
+      e.set(SCHEMA_ETAG, value);
     }
 
     public String getDbTableName() {
@@ -120,22 +114,6 @@ public class DbTableDefinitions extends Relation {
 
     public void setDbTableName(String value) {
       e.set(DB_TABLE_NAME, value);
-    }
-
-    public String getType() {
-      return e.getString(TYPE);
-    }
-
-    public void setType(String value) {
-      e.set(TYPE, value);
-    }
-
-    public String getTableIdAccessControls() {
-      return e.getString(TABLE_ID_ACCESS_CONTROLS);
-    }
-
-    public void setTableIdAccessControls(String value) {
-      e.set(TABLE_ID_ACCESS_CONTROLS, value);
     }
   }
 
@@ -161,11 +139,11 @@ public class DbTableDefinitions extends Relation {
     return new DbTableDefinitionsEntity(getRelation(cc).newEntity(cc));
   }
 
-  public static DbTableDefinitionsEntity getDefinition(String tableId, String propertiesEtag,
+  public static DbTableDefinitionsEntity getDefinition(String tableId, String schemaEtag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbTableDefinitions.getDefinition", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(PROPERTIES_ETAG, FilterOperation.EQUAL, propertiesEtag);
+    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaEtag);
 
     List<Entity> list = query.execute();
     if (list.isEmpty()) {
@@ -174,8 +152,8 @@ public class DbTableDefinitions extends Relation {
 
     if (list.size() != 1) {
       Logger.getLogger(DbTableDefinitions.class).warn(
-          "Multiple DbTableDefinitions records for table id " + tableId + " and propertiesEtag "
-              + propertiesEtag);
+          "Multiple DbTableDefinitions records for table id " + tableId + " and schemaEtag "
+              + schemaEtag);
     }
 
     Entity e = list.get(0);

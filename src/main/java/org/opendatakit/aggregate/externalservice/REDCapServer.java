@@ -78,6 +78,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.ibm.icu.util.Calendar;
 
 public class REDCapServer extends AbstractExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
@@ -143,7 +144,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
     fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
     persist(cc);
-    
+
     // upload data to external service
     postUploadTask(cc);
   }
@@ -285,45 +286,47 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           case JRDATETIME: {
             JRDateTimeType dt = (JRDateTimeType) value;
             Date dtValue = dt.getValue();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dtValue);
             if (dtValue != null) {
 
-              String dtYear = Integer.toString(dtValue.getYear() + 1900);
+              String dtYear = Integer.toString(cal.get(Calendar.YEAR));
               String dtMonth = "";
               String dtDay = "";
               String dtHour = "";
               String dtMinutes = "";
               String dtSeconds = "";
 
-              Integer monthInt = dtValue.getMonth() + 1;
+              Integer monthInt = cal.get(Calendar.MONTH) + 1;
               if (monthInt < 10) {
                 dtMonth = "0" + Integer.toString(monthInt);
               } else {
                 dtMonth = Integer.toString(monthInt);
               }
 
-              Integer dayInt = dtValue.getDate();
+              Integer dayInt = cal.get(Calendar.DAY_OF_MONTH);
               if (dayInt < 10) {
                 dtDay = "0" + Integer.toString(dayInt);
               } else {
                 dtDay = Integer.toString(dayInt);
               }
 
-              if (dtValue.getHours() < 10) {
-                dtHour = "0" + Integer.toString(dtValue.getHours());
+              if (cal.get(Calendar.HOUR_OF_DAY) < 10) {
+                dtHour = "0" + Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
               } else {
-                dtHour = Integer.toString(dtValue.getHours());
+                dtHour = Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
               }
 
-              if (dtValue.getMinutes() < 10) {
-                dtMinutes = "0" + Integer.toString(dtValue.getMinutes());
+              if (cal.get(Calendar.MINUTE) < 10) {
+                dtMinutes = "0" + Integer.toString(cal.get(Calendar.MINUTE));
               } else {
-                dtMinutes = Integer.toString(dtValue.getMinutes());
+                dtMinutes = Integer.toString(cal.get(Calendar.MINUTE));
               }
 
-              if (dtValue.getSeconds() < 10) {
-                dtSeconds = "0" + Integer.toString(dtValue.getSeconds());
+              if (cal.get(Calendar.SECOND) < 10) {
+                dtSeconds = "0" + Integer.toString(cal.get(Calendar.SECOND));
               } else {
-                dtSeconds = Integer.toString(dtValue.getSeconds());
+                dtSeconds = Integer.toString(cal.get(Calendar.SECOND));
               }
 
               String strValue = dtYear + "-" + dtMonth + "-" + dtDay + " " + dtHour + ":"
@@ -340,21 +343,23 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           case JRDATE: {
             JRDateType dt = (JRDateType) value;
             Date dtValue = dt.getValue();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dtValue);
             if (dtValue != null) {
 
               String dtMonth = "";
               String dtDay = "";
 
-              String dtYear = Integer.toString(dtValue.getYear() + 1900);
+              String dtYear = Integer.toString(cal.get(Calendar.YEAR));
 
-              Integer monthInt = dtValue.getMonth() + 1;
+              Integer monthInt = cal.get(Calendar.MONTH) + 1;
               if (monthInt < 10) {
                 dtMonth = "0" + Integer.toString(monthInt);
               } else {
                 dtMonth = Integer.toString(monthInt);
               }
 
-              Integer dayInt = dtValue.getDate();
+              Integer dayInt = cal.get(Calendar.DAY_OF_MONTH);
               if (dayInt < 10) {
                 dtDay = "0" + Integer.toString(dayInt);
               } else {
@@ -373,21 +378,23 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           case JRTIME: {
             JRTimeType dt = (JRTimeType) value;
             Date dtValue = dt.getValue();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dtValue);
 
             if (dtValue != null) {
               String dtHour = "";
               String dtMinutes = "";
 
-              if (dtValue.getHours() < 10) {
-                dtHour = "0" + Integer.toString(dtValue.getHours());
+              if (cal.get(Calendar.HOUR_OF_DAY) < 10) {
+                dtHour = "0" + Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
               } else {
-                dtHour = Integer.toString(dtValue.getHours());
+                dtHour = Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
               }
 
-              if (dtValue.getMinutes() < 10) {
-                dtMinutes = "0" + Integer.toString(dtValue.getMinutes());
+              if (cal.get(Calendar.MINUTE) < 10) {
+                dtMinutes = "0" + Integer.toString(cal.get(Calendar.MINUTE));
               } else {
-                dtMinutes = Integer.toString(dtValue.getMinutes());
+                dtMinutes = Integer.toString(cal.get(Calendar.MINUTE));
               }
 
               String strValue = dtHour + ":" + dtMinutes;

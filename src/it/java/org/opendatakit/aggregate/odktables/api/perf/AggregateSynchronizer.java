@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
@@ -31,7 +32,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.rest.interceptor.AggregateRequestInterceptor;
 import org.opendatakit.aggregate.odktables.rest.serialization.JsonObjectHttpMessageConverter;
 import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
@@ -118,17 +118,18 @@ public class AggregateSynchronizer {
     }
 
     for (TableResource tableResource : tableResources)
-      tables.put(tableResource.getTableId(), tableResource.getTableKey());
+      tables.put(tableResource.getTableId(), tableResource.getSchemaEtag());
 
     return tables;
   }
 
-  public TableResource createTable(String tableId, String tableName, List<Column> columns,
+  public TableResource createTable(String tableId, List<Column> columns, String displayName,
       String tableProperties) throws IOException {
 
     // build request
     URI uri = baseUri.resolve(tableId);
-    TableDefinition definition = new TableDefinition(tableName, columns, tableName, tableName, TableType.DATA, tableProperties);
+    TableDefinition definition = new TableDefinition(tableId, columns);
+    definition.setDisplayName(displayName);
     HttpEntity<TableDefinition> requestEntity = new HttpEntity<TableDefinition>(definition,
         requestHeaders);
     // create table
@@ -205,7 +206,7 @@ public class AggregateSynchronizer {
 
     List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
-    entry.partition = "table";
+    entry.partition = KeyValueStoreConstants.PARTITION_TABLE;
     entry.aspect = "metadata";
     entry.key = "my_value";
     entry.type = "text";

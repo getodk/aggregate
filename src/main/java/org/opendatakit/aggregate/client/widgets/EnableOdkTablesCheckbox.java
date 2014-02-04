@@ -34,12 +34,15 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
   private static final String HELP_BALLOON_TXT = "Check this box if you want to manage ODK Tables.  "
       + "Otherwise leave unchecked.";
 
-  public EnableOdkTablesCheckbox(Boolean enabled) {
+  private PreferencesCompletionCallback settingsChange;
+
+  public EnableOdkTablesCheckbox(Boolean enabled, PreferencesCompletionCallback settingsChange) {
     super(LABEL, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.settingsChange = settingsChange;
     setValue(enabled);
-    boolean accessable = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+    boolean accessible = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
-    setEnabled(accessable);
+    setEnabled(accessible);
   }
 
   public void updateValue(Boolean value) {
@@ -65,17 +68,7 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
       @Override
       public void onSuccess(Void result) {
         AggregateUI.getUI().clearError();
-        Preferences.updatePreferences(new PreferencesCompletionCallback() {
-          @Override
-          public void refreshFromUpdatedPreferences() {
-            AggregateUI.getUI().updateOdkTablesFeatureVisibility();
-          }
-
-          @Override
-          public void failedRefresh() {
-            AggregateUI.getUI().updateOdkTablesFeatureVisibility();
-          }
-        });
+        Preferences.updatePreferences(settingsChange);
       }
     });
   }

@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -47,10 +47,10 @@ import org.opendatakit.common.web.CallingContext;
  * attachment relations, one for each distinct attachment. For submissions, for
  * example, each binary form element gets its own set of 3 attachment relations.
  * <p>
- * 
- * 
+ *
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class BinaryContentManipulator {
 
@@ -72,9 +72,9 @@ public class BinaryContentManipulator {
 
   /**
    * Manipulator class for handling an in-memory blob
-   * 
+   *
    * @author mitchellsundt@gmail.com
-   * 
+   *
    */
   public static class BlobManipulator {
 
@@ -83,7 +83,7 @@ public class BinaryContentManipulator {
 
     /**
      * Construct an blob entity and persist it into the data store
-     * 
+     *
      * @param blob
      * @param uriVersionedContent
      * @param versionedBinaryContentRefBlobModel
@@ -206,7 +206,7 @@ public class BinaryContentManipulator {
     }
     return max.intValue();
   }
-  
+
   public int getAttachmentCount(CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
     return internalGetAttachmentCount();
@@ -330,12 +330,12 @@ public class BinaryContentManipulator {
   /**
    * Atomically rename the given source file path to the destination path.
    * Will fail if the destination path already exists.
-   * 
+   *
    * @param unrootedFilePathSrc
    * @param unrootedFilePathDest
    * @param cc
    * @return true if unrootedFilePathSrc doesn't exist or if the rename succeeds
-   * @throws ODKDatastoreException 
+   * @throws ODKDatastoreException
    */
   public boolean renameFilePath( String unrootedFilePathSrc, String unrootedFilePathDest, CallingContext cc ) throws ODKDatastoreException {
 
@@ -361,30 +361,30 @@ public class BinaryContentManipulator {
         matchedBcDest = bc;
       }
     }
-    
+
     if ( matchedBcSrc != null && matchedBcDest != null ) {
       // they both exist -- can't rename...
       return false;
     }
-    
+
     if ( matchedBcSrc == null ) {
       // assume that this was already renamed...
       return true;
     }
-    
+
     matchedBcSrc.setUnrootedFilePath(unrootedFilePathDest);
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    
+
     ds.putEntity(matchedBcSrc, user);
     return true;
   }
-  
+
   /**
    * Save the attachment to the database. This can be called in two ways.
    * Everything non-null or unrootedFilePath non-null and everything else null.
-   * 
+   *
    * @param byteArray
    * @param contentType
    * @param unrootedFilePath
@@ -398,7 +398,8 @@ public class BinaryContentManipulator {
       String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
       throws ODKDatastoreException {
 
-	Long contentLength = (byteArray == null) ? null : Long.valueOf(byteArray.length);
+	@SuppressWarnings("unused")
+  Long contentLength = (byteArray == null) ? null : Long.valueOf(byteArray.length);
     // search for a matching entry for unrootedFilePath
     BinaryContent matchedBc = null;
     String currentContentHash = null;
@@ -434,18 +435,18 @@ public class BinaryContentManipulator {
 
         return BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
       } else {
-        // record already exists (and it might have file data, too)... 
+        // record already exists (and it might have file data, too)...
         return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
       }
     } else if (byteArray != null && contentType != null) {
       // adding a file entry with an actual file...
-      
+
       String md5Hash = CommonFieldsBase.newMD5HashUri(byteArray);
 
       if (matchedBc == null || currentContentHash == null) {
-        // either 
+        // either
         // - create a new entry with file data
-        // or 
+        // or
         // - update an existing file entry that does not have file data...
 
         // (0) create entry if no matchedBc
@@ -453,7 +454,7 @@ public class BinaryContentManipulator {
         // (2) delete the database entries for any incomplete old data.
         // (3) create the database entries for the new data.
         // (4) update contentHash to indicate that data is properly stored.
-        
+
         boolean newBc = (matchedBc == null);
 
         if (newBc) {
@@ -465,18 +466,18 @@ public class BinaryContentManipulator {
           matchedBc.setOrdinalNumber(internalGetAttachmentCount() + 1L);
           matchedBc.setUnrootedFilePath(unrootedFilePath);
         }
-        
+
         // Step (1)
         matchedBc.setContentType(contentType);
         matchedBc.setContentLength(Long.valueOf(byteArray.length));
         ds.putEntity(matchedBc, user);
-        
+
         if (newBc) {
           // persist was successful -- remember this new record...
           attachments.put(matchedBc.getOrdinalNumber(), matchedBc);
         }
 
-        // Step (2) 
+        // Step (2)
         // -- should not have any data. If it does, prior request failed before step 4 completed.
         BlobManipulator b = new BlobManipulator(matchedBc.getUri(), vrefRelation, blbRelation, cc);
         List<EntityKey> keyList = new ArrayList<EntityKey>();
@@ -492,7 +493,7 @@ public class BinaryContentManipulator {
         // Step (4)
         matchedBc.setContentHash(md5Hash);
         ds.putEntity(matchedBc, user);
-        
+
         return BinaryContentManipulator.BlobSubmissionOutcome.COMPLETELY_NEW_FILE;
       } else if (currentContentHash.equals(md5Hash)) {
         return BinaryContentManipulator.BlobSubmissionOutcome.FILE_UNCHANGED;
@@ -506,7 +507,7 @@ public class BinaryContentManipulator {
         // (2) delete the database entries for the old data.
         // (3) create the database entries for the new data.
         // (4) update contentHash to indicate that data is properly stored.
-        
+
         // Step (1)
         matchedBc.setContentHash(null);
         matchedBc.setContentType(contentType);
@@ -518,13 +519,13 @@ public class BinaryContentManipulator {
         List<EntityKey> keyList = new ArrayList<EntityKey>();
         b.recursivelyAddKeys(keyList);
         ds.deleteEntities(keyList, user);
-        
+
         // Step (3)
         // persist the binary data
         @SuppressWarnings("unused")
         BlobManipulator subBlob = new BlobManipulator(byteArray, matchedBc.getUri(), vrefRelation,
             blbRelation, topLevelKey, cc);
-        
+
         // Step (4)
         matchedBc.setContentHash(md5Hash);
         ds.putEntity(matchedBc, user);
@@ -557,7 +558,7 @@ public class BinaryContentManipulator {
       refreshBeforeUse = false;
     }
   }
-  
+
   public synchronized void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
     // if we need to refresh, then we don't have anything to persist...
     if ( !refreshBeforeUse ) {
@@ -568,13 +569,13 @@ public class BinaryContentManipulator {
 
   /**
    * Remove this binary content from the datastore.
-   * 
+   *
    * @param datastore
    * @param user
    * @throws ODKDatastoreException
    */
   public synchronized void deleteAll(CallingContext cc) throws ODKDatastoreException {
-    
+
     updateAttachments(cc);
     boolean success = false;
     List<EntityKey> keys = new ArrayList<EntityKey>();
@@ -613,7 +614,7 @@ public class BinaryContentManipulator {
 
   public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
-    
+
     updateAttachments(cc);
     for (BinaryContent bc : attachments.values()) {
       if (bc.getContentHash() != null) {

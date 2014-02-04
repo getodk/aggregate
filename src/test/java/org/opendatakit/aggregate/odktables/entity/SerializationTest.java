@@ -91,7 +91,7 @@ public class SerializationTest {
 
   @Test
   public void testTableEntry() throws Exception {
-    TableEntry expected = new TableEntry("1", "2", "3", "4");
+    TableEntry expected = new TableEntry("1", "data2", "property3", "schema4");
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
@@ -159,7 +159,7 @@ public class SerializationTest {
 
   @Test
   public void testTableResource() throws Exception {
-    TableEntry entry = new TableEntry("1", "2", "3", "4");
+    TableEntry entry = new TableEntry("1", "data2", "property3", "schema4");
     TableResource expected = new TableResource(entry);
     expected.setSelfUri("http://localhost:8080/odktables/tables/1");
     expected.setDataUri("http://localhost:8080/odktables/tables/1/rows");

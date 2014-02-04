@@ -9,7 +9,9 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer;
 import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer.InvalidAuthTokenException;
+import org.opendatakit.aggregate.odktables.api.perf.PerfTest;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
@@ -25,15 +27,15 @@ public class CreateTableTest implements PerfTest {
   private int numCols;
   private int numRows;
   private String tableId;
-  private String tableName;
+  private String displayName;
 
   public CreateTableTest(AggregateSynchronizer synchronizer, int numCols, int numRows)
       throws InvalidAuthTokenException {
     this.synchronizer = synchronizer;
     this.numCols = numCols;
     this.numRows = numRows;
-    this.tableId = UUID.randomUUID().toString();
-    this.tableName = "test_cols_" + numCols + "_rows_" + numRows;
+    this.tableId = "test_cols_" + numCols + "_rows_" + numRows;
+    this.displayName = "\"Display test_cols_" + numCols + "_rows_" + numRows + "\"";
   }
 
   private String colName(int colNum) {
@@ -49,9 +51,9 @@ public class CreateTableTest implements PerfTest {
       // create table
       List<Column> columns = new ArrayList<Column>();
       for (int i = 0; i < numCols; i++) {
-        columns.add(new Column(tableId, colName(i), colName(i), "STRING", null, true, null));
+        columns.add(new Column(tableId, colName(i), colName(i), "STRING", null, true));
       }
-      synchronizer.createTable(tableId, tableName, columns, null);
+      synchronizer.createTable(tableId, columns, displayName, null);
 
       // insert rows
       List<Row> rows = Lists.newArrayList();
@@ -98,7 +100,7 @@ public class CreateTableTest implements PerfTest {
     Map<String, Object> params = new HashMap<String, Object>();
     params.put(Key.numCols, numCols);
     params.put(Key.numRows, numRows);
-    return new TestInfo(this.getClass().getSimpleName(), tableId, tableName, params);
+    return new TestInfo(this.getClass().getSimpleName(), tableId, displayName, params);
   }
 
   public class Key {

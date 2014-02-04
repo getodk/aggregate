@@ -153,7 +153,7 @@ public class FileManifestManager {
       // To retrieve the actual file we need to get the uri of the file info
       // row, which is the top-level uri of the blob tables holding the files.
       String rowUri = row.getRowId();
-      String pathToFile = row.getValues().get(DbTableFileInfo.PATH_TO_FILE);
+      String pathToFile = row.getValues().get(DbTableFileInfo.PATH_TO_FILE.getName());
       BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(rowUri, cc);
       // We should only ever have one.
       if (blobEntitySet.getAttachmentCount(cc) > 1) {
