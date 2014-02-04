@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.table.FormTable;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.FormConsts;
@@ -37,23 +38,28 @@ public class FormsSubTab extends AggregateSubTabBase {
       + NEW_FORM_TXT;
 
 
+  private boolean showEnketoIntegration;
   private FormTable listOfForms;
 
   public FormsSubTab(AggregateUI baseUI) {
     // vertical
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
-    
+
     // create navigation buttons to servlet
-    
+
     ServletPopupButton newForm = new ServletPopupButton(NEW_FORM_BUTTON_TEXT, NEW_FORM_TXT,
         UIConsts.FORM_UPLOAD_SERVLET_ADDR, this, NEW_FORM_TOOLTIP_TXT, NEW_FORM_BALLOON_TXT);
-    
+
+    // save the webform setting
+    showEnketoIntegration = Preferences.showEnketoIntegration();
     // create form panel
     listOfForms = new FormTable();
+    listOfForms.getElement().setId("form_management_table");
 
     // add tables to panels
     add(newForm);
     add(listOfForms);
+
   }
 
   @Override
@@ -71,7 +77,27 @@ public class FormsSubTab extends AggregateSubTabBase {
 
       public void onSuccess(ArrayList<FormSummary> forms) {
         AggregateUI.getUI().clearError();
+        boolean resizeFormTable = false;
+        boolean newShowEnketoIntegration = Preferences.showEnketoIntegration();
+        if ( newShowEnketoIntegration != showEnketoIntegration ) {
+          resizeFormTable = true;
+          FormTable t = listOfForms;
+          @SuppressWarnings("unused")
+          boolean success = true;
+          if ( t != null ) {
+            listOfForms = null;
+            success = remove(t);
+          }
+          showEnketoIntegration = newShowEnketoIntegration;
+          listOfForms = new FormTable();
+          listOfForms.getElement().setId("form_management_table");
+          add(listOfForms);
+        }
         listOfForms.updateFormTable(forms);
+        if ( resizeFormTable ) {
+          // we need to force FormTable to be full width
+          AggregateUI.resize();
+        }
       }
     };
 

@@ -18,17 +18,16 @@ package org.opendatakit.aggregate.odktables.exception;
 
 import java.io.Serializable;
 
-public class PermissionDeniedException extends ODKTablesException
-	implements Serializable {
+public class PermissionDeniedException extends ODKTablesException implements Serializable {
 
   // private static final long serialVersionUID = 1L;
 
   /**
 	 *
 	 */
-	private static final long serialVersionUID = -6853618331957236951L;
+  private static final long serialVersionUID = -6853618331957236951L;
 
-public PermissionDeniedException() {
+  public PermissionDeniedException() {
     super();
   }
 

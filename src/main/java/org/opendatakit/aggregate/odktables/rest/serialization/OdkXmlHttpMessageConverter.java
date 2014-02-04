@@ -16,13 +16,21 @@
 package org.opendatakit.aggregate.odktables.rest.serialization;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.ws.rs.core.Context;
 
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.simpleframework.xml.Serializer;
@@ -50,26 +58,18 @@ import org.springframework.util.Assert;
  * @author Roy Clarkson
  * @since 1.0.0
  */
-public class SimpleXmlHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
+public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-  public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final String DEFAULT_ENCODING = "utf-8";
 
   private Serializer serializer;
 
-  /**
-   * Protected constructor that sets the
-   * {@link #setSupportedMediaTypes(java.util.List) supportedMediaTypes} to
-   * {@code text/xml} and {@code application/xml}, and {@code application/*-xml}
-   * .
-   */
-  public SimpleXmlHttpMessageConverter() {
-    super(MediaType.APPLICATION_XML, MediaType.TEXT_XML, new MediaType("application", "*+xml"));
-    this.serializer = new Persister();
-  }
+  @Context
+  private HttpHeaders requestHeaders;
 
-  public SimpleXmlHttpMessageConverter(Serializer serializer) {
+  public OdkXmlHttpMessageConverter() {
     super(MediaType.APPLICATION_XML, MediaType.TEXT_XML, new MediaType("application", "*+xml"));
-    this.serializer = serializer;
+    serializer = SimpleXMLSerializerForAggregate.getSerializer();
   }
 
   @Override
@@ -81,8 +81,21 @@ public class SimpleXmlHttpMessageConverter extends AbstractHttpMessageConverter<
   protected Object readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
       throws IOException {
     Assert.notNull(this.serializer, "Property 'serializer' is required");
+    InputStream stream;
+    HttpHeaders headers = inputMessage.getHeaders();
+    String charset = getCharsetAsString(headers.getContentType());
+    if ( !charset.equalsIgnoreCase(DEFAULT_ENCODING) ) {
+      throw new IllegalArgumentException("charset for the request is not utf-8");
+    }
+    List<String> encodings = headers.get(ApiConstants.CONTENT_ENCODING_HEADER);
+    if (encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
+      stream = new GZIPInputStream(inputMessage.getBody());
+    } else {
+      stream = inputMessage.getBody();
+    }
+    InputStreamReader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
     try {
-      Object result = this.serializer.read(clazz, inputMessage.getBody());
+      Object result = this.serializer.read(clazz, r);
       if (!clazz.isInstance(result)) {
         throw new TypeMismatchException(result, clazz);
       }
@@ -102,13 +115,43 @@ public class SimpleXmlHttpMessageConverter extends AbstractHttpMessageConverter<
       g.setTime(new Date());
       SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
       formatter.setCalendar(g);
-      headers.add(ApiConstants.DATE_HEADER,  formatter.format(new Date()));
-      headers.setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
+      headers.add(ApiConstants.DATE_HEADER, formatter.format(new Date()));
+      headers.add(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
+      headers
+          .setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
 
-      Writer writer = new OutputStreamWriter(outputMessage.getBody(), ApiConstants.UTF8_ENCODE);
+      // see if we should gzip the output
+      OutputStream rawStream = outputMessage.getBody();
+      OutputStream stream;
+      if (requestHeaders == null) {
+        // always send data to the server as encoded
+        headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
+        stream = new GZIPOutputStream(rawStream);
+      } else {
+        List<String> encodings = requestHeaders.get(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
+        if (encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
+          headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
+          stream = new GZIPOutputStream(rawStream);
+        } else {
+          stream = rawStream;
+        }
+      }
+      Writer writer = new OutputStreamWriter(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
       this.serializer.write(o, writer);
     } catch (Exception ex) {
       throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
     }
+  }
+
+  protected static String getCharsetAsString(MediaType m) {
+    if (m == null) {
+      return DEFAULT_ENCODING;
+    }
+    String result = m.getParameters().get("charset");
+    if ( result != null && result.startsWith("\"") && result.endsWith("\"") ) {
+      // work-around for parameters being wrapped in quotes in Springframework.
+      result = result.substring(1, result.length()-1);
+    }
+    return (result == null) ? DEFAULT_ENCODING : result;
   }
 }

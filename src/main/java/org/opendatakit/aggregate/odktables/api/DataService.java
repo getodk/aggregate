@@ -16,8 +16,6 @@
 
 package org.opendatakit.aggregate.odktables.api;
 
-import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -26,37 +24,82 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-@Produces(MediaType.TEXT_XML)
+@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DataService {
 
+  /**
+   *
+   * @return {@link RowResourceList} containing the rows being returned.
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
   @GET
-  public List<RowResource> getRows() throws ODKDatastoreException, PermissionDeniedException;
+  public Response /*RowResourceList*/ getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
+  /**
+   *
+   * @param rowId
+   * @return {@link RowResource} of the row
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
   @GET
   @Path("{rowId}")
-  public RowResource getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      PermissionDeniedException;
+  public Response /*RowResource*/ getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
+      PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
+  /**
+   *
+   * @param rowId
+   * @param row
+   * @return {@link RowResource} of the newly added/inserted row.
+   * @throws ODKTaskLockException
+   * @throws ODKDatastoreException
+   * @throws ETagMismatchException
+   * @throws PermissionDeniedException
+   * @throws BadColumnNameException
+   * @throws InconsistentStateException
+   */
   @PUT
   @Path("{rowId}")
-  @Consumes(MediaType.TEXT_XML)
-  public RowResource createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowResource*/ createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
-      PermissionDeniedException, BadColumnNameException;
+      PermissionDeniedException, BadColumnNameException, InconsistentStateException;
 
+  /**
+   *
+   * @param rowId
+   * @return String dataETag on the table that marks this row as deleted.
+   * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws BadColumnNameException
+   */
   @DELETE
   @Path("{rowId}")
-  @Produces(MediaType.TEXT_PLAIN)
-  public String deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException;
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*String*/ deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
+      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException;
 
 }

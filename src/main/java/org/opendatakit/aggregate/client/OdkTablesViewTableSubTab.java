@@ -17,11 +17,11 @@
 package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -45,15 +45,15 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   private FlexTable selectTablePanel;
 
   /**
-   * This will be the box that lets you choose which of the tables you are
-   * going to view.
+   * This will be the box that lets you choose which of the tables you are going
+   * to view.
    *
    * @return
    */
   private ListBox tableBox;
   /**
-   * This is the int of the selected value in the listbox, so you know
-   * which one to display.
+   * This is the int of the selected value in the listbox, so you know which one
+   * to display.
    */
   private int selectedValue;
 
@@ -126,8 +126,8 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   }
 
   /**
-   * Call this to remove any currently displayed data, set the selected table
-   * in the list box to zero, and generally reset this page.
+   * Call this to remove any currently displayed data, set the selected table in
+   * the list box to zero, and generally reset this page.
    */
   public void setTabToDislpayZero() {
     selectedValue = 0;
@@ -136,16 +136,24 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   }
 
   private void updateTableList() {
-    SecureGWT.getServerTableService()
-        .getTables(new AsyncCallback<List<TableEntryClient>>() {
+    SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
 
       @Override
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
+        if ( caught instanceof AccessDeniedException ) {
+          // swallow it...
+          AggregateUI.getUI().clearError();
+          ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
+          addTablesToListBox(tables);
+          tableBox.clear();
+          setTabToDislpayZero();
+        } else {
+          AggregateUI.getUI().reportError(caught);
+        }
       }
 
       @Override
-      public void onSuccess(List<TableEntryClient> tables) {
+      public void onSuccess(ArrayList<TableEntryClient> tables) {
         AggregateUI.getUI().clearError();
 
         addTablesToListBox(tables);
@@ -180,7 +188,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
 
   }
 
-  public void addTablesToListBox(List<TableEntryClient> tables) {
+  public void addTablesToListBox(ArrayList<TableEntryClient> tables) {
     // clear the old tables
     currentTables.clear();
     // and add the new
@@ -204,7 +212,9 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
       // we also want to have no current table.
       currentTable = null;
       // clear the "displaying: " thing.
-      selectTablePanel.removeRow(1);
+      if ( selectTablePanel.getRowCount() > 1 ) {
+        selectTablePanel.removeRow(1);
+      }
 
     } else {
       currentTable = currentTables.get(this.selectedValue - 1);
@@ -218,8 +228,9 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   }
 
   /**
-   * Set the table to be displayed. You have to set the it in
-   * the selectedValue and update it. O(n), could be improved.
+   * Set the table to be displayed. You have to set the it in the selectedValue
+   * and update it. O(n), could be improved.
+   *
    * @param tableId
    */
   public void setCurrentTable(String tableId) {

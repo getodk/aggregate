@@ -20,12 +20,12 @@ import java.io.Serializable;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.
- * <br>
- * The idea is that this will be the client-side object that will perform
- * the same function. Now standard caveat applies that at this point it
- * is not yet clear if this will be necessary, or if a new non-phone
- * object performing the same function needs to be created for the server.
+ * org.opendatakit.aggregate.odktables.entity. <br>
+ * The idea is that this will be the client-side object that will perform the
+ * same function. Now standard caveat applies that at this point it is not yet
+ * clear if this will be necessary, or if a new non-phone object performing the
+ * same function needs to be created for the server.
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -34,9 +34,9 @@ public class TableAclClient implements Serializable {
   /**
 	 *
 	 */
-	private static final long serialVersionUID = 3563986876354300986L;
+  private static final long serialVersionUID = 3563986876354300986L;
 
-private ScopeClient scope;
+  private ScopeClient scope;
 
   private TableRoleClient role;
 
@@ -78,7 +78,6 @@ private ScopeClient scope;
   public void setRole(TableRoleClient role) {
     this.role = role;
   }
-
 
   /*
    * (non-Javadoc)

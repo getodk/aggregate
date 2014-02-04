@@ -43,6 +43,8 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCallbackFormatter {
 
+  private boolean first = true;
+
   private JsonElementFormatter elemFormatter;
 
   private List<FormElementModel> propertyNames;
@@ -53,10 +55,11 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
       BinaryOption binaryOption, boolean expandMultipleChoiceAsArray, String webServerUrl) {
     output = printWriter;
 
-   if(binaryOption == BinaryOption.EMBED_BINARY) {
+    if (binaryOption == BinaryOption.EMBED_BINARY) {
       elemFormatter = new JsonElementFormatter(true, true, true, expandMultipleChoiceAsArray, this);
     } else {
-      elemFormatter = new JsonElementFormatter(webServerUrl,true, true, true, expandMultipleChoiceAsArray, this);
+      elemFormatter = new JsonElementFormatter(webServerUrl, true, true, true,
+          expandMultipleChoiceAsArray, this);
     }
 
     SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
@@ -67,6 +70,8 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
 
   @Override
   public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+    output.append(BasicConsts.LEFT_BRACE);
+    first = true;
   }
 
   @Override
@@ -74,6 +79,10 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
       throws ODKDatastoreException {
     // format row elements
     for (Submission sub : submissions) {
+      if (!first) {
+        output.append(FormatConsts.JSON_VALUE_DELIMITER);
+      }
+      first = false;
       Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       appendJsonObject(row.getFormattedValues().iterator());
     }
@@ -81,6 +90,7 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
 
   @Override
   public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+    output.append(BasicConsts.RIGHT_BRACE);
   }
 
   @Override
@@ -100,24 +110,26 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
     jsonString.append(repeatElement.getElementName());
     jsonString.append(BasicConsts.QUOTE + BasicConsts.COLON);
     jsonString.append(BasicConsts.LEFT_BRACKET);
+    boolean firstRepeatGroup = true;
     // format row elements
-    for (int i = 0 ; i < repeats.size() ; ++i ) {
+    for (int i = 0; i < repeats.size(); ++i) {
+      if (!firstRepeatGroup) {
+        jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
+      }
+      firstRepeatGroup = false;
       SubmissionSet repeat = repeats.get(i);
       Row repeatRow = repeat.getFormattedValuesAsRow(null, elemFormatter, false, cc);
       Iterator<String> itr = repeatRow.getFormattedValues().iterator();
+      boolean firstElement = true;
       jsonString.append(BasicConsts.LEFT_BRACE);
       while (itr.hasNext()) {
-        jsonString.append(itr.next());
-        if (itr.hasNext()) {
+        if (!firstElement) {
           jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
-        } else {
-          jsonString.append(BasicConsts.RIGHT_BRACE);
         }
+        firstElement = false;
+        jsonString.append(itr.next());
       }
-      if ( i != repeats.size()-1 ) {
-        // we aren't the last entry, so emit a comma...
-        jsonString.append(FormatConsts.JSON_VALUE_DELIMITER);
-      }
+      jsonString.append(BasicConsts.RIGHT_BRACE);
     }
     jsonString.append(BasicConsts.RIGHT_BRACKET);
     row.addFormattedValue(jsonString.toString());
@@ -132,13 +144,14 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
    */
   private void appendJsonObject(Iterator<String> itr) {
     output.append(BasicConsts.LEFT_BRACE);
+    boolean firstElement = true;
     while (itr.hasNext()) {
-      output.append(itr.next());
-      if (itr.hasNext()) {
+      if (!firstElement) {
         output.append(FormatConsts.JSON_VALUE_DELIMITER);
-      } else {
-        output.append(BasicConsts.RIGHT_BRACE);
       }
+      firstElement = false;
+      output.append(itr.next());
     }
+    output.append(BasicConsts.RIGHT_BRACE);
   }
 }

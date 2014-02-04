@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -48,8 +49,8 @@ public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
 	 */
   private static final long serialVersionUID = -4681728139240108291L;
 
-  private static final Log logger =
-      LogFactory.getLog(OdkTablesTableFileDownloadServlet.class);
+  @SuppressWarnings("unused")
+  private static final Log logger = LogFactory.getLog(OdkTablesTableFileDownloadServlet.class);
 
   /**
    * URI from base.
@@ -60,14 +61,13 @@ public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
    * Handler for the HTTP Get request.
    */
   @Override
-  public void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
+  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    ServiceUtils.examineRequest(getServletContext(), req);
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     // verify the parameters you expect are there
     String keyString = getParameter(req, ServletConsts.BLOB_KEY);
-    String downloadAsAttachmentString =
-        getParameter(req, ServletConsts.AS_ATTACHMENT);
+    String downloadAsAttachmentString = getParameter(req, ServletConsts.AS_ATTACHMENT);
 
     if (keyString == null) {
       sendErrorNotEnoughParams(resp);
@@ -98,12 +98,9 @@ public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
             "Unexpectedly non-unary attachment count");
       }
       imageBlob = blobSet.getBlob(1, cc);
-      unrootedFileName = files.getBlobEntitySet(keyString, cc)
-          .getUnrootedFilename(1, cc);
-      contentType = files.getBlobEntitySet(keyString, cc)
-          .getContentType(1, cc);
-      contentLength = files.getBlobEntitySet(keyString, cc)
-          .getContentLength(1, cc);
+      unrootedFileName = files.getBlobEntitySet(keyString, cc).getUnrootedFilename(1, cc);
+      contentType = files.getBlobEntitySet(keyString, cc).getContentType(1, cc);
+      contentLength = files.getBlobEntitySet(keyString, cc).getContentLength(1, cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -121,20 +118,21 @@ public class OdkTablesTableFileDownloadServlet extends ServletUtilBase {
       if (contentLength != null) {
         resp.setContentLength(contentLength.intValue());
       }
+      addOpenDataKitHeaders(resp);
 
-      if (downloadAsAttachmentString != null
-          && !"".equals(downloadAsAttachmentString)) {
+      if (downloadAsAttachmentString != null && !"".equals(downloadAsAttachmentString)) {
         // set the file name if we're downloading to the disk
         if (unrootedFileName != null) {
-          resp.addHeader(HtmlConsts.CONTENT_DISPOSITION,
-              "attachment; filename=\""
+          resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; filename=\""
               + unrootedFileName + "\"");
         }
       }
       OutputStream os = resp.getOutputStream();
       os.write(imageBlob);
     } else {
+      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
       resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
+      addOpenDataKitHeaders(resp);
       resp.getWriter().print(ErrorConsts.NO_IMAGE_EXISTS);
     }
 

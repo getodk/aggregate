@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.odktables.relation;
 
-
 /**
  * @author the.dylan.price@gmail.com
  *
@@ -37,6 +36,7 @@ public class RUtil {
    * Return a db-safe version of the proposed column name. This should be
    * equivalent to how it would be on the phone. At the moment replaces spaces
    * with underscores and precedes with an underscore.
+   *
    * @param proposedName
    * @return
    */

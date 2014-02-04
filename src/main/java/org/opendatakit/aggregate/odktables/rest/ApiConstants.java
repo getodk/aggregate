@@ -18,7 +18,8 @@ package org.opendatakit.aggregate.odktables.rest;
 
 public final class ApiConstants {
 
-  private ApiConstants() {};
+  private ApiConstants() {
+  };
 
   public static final String OPEN_DATA_KIT_VERSION_HEADER = "X-OpenDataKit-Version";
 
@@ -27,4 +28,14 @@ public final class ApiConstants {
   public static final String DATE_HEADER = "Date";
 
   public static final String UTF8_ENCODE = "UTF-8";
+
+  public static final String MEDIA_TEXT_XML_UTF8 = "text/xml;charset=UTF-8";
+
+  public static final String MEDIA_APPLICATION_XML_UTF8 = "application/xml;charset=UTF-8";
+
+  public static final String ACCEPT_CONTENT_ENCODING_HEADER = "Accept-Encoding";
+
+  public static final String CONTENT_ENCODING_HEADER = "Content-Encoding";
+
+  public static final String GZIP_CONTENT_ENCODING = "gzip";
 }

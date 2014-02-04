@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
@@ -50,7 +50,7 @@ public final class SaveFilterGroupButton extends AggregateButton implements Clic
     super.onClick(event);
 
     final FilterGroup filterGroup = parentSubTab.getDisplayedFilterGroup();
-    List<Filter> filters = filterGroup.getFilters();
+    ArrayList<Filter> filters = filterGroup.getFilters();
 
     if (filters == null || (filters.size() <= 0 && !filterGroup.getIncludeMetadata())) {
       Window.alert(UIConsts.ERROR_NO_FILTERS);

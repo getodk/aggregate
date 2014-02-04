@@ -23,21 +23,21 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Impose a strict ordering on the log entries associated with a file.
- * The ordering consists of two concatentated counters:
+ * Impose a strict ordering on the log entries associated with a file. The
+ * ordering consists of two concatentated counters:
  *
- *   sequenceBase.counter
+ * sequenceBase.counter
  *
- * Where sequenceBase is a value that is fetched, incremented and written
- * to the datastore via
+ * Where sequenceBase is a value that is fetched, incremented and written to the
+ * datastore via
  *
  * ServerPreferencesProperties.unsafeIncOdkTablesSequencerBase(cc).
  *
  * This is obtained when the Sequencer is created, which is at the time the
  * update lock is obtained.
  *
- * Counter is simply a counter held within this object instance to order
- * the updates occuring during the holding of the lock.
+ * Counter is simply a counter held within this object instance to order the
+ * updates occuring during the holding of the lock.
  *
  * @author mitchellsundt@gmail.com
  *
@@ -48,11 +48,10 @@ public class Sequencer {
   private final String sequenceBase;
   private int counter;
 
-
   /**
-   * Obtain a sequencer from the datastore. Should be called immediately
-   * after the update lock has been obtained, and released whenever the
-   * lock is released.
+   * Obtain a sequencer from the datastore. Should be called immediately after
+   * the update lock has been obtained, and released whenever the lock is
+   * released.
    *
    * @param cc
    * @throws ODKEntityNotFoundException
@@ -72,7 +71,6 @@ public class Sequencer {
    */
   public String getNextSequenceValue() {
     ++counter;
-    return sequenceBase + "." +
-      StringUtils.leftPad(Integer.toString(counter), DECIMAL_PLACES, '0');
+    return sequenceBase + "." + StringUtils.leftPad(Integer.toString(counter), DECIMAL_PLACES, '0');
   }
 }

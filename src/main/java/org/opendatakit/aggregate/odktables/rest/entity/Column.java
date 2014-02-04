@@ -22,9 +22,11 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
 /**
- * The XML document that represents a column. This is the XML representation
- * of a column definition as stored in the (keep this fully qualified!)
- * {@link org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions} table.
+ * The XML document that represents a column. This is the XML representation of
+ * a column definition as stored in the (keep this fully qualified!)
+ * {@link org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions}
+ * table.
+ *
  * @author dylan price?
  * @author sudar.sam@gmail.com
  *
@@ -35,27 +37,25 @@ public class Column implements Serializable {
   /**
 	 *
 	 */
-	private static final long serialVersionUID = -6624997293167731653L;
+  private static final long serialVersionUID = -6624997293167731653L;
 
   @Attribute(required = true)
   private String tableId;
 
   /**
-   * The fully qualified key for this element. If this is
-   * a retained field, then this is the element's database
-   * column name. For composite types whose elements are
-   * individually retained (e.g., geopoint), this would be
-   * the elementName of the geopoint (e.g., 'myLocation'
-   * concatenated with '_' and this elementName (e.g.,
-   * 'myLocation_latitude').
+   * The fully qualified key for this element. If this is a retained field, then
+   * this is the element's database column name. For composite types whose
+   * elements are individually retained (e.g., geopoint), this would be the
+   * elementName of the geopoint (e.g., 'myLocation' concatenated with '_' and
+   * this elementName (e.g., 'myLocation_latitude').
    */
   @Attribute(required = true)
   private String elementKey;
 
   /**
-   * The name by which this element is referred. For composite
-   * types whose elements are individually retained (e.g., geopoint),
-   * this would be simply 'latitude'
+   * The name by which this element is referred. For composite types whose
+   * elements are individually retained (e.g., geopoint), this would be simply
+   * 'latitude'
    */
   @Attribute(required = true)
   private String elementName;
@@ -73,16 +73,17 @@ public class Column implements Serializable {
   private int isUnitOfRetention;
 
   @SuppressWarnings("unused")
-  private Column() {}
+  private Column() {
+  }
 
   /**
-   * Create a column. NB: It needs to be decided if
-   * backing name and display name are different in the datastore on the server
-   * in the same way they are on the phone, and if they should both be stored
-   * in the COLUMN table as adjacent columns, or what exactly. Either way,
-   * its implementation should be brought into alignment with ColumnClient,
-   * which has both display and backing names when the answer to the above
-   * questions is decided.
+   * Create a column. NB: It needs to be decided if backing name and display
+   * name are different in the datastore on the server in the same way they are
+   * on the phone, and if they should both be stored in the COLUMN table as
+   * adjacent columns, or what exactly. Either way, its implementation should be
+   * brought into alignment with ColumnClient, which has both display and
+   * backing names when the answer to the above questions is decided.
+   *
    * @param tableId
    * @param elementKey
    * @param elementName
@@ -90,9 +91,8 @@ public class Column implements Serializable {
    * @param listChildElementKeys
    * @param isUnitOfRetention
    */
-  public Column(final String tableId, final String elementKey,
-      final String elementName, final String elementType,
-      final String listChildElementKeys, final Boolean isUnitOfRetention) {
+  public Column(final String tableId, final String elementKey, final String elementName,
+      final String elementType, final String listChildElementKeys, final Boolean isUnitOfRetention) {
     this.tableId = tableId;
     this.elementKey = elementKey;
     this.elementName = elementName;
@@ -130,13 +130,10 @@ public class Column implements Serializable {
 
   @Override
   public String toString() {
-    return "Column(tableId=" + getTableId()
-        + ", elementKey=" + this.getElementKey()
-        + ", elementName=" + this.getElementName()
-        + ", elementType= " + this.getElementType()
-        + ", listChildElementKeys=" + this.getListChildElementKeys()
-        + ", isUnitOfRetention=" + this.getIsUnitOfRetention()
-        + ")";
+    return "Column(tableId=" + getTableId() + ", elementKey=" + this.getElementKey()
+        + ", elementName=" + this.getElementName() + ", elementType= " + this.getElementType()
+        + ", listChildElementKeys=" + this.getListChildElementKeys() + ", isUnitOfRetention="
+        + this.getIsUnitOfRetention() + ")";
   }
 
   @Override
@@ -147,17 +144,18 @@ public class Column implements Serializable {
     result = prime * result + ((elementKey == null) ? 0 : elementKey.hashCode());
     result = prime * result + ((elementName == null) ? 0 : elementName.hashCode());
     result = prime * result + ((elementType == null) ? 0 : elementType.hashCode());
-    result = prime * result + ((listChildElementKeys == null) ? 0 : listChildElementKeys.hashCode());
+    result = prime * result
+        + ((listChildElementKeys == null) ? 0 : listChildElementKeys.hashCode());
     result = prime * result + isUnitOfRetention;
     return result;
   }
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
     if (!(obj instanceof Column)) {
@@ -168,7 +166,8 @@ public class Column implements Serializable {
         && (elementKey == null ? other.elementKey == null : elementKey.equals(other.elementKey))
         && (elementName == null ? other.elementName == null : elementName.equals(other.elementName))
         && (elementType == null ? other.elementType == null : elementType.equals(other.elementType))
-        && (listChildElementKeys == null ? other.listChildElementKeys == null : listChildElementKeys.equals(other.listChildElementKeys))
+        && (listChildElementKeys == null ? other.listChildElementKeys == null
+            : listChildElementKeys.equals(other.listChildElementKeys))
         && (isUnitOfRetention == other.isUnitOfRetention);
   }
 }
