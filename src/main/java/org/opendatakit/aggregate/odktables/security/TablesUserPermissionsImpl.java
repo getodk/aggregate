@@ -82,8 +82,16 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
           .name()))
           || roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_ADMINISTER_TABLES
               .name()))) {
+        //
+        // Determine the external UID that will identify this user
+        String externalUID = null;
+        if (user.getEmail() != null) {
+          externalUID = user.getEmail();
+        } else if (user.getUsername() != null) {
+          externalUID = SecurityUtils.USERNAME_COLON + user.getUsername();
+        }
         // GAIN LOCK
-        LockTemplate tablesUserPermissions = new LockTemplate("--odk-access-lock--", ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+        LockTemplate tablesUserPermissions = new LockTemplate(externalUID, ODKTablesTaskLockType.TABLES_USER_PERMISSION_CREATION, cc);
         try {
           tablesUserPermissions.acquire();
           // attempt to re-fetch the record.
@@ -96,12 +104,6 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
           // otherwise, create a record
           odkTablesUserInfo = ds.createEntityUsingRelation(prototype, cc.getCurrentUser());
           odkTablesUserInfo.setUriUser(uriUser);
-          String externalUID = null;
-          if (user.getEmail() != null) {
-            externalUID = user.getEmail();
-          } else if (user.getUsername() != null) {
-            externalUID = SecurityUtils.USERNAME_COLON + user.getUsername();
-          }
           odkTablesUserInfo.setOdkTablesUserId(externalUID);
           odkTablesUserInfo.persist(cc);
           userInfo = odkTablesUserInfo;

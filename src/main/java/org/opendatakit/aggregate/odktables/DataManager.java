@@ -171,7 +171,7 @@ public class DataManager {
 
     List<DbColumnDefinitionsEntity> columns = null;
     List<Entity> entities = null;
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
 
@@ -240,7 +240,7 @@ public class DataManager {
 
     List<DbColumnDefinitionsEntity> columns = null;
     List<Entity> entities = null;
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
 
@@ -387,7 +387,7 @@ public class DataManager {
 
     List<DbColumnDefinitionsEntity> columns = null;
     Entity entity = null;
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
 
@@ -467,7 +467,7 @@ public class DataManager {
 
     List<DbColumnDefinitionsEntity> columns = null;
     Entity entity = null;
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
       Sequencer sequencer = new Sequencer(cc);
@@ -631,7 +631,7 @@ public class DataManager {
 
     userPermissions.checkPermission(tableId, TablePermission.DELETE_ROW);
     String dataETagAtModification = null;
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
       Sequencer sequencer = new Sequencer(cc);
