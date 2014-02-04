@@ -165,7 +165,7 @@ public class UtilTransforms {
     serverRow.setDeleted(client.isDeleted());
     serverRow.setFilterScope(transform(client.getFilterScope()));
     serverRow.setLastUpdateUser(client.getLastUpdateUser());
-    serverRow.setRowEtag(client.getRowEtag());
+    serverRow.setRowETag(client.getRowETag());
     serverRow.setRowId(client.getRowId());
     serverRow.setValues(client.getValues());
     serverRow.setUriAccessControl(client.getUriAccessControl());
@@ -240,7 +240,7 @@ public class UtilTransforms {
    */
   public static TableEntryClient transform(TableEntry serverEntry, String displayName) {
     TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(), displayName,
-        serverEntry.getDataEtag(), serverEntry.getPropertiesEtag(), serverEntry.getSchemaEtag());
+        serverEntry.getDataETag(), serverEntry.getPropertiesETag(), serverEntry.getSchemaETag());
     return clientEntry;
   }
 
@@ -250,8 +250,8 @@ public class UtilTransforms {
    */
   public static TableResourceClient transform(TableResource serverResource, String displayName) {
     TableResourceClient clientResource = new TableResourceClient(new TableEntryClient(
-        serverResource.getTableId(), displayName, serverResource.getDataEtag(),
-        serverResource.getPropertiesEtag(), serverResource.getSchemaEtag()));
+        serverResource.getTableId(), displayName, serverResource.getDataETag(),
+        serverResource.getPropertiesETag(), serverResource.getSchemaETag()));
     clientResource.setAclUri(serverResource.getAclUri());
     clientResource.setDataUri(serverResource.getDataUri());
     clientResource.setDiffUri(serverResource.getDiffUri());
@@ -262,7 +262,7 @@ public class UtilTransforms {
   }
 
   public static PropertiesResourceClient transform(PropertiesResource serverResource) {
-    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getPropertiesEtag(),
+    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getPropertiesETag(),
         serverResource.getTableId(), UtilTransforms.transform(serverResource
             .getKeyValueStoreEntries()));
     PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
@@ -280,7 +280,7 @@ public class UtilTransforms {
       clientEntries.add(UtilTransforms.transform(serverEntry));
     }
     TablePropertiesClient tpClient = new TablePropertiesClient(
-        serverProperties.getPropertiesEtag(), serverProperties.getTableId(), clientEntries);
+        serverProperties.getPropertiesETag(), serverProperties.getTableId(), clientEntries);
     return tpClient;
   }
 
@@ -292,14 +292,8 @@ public class UtilTransforms {
     row.setCreateUser(serverRow.getCreateUser());
     row.setDeleted(serverRow.isDeleted());
     row.setLastUpdateUser(serverRow.getLastUpdateUser());
-    row.setRowEtag(serverRow.getRowEtag());
+    row.setRowETag(serverRow.getRowETag());
     row.setRowId(serverRow.getRowId());
-    row.setValues(serverRow.getValues());
-    row.setUriAccessControl(serverRow.getUriAccessControl());
-    row.setFormId(serverRow.getFormId());
-    row.setLocale(serverRow.getLocale());
-    Long time = serverRow.getSavepointTimestamp();
-    row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
     if (serverRow.getFilterScope().getType() == null) {
       row.setFilterScope(ScopeClient.EMPTY_SCOPE);
     } else {
@@ -320,6 +314,16 @@ public class UtilTransforms {
         row.setFilterScope(ScopeClient.EMPTY_SCOPE);
       }
     }
+
+    // sync'd metadata
+    row.setUriAccessControl(serverRow.getUriAccessControl());
+    row.setFormId(serverRow.getFormId());
+    row.setLocale(serverRow.getLocale());
+    Long time = serverRow.getSavepointTimestamp();
+    row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
+
+    // data
+    row.setValues(serverRow.getValues());
     return row;
   }
 
@@ -330,15 +334,20 @@ public class UtilTransforms {
     rowClient.setDeleted(serverResource.isDeleted());
     rowClient.setFilterScope(UtilTransforms.transform(serverResource.getFilterScope()));
     rowClient.setLastUpdateUser(serverResource.getLastUpdateUser());
-    rowClient.setRowEtag(serverResource.getRowEtag());
+    rowClient.setRowETag(serverResource.getRowETag());
     rowClient.setRowId(serverResource.getRowId());
-    rowClient.setValues(serverResource.getValues());
+
+    // sync'd metadata
     rowClient.setUriAccessControl(serverResource.getUriAccessControl());
     rowClient.setFormId(serverResource.getFormId());
     rowClient.setLocale(serverResource.getLocale());
     Long time = serverResource.getSavepointTimestamp();
     rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
 
+    // data
+    rowClient.setValues(serverResource.getValues());
+
+    // manipulator URIs
     RowResourceClient resource = new RowResourceClient(rowClient);
     resource.setSelfUri(serverResource.getSelfUri());
     resource.setTableUri(serverResource.getTableUri());

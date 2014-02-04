@@ -38,28 +38,29 @@ import org.simpleframework.xml.Root;
 public class TableDefinition {
 
   /**
-   * This is based roughly on the ODK Tables Schema Google Doc. The required
-   * elements are those that are not allowed to be null in (keep this fully
-   * qualified!)
-   * {@link org.opendatakit.aggregate.odktables.relation.DbTableDefinitions}.
+   * Schema version ETag for the tableId's database schema.
    */
+  @Element(name = "schemaETag", required = false)
+  private String schemaETag;
 
-  @Element(name = "table_id", required = true)
+  /**
+   * Unique tableId
+   */
+  @Element(name = "tableId", required = true)
   private String tableId;
-
-  /*
-   * While not defined in DbTableDefinitions, this was originally how column
-   * information was uploaded to the server, and will remain this way for now.
-   */
-  @ElementList(inline = true)
-  private List<Column> columns;
 
   /**
    * The displayName cannot be null. This is the only reason this is sent
    * up on the first request.
    */
-  @Element(name = "display_name")
+  @Element(name = "displayName", required = true)
   private String displayName;
+
+  /**
+   * The columns in the table.
+   */
+  @ElementList(inline = true)
+  private List<Column> columns;
 
   // ss: trying to subsume this information into the kvs.
   // @Element(required = false)
@@ -73,10 +74,10 @@ public class TableDefinition {
    *
    * @param tableId
    *          id of the table
+   * @param schemaETag
+   *          schemaETag of the table
    * @param columns
    *          list of {@link Column} objects
-   * @param tableKey
-   *          key of the table
    * @param displayName
    *          the displayName of the table (JSON.parse() to get viewable name)
    * @param type
@@ -87,9 +88,19 @@ public class TableDefinition {
    * @param tableIdAccessControls
    *          id of the table holding access controls
    */
-  public TableDefinition(final String tableId, final List<Column> columns) {
+  public TableDefinition(final String tableId, final String schemaETag, final List<Column> columns, final String displayName) {
     this.tableId = tableId;
+    this.schemaETag = schemaETag;
     this.columns = columns;
+    this.displayName = displayName;
+  }
+
+  public String getSchemaETag() {
+    return this.schemaETag;
+  }
+
+  public void setSchemaETag(String schemaETag) {
+    this.schemaETag = schemaETag;
   }
 
   public String getTableId() {
@@ -100,12 +111,12 @@ public class TableDefinition {
     return this.columns;
   }
 
-  public String getDisplayName() {
-    return this.displayName;
-  }
-
   public void setColumns(final List<Column> columns) {
     this.columns = columns;
+  }
+
+  public String getDisplayName() {
+    return this.displayName;
   }
 
   public void setDisplayName(String displayName) {
@@ -114,16 +125,21 @@ public class TableDefinition {
 
   @Override
   public String toString() {
-    return "TableDefinition [tableId=" + tableId + ", columns=" + columns + ", displayName=" + displayName + "]";
+    return "TableDefinition [schemaETag=" + schemaETag
+        + ", tableId=" + tableId
+        + ", displayName=" + displayName
+        + ", columns=" + columns
+        + "]";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((columns == null) ? 0 : columns.hashCode());
-    result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+    result = prime * result + ((schemaETag == null) ? 1 : schemaETag.hashCode());
+    result = prime * result + ((tableId == null) ? 1 : tableId.hashCode());
+    result = prime * result + ((displayName == null) ? 1 : displayName.hashCode());
+    result = prime * result + ((columns == null) ? 1 : columns.hashCode());
     return result;
   }
 
@@ -139,9 +155,10 @@ public class TableDefinition {
       return false;
     }
     TableDefinition other = (TableDefinition) obj;
-    return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (columns == null ? other.columns == null : columns.equals(other.columns))
-        && (displayName == null ? other.displayName == null : displayName.equals(other.displayName));
+    return (schemaETag == null ? other.schemaETag == null : schemaETag.equals(other.schemaETag))
+        && (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
+        && (displayName == null ? other.displayName == null : displayName.equals(other.displayName))
+        && (columns == null ? other.columns == null : columns.equals(other.columns));
   }
 
 }

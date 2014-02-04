@@ -26,6 +26,10 @@ public class PreferenceSummary implements Serializable {
 
   private String googleApiClientId;
 
+  private String enketoApiUrl;
+
+  private String enketoApiToken;
+
   private Boolean odkTablesEnabled;
 
   private Boolean fasterBackgroundActionsDisabled;
@@ -34,9 +38,13 @@ public class PreferenceSummary implements Serializable {
 
   }
 
-  public PreferenceSummary(String googleSimpleApiKey, String googleApiClientId, Boolean odkTablesEnabled, Boolean fasterBackgroundActionsDisabled) {
+  public PreferenceSummary(String googleSimpleApiKey, String googleApiClientId,
+      String enketoApiUrl, String enketoApiToken, Boolean odkTablesEnabled,
+      Boolean fasterBackgroundActionsDisabled) {
     this.googleSimpleApiKey = googleSimpleApiKey;
     this.googleApiClientId = googleApiClientId;
+    this.enketoApiUrl = enketoApiUrl;
+    this.enketoApiToken = enketoApiToken;
     this.odkTablesEnabled = odkTablesEnabled;
     this.fasterBackgroundActionsDisabled = fasterBackgroundActionsDisabled;
   }
@@ -47,6 +55,14 @@ public class PreferenceSummary implements Serializable {
 
   public String getGoogleApiClientId() {
     return googleApiClientId;
+  }
+
+  public String getEnketoApiUrl() {
+    return enketoApiUrl;
+  }
+
+  public String getEnketoApiToken() {
+    return enketoApiToken;
   }
 
   public Boolean getOdkTablesEnabled() {

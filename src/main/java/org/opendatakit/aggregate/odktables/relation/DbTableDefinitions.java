@@ -139,11 +139,11 @@ public class DbTableDefinitions extends Relation {
     return new DbTableDefinitionsEntity(getRelation(cc).newEntity(cc));
   }
 
-  public static DbTableDefinitionsEntity getDefinition(String tableId, String schemaEtag,
+  public static DbTableDefinitionsEntity getDefinition(String tableId, String schemaETag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbTableDefinitions.getDefinition", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaEtag);
+    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaETag);
 
     List<Entity> list = query.execute();
     if (list.isEmpty()) {
@@ -152,8 +152,8 @@ public class DbTableDefinitions extends Relation {
 
     if (list.size() != 1) {
       Logger.getLogger(DbTableDefinitions.class).warn(
-          "Multiple DbTableDefinitions records for table id " + tableId + " and schemaEtag "
-              + schemaEtag);
+          "Multiple DbTableDefinitions records for table id " + tableId + " and schemaETag "
+              + schemaETag);
     }
 
     Entity e = list.get(0);

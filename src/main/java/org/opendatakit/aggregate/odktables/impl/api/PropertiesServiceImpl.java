@@ -25,7 +25,7 @@ import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
@@ -58,7 +58,7 @@ public class PropertiesServiceImpl implements PropertiesService {
 
   @Override
   public PropertiesResource setProperties(TableProperties properties)
-      throws ODKDatastoreException, EtagMismatchException,
+      throws ODKDatastoreException, ETagMismatchException,
       ODKTaskLockException, PermissionDeniedException {
     // TODO re-add permissions
     //af.checkPermission(TablePermission.WRITE_PROPERTIES);

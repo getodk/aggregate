@@ -70,7 +70,7 @@ public class AggregateSynchronizer {
     this.baseUri = uri;
 
     List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
-    interceptors.add(new AggregateRequestInterceptor(accessToken));
+    interceptors.add(new AggregateRequestInterceptor(uri,accessToken));
 
     this.rt = new RestTemplate();
 //    this.rt.setInterceptors(interceptors);
@@ -118,7 +118,7 @@ public class AggregateSynchronizer {
     }
 
     for (TableResource tableResource : tableResources)
-      tables.put(tableResource.getTableId(), tableResource.getSchemaEtag());
+      tables.put(tableResource.getTableId(), tableResource.getSchemaETag());
 
     return tables;
   }
@@ -173,7 +173,7 @@ public class AggregateSynchronizer {
 
   public RowResource putRow(String tableId, Row row) throws IOException {
     TableResource resource = getResource(tableId);
-    Map<String, String> rowEtags = new HashMap<String, String>();
+    Map<String, String> rowETags = new HashMap<String, String>();
 
     URI url = URI.create(resource.getDataUri() + "/" + row.getRowId()).normalize();
     HttpEntity<Row> requestEntity = new HttpEntity<Row>(row, requestHeaders);
@@ -184,7 +184,7 @@ public class AggregateSynchronizer {
       throw new IOException(e.getMessage());
     }
     RowResource putRow = insertedEntity.getBody();
-    rowEtags.put(putRow.getRowId(), putRow.getRowEtag());
+    rowETags.put(putRow.getRowId(), putRow.getRowETag());
 
     return putRow;
   }
@@ -200,7 +200,7 @@ public class AggregateSynchronizer {
     }
   }
 
-  public PropertiesResource setTableProperties(String tableId, String propertiesEtag,
+  public PropertiesResource setTableProperties(String tableId, String propertiesETag,
       String tableName, String tableProperties) throws IOException {
     TableResource resource = getResource(tableId);
 
@@ -213,7 +213,7 @@ public class AggregateSynchronizer {
     entry.value = tableProperties;
     keyValueStoreEntries.add(entry);
     // put new properties
-    TableProperties properties = new TableProperties(propertiesEtag, tableName, keyValueStoreEntries);
+    TableProperties properties = new TableProperties(propertiesETag, tableName, keyValueStoreEntries);
     HttpEntity<TableProperties> entity = new HttpEntity<TableProperties>(properties, requestHeaders);
     ResponseEntity<PropertiesResource> updatedEntity;
     try {

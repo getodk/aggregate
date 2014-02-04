@@ -29,7 +29,7 @@ import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
@@ -83,7 +83,7 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public RowResource createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
-      ODKDatastoreException, EtagMismatchException, PermissionDeniedException,
+      ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
       BadColumnNameException {
     row.setRowId(rowId);
     List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(row));
