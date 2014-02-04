@@ -95,8 +95,8 @@ public class TableAclManagerTest {
 
     TableEntry te = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), null, tableId, T.kvsEntries);
+    tableProperties = pm.setProperties(tableProperties);
 
     this.scope = new Scope(Scope.Type.USER, T.user);
     this.role = TableRole.FILTERED_READER;

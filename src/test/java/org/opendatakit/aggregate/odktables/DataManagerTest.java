@@ -91,7 +91,6 @@ public class DataManagerTest {
 
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
-  private String tableId;
   private TableManager tm;
   private DataManager dm;
   private List<Row> rows;
@@ -104,12 +103,12 @@ public class DataManagerTest {
 
     this.tm = new TableManager(userPermissions, cc);
 
-    TableEntry te = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
+    TableEntry te = tm.createTable(T.tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( T.tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), null, T.tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
 
-    this.dm = new DataManager(tableId, userPermissions, cc);
+    this.dm = new DataManager(T.tableId, userPermissions, cc);
 
     this.rows = T.rows;
     clearRows();
@@ -118,7 +117,7 @@ public class DataManagerTest {
   @After
   public void tearDown() throws Exception {
     try {
-      tm.deleteTable(tableId);
+      tm.deleteTable(T.tableId);
     } catch (ODKEntityNotFoundException e) {
       // ignore
     }
@@ -150,7 +149,7 @@ public class DataManagerTest {
     assertEquals(rows.get(1), actualRows.get(1));
   }
 
-  @Test(expected = ETagMismatchException.class)
+  @Test
   public void testInsertRowsAlreadyExist() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException, BadColumnNameException, ETagMismatchException, PermissionDeniedException, InconsistentStateException {
     List<Row> actualRows = new ArrayList<Row>();
@@ -160,6 +159,12 @@ public class DataManagerTest {
     List<Row> actual2Rows = new ArrayList<Row>();
     for ( Row r : rows ) {
       actual2Rows.add(dm.insertOrUpdateRow(r));
+    }
+    for ( int i = 0 ; i < rows.size() ; ++i ) {
+      String etag1 = actualRows.get(i).getRowETag();
+      String etag2 = actual2Rows.get(i).getRowETag();
+
+      assertEquals(etag1,etag2);
     }
   }
 
@@ -234,8 +239,8 @@ public class DataManagerTest {
     assertEquals(expected, actual);
   }
 
-  @Test(expected = ETagMismatchException.class)
-  public void testUpdateRowVersionMismatch() throws ODKEntityPersistException,
+  @Test
+  public void testUpdateRowVersionMismatchIdenticalValues() throws ODKEntityPersistException,
       ODKDatastoreException, ODKTaskLockException, ETagMismatchException,
       BadColumnNameException, PermissionDeniedException, InconsistentStateException {
     List<Row> expectedChanges = new ArrayList<Row>();
@@ -247,7 +252,23 @@ public class DataManagerTest {
     dm.insertOrUpdateRow(row);
   }
 
-  @Test(expected = ODKEntityNotFoundException.class)
+  @Test(expected = ETagMismatchException.class)
+  public void testUpdateRowVersionMismatchDeltaValues() throws ODKEntityPersistException,
+      ODKDatastoreException, ODKTaskLockException, ETagMismatchException,
+      BadColumnNameException, PermissionDeniedException, InconsistentStateException {
+    List<Row> expectedChanges = new ArrayList<Row>();
+    for ( Row r : T.rows ) {
+      expectedChanges.add(dm.insertOrUpdateRow(r));
+    }
+    Row row = expectedChanges.get(0);
+    row.setRowETag(CommonFieldsBase.newUri());
+    Map<String,String> values = row.getValues();
+    values.put(T.Columns.column_age.getElementKey(), "40");
+    row.setValues(values);
+    dm.insertOrUpdateRow(row);
+  }
+
+  @Test
   public void testUpdateRowDoesNotExist() throws ODKEntityNotFoundException, ODKDatastoreException,
       ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException, InconsistentStateException {
     Row row = rows.get(0);
@@ -333,7 +354,7 @@ public class DataManagerTest {
   @Test
   public void testGetRowsSince() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException, InconsistentStateException {
-    TableEntry entry = tm.getTableNullSafe(tableId);
+    TableEntry entry = tm.getTableNullSafe(T.tableId);
     String beginETag = entry.getDataETag();
     List<Row> changes = new ArrayList<Row>();
     for ( Row r : rows ) {

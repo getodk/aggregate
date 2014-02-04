@@ -91,8 +91,8 @@ public class PropertiesManagerTest {
     this.tm = new TableManager(userPermissions, cc);
 
     TableEntry te = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
+    this.pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), null, tableId, T.kvsEntries);
     TableProperties tpNew = pm.setProperties(tableProperties);
     this.eSchemaTag = tpNew.getSchemaETag();
     this.ePropertiesTag = tpNew.getPropertiesETag();

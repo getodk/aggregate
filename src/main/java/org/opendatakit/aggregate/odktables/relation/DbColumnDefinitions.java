@@ -176,7 +176,13 @@ public class DbColumnDefinitions extends Relation {
       if (!this.getIsUnitOfRetention().equals(e.getIsUnitOfRetention())) {
         return false;
       }
-      if (!this.getListChildElementKeys().equals(e.getListChildElementKeys())) {
+      if (this.getListChildElementKeys() == null) {
+        if ( e.getListChildElementKeys() != null ) {
+          return false;
+        }
+      } else if ( e.getListChildElementKeys() == null) {
+        return false;
+      } else if ( !this.getListChildElementKeys().equals(e.getListChildElementKeys())) {
         return false;
       }
       return true;
