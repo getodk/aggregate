@@ -99,7 +99,7 @@ public class PropertiesManager {
     String schemaETag = null;
     String propertiesETag = null;
     List<DbKeyValueStoreEntity> kvsEntities = new ArrayList<DbKeyValueStoreEntity>();
-    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       lock.acquire();
       DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
@@ -140,7 +140,7 @@ public class PropertiesManager {
     String propertiesETag = CommonFieldsBase.newUri();
 
     // lock table
-    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       lock.acquire();
 

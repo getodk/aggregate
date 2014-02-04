@@ -25,7 +25,8 @@ import org.opendatakit.common.persistence.ITaskLockType;
  *
  */
 public enum ODKTablesTaskLockType implements ITaskLockType {
-  UPDATE_PROPERTIES(66000);
+  TABLES_NON_PERMISSIONS_CHANGES(66000),
+  TABLES_USER_PERMISSION_CREATION(66000);
 
   private long timeout;
 

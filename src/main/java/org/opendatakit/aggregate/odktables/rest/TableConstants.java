@@ -16,8 +16,14 @@
 
 package org.opendatakit.aggregate.odktables.rest;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SimpleTimeZone;
 
 /**
  * Contains various things that are constant in tables and must be known and
@@ -104,28 +110,35 @@ public class TableConstants {
     CLIENT_ONLY_COLUMN_NAMES.add(CONFLICT_TYPE);
   }
 
-  // UTC time is of the form:
-  //  1391456202-- epoch seconds since January 1, 1970  (10 char)
-  //  1391456202000 -- milliseconds (13 char)
-  //  1391456202000000000 -- nanoseconds (19 char)
-  public static final String MILLI_TO_NANO_TIMESTAMP_EXTENSION = "000000";
-  public static final int NANO_TIME_LENGTH = 19;
+  // nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
+  private static final String MILLI_TO_NANO_TIMESTAMP_EXTENSION = "000000";
 
   public static String nanoSecondsFromMillis(Long timeMillis ) {
     if ( timeMillis == null ) return null;
-    String v = Long.toString(timeMillis) + MILLI_TO_NANO_TIMESTAMP_EXTENSION;
-    if ( v.length() != NANO_TIME_LENGTH ) {
-      throw new IllegalArgumentException("unexpected length for nanosecond time");
-    }
+    // convert to a nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
+    Calendar c = GregorianCalendar.getInstance(new SimpleTimeZone(0,"UT"));
+    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    sf.setCalendar(c);
+    Date d = new Date(timeMillis);
+    String v = sf.format(d) + MILLI_TO_NANO_TIMESTAMP_EXTENSION;
     return v;
   }
 
   public static Long milliSecondsFromNanos(String timeNanos ) {
     if ( timeNanos == null ) return null;
-    if ( timeNanos.length() != NANO_TIME_LENGTH ) {
-      throw new IllegalArgumentException("unexpected length for nanosecond time");
+    // convert from a nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
+    Calendar c = GregorianCalendar.getInstance(new SimpleTimeZone(0,"UT"));
+    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    sf.setCalendar(c);
+    String truncated = timeNanos.substring(0, timeNanos.length()-MILLI_TO_NANO_TIMESTAMP_EXTENSION.length());
+    Date d;
+    try {
+      d = sf.parse(truncated);
+    } catch (ParseException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unrecognized time format: " + timeNanos);
     }
-    //
-    return Long.parseLong(timeNanos.substring(0,timeNanos.length()-MILLI_TO_NANO_TIMESTAMP_EXTENSION.length()));
+    Long v = d.getTime();
+    return v;
   }
 }
