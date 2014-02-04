@@ -19,11 +19,12 @@ package org.opendatakit.aggregate.client.odktables;
 import java.io.Serializable;
 
 /**
- * Represents a summary of a file that has been uploaded to be associated with
- * a table.
+ * Represents a summary of a file that has been uploaded to be associated with a
+ * table.
  * <p>
  * Modeled on (keep this fully qualified!)
  * {@link org.opendatakit.aggregate.client.form.MediaFileSummary}
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -51,9 +52,8 @@ public class FileSummaryClient implements Serializable {
     // necessary for gwt serialization
   }
 
-  public FileSummaryClient(String filename, String contentType,
-      Long contentLength, String key, int numMediaFiles, String id,
-      String tableId) {
+  public FileSummaryClient(String filename, String contentType, Long contentLength, String key,
+      int numMediaFiles, String id, String tableId) {
     this.filename = filename;
     this.contentType = contentType;
     this.contentLength = contentLength;

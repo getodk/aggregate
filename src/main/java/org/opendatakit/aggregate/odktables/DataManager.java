@@ -17,8 +17,6 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,17 +24,22 @@ import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -56,19 +59,18 @@ import org.opendatakit.common.web.CallingContext;
 
 public class DataManager {
   private CallingContext cc;
+  private TablesUserPermissions userPermissions;
   private EntityConverter converter;
   private EntityCreator creator;
   private String tableId;
-  private DbTableEntryEntity entry;
-  private DbTable table;
-  private DbLogTable logTable;
-  private List<DbColumnDefinitionsEntity> columns;
 
   /**
    * Construct a new DataManager.
    *
    * @param tableId
    *          the unique identifier of the table
+   * @param userPermissions
+   *          the requesting user's permissions
    * @param cc
    *          the calling context
    * @throws ODKEntityNotFoundException
@@ -76,23 +78,81 @@ public class DataManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public DataManager(String tableId, CallingContext cc) throws ODKEntityNotFoundException,
+  public DataManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
     this.cc = cc;
+    this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
     this.tableId = tableId;
-    this.entry = DbTableEntry.getTableIdEntry(tableId, cc);
-    String schemaETag = entry.getSchemaETag();
-    this.table = DbTable.getRelation(tableId, schemaETag, cc);
-    this.logTable = DbLogTable.getRelation(tableId, schemaETag, cc);
-    this.columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
   }
 
   public String getTableId() {
     return tableId;
+  }
+
+  private void revertPendingChanges(DbTableEntryEntity entry, List<DbColumnDefinitionsEntity> columns,
+        DbTable table, DbLogTable logTable) throws ODKDatastoreException, BadColumnNameException {
+
+    // we have nothing to do if the pending dataETag is null...
+    String dataETag = entry.getPendingDataETag();
+    if ( dataETag == null ) {
+      return;
+    }
+
+    // search for log entries matching the TableEntry dataETag
+    // log entries are written first, so these should exist, and the
+    // row entries may or may not reflect the log contents.
+
+    Query query = logTable.query("DataManager.revertPendingChanges", cc);
+    query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
+    List<Entity> logEntries = query.execute();
+
+    for ( Entity logEntity : logEntries ) {
+      // Log entries maintain the history of previous rowETags
+      // Chain back through that to get the previous log record.
+      // If the previous rowETag is null, it means that the rowId
+      // did not exist prior to this log entry.
+      String priorETag = logEntity.getString(DbLogTable.PREVIOUS_ROW_ETAG);
+      if ( priorETag == null ) {
+        // no prior state -- so rowId may not exist now...
+        try {
+          // try to retrieve the rowId from the DbTable
+          Entity rowEntity = table.getEntity(logEntity.getString(DbLogTable.ROW_ID), cc);
+          // if found, delete it
+          rowEntity.delete(cc);
+        } catch ( ODKEntityNotFoundException e ) {
+          // ignore... it was never created, which is OK!
+        }
+        // remove the entry in DbLogTable for the pending state
+        logEntity.delete(cc);
+      } else {
+        // there is prior state, so the rowId should exist
+        Entity rowEntity = table.getEntity(logEntity.getString(DbLogTable.ROW_ID), cc);
+        // and the prior state should exist in the log...
+        Entity priorLogEntity = logTable.getEntity(logEntity.getString(DbLogTable.PREVIOUS_ROW_ETAG), cc);
+
+        // reset the row to the prior row state
+        creator.setRowFields(rowEntity,
+            priorLogEntity.getId(),
+            priorLogEntity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION),
+            priorLogEntity.getString(DbLogTable.LAST_UPDATE_USER),
+            converter.getDbLogTableFilterScope(priorLogEntity),
+            priorLogEntity.getBoolean(DbLogTable.DELETED),
+            priorLogEntity.getString(DbLogTable.FORM_ID),
+            priorLogEntity.getString(DbLogTable.LOCALE),
+            priorLogEntity.getString(DbLogTable.SAVEPOINT_TIMESTAMP),
+            priorLogEntity.getString(DbLogTable.SAVEPOINT_CREATOR),
+            converter.getRowValues(priorLogEntity, columns), columns);
+
+        // revert DbTable to the prior row state
+        rowEntity.put(cc);
+        // remove the entry in DbLogTable for the pending state
+        logEntity.delete(cc);
+      }
+    }
   }
 
   /**
@@ -100,50 +160,63 @@ public class DataManager {
    *
    * @return all the rows of the table.
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws ODKTaskLockException
+   * @throws InconsistentStateException
+   * @throws BadColumnNameException
    */
-  public List<Row> getRows() throws ODKDatastoreException {
-    Query query = buildRowsQuery();
-    List<Entity> rows = query.execute();
-    return converter.toRows(rows, columns, false);
-  }
+  public List<Row> getRows() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, InconsistentStateException, BadColumnNameException {
 
-  /**
-   * Retrieve all current rows of the table, filtered by the given scope.
-   *
-   * @param scope
-   *          the scope to filter by
-   * @return all the rows of the table, filtered by the given scope
-   * @throws ODKDatastoreException
-   */
-  public List<Row> getRows(Scope scope) throws ODKDatastoreException {
-    Query query = buildRowsQuery();
-    query.equal(DbTable.FILTER_TYPE, scope.getType().name());
-    query.equal(DbTable.FILTER_VALUE, scope.getValue());
-    List<Entity> rows = query.execute();
-    return converter.toRows(rows, columns, false);
-  }
+    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
 
-  /**
-   * Retrieve all current rows of the table, filtered by rows that match any of
-   * the given scopes.
-   *
-   * @param scopes
-   *          the scopes to filter by
-   * @return all the rows of the table, filtered by the given scopes
-   * @throws ODKDatastoreException
-   */
-  public List<Row> getRows(List<Scope> scopes) throws ODKDatastoreException {
-    List<Row> rows = new ArrayList<Row>();
-    for (Scope scope : scopes) {
-      rows.addAll(getRows(scope));
+    List<DbColumnDefinitionsEntity> columns = null;
+    List<Entity> entities = null;
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();
+
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
+
+      if ( schemaETag == null ) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
+      }
+
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+      columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
+
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges( entry, columns, table, logTable);
+
+      Query query = buildRowsQuery(table);
+      entities = query.execute();
+
+    } finally {
+      propsLock.release();
     }
-    return computeDiff(rows);
+
+    if ( entities == null || columns == null ) {
+      throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
+    }
+
+    ArrayList<Row> rows = new ArrayList<Row>();
+    for (Entity entity : entities) {
+      Row row = converter.toRow(entity, columns);
+      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+        rows.add(row);
+      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
+        rows.add(row);
+      }
+    }
+    return rows;
   }
 
   /**
    * @return the query for current rows in the table
    */
-  private Query buildRowsQuery() {
+  private Query buildRowsQuery(DbTable table) {
     Query query = table.query("DataManager.buildRowsQuery", cc);
     query.equal(DbTable.DELETED, false);
     return query;
@@ -156,87 +229,74 @@ public class DataManager {
    *          the data ETag
    * @return the rows which have changed or been added since the given data etag
    * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
+   * @throws InconsistentStateException
+   * @throws PermissionDeniedException
+   * @throws BadColumnNameException
    */
-  public List<Row> getRowsSince(String dataETag) throws ODKDatastoreException {
-    String sequenceValue = null;
-    if ( dataETag != null ) {
-      try {
-        sequenceValue = getSequenceValueForDataETag(dataETag);
-      } catch ( ODKEntityNotFoundException e ) {
-        // TODO: log this as a warning -- may be returning a very large set
-        sequenceValue = null;
+  public List<Row> getRowsSince(String dataETag) throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException, PermissionDeniedException, BadColumnNameException {
+
+    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
+
+    List<DbColumnDefinitionsEntity> columns = null;
+    List<Entity> entities = null;
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();
+
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
+
+      if ( schemaETag == null ) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
       }
-    }
-    Query query;
-    if ( sequenceValue == null ) {
-      query = buildRowsFromBeginningQuery();
-    } else {
-      query = buildRowsSinceQuery(sequenceValue);
-    }
-    List<Entity> results = query.execute();
-    List<Row> logRows = converter.toRows(results, columns, true);
-    return computeDiff(logRows);
-  }
 
-  /**
-   * Retrieves a set of row representing the changes since the given data etag,
-   * and filtered to rows which match the given scope.
-   *
-   * @param dataETag
-   *          the data ETag
-   * @param scope
-   *          the scope to filter to
-   * @return the rows which have changed or been added since the given data etag
-   * @throws ODKDatastoreException
-   */
-  public List<Row> getRowsSince(String dataETag, Scope scope) throws ODKDatastoreException {
-    String sequenceValue = (dataETag == null) ? null : getSequenceValueForDataETag(dataETag);
-    Query query;
-    if ( sequenceValue == null ) {
-      query = buildRowsFromBeginningQuery();
-    } else {
-      query = buildRowsSinceQuery(sequenceValue);
-    }
-    query = narrowByScope(query, scope);
-    List<Entity> results = query.execute();
-    List<Row> logRows = converter.toRows(results, columns, true);
-    return computeDiff(logRows);
-  }
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+      columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
 
-  /**
-   * Retrieves a set of row representing the changes since the given data etag,
-   * and filtered to rows which match any of the given scopes.
-   *
-   * @param dataETag
-   *          the data ETag
-   * @param scopes
-   *          the scopes to filter to
-   * @return the rows which have changed or been added since the given data etag
-   * @throws ODKDatastoreException
-   */
-  public List<Row> getRowsSince(String dataETag, List<Scope> scopes) throws ODKDatastoreException {
-    String sequenceValue = (dataETag == null) ? null : getSequenceValueForDataETag(dataETag);
-    List<Entity> entities = new ArrayList<Entity>();
-    for (Scope scope : scopes) {
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges( entry, columns, table, logTable);
+
+      String sequenceValue = null;
+      if (dataETag != null) {
+        try {
+          sequenceValue = getSequenceValueForDataETag(logTable, dataETag);
+        } catch (ODKEntityNotFoundException e) {
+          // TODO: log this as a warning -- may be returning a very large set
+          sequenceValue = null;
+        }
+      }
+
       Query query;
-      if ( sequenceValue == null ) {
-        query = buildRowsFromBeginningQuery();
+      if (sequenceValue == null) {
+        query = buildRowsFromBeginningQuery(logTable, entry);
       } else {
-        query = buildRowsSinceQuery(sequenceValue);
+        query = buildRowsSinceQuery(logTable, sequenceValue);
       }
-      query = narrowByScope(query, scope);
-      List<Entity> results = query.execute();
-      entities.addAll(results);
+
+      entities = query.execute();
+    } finally {
+      propsLock.release();
     }
 
-    Collections.sort(entities, new Comparator<Entity>() {
-      public int compare(Entity o1, Entity o2) {
-        return o1.getString(DbLogTable.SEQUENCE_VALUE)
-            .compareTo(o2.getString(DbLogTable.SEQUENCE_VALUE));
+    if ( entities == null || columns == null ) {
+      throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
+    }
+
+    // TODO: properly handle reporting of rows that the user no longer has
+    // access to because of a access / permissions change for that user and / or row.
+    ArrayList<Row> rows = new ArrayList<Row>();
+    for (Entity entity : entities) {
+      Row row = converter.toRowFromLogTable(entity, columns);
+      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+        rows.add(row);
+      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
+        rows.add(row);
       }
-    });
-    List<Row> logRows = converter.toRows(entities, columns, true);
-    return computeDiff(logRows);
+    }
+    return computeDiff(rows);
   }
 
   /**
@@ -248,27 +308,27 @@ public class DataManager {
    * @return SEQUENCE_VALUE of that row
    * @throws ODKDatastoreException
    */
-  private String getSequenceValueForDataETag(String dataETag) throws ODKDatastoreException {
+  private String getSequenceValueForDataETag(DbLogTable logTable, String dataETag) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.getSequenceValueForDataETag", cc);
-    // TODO: did this break (if it ever worked) when converted to string etags
-    // instead of flawed mod numbers?
     query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
     List<Entity> values = query.execute();
-    if ( values == null || values.size() == 0 ) {
+    if (values == null || values.size() == 0) {
       throw new ODKEntityNotFoundException("ETag " + dataETag + " was not found in log table!");
-    } else if ( values.size() != 1 ) {
-      throw new ODKDatastoreException("Unexpected duplicate records for ETag " +
-          dataETag + " found in log table!");
+    } else if (values.size() != 1) {
+      // TODO: at least for now, we only have one update per change event...
+      throw new ODKDatastoreException("Unexpected duplicate records for ETag " + dataETag
+          + " found in log table!");
     }
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
   }
 
   /**
-   * @return the query for rows which have been changed or added from the beginning
+   * @return the query for rows which have been changed or added from the
+   *         beginning
    * @throws ODKDatastoreException
    */
-  private Query buildRowsFromBeginningQuery() throws ODKDatastoreException {
+  private Query buildRowsFromBeginningQuery(DbLogTable logTable, DbTableEntryEntity entry) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsBeginningFromQuery", cc);
     query.greaterThanOrEqual(DbLogTable.SEQUENCE_VALUE, entry.getAprioriDataSequenceValue());
     query.sortAscending(DbLogTable.SEQUENCE_VALUE);
@@ -281,27 +341,10 @@ public class DataManager {
    *         sequenceValue
    * @throws ODKDatastoreException
    */
-  private Query buildRowsSinceQuery(String sequenceValue) throws ODKDatastoreException {
+  private Query buildRowsSinceQuery(DbLogTable logTable, String sequenceValue) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
     query.greaterThan(DbLogTable.SEQUENCE_VALUE, sequenceValue);
     query.sortAscending(DbLogTable.SEQUENCE_VALUE);
-    return query;
-  }
-
-  /**
-   * Narrows the given {@link DbLogTable} query to filter to rows which match
-   * the given scope.
-   *
-   * @param query
-   *          the query
-   * @param scope
-   *          the scope to narrow the query by
-   * @return the query
-   * @throws ODKDatastoreException
-   */
-  private Query narrowByScope(Query query, Scope scope) throws ODKDatastoreException {
-    query.equal(DbLogTable.FILTER_TYPE, scope.getType().name());
-    query.equal(DbLogTable.FILTER_VALUE, scope.getValue());
     return query;
   }
 
@@ -328,172 +371,345 @@ public class DataManager {
    *
    * @param rowId
    *          the id of the row
-   * @return the row, or null if no such row exists
-   * @throws ODKDatastoreException
-   */
-  public Row getRow(String rowId) throws ODKDatastoreException {
-    Validate.notEmpty(rowId);
-    try {
-      return getRowNullSafe(rowId);
-    } catch (ODKEntityNotFoundException e) {
-      return null;
-    }
-  }
-
-  /**
-   * Retrieve a row from the table.
-   *
-   * @param rowId
-   *          the id of the row
    * @return the row
    * @throws ODKEntityNotFoundException
    *           if the row with the given id does not exist
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
    */
-  public Row getRowNullSafe(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException {
+  public Row getRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     Validate.notEmpty(rowId);
-    Entity row = table.getEntity(rowId, cc);
-    return converter.toRow(row, columns);
+
+    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
+
+    List<DbColumnDefinitionsEntity> columns = null;
+    Entity entity = null;
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();
+
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
+
+      if ( schemaETag == null ) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
+      }
+
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+      columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
+
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges( entry, columns, table, logTable);
+
+      entity = table.getEntity(rowId, cc);
+
+    } finally {
+      propsLock.release();
+    }
+
+    if ( columns == null ) {
+      throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
+    }
+
+    Row row = converter.toRow(entity, columns);
+    if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+      return row;
+    } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
+      return row;
+    }
+    throw new PermissionDeniedException(String.format("Denied table %s row %s access to user %s",
+        tableId, rowId, userPermissions.getOdkTablesUserId()));
   }
 
   /**
-   * Inserts or Updates a list of rows.  If inserting, the row must not already exist
-   * or the eTag for the row being inserted must exactly match that on the server.
+   * Inserts or Updates a row. If inserting, the row must not already
+   * exist or the eTag for the row being inserted must exactly match that on the
+   * server.
    *
-   * @param af -- authentication filter to be applied to this action
-   * @param rows
-   *          the rows to update. See
+   * @param af
+   *          -- authentication filter to be applied to this action
+   * @param row
+   *          the row to update. See
    *          {@link Row#forInsert(String, String, java.util.Map)}.
    *          {@link Row#forUpdate(String, String, java.util.Map)}
    *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
    *          {@link Row#getLastUpdateUser()} will be ignored if they are set.
-   * @return the rows that were inserted or updated, with each row's rowETtag populated with
-   *         the new rowETtag. If the original passed in row had a null rowId, the row
-   *         will contain the generated rowId.
+   * @return a copy of the row that was inserted or updated, with the row's rowETtag
+   *         populated with the new rowETtag. If the original passed in row had
+   *         a null rowId, the row will contain the generated rowId.
    * @throws ODKEntityNotFoundException
-   *           if one of the passed in rows does not exist
+   *           if the passed in row does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    * @throws ETagMismatchException
-   *           if one of the passed in rows has a different rowETtag from the row
-   *           in the datastore (e.g., on insert, the row already exists, or on
-   *           update, there is conflict that needs to be resolved).
+   *           if the passed in row has a different rowETtag from the
+   *           row in the datastore (e.g., on insert, the row already exists, or
+   *           on update, there is conflict that needs to be resolved).
    * @throws BadColumnNameException
-   *           if one of the passed in rows set a value for a column which
+   *           if the passed in row set a value for a column which
    *           doesn't exist in the table
    * @throws PermissionDeniedException
+   * @throws InconsistentStateException
    *
    */
-  public List<Row> insertOrUpdateRows(AuthFilter af, List<Row> rows)
+  public Row insertOrUpdateRow(Row row)
       throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException {
-    Validate.noNullElements(rows);
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException,
+      PermissionDeniedException, InconsistentStateException {
+    Validate.notNull(row);
 
-    List<Entity> rowEntities;
+    userPermissions.checkPermission(tableId, TablePermission.WRITE_ROW);
 
-    // lock table
-    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.UPDATE_DATA, cc);
+    List<DbColumnDefinitionsEntity> columns = null;
+    Entity entity = null;
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
-      lock.acquire();
-      // TODO: CRITICAL need to start a transaction here!!!
+      propsLock.acquire();
       Sequencer sequencer = new Sequencer(cc);
 
-      // refresh entry
-      entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
 
-      // get new data ETag
-      String dataETag = CommonFieldsBase.newUri();
-      entry.setDataETag(dataETag);
+      if ( schemaETag == null ) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
+      }
 
-      // create or update entities
-      rowEntities = creator.insertOrUpdateRowEntities(af, table, dataETag, rows, columns, cc);
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+      columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
 
-      // create log table entries
-      List<Entity> logEntities =
-          creator.newLogEntities(logTable, dataETag, rowEntities,
-                                  columns, sequencer, cc);
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges( entry, columns, table, logTable);
+
+      String rowId = row.getRowId();
+      boolean newRowId = false;
+      if (rowId == null) {
+        newRowId = true;
+        rowId = CommonFieldsBase.newUri();
+        row.setRowId(rowId);
+      }
+      boolean nullIncomingScope = false;
+      Scope scope = row.getFilterScope();
+      if (scope == null) {
+        nullIncomingScope = true;
+        scope = Scope.EMPTY_SCOPE;
+        row.setFilterScope(scope);
+      }
+
+      try {
+        entity = table.getEntity(rowId, cc);
+
+        if ( newRowId ) {
+          throw new  InconsistentStateException("Synthesized rowId collides with existing row in table " + tableId + ".");
+        }
+
+        if ( nullIncomingScope ) {
+          // preserve the scope of the existing entity if the incoming Row didn't specify one.
+          scope = converter.getDbTableFilterScope(entity);
+        }
+
+        // confirm that the user has the ability to read the row
+        boolean hasPermissions = false;
+        if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+          hasPermissions = true;
+        } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, rowId, scope)) {
+          hasPermissions = true;
+        }
+
+        if (!hasPermissions ) {
+          throw new PermissionDeniedException(String.format("Denied table %s row %s read access to user %s",
+              tableId, rowId, userPermissions.getOdkTablesUserId()));
+        }
+
+        // confirm they have the ability to write to it
+        hasPermissions = false;
+        if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_WRITE)) {
+          hasPermissions = true;
+        } else if ( userPermissions.hasFilterScope(tableId, TablePermission.WRITE_ROW, rowId, scope)) {
+          hasPermissions = true;
+        }
+
+        if (!hasPermissions ) {
+          throw new PermissionDeniedException(String.format("Denied table %s row %s read access to user %s",
+              tableId, rowId, userPermissions.getOdkTablesUserId()));
+        }
+
+        String rowETag = entity.getString(DbTable.ROW_ETAG);
+        String currentETag = row.getRowETag();
+        if (currentETag == null || !currentETag.equals(rowETag)) {
+
+          // Take the hit to convert the row we have.
+          // If the row matches everywhere except on the rowETag, return it.
+          Row currentRow = converter.toRow(entity, columns);
+          if ( row.hasMatchingSignificantFieldValues(currentRow) ) {
+            return currentRow;
+          }
+
+          // if null, then the client thinks they are creating a new row.
+          // The rows may be identical, but leave that to the client to determine
+          // trigger client-side conflict resolution.
+          // Otherwise, if there is a mis-match, then the client needs to pull and
+          // perform client-side conflict resolution on the changes already up on the server.
+          throw new ETagMismatchException(String.format("%s does not match %s " + "for rowId %s",
+              currentETag, rowETag, rowId));
+        }
+
+      } catch ( ODKEntityNotFoundException e ) {
+
+        // require unfiltered write permissions to create a new record
+        userPermissions.checkPermission(tableId, TablePermission.UNFILTERED_WRITE);
+
+        newRowId = true;
+        // initialization for insert...
+        entity = table.newEntity(rowId, cc);
+        entity.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
+      }
+
+      // OK we are able to update or insert the record -- mark as pending change.
+
+      // get new dataETag
+      String dataETagAtModification = CommonFieldsBase.newUri();
+      entry.setPendingDataETag(dataETagAtModification);
+      entry.put(cc);
+
+      // this will be null of the entity is newly created...
+      String previousRowETag = row.getRowETag();
+
+      // update the fields in the DbTable entity...
+      creator.setRowFields(entity, CommonFieldsBase.newUri(), dataETagAtModification,
+          userPermissions.getOdkTablesUserId(), scope, false, row.getFormId(), row.getLocale(),
+          row.getSavepointTimestamp(), row.getSavepointCreator(), row.getValues(), columns);
+
+      // create log table entry
+      Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);
 
       // update db
-      // This is where a user-defined table actually gets created for the first
-      // time.
-      DbLogTable.putEntities(logEntities, cc);
-      DbTable.putEntities(rowEntities, cc);
+      DbLogTable.putEntity(logEntity, cc);
+      DbTable.putEntity(entity, cc);
+
+      // commit change
+      entry.setDataETag(entry.getPendingDataETag());
+      entry.setPendingDataETag(null);
       entry.put(cc);
-      // TODO: CRITICAL need to commit a transaction here!!!
+
     } finally {
-      // TODO: CRITICAL if failure then need to rollback a transaction!!!
-      lock.release();
+      propsLock.release();
     }
-    return converter.toRows(rowEntities, columns, false);
+
+    if ( columns == null ) {
+      throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
+    }
+
+    Row updatedRow = converter.toRow(entity, columns);
+    return updatedRow;
   }
 
   /**
-   * Delete a row. This is equivalent to calling {@link #deleteRows(List)} with
-   * a list of size 1.
+   * Delete a row.
    *
    * @param rowId
    *          the row to delete.
+   * @return returns the new dataETag that is current after deleting the row.
    * @throws ODKEntityNotFoundException
    *           if there is no row with the given id in the datastore
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws BadColumnNameException
    */
   public String deleteRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException,
-      ODKTaskLockException {
-    List<String> rowIds = new ArrayList<String>();
-    rowIds.add(rowId);
-    return deleteRows(rowIds);
-  }
+      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException {
+    Validate.notNull(rowId);
+    Validate.notBlank(rowId);
 
-  /**
-   * Deletes a set of rows.
-   *
-   * @param rowIds
-   *          the rows to delete.
-   * @return returns the new dataETag that is current after deleting the rows.
-   * Returns null if something goes wrong and the lock can never be acquired.
-   * @throws ODKEntityNotFoundException
-   *           if one of the rowIds does not exist in the datastore
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   */
-  public String deleteRows(List<String> rowIds) throws ODKEntityNotFoundException,
-      ODKDatastoreException, ODKTaskLockException {
-    Validate.noNullElements(rowIds);
-
-    // lock table
-    LockTemplate lock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.UPDATE_DATA, cc);
-    String dataETag = null;
+    userPermissions.checkPermission(tableId, TablePermission.DELETE_ROW);
+    String dataETagAtModification = null;
+    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
-      lock.acquire();
+      propsLock.acquire();
       Sequencer sequencer = new Sequencer(cc);
 
-      // refresh entry
-      entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
 
-      // get new dataETag
-      dataETag = CommonFieldsBase.newUri();
-      entry.setDataETag(dataETag);
-
-      // get entities and mark deleted
-      List<Entity> rows = DbTable.query(table, rowIds, cc);
-      for (Entity row : rows) {
-        row.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
-        row.set(DbTable.DELETED, true);
+      if ( schemaETag == null ) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
       }
 
-      // create log table entries
-      List<Entity> logRows =
-          creator.newLogEntities(logTable, dataETag, rows, columns, sequencer, cc);
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+      List<DbColumnDefinitionsEntity> columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
 
-      // update db
-      DbLogTable.putEntities(logRows, cc);
-      DbTable.putEntities(rows, cc);
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges( entry, columns, table, logTable);
+
+      Entity entity = table.getEntity(rowId, cc);
+
+      Scope scope = converter.getDbTableFilterScope(entity);
+
+      // check for read access
+      boolean hasPermissions = false;
+      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+        hasPermissions = true;
+      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, rowId, scope)) {
+        hasPermissions = true;
+      }
+
+      if (!hasPermissions ) {
+        throw new PermissionDeniedException(String.format("Denied table %s row %s read access to user %s",
+            tableId, rowId, userPermissions.getOdkTablesUserId()));
+      }
+
+      // check for delete access
+      hasPermissions = false;
+      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_DELETE)) {
+        hasPermissions = true;
+      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.DELETE_ROW, rowId, scope)) {
+        hasPermissions = true;
+      }
+
+      if (!hasPermissions ) {
+        throw new PermissionDeniedException(String.format("Denied table %s row %s delete access to user %s",
+            tableId, rowId, userPermissions.getOdkTablesUserId()));
+      }
+
+      // get new dataETag
+      dataETagAtModification = CommonFieldsBase.newUri();
+      entry.setPendingDataETag(dataETagAtModification);
       entry.put(cc);
+
+      // remember the previous row ETag so we can chain revisions in the DbLogTable
+      String previousRowETag = entity.getString(DbTable.ROW_ETAG);
+
+      // update the row ETag and deletion status
+      entity.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
+      entity.set(DbTable.DELETED, true);
+
+      // create log table entry
+      Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);
+
+      // commit the log change to the database (must be done first!)
+      DbLogTable.putEntity(logEntity, cc);
+      // commit the row change
+      DbTable.putEntity(entity, cc);
+
+      // update the TableEntry to reflect the completion of the change
+      entry.setDataETag(entry.getPendingDataETag());
+      entry.setPendingDataETag(null);
+      entry.put(cc);
+
     } finally {
-      lock.release();
+      propsLock.release();
     }
-    return dataETag;
+
+    return dataETagAtModification;
   }
 }

@@ -64,7 +64,7 @@ public class EnketoWebformButton extends AggregateButton implements ClickHandler
   public void onClick(ClickEvent event) {
     super.onClick(event);
 
-    RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, UIConsts.ENKETO_UI_GENERATE);
+    RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, UIConsts.ENKETO_API_HANDLER_ADDR);
     builder.setHeader("Content-type", "application/x-www-form-urlencoded");
 
     StringBuffer requestdata = new StringBuffer();

@@ -50,6 +50,8 @@ public class Relation {
   /** maximum length of a table or column name */
   public static final int MAX_PERSISTENCE_NAME_LENGTH = 63;
 
+  private static final int MAX_DELETE_COUNT = 100;
+
   /** the table namespace of this relation */
   @SuppressWarnings("unused")
   private final TableNamespace namespace;
@@ -290,6 +292,10 @@ public class Relation {
       // we don't ahve the individual records, just the PKs for them
       // construct the entity keys from the relation and those PKs
       keys.add(new EntityKey(prototype, (String) key));
+      if ( keys.size() > MAX_DELETE_COUNT ) {
+        ds.deleteEntities(keys, user);
+        keys.clear();
+      }
     }
     ds.deleteEntities(keys, user);
     ds.dropRelation(prototype, user);

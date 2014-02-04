@@ -24,7 +24,6 @@ package org.opendatakit.aggregate.odktables.rest;
  */
 public class KeyValueStoreConstants {
 
-
   // special well-known partitions
   public static final String PARTITION_TABLE = "Table";
   public static final String PARTITION_COLUMN = "Column";

@@ -29,6 +29,7 @@ public class OdkTablesKeyValueStoreEntryClient implements Serializable {
    *
    */
   private static final long serialVersionUID = -4019279442687770191L;
+
   public OdkTablesKeyValueStoreEntryClient() {
     // necessary for gwt serialization
   }

@@ -15,30 +15,36 @@
  */
 package org.opendatakit.aggregate.odktables.api;
 
-import java.io.IOException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 
 /**
  * Servlet for downloading a manifest of files to the phone for the correct app
  * and the correct table.
+ *
  * @author sudar.sam@gmail.com
  *
  */
 @Path("filemanifest")
+@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface FileManifestService {
-    
+
   /** URL parameter specifying the app. Always required. */
   public static final String PARAM_APP_ID = "app_id";
-  /** 
-   * URL parameter specifying the tableId. Optional. If not present, will 
-   * return all the files for the application.
+  /**
+   * URL parameter specifying the tableId. Optional. If not present, will return
+   * all the files for the application.
    */
   public static final String PARAM_TABLE_ID = "table_id";
   /**
@@ -47,11 +53,20 @@ public interface FileManifestService {
    */
   public static final String PARAM_APP_LEVEL_FILES = "app_level_files";
 
+  /**
+   *
+   * @param servletContext
+   * @param req
+   * @param resp
+   * @param appId
+   * @param tableId
+   * @param appLevel
+   * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
+   */
   @GET
-  public String getFileManifest(@Context ServletContext servletContext, 
+  public Response /*OdkTablesFileManifest*/ getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
-      @QueryParam (PARAM_APP_ID) String appId,
-      @QueryParam (PARAM_TABLE_ID) String tableId, 
-      @QueryParam (PARAM_APP_LEVEL_FILES) String appLevel) throws IOException;
-  
+      @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
+      @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel);
+
 }

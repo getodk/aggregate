@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
 
 /**
  * This represents information about a file so that a phone running ODKTables
@@ -27,25 +29,28 @@ package org.opendatakit.aggregate.odktables.rest.entity;
  * @author sudar.sam@gmail.com
  *
  */
+@Root
 public class OdkTablesFileManifestEntry {
 
   /**
    * This is the name of the file.
    */
+  @Attribute(required = true)
   public String filename;
 
   /**
    * This is the md5hash of the file, which will be used for checking whether or
    * not the version of the file on the phone is current.
    */
+  @Attribute(required = true)
   public String md5hash;
 
   /**
    * This is the url from which the current version of the file can be
    * downloaded.
    */
+  @Attribute(required = true)
   public String downloadUrl;
-
 
   @Override
   public int hashCode() {
@@ -59,10 +64,10 @@ public class OdkTablesFileManifestEntry {
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
     if (!(obj instanceof OdkTablesFileManifestEntry)) {

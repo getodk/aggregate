@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.junit.Ignore;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -58,7 +59,8 @@ public class T {
 
     public static final String tableTypeKey = KeyValueStoreConstants.TABLE_TYPE;
     public static final String tableTypeType = "string";
-    public static final String tableTypeValue = TableType.DATA.name();
+    public static final TableType tableTypeValueAsTableType = TableType.DATA;
+    public static final String tableTypeValue = tableTypeValueAsTableType.name();
 
     public static final String tableAccessControlTableIdKey = KeyValueStoreConstants.TABLE_ACCESS_CONTROL_TABLE_ID;
     public static final String tableAccessControlTableIdType = "string";
@@ -124,15 +126,15 @@ public class T {
         weight + elementName_suffix, "NONE", null, true);
   }
 
-  public static final String uri_access_control_1 = null;
+  public static final String savepoint_creator_1 = null;
   public static final String form_id_1 = null;
   public static final String locale_1 = "default";
-  public static final Long savepoint_timestamp_1 = System.currentTimeMillis()-1000;
+  public static final String savepoint_timestamp_1 = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()-1000);
 
-  public static final String uri_access_control_2 = "fred";
+  public static final String savepoint_creator_2 = "fred";
   public static final String form_id_2 = "ralph";
   public static final String locale_2 = "default";
-  public static final Long savepoint_timestamp_2 = System.currentTimeMillis()-2000;
+  public static final String savepoint_timestamp_2 = TableConstants.nanoSecondsFromMillis(System.currentTimeMillis()-2000);
 
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"), JOHN("2", "john", "58", "200");
@@ -184,9 +186,10 @@ public class T {
   public static final String tableMetadata = null;
   public static final String propertiesETag = "propertiesETag";
 
-  public static final List<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+  public static final ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
   public static final List<Column> columns = new ArrayList<Column>();
+  public static final List<Column> columns2 = new ArrayList<Column>();
 
   public static final List<Row> rows = new ArrayList<Row>();
 
@@ -199,7 +202,9 @@ public class T {
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);
     columns.add(T.Columns.column_weight);
-    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues()));
-    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.Data.JOHN.getValues()));
+    columns2.add(T.Columns.column_name);
+    columns2.add(T.Columns.column_age);
+    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues()));
+    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.savepoint_creator_2, T.Data.JOHN.getValues()));
   };
 }

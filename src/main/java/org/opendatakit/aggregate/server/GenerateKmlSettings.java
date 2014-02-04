@@ -28,23 +28,23 @@ public class GenerateKmlSettings {
   private KmlSettings settings;
   private IForm form;
   boolean ignoreRepeats;
-  
+
   public GenerateKmlSettings(IForm form, boolean ignoreRepeats) {
     this.form = form;
     this.settings = new KmlSettings();
     this.ignoreRepeats = ignoreRepeats;
   }
-  
+
   public KmlSettings generate() {
     FormElementModel root = form.getTopLevelGroupElement();
     processElementForColumnHead(form, root, root);
     return settings;
   }
-  
+
   /**
    * Helper function to recursively go through the element tree and create the
    * FormElementKeys
-   * 
+   *
    */
   private void processElementForColumnHead(IForm form, FormElementModel node, FormElementModel root) {
     if (node == null)
@@ -60,7 +60,7 @@ public class GenerateKmlSettings {
       settings.addBinaryNode(nodeName, key.toString());
       break;
     case REPEAT:
-      if(ignoreRepeats) {
+      if (ignoreRepeats) {
         return;
       }
     case GROUP:
@@ -78,5 +78,4 @@ public class GenerateKmlSettings {
     }
   }
 
-  
 }

@@ -45,10 +45,10 @@ public class RowResource extends Row {
     setLastUpdateUser(row.getLastUpdateUser());
     setFilterScope(row.getFilterScope());
     // sync'd metadata
-    setUriAccessControl(row.getUriAccessControl());
     setFormId(row.getFormId());
     setLocale(row.getLocale());
     setSavepointTimestamp(row.getSavepointTimestamp());
+    setSavepointCreator(row.getSavepointCreator());
     // data
     setValues(row.getValues());
   }

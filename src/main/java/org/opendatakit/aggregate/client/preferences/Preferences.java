@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.client.preferences;
 
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
@@ -76,6 +77,7 @@ public class Preferences {
       googleApiClientId = summary.getGoogleApiClientId();
       enketoApiUrl = summary.getEnketoApiUrl();
       enketoApiToken = summary.getEnketoApiToken();
+      @SuppressWarnings("unused")
       Boolean oldTablesValue = odkTablesEnabled;
       odkTablesEnabled = summary.getOdkTablesEnabled();
       fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
@@ -115,8 +117,8 @@ public class Preferences {
   }
 
   public static boolean showEnketoIntegration() {
-    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
-        .contains(GrantedAuthorityName.ROLE_DATA_COLLECTOR)) {
+    TreeSet<GrantedAuthorityName> authorities = AggregateUI.getUI().getUserInfo().getGrantedAuthorities();
+    if (authorities.contains(GrantedAuthorityName.ROLE_DATA_COLLECTOR) || authorities.contains(GrantedAuthorityName.ROLE_DATA_OWNER)) {
       if (getEnketoApiUrl() != null && !getEnketoApiUrl().equals("")) {
         return true;
       }

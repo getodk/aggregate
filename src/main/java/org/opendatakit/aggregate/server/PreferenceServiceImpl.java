@@ -35,7 +35,7 @@ import org.opendatakit.common.web.CallingContext;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class PreferenceServiceImpl extends RemoteServiceServlet implements
-org.opendatakit.aggregate.client.preferences.PreferenceService {
+    org.opendatakit.aggregate.client.preferences.PreferenceService {
 
   private static final Log log = LogFactory.getLog(PreferenceServiceImpl.class);
   /**
@@ -44,7 +44,8 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
   private static final long serialVersionUID = -4892832848446000170L;
 
   @Override
-  public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException,
+      DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -60,12 +61,13 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
   }
 
   @Override
-  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     try {
-      ServerPreferencesProperties.setOdkTablesEnabled(cc,enabled);
+      ServerPreferencesProperties.setOdkTablesEnabled(cc, enabled);
 
       log.info("setOdkTablesEnabled as: " + Boolean.toString(enabled));
     } catch (ODKEntityNotFoundException e) {
@@ -79,7 +81,8 @@ org.opendatakit.aggregate.client.preferences.PreferenceService {
   }
 
   @Override
-  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

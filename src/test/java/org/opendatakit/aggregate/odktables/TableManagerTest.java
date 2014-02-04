@@ -27,11 +27,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -46,16 +51,55 @@ import com.google.common.collect.Lists;
 public class TableManagerTest {
 
   private CallingContext cc;
+  private TablesUserPermissions userPermissions;
   private TableManager tm;
   private String tableId;
   private String tableId2;
   private List<Column> columns;
   private String tableProperties;
 
+  private class MockCurrentUserPermissions implements TablesUserPermissions {
+
+    @Override
+    public String getOdkTablesUserId() {
+      return "myid";
+    }
+
+    @Override
+    public String getPhoneNumber() {
+      return null;
+    }
+
+    @Override
+    public String getXBearerCode() {
+      return null;
+    }
+
+    @Override
+    public void checkPermission(String tableId, TablePermission permission)
+        throws ODKDatastoreException, PermissionDeniedException {
+      return;
+    }
+
+    @Override
+    public boolean hasPermission(String tableId, TablePermission permission)
+        throws ODKDatastoreException {
+      return true;
+    }
+
+    @Override
+    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
+      return true;
+    }
+
+  }
+
   @Before
   public void setUp() throws Exception {
     this.cc = TestContextFactory.getCallingContext();
-    this.tm = new TableManager(cc);
+    userPermissions = new MockCurrentUserPermissions();
+
+    this.tm = new TableManager(userPermissions, cc);
     this.tableId = T.tableId;
     this.tableId2 = T.tableId + "2";
     this.columns = T.columns;
@@ -83,22 +127,40 @@ public class TableManagerTest {
   }
 
   @Test
-  public void testCreateTable() throws ODKDatastoreException, TableAlreadyExistsException {
-    TableEntry entry = tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+  public void testCreateTable() throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
+
+    TableEntry entry = tm.createTable(tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
+    tableProperties = pm.setProperties(tableProperties);
+
+    entry = tm.getTable(tableId);
     assertEquals(tableId, entry.getTableId());
     assertNotNull(entry.getPropertiesETag());
+    assertEquals(tableProperties.getPropertiesETag(), entry.getPropertiesETag());
     // data eTag is null when table is first created
     assertTrue(null == entry.getDataETag());
   }
 
+  @Test
+  public void testCreateTableIdempotent() throws ODKDatastoreException,
+      TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
+    tm.createTable(tableId, T.columns);
+    tm.createTable(tableId, T.columns);
+  }
+
   @Test(expected = TableAlreadyExistsException.class)
   public void testCreateTableAlreadyExists() throws ODKDatastoreException,
-      TableAlreadyExistsException {
-    tm.createTable(tableId,
-        T.columns, T.kvsEntries);
-    tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+      TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
+    tm.createTable(tableId, T.columns);
+    tm.createTable(tableId, T.columns2);
+  }
+
+  @Test(expected = TableAlreadyExistsException.class)
+  public void testCreateTableAlreadyExistsTransitive() throws ODKDatastoreException,
+      TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
+    tm.createTable(tableId, T.columns2);
+    tm.createTable(tableId, T.columns);
   }
 
 //  @Test(expected = IllegalArgumentException.class)
@@ -120,32 +182,39 @@ public class TableManagerTest {
 //  }
 
   @Test
-  public void testGetTable() throws ODKDatastoreException, TableAlreadyExistsException {
-    TableEntry expected = tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+  public void testGetTable() throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
+    TableEntry expected = tm.createTable(tableId, T.columns);
     TableEntry actual = tm.getTableNullSafe(tableId);
     assertEquals(expected, actual);
   }
 
   @Test(expected = ODKEntityNotFoundException.class)
-  public void testGetTableDoesNotExist() throws ODKEntityNotFoundException, ODKDatastoreException {
+  public void testGetTableDoesNotExist() throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException {
     tm.getTableNullSafe(tableId);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testGetTableNullTableId() throws ODKEntityNotFoundException, ODKDatastoreException {
+  public void testGetTableNullTableId() throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException {
     tm.getTableNullSafe(null);
   }
 
   @Test
   public void testGetTables() throws ODKEntityPersistException, ODKDatastoreException,
-      ODKTaskLockException, TableAlreadyExistsException {
+      ODKTaskLockException, TableAlreadyExistsException, PermissionDeniedException, ETagMismatchException {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
-    TableEntry one = tm.createTable(tableId2,
-        T.columns, T.kvsEntries);
-    TableEntry two = tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+    TableEntry entry = tm.createTable(tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
+    pm.setProperties(tableProperties);
+    TableEntry one = tm.getTable(tableId);
+
+    TableEntry entry2 = tm.createTable(tableId2, T.columns);
+    PropertiesManager pm2 = new PropertiesManager( tableId2, userPermissions, cc);
+    TableProperties tableProperties2 = new TableProperties(entry2.getSchemaETag(), null, tableId2, T.kvsEntries);
+    pm2.setProperties(tableProperties2);
+    tm.createTable(tableId2, T.columns);
+    TableEntry two = tm.getTable(tableId2);
 
     expected.add(one);
     expected.add(two);
@@ -159,19 +228,28 @@ public class TableManagerTest {
   // TODO: reactivate when we have scopes working...
   @Ignore
   public void testGetTablesByScopes() throws ODKEntityNotFoundException, ODKDatastoreException,
-      TableAlreadyExistsException {
+      TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
-    TableEntry one = tm.createTable(tableId2,
-        T.columns, T.kvsEntries);
-    tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+    TableEntry entry = tm.createTable(tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
+    pm.setProperties(tableProperties);
+    TableEntry one = tm.getTable(tableId);
 
-    TableAclManager am = new TableAclManager(one.getTableId(), cc);
+    TableEntry entry2 = tm.createTable(tableId2, T.columns);
+    PropertiesManager pm2 = new PropertiesManager( tableId2, userPermissions, cc);
+    TableProperties tableProperties2 = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId2, T.kvsEntries);
+    pm2.setProperties(tableProperties);
+    tm.createTable(tableId2, T.columns);
+    TableEntry two = tm.getTable(tableId2);
+
+    TableAclManager am = new TableAclManager(one.getTableId(), userPermissions, cc);
     Scope scope = new Scope(Scope.Type.DEFAULT, null);
     am.setAcl(scope, TableRole.READER);
 
     expected.add(one);
+    expected.add(two);
 
     List<TableEntry> actual = tm.getTables(Lists.newArrayList(scope));
 
@@ -180,20 +258,23 @@ public class TableManagerTest {
 
   @Test(expected = ODKEntityNotFoundException.class)
   public void testDeleteTable() throws ODKDatastoreException, ODKTaskLockException,
-      TableAlreadyExistsException {
-    tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+      TableAlreadyExistsException, PermissionDeniedException, ETagMismatchException {
+
+    TableEntry entry = tm.createTable(tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
+    pm.setProperties(tableProperties);
     tm.deleteTable(tableId);
     tm.getTableNullSafe(tableId);
   }
 
   @Test(expected = ODKEntityNotFoundException.class)
-  public void testDeleteTableDoesNotExist() throws ODKDatastoreException, ODKTaskLockException {
+  public void testDeleteTableDoesNotExist() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
     tm.deleteTable(tableId);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testDeleteTableNullTableId() throws ODKDatastoreException, ODKTaskLockException {
+  public void testDeleteTableNullTableId() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
     tm.deleteTable(null);
   }
 

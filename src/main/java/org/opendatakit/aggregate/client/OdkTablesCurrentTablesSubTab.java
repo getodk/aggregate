@@ -16,11 +16,12 @@
 
 package org.opendatakit.aggregate.client;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -35,16 +36,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
 
   private static final String IMPORT_TABLE_TXT = "Import table from CSV";
-  private static final String IMPORT_TABLE_TOOLTIP_TEXT =
-      "Create a new  table by importing a CSV";
-  private static final String IMPORT_TABLE_BALLOON_TXT =
-      "Create a new table by importing from a CSV";
-  private static final String IMPORT_TABLE_BUTTON_TXT =
-      "<img src =\"images/yellow_plus.png\" />Import Table From CSV";
+  private static final String IMPORT_TABLE_TOOLTIP_TEXT = "Create a new  table by importing a CSV";
+  private static final String IMPORT_TABLE_BALLOON_TXT = "Create a new table by importing from a CSV";
+  private static final String IMPORT_TABLE_BUTTON_TXT = "<img src =\"images/yellow_plus.png\" />Import Table From CSV";
 
   private OdkTablesTableList tableList;
 
-  //private OdkTablesAddTableButton addButton;
+  // private OdkTablesAddTableButton addButton;
 
   private ServletPopupButton importTableButton;
 
@@ -57,13 +55,13 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
 
     tableList = new OdkTablesTableList();
 
-    //addButton = new OdkTablesAddTableButton();
+    // addButton = new OdkTablesAddTableButton();
 
-//    importTableButton = new ServletPopupButton(IMPORT_TABLE_BUTTON_TXT,
-//        IMPORT_TABLE_TXT, UIConsts.UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR, this,
-//        IMPORT_TABLE_TOOLTIP_TEXT, IMPORT_TABLE_BALLOON_TXT);
-//
-//    add(importTableButton);
+    // importTableButton = new ServletPopupButton(IMPORT_TABLE_BUTTON_TXT,
+    // IMPORT_TABLE_TXT, UIConsts.UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR, this,
+    // IMPORT_TABLE_TOOLTIP_TEXT, IMPORT_TABLE_BALLOON_TXT);
+    //
+    // add(importTableButton);
     add(tableList);
 
   }
@@ -78,16 +76,27 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
    */
   @Override
   public void update() {
-    SecureGWT.getServerTableService().getTables(
-        new AsyncCallback<List<TableEntryClient>>() {
+    SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
 
       @Override
       public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
+        if (caught instanceof AccessDeniedException) {
+          // swallow it...
+          AggregateUI.getUI().clearError();
+          ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
+          tableList.updateTableList(tables);
+          tableList.setVisible(true);
+
+          // for some reason this line was making a crazy number of
+          // refreshes when you were just sitting on the page.
+          // AggregateUI.getUI().getTimer().refreshNow();
+        } else {
+          AggregateUI.getUI().reportError(caught);
+        }
       }
 
       @Override
-      public void onSuccess(List<TableEntryClient> tables) {
+      public void onSuccess(ArrayList<TableEntryClient> tables) {
         AggregateUI.getUI().clearError();
         tableList.updateTableList(tables);
         tableList.setVisible(true);

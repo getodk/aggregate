@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -38,11 +38,11 @@ public class TableDefinitionResource extends TableDefinition {
   }
 
   public TableDefinitionResource(TableDefinition definition) {
-    this(definition.getTableId(), definition.getSchemaETag(), definition.getColumns(), definition.getDisplayName());
+    this(definition.getTableId(), definition.getSchemaETag(), definition.getColumns());
   }
 
-  public TableDefinitionResource(String tableId, String schemaETag, List<Column> columns, String displayName) {
-    super(tableId, schemaETag, columns, displayName);
+  public TableDefinitionResource(String tableId, String schemaETag, ArrayList<Column> columns) {
+    super(tableId, schemaETag, columns);
   }
 
   public String getSelfUri() {

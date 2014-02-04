@@ -33,10 +33,8 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.interceptor.AggregateRequestInterceptor;
-import org.opendatakit.aggregate.odktables.rest.serialization.JsonObjectHttpMessageConverter;
-import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
-import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXmlHttpMessageConverter;
-import org.simpleframework.xml.Serializer;
+import org.opendatakit.aggregate.odktables.rest.serialization.OdkJsonHttpMessageConverter;
+import org.opendatakit.aggregate.odktables.rest.serialization.OdkXmlHttpMessageConverter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -75,11 +73,10 @@ public class AggregateSynchronizer {
     this.rt = new RestTemplate();
 //    this.rt.setInterceptors(interceptors);
 
-    Serializer serializer = SimpleXMLSerializerForAggregate.getSerializer();
     List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 
-    converters.add(new JsonObjectHttpMessageConverter());
-    converters.add(new SimpleXmlHttpMessageConverter(serializer));
+    converters.add(new OdkJsonHttpMessageConverter(false));
+    converters.add(new OdkXmlHttpMessageConverter());
     this.rt.setMessageConverters(converters);
 
     List<MediaType> acceptableMediaTypes = new ArrayList<MediaType>();
@@ -123,13 +120,11 @@ public class AggregateSynchronizer {
     return tables;
   }
 
-  public TableResource createTable(String tableId, List<Column> columns, String displayName,
-      String tableProperties) throws IOException {
+  public TableResource createTable(String tableId, String schemaETag, ArrayList<Column> columns) throws IOException {
 
     // build request
     URI uri = baseUri.resolve(tableId);
-    TableDefinition definition = new TableDefinition(tableId, columns);
-    definition.setDisplayName(displayName);
+    TableDefinition definition = new TableDefinition(tableId, schemaETag, columns);
     HttpEntity<TableDefinition> requestEntity = new HttpEntity<TableDefinition>(definition,
         requestHeaders);
     // create table
@@ -200,20 +195,19 @@ public class AggregateSynchronizer {
     }
   }
 
-  public PropertiesResource setTableProperties(String tableId, String propertiesETag,
-      String tableName, String tableProperties) throws IOException {
+  public PropertiesResource setTableProperties(String schemaETag, String propertiesETag, String tableId) throws IOException {
     TableResource resource = getResource(tableId);
 
-    List<OdkTablesKeyValueStoreEntry> keyValueStoreEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+    ArrayList<OdkTablesKeyValueStoreEntry> keyValueStoreEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
     entry.partition = KeyValueStoreConstants.PARTITION_TABLE;
     entry.aspect = "metadata";
     entry.key = "my_value";
     entry.type = "text";
-    entry.value = tableProperties;
+    entry.value = "aValue";
     keyValueStoreEntries.add(entry);
     // put new properties
-    TableProperties properties = new TableProperties(propertiesETag, tableName, keyValueStoreEntries);
+    TableProperties properties = new TableProperties(schemaETag, propertiesETag, tableId, keyValueStoreEntries);
     HttpEntity<TableProperties> entity = new HttpEntity<TableProperties>(properties, requestHeaders);
     ResponseEntity<PropertiesResource> updatedEntity;
     try {

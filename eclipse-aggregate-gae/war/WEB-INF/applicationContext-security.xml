@@ -264,7 +264,8 @@
 		<beans:constructor-arg name="entryPoints">
 			<beans:map>
                       <beans:entry key="hasHeader('X-OpenRosa-Version','1.0')" value-ref="${security.server.deviceAuthentication}EntryPoint" />
-			</beans:map>
+                      <beans:entry key="hasHeader('X-OpenDataKit-Version','2.0')" value-ref="${security.server.deviceAuthentication}EntryPoint" />
+                      			</beans:map>
 		</beans:constructor-arg>
 		<beans:property name="defaultEntryPoint" ref="openIdEntryPoint" />
 	</beans:bean>
