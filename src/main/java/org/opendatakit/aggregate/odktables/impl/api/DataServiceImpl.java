@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.core.UriBuilder;
@@ -84,17 +85,9 @@ public class DataServiceImpl implements DataService {
   public RowResource createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
       ODKDatastoreException, EtagMismatchException, PermissionDeniedException,
       BadColumnNameException {
-    // TODO re-do permissions stuff
-    //af.checkPermission(TablePermission.WRITE_ROW);
     row.setRowId(rowId);
-    Row dbRow = dm.getRow(rowId);
-    if (dbRow == null) {
-      row = dm.insertRow(row);
-    } else {
-      // TODO re-do permissions stuff
-      //af.checkFilter(TablePermission.UNFILTERED_WRITE, dbRow);
-      row = dm.updateRow(row);
-    }
+    List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(row));
+    row = changes.get(0);
     RowResource resource = getResource(row);
     return resource;
   }

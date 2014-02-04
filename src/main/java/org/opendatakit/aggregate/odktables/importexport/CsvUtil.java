@@ -34,6 +34,10 @@ import au.com.bytecode.opencsv.CSVReader;
  * Holds various things for importing and exporting tables through CSVs.
  * <p>
  * Modified from the same class on the phone.
+ *
+ * TODO: subclass from phone definition and modify to fit server.
+ * TODO: THIS IS BROKEN!!!!
+ *
  * @author sudar.sam@gmail.com
  *
  */

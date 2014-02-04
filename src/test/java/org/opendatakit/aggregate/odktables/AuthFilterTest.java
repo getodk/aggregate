@@ -42,9 +42,6 @@ public class AuthFilterTest {
 
   private CallingContext cc;
   private String tableId;
-  private String tableKey;
-  private String dbTableName;
-  private String tableIdAccessControls;
   private TableManager tm;
   private TableAclManager am;
   private AuthFilter af;
@@ -56,9 +53,8 @@ public class AuthFilterTest {
     this.tableId = T.tableId;
     this.tm = new TableManager(cc);
 
-    tm.createTable(tableId, T.tableKey, T.dbTableName,
-        T.tableType, T.tableIdAccessControls, T.columns,
-        T.kvsEntries);
+    tm.createTable(tableId,
+        T.columns, T.kvsEntries);
 
     this.am = new TableAclManager(tableId, cc);
     this.af = new AuthFilter(tableId, cc);
@@ -115,7 +111,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.DEFAULT, null));
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test(expected = PermissionDeniedException.class)
@@ -125,7 +121,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(Scope.EMPTY_SCOPE);
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test
@@ -135,7 +131,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(currentUserScope);
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test(expected = PermissionDeniedException.class)
@@ -145,7 +141,7 @@ public class AuthFilterTest {
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
     Row row = Row.forInsert("1", Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.USER, currentUserScope.getValue() + "diff"));
-    af.checkFilter(TablePermission.UNFILTERED_READ, row);
+    af.checkFilter(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope());
   }
 
   @Test

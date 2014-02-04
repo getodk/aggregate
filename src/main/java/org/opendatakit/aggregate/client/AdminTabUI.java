@@ -24,13 +24,15 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class AdminTabUI extends AggregateTabBase {
 
+  private PermissionsSubTab permissionsSubTab;
   private OdkTablesAdminSubTab odkTablesAdminTab;
 
   public AdminTabUI(AggregateUI baseUI) {
     super();
 
     // build the UI
-    addSubTab(new PermissionsSubTab(), SubTabs.PERMISSIONS);
+    permissionsSubTab = new PermissionsSubTab();
+    addSubTab(permissionsSubTab, SubTabs.PERMISSIONS);
     addSubTab(new PreferencesSubTab(), SubTabs.PREFERENCES);
 
     odkTablesAdminTab = new OdkTablesAdminSubTab();
@@ -63,10 +65,12 @@ public class AdminTabUI extends AggregateTabBase {
 
   public void displayOdkTablesSubTab() {
     changeVisibilityOdkTablesSubTab(true);
+    permissionsSubTab.changeTablesPrivilegesVisibility(true);
   }
 
   public void hideOdkTablesSubTab() {
     changeVisibilityOdkTablesSubTab(false);
+    permissionsSubTab.changeTablesPrivilegesVisibility(false);
   }
 
 }

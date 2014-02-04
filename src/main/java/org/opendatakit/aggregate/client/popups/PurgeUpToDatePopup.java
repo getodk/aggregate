@@ -45,7 +45,7 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
     super();
 
     this.summary = formSummary;
-    
+
     confirm = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     confirm.addClickHandler(new PurgeHandler());
     confirm.setEnabled(false);
@@ -66,7 +66,7 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
       }});
 
     FlexTable layout = new FlexTable();
-    layout.setWidget(0, 0, new HTML("Purge submissions data for:<br>" 
+    layout.setWidget(0, 0, new HTML("Purge submissions data for:<br>"
         + formSummary.getTitle() + " [" + formSummary.getId() + "]<br>up to the chosen GMT date.<br>Incomplete submissions will<br>not be deleted."));
     layout.setWidget(0, 1, picker);
     layout.setWidget(0, 2, confirm);
@@ -79,10 +79,11 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
     public void onClick(ClickEvent event) {
 
       // set time to one millisecond past midnight at the start of the chosen day
-      Date theDate = new Date( Date.UTC(selectedDate.getYear(), 
-                                selectedDate.getMonth(), selectedDate.getDate(), 
+      @SuppressWarnings("deprecation")
+      Date theDate = new Date( Date.UTC(selectedDate.getYear(),
+                                selectedDate.getMonth(), selectedDate.getDate(),
                                 0, 0, 0));
-      
+
       if ( theDate.getTime() > System.currentTimeMillis() ) {
         // if in the future -- reset to current time...
         theDate = new Date();

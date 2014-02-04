@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Relation;
@@ -215,5 +216,33 @@ public class DbKeyValueStore extends Relation {
       results.add(new DbKeyValueStoreEntity(e));
     }
     return results;
+  }
+
+  /**
+   * Get the displayName of a given tableId
+   *
+   * @param tableId
+   * @param propertiesEtag
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static String getDisplayName(String tableId, String propertiesEtag,
+      CallingContext cc) throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbKeyValueStore.getDisplayName", cc);
+    query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
+    query.addFilter(PROPERTIES_ETAG, FilterOperation.EQUAL, propertiesEtag);
+    query.addFilter(PARTITION, FilterOperation.EQUAL, KeyValueStoreConstants.PARTITION_TABLE);
+    query.addFilter(ASPECT, FilterOperation.EQUAL, KeyValueStoreConstants.ASPECT_DEFAULT);
+    query.addFilter(KEY, FilterOperation.EQUAL, KeyValueStoreConstants.TABLE_DISPLAY_NAME);
+
+    List<Entity> list = query.execute();
+    if ( list.size() != 1 ) {
+      return "Ill-defined";
+    } else {
+      Entity e = list.get(0);
+      return e.getString(VALUE);
+    }
   }
 }
