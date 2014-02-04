@@ -494,8 +494,10 @@ public class DataManager {
         rowId = CommonFieldsBase.newUri();
         row.setRowId(rowId);
       }
+      boolean nullIncomingScope = false;
       Scope scope = row.getFilterScope();
       if (scope == null) {
+        nullIncomingScope = true;
         scope = Scope.EMPTY_SCOPE;
         row.setFilterScope(scope);
       }
@@ -507,8 +509,10 @@ public class DataManager {
           throw new  InconsistentStateException("Synthesized rowId collides with existing row in table " + tableId + ".");
         }
 
-        // ignore supplied scope if we are updating an existing entity -- use its current scope instead.
-        scope = converter.getDbTableFilterScope(entity);
+        if ( nullIncomingScope ) {
+          // preserve the scope of the existing entity if the incoming Row didn't specify one.
+          scope = converter.getDbTableFilterScope(entity);
+        }
 
         // confirm that the user has the ability to read the row
         boolean hasPermissions = false;

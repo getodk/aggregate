@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -43,6 +44,7 @@ import org.opendatakit.common.web.TestContextFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+@Ignore
 public class AuthFilterTest {
 
   private CallingContext cc;

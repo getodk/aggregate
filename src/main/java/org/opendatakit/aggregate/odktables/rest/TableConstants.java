@@ -38,7 +38,7 @@ public class TableConstants {
 
   // tablename is chosen by user...
   public static final String ID = "_id";
-  public static final String SYNC_TAG = "_sync_tag";
+  public static final String ROW_ETAG = "_row_etag";
   public static final String SYNC_STATE = "_sync_state";
   public static final String CONFLICT_TYPE = "_conflict_type";
 
@@ -100,7 +100,7 @@ public class TableConstants {
     CLIENT_ONLY_COLUMN_NAMES.add(ID);
     CLIENT_ONLY_COLUMN_NAMES.add(SAVEPOINT_TYPE);
     CLIENT_ONLY_COLUMN_NAMES.add(SYNC_STATE);
-    CLIENT_ONLY_COLUMN_NAMES.add(SYNC_TAG);
+    CLIENT_ONLY_COLUMN_NAMES.add(ROW_ETAG); // somewhat of a misnomer -- this is transmitted, but never overwrites server.
     CLIENT_ONLY_COLUMN_NAMES.add(CONFLICT_TYPE);
   }
 
@@ -110,7 +110,6 @@ public class TableConstants {
   //  1391456202000000000 -- nanoseconds (19 char)
   public static final String MILLI_TO_NANO_TIMESTAMP_EXTENSION = "000000";
   public static final int NANO_TIME_LENGTH = 19;
-  public static final int MILLI_TIME_LENGTH = NANO_TIME_LENGTH - MILLI_TO_NANO_TIMESTAMP_EXTENSION.length();
 
   public static String nanoSecondsFromMillis(Long timeMillis ) {
     if ( timeMillis == null ) return null;
@@ -127,6 +126,6 @@ public class TableConstants {
       throw new IllegalArgumentException("unexpected length for nanosecond time");
     }
     //
-    return Long.parseLong(timeNanos.substring(0,MILLI_TIME_LENGTH));
+    return Long.parseLong(timeNanos.substring(0,timeNanos.length()-MILLI_TO_NANO_TIMESTAMP_EXTENSION.length()));
   }
 }

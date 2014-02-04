@@ -204,11 +204,15 @@ public class SerializationTest {
   public void testListOfRowResource() throws Exception {
     ArrayList<RowResource> expected = new ArrayList<RowResource>();
     RowResource one = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues()));
+    one.setSelfUri("http://localhost/tables/1/rows/1");
+    one.setTableUri("http://localhost/tables/1");
     RowResource two = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.JOHN.getValues()));
+    two.setSelfUri("http://localhost/tables/1/rows/2");
+    two.setTableUri("http://localhost/tables/1");
     expected.add(one);
     expected.add(two);
-
-    serializer.write(new RowResourceList(expected), writer);
+    RowResourceList rrl = new RowResourceList(expected);
+    serializer.write(rrl, writer);
     String xml = writer.toString();
     System.out.println(xml);
     RowResourceList rrList = serializer.read(RowResourceList.class, xml);

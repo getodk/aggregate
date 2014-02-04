@@ -280,6 +280,10 @@ public class TableManager {
         List<DbColumnDefinitionsEntity> cols = DbColumnDefinitions.query(tableId,
             existing.getSchemaETag(), cc);
 
+        if ( cols.size() != columns.size() ) {
+          throw new TableAlreadyExistsException(String.format(
+              "Table with tableId '%s' already exists with a different number of columns.", tableId));
+        }
         for (DbColumnDefinitionsEntity cde : cols) {
           boolean found = false;
           for (Column column : columns) {

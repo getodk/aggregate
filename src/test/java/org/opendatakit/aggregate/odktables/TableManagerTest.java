@@ -131,13 +131,13 @@ public class TableManagerTest {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
+    tableProperties = pm.setProperties(tableProperties);
 
     entry = tm.getTable(tableId);
     assertEquals(tableId, entry.getTableId());
     assertNotNull(entry.getPropertiesETag());
-    assertEquals(T.propertiesETag, entry.getPropertiesETag());
+    assertEquals(tableProperties.getPropertiesETag(), entry.getPropertiesETag());
     // data eTag is null when table is first created
     assertTrue(null == entry.getDataETag());
   }
@@ -205,14 +205,14 @@ public class TableManagerTest {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
     TableEntry entry2 = tm.createTable(tableId2, T.columns);
     PropertiesManager pm2 = new PropertiesManager( tableId2, userPermissions, cc);
-    TableProperties tableProperties2 = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId2, T.kvsEntries);
-    pm2.setProperties(tableProperties);
+    TableProperties tableProperties2 = new TableProperties(entry2.getSchemaETag(), null, tableId2, T.kvsEntries);
+    pm2.setProperties(tableProperties2);
     tm.createTable(tableId2, T.columns);
     TableEntry two = tm.getTable(tableId2);
 
@@ -262,7 +262,7 @@ public class TableManagerTest {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
     PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
+    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     tm.deleteTable(tableId);
     tm.getTableNullSafe(tableId);
