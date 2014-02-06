@@ -33,7 +33,7 @@ public class TableEntryClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = -7094543853434685403L;
+  private static final long serialVersionUID = -70945438534365403L;
 
   private String tableId;
   private String displayName;

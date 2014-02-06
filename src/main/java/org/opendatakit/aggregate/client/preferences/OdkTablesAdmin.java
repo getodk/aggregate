@@ -23,7 +23,7 @@ public class OdkTablesAdmin implements Serializable{
   /**
    *
    */
-  private static final long serialVersionUID = 7628052757666367473L;
+  private static final long serialVersionUID = 762805275766667473L;
 
   private String uriUser;
 
