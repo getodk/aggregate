@@ -32,7 +32,7 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
   /**
    *
    */
-  private static final long serialVersionUID = 8148313936521796890L;
+  private static final long serialVersionUID = 81481336521796890L;
   private String selfUri;
   private String definitionUri;
   private String propertiesUri;

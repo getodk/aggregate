@@ -37,7 +37,7 @@ public class TableContentsForFilesClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -5644953958281330963L;
+  private static final long serialVersionUID = -564495395828330963L;
 
   public TableContentsForFilesClient() {
     // necessary for gwt serialization

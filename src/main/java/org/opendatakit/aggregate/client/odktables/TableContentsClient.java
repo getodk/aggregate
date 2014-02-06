@@ -35,7 +35,7 @@ public class TableContentsClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -6147882937837108751L;
+  private static final long serialVersionUID = -61478297837108751L;
 
   public TableContentsClient() {
     // necessary for gwt serialization
