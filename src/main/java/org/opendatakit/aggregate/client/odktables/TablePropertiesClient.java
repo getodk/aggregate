@@ -35,7 +35,7 @@ public class TablePropertiesClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = 197746211663068996L;
+  private static final long serialVersionUID = 1977461163068996L;
 
   private String schemaETag;
   private String propertiesETag;

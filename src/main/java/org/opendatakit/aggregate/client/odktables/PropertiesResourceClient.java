@@ -34,7 +34,7 @@ public class PropertiesResourceClient extends TablePropertiesClient implements S
   /**
    *
    */
-  private static final long serialVersionUID = -3016334795208571037L;
+  private static final long serialVersionUID = -30163347528571037L;
   private String selfUri;
   private String tableUri;
 

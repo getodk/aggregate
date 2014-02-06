@@ -34,7 +34,7 @@ public class TableDefinitionClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = -1413634509888543150L;
+  private static final long serialVersionUID = -113634509888543150L;
 
   private String tableId;
   private String displayName;

@@ -36,7 +36,7 @@ public class RowClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = -3396839962551194663L;
+  private static final long serialVersionUID = -33968399625514663L;
 
   private String rowId;
 
