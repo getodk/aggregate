@@ -70,7 +70,7 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
 
   @Override
   public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
-    output.append(BasicConsts.LEFT_BRACE);
+    output.append(BasicConsts.LEFT_BRACKET);
     first = true;
   }
 
@@ -90,7 +90,7 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
 
   @Override
   public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
-    output.append(BasicConsts.RIGHT_BRACE);
+    output.append(BasicConsts.RIGHT_BRACKET);
   }
 
   @Override
