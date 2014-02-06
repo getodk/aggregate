@@ -32,7 +32,7 @@ public class RowResourceClient extends RowClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -629546633036596904L;
+  private static final long serialVersionUID = -6295463336596904L;
   private String selfUri;
   private String tableUri;
 
