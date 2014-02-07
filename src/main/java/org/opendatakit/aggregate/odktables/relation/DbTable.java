@@ -48,33 +48,34 @@ public class DbTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
-  public static final DataField ROW_VERSION = new DataField("ROW_VERSION", DataType.STRING, false);
+  public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
   /**
    * This should hold the data etag at the time the row was modified/created.
    */
   public static final DataField DATA_ETAG_AT_MODIFICATION =
-      new DataField("DATA_ETAG_AT_MODIFICATION", DataType.STRING, false);
-  public static final DataField CREATE_USER = new DataField("CREATE_USER", DataType.STRING, true);
-  public static final DataField LAST_UPDATE_USER = new DataField("LAST_UPDATE_USER", DataType.STRING, true);
-  public static final DataField FILTER_TYPE = new DataField("FILTER_TYPE", DataType.STRING, true);
-  public static final DataField FILTER_VALUE = new DataField("FILTER_VALUE", DataType.STRING, true)
+      new DataField("_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false);
+  public static final DataField CREATE_USER = new DataField("_CREATE_USER", DataType.STRING, true);
+  public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER", DataType.STRING, true);
+  public static final DataField FILTER_TYPE = new DataField("_FILTER_TYPE", DataType.STRING, true);
+  public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
                         .setIndexable(IndexType.HASH);
-  public static final DataField DELETED = new DataField("DELETED", DataType.BOOLEAN, false);
+  public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
+
   public static final DataField URI_ACCESS_CONTROL = new DataField(TableConstants.URI_ACCESS_CONTROL.toUpperCase(),
       DataType.STRING, true);
   public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
       DataType.STRING, true);
-  public static final DataField INSTANCE_NAME = new DataField(TableConstants.INSTANCE_NAME.toUpperCase(),
-      DataType.STRING, true);
   public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
       DataType.STRING, true);
-  public static final DataField TIMESTAMP = new DataField(TableConstants.TIMESTAMP.toUpperCase(),
-      DataType.DATETIME, true);
+  // milliseconds
+  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(),
+      DataType.INTEGER, true);
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    dataFields.add(ROW_VERSION);
+    // server-side metadata
+    dataFields.add(ROW_ETAG);
     dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(CREATE_USER);
     dataFields.add(LAST_UPDATE_USER);
@@ -82,19 +83,18 @@ public class DbTable extends Relation {
     dataFields.add(FILTER_VALUE);
     dataFields.add(DELETED);
 
-    // And now make the OdkTables metadata columns.
+    // common metadata
     dataFields.add(URI_ACCESS_CONTROL);
     dataFields.add(FORM_ID);
-    dataFields.add(INSTANCE_NAME);
     dataFields.add(LOCALE);
-    dataFields.add(TIMESTAMP);
+    dataFields.add(SAVEPOINT_TIMESTAMP);
   }
 
   private static final EntityConverter converter = new EntityConverter();
 
-  public static DbTable getRelation(String tableId, String propertiesEtag, CallingContext cc)
+  public static DbTable getRelation(String tableId, String schemaEtag, CallingContext cc)
       throws ODKDatastoreException {
-    List<DataField> fields = getDynamicFields(tableId, propertiesEtag, cc);
+    List<DataField> fields = getDynamicFields(tableId, schemaEtag, cc);
     fields.addAll(getStaticFields());
     return getRelation(tableId, fields, cc);
   }
@@ -107,10 +107,10 @@ public class DbTable extends Relation {
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, String propertiesEtag,
+  private static List<DataField> getDynamicFields(String tableId, String schemaEtag,
       CallingContext cc)
       throws ODKDatastoreException {
-    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, propertiesEtag, cc);
+    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaEtag, cc);
     return converter.toFields(entities);
   }
 

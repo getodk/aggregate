@@ -36,7 +36,6 @@ public class PropertiesManagerTest {
   private CallingContext cc;
   private String ePropertiesTag;
   private String tableId;
-  private String tableName;
   private String tableMetadata;
   private TableManager tm;
   private PropertiesManager pm;
@@ -46,13 +45,11 @@ public class PropertiesManagerTest {
     this.cc = TestContextFactory.getCallingContext();
 
     this.tableId = T.tableId;
-    this.tableName = T.tableName;
     this.tableMetadata = T.tableMetadata;
     this.tm = new TableManager(cc);
 
-    TableEntry te = tm.createTable(tableId, T.tableKey, T.dbTableName,
-        T.tableType, T.tableIdAccessControls, T.columns,
-        T.kvsEntries);
+    TableEntry te = tm.createTable(tableId,
+        T.columns, T.kvsEntries);
     this.ePropertiesTag = te.getPropertiesEtag();
 
     this.pm = new PropertiesManager(tableId, cc);

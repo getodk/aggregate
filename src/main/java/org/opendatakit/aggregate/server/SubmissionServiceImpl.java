@@ -72,7 +72,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-      
+
       SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
       GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(filterGroup, summary, form);
       headerGenerator.processForHeaderInfo(form.getTopLevelGroupElement());
@@ -81,7 +81,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
           headerGenerator.getGeopointIncludes());
       List<FormElementNamespace> includedTypes = headerGenerator.includedFormElementNamespaces();
       query.populateSubmissions(summary, filteredElements, elemFormatter, includedTypes, cc);
-      
+
       return summary;
 
     } catch (ODKFormNotFoundException e) {
@@ -100,7 +100,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
 
   @Override
-  public SubmissionUISummary getRepeatSubmissions(String keyString) 
+  public SubmissionUISummary getRepeatSubmissions(String keyString)
       throws FormNotAvailableException, RequestFailureException, DatastoreFailureException, AccessDeniedException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -122,7 +122,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       if (sub != null) {
         SubmissionElement tmp = sub.resolveSubmissionKey(parts);
         RepeatSubmissionType repeat = (RepeatSubmissionType) tmp;
-        
+
         SubmissionUISummary summary = new SubmissionUISummary(form.getViewableName());
         GenerateHeaderInfo headerGenerator = new GenerateHeaderInfo(null, summary, form);
         headerGenerator.processForHeaderInfo(repeat.getElement());
@@ -136,12 +136,11 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
           try {
             summary.addSubmission(new SubmissionUI(row.getFormattedValues(), null));
           } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
           }
         }
         return summary;
-        
+
       } else {
         return null;
       }

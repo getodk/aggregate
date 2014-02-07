@@ -19,12 +19,18 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.servlet.CommonServletBase;
@@ -119,6 +125,37 @@ public class ServletUtilBase extends CommonServletBase {
   private static final String TABLE_STYLE_RESOURCE = "stylesheets/table.css";
   private static final String UPLOAD_STYLE_RESOURCE = "stylesheets/navigation.css";
 
+
+  /**
+   * Determine the OpenRosa version number on this request.
+   * @param req
+   * @return null if unspecified (1.1.5 and earlier); otherwise, e.g., "1.0"
+   */
+  protected final Double getOpenRosaVersion(HttpServletRequest req) {
+   String value = req.getHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER);
+   if ( value == null || value.length() == 0 ) return null;
+   Double d = Double.valueOf(value);
+   return d;
+  }
+
+  protected final void addOpenRosaHeaders(HttpServletResponse resp) {
+   resp.setHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER, ServletConsts.OPEN_ROSA_VERSION );
+    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    g.setTime(new Date());
+    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
+    formatter.setCalendar(g);
+    resp.setHeader(ApiConstants.DATE_HEADER,  formatter.format(new Date()));
+    resp.setHeader(ServletConsts.OPEN_ROSA_ACCEPT_CONTENT_LENGTH_HEADER, "10485760"); // 10MB
+  }
+
+  protected final void addOpenDataKitHeaders(HttpServletResponse resp) {
+    resp.setHeader(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
+    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+    g.setTime(new Date());
+    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
+    formatter.setCalendar(g);
+    resp.setHeader(ApiConstants.DATE_HEADER,  formatter.format(new Date()));
+  }
 
   @Override
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,

@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.client.PermissionsSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
+import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.EmailParser;
@@ -95,6 +96,11 @@ public class AccessConfigurationSheet extends Composite {
 
   private boolean changesHappened = false;
 
+  private GroupMembershipColumn formsAdmin;
+  private GroupMembershipColumn synchronizeTables;
+  private GroupMembershipColumn administerTables;
+  private GroupMembershipColumn siteAdmin;
+
   public boolean isUiOutOfSyncWithServer() {
     return changesHappened;
   }
@@ -143,6 +149,16 @@ public class AccessConfigurationSheet extends Composite {
         return (key.getType() != UserType.ANONYMOUS);
       }
 
+      if (auth == GrantedAuthorityName.GROUP_ADMINISTER_TABLES) {
+        // anonymous user cannot synchronize tables
+        return (key.getType() != UserType.ANONYMOUS);
+      }
+
+      if (auth == GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES) {
+        // anonymous user cannot synchronize tables
+        return (key.getType() != UserType.ANONYMOUS);
+      }
+
       if (auth == GrantedAuthorityName.GROUP_DATA_COLLECTORS) {
         // data collectors can only be ODK accounts...
         return (key.getUsername() != null);
@@ -173,6 +189,18 @@ public class AccessConfigurationSheet extends Composite {
       case GROUP_DATA_VIEWERS:
         if (assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
             || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+          return false;
+        }
+        return true;
+      case GROUP_SYNCHRONIZE_TABLES:
+        if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+          return false;
+        }
+        // TODO: relax this
+        // table synchronizers must have a gmail (OAuth2) account
+        return (info.getUsername() == null);
+      case GROUP_ADMINISTER_TABLES:
+        if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
           return false;
         }
         return true;
@@ -276,6 +304,12 @@ public class AccessConfigurationSheet extends Composite {
       case GROUP_FORM_MANAGERS:
         return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
             || assignedGroups.contains(auth);
+      case GROUP_SYNCHRONIZE_TABLES:
+        return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+            || assignedGroups.contains(auth);
+      case GROUP_ADMINISTER_TABLES:
+        return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+            || assignedGroups.contains(auth);
       case GROUP_SITE_ADMINS:
         return assignedGroups.contains(auth);
       default:
@@ -320,6 +354,8 @@ public class AccessConfigurationSheet extends Composite {
   public void updateUsersOnServer() {
     ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
     allGroups.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
+    allGroups.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
+    allGroups.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
     allGroups.add(GrantedAuthorityName.GROUP_FORM_MANAGERS);
     allGroups.add(GrantedAuthorityName.GROUP_DATA_VIEWERS);
     allGroups.add(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
@@ -339,6 +375,10 @@ public class AccessConfigurationSheet extends Composite {
         if (i.getUsername() == null) {
           // don't allow Google users to be data collectors
           i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+        } else {
+          // TODO: relax thisx
+          // don't allow non-Google users to synchronize tables
+          i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
         }
       }
     }
@@ -684,22 +724,62 @@ public class AccessConfigurationSheet extends Composite {
     GroupMembershipColumn dv = new GroupMembershipColumn(GrantedAuthorityName.GROUP_DATA_VIEWERS);
     userTable.addColumn(dv, GrantedAuthorityName.GROUP_DATA_VIEWERS.getDisplayText());
 
-    GroupMembershipColumn fm = new GroupMembershipColumn(GrantedAuthorityName.GROUP_FORM_MANAGERS);
-    userTable.addColumn(fm, GrantedAuthorityName.GROUP_FORM_MANAGERS.getDisplayText());
-
-    GroupMembershipColumn sa = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SITE_ADMINS);
-    userTable.addColumn(sa, GrantedAuthorityName.GROUP_SITE_ADMINS.getDisplayText());
-
-    dataProvider.addDataDisplay(userTable);
+    formsAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_FORM_MANAGERS);
+    userTable.addColumn(formsAdmin, GrantedAuthorityName.GROUP_FORM_MANAGERS.getDisplayText());
 
     columnSortHandler.setComparator(username, username.getComparator());
     columnSortHandler.setComparator(fullname, fullname.getComparator());
     columnSortHandler.setComparator(type, type.getComparator());
     columnSortHandler.setComparator(dc, dc.getComparator());
     columnSortHandler.setComparator(dv, dv.getComparator());
-    columnSortHandler.setComparator(fm, fm.getComparator());
-    columnSortHandler.setComparator(sa, sa.getComparator());
+    columnSortHandler.setComparator(formsAdmin, formsAdmin.getComparator());
+
+    synchronizeTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
+    if ( Preferences.getOdkTablesEnabled() ) {
+      userTable.addColumn(synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
+    }
+
+    administerTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
+    if ( Preferences.getOdkTablesEnabled() ) {
+      userTable.addColumn(administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
+    }
+
+    columnSortHandler.setComparator(synchronizeTables, synchronizeTables.getComparator());
+    columnSortHandler.setComparator(administerTables, administerTables.getComparator());
+
+    siteAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SITE_ADMINS);
+    userTable.addColumn(siteAdmin, GrantedAuthorityName.GROUP_SITE_ADMINS.getDisplayText());
+    columnSortHandler.setComparator(siteAdmin, siteAdmin.getComparator());
+
+    dataProvider.addDataDisplay(userTable);
+
     userTable.addColumnSortHandler(columnSortHandler);
+  }
+
+  public void changeTablesPrivilegesVisibility(boolean isVisible) {
+    int idxNow;
+
+    // insert or remove the synchronizeTables permissions
+    idxNow = userTable.getColumnIndex(synchronizeTables);
+    if ( isVisible && idxNow == -1) {
+      idxNow = userTable.getColumnIndex(formsAdmin);
+      if ( idxNow != -1) {
+        userTable.insertColumn(idxNow+1, synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
+      }
+    } else if ( !isVisible && idxNow != -1) {
+      userTable.removeColumn(idxNow);
+    }
+
+    // insert or remove the administerTables permissions
+    idxNow = userTable.getColumnIndex(administerTables);
+    if ( isVisible && idxNow == -1) {
+      idxNow = userTable.getColumnIndex(siteAdmin);
+      if ( idxNow != -1) {
+        userTable.insertColumn(idxNow, administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
+      }
+    } else if ( !isVisible && idxNow != -1) {
+      userTable.removeColumn(idxNow);
+    }
   }
 
   @Override

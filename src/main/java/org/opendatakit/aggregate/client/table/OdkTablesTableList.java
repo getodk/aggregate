@@ -89,12 +89,12 @@ public class OdkTablesTableList extends FlexTable {
 				// this will maintain the row you're adding to, always +1
 				// because of the title row
 				int j = i + 1;
-				setWidget(j, TABLE_NAME_COLUMN, new HTML("<b>" + table.getTableKey()+ "</b>"));
+				setWidget(j, TABLE_NAME_COLUMN, new HTML("<b>" + table.getDisplayName()+ "</b>"));
 				setWidget(j, DELETE_BUTTON_COLUMN, new OdkTablesDeleteTableButton(
 						this, table.getTableId()));
 				setWidget(j, VIEW_TABLE_BUTTON_COLUMN,
 				    new OdkTablesShowTableButton(this, table.getTableId(),
-				    table.getTableKey()));
+				    table.getDisplayName()));
 				setWidget(j, TABLE_FILES_BUTTON_COLUMN,
 				    new OdkTablesShowTableFilesButton(this, table.getTableId()));
 

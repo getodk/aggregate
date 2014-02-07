@@ -37,11 +37,11 @@ public class TableEntry {
   @Element(required = true)
   private String tableId;
 
-  @Element(required = true)
-  private String tableKey;
-
   @Element(required = false)
   private String dataEtag;
+
+  @Element(required = false)
+  private String schemaEtag;
 
   @Element(required = false)
   private String propertiesEtag;
@@ -49,20 +49,16 @@ public class TableEntry {
   protected TableEntry() {
   }
 
-  public TableEntry(final String tableId, String tableKey,
-      final String dataEtag, final String propertiesEtag) {
+  public TableEntry(final String tableId,
+      final String dataEtag, final String propertiesEtag, final String schemaEtag) {
     this.tableId = tableId;
-    this.tableKey = tableKey;
     this.dataEtag = dataEtag;
+    this.schemaEtag = schemaEtag;
     this.propertiesEtag = propertiesEtag;
   }
 
   public String getTableId() {
     return this.tableId;
-  }
-
-  public String getTableKey() {
-    return this.tableKey;
   }
 
   public String getDataEtag() {
@@ -85,14 +81,22 @@ public class TableEntry {
     this.propertiesEtag = propertiesEtag;
   }
 
+  public String getSchemaEtag() {
+    return schemaEtag;
+  }
+
+  public void setSchemaEtag(String schemaEtag) {
+    this.schemaEtag = schemaEtag;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
     result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
     result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
+    result = prime * result + ((schemaEtag == null) ? 0 : schemaEtag.hashCode());
     return result;
   }
 
@@ -109,17 +113,17 @@ public class TableEntry {
     }
     TableEntry other = (TableEntry) obj;
     return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (tableKey == null ? other.tableKey == null : tableKey.equals(other.tableKey))
         && (dataEtag == null ? other.dataEtag == null : dataEtag.equals(other.dataEtag))
-        && (propertiesEtag == null ? other.propertiesEtag == null : propertiesEtag.equals(other.propertiesEtag));
+        && (propertiesEtag == null ? other.propertiesEtag == null : propertiesEtag.equals(other.propertiesEtag))
+        && (schemaEtag == null ? other.schemaEtag == null : schemaEtag.equals(other.schemaEtag));
   }
 
   @Override
   public String toString() {
     return "TableEntry [tableId=" + tableId
-        + ", tableKey=" + tableKey
         + ", dataEtag=" + dataEtag
         + ", propertiesEtag=" + propertiesEtag
+        + ", schemaEtag=" + schemaEtag
         + "]";
   }
 }

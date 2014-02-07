@@ -82,11 +82,6 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
 				}
 			}
 
-			// TODO:
-			// if you fall through to here, you've either got 0 admins
-			// or you've returned something bizarre... not sure which it is...
-			// should make something to notify them this is the case.
-
 	   } catch (ODKDatastoreException e) {
 		   e.printStackTrace();
 		   throw new DatastoreFailureException(e);

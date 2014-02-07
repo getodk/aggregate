@@ -27,3 +27,5 @@ eclipse-aggregate-gae/war/WEB-INF/lib/jdo2-api-2\.3-eb\.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/jsr107cache-1\.1\.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/odk-gae-settings-latest\.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/gwt-servlet\.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/appengine-jsr107cache-1\.6\.6\.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/appengine-webapis\.jar

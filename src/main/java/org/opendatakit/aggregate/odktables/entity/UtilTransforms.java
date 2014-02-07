@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +48,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.common.utils.WebUtils;
 
 /**
  * Various methods for transforming objects from client to server code.
@@ -64,7 +66,7 @@ public class UtilTransforms {
     Column transformedColumn = new Column(client.getTableId(),
         client.getElementKey(), client.getElementName(),
         client.getElementType(), client.getListChildElementKeys(),
-        (client.getIsPersisted() != 0), client.getJoins());
+        (client.getIsPersisted() != 0));
     return transformedColumn;
   }
 
@@ -166,11 +168,13 @@ public class UtilTransforms {
     serverRow.setRowEtag(client.getRowEtag());
     serverRow.setRowId(client.getRowId());
     serverRow.setValues(client.getValues());
-    serverRow.setUriUser(client.getUriUser());
+    serverRow.setUriAccessControl(client.getUriAccessControl());
     serverRow.setFormId(client.getFormId());
-    serverRow.setInstanceName(client.getInstanceName());
     serverRow.setLocale(client.getLocale());
-    serverRow.setTimestamp(client.getTimestamp());
+    String isoDateStr = client.getSavepointTimestampIso8601Date();
+    Date isoDate = WebUtils.parseDate(isoDateStr);
+    Long time = (isoDate == null) ? null : isoDate.getTime();
+    serverRow.setSavepointTimestamp(time);
     return serverRow;
   }
 
@@ -234,9 +238,9 @@ public class UtilTransforms {
   /**
    * Transforms the object into client-side TableEntryClient object.
    */
-  public static TableEntryClient transform(TableEntry serverEntry) {
-    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(),
-        serverEntry.getTableKey(), serverEntry.getDataEtag(), serverEntry.getPropertiesEtag());
+  public static TableEntryClient transform(TableEntry serverEntry, String displayName) {
+    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(), displayName,
+        serverEntry.getDataEtag(), serverEntry.getPropertiesEtag(), serverEntry.getSchemaEtag());
     return clientEntry;
   }
 
@@ -244,10 +248,10 @@ public class UtilTransforms {
    * This method transforms the TableResource into a client-side
    * TableResourceClient object.
    */
-  public static TableResourceClient transform(TableResource serverResource) {
+  public static TableResourceClient transform(TableResource serverResource, String displayName) {
     TableResourceClient clientResource = new TableResourceClient(new TableEntryClient(
-        serverResource.getTableId(), serverResource.getTableKey(), serverResource.getDataEtag(),
-        serverResource.getPropertiesEtag()));
+        serverResource.getTableId(), displayName, serverResource.getDataEtag(),
+        serverResource.getPropertiesEtag(), serverResource.getSchemaEtag()));
     clientResource.setAclUri(serverResource.getAclUri());
     clientResource.setDataUri(serverResource.getDataUri());
     clientResource.setDiffUri(serverResource.getDiffUri());
@@ -291,11 +295,11 @@ public class UtilTransforms {
     row.setRowEtag(serverRow.getRowEtag());
     row.setRowId(serverRow.getRowId());
     row.setValues(serverRow.getValues());
-    row.setUriUser(serverRow.getUriUser());
+    row.setUriAccessControl(serverRow.getUriAccessControl());
     row.setFormId(serverRow.getFormId());
-    row.setInstanceName(serverRow.getInstanceName());
     row.setLocale(serverRow.getLocale());
-    row.setTimestamp(serverRow.getTimestamp());
+    Long time = serverRow.getSavepointTimestamp();
+    row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
     if (serverRow.getFilterScope().getType() == null) {
       row.setFilterScope(ScopeClient.EMPTY_SCOPE);
     } else {
@@ -329,11 +333,11 @@ public class UtilTransforms {
     rowClient.setRowEtag(serverResource.getRowEtag());
     rowClient.setRowId(serverResource.getRowId());
     rowClient.setValues(serverResource.getValues());
-    rowClient.setUriUser(serverResource.getUriUser());
+    rowClient.setUriAccessControl(serverResource.getUriAccessControl());
     rowClient.setFormId(serverResource.getFormId());
-    rowClient.setInstanceName(serverResource.getInstanceName());
     rowClient.setLocale(serverResource.getLocale());
-    rowClient.setTimestamp(serverResource.getTimestamp());
+    Long time = serverResource.getSavepointTimestamp();
+    rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
 
     RowResourceClient resource = new RowResourceClient(rowClient);
     resource.setSelfUri(serverResource.getSelfUri());

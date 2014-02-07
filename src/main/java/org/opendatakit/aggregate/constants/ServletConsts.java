@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,10 +20,10 @@ package org.opendatakit.aggregate.constants;
 
 /**
  * Constant values used in ODK aggregate to aid with servlet management
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class ServletConsts {
 
@@ -38,13 +38,11 @@ public final class ServletConsts {
 
   public static final String OPEN_ROSA_VERSION_HEADER = "X-OpenRosa-Version";
   public static final String OPEN_ROSA_VERSION = "1.0";
-  
-  public static final String OPEN_ROSA_DATE_HEADER = "Date";
 
   public static final String OPEN_ROSA_ACCEPT_CONTENT_LENGTH_HEADER = "X-OpenRosa-Accept-Content-Length";
-  
+
   /**
-   * Flag on submissions and form uploads indicating that this is 
+   * Flag on submissions and form uploads indicating that this is
    * a partial submission or form upload.
    */
   public static final String TRANSFER_IS_INCOMPLETE = "*isIncomplete*";
@@ -65,7 +63,7 @@ public final class ServletConsts {
    * The name of the property that includes the form id
    */
   public static final String FORM_ID = "formId";
-  
+
   /**
    * For OdkTables:
    * The argument for a tableId.
@@ -84,7 +82,7 @@ public final class ServletConsts {
   public static final String ATTEMPT_COUNT = "attemptCount";
 
   public static final String BACKEND_GAE_SERVICE = "background";
-  
+
   public static final String HOST = "Host";
   /**
    * The name of the property that determines how to format webpage
@@ -107,11 +105,11 @@ public final class ServletConsts {
   public static final String AS_ATTACHMENT = "as_attachment";
 
   public static final String OAUTH_CONSUMER_KEY = "anonymous";
-  
+
   public static final String OAUTH_CONSUMER_SECRET = "anonymous";
-  
+
   public static final String OAUTH_TOKEN_PARAMETER = "oauth_token";
-  
+
   public static final String OAUTH_TOKEN_SECRET_PARAMETER = "oauth_token_secret";
 
   public static final String DOWNLOAD_XML_BUTTON_TXT = "Download XML";
@@ -119,7 +117,7 @@ public final class ServletConsts {
   public static final String CSV_FILENAME_APPEND = "_results.csv";
 
   public static final String KML_FILENAME_APPEND = "_results.kml";
-  
+
   public static final String JSON_FILENAME_APPEND = "_results.json";
 
   public static final String RECORD_KEY = "record";
@@ -135,7 +133,7 @@ public final class ServletConsts {
    * cursor (fragmented Csv servlet).
    */
   public static final String NUM_ENTRIES = "numEntries";
-  
+
   public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
 
   public static final String START_DATE = "startDate";
@@ -150,5 +148,5 @@ public final class ServletConsts {
   public static final String UPLOAD_BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
 
   public static final String AGGREGATE_STYLE = "AggregateUI.css";
-  
+
 }

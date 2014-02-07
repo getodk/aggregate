@@ -31,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.TableManager;
-import org.opendatakit.aggregate.odktables.api.ColumnService;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
@@ -39,6 +38,8 @@ import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
+import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
@@ -73,7 +74,12 @@ public class TableServiceImpl implements TableService {
     List<TableEntry> entries = tm.getTables(scopes);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
-      resources.add(getResource(entry));
+      TableResource resource = getResource(entry);
+      if ( entry.getPropertiesEtag() != null ) {
+        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesEtag(), cc);
+        resource.setDisplayName(displayName);
+      }
+      resources.add(resource);
     }
     return resources;
   }
@@ -93,16 +99,32 @@ public class TableServiceImpl implements TableService {
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
     // TODO: add access control stuff
-    String tableKey = definition.getTableKey();
-    String dbTableName = definition.getDbTableName();
-    TableType type = definition.getType();
-    String tableIdAccessControls = definition.getTableIdAccessControls();
+    String displayName = definition.getDisplayName();
     List<Column> columns = definition.getColumns();
     // TODO: need a method to init a default minimal list of kvs entries.
     List<OdkTablesKeyValueStoreEntry> kvsEntries =
         new ArrayList<OdkTablesKeyValueStoreEntry>();
-    TableEntry entry = tm.createTable(tableId, tableKey, dbTableName, type,
-        tableIdAccessControls, columns, kvsEntries);
+
+    OdkTablesKeyValueStoreEntry tt;
+    tt = new OdkTablesKeyValueStoreEntry();
+    tt.tableId = tableId;
+    tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
+    tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+    tt.key = KeyValueStoreConstants.TABLE_TYPE;
+    tt.type = "string";
+    tt.value = TableType.DATA.name();
+    kvsEntries.add(tt);
+
+    tt = new OdkTablesKeyValueStoreEntry();
+    tt.tableId = tableId;
+    tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
+    tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
+    tt.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
+    tt.type = "json";
+    tt.value = displayName;
+    kvsEntries.add(tt);
+
+    TableEntry entry = tm.createTable(tableId, columns, kvsEntries);
     TableResource resource = getResource(entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return resource;
@@ -116,12 +138,6 @@ public class TableServiceImpl implements TableService {
     logger.info("tableId: " + tableId);
     DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
     ds.getDam().logUsage();
-  }
-
-  @Override
-  public ColumnService getColumns(String tableId) throws ODKDatastoreException {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   @Override
@@ -143,7 +159,6 @@ public class TableServiceImpl implements TableService {
   public TableAclService getAcl(String tableId) throws ODKDatastoreException {
     return new TableAclServiceImpl(tableId, info, cc);
   }
-
 
   @Override
   public TableDefinitionResource getDefinition(String tableId)
