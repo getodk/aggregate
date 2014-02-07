@@ -59,7 +59,7 @@ public class SerializationTest {
 
   @Test
   public void testRowForUpdate() throws Exception {
-    Row expected = Row.forUpdate("1", "5", T.Data.DYLAN.getValues());
+    Row expected = Row.forUpdate("1", "5", T.uri_access_control_2, T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.Data.DYLAN.getValues());
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
@@ -69,7 +69,7 @@ public class SerializationTest {
 
   @Test
   public void testRowInsert() throws Exception {
-    Row expected = Row.forInsert("1", T.Data.DYLAN.getValues());
+    Row expected = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues());
 
     serializer.write(expected, writer);
     String xml = writer.toString();
@@ -136,7 +136,7 @@ public class SerializationTest {
   @Test
   public void testRowResource() throws Exception {
     Map<String, String> values = T.Data.DYLAN.getValues();
-    RowResource expected = new RowResource(Row.forInsert("1", values));
+    RowResource expected = new RowResource(Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, values));
     expected.setSelfUri("http://localhost:8080/odktables/tables/1/rows/1");
     expected.setTableUri("http://localhost:8080/odktables/tables/1");
 
@@ -205,8 +205,8 @@ public class SerializationTest {
   @Test
   public void testListOfRow() throws Exception {
     List<Row> expected = new ArrayList<Row>();
-    Row one = Row.forInsert("1", T.Data.DYLAN.getValues());
-    Row two = Row.forInsert("1", T.Data.JOHN.getValues());
+    Row one = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.DYLAN.getValues());
+    Row two = Row.forInsert("1", T.uri_access_control_1, T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.Data.JOHN.getValues());
     expected.add(one);
     expected.add(two);
 

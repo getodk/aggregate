@@ -49,8 +49,24 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private static final String NEW_SERVICE_ACCOUNT_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> "
       + NEW_SERVICE_ACCOUNT_TXT;
 
+  private static final String ENKETO_API_CREDENTIALS_LABEL = "<h2>Enketo Webform Integration</h2>";
+  private static final String ENKETO_API_CREDENTIALS_INFO = "<p>See <a href=\"https://accounts.enketo.org/support/aggregate/\" target=\"_blank\">instructions</a> on how to do this.</p>";
+  private static final String ENKETO_API_URL_LABEL = "<h3>Enketo API URL</h3>";
+  private static final String ENKETO_API_URL_INFO = "<p>The URL of the Enketo service API</p>";
+  private static final String ENKETO_API_TOKEN = "<h3>Enketo API token</h3>";
+  private static final String ENKETO_API_TOKEN_INFO = "<p>Neccessary for authentication with the Enketo service</p>";
+
+  private static final String NEW_ENKETO_SERVICE_ACCOUNT_TXT = "Change Enketo API Configuration";
+  private static final String NEW_ENKETO_SERVICE_ACCOUNT_TOOLTIP_TXT = "Enter Enketo service URL and API token information.";
+  private static final String NEW_ENKETO_SERVICE_ACCOUNT_BALLOON_TXT = "Enter an Enketo service API URL and API token information to enable Enketo Webforms.";
+  private static final String NEW_ENKETO_SERVICE_ACCOUNT_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> "
+      + NEW_ENKETO_SERVICE_ACCOUNT_TXT;
+
   private Label simpleApiKey;
   private Label googleApiClientId;
+
+  private Label enketoApiUrl;
+  private Label enketoApiToken;
   private EnableOdkTablesCheckbox odkTablesEnable;
   private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
 
@@ -110,13 +126,51 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     labelApiClientIdInfo.setStylePrimaryName(INDENTED_STYLE);
     add(labelApiClientIdInfo);
 
-    setCredentialValues();
-
     ServletPopupButton newCredential = new ServletPopupButton(NEW_SERVICE_ACCOUNT_BUTTON_TEXT,
         NEW_SERVICE_ACCOUNT_TXT, UIConsts.SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR, this,
         NEW_SERVICE_ACCOUNT_TOOLTIP_TXT, NEW_SERVICE_ACCOUNT_BALLOON_TXT);
     newCredential.setStylePrimaryName(INDENTED_STYLE);
     add(newCredential);
+
+    HTML labelCredentialsSectionEnketo = new HTML(ENKETO_API_CREDENTIALS_LABEL);
+    add(labelCredentialsSectionEnketo);
+
+    HTML labelCredentialsInfoEnketo = new HTML(ENKETO_API_CREDENTIALS_INFO);
+    labelCredentialsInfoEnketo.setStylePrimaryName(INDENTED_STYLE);
+    add(labelCredentialsInfoEnketo);
+
+    HTML labelApiKeyHeadingEnketo = new HTML(ENKETO_API_URL_LABEL);
+    labelApiKeyHeadingEnketo.setStylePrimaryName(INDENTED_STYLE);
+    add(labelApiKeyHeadingEnketo);
+
+    enketoApiUrl = new Label();
+    enketoApiUrl.setStylePrimaryName(INDENTED_ENTRY_STYLE);
+    add(enketoApiUrl);
+
+    HTML labelApiKeyInfoEnketo = new HTML(ENKETO_API_URL_INFO);
+    labelApiKeyInfoEnketo.setStylePrimaryName(INDENTED_STYLE);
+    add(labelApiKeyInfoEnketo);
+
+    HTML labelApiClientIdHeadingEnketo = new HTML(ENKETO_API_TOKEN);
+    labelApiClientIdHeadingEnketo.setStylePrimaryName(INDENTED_STYLE);
+    add(labelApiClientIdHeadingEnketo);
+
+    enketoApiToken = new Label();
+    enketoApiToken.setStylePrimaryName(INDENTED_ENTRY_STYLE);
+    add(enketoApiToken);
+
+    HTML labelApiClientIdInfoEnketo = new HTML(ENKETO_API_TOKEN_INFO);
+    labelApiClientIdInfoEnketo.setStylePrimaryName(INDENTED_STYLE);
+    add(labelApiClientIdInfoEnketo);
+
+    ServletPopupButton newEnketoCredential = new ServletPopupButton(
+        NEW_ENKETO_SERVICE_ACCOUNT_BUTTON_TEXT, NEW_ENKETO_SERVICE_ACCOUNT_TXT,
+        UIConsts.ENKETO_SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR, this,
+        NEW_ENKETO_SERVICE_ACCOUNT_TOOLTIP_TXT, NEW_ENKETO_SERVICE_ACCOUNT_BALLOON_TXT);
+    newEnketoCredential.setStylePrimaryName(INDENTED_STYLE);
+    add(newEnketoCredential);
+
+    setCredentialValues();
     // add(new UpdateGMapsKeyButton(mapsApiKey));
     // add(new
     // UpdateGoogleClientCredentialsButton(googleApiClientId.getText()));
@@ -142,6 +196,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   private void setCredentialValues() {
     String value;
+    String enketoValue;
 
     value = SafeHtmlUtils.fromString(Preferences.getGoogleSimpleApiKey()).asString();
     if (value.length() == 0) {
@@ -164,6 +219,32 @@ public class PreferencesSubTab extends AggregateSubTabBase {
       googleApiClientId.setStyleName(DEFINED_STYLE, true);
     }
     googleApiClientId.setText(value);
+
+    enketoValue = SafeHtmlUtils.fromString(Preferences.getEnketoApiUrl()).asString();
+    if (enketoValue.length() == 0) {
+      enketoValue = "undefined";
+
+      enketoApiUrl.setStyleName(UNDEFINED_STYLE, true);
+      enketoApiUrl.setStyleName(DEFINED_STYLE, false);
+    } else {
+
+      enketoApiUrl.setStyleName(UNDEFINED_STYLE, false);
+      enketoApiUrl.setStyleName(DEFINED_STYLE, true);
+    }
+    enketoApiUrl.setText(enketoValue);
+
+    enketoValue = SafeHtmlUtils.fromString(Preferences.getEnketoApiToken()).asString();
+    if (enketoValue.length() == 0) {
+      enketoValue = "undefined";
+
+      enketoApiToken.setStyleName(UNDEFINED_STYLE, true);
+      enketoApiToken.setStyleName(DEFINED_STYLE, false);
+    } else {
+
+      enketoApiToken.setStyleName(UNDEFINED_STYLE, false);
+      enketoApiToken.setStyleName(DEFINED_STYLE, true);
+    }
+    enketoApiToken.setText(enketoValue);
   }
 
   @Override

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -27,9 +28,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class Preferences {
 
   public static interface PreferencesCompletionCallback {
-	  public void refreshFromUpdatedPreferences();
+    public void refreshFromUpdatedPreferences();
 
-	  public void failedRefresh();
+    public void failedRefresh();
   }
 
   private static final String NULL_PREFERENCES_ERROR = "ERROR: somehow got a null preference summary";
@@ -37,6 +38,10 @@ public class Preferences {
   private static String googleSimpleApiKey;
 
   private static String googleApiClientId;
+
+  private static String enketoApiUrl;
+
+  private static String enketoApiToken;
 
   private static Boolean odkTablesEnabled;
 
@@ -62,13 +67,15 @@ public class Preferences {
 
     @Override
     public void onSuccess(PreferenceSummary summary) {
-      if(summary == null) {
+      if (summary == null) {
         GWT.log(NULL_PREFERENCES_ERROR);
         AggregateUI.getUI().reportError(new Throwable(NULL_PREFERENCES_ERROR));
       }
 
       googleSimpleApiKey = summary.getGoogleSimpleApiKey();
       googleApiClientId = summary.getGoogleApiClientId();
+      enketoApiUrl = summary.getEnketoApiUrl();
+      enketoApiToken = summary.getEnketoApiToken();
       Boolean oldTablesValue = odkTablesEnabled;
       odkTablesEnabled = summary.getOdkTablesEnabled();
       fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
@@ -94,32 +101,58 @@ public class Preferences {
   }
 
   public static String getGoogleSimpleApiKey() {
-    if(googleSimpleApiKey != null) {
+    if (googleSimpleApiKey != null) {
       return googleSimpleApiKey;
     }
     return "";
   }
 
   public static String getGoogleApiClientId() {
-    if(googleApiClientId != null) {
+    if (googleApiClientId != null) {
       return googleApiClientId;
     }
     return "";
   }
 
+  public static boolean showEnketoIntegration() {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_DATA_COLLECTOR)) {
+      if (getEnketoApiUrl() != null && !getEnketoApiUrl().equals("")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static String getEnketoApiUrl() {
+    if (enketoApiUrl != null) {
+      return enketoApiUrl;
+    }
+    return "";
+  }
+
+  public static String getEnketoApiToken() {
+    if (enketoApiToken != null) {
+      return enketoApiToken;
+    }
+    return "";
+  }
+
   public static Boolean getOdkTablesEnabled() {
-    if(odkTablesEnabled != null) {
+    if (odkTablesEnabled != null) {
       return odkTablesEnabled;
     }
     return Boolean.FALSE;
   }
 
+
   public static Boolean getFasterBackgroundActionsDisabled() {
-    if(fasterBackgroundActionsDisabled != null) {
+    if (fasterBackgroundActionsDisabled != null) {
       return fasterBackgroundActionsDisabled;
     }
     return Boolean.FALSE;
   }
+
 
 
 }

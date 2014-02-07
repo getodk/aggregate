@@ -75,8 +75,8 @@ public class TableServiceImpl implements TableService {
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
       TableResource resource = getResource(entry);
-      if ( entry.getPropertiesEtag() != null ) {
-        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesEtag(), cc);
+      if ( entry.getPropertiesETag() != null ) {
+        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesETag(), cc);
         resource.setDisplayName(displayName);
       }
       resources.add(resource);
@@ -98,6 +98,7 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableResource createTable(String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException {
+    // TODO: what if schemaETag is specified??? or if table already exists????
     // TODO: add access control stuff
     String displayName = definition.getDisplayName();
     List<Column> columns = definition.getColumns();

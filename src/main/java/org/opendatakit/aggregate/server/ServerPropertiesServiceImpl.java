@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.server;
 import javax.servlet.http.HttpServletRequest;
 
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.ServerPropertiesService;
@@ -27,7 +27,7 @@ import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
-import org.opendatakit.aggregate.odktables.exception.EtagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -71,7 +71,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public TablePropertiesClient setProperties(TablePropertiesClient properties,
 			String tableId) throws AccessDeniedException,
-			RequestFailureException, DatastoreFailureException, EtagMismatchExceptionClient,
+			RequestFailureException, DatastoreFailureException, ETagMismatchExceptionClient,
 			PermissionDeniedExceptionClient {
 	    HttpServletRequest req = this.getThreadLocalRequest();
 	    CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -85,7 +85,7 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 		    // the variable, but should be wary of this.
 		    // first make the type TableProperties object
 		    TableProperties tableProperties = new TableProperties(
-		        properties.getPropertiesEtag(), properties.getTableId(),
+		        properties.getPropertiesETag(), properties.getTableId(),
 		        UtilTransforms.transformToServerEntries(
 		            properties.getKeyValueStoreEntries()));
 		    tableProperties = pm.setProperties(tableProperties);
@@ -96,9 +96,9 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
 	    } catch (PermissionDeniedException e) {
 	    	e.printStackTrace();
 	    	throw new PermissionDeniedExceptionClient(e);
-	    } catch (EtagMismatchException e) {
+	    } catch (ETagMismatchException e) {
 	    	e.printStackTrace();
-	    	throw new EtagMismatchExceptionClient(e);
+	    	throw new ETagMismatchExceptionClient(e);
 	    } catch (ODKTaskLockException e) {
 	    	e.printStackTrace();
 	    	throw new RequestFailureException(e);

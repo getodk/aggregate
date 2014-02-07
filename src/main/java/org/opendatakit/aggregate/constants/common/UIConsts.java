@@ -31,15 +31,18 @@ public class UIConsts {
 
   public static final String FORM_UPLOAD_SERVLET_ADDR = "formUpload";
   public static final String SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR = "ssl/oauth2-service-account";
-  
+
+  public static final String ENKETO_SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR = "ssl/enketo-service-account";
+  public static final String ENKETO_UI_GENERATE = "enk/generateEnketoui";
+
   // url pattern for uploading files associated with ODKTables tables
-  public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR = 
+  public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR =
       "tableFileUpload";
   // url pattern for downloading files associated with odktables tables
-  public static final String TABLE_FILE_DOWNLOAD_SERVLET_ADDR = 
+  public static final String TABLE_FILE_DOWNLOAD_SERVLET_ADDR =
       "tableFileDownload";
   // url pattern for uploading a table from a CSV file
-  public static final String UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR = 
+  public static final String UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR =
       "uploadTableFromCSV";
 
   public static final String SUBMISSION_SERVLET_ADDR = "submission";

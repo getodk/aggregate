@@ -30,11 +30,11 @@ public class Row {
   @Element(name = "id", required = false)
   private String rowId;
 
-  @Element(name = "etag", required = false)
-  private String rowEtag;
+  @Element(name = "ETag", required = false)
+  private String rowETag;
 
-  @Element(name = "dataEtagAtModification", required=false)
-  private String dataEtagAtModification;
+  @Element(name = "dataETagAtModification", required=false)
+  private String dataETagAtModification;
 
   @Element(required = false)
   private boolean deleted;
@@ -77,58 +77,68 @@ public class Row {
 
   /**
    * Construct a row for insertion.
+   * This is used by the remote client (ODK Tables) to construct a REST request to insert the row.
    *
    * @param rowId
    * @param values
    */
-  public static Row forInsert(String rowId, Map<String, String> values) {
+  public static Row forInsert(String rowId, String uriAccessControl, String formId, String locale, Long savepointTimestamp, Map<String, String> values) {
     Row row = new Row();
     row.rowId = rowId;
+    row.uriAccessControl = uriAccessControl;
+    row.formId = formId;
+    row.locale = locale;
+    row.savepointTimestamp = savepointTimestamp;
     row.values = values;
-    row.filterScope = Scope.EMPTY_SCOPE;
     return row;
   }
 
   /**
    * Construct a row for updating.
+   * This is used by the remote client (ODK Tables) to construct a REST request to modify the row.
    *
    * @param rowId
-   * @param rowEtag
+   * @param rowETag
    * @param values
    */
-  public static Row forUpdate(String rowId, String rowEtag, Map<String, String> values) {
+  public static Row forUpdate(String rowId, String rowETag, String uriAccessControl, String formId, String locale, Long savepointTimestamp, Map<String, String> values) {
     Row row = new Row();
     row.rowId = rowId;
-    row.rowEtag = rowEtag;
+    row.rowETag = rowETag;
+    row.uriAccessControl = uriAccessControl;
+    row.formId = formId;
+    row.locale = locale;
+    row.savepointTimestamp = savepointTimestamp;
     row.values = values;
     return row;
   }
 
   public Row() {
     this.rowId = null;
-    this.rowEtag = null;
-    this.dataEtagAtModification = null;
+    this.rowETag = null;
+    this.dataETagAtModification = null;
     this.deleted = false;
     this.createUser = null;
     this.lastUpdateUser = null;
     this.filterScope = null;
-    this.values = new HashMap<String, String>();
+    // data coming up from client
     this.uriAccessControl = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestamp = null;
+    this.values = new HashMap<String, String>();
   }
 
   public String getRowId() {
     return this.rowId;
   }
 
-  public String getRowEtag() {
-    return this.rowEtag;
+  public String getRowETag() {
+    return this.rowETag;
   }
 
-  public String getDataEtagAtModification() {
-    return this.dataEtagAtModification;
+  public String getDataETagAtModification() {
+    return this.dataETagAtModification;
   }
 
   public boolean isDeleted() {
@@ -147,6 +157,22 @@ public class Row {
     return filterScope;
   }
 
+  public String getUriAccessControl() {
+    return this.uriAccessControl;
+  }
+
+  public String getFormId() {
+    return this.formId;
+  }
+
+  public String getLocale() {
+    return this.locale;
+  }
+
+  public Long getSavepointTimestamp() {
+    return this.savepointTimestamp;
+  }
+
   public Map<String, String> getValues() {
     return this.values;
   }
@@ -155,12 +181,12 @@ public class Row {
     this.rowId = rowId;
   }
 
-  public void setRowEtag(final String rowEtag) {
-    this.rowEtag = rowEtag;
+  public void setRowETag(final String rowETag) {
+    this.rowETag = rowETag;
   }
 
-  public void setDataEtagAtModification(final String dataEtagAtModification) {
-    this.dataEtagAtModification = dataEtagAtModification;
+  public void setDataETagAtModification(final String dataETagAtModification) {
+    this.dataETagAtModification = dataETagAtModification;
   }
 
   public void setDeleted(final boolean deleted) {
@@ -179,26 +205,6 @@ public class Row {
     this.filterScope = filterScope;
   }
 
-  public void setValues(final Map<String, String> values) {
-    this.values = values;
-  }
-
-  public String getUriAccessControl() {
-    return this.uriAccessControl;
-  }
-
-  public String getFormId() {
-    return this.formId;
-  }
-
-  public String getLocale() {
-    return this.locale;
-  }
-
-  public Long getSavepointTimestamp() {
-    return this.savepointTimestamp;
-  }
-
   public void setUriAccessControl(String uriAccessControl) {
     this.uriAccessControl = uriAccessControl;
   }
@@ -209,6 +215,10 @@ public class Row {
 
   public void setLocale(String locale) {
     this.locale = locale;
+  }
+
+  public void setValues(final Map<String, String> values) {
+    this.values = values;
   }
 
   /**
@@ -238,9 +248,9 @@ public class Row {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((rowId == null) ? 0 : rowId.hashCode());
-    result = prime * result + ((rowEtag == null) ? 0 : rowEtag.hashCode());
-    result = prime * result + ((dataEtagAtModification == null) ?
-        0 : dataEtagAtModification.hashCode());
+    result = prime * result + ((rowETag == null) ? 0 : rowETag.hashCode());
+    result = prime * result + ((dataETagAtModification == null) ?
+        0 : dataETagAtModification.hashCode());
     result = prime * result + ((deleted) ? 0 : 1);
     result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
     result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
@@ -266,9 +276,9 @@ public class Row {
     }
     Row other = (Row) obj;
     return (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
-        && (rowEtag == null ? other.rowEtag == null : rowEtag.equals(other.rowEtag))
-        && (dataEtagAtModification == null ? other.dataEtagAtModification == null :
-            dataEtagAtModification.equals(dataEtagAtModification))
+        && (rowETag == null ? other.rowETag == null : rowETag.equals(other.rowETag))
+        && (dataETagAtModification == null ? other.dataETagAtModification == null :
+            dataETagAtModification.equals(dataETagAtModification))
         && (deleted == other.deleted)
         && (createUser == null ? other.createUser == null : createUser.equals(other.createUser))
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
@@ -291,10 +301,10 @@ public class Row {
     StringBuilder builder = new StringBuilder();
     builder.append("Row [rowId=");
     builder.append(rowId);
-    builder.append(", rowEtag=");
-    builder.append(rowEtag);
-    builder.append(", dataEtagAtModification=");
-    builder.append(dataEtagAtModification);
+    builder.append(", rowETag=");
+    builder.append(rowETag);
+    builder.append(", dataETagAtModification=");
+    builder.append(dataETagAtModification);
     builder.append(", deleted=");
     builder.append(deleted);
     builder.append(", createUser=");
@@ -303,6 +313,14 @@ public class Row {
     builder.append(lastUpdateUser);
     builder.append(", filterScope=");
     builder.append(filterScope);
+    builder.append(", uriAccessControl=");
+    builder.append(uriAccessControl);
+    builder.append(", formId=");
+    builder.append(formId);
+    builder.append(", locale=");
+    builder.append(locale);
+    builder.append(", savepointTimestamp=");
+    builder.append(savepointTimestamp);
     builder.append(", values=");
     builder.append(values);
     builder.append("]");

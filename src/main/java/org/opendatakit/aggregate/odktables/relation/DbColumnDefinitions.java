@@ -32,7 +32,7 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * This defines the columns in a given schemaEtag storage representation
+ * This defines the columns in a given schemaETag storage representation
  * of that tableId. The table defines the abstract objects (e.g., geopoint)
  * and underlying database fields (e.g., latitude, longitude, etc.) for the
  * table.
@@ -214,16 +214,16 @@ public class DbColumnDefinitions extends Relation {
    * rowid.
    *
    * @param tableId
-   * @param schemaEtag
+   * @param schemaETag
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<DbColumnDefinitionsEntity> query(String tableId, String schemaEtag,
+  public static List<DbColumnDefinitionsEntity> query(String tableId, String schemaETag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbColumnDefinitions.query", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaEtag);
+    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaETag);
 
     List<Entity> list = query.execute();
     List<DbColumnDefinitionsEntity> results = new ArrayList<DbColumnDefinitionsEntity>();
@@ -238,16 +238,16 @@ public class DbColumnDefinitions extends Relation {
    * the non-unit-of-retention ones.
    *
    * @param tableId
-   * @param schemaEtag
+   * @param schemaETag
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<String> queryForColumnNames(String tableId, String schemaEtag,
+  public static List<String> queryForColumnNames(String tableId, String schemaETag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbColumnDefinitions.queryForColumnNames", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaEtag);
+    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaETag);
 
     List<?> results = query.getDistinct(ELEMENT_NAME);
     List<String> list = new ArrayList<String>();

@@ -69,7 +69,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       List<TableEntry> entries = tm.getTables(scopes);
       ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
       for (TableEntry entry : entries) {
-        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesEtag(), cc);
+        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(), entry.getPropertiesETag(), cc);
         clientEntries.add(UtilTransforms.transform(entry, displayName));
       }
       Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
@@ -94,7 +94,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     try {
       new AuthFilter(tableId, cc).checkPermission(TablePermission.READ_TABLE_ENTRY);
       TableEntry entry = tm.getTableNullSafe(tableId);
-      String displayName = DbKeyValueStore.getDisplayName(tableId, entry.getPropertiesEtag(), cc);
+      String displayName = DbKeyValueStore.getDisplayName(tableId, entry.getPropertiesETag(), cc);
       TableEntryClient resource = UtilTransforms.transform(entry, displayName);
       return resource;
     } catch (ODKDatastoreException e) {
