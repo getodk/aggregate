@@ -20,10 +20,10 @@ import java.io.Serializable;
 
 /**
  * This is the client-side version of RowResource. It is based heavily on
- * org.opendatakit.aggregate.odktables.entity.api.RowResource.java.
- * <br>
- * The idea is that this will serve the same function as RowResource,
- * but for the client.
+ * org.opendatakit.aggregate.odktables.entity.api.RowResource.java. <br>
+ * The idea is that this will serve the same function as RowResource, but for
+ * the client.
+ *
  * @author sudars
  *
  */
@@ -32,7 +32,7 @@ public class RowResourceClient extends RowClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -629546633036596904L;
+  private static final long serialVersionUID = -6295463336596904L;
   private String selfUri;
   private String tableUri;
 

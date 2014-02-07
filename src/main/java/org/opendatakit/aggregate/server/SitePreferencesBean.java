@@ -25,8 +25,8 @@ import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Simple class to retrieve the site key from ServerPreferencesProperties
- * during start-up.
+ * Simple class to retrieve the site key from ServerPreferencesProperties during
+ * start-up.
  *
  * @author mitchellsundt@gmail.com
  *
@@ -91,7 +91,8 @@ public class SitePreferencesBean {
     @Override
     public String getSecureServerURL() {
       throw new IllegalStateException("unexpected call");
-    }};
+    }
+  };
 
   SitePreferencesBean() {
   }
@@ -113,7 +114,7 @@ public class SitePreferencesBean {
   }
 
   public synchronized String getSiteKey() throws ODKEntityNotFoundException, ODKOverQuotaException {
-    if ( siteKey == null ) {
+    if (siteKey == null) {
       siteKey = ServerPreferencesProperties.getSiteKey(ccHack);
     }
     return siteKey;

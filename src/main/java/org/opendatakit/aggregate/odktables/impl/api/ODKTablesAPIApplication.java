@@ -21,6 +21,7 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
+import org.opendatakit.aggregate.odktables.entity.serialization.SimpleJSONMessageReaderWriter;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLMessageReaderWriter;
 
 public class ODKTablesAPIApplication extends Application {
@@ -31,10 +32,12 @@ public class ODKTablesAPIApplication extends Application {
     classes.add(TableServiceImpl.class);
     classes.add(FileServiceImpl.class);
     classes.add(FileManifestServiceImpl.class);
+    classes.add(SimpleJSONMessageReaderWriter.class);
     classes.add(SimpleXMLMessageReaderWriter.class);
     classes.add(ODKDatastoreExceptionMapper.class);
     classes.add(ODKTablesExceptionMapper.class);
     classes.add(ODKTaskLockExceptionMapper.class);
+    classes.add(IOExceptionMapper.class);
     classes.add(RuntimeExceptionMapper.class);
     return classes;
   }

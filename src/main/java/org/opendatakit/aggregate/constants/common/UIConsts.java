@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.constants.common;
 
 public class UIConsts {
-  public static final String VERSION_STRING = "v1.4 Production";
+  public static final String VERSION_STRING = "v1.4.1 Production";
 
   public static final String URI_DEFAULT = "no uuid";
   public static final String FSC_URI_PARAM = "fsc";
@@ -33,7 +33,7 @@ public class UIConsts {
   public static final String SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR = "ssl/oauth2-service-account";
 
   public static final String ENKETO_SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR = "ssl/enketo-service-account";
-  public static final String ENKETO_UI_GENERATE = "enk/generateEnketoui";
+  public static final String ENKETO_API_HANDLER_ADDR = "enk/enketoApiHandler";
 
   // url pattern for uploading files associated with ODKTables tables
   public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR =

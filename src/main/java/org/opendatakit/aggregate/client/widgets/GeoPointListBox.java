@@ -1,6 +1,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.externalserv.GeoPointElement;
 
@@ -10,7 +10,7 @@ public class GeoPointListBox extends AggregateListBox {
     super(tooltipText, false, balloonText);
   }
 
-  public void updateValues(List<GeoPointElement> geopoints) {
+  public void updateValues(ArrayList<GeoPointElement> geopoints) {
     clear();
     for (GeoPointElement geo : geopoints) {
       addItem(geo.getDisplayName(), geo.getElementKey());
@@ -22,10 +22,10 @@ public class GeoPointListBox extends AggregateListBox {
     int size = getItemCount();
 
     String geoPointValue = null;
-    if(size > index && size > 0) {
+    if (size > index && size > 0) {
       geoPointValue = getValue(index);
     }
     return geoPointValue;
   }
-  
+
 }

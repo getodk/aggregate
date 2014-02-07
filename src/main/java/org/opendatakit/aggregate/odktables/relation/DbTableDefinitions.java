@@ -33,12 +33,13 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * This provides a concrete mapping of (tableId,schemaETag) to a database table name.
+ * This provides a concrete mapping of (tableId,schemaETag) to a database table
+ * name.
  * <p>
  * NB: This is NOT directly analogous to the
- * {@link org.opendatakit.aggregate.odktables.rest.entity.TableDefinition} object,
- * which represents the XML document defining a table by which ODKTables talks
- * to the server.
+ * {@link org.opendatakit.aggregate.odktables.rest.entity.TableDefinition}
+ * object, which represents the XML document defining a table by which ODKTables
+ * talks to the server.
  *
  * @author sudar.sam@gmail.com
  *
@@ -57,8 +58,7 @@ public class DbTableDefinitions extends Relation {
   // non client-local columns.
   public static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
       .setIndexable(IndexType.HASH);
-  public static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING,
-      false);
+  public static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, false);
   public static final DataField DB_TABLE_NAME = new DataField("DB_TABLE_NAME", DataType.STRING,
       false);
 

@@ -23,21 +23,20 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
-import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
-import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -52,10 +51,8 @@ public class PropertiesManager {
   private static final Log log = LogFactory.getLog(PropertiesManager.class);
 
   private CallingContext cc;
+  private TablesUserPermissions userPermissions;
   private String tableId;
-  private DbTableEntryEntity entry;
-  private DbTableDefinitionsEntity definitionEntity;
-  private List<DbKeyValueStoreEntity> kvsEntities;
   private EntityConverter converter;
 
   /**
@@ -70,17 +67,13 @@ public class PropertiesManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public PropertiesManager(String tableId, CallingContext cc) throws ODKEntityNotFoundException,
+  public PropertiesManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
     this.cc = cc;
+    this.userPermissions = userPermissions;
     this.tableId = tableId;
-    this.entry = DbTableEntry.getTableIdEntry(tableId, cc);
-    String schemaETag = entry.getSchemaETag();
-    this.definitionEntity = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
-    String propertiesETag = entry.getPropertiesETag();
-    this.kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesETag, cc);
     this.converter = new EntityConverter();
   }
 
@@ -96,16 +89,33 @@ public class PropertiesManager {
    *
    * @return the current table properties.
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws ODKTaskLockException
+   * @throws ETagMismatchException
    */
-  public TableProperties getProperties() throws ODKDatastoreException {
-    // refresh entities
-    entry = DbTableEntry.getTableIdEntry(tableId, cc);
-    String schemaETag = entry.getSchemaETag();
-    definitionEntity = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+  public TableProperties getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
+    userPermissions.checkPermission(tableId, TablePermission.READ_PROPERTIES);
 
-    String propertiesETag = entry.getPropertiesETag();
-    kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesETag, cc);
-    return converter.toTableProperties(kvsEntities, tableId, propertiesETag);
+    String schemaETag = null;
+    String propertiesETag = null;
+    List<DbKeyValueStoreEntity> kvsEntities = new ArrayList<DbKeyValueStoreEntity>();
+    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      lock.acquire();
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      schemaETag = entry.getSchemaETag();
+      if ( schemaETag != null ) {
+        propertiesETag = entry.getPropertiesETag();
+        kvsEntities = DbKeyValueStore.getKVSEntries(tableId, propertiesETag, cc);
+      }
+    } finally {
+      lock.release();
+    }
+    if ( schemaETag == null ) {
+      throw new ETagMismatchException(String.format(
+          "Unable to get table properties -- schema not defined for table with tableId %s", tableId));
+    }
+    return converter.toTableProperties(kvsEntities, tableId, schemaETag, propertiesETag);
   }
 
   /**
@@ -119,101 +129,98 @@ public class PropertiesManager {
    *           properties etag.
    * @throws ODKTaskLockException
    * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
   public TableProperties setProperties(TableProperties tableProperties)
-      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException {
+      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException, PermissionDeniedException {
 
+    userPermissions.checkPermission(tableId, TablePermission.WRITE_PROPERTIES);
+    String schemaETag = null;
     // create new eTag
     String propertiesETag = CommonFieldsBase.newUri();
 
     // lock table
-    LockTemplate lock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.UPDATE_PROPERTIES, cc);
+    LockTemplate lock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       lock.acquire();
 
       // refresh entry
-      entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+
+      schemaETag = entry.getSchemaETag();
+      if ( schemaETag == null ) {
+        throw new ETagMismatchException(String.format(
+            "Unable to set table properties -- schema not defined for table with tableId %s", tableId));
+      }
+      if ( !schemaETag.equals(tableProperties.getSchemaETag()) ) {
+        throw new ETagMismatchException(String.format(
+            "Unable to set table properties -- schemaETag does not match for table with tableId %s", tableId));
+      }
 
       String oldPropertiesETag = entry.getPropertiesETag();
 
       // check etags
       String currentETag = tableProperties.getPropertiesETag();
-      if (currentETag == null || !currentETag.equals(oldPropertiesETag)) {
+      if ((currentETag == null && oldPropertiesETag != null) ||
+          (currentETag != null && !currentETag.equals(oldPropertiesETag))) {
         throw new ETagMismatchException(String.format(
-            "%s does not match %s for properties for table with tableId %s",
-            currentETag, oldPropertiesETag, tableId));
+            "%s does not match %s for properties for table with tableId %s", currentETag,
+            oldPropertiesETag, tableId));
       }
+
+      // clean up any pending or stale state
+      TableManager.deleteVersionedTable(entry, false, cc);
+
+      // write it as a pending eTag
+      entry.setPendingPropertiesETag(propertiesETag);
+      entry.put(cc);
 
       EntityCreator creator = new EntityCreator();
 
-      List<DbKeyValueStoreEntity> newKvsEntities = new ArrayList<DbKeyValueStoreEntity>();
+      /**
+       * Enter the new properties in under the new propertiesETag.
+       * The old properties remain under the old propertiesETag
+       */
+      log.info("setProperties: before kvs stuff in set properties");
+      List<OdkTablesKeyValueStoreEntry> kvsEntries = tableProperties.getKeyValueStoreEntries();
+      OdkTablesKeyValueStoreEntry holderEntry = null;
+      List<DbKeyValueStoreEntity> kvsEntities = new ArrayList<DbKeyValueStoreEntity>();
       try {
-        // TODO: we should probably be diff'ing somehow, so we don't have to
-        // change all of the entries. However, it's not obvious how to do that
-        // without giving all of them their own etags. So, for now just wipe
-        // all the kvs entries and replace them.
-
-        // TODO: we should perhaps also be dealing with any changes to the
-        // TableDefinition here. However, we're going to have to pass on this
-        // for now and assume that once you've synched to the server, the
-        // definition is static and immutable.
-        log.info("setProperties: before kvs stuff in set properties");
-        List<OdkTablesKeyValueStoreEntry> kvsEntries =
-            tableProperties.getKeyValueStoreEntries();
-        OdkTablesKeyValueStoreEntry holderEntry = null;
-        try {
         for (OdkTablesKeyValueStoreEntry kvsEntry : kvsEntries) {
           holderEntry = kvsEntry;
-          DbKeyValueStoreEntity kvsEntity = creator.newKeyValueStoreEntity(kvsEntry, propertiesETag, cc);
-          newKvsEntities.add(kvsEntity);
+          DbKeyValueStoreEntity kvsEntity = creator.newKeyValueStoreEntity(kvsEntry,
+              propertiesETag, cc);
+          kvsEntity.put(cc);
+          kvsEntities.add(kvsEntity);
         }
-        } catch (Exception e) {
-          e.printStackTrace();
-          // what is the deal.
-          log.error("setProperties (" + holderEntry.partition + ", " +
-                    holderEntry.aspect + ", " + holderEntry.key + ") failed: " + e.toString());
-          throw new ODKDatastoreException("Something went wrong in creating " +
-          		"key value " +
-          		"store entries: " + e.toString());
-        }
-        // Wipe the existing kvsEntries.
-        // Caution! See javadoc of {@link clearAllEntries} and note that this is
-        // not done transactionally, so you could end up in a rough spot if your
-        // pursuant call to add all the new entities fails.
-        log.info("setProperties Made it past add all to lists");
-        // Now put all the entries.
-        for ( DbKeyValueStoreEntity e : newKvsEntities ) {
-          e.put(cc);
-        }
-        log.info("setProperties made it past persist of kvsEntities");
-        // set properties entity
-
-        // update tableEntry with new properties eTag
-        entry.setPropertiesETag(propertiesETag);
-        // write the entry out...
-        entry.put(cc);
-
-        kvsEntities = newKvsEntities;
-        log.info("setProperties made it past update to propertiesETag");
-
-        // everything was successfully committed -- we can now delete the old values...
-        DbKeyValueStore.clearAllEntries(tableId, oldPropertiesETag, cc);
-        log.info("setProperties made it past clear");
-
-      } catch ( ODKEntityPersistException e ) {
-        // on failure, restore from the database (likely fails...)...
-        getProperties();
-        throw e;
-      } catch ( ODKOverQuotaException e ) {
-        // on failure, restore from the database (likely fails...)...
-        getProperties();
-        throw e;
+      } catch (Exception e) {
+        e.printStackTrace();
+        // what is the deal.
+        log.error("setProperties (" + holderEntry.partition + ", " + holderEntry.aspect + ", "
+            + holderEntry.key + ") failed: " + e.toString());
+        throw new ODKDatastoreException("Something went wrong in creating " + "key value "
+            + "store entries: " + e.toString(), e);
       }
+
+      // Wipe the existing kvsEntries.
+      // Caution! See javadoc of {@link clearAllEntries} and note that this is
+      // not done transactionally, so you could end up in a rough spot if your
+      // pursuant call to add all the new entities fails.
+      log.info("setProperties Made it past persist of pending kvsEntries");
+
+      entry.setStalePropertiesETag(entry.getPropertiesETag());
+      entry.setPropertiesETag(entry.getPendingPropertiesETag());
+      entry.setPendingPropertiesETag(null);
+      entry.put(cc);
+
+      log.info("setProperties made it past persist of ETags");
+      // set properties entity
+      TableManager.deleteVersionedTable(entry, false, cc);
+      log.info("setProperties cleaned up stale properties");
+
+      return converter.toTableProperties(kvsEntities, tableId, schemaETag, propertiesETag);
     } finally {
       lock.release();
     }
-
-    return converter.toTableProperties(kvsEntities, tableId, propertiesETag );
   }
 }

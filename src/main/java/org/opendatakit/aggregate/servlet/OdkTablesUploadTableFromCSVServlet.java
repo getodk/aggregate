@@ -38,6 +38,7 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.importexport.CsvUtil;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
@@ -46,6 +47,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet that handles the generation of a table from an uploaded CSV file.
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -56,34 +58,31 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = -890634967842304210L;
 
-  private static final Log logger =
-      LogFactory.getLog(OdkTablesUploadTableFromCSVServlet.class);
+  private static final Log logger = LogFactory.getLog(OdkTablesUploadTableFromCSVServlet.class);
 
-  private static final String ADDR =
-      UIConsts.UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR;
+  private static final String ADDR = UIConsts.UPLOAD_TABLE_FROM_CSV_SERVLET_ADDR;
 
   /**
    * title for generated webpage
    */
   public static final String TITLE_INFO = "OdkTables Upload Table From CSV";
 
-
   private static final String UPLOAD_PAGE_BODY_START =
 
-       "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Import a table from a CSV</h2></p>"
-        + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
-        + "<![endif] -->"
-        + "<form id=\"ie_backward_compatible_form\""
-        + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
-        + " action=\""; // emit the ADDR
+  "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Import a table from a CSV</h2></p>"
+      + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
+      + "<![endif] -->"
+      + "<form id=\"ie_backward_compatible_form\""
+      + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
+      + " action=\""; // emit the ADDR
 
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
       + "     <table id=\"uploadTable\">"
-     + "    <tr>"
-          + "         <td><label for=\"table_name\">Name of New Table:</label></td>"
-     + "       <td><input id=\"table_name\" type=\"text\" name=\"table_name\" /></td>"
-          + "      </tr>\n"
-     + "</td>"
+      + "    <tr>"
+      + "         <td><label for=\"table_name\">Name of New Table:</label></td>"
+      + "       <td><input id=\"table_name\" type=\"text\" name=\"table_name\" /></td>"
+      + "      </tr>\n"
+      + "</td>"
       + "      <tr>"
       + "         <td><label for=\"table_file\">File:</label></td>"
       + "         <td><input id=\"table_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
@@ -91,72 +90,71 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
       + "      </tr>"
       + "<tr>"
       + "<td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Create Table From CSv\" /></td>"
-      + "<td />"
-      + "</tr>"
-      + " </table>\n"
-      + "</form>";
+      + "<td />" + "</tr>" + " </table>\n" + "</form>";
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    ServiceUtils.examineRequest(getServletContext(), req);
 
-     CallingContext cc = ContextFactory.getCallingContext(this, req);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-     //TODO deal with the javarosa stuff, as in FormUploadServlet's corresponding method
+    // TODO deal with the javarosa stuff, as in FormUploadServlet's
+    // corresponding method
 
-       StringBuilder headerString = new StringBuilder();
-       headerString.append("<script type=\"application/javascript\" src=\"");
-       headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
-       headerString.append("\"></script>");
-       headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-       headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_STYLE_RESOURCE));
-       headerString.append("\" />");
-       headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-       headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_BUTTON_STYLE_RESOURCE));
-       headerString.append("\" />");
-       headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
-       headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
-       headerString.append("\" />");
+    StringBuilder headerString = new StringBuilder();
+    headerString.append("<script type=\"application/javascript\" src=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
+    headerString.append("\"></script>");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_BUTTON_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+    headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
+    headerString.append("\" />");
 
-       // header info
-       beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
-       PrintWriter out = resp.getWriter();
-       out.write(UPLOAD_PAGE_BODY_START);
-       out.write(cc.getWebApplicationURL(ADDR));
-       out.write(UPLOAD_PAGE_BODY_MIDDLE);
-       finishBasicHtmlResponse(resp);
+    // header info
+    beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
+    addOpenDataKitHeaders(resp);
+    PrintWriter out = resp.getWriter();
+    out.write(UPLOAD_PAGE_BODY_START);
+    out.write(cc.getWebApplicationURL(ADDR));
+    out.write(UPLOAD_PAGE_BODY_MIDDLE);
+    finishBasicHtmlResponse(resp);
   }
 
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-     CallingContext cc = ContextFactory.getCallingContext(this, req);
-     logger.info("Inside doHead");
-     addOpenDataKitHeaders(resp);
-     resp.setStatus(204); // no content...
+    ServiceUtils.examineRequest(getServletContext(), req);
+    @SuppressWarnings("unused")
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    logger.info("Inside doHead");
+    addOpenDataKitHeaders(resp);
+    resp.setStatus(204); // no content...
   }
 
   /**
-   * Handler for HTTP Post request that takes a CSV file, uses that file to
-   * add a new OdkTables table to the datastore.
+   * Handler for HTTP Post request that takes a CSV file, uses that file to add
+   * a new OdkTables table to the datastore.
    */
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    ServiceUtils.examineRequest(getServletContext(), req);
     // TODO here do I need to handle the log stuff?
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     if (!ServletFileUpload.isMultipartContent(req)) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-          ErrorConsts.NO_MULTI_PART_CONTENT);
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.NO_MULTI_PART_CONTENT);
       return;
     }
 
     try {
       MultiPartFormData uploadedFormItems = new MultiPartFormData(req);
 
-      MultiPartFormItem csvFile = uploadedFormItems
-          .getFormDataByFieldName("table_file");
+      MultiPartFormItem csvFile = uploadedFormItems.getFormDataByFieldName("table_file");
 
-      String tableName = uploadedFormItems
-          .getSimpleFormField("table_name");
+      String tableName = uploadedFormItems.getSimpleFormField("table_name");
 
       addOpenDataKitHeaders(resp);
       resp.setStatus(HttpServletResponse.SC_CREATED);
@@ -166,8 +164,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
       CsvUtil csvUtil = new CsvUtil();
       byte[] bytes = csvFile.getStream().toByteArray();
       ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-      BufferedReader br =
-          new BufferedReader(new InputStreamReader(inputStream));
+      BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
       boolean success = csvUtil.importNewTable(br, tableName, cc);
       PrintWriter out = resp.getWriter();
       if (success) {
@@ -189,8 +186,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
     } catch (ImportFromCSVExceptionClient e) {
       logger.error("problem importing from CSV: " + e.getMessage());
       e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          ErrorConsts.PARSING_PROBLEM);
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
     } catch (ETagMismatchExceptionClient e) {
       logger.error("etag mismatch while importing: " + e.getMessage());
       e.printStackTrace();
@@ -208,6 +204,5 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
     }
   }
-
 
 }

@@ -20,20 +20,19 @@ import java.io.Serializable;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.api.
- * <br>
- * The idea is that this will perform the same function on the client.
- * Usual caveat that it's not yet clear if this is necessary or if a
- * new non-phone class has to be created on the server.
+ * org.opendatakit.aggregate.odktables.entity.api. <br>
+ * The idea is that this will perform the same function on the client. Usual
+ * caveat that it's not yet clear if this is necessary or if a new non-phone
+ * class has to be created on the server.
+ *
  * @author sudar.sam@gmail.com
  *
  */
-public class TableResourceClient extends TableEntryClient
-    implements Serializable{
+public class TableResourceClient extends TableEntryClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = 8148313936521796890L;
+  private static final long serialVersionUID = 81481336521796890L;
   private String selfUri;
   private String definitionUri;
   private String propertiesUri;
@@ -42,7 +41,8 @@ public class TableResourceClient extends TableEntryClient
   private String aclUri;
 
   public TableResourceClient(TableEntryClient entry) {
-    super(entry.getTableId(), entry.getDisplayName(), entry.getDataETag(), entry.getPropertiesETag(), entry.getSchemaETag());
+    super(entry.getTableId(), entry.getDisplayName(), entry.getDataETag(), entry
+        .getPropertiesETag(), entry.getSchemaETag());
   }
 
   @SuppressWarnings("unused")

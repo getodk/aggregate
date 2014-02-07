@@ -177,8 +177,8 @@ public class DbKeyValueStore extends Relation {
    * Delete all the key value store entities for the given table.
    * <p>
    * NB: No logging is performed! Currently no notion of transactions, so if
-   * this method is called and a subsequent add of new entities fails, there will
-   * be no recourse to restore the state.
+   * this method is called and a subsequent add of new entities fails, there
+   * will be no recourse to restore the state.
    *
    * @param tableId
    * @param propertiesETag
@@ -227,8 +227,8 @@ public class DbKeyValueStore extends Relation {
    * @return
    * @throws ODKDatastoreException
    */
-  public static String getDisplayName(String tableId, String propertiesETag,
-      CallingContext cc) throws ODKDatastoreException {
+  public static String getDisplayName(String tableId, String propertiesETag, CallingContext cc)
+      throws ODKDatastoreException {
 
     Query query = getRelation(cc).query("DbKeyValueStore.getDisplayName", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
@@ -238,7 +238,7 @@ public class DbKeyValueStore extends Relation {
     query.addFilter(KEY, FilterOperation.EQUAL, KeyValueStoreConstants.TABLE_DISPLAY_NAME);
 
     List<Entity> list = query.execute();
-    if ( list.size() != 1 ) {
+    if (list.size() != 1) {
       return "Ill-defined";
     } else {
       Entity e = list.get(0);

@@ -16,16 +16,20 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
+import java.util.ArrayList;
+
+import org.opendatakit.common.security.client.UserSecurityInfo;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface OdkTablesAdminServiceAsync {
 
-  void addAdmin(OdkTablesAdmin admin, AsyncCallback<Boolean> callback);
-
-  void deleteAdmin(String aggregateUid, AsyncCallback<Boolean> callback);
+  void deleteAdmin(String uriUser, AsyncCallback<Boolean> callback);
 
   void listAdmin(AsyncCallback<OdkTablesAdmin[]> callback);
 
   void updateAdmin(OdkTablesAdmin admin, AsyncCallback<Boolean> callback);
+
+  void setAdmins(ArrayList<UserSecurityInfo> admins, AsyncCallback<Boolean> callback);
 
 }

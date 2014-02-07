@@ -107,10 +107,10 @@ public class OdkTablesKeyValueStoreEntry {
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
     if (!(obj instanceof OdkTablesKeyValueStoreEntry)) {

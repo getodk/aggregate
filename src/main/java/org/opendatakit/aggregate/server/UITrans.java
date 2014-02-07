@@ -25,7 +25,7 @@ import org.opendatakit.common.persistence.Query;
 
 /**
  * Translate enumerations between the UI layer and the rest of Aggregate
- * 
+ *
  * @author wbrunette@gmail.com
  *
  */
@@ -38,10 +38,12 @@ public final class UITrans {
     toPersistenceDisplay.put(FilterOperation.EQUAL, Query.FilterOperation.EQUAL);
     toPersistenceDisplay.put(FilterOperation.NOT_EQUAL, Query.FilterOperation.NOT_EQUAL);
     toPersistenceDisplay.put(FilterOperation.GREATER_THAN, Query.FilterOperation.GREATER_THAN);
-    toPersistenceDisplay.put(FilterOperation.GREATER_THAN_OR_EQUAL, Query.FilterOperation.GREATER_THAN_OR_EQUAL);
+    toPersistenceDisplay.put(FilterOperation.GREATER_THAN_OR_EQUAL,
+        Query.FilterOperation.GREATER_THAN_OR_EQUAL);
     toPersistenceDisplay.put(FilterOperation.LESS_THAN, Query.FilterOperation.LESS_THAN);
-    toPersistenceDisplay.put(FilterOperation.LESS_THAN_OR_EQUAL, Query.FilterOperation.LESS_THAN_OR_EQUAL);
-    
+    toPersistenceDisplay.put(FilterOperation.LESS_THAN_OR_EQUAL,
+        Query.FilterOperation.LESS_THAN_OR_EQUAL);
+
     toPersistenceHide.put(FilterOperation.EQUAL, Query.FilterOperation.NOT_EQUAL);
     toPersistenceHide.put(FilterOperation.NOT_EQUAL, Query.FilterOperation.EQUAL);
     toPersistenceHide.put(FilterOperation.GREATER_THAN, Query.FilterOperation.LESS_THAN_OR_EQUAL);
@@ -49,10 +51,10 @@ public final class UITrans {
     toPersistenceHide.put(FilterOperation.LESS_THAN, Query.FilterOperation.GREATER_THAN_OR_EQUAL);
     toPersistenceHide.put(FilterOperation.LESS_THAN_OR_EQUAL, Query.FilterOperation.GREATER_THAN);
   }
-  
-  public static final Query.FilterOperation convertFilterOperation(FilterOperation op, Visibility visibility) {
+
+  public static final Query.FilterOperation convertFilterOperation(FilterOperation op,
+      Visibility visibility) {
     return toPersistenceDisplay.get(op);
   }
-  
- 
+
 }

@@ -18,10 +18,10 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableService;
@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -38,32 +39,26 @@ public class PropertiesServiceImpl implements PropertiesService {
 
   private PropertiesManager pm;
   private UriInfo info;
-  private AuthFilter af;
 
-  public PropertiesServiceImpl(String tableId, UriInfo info, CallingContext cc)
+  public PropertiesServiceImpl(String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
-    this.pm = new PropertiesManager(tableId, cc);
+    this.pm = new PropertiesManager(tableId, userPermissions, cc);
     this.info = info;
-    this.af = new AuthFilter(tableId, cc);
   }
 
   @Override
-  public PropertiesResource getProperties() throws ODKDatastoreException,
-      PermissionDeniedException {
-    // TODO re-add permissions stuff.
-    //af.checkPermission(TablePermission.READ_PROPERTIES);
+  public Response getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
     TableProperties properties = pm.getProperties();
-    return getResource(properties);
+    PropertiesResource resource = getResource(properties);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public PropertiesResource setProperties(TableProperties properties)
-      throws ODKDatastoreException, ETagMismatchException,
-      ODKTaskLockException, PermissionDeniedException {
-    // TODO re-add permissions
-    //af.checkPermission(TablePermission.WRITE_PROPERTIES);
+  public Response setProperties(TableProperties properties) throws ODKDatastoreException,
+      ETagMismatchException, ODKTaskLockException, PermissionDeniedException {
     properties = pm.setProperties(properties);
-    return getResource(properties);
+    PropertiesResource resource = getResource(properties);
+    return Response.ok(resource).build();
   }
 
   private PropertiesResource getResource(TableProperties properties) {

@@ -18,89 +18,68 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DataServiceImpl implements DataService {
-  private CallingContext cc;
   private DataManager dm;
   private UriInfo info;
-  private AuthFilter af;
 
-  public DataServiceImpl(String tableId, UriInfo info, CallingContext cc)
+  public DataServiceImpl(String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
-    this.cc = cc;
-    this.dm = new DataManager(tableId, cc);
+    this.dm = new DataManager(tableId, userPermissions, cc);
     this.info = info;
-    this.af = new AuthFilter(tableId, cc);
   }
 
   @Override
-  public List<RowResource> getRows() throws ODKDatastoreException, PermissionDeniedException {
-    // TODO remove comments and do permissions.
-    //af.checkPermission(TablePermission.READ_ROW);
+  public Response getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRows();
-    /* Oct15--changing this to avoid scopes
-     //TODO fix the above so it uses permissions.
-    if (af.hasPermission(TablePermission.UNFILTERED_READ)) {
-      rows = dm.getRows();
-    } else {
-      List<Scope> scopes = AuthFilter.getScopes(cc);
-      rows = dm.getRows(scopes);
-    }*/
-    return getResources(rows);
+    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+    return Response.ok(rowResourceList).build();
   }
 
   @Override
-  public RowResource getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException {
-    // TODO remove comments and do permissions
-    //af.checkPermission(TablePermission.READ_ROW);
-    Row row = dm.getRowNullSafe(rowId);
-    // Oct15--removing this
-    // TODO fix the filters.
-    //af.checkFilter(TablePermission.UNFILTERED_READ, row);
+  public Response getRow(String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+    Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
-    return resource;
+    return Response.ok(resource).build();
   }
 
   @Override
-  public RowResource createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
+  public Response createOrUpdateRow(String rowId, Row row) throws ODKTaskLockException,
       ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
-      BadColumnNameException {
+      BadColumnNameException, InconsistentStateException {
     row.setRowId(rowId);
-    List<Row> changes = dm.insertOrUpdateRows(af, Collections.singletonList(row));
-    row = changes.get(0);
-    RowResource resource = getResource(row);
-    return resource;
+    Row newRow = dm.insertOrUpdateRow(row);
+    RowResource resource = getResource(newRow);
+    return Response.ok(resource).build();
   }
 
   @Override
-  public String deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
-      PermissionDeniedException {
-    // TODO re-do permissions stuff
-    //af.checkPermission(TablePermission.DELETE_ROW);
-    Row row = dm.getRowNullSafe(rowId);
-    // TODO re-do permissions stuff
-    //af.checkFilter(TablePermission.UNFILTERED_DELETE, row);
-    return dm.deleteRow(rowId);
+  public Response deleteRow(String rowId) throws ODKDatastoreException, ODKTaskLockException,
+      PermissionDeniedException, InconsistentStateException, BadColumnNameException {
+    String dataETagOnTableOfModification = dm.deleteRow(rowId);
+    return Response.ok(dataETagOnTableOfModification).build();
   }
 
   private RowResource getResource(Row row) {
@@ -117,7 +96,7 @@ public class DataServiceImpl implements DataService {
     return resource;
   }
 
-  private List<RowResource> getResources(List<Row> rows) {
+  private ArrayList<RowResource> getResources(List<Row> rows) {
     ArrayList<RowResource> resources = new ArrayList<RowResource>();
     for (Row row : rows) {
       resources.add(getResource(row));
