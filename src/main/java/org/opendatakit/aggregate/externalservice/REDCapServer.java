@@ -21,10 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,6 +50,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
+import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.form.IForm;
@@ -78,7 +82,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.ibm.icu.util.Calendar;
 
 public class REDCapServer extends AbstractExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
@@ -286,51 +289,14 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           case JRDATETIME: {
             JRDateTimeType dt = (JRDateTimeType) value;
             Date dtValue = dt.getValue();
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(dtValue);
+
             if (dtValue != null) {
+              GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+              g.setTime(dtValue);
 
-              String dtYear = Integer.toString(cal.get(Calendar.YEAR));
-              String dtMonth = "";
-              String dtDay = "";
-              String dtHour = "";
-              String dtMinutes = "";
-              String dtSeconds = "";
-
-              Integer monthInt = cal.get(Calendar.MONTH) + 1;
-              if (monthInt < 10) {
-                dtMonth = "0" + Integer.toString(monthInt);
-              } else {
-                dtMonth = Integer.toString(monthInt);
-              }
-
-              Integer dayInt = cal.get(Calendar.DAY_OF_MONTH);
-              if (dayInt < 10) {
-                dtDay = "0" + Integer.toString(dayInt);
-              } else {
-                dtDay = Integer.toString(dayInt);
-              }
-
-              if (cal.get(Calendar.HOUR_OF_DAY) < 10) {
-                dtHour = "0" + Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
-              } else {
-                dtHour = Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
-              }
-
-              if (cal.get(Calendar.MINUTE) < 10) {
-                dtMinutes = "0" + Integer.toString(cal.get(Calendar.MINUTE));
-              } else {
-                dtMinutes = Integer.toString(cal.get(Calendar.MINUTE));
-              }
-
-              if (cal.get(Calendar.SECOND) < 10) {
-                dtSeconds = "0" + Integer.toString(cal.get(Calendar.SECOND));
-              } else {
-                dtSeconds = Integer.toString(cal.get(Calendar.SECOND));
-              }
-
-              String strValue = dtYear + "-" + dtMonth + "-" + dtDay + " " + dtHour + ":"
-                  + dtMinutes + ":" + dtSeconds;
+              String strValue = String.format(FormatConsts.REDCAP_DATE_TIME_FORMAT_STRING,
+                  g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH),
+                  g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE), g.get(Calendar.SECOND));
 
               b.append("<").append(element.getElementName()).append(">")
                   .append(StringEscapeUtils.escapeXml(strValue)).append("</")
@@ -343,30 +309,13 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           case JRDATE: {
             JRDateType dt = (JRDateType) value;
             Date dtValue = dt.getValue();
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(dtValue);
+
             if (dtValue != null) {
+              GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+              g.setTime(dtValue);
 
-              String dtMonth = "";
-              String dtDay = "";
-
-              String dtYear = Integer.toString(cal.get(Calendar.YEAR));
-
-              Integer monthInt = cal.get(Calendar.MONTH) + 1;
-              if (monthInt < 10) {
-                dtMonth = "0" + Integer.toString(monthInt);
-              } else {
-                dtMonth = Integer.toString(monthInt);
-              }
-
-              Integer dayInt = cal.get(Calendar.DAY_OF_MONTH);
-              if (dayInt < 10) {
-                dtDay = "0" + Integer.toString(dayInt);
-              } else {
-                dtDay = Integer.toString(dayInt);
-              }
-
-              String strValue = dtYear + "-" + dtMonth + "-" + dtDay;
+              String strValue = String.format(FormatConsts.REDCAP_DATE_ONLY_FORMAT_STRING,
+                  g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH));
 
               b.append("<").append(element.getElementName()).append(">")
                   .append(StringEscapeUtils.escapeXml(strValue)).append("</")
@@ -378,26 +327,13 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           case JRTIME: {
             JRTimeType dt = (JRTimeType) value;
             Date dtValue = dt.getValue();
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(dtValue);
 
             if (dtValue != null) {
-              String dtHour = "";
-              String dtMinutes = "";
+              GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+              g.setTime(dtValue);
 
-              if (cal.get(Calendar.HOUR_OF_DAY) < 10) {
-                dtHour = "0" + Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
-              } else {
-                dtHour = Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
-              }
-
-              if (cal.get(Calendar.MINUTE) < 10) {
-                dtMinutes = "0" + Integer.toString(cal.get(Calendar.MINUTE));
-              } else {
-                dtMinutes = Integer.toString(cal.get(Calendar.MINUTE));
-              }
-
-              String strValue = dtHour + ":" + dtMinutes;
+              String strValue = String.format(FormatConsts.REDCAP_TIME_FORMAT_STRING,
+                  g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE));
 
               b.append("<").append(element.getElementName()).append(">")
                   .append(StringEscapeUtils.escapeXml(strValue)).append("</")
