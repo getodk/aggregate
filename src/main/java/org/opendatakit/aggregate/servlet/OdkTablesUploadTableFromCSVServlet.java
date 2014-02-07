@@ -42,7 +42,7 @@ import org.opendatakit.aggregate.odktables.importexport.CsvUtil;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Servlet that handles the generation of a table from an uploaded CSV file.
@@ -130,10 +130,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
      CallingContext cc = ContextFactory.getCallingContext(this, req);
      logger.info("Inside doHead");
-     //TODO add openrosa stuff?
-     String serverUrl = cc.getServerURL();
-     String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
-     resp.setHeader("Location", url);
+     addOpenDataKitHeaders(resp);
      resp.setStatus(204); // no content...
   }
 
@@ -161,9 +158,10 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
       String tableName = uploadedFormItems
           .getSimpleFormField("table_name");
 
+      addOpenDataKitHeaders(resp);
       resp.setStatus(HttpServletResponse.SC_CREATED);
-      resp.setHeader("Location", cc.getServerURL() +
-          BasicConsts.FORWARDSLASH + ADDR);
+      resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
+      resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 
       CsvUtil csvUtil = new CsvUtil();
       byte[] bytes = csvFile.getStream().toByteArray();

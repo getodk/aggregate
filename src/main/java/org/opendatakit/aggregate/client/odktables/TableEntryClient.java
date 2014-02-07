@@ -38,35 +38,41 @@ public class TableEntryClient implements Serializable {
 
 
   private String tableId;
-  private String tableKey;
+  private String displayName;
   private String dataEtag;
   private String propertiesEtag;
+  private String schemaEtag;
 
   protected TableEntryClient() {
   }
 
-  public TableEntryClient(final String tableId, String tableKey,
-      final String dataEtag, final String propertiesEtag) {
+  public TableEntryClient(final String tableId, final String displayName,
+      final String dataEtag, final String propertiesEtag, final String schemaEtag) {
     this.tableId = tableId;
-    this.tableKey = tableKey;
+    this.displayName = displayName;
     this.dataEtag = dataEtag;
     this.propertiesEtag = propertiesEtag;
+    this.schemaEtag = schemaEtag;
   }
 
   public String getTableId() {
     return this.tableId;
   }
 
-  public String getTableKey() {
-    return this.tableKey;
+  public void setTableId(final String tableId) {
+    this.tableId = tableId;
+  }
+
+  public String getDisplayName() {
+    return this.displayName;
+  }
+
+  public void setDisplayName(final String displayName) {
+    this.displayName = displayName;
   }
 
   public String getDataEtag() {
     return this.dataEtag;
-  }
-
-  public void setTableId(final String tableId) {
-    this.tableId = tableId;
   }
 
   public void setDataEtag(final String dataEtag) {
@@ -81,6 +87,14 @@ public class TableEntryClient implements Serializable {
     this.propertiesEtag = propertiesEtag;
   }
 
+  public String getSchemaEtag() {
+    return schemaEtag;
+  }
+
+  public void setSchemaEtag(String schemaEtag) {
+    this.schemaEtag = schemaEtag;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -90,26 +104,47 @@ public class TableEntryClient implements Serializable {
     if (!(obj instanceof TableEntryClient))
       return false;
     TableEntryClient other = (TableEntryClient) obj;
+
     if (dataEtag == null) {
-      if (other.dataEtag != null)
+      if (other.dataEtag != null) {
         return false;
-    } else if (!dataEtag.equals(other.dataEtag))
+      }
+    } else if (!dataEtag.equals(other.dataEtag)) {
       return false;
+    }
+
     if (propertiesEtag == null) {
-      if (other.propertiesEtag != null)
+      if (other.propertiesEtag != null) {
         return false;
-    } else if (!propertiesEtag.equals(other.propertiesEtag))
+      }
+    } else if (!propertiesEtag.equals(other.propertiesEtag)) {
       return false;
+    }
+
+    if (schemaEtag == null) {
+      if (other.schemaEtag != null) {
+        return false;
+      }
+    } else if (!schemaEtag.equals(other.schemaEtag)) {
+      return false;
+    }
+
     if (tableId == null) {
-      if (other.tableId != null)
+      if (other.tableId != null) {
         return false;
-    } else if (!tableId.equals(other.tableId))
+      }
+    } else if (!tableId.equals(other.tableId)) {
       return false;
-    if (tableKey == null) {
-      if (other.tableKey != null)
+    }
+
+    if (displayName == null) {
+      if (other.displayName != null) {
         return false;
-    } else if (!tableKey.equals(other.tableKey))
+      }
+    } else if (!displayName.equals(other.displayName)) {
       return false;
+    }
+
     return true;
   }
 
@@ -119,16 +154,18 @@ public class TableEntryClient implements Serializable {
     int result = 1;
     result = prime * result + ((dataEtag == null) ? 0 : dataEtag.hashCode());
     result = prime * result + ((propertiesEtag == null) ? 0 : propertiesEtag.hashCode());
+    result = prime * result + ((schemaEtag == null) ? 0 : schemaEtag.hashCode());
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
+    result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
     return result;
   }
 
   @Override
   public String toString() {
     return "TableEntry [tableId=" + tableId
-        + ", tableKey=" + tableKey
+        + ", displayName=" + displayName
         + ", dataEtag=" + dataEtag
-        + ", propertiesEtag=" + propertiesEtag + "]";
+        + ", propertiesEtag=" + propertiesEtag
+        + ", schemaEtag=" + schemaEtag + "]";
   }
 }

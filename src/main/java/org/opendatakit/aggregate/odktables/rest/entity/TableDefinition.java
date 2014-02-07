@@ -47,24 +47,19 @@ public class TableDefinition {
   @Element(name = "table_id", required = true)
   private String tableId;
 
-  @Element(name = "table_key", required = true)
-  private String tableKey;
-
-  @Element(name = "db_table_name", required = true)
-  private String dbTableName;
-
-  @Element(name = "type", required = true)
-  private TableType type;
-
-  @Element(name = "table_id_access_controls", required = false)
-  private String tableIdAccessControls;
-
   /*
    * While not defined in DbTableDefinitions, this was originally how column
    * information was uploaded to the server, and will remain this way for now.
    */
   @ElementList(inline = true)
   private List<Column> columns;
+
+  /**
+   * The displayName cannot be null. This is the only reason this is sent
+   * up on the first request.
+   */
+  @Element(name = "display_name")
+  private String displayName;
 
   // ss: trying to subsume this information into the kvs.
   // @Element(required = false)
@@ -82,8 +77,8 @@ public class TableDefinition {
    *          list of {@link Column} objects
    * @param tableKey
    *          key of the table
-   * @param dbTableName
-   *          the db name of the table
+   * @param displayName
+   *          the displayName of the table (JSON.parse() to get viewable name)
    * @param type
    *          the string type of the table (must be one of (keep this fully
    *          qualified!)
@@ -92,49 +87,34 @@ public class TableDefinition {
    * @param tableIdAccessControls
    *          id of the table holding access controls
    */
-  public TableDefinition(final String tableId, final List<Column> columns, final String tableKey,
-      final String dbTableName, final TableType type, final String tableIdAccessControls) {
+  public TableDefinition(final String tableId, final List<Column> columns) {
     this.tableId = tableId;
     this.columns = columns;
-    this.tableKey = tableKey;
-    this.dbTableName = dbTableName;
-    this.type = type;
-    this.tableIdAccessControls = tableIdAccessControls;
   }
 
   public String getTableId() {
     return this.tableId;
   }
 
-  public String getTableKey() {
-    return this.tableKey;
-  }
-
   public List<Column> getColumns() {
     return this.columns;
   }
 
-  public TableType getType() {
-    return this.type;
-  }
-
-  public String getTableIdAccessControls() {
-    return this.tableIdAccessControls;
-  }
-
-  public String getDbTableName() {
-    return this.dbTableName;
+  public String getDisplayName() {
+    return this.displayName;
   }
 
   public void setColumns(final List<Column> columns) {
     this.columns = columns;
   }
 
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
   @Override
   public String toString() {
-    return "TableDefinition [tableId=" + tableId + ", columns=" + columns + ", tableKey="
-        + tableKey + ", dbTableName=" + dbTableName + ", type=" + type + ", tableIdAccessControls="
-        + tableIdAccessControls + "]";
+    return "TableDefinition [tableId=" + tableId + ", columns=" + columns + ", displayName=" + displayName + "]";
   }
 
   @Override
@@ -142,12 +122,8 @@ public class TableDefinition {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((tableKey == null) ? 0 : tableKey.hashCode());
-    result = prime * result + ((dbTableName == null) ? 0 : dbTableName.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    result = prime * result
-        + ((tableIdAccessControls == null) ? 0 : tableIdAccessControls.hashCode());
     result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+    result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
     return result;
   }
 
@@ -164,12 +140,8 @@ public class TableDefinition {
     }
     TableDefinition other = (TableDefinition) obj;
     return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (tableKey == null ? other.tableKey == null : tableKey.equals(other.tableKey))
-        && (dbTableName == null ? other.dbTableName == null : dbTableName.equals(other.dbTableName))
-        && (type == null ? other.type == null : type.equals(other.type))
-        && (tableIdAccessControls == null ? other.tableIdAccessControls == null
-            : tableIdAccessControls.equals(other.tableIdAccessControls))
-        && (columns == null ? other.columns == null : columns.equals(other.columns));
+        && (columns == null ? other.columns == null : columns.equals(other.columns))
+        && (displayName == null ? other.displayName == null : displayName.equals(other.displayName));
   }
 
 }

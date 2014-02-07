@@ -32,20 +32,14 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Comments by sudar.sam@gmail.com, so there may be discrepancies between the
- * comments and what was actually intended.
+ * This defines the columns in a given schemaEtag storage representation
+ * of that tableId. The table defines the abstract objects (e.g., geopoint)
+ * and underlying database fields (e.g., latitude, longitude, etc.) for the
+ * table.
  * <p>
  * This table stores the immutable definitions of each column in the datastore.
- * It is based on the eponymous table in ODK Tables, so that there should be a
+ * It is based on the ColumnDefinitions table in ODK Tables; there should be a
  * mirrored architecture. It is based on the ODK Tables Schema Google doc.
- * <p>
- * This is the table (i.e. "relation") that appears in the datastore as the
- * "_ODKTABLES_COLUMN" table. This is the table that stores the information
- * about the "columns" that are in the different odktables tables. It has the
- * type and name information. Therefore this is the datastore table that you
- * query to get all the column names for a certain table. Each entity (row in
- * this "relation") has the table id that the column belongs to, along with the
- * column type and name.
  *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
@@ -63,7 +57,7 @@ public class DbColumnDefinitions extends Relation {
   // these are the column names in the COLUMN table
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
       .setIndexable(IndexType.HASH);
-  private static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG",
+  private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG",
       DataType.STRING, false);
   private static final DataField ELEMENT_KEY = new DataField("ELEMENT_KEY", DataType.STRING, false);
   private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataType.STRING,
@@ -71,24 +65,23 @@ public class DbColumnDefinitions extends Relation {
   private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataType.STRING, true);
   private static final DataField LIST_CHILD_ELEMENT_KEYS = new DataField("LIST_CHILD_ELEMENT_KEYS",
       DataType.STRING, true, 4096L);
-  private static final DataField IS_PERSISTED = new DataField("IS_PERSISTED", DataType.BOOLEAN,
+  private static final DataField IS_UNIT_OF_RETENTION = new DataField("IS_UNIT_OF_RETENTION", DataType.BOOLEAN,
       false);
-  private static final DataField JOINS = new DataField("JOINS", DataType.STRING, true, 12288L);
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(TABLE_ID);
-    dataFields.add(PROPERTIES_ETAG);
+    dataFields.add(SCHEMA_ETAG);
     dataFields.add(ELEMENT_KEY);
     dataFields.add(ELEMENT_NAME);
     dataFields.add(ELEMENT_TYPE);
     dataFields.add(LIST_CHILD_ELEMENT_KEYS);
-    dataFields.add(IS_PERSISTED);
-    dataFields.add(JOINS);
+    dataFields.add(IS_UNIT_OF_RETENTION);
   }
 
   public static class DbColumnDefinitionsEntity {
+
     Entity e;
 
     DbColumnDefinitionsEntity(Entity e) {
@@ -118,12 +111,12 @@ public class DbColumnDefinitions extends Relation {
       e.set(TABLE_ID, value);
     }
 
-    public String getPropertiesETag() {
-      return e.getString(PROPERTIES_ETAG);
+    public String getschemaETag() {
+      return e.getString(SCHEMA_ETAG);
     }
 
-    public void setPropertiesETag(String value) {
-      e.set(PROPERTIES_ETAG, value);
+    public void setschemaETag(String value) {
+      e.set(SCHEMA_ETAG, value);
     }
 
     public String getElementKey() {
@@ -158,21 +151,39 @@ public class DbColumnDefinitions extends Relation {
       e.set(LIST_CHILD_ELEMENT_KEYS, value);
     }
 
-    public Boolean getIsPersisted() {
-      return e.getBoolean(IS_PERSISTED);
+    public Boolean getIsUnitOfRetention() {
+      return e.getBoolean(IS_UNIT_OF_RETENTION);
     }
 
-    public void setIsPersisted(Boolean value) {
-      e.set(IS_PERSISTED, value);
+    public void setIsUnitOfRetention(Boolean value) {
+      e.set(IS_UNIT_OF_RETENTION, value);
     }
 
-    public String getJoins() {
-      return e.getString(JOINS);
+    /**
+     * Tests whether the semantically meaningful fields are equivalent.
+     *
+     * @param e
+     * @return true if these are matching column definitions
+     */
+    public boolean matchingColumnDefinition(DbColumnDefinitionsEntity e) {
+      if ( !this.getElementKey().equals(e.getElementKey()) ) {
+        return false;
+      }
+      if ( !this.getElementName().equals(e.getElementName()) ) {
+        return false;
+      }
+      if ( !this.getElementType().equals(e.getElementType()) ) {
+        return false;
+      }
+      if ( !this.getIsUnitOfRetention().equals(e.getIsUnitOfRetention()) ) {
+        return false;
+      }
+      if ( !this.getListChildElementKeys().equals(e.getListChildElementKeys()) ) {
+        return false;
+      }
+      return true;
     }
 
-    public void setJoins(String value) {
-      e.set(JOINS, value);
-    }
   }
 
   private static DbColumnDefinitions relation = null;
@@ -199,20 +210,20 @@ public class DbColumnDefinitions extends Relation {
 
   /**
    * Gets all of the columns in the column definitions table. This will not
-   * include metadata columns present in the data tables, like last_mod_time or
+   * include metadata columns present in the data tables, like _savepoint_timestamp or
    * rowid.
    *
    * @param tableId
-   * @param propertiesEtag
+   * @param schemaEtag
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<DbColumnDefinitionsEntity> query(String tableId, String propertiesEtag,
+  public static List<DbColumnDefinitionsEntity> query(String tableId, String schemaEtag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbColumnDefinitions.query", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(PROPERTIES_ETAG, FilterOperation.EQUAL, propertiesEtag);
+    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaEtag);
 
     List<Entity> list = query.execute();
     List<DbColumnDefinitionsEntity> results = new ArrayList<DbColumnDefinitionsEntity>();
@@ -224,19 +235,19 @@ public class DbColumnDefinitions extends Relation {
 
   /**
    * Return the ELEMENT_NAMEs for the given table. Currently returns all, even
-   * the non-persisted ones.
+   * the non-unit-of-retention ones.
    *
    * @param tableId
-   * @param propertiesEtag
+   * @param schemaEtag
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public static List<String> queryForColumnNames(String tableId, String propertiesEtag,
+  public static List<String> queryForColumnNames(String tableId, String schemaEtag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbColumnDefinitions.queryForColumnNames", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(PROPERTIES_ETAG, FilterOperation.EQUAL, propertiesEtag);
+    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaEtag);
 
     List<?> results = query.getDistinct(ELEMENT_NAME);
     List<String> list = new ArrayList<String>();
