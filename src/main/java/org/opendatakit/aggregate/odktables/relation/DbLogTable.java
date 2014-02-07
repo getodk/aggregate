@@ -88,9 +88,9 @@ public class DbLogTable extends Relation {
 
   private static final EntityConverter converter = new EntityConverter();
 
-  public static DbLogTable getRelation(String tableId, String schemaEtag, CallingContext cc)
+  public static DbLogTable getRelation(String tableId, String schemaETag, CallingContext cc)
       throws ODKDatastoreException {
-    List<DataField> fields = getDynamicFields(tableId, schemaEtag, cc);
+    List<DataField> fields = getDynamicFields(tableId, schemaETag, cc);
     fields.addAll(getStaticFields());
     return getRelation(tableId, fields, cc);
   }
@@ -104,10 +104,10 @@ public class DbLogTable extends Relation {
     return relation;
   }
 
-  private static List<DataField> getDynamicFields(String tableId, String schemaEtag,
+  private static List<DataField> getDynamicFields(String tableId, String schemaETag,
       CallingContext cc)
       throws ODKDatastoreException {
-    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaEtag, cc);
+    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaETag, cc);
     return converter.toFields(entities);
   }
 

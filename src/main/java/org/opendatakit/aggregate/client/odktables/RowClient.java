@@ -39,7 +39,7 @@ public class RowClient implements Serializable {
 
   private String rowId;
 
-  private String rowEtag;
+  private String rowETag;
 
   private boolean deleted;
 
@@ -77,21 +77,21 @@ public class RowClient implements Serializable {
    * Construct a row for updating.
    *
    * @param rowId
-   * @param rowEtag
+   * @param rowETag
    * @param values
    */
-  public static RowClient forUpdate(String rowId, String rowEtag,
+  public static RowClient forUpdate(String rowId, String rowETag,
       Map<String, String> values) {
     RowClient row = new RowClient();
     row.rowId = rowId;
-    row.rowEtag = rowEtag;
+    row.rowETag = rowETag;
     row.values = values;
     return row;
   }
 
   public RowClient() {
     this.rowId = null;
-    this.rowEtag = null;
+    this.rowETag = null;
     this.deleted = false;
     this.createUser = null;
     this.lastUpdateUser = null;
@@ -107,8 +107,8 @@ public class RowClient implements Serializable {
     return this.rowId;
   }
 
-  public String getRowEtag() {
-    return this.rowEtag;
+  public String getRowETag() {
+    return this.rowETag;
   }
 
   public boolean isDeleted() {
@@ -135,8 +135,8 @@ public class RowClient implements Serializable {
     this.rowId = rowId;
   }
 
-  public void setRowEtag(final String rowEtag) {
-    this.rowEtag = rowEtag;
+  public void setRowETag(final String rowETag) {
+    this.rowETag = rowETag;
   }
 
   public void setDeleted(final boolean deleted) {
@@ -208,7 +208,7 @@ public class RowClient implements Serializable {
     result = prime * result + (deleted ? 1231 : 1237);
     result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
     result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
-    result = prime * result + ((rowEtag == null) ? 0 : rowEtag.hashCode());
+    result = prime * result + ((rowETag == null) ? 0 : rowETag.hashCode());
     result = prime * result + ((rowId == null) ? 0 : rowId.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
     return result;
@@ -245,10 +245,10 @@ public class RowClient implements Serializable {
         return false;
     } else if (!lastUpdateUser.equals(other.lastUpdateUser))
       return false;
-    if (rowEtag == null) {
-      if (other.rowEtag != null)
+    if (rowETag == null) {
+      if (other.rowETag != null)
         return false;
-    } else if (!rowEtag.equals(other.rowEtag))
+    } else if (!rowETag.equals(other.rowETag))
       return false;
     if (rowId == null) {
       if (other.rowId != null)
@@ -273,8 +273,8 @@ public class RowClient implements Serializable {
     StringBuilder builder = new StringBuilder();
     builder.append("Row [rowId=");
     builder.append(rowId);
-    builder.append(", rowEtag=");
-    builder.append(rowEtag);
+    builder.append(", rowETag=");
+    builder.append(rowETag);
     builder.append(", deleted=");
     builder.append(deleted);
     builder.append(", createUser=");

@@ -87,9 +87,9 @@ public class TableManagerTest {
     TableEntry entry = tm.createTable(tableId,
         T.columns, T.kvsEntries);
     assertEquals(tableId, entry.getTableId());
-    assertNotNull(entry.getPropertiesEtag());
+    assertNotNull(entry.getPropertiesETag());
     // data eTag is null when table is first created
-    assertTrue(null == entry.getDataEtag());
+    assertTrue(null == entry.getDataETag());
   }
 
   @Test(expected = TableAlreadyExistsException.class)

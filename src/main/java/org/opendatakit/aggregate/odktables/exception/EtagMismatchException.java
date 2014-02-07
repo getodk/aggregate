@@ -16,23 +16,23 @@
 
 package org.opendatakit.aggregate.odktables.exception;
 
-public class EtagMismatchException extends ODKTablesException {
+public class ETagMismatchException extends ODKTablesException {
 
   private static final long serialVersionUID = 1L;
 
-  public EtagMismatchException() {
+  public ETagMismatchException() {
     super();
   }
 
-  public EtagMismatchException(String message) {
+  public ETagMismatchException(String message) {
     super(message);
   }
 
-  public EtagMismatchException(Throwable cause) {
+  public ETagMismatchException(Throwable cause) {
     super(cause);
   }
 
-  public EtagMismatchException(String message, Throwable cause) {
+  public ETagMismatchException(String message, Throwable cause) {
     super(message, cause);
   }
 

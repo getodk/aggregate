@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
-import org.opendatakit.aggregate.client.exception.EtagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.ImportFromCSVExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
@@ -60,7 +60,7 @@ public class CsvUtil {
    */
   public boolean importNewTable(BufferedReader buffReader, String tableName,
       CallingContext cc) throws ImportFromCSVExceptionClient,
-      EtagMismatchExceptionClient, PermissionDeniedExceptionClient,
+      ETagMismatchExceptionClient, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     LogFactory.getLog(getClass())
         .error("importNewTable out of date and is unimplemented!");
@@ -153,7 +153,7 @@ public class CsvUtil {
       List<ColumnClient> columns, boolean includeTs, boolean includePn,
       CallingContext cc) throws BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient,
-      EtagMismatchExceptionClient, ImportFromCSVExceptionClient {
+      ETagMismatchExceptionClient, ImportFromCSVExceptionClient {
     return false; // unimplemented and out of date.
 //    int tsIndex = includeTs ? 0 : -1;
 //    int pnIndex = includePn ? (includeTs ? 1 : 0) : -1;

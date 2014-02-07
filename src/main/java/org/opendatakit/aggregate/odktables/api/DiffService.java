@@ -33,6 +33,6 @@ public interface DiffService {
   public static final String QUERY_DATA_ETAG = "data_etag";
 
   @GET
-  public List<RowResource> getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataEtag)
+  public List<RowResource> getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
       throws ODKDatastoreException, PermissionDeniedException;
 }

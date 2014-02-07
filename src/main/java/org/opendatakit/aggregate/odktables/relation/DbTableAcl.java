@@ -32,10 +32,10 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Unlike the other tables, this is not updated atomically through the use of
- * the propertiesEtag.
+ * the propertiesETag.
  *
- * Instead, all changes are immediate and apply to all propertiesEtag and
- * dataEtag versions of the table and its data.
+ * Instead, all changes are immediate and apply to all propertiesETag and
+ * dataETag versions of the table and its data.
  *
  * If we eventually do bulk updates from the UI, e.g., setAcls( List&lt;Acl&gt;
  * ) then we will need to craft the updates to first add privileges then to
