@@ -20,16 +20,15 @@ import java.io.Serializable;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.api.TableAclResource.java.
- * <br>
+ * org.opendatakit.aggregate.odktables.entity.api.TableAclResource.java. <br>
  * The idea is that this will perform the same function but on the client side.
- * Usual caveat that it is currently unclear if this is necessary and if a
- * new non-phone object has to be created for the server.
+ * Usual caveat that it is currently unclear if this is necessary and if a new
+ * non-phone object has to be created for the server.
+ *
  * @author sudar.sam@gmail.com
  *
  */
-public class TableAclResourceClient extends TableAclClient
-    implements Serializable {
+public class TableAclResourceClient extends TableAclClient implements Serializable {
 
   /**
    *
@@ -161,4 +160,3 @@ public class TableAclResourceClient extends TableAclClient
   }
 
 }
-

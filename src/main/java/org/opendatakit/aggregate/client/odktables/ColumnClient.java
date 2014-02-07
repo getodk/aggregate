@@ -21,6 +21,7 @@ import java.io.Serializable;
 /**
  * This is the client-side code of
  * {@link org.opendatakit.aggregate.odktables.rest.entity.Column}
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -45,18 +46,18 @@ public class ColumnClient implements Serializable {
   }
 
   /**
-   * Create a column. Spaces will be replaced by underscores. The backing
-   * dbName of the column will be the displayName changed to lower case and
-   * prepended with an underscore.
+   * Create a column. Spaces will be replaced by underscores. The backing dbName
+   * of the column will be the displayName changed to lower case and prepended
+   * with an underscore.
+   *
    * @param displayName
    * @param type
    */
-  public ColumnClient(final String tableId, final String elementKey,
-      final String elementName, final String elementType,
-      final String listChildElementKeys, final int isPersisted,
+  public ColumnClient(final String tableId, final String elementKey, final String elementName,
+      final String elementType, final String listChildElementKeys, final int isPersisted,
       final String joins) {
-// ss: not sure what this was.leaving it out for now.
-//    String nameToBeEntered = displayName.toLowerCase().replace(" ", "_");
+    // ss: not sure what this was.leaving it out for now.
+    // String nameToBeEntered = displayName.toLowerCase().replace(" ", "_");
     this.tableId = tableId;
     this.elementKey = elementKey;
     this.elementName = elementName;
@@ -95,13 +96,9 @@ public class ColumnClient implements Serializable {
   }
 
   public String toString() {
-    return "Column(tableId=" + this.getTableId()
-        + ", elementKey=" + this.getElementKey()
-        + ", elementName=" + this.getElementName()
-        + ", elementType=" + this.getElementType()
-        + ", listChildElementKeys=" + this.getListChildElementKeys()
-        + ", isPersisted=" + this.getIsPersisted()
-        + ", joins=" + this.getJoins()
-        + ")";
+    return "Column(tableId=" + this.getTableId() + ", elementKey=" + this.getElementKey()
+        + ", elementName=" + this.getElementName() + ", elementType=" + this.getElementType()
+        + ", listChildElementKeys=" + this.getListChildElementKeys() + ", isPersisted="
+        + this.getIsPersisted() + ", joins=" + this.getJoins() + ")";
   }
 }

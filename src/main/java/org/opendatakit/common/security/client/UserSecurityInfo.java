@@ -28,22 +28,22 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
  * If requested, it provides the full set of authorizations and group memberships that
  * a user possesses (so that the client can show or hide tabs as appropriate).  The
  * username is a unique key for this object.
- * 
+ *
  * @author mitchellsundt@gmail.com
  *
  */
 public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializable {
 
 	/**
-   * 
+   *
    */
-  private static final long serialVersionUID = 7581021818962882604L;
+  private static final long serialVersionUID = 758102181896882604L;
 
   public enum UserType implements Serializable {
 		ANONYMOUS,     // not authenticated (anonymous)
 		REGISTERED,    // authenticated and registered
 		AUTHENTICATED;  // openId authentication but not registered
-		
+
 		private UserType() {
 		  // GWT
 		}
@@ -54,10 +54,10 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
 	UserType type;
 	TreeSet<GrantedAuthorityName> assignedUserGroups = new TreeSet<GrantedAuthorityName>();
 	TreeSet<GrantedAuthorityName> grantedAuthorities = new TreeSet<GrantedAuthorityName>();
-	
-	public UserSecurityInfo() {	
+
+	public UserSecurityInfo() {
 	}
-	
+
 	public UserSecurityInfo(String username, String fullname, String email, UserType type) {
 		this.username = username;
 		this.fullname = fullname;
@@ -67,7 +67,7 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
 			throw new IllegalArgumentException("must have either just username or just email non-null");
 		}
 	}
-	
+
 	public UserType getType() {
 		return type;
 	}
@@ -107,7 +107,7 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
 			return email.substring(EmailParser.K_MAILTO.length());
 		}
 	}
-	
+
 	public TreeSet<GrantedAuthorityName> getAssignedUserGroups() {
 		return assignedUserGroups;
 	}
@@ -164,15 +164,15 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
 		if ( username != null ) return -1;
 		return 1;
 	}
-	
+
 	private static final String UID_PREFIX = "uid:";
-	
+
 	/**
 	 * Simple converter of user's primary key to a display name.
-	 * The actual user record at the time of the storage is identified by the 
-	 * uriUser.  The user's display name is encoded in that as well as a 
+	 * The actual user record at the time of the storage is identified by the
+	 * uriUser.  The user's display name is encoded in that as well as a
 	 * creation timestamp.
-	 * 
+	 *
 	 * @param uriUser
 	 * @return
 	 */

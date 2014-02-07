@@ -18,8 +18,15 @@ package org.opendatakit.aggregate.odktables;
 
 import org.opendatakit.common.persistence.ITaskLockType;
 
+/**
+ * There is only one lock for ODK Tables data.
+ *
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public enum ODKTablesTaskLockType implements ITaskLockType {
-  UPDATE_DATA(15000), UPDATE_PROPERTIES(15000);
+  TABLES_NON_PERMISSIONS_CHANGES(66000),
+  TABLES_USER_PERMISSION_CREATION(66000);
 
   private long timeout;
 

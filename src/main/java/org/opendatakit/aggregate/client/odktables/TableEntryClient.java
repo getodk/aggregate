@@ -20,12 +20,11 @@ import java.io.Serializable;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.TableEntry.java.
- * <br>
- * The idea is that this is the client-side implementation of the same
- * object. Usual caveat that it is unclear yet whether this all is
- * necessary and if similar non-phone objects will be needed on the
- * server side.
+ * org.opendatakit.aggregate.odktables.entity.TableEntry.java. <br>
+ * The idea is that this is the client-side implementation of the same object.
+ * Usual caveat that it is unclear yet whether this all is necessary and if
+ * similar non-phone objects will be needed on the server side.
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -34,8 +33,7 @@ public class TableEntryClient implements Serializable {
   /**
 	 *
 	 */
-	private static final long serialVersionUID = -7094543853434685403L;
-
+  private static final long serialVersionUID = -70945438534365403L;
 
   private String tableId;
   private String displayName;
@@ -46,8 +44,8 @@ public class TableEntryClient implements Serializable {
   protected TableEntryClient() {
   }
 
-  public TableEntryClient(final String tableId, final String displayName,
-      final String dataETag, final String propertiesETag, final String schemaETag) {
+  public TableEntryClient(final String tableId, final String displayName, final String dataETag,
+      final String propertiesETag, final String schemaETag) {
     this.tableId = tableId;
     this.displayName = displayName;
     this.dataETag = dataETag;
@@ -162,10 +160,7 @@ public class TableEntryClient implements Serializable {
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId
-        + ", displayName=" + displayName
-        + ", dataETag=" + dataETag
-        + ", propertiesETag=" + propertiesETag
-        + ", schemaETag=" + schemaETag + "]";
+    return "TableEntry [tableId=" + tableId + ", displayName=" + displayName + ", dataETag="
+        + dataETag + ", propertiesETag=" + propertiesETag + ", schemaETag=" + schemaETag + "]";
   }
 }

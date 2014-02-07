@@ -35,6 +35,7 @@ public class OdkTablesShowTableFilesButton extends AggregateButton implements Cl
   // the table id of the button this table is tied to.
   private String tableId;
   // the parent table to which this table belongs
+  @SuppressWarnings("unused")
   private OdkTablesTableList parentTable;
 
   public OdkTablesShowTableFilesButton(OdkTablesTableList parentTable,

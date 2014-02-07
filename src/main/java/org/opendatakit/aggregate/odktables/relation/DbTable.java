@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
@@ -35,8 +36,9 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * Represents the schema for a user-defined (data, security, shortcut) table
- * in the database.
+ * Represents the schema for a user-defined (data, security, shortcut) table in
+ * the database.
+ *
  * @author dylan price
  * @author sudar.sam@gmail.com
  *
@@ -48,74 +50,75 @@ public class DbTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
+  /**
+   * NOTE: the PK of this table is the ROW_ID of the DbLogTable entry
+   * who's state matches this row.
+   */
+
   public static final DataField ROW_ETAG = new DataField("_ROW_ETAG", DataType.STRING, false);
   /**
-   * This should hold the data etag at the time the row was modified/created.
+   * This should hold the TableEntry's data ETag at the time the row was modified/created.
    */
-  public static final DataField DATA_ETAG_AT_MODIFICATION =
-      new DataField("_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false);
+  public static final DataField DATA_ETAG_AT_MODIFICATION = new DataField(
+      "_DATA_ETAG_AT_MODIFICATION", DataType.STRING, false);
   public static final DataField CREATE_USER = new DataField("_CREATE_USER", DataType.STRING, true);
-  public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER", DataType.STRING, true);
+  public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER",
+      DataType.STRING, true);
   public static final DataField FILTER_TYPE = new DataField("_FILTER_TYPE", DataType.STRING, true);
   public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
-                        .setIndexable(IndexType.HASH);
+      .setIndexable(IndexType.HASH);
   public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
 
-  public static final DataField URI_ACCESS_CONTROL = new DataField(TableConstants.URI_ACCESS_CONTROL.toUpperCase(),
-      DataType.STRING, true);
   public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
       DataType.STRING, true);
   public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
       DataType.STRING, true);
-  // milliseconds
-  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(),
-      DataType.INTEGER, true);
+  // nanoseconds
+  public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, true);
+  public static final DataField SAVEPOINT_CREATOR = new DataField(
+      TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);
 
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
-    // server-side metadata
+
+    // metadata held only up at server
     dataFields.add(ROW_ETAG);
     dataFields.add(DATA_ETAG_AT_MODIFICATION);
     dataFields.add(CREATE_USER);
     dataFields.add(LAST_UPDATE_USER);
-    dataFields.add(FILTER_TYPE);
-    dataFields.add(FILTER_VALUE);
     dataFields.add(DELETED);
 
-    // common metadata
-    dataFields.add(URI_ACCESS_CONTROL);
+    // common metadata transmitted between server and device
     dataFields.add(FORM_ID);
     dataFields.add(LOCALE);
     dataFields.add(SAVEPOINT_TIMESTAMP);
+    dataFields.add(SAVEPOINT_CREATOR);
+
+    // Access control filters accessible only on server (these may be useless)
+    dataFields.add(FILTER_TYPE);
+    dataFields.add(FILTER_VALUE);
   }
 
   private static final EntityConverter converter = new EntityConverter();
 
-  public static DbTable getRelation(String tableId, String schemaETag, CallingContext cc)
+  public static DbTable getRelation(DbTableDefinitionsEntity entity, List<DbColumnDefinitionsEntity> entities, CallingContext cc)
       throws ODKDatastoreException {
-    List<DataField> fields = getDynamicFields(tableId, schemaETag, cc);
+    List<DataField> fields = converter.toFields(entities);
     fields.addAll(getStaticFields());
-    return getRelation(tableId, fields, cc);
+    return getRelation(entity.getDbTableName(), fields, cc);
   }
 
-  private static synchronized DbTable getRelation(String tableId, List<DataField> fields,
-      CallingContext cc)
-      throws ODKDatastoreException {
-    DbTable relation = new DbTable(RUtil.NAMESPACE,
-        RUtil.convertIdentifier(tableId), fields, cc);
+  private static synchronized DbTable getRelation(String dbTableName, List<DataField> fields,
+      CallingContext cc) throws ODKDatastoreException {
+    DbTable relation = new DbTable(RUtil.NAMESPACE, dbTableName, fields, cc);
     return relation;
-  }
-
-  private static List<DataField> getDynamicFields(String tableId, String schemaETag,
-      CallingContext cc)
-      throws ODKDatastoreException {
-    List<DbColumnDefinitionsEntity> entities = DbColumnDefinitions.query(tableId, schemaETag, cc);
-    return converter.toFields(entities);
   }
 
   /**
    * This should only be called sparingly.
+   *
    * @return
    */
   public static List<DataField> getStaticFields() {
@@ -135,8 +138,7 @@ public class DbTable extends Relation {
    *           if one of the rows does not exist
    * @throws ODKDatastoreException
    */
-  public static List<Entity> query(DbTable table, List<String> rowIds,
-      CallingContext cc)
+  public static List<Entity> query(DbTable table, List<String> rowIds, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     Validate.notNull(table);
     Validate.noNullElements(rowIds);

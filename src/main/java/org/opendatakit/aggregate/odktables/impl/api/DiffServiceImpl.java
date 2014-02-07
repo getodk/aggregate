@@ -20,48 +20,43 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.opendatakit.aggregate.odktables.AuthFilter;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.TableService;
+import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
+import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DiffServiceImpl implements DiffService {
-  private CallingContext cc;
   private DataManager dm;
   private UriInfo info;
-  private AuthFilter af;
 
-  public DiffServiceImpl(String tableId, UriInfo info, CallingContext cc)
+  public DiffServiceImpl(String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
-    this.cc = cc;
-    this.dm = new DataManager(tableId, cc);
+    this.dm = new DataManager(tableId, userPermissions, cc);
     this.info = info;
-    this.af = new AuthFilter(tableId, cc);
   }
 
   @Override
-  public List<RowResource> getRowsSince(String dataETag) throws ODKDatastoreException,
-      PermissionDeniedException {
-    // TODO re-do permissions stuff
-    //af.checkPermission(TablePermission.READ_ROW);
+  public Response getRowsSince(String dataETag) throws ODKDatastoreException,
+      PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
-    /*if (af.hasPermission(TablePermission.UNFILTERED_READ)) { */
-      rows = dm.getRowsSince(dataETag);
-    /*} else {
-      List<Scope> scopes = AuthFilter.getScopes(cc);
-      rows = dm.getRowsSince(dataETag, scopes);
-    }*/
-    return getResources(rows);
+    rows = dm.getRowsSince(dataETag);
+    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+    return Response.ok(rowResourceList).build();
   }
 
   private RowResource getResource(Row row) {
@@ -78,7 +73,7 @@ public class DiffServiceImpl implements DiffService {
     return resource;
   }
 
-  private List<RowResource> getResources(List<Row> rows) {
+  private ArrayList<RowResource> getResources(List<Row> rows) {
     ArrayList<RowResource> resources = new ArrayList<RowResource>();
     for (Row row : rows) {
       resources.add(getResource(row));

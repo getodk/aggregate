@@ -34,11 +34,11 @@ public class ConfirmDeleteTablesAdminPopup extends AbstractPopupBase {
   private static final String TOOLTIP_TXT = "Remove this user";
   private static final String HELP_BALLOON_TXT = "Remove this administrative user from editing data.";
 
-  private final String aggregateUid;
+  private final String uriUser;
 
-  public ConfirmDeleteTablesAdminPopup(String aggregateUid) {
+  public ConfirmDeleteTablesAdminPopup(String uriUser) {
     super();
-    this.aggregateUid = aggregateUid;
+    this.uriUser = uriUser;
 
     AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT,
         HELP_BALLOON_TXT);
@@ -77,7 +77,7 @@ public class ConfirmDeleteTablesAdminPopup extends AbstractPopupBase {
         }
       };
       // Make the call to the form service.
-      SecureGWT.getOdkTablesAdminService().deleteAdmin(aggregateUid, callback);
+      SecureGWT.getOdkTablesAdminService().deleteAdmin(uriUser, callback);
       hide();
     }
   }

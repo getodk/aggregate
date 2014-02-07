@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
@@ -50,17 +50,10 @@ public class TableDefinition {
   private String tableId;
 
   /**
-   * The displayName cannot be null. This is the only reason this is sent
-   * up on the first request.
-   */
-  @Element(name = "displayName", required = true)
-  private String displayName;
-
-  /**
    * The columns in the table.
    */
-  @ElementList(inline = true)
-  private List<Column> columns;
+  @ElementList(inline = true, required = false)
+  private ArrayList<Column> columns;
 
   // ss: trying to subsume this information into the kvs.
   // @Element(required = false)
@@ -88,11 +81,14 @@ public class TableDefinition {
    * @param tableIdAccessControls
    *          id of the table holding access controls
    */
-  public TableDefinition(final String tableId, final String schemaETag, final List<Column> columns, final String displayName) {
+  public TableDefinition(final String tableId, final String schemaETag, final ArrayList<Column> columns) {
     this.tableId = tableId;
     this.schemaETag = schemaETag;
-    this.columns = columns;
-    this.displayName = displayName;
+    if ( columns == null ) {
+      this.columns = new ArrayList<Column>();
+    } else {
+      this.columns = columns;
+    }
   }
 
   public String getSchemaETag() {
@@ -107,27 +103,22 @@ public class TableDefinition {
     return this.tableId;
   }
 
-  public List<Column> getColumns() {
+  public ArrayList<Column> getColumns() {
     return this.columns;
   }
 
-  public void setColumns(final List<Column> columns) {
-    this.columns = columns;
-  }
-
-  public String getDisplayName() {
-    return this.displayName;
-  }
-
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
+  public void setColumns(final ArrayList<Column> columns) {
+    if ( columns == null ) {
+      this.columns = new ArrayList<Column>();
+    } else {
+      this.columns = columns;
+    }
   }
 
   @Override
   public String toString() {
     return "TableDefinition [schemaETag=" + schemaETag
         + ", tableId=" + tableId
-        + ", displayName=" + displayName
         + ", columns=" + columns
         + "]";
   }
@@ -138,7 +129,6 @@ public class TableDefinition {
     int result = 1;
     result = prime * result + ((schemaETag == null) ? 1 : schemaETag.hashCode());
     result = prime * result + ((tableId == null) ? 1 : tableId.hashCode());
-    result = prime * result + ((displayName == null) ? 1 : displayName.hashCode());
     result = prime * result + ((columns == null) ? 1 : columns.hashCode());
     return result;
   }
@@ -157,7 +147,6 @@ public class TableDefinition {
     TableDefinition other = (TableDefinition) obj;
     return (schemaETag == null ? other.schemaETag == null : schemaETag.equals(other.schemaETag))
         && (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (displayName == null ? other.displayName == null : displayName.equals(other.displayName))
         && (columns == null ? other.columns == null : columns.equals(other.columns));
   }
 

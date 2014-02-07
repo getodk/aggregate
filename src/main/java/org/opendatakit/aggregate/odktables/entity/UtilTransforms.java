@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.opendatakit.aggregate.client.odktables.TableTypeClient;
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
@@ -57,15 +58,14 @@ import org.opendatakit.common.utils.WebUtils;
  *
  */
 public class UtilTransforms {
-	private static final Log log = LogFactory.getLog(UtilTransforms.class);
+  private static final Log log = LogFactory.getLog(UtilTransforms.class);
 
   /**
    * Transform the object into a server-side Column object.
    */
   public static Column transform(ColumnClient client) {
-    Column transformedColumn = new Column(client.getTableId(),
-        client.getElementKey(), client.getElementName(),
-        client.getElementType(), client.getListChildElementKeys(),
+    Column transformedColumn = new Column(client.getTableId(), client.getElementKey(),
+        client.getElementName(), client.getElementType(), client.getListChildElementKeys(),
         (client.getIsPersisted() != 0));
     return transformedColumn;
   }
@@ -113,9 +113,9 @@ public class UtilTransforms {
    * @param serverEntries
    * @return
    */
-  public static List<OdkTablesKeyValueStoreEntryClient> transform(
+  public static ArrayList<OdkTablesKeyValueStoreEntryClient> transform(
       List<OdkTablesKeyValueStoreEntry> serverEntries) {
-    List<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
+    ArrayList<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
     for (OdkTablesKeyValueStoreEntry serverEntry : serverEntries) {
       clientEntries.add(transform(serverEntry));
     }
@@ -147,9 +147,9 @@ public class UtilTransforms {
    * @param serverEntries
    * @return
    */
-  public static List<OdkTablesKeyValueStoreEntry> transformToServerEntries(
+  public static ArrayList<OdkTablesKeyValueStoreEntry> transformToServerEntries(
       List<OdkTablesKeyValueStoreEntryClient> clientEntries) {
-    List<OdkTablesKeyValueStoreEntry> serverEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
+    ArrayList<OdkTablesKeyValueStoreEntry> serverEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
     for (OdkTablesKeyValueStoreEntryClient clientEntry : clientEntries) {
       serverEntries.add(transform(clientEntry));
     }
@@ -168,13 +168,14 @@ public class UtilTransforms {
     serverRow.setRowETag(client.getRowETag());
     serverRow.setRowId(client.getRowId());
     serverRow.setValues(client.getValues());
-    serverRow.setUriAccessControl(client.getUriAccessControl());
     serverRow.setFormId(client.getFormId());
     serverRow.setLocale(client.getLocale());
     String isoDateStr = client.getSavepointTimestampIso8601Date();
-    Date isoDate = WebUtils.parseDate(isoDateStr);
-    Long time = (isoDate == null) ? null : isoDate.getTime();
-    serverRow.setSavepointTimestamp(time);
+    Date isoDate = (isoDateStr == null) ? null : WebUtils.parseDate(isoDateStr);
+    String nanoTime = (isoDate == null) ? null : TableConstants.nanoSecondsFromMillis(isoDate.getTime());
+    // TODO: this truncates the nanosecond portion of a date!
+    serverRow.setSavepointTimestamp(nanoTime);
+    serverRow.setSavepointCreator(client.getSavepointCreator());
     return serverRow;
   }
 
@@ -262,7 +263,8 @@ public class UtilTransforms {
   }
 
   public static PropertiesResourceClient transform(PropertiesResource serverResource) {
-    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getPropertiesETag(),
+    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getSchemaETag(),
+        serverResource.getPropertiesETag(),
         serverResource.getTableId(), UtilTransforms.transform(serverResource
             .getKeyValueStoreEntries()));
     PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
@@ -275,11 +277,11 @@ public class UtilTransforms {
    * Transform the object into the client-side object.
    */
   public static TablePropertiesClient transform(TableProperties serverProperties) {
-    List<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
+    ArrayList<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
     for (OdkTablesKeyValueStoreEntry serverEntry : serverProperties.getKeyValueStoreEntries()) {
       clientEntries.add(UtilTransforms.transform(serverEntry));
     }
-    TablePropertiesClient tpClient = new TablePropertiesClient(
+    TablePropertiesClient tpClient = new TablePropertiesClient(serverProperties.getSchemaETag(),
         serverProperties.getPropertiesETag(), serverProperties.getTableId(), clientEntries);
     return tpClient;
   }
@@ -316,11 +318,12 @@ public class UtilTransforms {
     }
 
     // sync'd metadata
-    row.setUriAccessControl(serverRow.getUriAccessControl());
     row.setFormId(serverRow.getFormId());
     row.setLocale(serverRow.getLocale());
-    Long time = serverRow.getSavepointTimestamp();
+    String savepointTimestamp = serverRow.getSavepointTimestamp();
+    Long time = TableConstants.milliSecondsFromNanos(savepointTimestamp);
     row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
+    row.setSavepointCreator(serverRow.getSavepointCreator());
 
     // data
     row.setValues(serverRow.getValues());
@@ -338,11 +341,13 @@ public class UtilTransforms {
     rowClient.setRowId(serverResource.getRowId());
 
     // sync'd metadata
-    rowClient.setUriAccessControl(serverResource.getUriAccessControl());
     rowClient.setFormId(serverResource.getFormId());
     rowClient.setLocale(serverResource.getLocale());
-    Long time = serverResource.getSavepointTimestamp();
-    rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
+    String savepointTimestamp = serverResource.getSavepointTimestamp();
+    Long time = TableConstants.milliSecondsFromNanos(savepointTimestamp);
+    rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(
+        time)));
+    rowClient.setSavepointCreator(serverResource.getSavepointCreator());
 
     // data
     rowClient.setValues(serverResource.getValues());

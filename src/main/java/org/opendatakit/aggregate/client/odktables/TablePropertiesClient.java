@@ -17,16 +17,16 @@
 package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.TableProperties.java.
- * <br>
+ * org.opendatakit.aggregate.odktables.entity.TableProperties.java. <br>
  * The idea is that this will do the same thing, but for the server. The common
- * caveats apply for all of these objects, in that it is not yet clear how
- * they will work, and if there will need to be similar objects that are NOT
- * the original for-the-phone objects on the server.
+ * caveats apply for all of these objects, in that it is not yet clear how they
+ * will work, and if there will need to be similar objects that are NOT the
+ * original for-the-phone objects on the server.
+ *
  * @author sudar.sam@gmail.com
  *
  */
@@ -35,20 +35,30 @@ public class TablePropertiesClient implements Serializable {
   /**
 	 *
 	 */
-	private static final long serialVersionUID = 197746211663068997L;
+  private static final long serialVersionUID = 1977461163068996L;
 
+  private String schemaETag;
   private String propertiesETag;
   private String tableId;
-  private List<OdkTablesKeyValueStoreEntryClient> kvsEntries;
+  private ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries;
 
   protected TablePropertiesClient() {
   }
 
-  public TablePropertiesClient(String propertiesETag, String tableId,
-      List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+  public TablePropertiesClient(String schemaETag, String propertiesETag, String tableId,
+      ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+    this.schemaETag = schemaETag;
     this.propertiesETag = propertiesETag;
     this.tableId = tableId;
     this.kvsEntries = kvsEntries;
+  }
+
+  public String getSchemaETag() {
+    return schemaETag;
+  }
+
+  public void setSchemaETag(String schemaETag) {
+    this.schemaETag = schemaETag;
   }
 
   public String getPropertiesETag() {
@@ -67,21 +77,18 @@ public class TablePropertiesClient implements Serializable {
     this.tableId = tableId;
   }
 
-  public List<OdkTablesKeyValueStoreEntryClient> getKeyValueStoreEntries() {
+  public ArrayList<OdkTablesKeyValueStoreEntryClient> getKeyValueStoreEntries() {
     return this.kvsEntries;
   }
 
-  public void setKeyValueStoreEntries(
-      List<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
+  public void setKeyValueStoreEntries(ArrayList<OdkTablesKeyValueStoreEntryClient> kvsEntries) {
     this.kvsEntries = kvsEntries;
   }
 
   @Override
   public String toString() {
-    return "TableProperties [propertiesETag=" + propertiesETag
-        + ", tableId=" + tableId
-        + ", kvsEntries=" + kvsEntries.toString()
-        + "]";
+    return "TableProperties [schemaETag=" + schemaETag + ", propertiesETag=" + propertiesETag + ", tableId=" + tableId
+        + ", kvsEntries=" + kvsEntries.toString() + "]";
   }
 
 }

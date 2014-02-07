@@ -69,25 +69,38 @@ public final class NewTablesAdminPopup extends AbstractPopupBase {
       AggregateUI.getUI().clearError();
 
       ArrayList<UserSecurityInfo> filteredResult = new ArrayList<UserSecurityInfo>();
-      for ( UserSecurityInfo user : result ) {
-        if ( user.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) ) {
+      for (UserSecurityInfo user : result) {
+        if (user.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
           filteredResult.add(user);
         }
       }
-      Collections.sort(filteredResult, new Comparator<UserSecurityInfo>(){
+      Collections.sort(filteredResult, new Comparator<UserSecurityInfo>() {
 
         @Override
         public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
-          return arg0.getFullName().compareTo(arg1.getFullName());
-        }} );
+          String name0 = arg0.getFullName();
+          String name1 = arg1.getFullName();
+          if (name0 == null) {
+            name0 = arg0.getCanonicalName();
+          }
+          if (name1 == null) {
+            name1 = arg1.getCanonicalName();
+          }
+          return name0.compareTo(name1);
+        }
+      });
 
       users.clear();
       userList = filteredResult;
-      for ( int i = 0 ; i < userList.size(); ++i) {
+      for (int i = 0; i < userList.size(); ++i) {
         UserSecurityInfo user = userList.get(i);
         String displayName = user.getFullName();
+        if (displayName == null) {
+          displayName = user.getCanonicalName();
+        }
         users.addItem(displayName, Integer.toString(i));
-        users.setItemSelected(i, user.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES));
+        users.setItemSelected(i,
+            user.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES));
       }
     }
 
@@ -96,19 +109,16 @@ public final class NewTablesAdminPopup extends AbstractPopupBase {
   public NewTablesAdminPopup() {
     super();
 
-    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
-    deleteButton.addClickHandler(new CreateUser());
-
     users = new UserListBox();
-
-    UserSecurityInfo[] valuesToShow = {};
+    AggregateButton addButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    addButton.addClickHandler(new CreateUser());
 
     FlexTable layout = new FlexTable();
     layout.setWidget(0, 0, new ClosePopupButton(this));
     layout.setWidget(0, 1, new HTML(LABEL_TXT));
     layout.setWidget(1, 0, new HTML("Users:"));
     layout.setWidget(1, 1, users);
-    layout.setWidget(3, 1, deleteButton);
+    layout.setWidget(3, 1, addButton);
 
     SecureGWT.getSecurityAdminService().getAllUsers(true, new ODKTablesAdminPopupCallback());
     setWidget(layout);
@@ -137,14 +147,14 @@ public final class NewTablesAdminPopup extends AbstractPopupBase {
       };
 
       ArrayList<UserSecurityInfo> enabledUsers = new ArrayList<UserSecurityInfo>();
-      for ( int i = 0 ; i < userList.size(); ++i ) {
-        if ( users.isItemSelected(i) ) {
+      for (int i = 0; i < userList.size(); ++i) {
+        if (users.isItemSelected(i)) {
           UserSecurityInfo user = userList.get(i);
           enabledUsers.add(user);
         }
       }
       // Make the call to the odk tables user admin service.
-      //SecureGWT.getOdkTablesAdminService().setAdmins(enabledUsers, callback);
+      SecureGWT.getOdkTablesAdminService().setAdmins(enabledUsers, callback);
       hide();
     }
   }

@@ -79,7 +79,6 @@ public class FormTable extends FlexTable {
     // add styling
     getRowFormatter().addStyleName(0, "titleBar");
     addStyleName("dataTable");
-    getElement().setId("form_management_table");
   }
 
   /**

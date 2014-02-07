@@ -224,6 +224,7 @@ a,a:visited,a:hover {
 	position: absolute;
 	left: 20px;
 	top: 8px;
+	padding-bottom: 4px;
 }
 
 #form_title_cell {

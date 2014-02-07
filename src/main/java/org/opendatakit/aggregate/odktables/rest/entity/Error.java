@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Default;
 import org.simpleframework.xml.DefaultType;
 import org.simpleframework.xml.Root;
@@ -23,7 +24,11 @@ import org.simpleframework.xml.Root;
 @Root
 @Default(DefaultType.FIELD)
 public class Error {
+
+  @Attribute(required = true)
   private ErrorType type;
+
+  @Attribute(required = true)
   private String message;
 
   @SuppressWarnings("unused")
@@ -124,13 +129,6 @@ public class Error {
   }
 
   public enum ErrorType {
-    ETAG_MISMATCH,
-    TABLE_EXISTS,
-    PERMISSION_DENIED,
-    RESOURCE_NOT_FOUND,
-    BAD_COLUMN_NAME,
-    INTERNAL_ERROR,
-    BAD_REQUEST,
-    LOCK_TIMEOUT,
+    ETAG_MISMATCH, TABLE_EXISTS, PERMISSION_DENIED, RESOURCE_NOT_FOUND, BAD_COLUMN_NAME, INTERNAL_ERROR, BAD_REQUEST, LOCK_TIMEOUT,
   }
 }

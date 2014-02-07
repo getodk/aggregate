@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.popups;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
@@ -380,7 +379,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
   private LatLng getLatLonFromSubmission(int latIndex, int lonIndex, SubmissionUI sub) {
     LatLng gpsPoint;
-    List<String> values = sub.getValues();
+    ArrayList<String> values = sub.getValues();
     try {
       Double lat = Double.parseDouble(values.get(latIndex));
       Double lon = Double.parseDouble(values.get(lonIndex));

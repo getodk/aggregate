@@ -23,37 +23,28 @@ public class OdkTablesAdmin implements Serializable{
   /**
    *
    */
-  private static final long serialVersionUID = 7628052757666367474L;
+  private static final long serialVersionUID = 762805275766667473L;
 
-  private String aggregateUid;
+  private String uriUser;
+
+  private String odkTablesUserId;
 
   private String name;
 
-  private String externalUid;
+  private String phoneNumber;
+
+  private String xBearerCode;
 
   public OdkTablesAdmin() {
 
   }
 
-  public OdkTablesAdmin(String name, String externalUid) {
-    this.aggregateUid = null;
-    this.name = name;
-    this.externalUid = externalUid;
+  public String getUriUser() {
+    return uriUser;
   }
 
-
-  public OdkTablesAdmin(String aggregateUid, String name, String externalUid) {
-    this.aggregateUid = aggregateUid;
-    this.name = name;
-    this.externalUid = externalUid;
-  }
-
-  public String getAggregateUid() {
-    return aggregateUid;
-  }
-
-  public void setAggregateUid(String aggregateUid) {
-    this.aggregateUid = aggregateUid;
+  public void setUriUser(String uriUser) {
+    this.uriUser = uriUser;
   }
 
   public String getName() {
@@ -64,11 +55,27 @@ public class OdkTablesAdmin implements Serializable{
     this.name = name;
   }
 
-  public String getExternalUid() {
-    return externalUid;
+  public String getOdkTablesUserId() {
+    return odkTablesUserId;
   }
 
-  public void setExternalUid(String externalUid) {
-    this.externalUid = externalUid;
+  public void setOdkTablesUserId(String odkTablesUserId) {
+    this.odkTablesUserId = odkTablesUserId;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getXBearerCode() {
+    return xBearerCode;
+  }
+
+  public void setXBearerCode(String xBearerCode) {
+    this.xBearerCode = xBearerCode;
   }
 }

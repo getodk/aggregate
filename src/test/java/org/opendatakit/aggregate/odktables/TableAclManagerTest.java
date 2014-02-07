@@ -24,9 +24,14 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
+import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -36,30 +41,70 @@ import org.opendatakit.common.web.TestContextFactory;
 public class TableAclManagerTest {
 
   private CallingContext cc;
+  private TablesUserPermissions userPermissions;
   private String tableId;
   private TableManager tm;
   private Scope scope;
   private TableRole role;
   private TableAclManager am;
 
+  private class MockCurrentUserPermissions implements TablesUserPermissions {
+
+    @Override
+    public String getOdkTablesUserId() {
+      return "myid";
+    }
+
+    @Override
+    public String getPhoneNumber() {
+      return null;
+    }
+
+    @Override
+    public String getXBearerCode() {
+      return null;
+    }
+
+    @Override
+    public void checkPermission(String tableId, TablePermission permission)
+        throws ODKDatastoreException, PermissionDeniedException {
+      return;
+    }
+
+    @Override
+    public boolean hasPermission(String tableId, TablePermission permission)
+        throws ODKDatastoreException {
+      return true;
+    }
+
+    @Override
+    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
+      return true;
+    }
+
+  }
+
   @Before
   public void setUp() throws Exception {
     this.cc = TestContextFactory.getCallingContext();
 
-    this.tableId = T.tableId;
-    String tableProperties = T.tableMetadata;
-    this.tm = new TableManager(cc);
+    userPermissions = new MockCurrentUserPermissions();
 
-    tm.createTable(tableId,
-        T.columns, T.kvsEntries);
+    this.tableId = T.tableId;
+    this.tm = new TableManager(userPermissions, cc);
+
+    TableEntry te = tm.createTable(tableId, T.columns);
+    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), null, tableId, T.kvsEntries);
+    tableProperties = pm.setProperties(tableProperties);
 
     this.scope = new Scope(Scope.Type.USER, T.user);
     this.role = TableRole.FILTERED_READER;
-    this.am = new TableAclManager(tableId, cc);
+    this.am = new TableAclManager(tableId, userPermissions, cc);
   }
 
   @After
-  public void tearDown() throws ODKDatastoreException, ODKTaskLockException {
+  public void tearDown() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
     try {
       tm.deleteTable(tableId);
     } catch (ODKEntityNotFoundException e) {
@@ -68,13 +113,13 @@ public class TableAclManagerTest {
   }
 
   @Test
-  public void testGetAclsEmpty() throws ODKDatastoreException {
+  public void testGetAclsEmpty() throws ODKDatastoreException, PermissionDeniedException {
     List<TableAcl> acls = am.getAcls();
     assertEquals(1, acls.size());
   }
 
   @Test
-  public void testGetAcls() throws ODKDatastoreException {
+  public void testGetAcls() throws ODKDatastoreException, PermissionDeniedException {
     am.setAcl(scope, role);
     scope.setValue(scope.getValue() + "diff");
     am.setAcl(scope, role);
@@ -83,7 +128,7 @@ public class TableAclManagerTest {
   }
 
   @Test
-  public void testGetUserAcls() throws ODKDatastoreException {
+  public void testGetUserAcls() throws ODKDatastoreException, PermissionDeniedException {
     am.setAcl(scope, role);
     scope.setValue(scope.getValue() + "diff");
     am.setAcl(scope, role);
@@ -92,7 +137,7 @@ public class TableAclManagerTest {
   }
 
   @Test
-  public void testGetGroupAcls() throws ODKDatastoreException {
+  public void testGetGroupAcls() throws ODKDatastoreException, PermissionDeniedException {
     am.setAcl(scope, role);
     scope.setValue(scope.getValue() + "diff");
     am.setAcl(scope, role);
@@ -101,13 +146,13 @@ public class TableAclManagerTest {
   }
 
   @Test
-  public void testGetAclEmpty() throws ODKDatastoreException {
+  public void testGetAclEmpty() throws ODKDatastoreException, PermissionDeniedException {
     TableAcl acl = am.getAcl(scope);
     assertTrue(acl == null);
   }
 
   @Test
-  public void testSetAcl() throws ODKDatastoreException {
+  public void testSetAcl() throws ODKDatastoreException, PermissionDeniedException {
     TableAcl expected = am.setAcl(scope, role);
     TableAcl actual = am.getAcl(scope);
     assertEquals(expected, actual);
