@@ -76,19 +76,19 @@ public class TableManagerTest {
     }
 
     @Override
-    public void checkPermission(String tableId, TablePermission permission)
+    public void checkPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException, PermissionDeniedException {
       return;
     }
 
     @Override
-    public boolean hasPermission(String tableId, TablePermission permission)
+    public boolean hasPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException {
       return true;
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
+    public boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
     }
 
@@ -99,7 +99,7 @@ public class TableManagerTest {
     this.cc = TestContextFactory.getCallingContext();
     userPermissions = new MockCurrentUserPermissions();
 
-    this.tm = new TableManager(userPermissions, cc);
+    this.tm = new TableManager(T.appId, userPermissions, cc);
     this.tableId = T.tableId;
     this.tableId2 = T.tableId + "2";
     this.columns = T.columns;
@@ -130,7 +130,7 @@ public class TableManagerTest {
   public void testCreateTable() throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
     TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
     tableProperties = pm.setProperties(tableProperties);
 
@@ -204,13 +204,13 @@ public class TableManagerTest {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
     TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
     TableEntry entry2 = tm.createTable(tableId2, T.columns);
-    PropertiesManager pm2 = new PropertiesManager( tableId2, userPermissions, cc);
+    PropertiesManager pm2 = new PropertiesManager( T.appId, tableId2, userPermissions, cc);
     TableProperties tableProperties2 = new TableProperties(entry2.getSchemaETag(), null, tableId2, T.kvsEntries);
     pm2.setProperties(tableProperties2);
     tm.createTable(tableId2, T.columns);
@@ -232,19 +232,19 @@ public class TableManagerTest {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
     TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
     TableEntry entry2 = tm.createTable(tableId2, T.columns);
-    PropertiesManager pm2 = new PropertiesManager( tableId2, userPermissions, cc);
+    PropertiesManager pm2 = new PropertiesManager( T.appId, tableId2, userPermissions, cc);
     TableProperties tableProperties2 = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId2, T.kvsEntries);
     pm2.setProperties(tableProperties);
     tm.createTable(tableId2, T.columns);
     TableEntry two = tm.getTable(tableId2);
 
-    TableAclManager am = new TableAclManager(one.getTableId(), userPermissions, cc);
+    TableAclManager am = new TableAclManager(T.appId, one.getTableId(), userPermissions, cc);
     Scope scope = new Scope(Scope.Type.DEFAULT, null);
     am.setAcl(scope, TableRole.READER);
 
@@ -261,7 +261,7 @@ public class TableManagerTest {
       TableAlreadyExistsException, PermissionDeniedException, ETagMismatchException {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
     TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
     tm.deleteTable(tableId);

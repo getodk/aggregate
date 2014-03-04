@@ -31,6 +31,7 @@ import org.codehaus.jackson.type.TypeReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValueManifestManager;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
@@ -71,19 +72,19 @@ public class ManifestTest {
     }
 
     @Override
-    public void checkPermission(String tableId, TablePermission permission)
+    public void checkPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException, PermissionDeniedException {
       return;
     }
 
     @Override
-    public boolean hasPermission(String tableId, TablePermission permission)
+    public boolean hasPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException {
       return true;
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
+    public boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
     }
 
@@ -126,7 +127,7 @@ public class ManifestTest {
     entryList.add(entry);
     entryList.add(entry2);
 
-    OdkTablesKeyValueManifestManager manifest = new OdkTablesKeyValueManifestManager(
+    OdkTablesKeyValueManifestManager manifest = new OdkTablesKeyValueManifestManager(T.appId,
         "this-is-a-uuid", userPermissions, cc);
     manifest.addEntries(entryList);
 

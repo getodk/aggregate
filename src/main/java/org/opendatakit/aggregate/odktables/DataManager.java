@@ -62,6 +62,7 @@ public class DataManager {
   private TablesUserPermissions userPermissions;
   private EntityConverter converter;
   private EntityCreator creator;
+  private String appId;
   private String tableId;
 
   /**
@@ -78,15 +79,21 @@ public class DataManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public DataManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
+  public DataManager(String appId, String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
+    Validate.notEmpty(appId);
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
     this.cc = cc;
     this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
+    this.appId = appId;
     this.tableId = tableId;
+  }
+
+  public String getAppId() {
+    return appId;
   }
 
   public String getTableId() {
@@ -167,7 +174,7 @@ public class DataManager {
    */
   public List<Row> getRows() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, InconsistentStateException, BadColumnNameException {
 
-    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     List<DbColumnDefinitionsEntity> columns = null;
     List<Entity> entities = null;
@@ -204,9 +211,9 @@ public class DataManager {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {
       Row row = converter.toRow(entity, columns);
-      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+      if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
-      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
+      } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
         rows.add(row);
       }
     }
@@ -236,7 +243,7 @@ public class DataManager {
    */
   public List<Row> getRowsSince(String dataETag) throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException, PermissionDeniedException, BadColumnNameException {
 
-    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     List<DbColumnDefinitionsEntity> columns = null;
     List<Entity> entities = null;
@@ -290,9 +297,9 @@ public class DataManager {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {
       Row row = converter.toRowFromLogTable(entity, columns);
-      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+      if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
-      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
+      } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
         rows.add(row);
       }
     }
@@ -383,7 +390,7 @@ public class DataManager {
   public Row getRow(String rowId) throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     Validate.notEmpty(rowId);
 
-    userPermissions.checkPermission(tableId, TablePermission.READ_ROW);
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     List<DbColumnDefinitionsEntity> columns = null;
     Entity entity = null;
@@ -417,9 +424,9 @@ public class DataManager {
     }
 
     Row row = converter.toRow(entity, columns);
-    if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+    if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
       return row;
-    } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
+    } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, row.getRowId(), row.getFilterScope())) {
       return row;
     }
     throw new PermissionDeniedException(String.format("Denied table %s row %s access to user %s",
@@ -463,7 +470,7 @@ public class DataManager {
       PermissionDeniedException, InconsistentStateException {
     Validate.notNull(row);
 
-    userPermissions.checkPermission(tableId, TablePermission.WRITE_ROW);
+    userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
 
     List<DbColumnDefinitionsEntity> columns = null;
     Entity entity = null;
@@ -516,9 +523,9 @@ public class DataManager {
 
         // confirm that the user has the ability to read the row
         boolean hasPermissions = false;
-        if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+        if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
           hasPermissions = true;
-        } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, rowId, scope)) {
+        } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, rowId, scope)) {
           hasPermissions = true;
         }
 
@@ -529,9 +536,9 @@ public class DataManager {
 
         // confirm they have the ability to write to it
         hasPermissions = false;
-        if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_WRITE)) {
+        if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
           hasPermissions = true;
-        } else if ( userPermissions.hasFilterScope(tableId, TablePermission.WRITE_ROW, rowId, scope)) {
+        } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.WRITE_ROW, rowId, scope)) {
           hasPermissions = true;
         }
 
@@ -563,7 +570,7 @@ public class DataManager {
       } catch ( ODKEntityNotFoundException e ) {
 
         // require unfiltered write permissions to create a new record
-        userPermissions.checkPermission(tableId, TablePermission.UNFILTERED_WRITE);
+        userPermissions.checkPermission(appId, tableId, TablePermission.UNFILTERED_WRITE);
 
         newRowId = true;
         // initialization for insert...
@@ -629,7 +636,7 @@ public class DataManager {
     Validate.notNull(rowId);
     Validate.notBlank(rowId);
 
-    userPermissions.checkPermission(tableId, TablePermission.DELETE_ROW);
+    userPermissions.checkPermission(appId, tableId, TablePermission.DELETE_ROW);
     String dataETagAtModification = null;
     LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
@@ -657,9 +664,9 @@ public class DataManager {
 
       // check for read access
       boolean hasPermissions = false;
-      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_READ)) {
+      if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         hasPermissions = true;
-      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.READ_ROW, rowId, scope)) {
+      } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, rowId, scope)) {
         hasPermissions = true;
       }
 
@@ -670,9 +677,9 @@ public class DataManager {
 
       // check for delete access
       hasPermissions = false;
-      if ( userPermissions.hasPermission(tableId, TablePermission.UNFILTERED_DELETE)) {
+      if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_DELETE)) {
         hasPermissions = true;
-      } else if ( userPermissions.hasFilterScope(tableId, TablePermission.DELETE_ROW, rowId, scope)) {
+      } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.DELETE_ROW, rowId, scope)) {
         hasPermissions = true;
       }
 

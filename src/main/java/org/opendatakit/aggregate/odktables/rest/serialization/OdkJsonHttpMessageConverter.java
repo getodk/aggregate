@@ -28,8 +28,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import javax.ws.rs.core.Context;
 
@@ -61,11 +59,8 @@ public class OdkJsonHttpMessageConverter extends MappingJacksonHttpMessageConver
 
   private static final String DEFAULT_ENCODING = "utf-8";
 
-  private boolean ignoreContentEncoding;
-
   public OdkJsonHttpMessageConverter(boolean ignoreContentEncoding) {
     super();
-    this.ignoreContentEncoding = ignoreContentEncoding;
     getObjectMapper().disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
 
   }
@@ -79,17 +74,11 @@ public class OdkJsonHttpMessageConverter extends MappingJacksonHttpMessageConver
     if (!charset.equalsIgnoreCase(DEFAULT_ENCODING)) {
       throw new IllegalArgumentException("charset for the request is not utf-8");
     }
-    List<String> encodings = inputMessage.getHeaders().get(ApiConstants.CONTENT_ENCODING_HEADER);
-    if (!ignoreContentEncoding && encodings != null
-        && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-      stream = new GZIPInputStream(inputMessage.getBody());
-    } else {
-      stream = inputMessage.getBody();
-    }
-
-    InputStreamReader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
-    JavaType javaType = getJavaType(clazz);
     try {
+      // Android RestTemplate already does GZIP decoding before it gets to this message converter
+      stream = inputMessage.getBody();
+      InputStreamReader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
+      JavaType javaType = getJavaType(clazz);
       return this.getObjectMapper().readValue(r, javaType);
     } catch (Exception ex) {
       throw new HttpMessageNotReadableException("Could not read [" + clazz + "] JSON: "
@@ -108,26 +97,23 @@ public class OdkJsonHttpMessageConverter extends MappingJacksonHttpMessageConver
       formatter.setCalendar(g);
       headers.add(ApiConstants.DATE_HEADER, formatter.format(new Date()));
       headers.add(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-      headers.setContentType(new MediaType("application", "json", Charset
-          .forName(ApiConstants.UTF8_ENCODE)));
 
       // see if we should gzip the output
+      // The actual GZipping is done by a wrapper based upon the Content-Encoding setting
       OutputStream rawStream = outputMessage.getBody();
-      OutputStream stream;
       if (requestHeaders == null) {
         // always send data to the server as encoded
-        headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-        stream = new GZIPOutputStream(rawStream);
+        headers.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
       } else {
         List<String> encodings = requestHeaders.get(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
         if (encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-          headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-          stream = new GZIPOutputStream(rawStream);
-        } else {
-          stream = rawStream;
+          headers.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
         }
       }
-      Writer writer = new OutputStreamWriter(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
+
+      headers.setContentType(new MediaType("application", "json", Charset
+          .forName(ApiConstants.UTF8_ENCODE)));
+      Writer writer = new OutputStreamWriter(rawStream, Charset.forName(ApiConstants.UTF8_ENCODE));
       this.getObjectMapper().writeValue(writer, o);
     } catch (JsonProcessingException ex) {
       throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
@@ -139,9 +125,9 @@ public class OdkJsonHttpMessageConverter extends MappingJacksonHttpMessageConver
       return DEFAULT_ENCODING;
     }
     String result = m.getParameters().get("charset");
-    if ( result != null && result.startsWith("\"") && result.endsWith("\"") ) {
+    if (result != null && result.startsWith("\"") && result.endsWith("\"")) {
       // work-around for parameters being wrapped in quotes in Springframework.
-      result = result.substring(1, result.length()-1);
+      result = result.substring(1, result.length() - 1);
     }
     return (result == null) ? DEFAULT_ENCODING : result;
   }

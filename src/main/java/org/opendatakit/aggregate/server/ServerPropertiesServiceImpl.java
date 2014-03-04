@@ -55,7 +55,8 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      PropertiesManager pm = new PropertiesManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      PropertiesManager pm = new PropertiesManager(appId, tableId, userPermissions, cc);
       TableProperties properties = pm.getProperties();
       return UtilTransforms.transform(properties);
     } catch (ODKDatastoreException e) {
@@ -82,7 +83,8 @@ public class ServerPropertiesServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      PropertiesManager pm = new PropertiesManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      PropertiesManager pm = new PropertiesManager(appId, tableId, userPermissions, cc);
       // this seems fishy. Originally was passing in the parameter of type
       // TablePropertiesClient, but it isn't clear why I need to, when
       // nothing is being explicitly set. Fixed by changing the type of

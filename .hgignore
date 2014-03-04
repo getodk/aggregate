@@ -29,3 +29,7 @@ eclipse-aggregate-gae/war/WEB-INF/lib/odk-gae-settings-latest\.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/gwt-servlet\.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/appengine-jsr107cache-1\.6\.6\.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/appengine-webapis\.jar
+syntax: glob
+eclipse-aggregate-mysql/war/aggregateui/**
+eclipse-aggregate-mysql/war/WEB-INF/classes/**
+eclipse-aggregate-mysql/war/WEB-INF/deploy/**

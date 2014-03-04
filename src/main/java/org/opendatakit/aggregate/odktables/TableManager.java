@@ -63,10 +63,12 @@ public class TableManager {
   private EntityConverter converter;
   private EntityCreator creator;
   private TablesUserPermissions userPermissions;
+  private String appId;
 
-  public TableManager(TablesUserPermissions userPermissions, CallingContext cc)
+  public TableManager(String appId, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKDatastoreException {
     this.cc = cc;
+    this.appId = appId;
     this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
@@ -82,7 +84,7 @@ public class TableManager {
     List<TableEntry> tables = converter.toTableEntries(DbTableEntry.query(cc));
     List<TableEntry> filteredList = new ArrayList<TableEntry>();
     for (TableEntry e : tables) {
-      if (userPermissions.hasPermission(e.getTableId(), TablePermission.READ_TABLE_ENTRY)) {
+      if (userPermissions.hasPermission(appId, e.getTableId(), TablePermission.READ_TABLE_ENTRY)) {
         filteredList.add(e);
       }
     }
@@ -137,7 +139,7 @@ public class TableManager {
    */
   public TableEntry getTable(String tableId) throws ODKDatastoreException,
       PermissionDeniedException {
-    userPermissions.checkPermission(tableId, TablePermission.READ_TABLE_ENTRY);
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_TABLE_ENTRY);
 
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
@@ -218,7 +220,7 @@ public class TableManager {
       ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
-    userPermissions.checkPermission(tableId, TablePermission.READ_TABLE_ENTRY);
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_TABLE_ENTRY);
     // get table entry entity
     DbTableEntryEntity entryEntity = DbTableEntry.getTableIdEntry(tableId, cc);
     return converter.toTableEntry(entryEntity);
@@ -529,7 +531,7 @@ public class TableManager {
     Validate.notNull(tableId);
     Validate.notEmpty(tableId);
 
-    userPermissions.checkPermission(tableId, TablePermission.DELETE_TABLE);
+    userPermissions.checkPermission(appId, tableId, TablePermission.DELETE_TABLE);
 
     DbTableEntryEntity tableEntry = DbTableEntry.getTableIdEntry(tableId, cc);
 

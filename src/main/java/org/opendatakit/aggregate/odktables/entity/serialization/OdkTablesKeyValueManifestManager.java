@@ -59,6 +59,8 @@ public class OdkTablesKeyValueManifestManager {
 
   private ObjectMapper mapper;
 
+  private String appId;
+
   private String tableId;
 
   private CallingContext cc;
@@ -70,7 +72,8 @@ public class OdkTablesKeyValueManifestManager {
   /**
    * Get the manifest ready for a specific table.
    */
-  public OdkTablesKeyValueManifestManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) {
+  public OdkTablesKeyValueManifestManager(String appId, String tableId, TablesUserPermissions userPermissions, CallingContext cc) {
+    this.appId = appId;
     this.tableId = tableId;
     this.cc = cc;
     this.userPermissions = userPermissions;
@@ -114,7 +117,7 @@ public class OdkTablesKeyValueManifestManager {
     try {
       List<Row> infoRows = EntityConverter.toRowsFromFileInfo(DbTableFileInfo.queryForTableId(
           tableId, cc));
-      TableManager tm = new TableManager(userPermissions, cc);
+      TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
       DbTableFiles blobSetRelation = new DbTableFiles(cc);
       List<OdkTablesKeyValueStoreEntry> entries = new ArrayList<OdkTablesKeyValueStoreEntry>();

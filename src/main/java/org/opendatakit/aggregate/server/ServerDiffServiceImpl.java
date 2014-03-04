@@ -59,7 +59,8 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      DataManager dm = new DataManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       List<Row> rows;
       rows = dm.getRowsSince(dataETag);
       return transformRows(rows);
