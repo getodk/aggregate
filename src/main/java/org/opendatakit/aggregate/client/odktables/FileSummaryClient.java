@@ -33,7 +33,7 @@ public class FileSummaryClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -6081623884490673459L;
+  private static final long serialVersionUID = -608162388449067349L;
 
   private String filename;
   private String contentType;

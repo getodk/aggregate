@@ -29,7 +29,6 @@ import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.popups.OdkTablesMediaFileListPopup;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -40,8 +39,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Displays the entries in the {@link DbTableFileInfo} table that pertain to a
- * specific table.
+ * Displays the entries in the DbTableFileInfo table that pertain to a specific
+ * table.
  *
  * @author sudar.sam@gmail.com
  *
