@@ -27,8 +27,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import javax.ws.rs.core.Context;
 
@@ -87,12 +85,7 @@ public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Obj
     if ( !charset.equalsIgnoreCase(DEFAULT_ENCODING) ) {
       throw new IllegalArgumentException("charset for the request is not utf-8");
     }
-    List<String> encodings = headers.get(ApiConstants.CONTENT_ENCODING_HEADER);
-    if (encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-      stream = new GZIPInputStream(inputMessage.getBody());
-    } else {
-      stream = inputMessage.getBody();
-    }
+    stream = inputMessage.getBody();
     InputStreamReader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
     try {
       Object result = this.serializer.read(clazz, r);
@@ -117,26 +110,23 @@ public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Obj
       formatter.setCalendar(g);
       headers.add(ApiConstants.DATE_HEADER, formatter.format(new Date()));
       headers.add(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-      headers
-          .setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
 
       // see if we should gzip the output
+      // the actual GZipping is done by a wrapper based upon the Content-Encoding
       OutputStream rawStream = outputMessage.getBody();
-      OutputStream stream;
       if (requestHeaders == null) {
         // always send data to the server as encoded
-        headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-        stream = new GZIPOutputStream(rawStream);
+        headers.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
       } else {
         List<String> encodings = requestHeaders.get(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
         if (encodings != null && encodings.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-          headers.set(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-          stream = new GZIPOutputStream(rawStream);
-        } else {
-          stream = rawStream;
+          headers.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
         }
       }
-      Writer writer = new OutputStreamWriter(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
+
+      headers
+      .setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
+      Writer writer = new OutputStreamWriter(rawStream, Charset.forName(ApiConstants.UTF8_ENCODE));
       this.serializer.write(o, writer);
     } catch (Exception ex) {
       throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);

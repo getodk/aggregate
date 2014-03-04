@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -51,6 +52,7 @@ public class FileManifestManager {
   private Log log;
 
   public FileManifestManager(String appId, CallingContext cc) {
+    Validate.notEmpty(appId);
     this.appId = appId;
     // TODO: verify that appId matches what stored in
     // ServerPreferencesProperties...

@@ -26,9 +26,6 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -83,18 +80,7 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
       throw new IllegalArgumentException("charset for the request is not utf-8");
     }
     try {
-      InputStream jsonStream;
-      if (headers != null) {
-        List<String> ce = headers.getRequestHeader(ApiConstants.CONTENT_ENCODING_HEADER);
-        if (ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-          jsonStream = new GZIPInputStream(stream);
-        } else {
-          jsonStream = stream;
-        }
-      } else {
-        jsonStream = stream;
-      }
-      Reader r = new InputStreamReader(jsonStream, Charset.forName(ApiConstants.UTF8_ENCODE));
+      Reader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
       return serializer.read(aClass, r);
     } catch (Exception e) {
       throw new IOException(e);
@@ -110,21 +96,10 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
       throw new IllegalArgumentException("charset for the response is not utf-8");
     }
     try {
-      OutputStream stream;
-      if (headers != null) {
-        List<String> ce = headers.getRequestHeader(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
-        if (ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-          stream = new GZIPOutputStream(rawStream);
-        } else {
-          stream = rawStream;
-        }
-      } else {
-        stream = rawStream;
-      }
       if (mediaType.getParameters().get("charset") == null) {
         mediaType.getParameters().put("charset", DEFAULT_ENCODING);
       }
-      Writer writer = new OutputStreamWriter(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
+      Writer writer = new OutputStreamWriter(rawStream, Charset.forName(ApiConstants.UTF8_ENCODE));
       serializer.write(o, writer);
     } catch (Exception e) {
       throw new IOException(e);

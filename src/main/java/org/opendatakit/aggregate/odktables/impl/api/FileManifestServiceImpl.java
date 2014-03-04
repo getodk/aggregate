@@ -19,6 +19,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
 import org.opendatakit.aggregate.odktables.api.FileManifestService;
@@ -43,9 +45,10 @@ public class FileManifestServiceImpl implements FileManifestService {
 
   @Override
   @GET
+  @GZIP
   public Response getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
-      @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
+      @PathParam("appId") String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
       @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) {
     ServiceUtils.examineRequest(servletContext, req);
     // First we need to get the calling context.

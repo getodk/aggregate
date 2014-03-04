@@ -24,9 +24,6 @@ import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -77,18 +74,7 @@ public class SimpleJSONMessageReaderWriter implements MessageBodyReader<Object>,
       if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
         throw new IllegalArgumentException("charset for the request is not utf-8");
       }
-      InputStream jsonStream;
-      if (headers != null) {
-        List<String> ce = headers.getRequestHeader(ApiConstants.CONTENT_ENCODING_HEADER);
-        if (ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-          jsonStream = new GZIPInputStream(stream);
-        } else {
-          jsonStream = stream;
-        }
-      } else {
-        jsonStream = stream;
-      }
-      InputStreamReader r = new InputStreamReader(jsonStream,
+      InputStreamReader r = new InputStreamReader(stream,
           Charset.forName(ApiConstants.UTF8_ENCODE));
       return mapper.readValue(r, aClass);
     } catch (Exception e) {
@@ -105,18 +91,7 @@ public class SimpleJSONMessageReaderWriter implements MessageBodyReader<Object>,
       if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
         throw new IllegalArgumentException("charset for the response is not utf-8");
       }
-      OutputStream stream;
-      if (headers != null) {
-        List<String> ce = headers.getRequestHeader(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
-        if (ce != null && ce.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-          stream = new GZIPOutputStream(rawStream);
-        } else {
-          stream = rawStream;
-        }
-      } else {
-        stream = rawStream;
-      }
-      OutputStreamWriter w = new OutputStreamWriter(stream,
+      OutputStreamWriter w = new OutputStreamWriter(rawStream,
           Charset.forName(ApiConstants.UTF8_ENCODE));
       mapper.writeValue(w, o);
     } catch (Exception e) {

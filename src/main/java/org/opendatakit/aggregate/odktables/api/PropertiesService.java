@@ -24,6 +24,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
@@ -45,6 +46,7 @@ public interface PropertiesService {
    */
   @GET
   @Path("")
+  @GZIP
   public Response /*PropertiesResource*/ getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException;
 
   /**
@@ -59,7 +61,8 @@ public interface PropertiesService {
   @PUT
   @Path("")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*PropertiesResource*/ setProperties(TableProperties properties) throws ODKDatastoreException,
+  @GZIP
+  public Response /*PropertiesResource*/ setProperties(@GZIP TableProperties properties) throws ODKDatastoreException,
       ODKTaskLockException, ETagMismatchException, PermissionDeniedException;
 
 }

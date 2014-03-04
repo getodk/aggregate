@@ -17,25 +17,26 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
@@ -47,6 +48,7 @@ import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 public class FileServiceImpl implements FileService {
@@ -74,9 +76,8 @@ public class FileServiceImpl implements FileService {
   @GET
   @Path("{filePath:.*}")
   // because we want to get the whole path
-  public void getFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req,
-      @Context HttpServletResponse resp) throws IOException {
+  public Response getFile(@Context ServletContext servletContext,
+      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException {
     // Basing this off of OdkTablesTableFileDownloadServlet, which in turn was
     // based off of XFormsDownloadServlet.
 
@@ -88,8 +89,7 @@ public class FileServiceImpl implements FileService {
     // library, you will be sure to have an appid and the table name, so these
     // calls should never fail. Try to enforce this, however.
     if (segments.size() <= 1) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, FileService.ERROR_MSG_INSUFFICIENT_PATH);
-      return;
+      return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
     String appId = segments.get(0).toString();
     String tableId = getTableIdFromPathSegments(segments);
@@ -108,8 +108,7 @@ public class FileServiceImpl implements FileService {
         log.error("more than one entity for appId: " + appId + ", tableId: " + tableId
             + ", pathToFile: " + wholePath);
       } else if (entities.size() < 1) {
-        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "no file found for: " + wholePath);
-        return;
+        return Response.status(Status.NOT_FOUND).entity("No manifest entry found for: " + wholePath).build();
       }
       DbTableFileInfoEntity dbTableFileInfoRow = entities.get(0);
       String uri = dbTableFileInfoRow.getId();
@@ -117,43 +116,29 @@ public class FileServiceImpl implements FileService {
       BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(uri, cc);
       // We should only ever have one, as wholePath is the primary key.
       if (blobEntitySet.getAttachmentCount(cc) > 1) {
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            "More than one file specified for: " + wholePath);
+        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("More than one file specified for: " + wholePath).build();
       }
       if (blobEntitySet.getAttachmentCount(cc) < 1) {
-        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No file found for path: " + wholePath);
-        return;
+        return Response.status(Status.NOT_FOUND).entity("No file found for path: " + wholePath).build();
       }
       fileBlob = blobEntitySet.getBlob(1, cc);
       contentType = blobEntitySet.getContentType(1, cc);
       contentLength = blobEntitySet.getContentLength(1, cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          "Unable to retrieve attachment and access attributes.");
-      return;
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve attachment and access attributes for: " + wholePath).build();
     }
     // And now prepare everything to be returned to the caller.
-    if (fileBlob != null) {
-      if (contentType == null) {
-        resp.setContentType(HtmlConsts.RESP_TYPE_IMAGE_JPEG);
-      } else {
-        resp.setContentType(contentType);
-      }
-      if (contentLength != null) {
-        resp.setContentType(contentType);
-      }
+    if (fileBlob != null && contentType != null && contentLength != null && contentLength != 0L) {
+      ResponseBuilder rBuild = Response.ok(fileBlob, contentType );
       if (downloadAsAttachmentString != null && !"".equals(downloadAsAttachmentString)) {
         // Set the filename we're downloading to the disk.
-        resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + wholePath
+        rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + wholePath
             + "\"");
       }
-      OutputStream os = resp.getOutputStream();
-      os.write(fileBlob);
-      resp.setStatus(HttpStatus.SC_OK);
+      return rBuild.build();
     } else {
-      resp.setContentType(HtmlConsts.RESP_TYPE_PLAIN);
-      resp.getWriter().print(ErrorConsts.NO_IMAGE_EXISTS);
+      return Response.status(Status.NOT_FOUND).entity("File content not yet available for: " + wholePath).build();
     }
   }
 
@@ -161,12 +146,10 @@ public class FileServiceImpl implements FileService {
   @POST
   @Path("{filePath:.*}")
   // because we want to get the whole path
-  public void putFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req,
-      @Context HttpServletResponse resp) throws IOException, ODKTaskLockException {
+  public Response putFile(@Context ServletContext servletContext,
+      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException, ODKTaskLockException {
     if (segments.size() <= 1) {
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, FileService.ERROR_MSG_INSUFFICIENT_PATH);
-      return;
+      return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
     // TODO This stuff all needs to be handled in the log table somehow, and
     // it currently isn't.
@@ -179,9 +162,8 @@ public class FileServiceImpl implements FileService {
       // For now we'll just do tables. eventually we want all apps.
       // TODO: incorporate checking for apps
       // TODO: incorporate checking for access control
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, FileService.ERROR_MSG_UNRECOGNIZED_APP_ID
-          + appId);
-      return;
+      return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_UNRECOGNIZED_APP_ID
+          + appId).build();
     }
     String wholePath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
@@ -228,15 +210,18 @@ public class FileServiceImpl implements FileService {
       // 3) persist the user-friendly table entry about the blob
       tableFileInfoRow.put(cc);
 
-      resp.setStatus(HttpServletResponse.SC_CREATED);
-      resp.addHeader("Location", wholePath);
+      String locationUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
+          + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
+          + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH + appId + BasicConsts.FORWARDSLASH
+          + wholePath;
+
+      return Response.status(Status.CREATED).header("Location",locationUrl).build();
     } catch (ODKDatastoreException e) {
       LOGGER.error(("ODKTables file upload persistence error: " + e.getMessage()));
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage()).build();
     } catch (PermissionDeniedException e) {
       LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Permission denied");
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
     }
   }
 

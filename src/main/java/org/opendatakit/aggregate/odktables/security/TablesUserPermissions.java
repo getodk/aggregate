@@ -25,6 +25,7 @@ public interface TablesUserPermissions {
   /**
    * Checks that the current user has the given permission on the table.
    *
+   * @param appId
    * @param tableId
    * @param permission
    *          the permission to check
@@ -32,13 +33,14 @@ public interface TablesUserPermissions {
    * @throws PermissionDeniedException
    *           if the current user does not have the permission
    */
-  public abstract void checkPermission(String tableId, TablePermission permission)
+  public abstract void checkPermission(String appId, String tableId, TablePermission permission)
       throws ODKDatastoreException, PermissionDeniedException;
 
   /**
    * Check if the current user has the given permission on the table. An
    * exception-safe alternative to {@link #checkPermission(TablePermission)}
    *
+   * @param appId
    * @param tableId
    * @param permission
    *          the permission to check
@@ -46,12 +48,13 @@ public interface TablesUserPermissions {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    */
-  public abstract boolean hasPermission(String tableId, TablePermission permission)
+  public abstract boolean hasPermission(String appId, String tableId, TablePermission permission)
       throws ODKDatastoreException;
 
   /**
    * Check if the current user has the given filter scope on this table.
    *
+   * @param appId
    * @param tableId
    * @param permission
    *          the permission that guards access to the row. Should be one of
@@ -66,6 +69,6 @@ public interface TablesUserPermissions {
    * @throws ODKDatastoreException
    * @throws ODKEntityNotFoundException
    */
-  public abstract boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException;
+  public abstract boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException;
 
 }
