@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -44,14 +45,14 @@ public class DiffServiceImpl implements DiffService {
   private DataManager dm;
   private UriInfo info;
 
-  public DiffServiceImpl(String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+  public DiffServiceImpl(String appId, String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
-    this.dm = new DataManager(tableId, userPermissions, cc);
+    this.dm = new DataManager(appId, tableId, userPermissions, cc);
     this.info = info;
   }
 
   @Override
-  public Response getRowsSince(String dataETag) throws ODKDatastoreException,
+  public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRowsSince(dataETag);
@@ -60,13 +61,14 @@ public class DiffServiceImpl implements DiffService {
   }
 
   private RowResource getResource(Row row) {
+    String appId = dm.getAppId();
     String tableId = dm.getTableId();
     String rowId = row.getRowId();
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-        .build(tableId, rowId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
+        .build(appId, tableId, rowId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
     RowResource resource = new RowResource(row);
     resource.setSelfUri(self.toASCIIString());
     resource.setTableUri(table.toASCIIString());

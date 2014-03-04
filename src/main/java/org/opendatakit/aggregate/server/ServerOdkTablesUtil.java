@@ -72,6 +72,7 @@ public class ServerOdkTablesUtil {
   /**
    * Create a table in the datastore.
    *
+   * @param appId
    * @param tableId
    * @param definition
    * @param cc
@@ -81,7 +82,7 @@ public class ServerOdkTablesUtil {
    * @throws PermissionDeniedExceptionClient
    * @throws ETagMismatchException
    */
-  public static TableEntryClient createTable(String tableId, TableDefinitionClient definition,
+  public static TableEntryClient createTable(String appId, String tableId, TableDefinitionClient definition,
       TablesUserPermissions userPermissions, CallingContext cc) throws DatastoreFailureException,
       TableAlreadyExistsExceptionClient, PermissionDeniedExceptionClient, ETagMismatchException {
     Log logger = LogFactory.getLog(ServerOdkTablesUtil.class);
@@ -92,7 +93,7 @@ public class ServerOdkTablesUtil {
     // column resource or something, in which case the transform() method is not
     // altering all of the requisite fields.
     try {
-      TableManager tm = new TableManager(userPermissions, cc);
+      TableManager tm = new TableManager(appId, userPermissions, cc);
       String displayName = definition.getDisplayName();
       TableType type = UtilTransforms.transform(definition.getType());
 
@@ -102,7 +103,7 @@ public class ServerOdkTablesUtil {
         columnsServer.add(UtilTransforms.transform(column));
       }
       TableEntry entry = tm.createTable(tableId, columnsServer);
-      PropertiesManager pm = new PropertiesManager(tableId, userPermissions, cc);
+      PropertiesManager pm = new PropertiesManager(appId, tableId, userPermissions, cc);
       TableProperties tableProperties = pm.getProperties();
       // TODO:
       // (1) add table type (Data)
@@ -183,6 +184,7 @@ public class ServerOdkTablesUtil {
   /**
    * Create or update a row in the datastore.
    *
+   * @param appId
    * @param tableId
    * @param rowId
    * @param row
@@ -197,14 +199,14 @@ public class ServerOdkTablesUtil {
    * @throws EntityNotFoundExceptionClient
    * @throws InconsistentStateException
    */
-  public static RowClient createOrUpdateRow(String tableId, String rowId, RowClient row,
+  public static RowClient createOrUpdateRow(String appId, String tableId, String rowId, RowClient row,
       TablesUserPermissions userPermissions, CallingContext cc) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, ETagMismatchExceptionClient,
       PermissionDeniedExceptionClient, BadColumnNameExceptionClient, EntityNotFoundExceptionClient, InconsistentStateException {
     try {
       // first transform row into a server-side row
       Row serverRow = UtilTransforms.transform(row);
-      DataManager dm = new DataManager(tableId, userPermissions, cc);
+      DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       row.setRowId(rowId);
 
       Row newServerRow = dm.insertOrUpdateRow(serverRow);
@@ -247,9 +249,8 @@ public class ServerOdkTablesUtil {
     Long contentLength = blobSetRelation.getBlobEntitySet(filename, cc).getContentLength(1, cc);
     String contentType = blobSetRelation.getBlobEntitySet(filename, cc).getContentType(1, cc);
     String id = row.getRowId();
-    String key = "this isn't implemented.";
-    FileSummaryClient summary = new FileSummaryClient(filename, contentType, contentLength, key, 0,
-        id, tableId);
+    String downloadUrl = null;
+    FileSummaryClient summary = new FileSummaryClient(filename, contentType, contentLength, id, tableId, downloadUrl);
     return summary;
   }
 }

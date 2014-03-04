@@ -37,11 +37,11 @@ public class AuthFilter {
   private TablesUserPermissions userPermissions;
   private Set<TablePermission> permissions;
 
-  public AuthFilter(String tableId, TablesUserPermissions userPermissions, List<Scope> scopes, CallingContext cc) throws ODKEntityNotFoundException,
+  public AuthFilter(String appId, String tableId, TablesUserPermissions userPermissions, List<Scope> scopes, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     this.cc = cc;
     this.userPermissions = userPermissions;
-    this.am = new TableAclManager(tableId, userPermissions, cc);
+    this.am = new TableAclManager(appId, tableId, userPermissions, cc);
 
     permissions = new HashSet<TablePermission>();
 

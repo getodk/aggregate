@@ -71,19 +71,19 @@ public class DataManagerTest {
     }
 
     @Override
-    public void checkPermission(String tableId, TablePermission permission)
+    public void checkPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException, PermissionDeniedException {
       return;
     }
 
     @Override
-    public boolean hasPermission(String tableId, TablePermission permission)
+    public boolean hasPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException {
       return true;
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
+    public boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
     }
 
@@ -101,14 +101,14 @@ public class DataManagerTest {
 
     userPermissions = new MockCurrentUserPermissions();
 
-    this.tm = new TableManager(userPermissions, cc);
+    this.tm = new TableManager(T.appId, userPermissions, cc);
 
     TableEntry te = tm.createTable(T.tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.tableId, userPermissions, cc);
+    PropertiesManager pm = new PropertiesManager( T.appId, T.tableId, userPermissions, cc);
     TableProperties tableProperties = new TableProperties(te.getSchemaETag(), null, T.tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
 
-    this.dm = new DataManager(T.tableId, userPermissions, cc);
+    this.dm = new DataManager(T.appId, T.tableId, userPermissions, cc);
 
     this.rows = T.rows;
     clearRows();
