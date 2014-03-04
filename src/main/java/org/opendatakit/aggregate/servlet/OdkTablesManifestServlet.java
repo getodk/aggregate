@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.odktables.entity.serialization.OdkTablesKeyValu
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -66,8 +67,10 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
       return;
     }
     TablesUserPermissionsImpl userPermissions;
+    String appId;
     try {
       userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser().getUriUser(), cc);
+      appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       datastoreError(resp);
@@ -81,8 +84,7 @@ public class OdkTablesManifestServlet extends ServletUtilBase {
       errorRetreivingData(resp);
       return;
     }
-
-    OdkTablesKeyValueManifestManager mm = new OdkTablesKeyValueManifestManager(tableId, userPermissions, cc);
+    OdkTablesKeyValueManifestManager mm = new OdkTablesKeyValueManifestManager(appId, tableId, userPermissions, cc);
 
     String manifest;
     try {

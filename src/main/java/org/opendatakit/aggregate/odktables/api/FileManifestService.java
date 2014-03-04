@@ -20,12 +20,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 
@@ -40,8 +42,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface FileManifestService {
 
-  /** URL parameter specifying the app. Always required. */
-  public static final String PARAM_APP_ID = "app_id";
   /**
    * URL parameter specifying the tableId. Optional. If not present, will return
    * all the files for the application.
@@ -64,9 +64,11 @@ public interface FileManifestService {
    * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
    */
   @GET
+  @Path("{appId}")
+  @GZIP
   public Response /*OdkTablesFileManifest*/ getFileManifest(@Context ServletContext servletContext,
       @Context HttpServletRequest req, @Context HttpServletResponse resp,
-      @QueryParam(PARAM_APP_ID) String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
+      @PathParam("appId") String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
       @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel);
 
 }

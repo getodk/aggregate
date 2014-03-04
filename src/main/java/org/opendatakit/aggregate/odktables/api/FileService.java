@@ -20,14 +20,15 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
+import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
@@ -63,14 +64,13 @@ public interface FileService {
 
   @GET
   @Path("{filePath:.*}")
-  public void getFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req,
-      @Context HttpServletResponse resp) throws IOException;
+  @GZIP
+  public Response getFile(@Context ServletContext servletContext,
+      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException;
 
   @POST
   @Path("{filePath:.*}")
-  public void putFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req,
-      @Context HttpServletResponse resp) throws IOException, ODKTaskLockException;
+  public Response putFile(@Context ServletContext servletContext,
+      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException, ODKTaskLockException;
 
 }

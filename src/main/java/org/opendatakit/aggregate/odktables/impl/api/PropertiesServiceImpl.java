@@ -40,9 +40,9 @@ public class PropertiesServiceImpl implements PropertiesService {
   private PropertiesManager pm;
   private UriInfo info;
 
-  public PropertiesServiceImpl(String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+  public PropertiesServiceImpl(String appId, String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
-    this.pm = new PropertiesManager(tableId, userPermissions, cc);
+    this.pm = new PropertiesManager(appId, tableId, userPermissions, cc);
     this.info = info;
   }
 
@@ -64,12 +64,13 @@ public class PropertiesServiceImpl implements PropertiesService {
   private PropertiesResource getResource(TableProperties properties) {
     PropertiesResource propertiesResource = new PropertiesResource(properties);
 
+    String appId = pm.getAppId();
     String tableId = pm.getTableId();
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     URI self = ub.clone().path(TableService.class, "getProperties")
-        .path(PropertiesService.class, "getProperties").build(tableId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
+        .path(PropertiesService.class, "getProperties").build(appId, tableId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
 
     propertiesResource.setSelfUri(self.toASCIIString());
     propertiesResource.setTableUri(table.toASCIIString());

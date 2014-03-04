@@ -157,14 +157,14 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
     return scopes;
   }
 
-  private AuthFilter getAuthFilter(String tableId) throws ODKEntityNotFoundException,
+  private AuthFilter getAuthFilter(String appId, String tableId) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     if (userInfo == null) {
       return null;
     }
     AuthFilter auth = authFilters.get(tableId);
     if (auth == null) {
-      auth = new AuthFilter(tableId, this, getScopes(), cc);
+      auth = new AuthFilter(appId, tableId, this, getScopes(), cc);
       authFilters.put(tableId, auth);
     }
     return auth;
@@ -178,9 +178,9 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
    * org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission)
    */
   @Override
-  public void checkPermission(String tableId, TablePermission permission)
+  public void checkPermission(String appId, String tableId, TablePermission permission)
       throws ODKDatastoreException, PermissionDeniedException {
-    AuthFilter authFilter = getAuthFilter(tableId);
+    AuthFilter authFilter = getAuthFilter(appId, tableId);
     if (authFilter != null) {
       authFilter.checkPermission(permission);
       return;
@@ -197,9 +197,9 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
    * org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission)
    */
   @Override
-  public boolean hasPermission(String tableId, TablePermission permission)
+  public boolean hasPermission(String appId, String tableId, TablePermission permission)
       throws ODKDatastoreException {
-    AuthFilter filter = getAuthFilter(tableId);
+    AuthFilter filter = getAuthFilter(appId, tableId);
     if (filter != null) {
       return filter.hasPermission(permission);
     }
@@ -207,8 +207,8 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
   }
 
   @Override
-  public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException {
-    AuthFilter authFilter = getAuthFilter(tableId);
+  public boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException {
+    AuthFilter authFilter = getAuthFilter(appId, tableId);
     if (authFilter != null) {
       return authFilter.hasFilterScope(permission, rowId, filterScope);
     }
