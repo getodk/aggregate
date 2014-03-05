@@ -110,6 +110,23 @@ Double-click to open the url.  After logging on, if running with
 the debug server, you will need to hand-edit the url to restore
 the gwt-server address.
 
+=====================
+MySQL Eclipse Setup
+---------------------
+
+First, get the eclipse-aggregate-gae project working.
+
+You will then copy the war directory of that project over to the 
+eclipse-aggregate-mysql project, and tweak it. 
+
+See the SETUP.txt instructions in the eclipse-aggregate-mysql
+directory for further information.
+
+The class files seem to get stuck and not Publish when running
+under Tomcat 6.0 and MySQL. The work-around for this is to 
+Stop the server and Clean... it, then Start it. This seems to 
+make everything current.
+
 ==========================================
 Troubleshooting Debugging/Running 
 ------------------------------------------
