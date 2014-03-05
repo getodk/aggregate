@@ -33,34 +33,30 @@ public class FileSummaryClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -6081623884490673459L;
+  private static final long serialVersionUID = -608162388449067349L;
 
   private String filename;
   private String contentType;
   private Long contentLength;
-  // the list of media files associated with this file. Only media files
-  // should be in this list, and they themselves should not have media files.
-  private int numMediaFiles;
-  private String key;
   // need to add and ID and change mediaFiles to numMediaFiles.
   // also should probably add the table name and table id.
   private String id;
   private String tableId;
+  private String downloadUrl;
 
   @SuppressWarnings("unused")
   private FileSummaryClient() {
     // necessary for gwt serialization
   }
 
-  public FileSummaryClient(String filename, String contentType, Long contentLength, String key,
-      int numMediaFiles, String id, String tableId) {
+  public FileSummaryClient(String filename, String contentType, Long contentLength,
+      String id, String tableId, String downloadUrl) {
     this.filename = filename;
     this.contentType = contentType;
     this.contentLength = contentLength;
-    this.key = key;
-    this.numMediaFiles = numMediaFiles;
     this.id = id;
     this.tableId = tableId;
+    this.downloadUrl = downloadUrl;
   }
 
   public String getFilename() {
@@ -75,19 +71,15 @@ public class FileSummaryClient implements Serializable {
     return contentLength;
   }
 
-  public int getNumMediaFiles() {
-    return numMediaFiles;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
   public String getId() {
     return id;
   }
 
   public String getTableId() {
     return tableId;
+  }
+
+  public String getDownloadUrl() {
+    return downloadUrl;
   }
 }

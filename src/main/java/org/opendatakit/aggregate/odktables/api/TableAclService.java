@@ -26,6 +26,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
@@ -43,6 +44,7 @@ public interface TableAclService {
    * @throws PermissionDeniedException
    */
   @GET
+  @GZIP
   public Response /*TableAclResourceList*/ getAcls() throws ODKDatastoreException, PermissionDeniedException;
 
   /**
@@ -53,6 +55,7 @@ public interface TableAclService {
    */
   @GET
   @Path("user")
+  @GZIP
   public Response /*TableAclResourceList*/ getUserAcls() throws ODKDatastoreException,
       PermissionDeniedException;
 
@@ -64,6 +67,7 @@ public interface TableAclService {
    */
   @GET
   @Path("group")
+  @GZIP
   public Response /*TableAclResourceList*/ getGroupAcls() throws ODKDatastoreException,
       PermissionDeniedException;
 
@@ -75,6 +79,7 @@ public interface TableAclService {
    */
   @GET
   @Path("default")
+  @GZIP
   public Response /*TableAclResource*/ getDefaultAcl() throws ODKDatastoreException, PermissionDeniedException;
 
   /**
@@ -86,6 +91,7 @@ public interface TableAclService {
    */
   @GET
   @Path("user/{userId}")
+  @GZIP
   public Response /*TableAclResource*/ getUserAcl(@PathParam("userId") String userId)
       throws ODKDatastoreException, PermissionDeniedException;
 
@@ -98,6 +104,7 @@ public interface TableAclService {
    */
   @GET
   @Path("group/{groupId}")
+  @GZIP
   public Response /*TableAclResource*/ getGroupAcl(@PathParam("groupId") String groupId)
       throws ODKDatastoreException, PermissionDeniedException;
 
@@ -111,7 +118,8 @@ public interface TableAclService {
   @PUT
   @Path("default")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*TableAclResource*/ setDefaultAcl(TableAcl acl) throws ODKDatastoreException,
+  @GZIP
+  public Response /*TableAclResource*/ setDefaultAcl(@GZIP TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException;
 
   /**
@@ -125,7 +133,8 @@ public interface TableAclService {
   @PUT
   @Path("user/{userId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*TableAclResource*/ setUserAcl(@PathParam("userId") String userId, TableAcl acl)
+  @GZIP
+  public Response /*TableAclResource*/ setUserAcl(@PathParam("userId") String userId, @GZIP TableAcl acl)
       throws ODKDatastoreException, PermissionDeniedException;
 
   /**
@@ -139,7 +148,8 @@ public interface TableAclService {
   @PUT
   @Path("group/{groupId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*TableAclResource*/ setGroupAcl(@PathParam("groupId") String groupId, TableAcl acl)
+  @GZIP
+  public Response /*TableAclResource*/ setGroupAcl(@PathParam("groupId") String groupId, @GZIP TableAcl acl)
       throws ODKDatastoreException, PermissionDeniedException;
 
   /**

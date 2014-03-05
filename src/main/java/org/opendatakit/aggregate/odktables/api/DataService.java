@@ -26,6 +26,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -50,6 +51,8 @@ public interface DataService {
    * @throws BadColumnNameException
    */
   @GET
+  @Path("")
+  @GZIP
   public Response /*RowResourceList*/ getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
   /**
@@ -64,6 +67,7 @@ public interface DataService {
    */
   @GET
   @Path("{rowId}")
+  @GZIP
   public Response /*RowResource*/ getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
@@ -82,7 +86,8 @@ public interface DataService {
   @PUT
   @Path("{rowId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*RowResource*/ createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
+  @GZIP
+  public Response /*RowResource*/ createOrUpdateRow(@PathParam("rowId") String rowId, @GZIP Row row)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
       PermissionDeniedException, BadColumnNameException, InconsistentStateException;
 

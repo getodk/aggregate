@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -47,6 +48,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -65,16 +67,17 @@ public class TableServiceImpl implements TableService {
     ServiceUtils.examineRequest(sc, req);
     this.cc = ContextFactory.getCallingContext(sc, req);
     this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
-    this.tm = new TableManager(userPermissions, cc);
+    String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+    this.tm = new TableManager(appId, userPermissions, cc);
     this.info = info;
   }
 
   @Override
-  public Response getTables() throws ODKDatastoreException {
+  public Response getTables(@PathParam("appId") String appId) throws ODKDatastoreException {
     List<TableEntry> entries = tm.getTables();
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
-      TableResource resource = getResource(entry);
+      TableResource resource = getResource(appId, entry);
       if (entry.getPropertiesETag() != null) {
         String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(),
             entry.getPropertiesETag(), cc);
@@ -88,28 +91,28 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response getTable(String tableId) throws ODKDatastoreException,
+  public Response getTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException,
       PermissionDeniedException {
     TableEntry entry = tm.getTableNullSafe(tableId);
-    TableResource resource = getResource(entry);
+    TableResource resource = getResource(appId, entry);
     return Response.ok(resource).build();
   }
 
   @Override
-  public Response createTable(String tableId, TableDefinition definition)
+  public Response createTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
     // TODO: what if schemaETag is specified??? or if table already exists????
     // TODO: add access control stuff
     List<Column> columns = definition.getColumns();
 
     TableEntry entry = tm.createTable(tableId, columns);
-    TableResource resource = getResource(entry);
+    TableResource resource = getResource(appId, entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
     return Response.ok(resource).build();
   }
 
   @Override
-  public Response deleteTable(String tableId) throws ODKDatastoreException, ODKTaskLockException,
+  public Response deleteTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
     tm.deleteTable(tableId);
     logger.info("tableId: " + tableId);
@@ -119,54 +122,54 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public DataService getData(String tableId) throws ODKDatastoreException {
-    DataService service = new DataServiceImpl(tableId, info, userPermissions, cc);
+  public DataService getData(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
+    DataService service = new DataServiceImpl(appId, tableId, info, userPermissions, cc);
     return service;
   }
 
   @Override
-  public PropertiesService getProperties(String tableId) throws ODKDatastoreException {
-    PropertiesService service = new PropertiesServiceImpl(tableId, info, userPermissions, cc);
+  public PropertiesService getProperties(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
+    PropertiesService service = new PropertiesServiceImpl(appId, tableId, info, userPermissions, cc);
     return service;
   }
 
   @Override
-  public DiffService getDiff(String tableId) throws ODKDatastoreException {
-    DiffService service = new DiffServiceImpl(tableId, info, userPermissions, cc);
+  public DiffService getDiff(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
+    DiffService service = new DiffServiceImpl(appId, tableId, info, userPermissions, cc);
     return service;
   }
 
   @Override
-  public TableAclService getAcl(String tableId) throws ODKDatastoreException {
-    TableAclService service = new TableAclServiceImpl(tableId, info, userPermissions, cc);
+  public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
+    TableAclService service = new TableAclServiceImpl(appId, tableId, info, userPermissions, cc);
     return service;
   }
 
   @Override
-  public Response getDefinition(String tableId) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+  public Response getDefinition(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     // TODO: permissions stuff for a table, perhaps? or just at the row level?
     TableDefinition definition = tm.getTableDefinition(tableId);
     TableDefinitionResource definitionResource = new TableDefinitionResource(definition);
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI selfUri = ub.clone().path(TableService.class, "getDefinition").build(tableId);
-    URI tableUri = ub.clone().path(TableService.class, "getTable").build(tableId);
+    URI selfUri = ub.clone().path(TableService.class, "getDefinition").build(appId, tableId);
+    URI tableUri = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
     definitionResource.setSelfUri(selfUri.toASCIIString());
     definitionResource.setTableUri(tableUri.toASCIIString());
     return Response.ok(definitionResource).build();
   }
 
-  private TableResource getResource(TableEntry entry) {
+  private TableResource getResource(String appId, TableEntry entry) {
     String tableId = entry.getTableId();
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getTable").build(tableId);
-    URI properties = ub.clone().path(TableService.class, "getProperties").build(tableId);
-    URI data = ub.clone().path(TableService.class, "getData").build(tableId);
-    URI diff = ub.clone().path(TableService.class, "getDiff").build(tableId);
-    URI acl = ub.clone().path(TableService.class, "getAcl").build(tableId);
-    URI definition = ub.clone().path(TableService.class, "getDefinition").build(tableId);
+    URI self = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    URI properties = ub.clone().path(TableService.class, "getProperties").build(appId, tableId);
+    URI data = ub.clone().path(TableService.class, "getData").build(appId, tableId);
+    URI diff = ub.clone().path(TableService.class, "getDiff").build(appId, tableId);
+    URI acl = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
+    URI definition = ub.clone().path(TableService.class, "getDefinition").build(appId, tableId);
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());

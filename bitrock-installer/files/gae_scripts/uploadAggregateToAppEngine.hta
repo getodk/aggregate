@@ -219,6 +219,7 @@ function continueWaitingForCompletion() {
 	var preElement = document.getElementById('output');
 	var output = preElement.innerHTML;
 	output = output + newOutput;
+	logContainsError = logContainsError + newOutput.indexOf('SEVERE',0) + 1;
 	logContainsError = logContainsError + newOutput.indexOf('rror:',0) + 1;
 	logContainsError = logContainsError + newOutput.indexOf('Unable to update app',0) + 1;
 	preElement.innerHTML = output;

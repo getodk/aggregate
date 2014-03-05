@@ -70,7 +70,7 @@ public class DbTableFileInfo extends Relation {
   // as I add in proper file sync support.
   public static final DataField TABLE_ID = new DataField("_TABLE_ID", DataType.STRING, true);
   public static final DataField PATH_TO_FILE = new DataField("_PATH_TO_FILE", DataType.STRING,
-      true, 20480L);
+      true, 5120L);
 
   // NOTE: code elsewhere depends upon all these data fields being String
   // fields.

@@ -42,9 +42,9 @@ public class TableAclServiceImpl implements TableAclService {
   private TableAclManager am;
   private UriInfo info;
 
-  public TableAclServiceImpl(String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+  public TableAclServiceImpl(String appId, String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
-    this.am = new TableAclManager(tableId, userPermissions, cc);
+    this.am = new TableAclManager(appId, tableId, userPermissions, cc);
     this.info = info;
   }
 
@@ -143,6 +143,7 @@ public class TableAclServiceImpl implements TableAclService {
   }
 
   private TableAclResource getResource(TableAcl acl) {
+    String appId = am.getAppId();
     String tableId = am.getTableId();
     Scope.Type type = acl.getScope().getType();
     String value = acl.getScope().getValue();
@@ -155,18 +156,18 @@ public class TableAclServiceImpl implements TableAclService {
     URI self;
     switch (type) {
     case USER:
-      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(tableId, value);
+      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
       break;
     case GROUP:
-      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(tableId, value);
+      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
       break;
     case DEFAULT:
     default:
-      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(tableId);
+      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
       break;
     }
-    URI acls = ub.clone().path(TableService.class, "getAcl").build(tableId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
+    URI acls = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
 
     TableAclResource resource = new TableAclResource(acl);
     resource.setSelfUri(self.toASCIIString());
