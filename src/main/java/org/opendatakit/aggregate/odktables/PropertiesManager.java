@@ -172,7 +172,7 @@ public class PropertiesManager {
       // check etags
       String currentETag = tableProperties.getPropertiesETag();
       if ((currentETag == null && oldPropertiesETag != null) ||
-          (currentETag != null && !currentETag.equals(oldPropertiesETag))) {
+          (currentETag != null && oldPropertiesETag != null && !currentETag.equals(oldPropertiesETag))) {
         throw new ETagMismatchException(String.format(
             "%s does not match %s for properties for table with tableId %s", currentETag,
             oldPropertiesETag, tableId));

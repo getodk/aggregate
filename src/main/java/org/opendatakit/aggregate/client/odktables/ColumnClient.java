@@ -19,8 +19,7 @@ package org.opendatakit.aggregate.client.odktables;
 import java.io.Serializable;
 
 /**
- * This is the client-side code of
- * {@link org.opendatakit.aggregate.odktables.rest.entity.Column}
+ * This is the client-side code of the Column class under odktables rest entity.
  *
  * @author sudar.sam@gmail.com
  *

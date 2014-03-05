@@ -15,15 +15,11 @@
  */
 package org.opendatakit.aggregate.odktables.api;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -66,8 +62,7 @@ public interface FileManifestService {
   @GET
   @Path("{appId}")
   @GZIP
-  public Response /*OdkTablesFileManifest*/ getFileManifest(@Context ServletContext servletContext,
-      @Context HttpServletRequest req, @Context HttpServletResponse resp,
+  public Response /*OdkTablesFileManifest*/ getFileManifest(
       @PathParam("appId") String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
       @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel);
 
