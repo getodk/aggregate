@@ -16,24 +16,27 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -43,6 +46,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -71,16 +75,23 @@ public class FileServiceImpl implements FileService {
    * @see #getTableIdFromPathSegments(List)
    */
   private static final String TABLES_FOLDER = "tables";
+  private CallingContext cc;
+  private TablesUserPermissions userPermissions;
+  private UriInfo info;
+
+  public FileServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
+      @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+    ServiceUtils.examineRequest(sc, req);
+    this.cc = ContextFactory.getCallingContext(sc, req);
+    this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
+    this.info = info;
+  }
 
   @Override
   @GET
   @Path("{filePath:.*}")
   // because we want to get the whole path
-  public Response getFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException {
-    // Basing this off of OdkTablesTableFileDownloadServlet, which in turn was
-    // based off of XFormsDownloadServlet.
-
+  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
     // First we need to get the app id and the table id from the path. We're
     // going to be assuming that you're passing the entire path of the file you
     // want to get. By convention, this is: appid/tableid/the/rest/of/path.
@@ -96,8 +107,6 @@ public class FileServiceImpl implements FileService {
     // Now construct the whole path.
     String wholePath = constructPathFromSegments(segments);
 
-    CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
-    String downloadAsAttachmentString = req.getParameter(FileService.PARAM_AS_ATTACHMENT);
     byte[] fileBlob;
     String contentType;
     Long contentLength;
@@ -131,7 +140,7 @@ public class FileServiceImpl implements FileService {
     // And now prepare everything to be returned to the caller.
     if (fileBlob != null && contentType != null && contentLength != null && contentLength != 0L) {
       ResponseBuilder rBuild = Response.ok(fileBlob, contentType );
-      if (downloadAsAttachmentString != null && !"".equals(downloadAsAttachmentString)) {
+      if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
         rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + wholePath
             + "\"");
@@ -145,16 +154,12 @@ public class FileServiceImpl implements FileService {
   @Override
   @POST
   @Path("{filePath:.*}")
+  @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   // because we want to get the whole path
-  public Response putFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException, ODKTaskLockException {
+  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments,  @GZIP byte[] content) throws IOException, ODKTaskLockException {
     if (segments.size() <= 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
-    // TODO This stuff all needs to be handled in the log table somehow, and
-    // it currently isn't.
-    CallingContext cc = ContextFactory.getCallingContext(servletContext, req);
-
     // First parse the url to get the correct app and table ids.
     String appId = segments.get(0).toString();
     String tableId = getTableIdFromPathSegments(segments);
@@ -171,9 +176,6 @@ public class FileServiceImpl implements FileService {
       TablesUserPermissionsImpl userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
 
-      // Process the file.
-      InputStream is = req.getInputStream();
-      byte[] fileBlob = IOUtils.toByteArray(is);
       // We are going to store the file in two tables: 1) a user-friendly table
       // that relates an app and table id to the name of a file; 2) a table
       // that holds the actual blob.
@@ -205,7 +207,7 @@ public class FileServiceImpl implements FileService {
       BlobEntitySet instance = dbTableFiles.newBlobEntitySet(rowUri, cc);
       // TODO: this being set to true is probably where some sort of versioning
       // should happen.
-      instance.addBlob(fileBlob, contentType, null, true, cc);
+      instance.addBlob(content, contentType, null, true, cc);
 
       // 3) persist the user-friendly table entry about the blob
       tableFileInfoRow.put(cc);
