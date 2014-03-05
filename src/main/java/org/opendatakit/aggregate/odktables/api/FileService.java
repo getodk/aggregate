@@ -20,15 +20,20 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.annotations.GZIP;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
@@ -65,12 +70,11 @@ public interface FileService {
   @GET
   @Path("{filePath:.*}")
   @GZIP
-  public Response getFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException;
+  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @POST
   @Path("{filePath:.*}")
-  public Response putFile(@Context ServletContext servletContext,
-      @PathParam("filePath") List<PathSegment> segments, @Context HttpServletRequest req) throws IOException, ODKTaskLockException;
+  @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
+  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
 
 }

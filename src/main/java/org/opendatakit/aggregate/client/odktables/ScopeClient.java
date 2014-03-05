@@ -18,15 +18,14 @@ package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
 
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.simpleframework.xml.Element;
 
 /**
- * This is the client-side version of
- * org.opendatakit.aggregate.odktables.entity.Scope.java <br>
+ * <p>This is the client-side version of Scope within odktables entity.</p>
+ * <p>
  * It might be possible that this isn't necessary. At this point I am just
  * copying exactly the entities that exist in that package, in the hopes of
- * translating almost directly the code implemented in the services there.
+ * translating almost directly the code implemented in the services there.</p>
  *
  * @author sudar.sam@gmail.com
  *
