@@ -73,19 +73,19 @@ public class AuthFilterTest {
     }
 
     @Override
-    public void checkPermission(String tableId, TablePermission permission)
+    public void checkPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException, PermissionDeniedException {
       return;
     }
 
     @Override
-    public boolean hasPermission(String tableId, TablePermission permission)
+    public boolean hasPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException {
       return true;
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
+    public boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
     }
 
@@ -98,19 +98,19 @@ public class AuthFilterTest {
     userPermissions = new MockCurrentUserPermissions();
     this.tableId = T.tableId;
 
-    this.tm = new TableManager(userPermissions, cc);
+    this.tm = new TableManager(T.appId, userPermissions, cc);
 
     TableEntry te = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
     TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
     pm.setProperties(tableProperties);
 
-    this.am = new TableAclManager(tableId, userPermissions, cc);
+    this.am = new TableAclManager(T.appId, tableId, userPermissions, cc);
     List<Scope> scopes = Lists.newArrayList();
     scopes.add(new Scope(Type.DEFAULT, null));
     scopes.add(new Scope(Type.USER, userPermissions.getOdkTablesUserId()));
 
-    this.af = new AuthFilter(tableId, userPermissions, scopes, cc);
+    this.af = new AuthFilter(T.appId, tableId, userPermissions, scopes, cc);
     this.currentUserScope = new Scope(Type.USER, userPermissions.getOdkTablesUserId());
   }
 

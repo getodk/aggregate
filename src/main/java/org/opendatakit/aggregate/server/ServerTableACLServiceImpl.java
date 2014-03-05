@@ -66,7 +66,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls();
       return transformTableAclList(acls);
     } catch (ODKDatastoreException e) {
@@ -89,7 +90,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls(Scope.Type.USER);
       return transformTableAclList(acls);
     } catch (ODKDatastoreException e) {
@@ -112,7 +114,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
       return transformTableAclList(acls);
     } catch (ODKDatastoreException e) {
@@ -135,7 +138,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
       return UtilTransforms.transform(acl);
     } catch (ODKDatastoreException e) {
@@ -159,7 +163,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
         odkTablesUserId = null;
       TableAcl acl = am.getAcl(new Scope(Scope.Type.USER, odkTablesUserId));
@@ -184,7 +189,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
       return UtilTransforms.transform(acl);
     } catch (ODKDatastoreException e) {
@@ -208,7 +214,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.DEFAULT, null),
           this.transformTableRoleClient(acl.getRole())));
       // Need to be careful here. A lot of transforming going on,
@@ -237,7 +244,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
         odkTablesUserId = null;
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.USER, odkTablesUserId),
@@ -268,7 +276,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.GROUP, groupId),
           this.transformTableRoleClient(acl.getRole())));
       // Need to be careful here. A lot of transforming going on,
@@ -296,7 +305,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.DEFAULT, null));
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
@@ -318,7 +328,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, odkTablesUserId));
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
@@ -340,7 +351,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
           .getUriUser(), cc);
-      TableAclManager am = new TableAclManager(tableId, userPermissions, cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, groupId));
     } catch (ODKDatastoreException e) {
       e.printStackTrace();

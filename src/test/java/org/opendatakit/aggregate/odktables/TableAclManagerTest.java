@@ -66,19 +66,19 @@ public class TableAclManagerTest {
     }
 
     @Override
-    public void checkPermission(String tableId, TablePermission permission)
+    public void checkPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException, PermissionDeniedException {
       return;
     }
 
     @Override
-    public boolean hasPermission(String tableId, TablePermission permission)
+    public boolean hasPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException {
       return true;
     }
 
     @Override
-    public boolean hasFilterScope(String tableId, TablePermission permission, String rowId, Scope filterScope) {
+    public boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) {
       return true;
     }
 
@@ -91,16 +91,16 @@ public class TableAclManagerTest {
     userPermissions = new MockCurrentUserPermissions();
 
     this.tableId = T.tableId;
-    this.tm = new TableManager(userPermissions, cc);
+    this.tm = new TableManager(T.appId, userPermissions, cc);
 
     TableEntry te = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( tableId, userPermissions, cc);
+    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
     TableProperties tableProperties = new TableProperties(te.getSchemaETag(), null, tableId, T.kvsEntries);
     tableProperties = pm.setProperties(tableProperties);
 
     this.scope = new Scope(Scope.Type.USER, T.user);
     this.role = TableRole.FILTERED_READER;
-    this.am = new TableAclManager(tableId, userPermissions, cc);
+    this.am = new TableAclManager(T.appId, tableId, userPermissions, cc);
   }
 
   @After

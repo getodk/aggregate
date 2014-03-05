@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.opendatakit.aggregate.odktables.api.T;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.serialization.OdkXmlHttpMessageConverter;
@@ -28,13 +29,14 @@ import org.springframework.web.client.RestTemplate;
 
 public abstract class AbstractServiceTest {
 
+  private String appId = "tables";
   protected URI baseUri;
   protected RestTemplate rt;
   protected HttpHeaders reqHeaders;
 
   @Before
   public void abstractServiceSetUp() throws Exception {
-    this.baseUri = URI.create("http://localhost:8888/odktables/tables/");
+    this.baseUri = URI.create("http://localhost:8888/odktables/tables/" + appId + "/");
 
     // RestTemplate
     this.rt = new RestTemplate();
@@ -56,7 +58,7 @@ public abstract class AbstractServiceTest {
   @After
   public void abstractServiceTearDown() throws Exception {
     try {
-      baseUri = baseUri.resolve("/odktables/tables/");
+      baseUri = baseUri.resolve("/odktables/tables/" + appId + "/");
       URI uri = baseUri.resolve(T.tableId);
       this.rt.delete(uri);
     } catch (Exception e) {
@@ -66,7 +68,7 @@ public abstract class AbstractServiceTest {
   }
 
   protected TableResource createTable() {
-    URI uri = baseUri.resolve(T.tableId);
+    URI uri = baseUri.resolve("/odktables/tables/" + appId + "/" + T.tableId);
 
     TableDefinition definition = new TableDefinition(T.tableId, null, T.columns);
     HttpEntity<TableDefinition> entity = entity(definition);

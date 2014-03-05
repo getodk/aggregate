@@ -179,6 +179,20 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     setServerPreferencesProperty(cc, ODK_TABLES_ENABLED, enabled.toString());
   }
 
+  public static String getOdkTablesAppId(CallingContext cc) throws ODKEntityNotFoundException,
+      ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, ODK_TABLES_APP_ID);
+    if ( value == null || value.length() == 0 ) {
+      value = "tables";
+    }
+    return value;
+  }
+
+  public static void setOdkTablesAppId(CallingContext cc, String appId)
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
+    setServerPreferencesProperty(cc, ODK_TABLES_APP_ID, appId);
+  }
+
   public static String unsafeIncOdkTablesSequencerBase(CallingContext cc)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, ODK_TABLES_SEQUENCER_BASE);

@@ -29,7 +29,6 @@ import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.popups.OdkTablesMediaFileListPopup;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -40,8 +39,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Displays the entries in the {@link DbTableFileInfo} table that pertain to a
- * specific table.
+ * Displays the entries in the DbTableFileInfo table that pertain to a specific
+ * table.
  *
  * @author sudar.sam@gmail.com
  *
@@ -67,8 +66,8 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   private static final String FILENAME_HEADING = "Filename";
   private static final int KEY_COLUMN = 1;
   private static final String KEY_HEADING = "Key";
-  private static final int MEDIA_FILE_COLUMN = 3;
-  private static final String MEDIA_FILE_HEADING = "Media files";
+  private static final int DOWNLOAD_COLUMN = 3;
+  private static final String DOWNLOAD_HEADING = "Download";
 
   private static final int numColumns = 4;
 
@@ -166,7 +165,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
     setText(0, DELETE_COLUMN, DELETE_HEADING);
     setText(0, FILENAME_COLUMN, FILENAME_HEADING);
     setText(0, KEY_COLUMN, KEY_HEADING);
-    setText(0, MEDIA_FILE_COLUMN, MEDIA_FILE_HEADING);
+    setText(0, DOWNLOAD_COLUMN, DOWNLOAD_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
   }
 
@@ -232,18 +231,18 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
         FileSummaryClient sum = fileSummaries.get(j);
         setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteFileButton(this.basePanel,
             currentTable.getTableId(), sum.getId()));
-        setText(currentRow, KEY_COLUMN, sum.getKey());
+        setText(currentRow, KEY_COLUMN, sum.getId());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
-        Widget mediaCount;
-        if (sum.getNumMediaFiles() > 0) {
-          Anchor mediaCountLink = new Anchor(Integer.toString(sum.getNumMediaFiles()));
-          mediaCountLink.addClickHandler(new MediaFileListClickHandler(currentTable.getTableId(),
-              sum.getKey()));
-          mediaCount = mediaCountLink;
+        Widget downloadCol;
+        if (sum.getDownloadUrl() != null) {
+          Anchor downloadLink = new Anchor();
+          downloadLink.setText("Get");
+          downloadLink.setHref(sum.getDownloadUrl());
+          downloadCol = downloadLink;
         } else {
-          mediaCount = new HTML(Integer.toString(sum.getNumMediaFiles()));
+          downloadCol = new HTML("");
         }
-        setWidget(currentRow, MEDIA_FILE_COLUMN, mediaCount);
+        setWidget(currentRow, DOWNLOAD_COLUMN, downloadCol);
         if (currentRow % 2 == 0) {
           getRowFormatter().addStyleName(currentRow, "evenTableRow");
         }

@@ -52,6 +52,7 @@ public class PropertiesManager {
 
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
+  private String appId;
   private String tableId;
   private EntityConverter converter;
 
@@ -67,14 +68,23 @@ public class PropertiesManager {
    * @throws ODKDatastoreException
    *           if there is an internal error in the datastore
    */
-  public PropertiesManager(String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
+  public PropertiesManager(String appId, String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
+    Validate.notEmpty(appId);
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
     this.cc = cc;
     this.userPermissions = userPermissions;
+    this.appId = appId;
     this.tableId = tableId;
     this.converter = new EntityConverter();
+  }
+
+  /**
+   * @return the appId that this PropertiesManager was constructed with.
+   */
+  public String getAppId() {
+    return appId;
   }
 
   /**
@@ -94,7 +104,7 @@ public class PropertiesManager {
    * @throws ETagMismatchException
    */
   public TableProperties getProperties() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
-    userPermissions.checkPermission(tableId, TablePermission.READ_PROPERTIES);
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_PROPERTIES);
 
     String schemaETag = null;
     String propertiesETag = null;
@@ -134,7 +144,7 @@ public class PropertiesManager {
   public TableProperties setProperties(TableProperties tableProperties)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException, PermissionDeniedException {
 
-    userPermissions.checkPermission(tableId, TablePermission.WRITE_PROPERTIES);
+    userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
     String schemaETag = null;
     // create new eTag
     String propertiesETag = CommonFieldsBase.newUri();
@@ -162,7 +172,7 @@ public class PropertiesManager {
       // check etags
       String currentETag = tableProperties.getPropertiesETag();
       if ((currentETag == null && oldPropertiesETag != null) ||
-          (currentETag != null && !currentETag.equals(oldPropertiesETag))) {
+          (currentETag != null && oldPropertiesETag != null && !currentETag.equals(oldPropertiesETag))) {
         throw new ETagMismatchException(String.format(
             "%s does not match %s for properties for table with tableId %s", currentETag,
             oldPropertiesETag, tableId));

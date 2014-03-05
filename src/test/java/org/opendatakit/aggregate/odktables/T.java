@@ -182,6 +182,7 @@ public class T {
 
   public static final String user = "someone@gmail.com";
   public static final String group = "somegroup";
+  public static final String appId = "app1";
   public static final String tableId = "people";
   public static final String tableMetadata = null;
   public static final String propertiesETag = "propertiesETag";
