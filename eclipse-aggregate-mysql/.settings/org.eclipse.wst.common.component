@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="eclipse-aggregate-mysql">
+        <wb-resource deploy-path="/" source-path="/war" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
+        <property name="context-root" value="eclipse-aggregate-mysql"/>
+        <property name="java-output-path" value="/eclipse-aggregate-mysql/war/WEB-INF/classes"/>
+    </wb-module>
+</project-modules>
