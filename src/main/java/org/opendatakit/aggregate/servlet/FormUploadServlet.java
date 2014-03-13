@@ -112,7 +112,7 @@ public class FormUploadServlet extends ServletUtilBase {
       + "	      </tr>"
       + "	      <![endif]-->\n"
       + "	  	<tr>"
-      + "	  		<td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Form\" /></td>"
+      + "	  		<td><input id=\"upload_form\" type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Form\" /></td>"
       + "	  		<td />"
       + "	  	</tr>"
       + "	  </table>\n"

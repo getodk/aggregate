@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry excluding="org/opendatakit/common/testing/gae/" kind="src" path="test"/>
+	<classpathentry excluding="org/opendatakit/common/testing/gae/*" kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjrt-1.6.12.jar"/>
@@ -44,8 +44,8 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.9.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.9.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2013-09-30.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javassist-3.12.1.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2014-03-10.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxrs-api-2.3.3.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jcip-annotations-1.0.jar"/>
@@ -59,7 +59,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/opencsv-2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/postgresql-9.0-801.jdbc4.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-2.3.4.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-3.0.6.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/scannotation-1.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.6.jar"/>
@@ -102,7 +102,7 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/selenium-java-2.33.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/selenium-java-2.37.0.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

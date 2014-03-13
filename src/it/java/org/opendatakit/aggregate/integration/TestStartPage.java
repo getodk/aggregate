@@ -4,15 +4,15 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
+import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriverBackedSelenium;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
-import com.thoughtworks.selenium.Selenium;
 import com.thoughtworks.selenium.Wait;
 
 @RunWith(org.junit.runners.JUnit4.class)
@@ -27,7 +27,7 @@ public class TestStartPage {
   private static String password = "aggregate";
   private static int port;
   private static FirefoxDriver driver;
-  private static Selenium selenium;
+  private static String fullRootUrl;
 
   @BeforeClass
   public static void setUp() throws Exception {
@@ -35,15 +35,48 @@ public class TestStartPage {
     hostname = System.getProperty("test.server.hostname");
     baseUrl = System.getProperty("test.server.baseUrl");
     port = Integer.parseInt(System.getProperty("test.server.port"));
+    fullRootUrl = "http://" + username + ":" + password + "@" + hostname + ":" + port + baseUrl;
     // We should also test different browsers?
     FirefoxProfile profile = new FirefoxProfile();
+    profile.setEnableNativeEvents(false);
     profile.setPreference("network.negotiate-auth.trusteduris", hostname);
     driver = new FirefoxDriver(profile);
     driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-    selenium = new WebDriverBackedSelenium(driver, "http://" + username + ":" + password + "@"
-        + hostname + ":" + port + baseUrl);
+    driver.get(fullRootUrl);
 
-    selenium.open("local_login.html");
+    driver.get(fullRootUrl + "local_login.html");
+
+    // wait for login process to complete...
+    try {
+      Thread.sleep(7000);
+    } catch (Exception e) {
+    }
+
+    // and verify that the Form Management tab appears...
+    Wait mainload = new Wait() {
+      public boolean until() {
+        try {
+          List<WebElement> elements = driver.findElementsByClassName("gwt-Label");
+          for (WebElement e : elements) {
+            if (e.getText().equals("Form Management"))
+              return true;
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        return false;
+      }
+    };
+
+    mainload.wait("Login did not progress to Aggregate.html page", TIMEOUT_INTERVAL_MS,
+        RETRY_INTERVAL_MS);
+  }
+
+  @Test
+  public void testStartPageHasCorrectTitle() throws Exception {
+    driver.get(fullRootUrl + "Aggregate.html");
+
+    // wait for login process to complete...
     try {
       Thread.sleep(7000);
     } catch (Exception e) {
@@ -51,30 +84,27 @@ public class TestStartPage {
 
     Wait mainload = new Wait() {
       public boolean until() {
-        return selenium.isTextPresent("Form Management");
+        try {
+          List<WebElement> elements = driver.findElementsByClassName("gwt-Label");
+          for (WebElement e : elements) {
+            if (e.getText().equals("Form Management"))
+              return true;
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        return false;
       }
     };
     mainload.wait("Login did not progress to Aggregate.html page", TIMEOUT_INTERVAL_MS,
         RETRY_INTERVAL_MS);
-  }
-
-  @Test
-  public void testStartPageHasCorrectTitle() throws Exception {
-    selenium.open("Aggregate.html");
-    Wait mainload = new Wait() {
-      public boolean until() {
-        return selenium.isTextPresent("Form Management");
-      }
-    };
-    mainload.wait("Login did not progress to Aggregate.html page", TIMEOUT_INTERVAL_MS,
-        RETRY_INTERVAL_MS);
-    assertEquals("ODK Aggregate", selenium.getTitle());
+    assertEquals("ODK Aggregate", driver.getTitle());
     // assertEquals("Name", selenium.getText("//th[1]"));
     // assertTrue(selenium.isElementPresent("link=List Forms"));
   }
 
   @AfterClass
   public static void tearDown() throws Exception {
-    selenium.close();
+    driver.close();
   }
 }
