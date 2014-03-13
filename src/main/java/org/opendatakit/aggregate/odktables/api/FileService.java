@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.api;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,8 +31,6 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.annotations.GZIP;
-import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
