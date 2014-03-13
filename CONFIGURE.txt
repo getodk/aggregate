@@ -24,8 +24,43 @@ The steps required are:
 
 (0) Install the latest Java 6 SDK
 
-(1) Install Eclipse 3.7.2 or higher.  This workspace WILL NOT work with 
+(1a) Install Eclipse 3.7.2 or higher.  This workspace WILL NOT work with 
     Eclipse 3.5.2 and earlier.
+
+(1b) Increase the start-up memory sizes for the Eclipse workspace as detailed 
+below. The GAE database consumes huge amounts of space in the JVM and the GAE
+environment runs two independent copies of the server code to mimic the existence
+of a foreground and background process. This all requires very large perm space
+and max memory for the underlying Java environments.
+
+To do this, edit the eclipse.ini file, located in the
+eclipse directory (e.g., C:\Users\User\eclipse\eclipse.ini).  This is 
+in the same directory as the eclipse.exe.
+
+This is my eclipse.ini:
+------------------------------start-------------------
+-startup
+plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
+--launcher.library
+plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.100.v20110502
+-product
+org.eclipse.epp.package.jee.product
+--launcher.defaultAction
+openFile
+--launcher.XXMaxPermSize
+1536M
+-showsplash
+org.eclipse.platform
+--launcher.XXMaxPermSize
+1536m
+--launcher.defaultAction
+openFile
+-vmargs
+-Dosgi.requiredJavaVersion=1.6
+-Xms100m
+-Xmx2048m
+-startup
+------------------------------end----------------------
 
 (2) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
 
@@ -41,11 +76,11 @@ Windows / Preferences:
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.5.0 or higher.
+    Be sure there is a WebToolkit SDK defined 2.5.1 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.5.0).  The GWT library is installed as 
+	pom.xml (currently 2.5.1).  The GWT library is installed as 
 	part of the plugin and can be found in:
-	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.5.0...\gwt-2.5.0
+	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.5.1...\gwt-2.5.1
 
 File / Import:
 
@@ -63,7 +98,7 @@ In this file:
 Set the security.server.superUser to your gmail account.
 
 Additionally, set the security.server.hostname=
-(blank) or to a dynamic DNS name or IP for your development box.
+(blank) to a dynamic DNS name or IP for your development box.
 
 Save.
 
@@ -82,10 +117,13 @@ Select eclipse-aggregate-gae
 right-click Properties
 
 under /Builders
+
 de-select Enhancer (based on the bug: http://code.google.com/p/googleappengine/issues/detail?id=1970 )
 
 under /Google/App Engine
-toggle the App Engine SDK between the default and specific settings (to make a rebuild as per instructions http://code.google.com/p/opendatakit/wiki/EclipseDebugging )
+
+toggle the App Engine SDK between the default and specific settings (to make a 
+rebuild as per instructions http://code.google.com/p/opendatakit/wiki/EclipseDebugging )
 
 (7) Select eclipse-aggregate-gae project.
 
@@ -98,17 +136,77 @@ to this, it is located under:
   Package: org.opendatakit.aggregate
   Filename: AggregateUI.gwt.xml
 
-(8) Running:
+Click on 'Advanced' to open more options.
+
+In the 'VM Arguments' section, add:
+
+-Xmx1536m
+
+Click 'Compile'
+
+This should now compile.
+
+==================================
+Running or Debugging under Eclipse
+==================================
 
 Select eclipse-aggregate-gae project.
 
-Run As 'Web Application'
+The first time you run or debug, you need to increase the JVM sizes
 
-Choose index.html
+Run As 'Run Configurations...'
+Debug As 'Debug Configurations...'
 
-Double-click to open the url.  After logging on, if running with 
-the debug server, you will need to hand-edit the url to restore
-the gwt-server address.
+Choose 'Web Application'
+
+Open this up, and select 'index.html'
+
+On the '(X)= Arguments' tab, insert the following at the front of the 'VM Arguments' section:
+
+-Xmx2048m -XX:MaxPermSize=1536m 
+
+Click 'Run' or 'Debug'
+
+This should start up the server.
+
+GWT UI debugging needs to be done on a Chrome browser.
+
+==================================
+Debugging GWT UI in Chrome Browser
+==================================
+
+Open a Chrome browser
+
+Go to Tools / Extensions
+
+Choose to 'Get more extensions'
+
+Search for 'GWT Developer Plugin' and install it.
+
+Ensure that it is enabled.
+
+Now paste in the URL from Eclipse's 'Development Mode' tab into 
+your browser. This will typically be:
+
+http://127.0.0.1:8888/index.html?gwt-server=127.0.0.1:9997
+
+This will redirect to the login screen. After logging in
+you will then be redirected to the Aggregate.html page and the
+main UI.
+
+At this point, the query string, ?gwt-server=127.0.0.1:9997
+may drop off. This will disconnect the UI rendering from the 
+client Java code, causing the rendering to fall back to the
+last manually compiled GWT code. Be on the alert for this.
+If it happens, just add the query string back into the URL 
+before the hash (#) mark.
+
+The URL should show have a red GWT toolbox to its right. If this
+ever changes to gray, you need to click on the toolbox and allow
+the new hostname and port to access GWT. If you specify an IP address
+or hostname in the security.properties file, you generally need to 
+do this (you would need to do that in order for a device to reach
+your server).
 
 =====================
 MySQL Eclipse Setup
@@ -178,7 +276,7 @@ To delete the local datastore:
 (3) delete "local_db.bin"
 
 ==========================================
-Full Development Environment Configuration
+Full Maven Development Environment Configuration
 ------------------------------------------
 
 (1) Install Maven 3.  This will generally set up a maven repository under
@@ -241,8 +339,14 @@ See the readme there for the maven commands to upload those files into your
 local repository.  In some cases, these are cutting edge Google libraries that
 may no longer need to be manually installed (once they get published to maven).
 
+(8a) Download and install Firefox ESR 24. This is a slowly-upgrading version
+of Firefox, since the upgrade cycle of Firefox is too rapid for Selenium
+(our UI testing framework) to keep up.
+
 (8) Download the Java Selenium Client Driver ( http://seleniumhq.org/download/ )
-The Maven pom.xml expects version 2.33.0.  Explode the zip and make note of 
+Since we use Firefox ESR 24, we need to use 2.37, available here: 
+https://code.google.com/p/selenium/downloads/detail?name=selenium-java-2.37.0.zip
+The Maven pom.xml expects version 2.37.0.  Explode the zip and make note of 
 the directory.
  
 (9) Edit Maven's settings.xml file (this is in the .m2 directory).
@@ -275,8 +379,8 @@ A minimal file is:
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
 		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.1\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
-		<selenium.home>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.33.0</selenium.home>
-		<selenium.libs>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.33.0\\libs</selenium.libs>
+		<selenium.home>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.37.0</selenium.home>
+		<selenium.libs>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.37.0\\libs</selenium.libs>
 		<test.server.hostname>YOUR.FULLY.QUALIFIED.HOSTNAME.AND.ORG</test.server.hostname>
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
@@ -297,123 +401,18 @@ etc. and do not need bitrock installed.
 
 The aggregate-mysql war file is used as the starting point for the installer build process.
 
-----------
+=========================
+Maven Command Line Builds
+=========================
 
-(10) Start Eclipse.  Choose the parent directory of the clone'd repository as your workspace.
+(12) Maven command-line builds are done as follows:
 
-Windows / Preferences:
+mvn clean 
 
-  Google / App Engine:
-  
-    Be sure there is an App Engine 1.8.0 or higher SDK defined.
-	The default GWT version should match that in the maven 
-	pom.xml (currently 1.8.0).
-
-  Google / Web Toolkit:
-  
-    Be sure there is a WebToolkit SDK defined 2.5.0 or higher.
-	The default GWT version should match that in the maven 
-	pom.xml (currently 2.5.0).
-	
-  Java / Build Path / Classpath Variables:
-
-	Define a new variable, M2_REPO, pointing to the .m2/repository
-	directory, or wherever you have configured your local 
-	Maven repository to be.
-
-  Java / Installed JREs:
-  
-    Add the JDK path. (needed only for Maven-based builds)
-	
-  Java / Installed JREs / Execution Environments:
-  
-    Choose JavaSE-1.6, check the checkbox beside the JDK. (needed only for Maven-based builds).
-	
-  Server / Runtime Environments:
-
-      Add: Apache Tomcat 6.0 and point it to the install location 
-      used in (3) earlier.  This is optional if you will not be 
-	importing or using the MySQL and Postgres builds.
-
-  File / Import:
-
-    Choose the directory of the clone'd repository as the directory to search
-	(this is one level below the workspace directory).
-	
-	Choose ONLY the eclipse-aggregate-gae and odk-gae-settings projects.
-
-	This should refresh and build without any errors.
-	
-(11) Exit eclipse.  Then edit the eclipse.ini file, located in the
-eclipse directory (e.g., C:\Users\User\eclipse\eclipse.ini).  This is 
-in the same directory as the eclipse.exe.
-
-You need to increase the Perm space of the JVM and the overall max size
-of the JVM.  The key entries are the XXMaxPermSzie 512m and the -Xmx1024m.
-
-This is my eclipse.ini:
-------------------------------start-------------------
--startup
-plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
---launcher.library
-plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.100.v20110502
--product
-org.eclipse.epp.package.jee.product
---launcher.defaultAction
-openFile
---launcher.XXMaxPermSize
-512M
--showsplash
-org.eclipse.platform
---launcher.XXMaxPermSize
-512m
---launcher.defaultAction
-openFile
--vmargs
--Dosgi.requiredJavaVersion=1.5
--Xms100m
--Xmx1024m
--startup
-------------------------------end----------------------
-
-(12)  If you want to experiment with building Maven inside Eclipse, 
-install the m2e Eclipse plugin http://www.eclipse.org/m2e/ . The 
-Maven pom.xml files have been modified to provide missing lifecycle
-definitions for, e.g., ant.  You will also need to install the
-"m2e connector for build-helper-maven-plugin"
-
-Support for this is still dodgy within Eclipse so for now, we use 
-maven for command-line builds and Eclipse gae for development.
-
-(13)	Edit odk-gae-settings / common / security.properties
-
-Be sure to set the security.server.superUser to your gmail account. Save.
-
-(14) Select the 'build.xml' (Ant Buildfile within odk-gae-settings), right-click, and 
-choose Run As / Ant Build.  This will rebuild the configuration 
-jar and copy it into the eclipse project.
-
-(15) Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
-
-Select eclipse-aggregate-gae project.
-
-Click on the red toolbox (GWT compile) to compile the GWT Java code into javascript.
-
-(15) Running:
-
-Select eclipse-aggregate-gae project.
-
-Run As 'Web Application'
-
-Choose index.html
-
-Double-click to open the url.  After logging on, if running with 
-the debug server, you will need to hand-edit the url to restore
-the gwt-server address.
-
-(16) For the non-gae projects, you will need to first build
-with maven manually.  Open a command window, browse to the 
-clone'd repository directroy. Type:
+This cleans the workspace, removing all temporary files.
+If this errors out, verify that there are no orphaned java
+executables running. If the GAE tests crash, they can leave
+a java database background process running.
 
 mvn install
 
@@ -421,16 +420,16 @@ This will build and install the projects, running the unit tests
 against the 3 datastores (Google BigTable, MySQL, Postgresql),
 and building the wars for the 3 platforms.
 
-(17) you can now also import the aggregate-mysql project into
-eclipse.  It can be used to export a WAR file similar to what 
-can be built with Maven.
-
-(18) If you have bitrock installed and licensed, you can 
+(13) If you have bitrock installed and licensed, you can 
 build the bitrock installer.  First, 
  copy aggregate-mysql\target\aggregate-mysql-1.0.war bitrock-installer
  cd bitrock-installer
  mvn clean
  mvn install
 Open bitrock and open the buildWar.xml project file in this directory.
-On the packaging page, build for windows, linux and OSX.
+On the packaging page, build for windows, linux, linux-64 and OSX.
+
+On Windows, the generated installers are placed under:
+
+C:\Users\Administrator\Documents\InstallBuilder\output
 

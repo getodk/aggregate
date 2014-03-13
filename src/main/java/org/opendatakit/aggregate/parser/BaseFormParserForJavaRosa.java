@@ -17,6 +17,7 @@
 
 package org.opendatakit.aggregate.parser;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import org.javarosa.core.model.DataBinding;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.IDataReference;
 import org.javarosa.core.model.SubmissionProfile;
+import org.javarosa.core.model.instance.AbstractTreeElement;
 import org.javarosa.core.model.instance.FormInstance;
 import org.javarosa.core.model.instance.TreeElement;
 import org.javarosa.core.model.instance.TreeReference;
@@ -66,28 +68,32 @@ public class BaseFormParserForJavaRosa {
    * Classes needed to serialize objects. Need to put anything from JR in here.
    */
   public final static String[] SERIALIABLE_CLASSES = {
-       "org.javarosa.core.services.locale.ResourceFileDataSource", // JavaRosaCoreModule
-       "org.javarosa.core.services.locale.TableLocaleSource", // JavaRosaCoreModule
-          "org.javarosa.core.model.FormDef",
-       "org.javarosa.core.model.SubmissionProfile", // CoreModelModule
-       "org.javarosa.core.model.QuestionDef", // CoreModelModule
-       "org.javarosa.core.model.GroupDef", // CoreModelModule
-       "org.javarosa.core.model.instance.FormInstance", // CoreModelModule
-       "org.javarosa.core.model.data.BooleanData", // CoreModelModule
-       "org.javarosa.core.model.data.DateData", // CoreModelModule
-       "org.javarosa.core.model.data.DateTimeData", // CoreModelModule
-       "org.javarosa.core.model.data.DecimalData", // CoreModelModule
-       "org.javarosa.core.model.data.GeoPointData", // CoreModelModule
-       "org.javarosa.core.model.data.IntegerData", // CoreModelModule
-       "org.javarosa.core.model.data.LongData", // CoreModelModule
-       "org.javarosa.core.model.data.MultiPointerAnswerData", // CoreModelModule
-       "org.javarosa.core.model.data.PointerAnswerData", // CoreModelModule
-       "org.javarosa.core.model.data.SelectMultiData", // CoreModelModule
-       "org.javarosa.core.model.data.SelectOneData", // CoreModelModule
-       "org.javarosa.core.model.data.StringData", // CoreModelModule
-       "org.javarosa.core.model.data.TimeData", // CoreModelModule
-       "org.javarosa.core.model.data.UncastData", // CoreModelModule
-       "org.javarosa.core.model.data.helper.BasicDataPointer" // CoreModelModule
+    "org.javarosa.core.services.locale.ResourceFileDataSource", // JavaRosaCoreModule
+    "org.javarosa.core.services.locale.TableLocaleSource", // JavaRosaCoreModule
+    "org.javarosa.core.model.FormDef",
+    "org.javarosa.core.model.SubmissionProfile", // CoreModelModule
+    "org.javarosa.core.model.QuestionDef", // CoreModelModule
+    "org.javarosa.core.model.GroupDef", // CoreModelModule
+    "org.javarosa.core.model.instance.FormInstance", // CoreModelModule
+    "org.javarosa.core.model.data.BooleanData", // CoreModelModule
+    "org.javarosa.core.model.data.DateData", // CoreModelModule
+    "org.javarosa.core.model.data.DateTimeData", // CoreModelModule
+    "org.javarosa.core.model.data.DecimalData", // CoreModelModule
+    "org.javarosa.core.model.data.GeoLineData", // CoreModelModule
+    "org.javarosa.core.model.data.GeoPointData", // CoreModelModule
+    "org.javarosa.core.model.data.GeoShapeData", // CoreModelModule
+    "org.javarosa.core.model.data.IntegerData", // CoreModelModule
+    "org.javarosa.core.model.data.LongData", // CoreModelModule
+    "org.javarosa.core.model.data.MultiPointerAnswerData", // CoreModelModule
+    "org.javarosa.core.model.data.PointerAnswerData", // CoreModelModule
+    "org.javarosa.core.model.data.SelectMultiData", // CoreModelModule
+    "org.javarosa.core.model.data.SelectOneData", // CoreModelModule
+    "org.javarosa.core.model.data.StringData", // CoreModelModule
+    "org.javarosa.core.model.data.TimeData", // CoreModelModule
+    "org.javarosa.core.model.data.UncastData", // CoreModelModule
+    "org.javarosa.core.model.data.helper.BasicDataPointer", // CoreModelModule
+    "org.javarosa.core.model.Action", // CoreModelModule
+    "org.javarosa.core.model.actions.SetValueAction" //CoreModelModule
   };
 
   private static boolean isJavaRosaInitialized = false;
@@ -115,53 +121,35 @@ public class BaseFormParserForJavaRosa {
   private static final String BASE64_ENCRYPTED_FIELD_KEY = "base64EncryptedFieldKey";
   private static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
 
-  public static enum DifferenceResult { // result from comparing two XForms
+  // result from comparing two XForms
+  public static enum DifferenceResult {
     XFORMS_IDENTICAL, // instance and body are identical
     XFORMS_SHARE_INSTANCE, // instances (including binding) identical; body
                            // differs
     XFORMS_SHARE_SCHEMA, // instances differ, but share common database schema
     XFORMS_DIFFERENT, // instances differ significantly enough to affect
-                      // database
-                      // schema
+                      // database schema
     XFORMS_MISSING_VERSION, XFORMS_EARLIER_VERSION
   }
 
-  private static final String[] ChangeableBindAttributes = { // bind attributes
-      // that CAN change
-      // without
-      // affecting
-      // database
-      // structure
+  // bind attributes that CAN change without affecting database structure
+  // Note: must specify these entirely in lowercase
+  private static final String[] ChangeableBindAttributes = {
       "relevant", "constraint", "readonly", "required", "calculate",
       XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":constraintmsg",
       XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preload",
-      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preloadparams", "appearance" }; // Note:
-                                                                                       // must
-                                                                                       // specify
-                                                                                       // the
-                                                                                       // above
-                                                                                       // in
-                                                                                       // all
-                                                                                       // lowercase
+      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preloadparams", "appearance" };
 
-  private static final String[] NonchangeableInstanceAttributes = { // core
-                                                                    // instance
-                                                                    // def.
-                                                                    // attrs.
-                                                                    // that
-                                                                    // CANNOT
-                                                                    // change
-                                                                    // w/o
-                                                                    // affecting
-                                                                    // db
-                                                                    // structure
-  "id" }; // Note: must specify the above in all lowercase
+  // core instance def. attrs. that CANNOT change w/o affecting db structure
+  // Note: must specify these entirely in lowercase
+  private static final String[] NonchangeableInstanceAttributes = {
+    "id" };
 
-  private static final String NODESET_ATTR = "nodeset"; // nodeset attribute
-                                                        // name, in <bind>
-                                                        // elements
-  private static final String TYPE_ATTR = "type"; // type attribute name, in
-                                                  // <bind> elements
+  // nodeset attribute name, in <bind> elements
+  private static final String NODESET_ATTR = "nodeset";
+
+  // type attribute name, in <bind> elements
+  private static final String TYPE_ATTR = "type";
 
   private static final String ENCRYPTED_FORM_DEFINITION = "<?xml version=\"1.0\"?>"
       + "<h:html xmlns=\"http://www.w3.org/2002/xforms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" xmlns:ev=\"http://www.w3.org/2001/xml-events\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:odk=\""
@@ -264,7 +252,6 @@ public class BaseFormParserForJavaRosa {
   }
 
   private static class XFormParserWithBindEnhancements extends XFormParser {
-    @SuppressWarnings("unused")
     private Document xmldoc;
     private BaseFormParserForJavaRosa parser;
 
@@ -277,7 +264,6 @@ public class BaseFormParserForJavaRosa {
     protected void parseBind(Element e) {
       // remember raw bindings in case we want to compare parsed XForms later
       parser.bindElements.addElement(copyBindingElement(e));
-      @SuppressWarnings("rawtypes")
       Vector usedAtts = new Vector();
 
       DataBinding binding = processStandardBindAttributes(usedAtts, e);
@@ -353,7 +339,7 @@ public class BaseFormParserForJavaRosa {
     stringLengths.put(nodeset, length);
   }
 
-  protected Integer getNodesetStringLength(TreeElement e) {
+  protected Integer getNodesetStringLength(AbstractTreeElement e) {
     List<String> path = new ArrayList<String>();
     while (e != null && e.getName() != null) {
       path.add(e.getName());
@@ -639,7 +625,11 @@ public class BaseFormParserForJavaRosa {
       // the
       // storage for this form.
       XFormParserWithBindEnhancements exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION, this);
-      formDef = exfp.parse();
+      try {
+        formDef = exfp.parse();
+      } catch (IOException e) {
+        throw new ODKIncompleteSubmissionData("Exception " + e.toString() + " during parsing!", Reason.BAD_JR_PARSE);
+      }
 
       if (formDef == null) {
         throw new ODKIncompleteSubmissionData("Javarosa failed to construct Encrypted FormDef!",
@@ -670,11 +660,11 @@ public class BaseFormParserForJavaRosa {
 
   @SuppressWarnings("unused")
   private void printTreeElementInfo(TreeElement treeElement) {
-    System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.dataType
-        + " repeatable: " + treeElement.repeatable);
+    System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.getDataType()
+        + " repeatable: " + treeElement.isRepeatable());
   }
 
-  public String getTreeElementPath(TreeElement e) {
+  public String getTreeElementPath(AbstractTreeElement e) {
     if (e == null)
       return null;
     String s = getTreeElementPath(e.getParent());
@@ -803,9 +793,9 @@ public class BaseFormParserForJavaRosa {
       // that will be submitted to Aggregate.
       IDataReference r;
       r = subProfile1.getRef();
-      TreeElement e1 = (r != null) ? formDef1.getInstance().resolveReference(r) : null;
+      AbstractTreeElement e1 = (r != null) ? formDef1.getInstance().resolveReference(r) : null;
       r = subProfile2.getRef();
-      TreeElement e2 = (r != null) ? formDef2.getInstance().resolveReference(r) : null;
+      AbstractTreeElement e2 = (r != null) ? formDef2.getInstance().resolveReference(r) : null;
 
       if (e1 != null && e2 != null) {
         // both return only a portion of the form.
@@ -1024,15 +1014,14 @@ public class BaseFormParserForJavaRosa {
     // Otherwise, if you have specified the jr:template attribute,
     // it appears only as an INDEX_TEMPLATE element.
 
-    @SuppressWarnings("unused")
     int template1DropCount = 0;
     // get non-template entries for treeElement1
     List<TreeElement> element1ExcludingRepeatIndex0Children = new ArrayList<TreeElement>();
 
     for (int i = 0; i < treeElement1.getNumChildren(); i++) {
       TreeElement child = (TreeElement) treeElement1.getChildAt(i);
-      if (child.repeatable) {
-        if (child.multiplicity != TreeReference.INDEX_TEMPLATE) {
+      if (child.isRepeatable()) {
+        if (child.getMult() != TreeReference.INDEX_TEMPLATE) {
           template1DropCount++;
           log.info("element1:dropping " + child.getName());
           continue;
@@ -1042,15 +1031,14 @@ public class BaseFormParserForJavaRosa {
       element1ExcludingRepeatIndex0Children.add(child);
     }
 
-    @SuppressWarnings("unused")
     int template2DropCount = 0;
     // get non-template entries for treeElement2
     Map<String, TreeElement> element2ExcludingRepeatIndex0Children = new HashMap<String, TreeElement>();
 
     for (int i = 0; i < treeElement2.getNumChildren(); i++) {
       TreeElement child = (TreeElement) treeElement2.getChildAt(i);
-      if (child.repeatable) {
-        if (child.multiplicity != TreeReference.INDEX_TEMPLATE) {
+      if (child.isRepeatable()) {
+        if (child.getMult() != TreeReference.INDEX_TEMPLATE) {
           template2DropCount++;
           log.info("element2:dropping " + child.getName());
           continue;
