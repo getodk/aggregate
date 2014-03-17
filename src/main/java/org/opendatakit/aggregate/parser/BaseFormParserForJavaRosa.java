@@ -79,9 +79,9 @@ public class BaseFormParserForJavaRosa {
     "org.javarosa.core.model.data.DateData", // CoreModelModule
     "org.javarosa.core.model.data.DateTimeData", // CoreModelModule
     "org.javarosa.core.model.data.DecimalData", // CoreModelModule
-    "org.javarosa.core.model.data.GeoLineData", // CoreModelModule
     "org.javarosa.core.model.data.GeoPointData", // CoreModelModule
     "org.javarosa.core.model.data.GeoShapeData", // CoreModelModule
+    "org.javarosa.core.model.data.GeoTraceData", // CoreModelModule
     "org.javarosa.core.model.data.IntegerData", // CoreModelModule
     "org.javarosa.core.model.data.LongData", // CoreModelModule
     "org.javarosa.core.model.data.MultiPointerAnswerData", // CoreModelModule
