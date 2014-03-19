@@ -326,7 +326,6 @@ public class DataManagerTest {
   @Test
   public void testDelete2Rows() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException, BadColumnNameException, ETagMismatchException, PermissionDeniedException, InconsistentStateException {
-    @SuppressWarnings("unused")
     List<Row> expectedChanges = new ArrayList<Row>();
     for ( Row r : rows ) {
       expectedChanges.add(dm.insertOrUpdateRow(r));

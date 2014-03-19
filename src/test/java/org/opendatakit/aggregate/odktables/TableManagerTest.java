@@ -55,7 +55,9 @@ public class TableManagerTest {
   private TableManager tm;
   private String tableId;
   private String tableId2;
+  @SuppressWarnings("unused")
   private List<Column> columns;
+  @SuppressWarnings("unused")
   private String tableProperties;
 
   private class MockCurrentUserPermissions implements TablesUserPermissions {
@@ -237,8 +239,10 @@ public class TableManagerTest {
     pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
-    TableEntry entry2 = tm.createTable(tableId2, T.columns);
+    @SuppressWarnings("unused")
+	TableEntry entry2 = tm.createTable(tableId2, T.columns);
     PropertiesManager pm2 = new PropertiesManager( T.appId, tableId2, userPermissions, cc);
+    @SuppressWarnings("unused")
     TableProperties tableProperties2 = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId2, T.kvsEntries);
     pm2.setProperties(tableProperties);
     tm.createTable(tableId2, T.columns);

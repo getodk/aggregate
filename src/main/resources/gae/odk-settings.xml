@@ -20,6 +20,7 @@
 
 	<!--	Website domain information	-->
 	<bean id="realm" class="org.opendatakit.common.security.Realm">
+		<property name="isGaeEnvironment" value="true" />
 		<property name="realmString" value="${security.server.realm.realmString}" />
 		<property name="hostname" value="${security.server.hostname}" />
 		<property name="port" value="${security.server.port}" />

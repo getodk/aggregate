@@ -21,6 +21,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -51,9 +52,9 @@ public class FileManifestServiceImpl implements FileManifestService {
   private TablesUserPermissions userPermissions;
   private UriInfo info;
 
-  public FileManifestServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
+  public FileManifestServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
       @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
-    ServiceUtils.examineRequest(sc, req);
+    ServiceUtils.examineRequest(sc, req, httpHeaders);
     this.cc = ContextFactory.getCallingContext(sc, req);
     this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
     this.info = info;
