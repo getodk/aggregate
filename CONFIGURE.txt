@@ -70,8 +70,8 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.8.0 or higher SDK defined.
-	If the default App Engine version is not 1.8.0, you may need to 
+    Be sure there is an App Engine 1.9.0 or higher SDK defined.
+	If the default App Engine version is not 1.9.0, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
@@ -161,7 +161,7 @@ Choose 'Web Application'
 
 Open this up, and select 'index.html'
 
-On the '(X)= Arguments' tab, insert the following at the front of the 'VM Arguments' section:
+On the '(X)= Arguments' tab, replace the '-Xmx512m' at the front of the 'VM Arguments' section with:
 
 -Xmx2048m -XX:MaxPermSize=1536m 
 
@@ -371,7 +371,7 @@ A minimal file is:
   	  <properties>
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<temp.home>C:\\Users\\Administrator\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.8.0</gae.home>
+	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.9.0</gae.home>
 		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.6.0</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\Administrator\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>

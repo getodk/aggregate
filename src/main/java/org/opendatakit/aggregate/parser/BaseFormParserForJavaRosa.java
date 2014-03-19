@@ -264,7 +264,7 @@ public class BaseFormParserForJavaRosa {
     protected void parseBind(Element e) {
       // remember raw bindings in case we want to compare parsed XForms later
       parser.bindElements.addElement(copyBindingElement(e));
-      Vector usedAtts = new Vector();
+      Vector<String> usedAtts = new Vector<String>();
 
       DataBinding binding = processStandardBindAttributes(usedAtts, e);
 
@@ -339,7 +339,7 @@ public class BaseFormParserForJavaRosa {
     stringLengths.put(nodeset, length);
   }
 
-  protected Integer getNodesetStringLength(AbstractTreeElement e) {
+  protected Integer getNodesetStringLength(AbstractTreeElement<?> e) {
     List<String> path = new ArrayList<String>();
     while (e != null && e.getName() != null) {
       path.add(e.getName());
@@ -664,7 +664,7 @@ public class BaseFormParserForJavaRosa {
         + " repeatable: " + treeElement.isRepeatable());
   }
 
-  public String getTreeElementPath(AbstractTreeElement e) {
+  public String getTreeElementPath(AbstractTreeElement<?> e) {
     if (e == null)
       return null;
     String s = getTreeElementPath(e.getParent());
@@ -793,9 +793,9 @@ public class BaseFormParserForJavaRosa {
       // that will be submitted to Aggregate.
       IDataReference r;
       r = subProfile1.getRef();
-      AbstractTreeElement e1 = (r != null) ? formDef1.getInstance().resolveReference(r) : null;
+      AbstractTreeElement<?> e1 = (r != null) ? formDef1.getInstance().resolveReference(r) : null;
       r = subProfile2.getRef();
-      AbstractTreeElement e2 = (r != null) ? formDef2.getInstance().resolveReference(r) : null;
+      AbstractTreeElement<?> e2 = (r != null) ? formDef2.getInstance().resolveReference(r) : null;
 
       if (e1 != null && e2 != null) {
         // both return only a portion of the form.
@@ -1014,7 +1014,8 @@ public class BaseFormParserForJavaRosa {
     // Otherwise, if you have specified the jr:template attribute,
     // it appears only as an INDEX_TEMPLATE element.
 
-    int template1DropCount = 0;
+    @SuppressWarnings("unused")
+	int template1DropCount = 0;
     // get non-template entries for treeElement1
     List<TreeElement> element1ExcludingRepeatIndex0Children = new ArrayList<TreeElement>();
 
@@ -1031,7 +1032,8 @@ public class BaseFormParserForJavaRosa {
       element1ExcludingRepeatIndex0Children.add(child);
     }
 
-    int template2DropCount = 0;
+    @SuppressWarnings("unused")
+	int template2DropCount = 0;
     // get non-template entries for treeElement2
     Map<String, TreeElement> element2ExcludingRepeatIndex0Children = new HashMap<String, TreeElement>();
 

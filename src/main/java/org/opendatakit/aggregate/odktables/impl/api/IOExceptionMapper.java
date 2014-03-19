@@ -38,6 +38,7 @@ public class IOExceptionMapper implements ExceptionMapper<IOException> {
   @Override
   public Response toResponse(IOException e) {
     MediaType type;
+    e.printStackTrace();
     type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
         0) : MediaType.APPLICATION_JSON_TYPE;
 
