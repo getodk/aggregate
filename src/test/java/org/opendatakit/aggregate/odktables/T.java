@@ -35,9 +35,7 @@ public class T {
   public static class OdkTablesKeyValueStoreEntries {
     public static final OdkTablesKeyValueStoreEntry entryOne;
     public static final OdkTablesKeyValueStoreEntry entryTwo;
-    public static final OdkTablesKeyValueStoreEntry tableType;
     public static final OdkTablesKeyValueStoreEntry displayName;
-    public static final OdkTablesKeyValueStoreEntry tableAccessControls;
 
     public static final String entryOnePartition = "tablePartition";
     public static final String entryOneAspect = "tableAspect";
@@ -57,14 +55,6 @@ public class T {
     public static final String displayNameType = "object";
     public static final String displayNameValue = "\"People\"";
 
-    public static final String tableTypeKey = KeyValueStoreConstants.TABLE_TYPE;
-    public static final String tableTypeType = "string";
-    public static final TableType tableTypeValueAsTableType = TableType.DATA;
-    public static final String tableTypeValue = tableTypeValueAsTableType.name();
-
-    public static final String tableAccessControlTableIdKey = KeyValueStoreConstants.TABLE_ACCESS_CONTROL_TABLE_ID;
-    public static final String tableAccessControlTableIdType = "string";
-    public static final String tableAccessControlTableIdValue = "someId";
     static {
       entryOne = new OdkTablesKeyValueStoreEntry();
       entryOne.tableId = T.tableId;
@@ -82,14 +72,6 @@ public class T {
       entryTwo.type = entryTwoType;
       entryTwo.value = entryTwoValue;
 
-      tableType = new OdkTablesKeyValueStoreEntry();
-      tableType.tableId = T.tableId;
-      tableType.partition = tablePartition;
-      tableType.aspect = tableAspect;
-      tableType.key = tableTypeKey;
-      tableType.type = tableTypeType;
-      tableType.value = tableTypeValue;
-
       displayName = new OdkTablesKeyValueStoreEntry();
       displayName.tableId = T.tableId;
       displayName.partition = tablePartition;
@@ -97,14 +79,6 @@ public class T {
       displayName.key = displayNameKey;
       displayName.type = displayNameType;
       displayName.value = displayNameValue;
-
-      tableAccessControls = new OdkTablesKeyValueStoreEntry();
-      tableAccessControls.tableId = T.tableId;
-      tableAccessControls.partition = tablePartition;
-      tableAccessControls.aspect = tableAspect;
-      tableAccessControls.key = tableAccessControlTableIdKey;
-      tableAccessControls.type = tableAccessControlTableIdType;
-      tableAccessControls.value = tableAccessControlTableIdValue;
 
     }
   }
@@ -197,9 +171,7 @@ public class T {
   static {
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableType);
     kvsEntries.add(T.OdkTablesKeyValueStoreEntries.displayName);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableAccessControls);
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);
     columns.add(T.Columns.column_weight);
