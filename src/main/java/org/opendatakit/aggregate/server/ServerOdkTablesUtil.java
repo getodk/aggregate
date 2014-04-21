@@ -106,18 +106,8 @@ public class ServerOdkTablesUtil {
       PropertiesManager pm = new PropertiesManager(appId, tableId, userPermissions, cc);
       TableProperties tableProperties = pm.getProperties();
       // TODO:
-      // (1) add table type (Data)
-      // (2) add displayName (displayName)
+      // (1) add displayName (displayName)
       //
-      OdkTablesKeyValueStoreEntry tt;
-      tt = new OdkTablesKeyValueStoreEntry();
-      tt.tableId = tableId;
-      tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
-      tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-      tt.key = KeyValueStoreConstants.TABLE_TYPE;
-      tt.type = "string";
-      tt.value = type.name();
-
       OdkTablesKeyValueStoreEntry tn;
       tn = new OdkTablesKeyValueStoreEntry();
       tn.tableId = tableId;
@@ -127,22 +117,11 @@ public class ServerOdkTablesUtil {
       tn.type = "json";
       tn.value = displayName;
 
-      boolean foundTT = false;
       boolean foundTN = false;
-      boolean changedTT = false;
       boolean changedTN = false;
       ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = tableProperties.getKeyValueStoreEntries();
       for ( OdkTablesKeyValueStoreEntry kvs : kvsEntries ) {
-        if ( kvs.key == tt.key && kvs.aspect == tt.aspect && kvs.partition == tt.partition ) {
-          foundTT = true;
-          if ( tt.type.equals(kvs.type) && type.name().equals(kvs.value) ) {
-            changedTT = false;
-          } else {
-            kvs.type = tt.type;
-            kvs.value = type.name();
-            changedTT = true;
-          }
-        } else if ( kvs.key == tn.key && kvs.aspect == tn.aspect && kvs.partition == tn.partition ) {
+        if ( kvs.key == tn.key && kvs.aspect == tn.aspect && kvs.partition == tn.partition ) {
           foundTN = true;
           if ( tn.type.equals(kvs.type) && displayName.equals(kvs.value) ) {
             changedTN = false;
@@ -153,13 +132,10 @@ public class ServerOdkTablesUtil {
           }
         }
       }
-      if ( !foundTT ) {
-        kvsEntries.add(tt);
-      }
       if ( !foundTN ) {
         kvsEntries.add(tn);
       }
-      if ( !foundTT || !foundTN || changedTT || changedTN ) {
+      if ( !foundTN || changedTN ) {
         tableProperties.setKeyValueStoreEntries(kvsEntries);
         pm.setProperties(tableProperties);
       }
