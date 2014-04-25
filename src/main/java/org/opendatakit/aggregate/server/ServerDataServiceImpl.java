@@ -474,7 +474,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       if (table == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
       }
-      List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(table.getTableId(), cc);
+      List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles(table.getTableId(), cc);
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
 
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
@@ -483,14 +483,15 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         if (blobEntitySet.getAttachmentCount(cc) != 1) {
           continue;
         }
+        String odkClientVersion = entry.getOdkClientVersion();
         String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
             + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH + appId + BasicConsts.FORWARDSLASH
-            + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+            + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
+            + odkClientVersion + BasicConsts.FORWARDSLASH + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
             blobEntitySet.getContentLength(1, cc),
-            entry.getId(), tableId, downloadUrl);
+            entry.getId(), odkClientVersion, tableId, downloadUrl);
         completedSummaries.add(sum);
       }
       tcc.nonMediaFiles = completedSummaries;

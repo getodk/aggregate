@@ -23,11 +23,12 @@ import java.util.Map;
 
 import org.junit.Ignore;
 import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
+import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
 @Ignore
 public class T {
@@ -177,7 +178,9 @@ public class T {
     columns.add(T.Columns.column_weight);
     columns2.add(T.Columns.column_name);
     columns2.add(T.Columns.column_age);
-    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues()));
-    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.savepoint_creator_2, T.Data.JOHN.getValues()));
+    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues()));
+    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.form_id_2, T.locale_2, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_2, T.savepoint_creator_2, Scope.EMPTY_SCOPE, T.Data.JOHN.getValues()));
   };
 }

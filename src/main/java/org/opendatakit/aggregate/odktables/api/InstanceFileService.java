@@ -34,11 +34,16 @@ import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
- * Servlet for handling the uploading and downloading of files from the phone.
+ * Servlet for handling the uploading and downloading of instance data files
+ * (instance attachments) from the phone.
  * <p>
  * The general idea is that the interaction with the actual files will occur at
- * /odktables/files/unrootedPathToFile. Files will thus be referred to by their
- * unrooted path relative to the /odk/tables/ directory on the device.
+ * /odktables/{appId}/tables/{tableId}/instances/{instanceId}/subpathToFile.
+ * <p>
+ * The interface only supports puts and gets -- no directory listings.
+ * <p>
+ * Files will thus be referred to by their unrooted path relative to the
+ * /sdcard/opendatakit/{appId}/ directory on the device.
  * <p>
  * A GET request to that url will download the file. A POST request to that url
  * must contain an entity that is the file, as well as a table id parameter on
@@ -50,8 +55,7 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
  * @author sudar.sam@gmail.com
  *
  */
-@Path("{appId}/files/{odkClientVersion}")
-public interface FileService {
+public interface InstanceFileService {
 
   /**
    * The url of the servlet that for downloading and uploading files. This must
@@ -60,6 +64,7 @@ public interface FileService {
   public static final String SERVLET_PATH = "files";
 
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
+  public static final String PARAM_MD5_HASH_ONLY = "md5_hash_only";
   public static final String ERROR_MSG_INSUFFICIENT_PATH = "Not Enough Path Segments: must be at least 2.";
   public static final String ERROR_MSG_UNRECOGNIZED_APP_ID = "Unrecognized app id: ";
   public static final String ERROR_MSG_PATH_NOT_UNDER_APP_ID = "File path is not under app id: ";
@@ -68,11 +73,11 @@ public interface FileService {
   @GET
   @Path("{filePath:.*}")
   @GZIP
-  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment, @QueryParam(PARAM_MD5_HASH_ONLY) String asMd5HashOnly) throws IOException;
 
   @POST
   @Path("{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
-  public Response putFile(@Context HttpServletRequest req, @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
+  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
 
 }

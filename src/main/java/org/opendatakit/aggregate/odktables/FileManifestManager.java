@@ -48,31 +48,18 @@ import org.opendatakit.common.web.constants.BasicConsts;
 public class FileManifestManager {
 
   private String appId;
+  private String odkClientVersion;
   private CallingContext cc;
   private Log log;
 
-  public FileManifestManager(String appId, CallingContext cc) {
+  public FileManifestManager(String appId, String odkClientVersion, CallingContext cc) {
     Validate.notEmpty(appId);
     this.appId = appId;
+    this.odkClientVersion = odkClientVersion;
     // TODO: verify that appId matches what stored in
     // ServerPreferencesProperties...
     this.cc = cc;
     this.log = LogFactory.getLog(FileManifestManager.class);
-  }
-
-  /**
-   * Get the manifest entries for all the files associated with the app.
-   *
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public OdkTablesFileManifest getManifestForAllAppFiles() throws ODKDatastoreException {
-    // TODO: need to handle access control
-    DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForApp(cc);
-    ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
-    OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-    return manifest;
   }
 
   /**
@@ -85,7 +72,7 @@ public class FileManifestManager {
   public OdkTablesFileManifest getManifestForTable(String tableId) throws ODKDatastoreException {
     // TODO: need to handle access control.
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(tableId, cc);
+    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableIdFiles(odkClientVersion, tableId, cc);
     ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
     return manifest;
@@ -102,8 +89,7 @@ public class FileManifestManager {
   public OdkTablesFileManifest getManifestForAppLevelFiles() throws ODKDatastoreException {
     // TODO: need to handle access control.
     DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(
-        FileServiceImpl.NO_TABLE_ID, cc);
+    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAppLevelFiles(odkClientVersion, cc);
     ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
     OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
     return manifest;
@@ -149,7 +135,7 @@ public class FileManifestManager {
       entry.md5hash = blobEntitySet.getContentHash(1, cc);
       String urlPartial = cc.getServerURL() + BasicConsts.FORWARDSLASH
           + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-          + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH + appId + BasicConsts.FORWARDSLASH
+          + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
           + pathToFile;
       String urlComplete = HtmlUtil.createLinkWithProperties(urlPartial, properties);
       entry.downloadUrl = urlComplete;

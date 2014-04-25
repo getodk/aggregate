@@ -21,29 +21,21 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * This represents the datastore table that holds files for the various
- * ODKTables tables. For instance, each ODKTable might have an html file with
- * information about how to display its contents when ListView or BoxView is
- * selected. Those files will be stored on the server in this table.
- * <p>
- * this is based on DbColumn.java.
+ * This represents the datastore table that holds files for the instance data
+ * of a table. There is one of these for each table in order to simplify
+ * DBA operations.
  * <p>
  * These files are going to be stored using an AbstractBlobRelationSet. This
  * handles most of the mechanics of storing arbitrarily large binary files. It
  * is based on BlobRelationSetTest.
  *
- * @author sudar.sam@gmail.com
+ * @author mitchellsundt@gmail.com
  *
  */
-public class DbTableFiles extends AbstractBlobRelationSet {
+public class DbTableInstanceFiles extends AbstractBlobRelationSet {
 
-  // the name of the whole relation set, and the String that
-  // precedes the underscore extensions.
-  private static final String BLOB_RELATION_NAME = "TABLEFILES";
-
-  // i had this private...why? should i keep it that way?
-  public DbTableFiles(CallingContext cc) throws ODKDatastoreException {
-    super(BLOB_RELATION_NAME, cc);
+  public DbTableInstanceFiles(String dataTableName, CallingContext cc) throws ODKDatastoreException {
+    super(dataTableName, cc);
   }
 
 }

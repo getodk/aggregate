@@ -62,23 +62,31 @@ public class DbLogTable extends Relation {
   // Whether or not this DbTable Row is deleted.
   public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
 
+
+  // limited to 10 characters
+  public static final DataField FILTER_TYPE = new DataField(TableConstants.FILTER_TYPE.toUpperCase(),
+      DataType.STRING, true, 10L);
+  // limited to 50 characters
+  public static final DataField FILTER_VALUE = new DataField(TableConstants.FILTER_VALUE.toUpperCase(),
+      DataType.STRING, true, 50L).setIndexable(IndexType.HASH);
   // The FormId of the form that was in use when this record was last saved.
+  // limited to 50 characters
   public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
-      DataType.STRING, true);
+      DataType.STRING, true, 50L);
   // The locale that was active when this record was last saved.
+  // limited to 10 characters
   public static final DataField LOCALE = new DataField(TableConstants.LOCALE.toUpperCase(),
-      DataType.STRING, true);
+      DataType.STRING, true, 10L);
+  // limited to 10 characters
+  public static final DataField SAVEPOINT_TYPE = new DataField(TableConstants.SAVEPOINT_TYPE.toUpperCase(),
+      DataType.STRING, true, 10L);
   // nanoseconds at the time the form was saved (on client).
+  // limited to 40 characters
   public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
-      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, true);
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, true, 40L);
   // the creator of this row, as reported by the device (may be a remote SMS user)
   public static final DataField SAVEPOINT_CREATOR = new DataField(
       TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);
-
-  // Access control filters accessible only on server (these may be useless)
-  public static final DataField FILTER_TYPE = new DataField("_FILTER_TYPE", DataType.STRING, true);
-  public static final DataField FILTER_VALUE = new DataField("_FILTER_VALUE", DataType.STRING, true)
-      .setIndexable(IndexType.HASH);
 
   private static final List<DataField> dataFields;
   static {
@@ -94,14 +102,13 @@ public class DbLogTable extends Relation {
     dataFields.add(DELETED);
 
     // common metadata transmitted between server and device
-    dataFields.add(FORM_ID);
-    dataFields.add(LOCALE);
-    dataFields.add(SAVEPOINT_TIMESTAMP);
-    dataFields.add(SAVEPOINT_CREATOR);
-
-    // Access control filters accessible only on server (these may be useless)
     dataFields.add(FILTER_TYPE);
     dataFields.add(FILTER_VALUE);
+    dataFields.add(FORM_ID);
+    dataFields.add(LOCALE);
+    dataFields.add(SAVEPOINT_TYPE);
+    dataFields.add(SAVEPOINT_TIMESTAMP);
+    dataFields.add(SAVEPOINT_CREATOR);
   }
 
   private static final EntityConverter converter = new EntityConverter();

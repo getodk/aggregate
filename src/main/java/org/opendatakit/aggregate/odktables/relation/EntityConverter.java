@@ -372,13 +372,14 @@ public class EntityConverter {
     row.setDataETagAtModification(entity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbLogTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));
-    row.setFilterScope(getDbLogTableFilterScope(entity));
     row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
 
+    row.setFilterScope(getDbLogTableFilterScope(entity));
     row.setFormId(entity.getString(DbLogTable.FORM_ID));
     row.setLocale(entity.getString(DbLogTable.LOCALE));
-    row.setSavepointCreator(entity.getString(DbLogTable.SAVEPOINT_CREATOR));
+    row.setSavepointType(entity.getString(DbLogTable.SAVEPOINT_TYPE));
     row.setSavepointTimestamp(entity.getString(DbLogTable.SAVEPOINT_TIMESTAMP));
+    row.setSavepointCreator(entity.getString(DbLogTable.SAVEPOINT_CREATOR));
 
     row.setValues(getRowValues(entity, columns));
     return row;

@@ -45,15 +45,6 @@ public class Row {
   @Element(required = false)
   private String lastUpdateUser;
 
-  @Element(required = false)
-  private Scope filterScope;
-
-  /**
-   * OdkTables metadata column.
-   */
-  @Element(required = false)
-  private String savepointCreator;
-
   /**
    * OdkTables metadata column.
    */
@@ -70,7 +61,25 @@ public class Row {
    * OdkTables metadata column.
    */
   @Element(required = false)
+  private String savepointType;
+
+  /**
+   * OdkTables metadata column.
+   */
+  @Element(required = false)
   private String savepointTimestamp;
+
+  /**
+   * OdkTables metadata column.
+   */
+  @Element(required = false)
+  private String savepointCreator;
+
+  /**
+   * FilterScope is passed down to device.
+   */
+  @Element(required = false)
+  private Scope filterScope;
 
   @ElementMap(entry = "entry", key = "column", attribute = true, inline = true)
   private Map<String, String> values;
@@ -83,13 +92,16 @@ public class Row {
    * @param values
    */
   public static Row forInsert(String rowId, String formId, String locale,
-      String savepointTimestamp, String savepointCreator, Map<String, String> values) {
+      String savepointType, String savepointTimestamp, String savepointCreator,
+      Scope filterScope, Map<String, String> values) {
     Row row = new Row();
     row.rowId = rowId;
     row.formId = formId;
     row.locale = locale;
+    row.savepointType = savepointType;
     row.savepointTimestamp = savepointTimestamp;
     row.savepointCreator = savepointCreator;
+    row.filterScope = filterScope;
     row.values = values;
     return row;
   }
@@ -103,14 +115,17 @@ public class Row {
    * @param values
    */
   public static Row forUpdate(String rowId, String rowETag, String formId,
-      String locale, String savepointTimestamp, String savepointCreator, Map<String, String> values) {
+      String locale, String savepointType, String savepointTimestamp,
+      String savepointCreator, Scope filterScope, Map<String, String> values) {
     Row row = new Row();
     row.rowId = rowId;
     row.rowETag = rowETag;
     row.formId = formId;
     row.locale = locale;
+    row.savepointType = savepointType;
     row.savepointTimestamp = savepointTimestamp;
     row.savepointCreator = savepointCreator;
+    row.filterScope = filterScope;
     row.values = values;
     return row;
   }
@@ -122,12 +137,13 @@ public class Row {
     this.deleted = false;
     this.createUser = null;
     this.lastUpdateUser = null;
-    this.filterScope = null;
     // data coming up from client
-    this.savepointCreator = null;
     this.formId = null;
     this.locale = null;
+    this.savepointType = null;
     this.savepointTimestamp = null;
+    this.savepointCreator = null;
+    this.filterScope = null;
     this.values = new HashMap<String, String>();
   }
 
@@ -169,6 +185,10 @@ public class Row {
 
   public String getLocale() {
     return this.locale;
+  }
+
+  public String getSavepointType() {
+    return this.savepointType;
   }
 
   public String getSavepointTimestamp() {
@@ -219,6 +239,10 @@ public class Row {
     this.locale = locale;
   }
 
+  public void setSavepointType(String savepointType) {
+    this.savepointType = savepointType;
+  }
+
   public void setValues(final Map<String, String> values) {
     this.values = values;
   }
@@ -248,6 +272,7 @@ public class Row {
     result = prime * result + ((savepointCreator == null) ? 0 : savepointCreator.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
+    result = prime * result + ((savepointType == null) ? 0 : savepointType.hashCode());
     result = prime * result + ((savepointTimestamp == null) ? 0 : savepointTimestamp.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
     return result;
@@ -278,6 +303,8 @@ public class Row {
             .equals(other.savepointCreator))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
+        && (savepointType == null ? other.savepointType == null : savepointType
+            .equals(other.savepointType))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
             .equals(other.savepointTimestamp))
         && (values == null ? other.values == null : values.equals(other.values));
@@ -304,6 +331,8 @@ public class Row {
         && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
+        && (savepointType == null ? other.savepointType == null : savepointType
+            .equals(other.savepointType))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
             .equals(other.savepointTimestamp))
         && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
@@ -337,6 +366,8 @@ public class Row {
     builder.append(formId);
     builder.append(", locale=");
     builder.append(locale);
+    builder.append(", savepointType=");
+    builder.append(savepointType);
     builder.append(", savepointTimestamp=");
     builder.append(savepointTimestamp);
     builder.append(", savepointCreator=");
