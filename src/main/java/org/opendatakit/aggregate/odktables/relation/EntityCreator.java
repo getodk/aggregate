@@ -122,19 +122,22 @@ public class EntityCreator {
   /**
    * Create a new {@link DbTableFileInfo} entity.
    *
+   * @param odkClientVersion
    * @param tableId
    * @param pathToFile
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public DbTableFileInfoEntity newTableFileInfoEntity(String tableId, String pathToFile,
+  public DbTableFileInfoEntity newTableFileInfoEntity(String odkClientVersion,
+      String tableId, String pathToFile,
       TablesUserPermissionsImpl userPermissions,
       CallingContext cc) throws ODKDatastoreException {
     // first do some preliminary checks
     Validate.notEmpty(pathToFile);
     // TODO: check permissions to create a file...
     DbTableFileInfoEntity entity = DbTableFileInfo.createNewEntity(cc);
+    entity.setOdkClientVersion(odkClientVersion);
     entity.setTableId(tableId);
     entity.setPathToFile(pathToFile);
 
@@ -265,13 +268,14 @@ public class EntityCreator {
   }
 
   public void setRowFields(Entity row, String rowETag, String dataETagAtModification,
-      String lastUpdateUser, Scope filterScope,
-      boolean deleted, String formId, String locale,
+      String lastUpdateUser, boolean deleted,
+      Scope filterScope, String formId, String locale, String savepointType,
       String savepointTimestamp, String savepointCreator, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_ETAG, rowETag);
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
     row.set(DbTable.LAST_UPDATE_USER, lastUpdateUser);
+    row.set(DbTable.DELETED, deleted);
 
     // if filterScope is null, don't change the value
     // if filterScope is the empty scope, set both filter type and value to null
@@ -292,10 +296,9 @@ public class EntityCreator {
       }
     }
 
-    row.set(DbTable.DELETED, deleted);
-
     row.set(DbTable.FORM_ID, formId);
     row.set(DbTable.LOCALE, locale);
+    row.set(DbTable.SAVEPOINT_TYPE, savepointType);
     row.set(DbTable.SAVEPOINT_TIMESTAMP, savepointTimestamp);
     row.set(DbTable.SAVEPOINT_CREATOR, savepointCreator);
 
@@ -378,15 +381,16 @@ public class EntityCreator {
     entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
     entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
-    entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
-    entity.set(DbLogTable.FILTER_VALUE, row.getString(DbTable.FILTER_VALUE));
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
 
     // common metadata
-    entity.set(DbLogTable.SAVEPOINT_CREATOR, row.getString(DbTable.SAVEPOINT_CREATOR));
+    entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
+    entity.set(DbLogTable.FILTER_VALUE, row.getString(DbTable.FILTER_VALUE));
     entity.set(DbLogTable.FORM_ID, row.getString(DbTable.FORM_ID));
     entity.set(DbLogTable.LOCALE, row.getString(DbTable.LOCALE));
+    entity.set(DbLogTable.SAVEPOINT_TYPE, row.getString(DbTable.SAVEPOINT_TYPE));
     entity.set(DbLogTable.SAVEPOINT_TIMESTAMP, row.getString(DbTable.SAVEPOINT_TIMESTAMP));
+    entity.set(DbLogTable.SAVEPOINT_CREATOR, row.getString(DbTable.SAVEPOINT_CREATOR));
 
     for (DbColumnDefinitionsEntity column : columns) {
       if (column.getIsUnitOfRetention()) {

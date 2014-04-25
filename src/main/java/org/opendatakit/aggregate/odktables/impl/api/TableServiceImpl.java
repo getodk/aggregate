@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
+import org.opendatakit.aggregate.odktables.api.InstanceFileService;
 import org.opendatakit.aggregate.odktables.api.PropertiesService;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
@@ -143,6 +144,12 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
     TableAclService service = new TableAclServiceImpl(appId, tableId, info, userPermissions, cc);
+    return service;
+  }
+
+  @Override
+  public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
+    InstanceFileService service = new InstanceFileServiceImpl(appId, tableId, info, userPermissions, cc);
     return service;
   }
 
