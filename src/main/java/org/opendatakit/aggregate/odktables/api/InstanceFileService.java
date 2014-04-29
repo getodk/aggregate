@@ -24,6 +24,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -31,6 +32,7 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.annotations.GZIP;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
@@ -64,19 +66,30 @@ public interface InstanceFileService {
   public static final String SERVLET_PATH = "files";
 
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
-  public static final String PARAM_MD5_HASH_ONLY = "md5_hash_only";
   public static final String ERROR_MSG_INSUFFICIENT_PATH = "Not Enough Path Segments: must be at least 2.";
   public static final String ERROR_MSG_UNRECOGNIZED_APP_ID = "Unrecognized app id: ";
   public static final String ERROR_MSG_PATH_NOT_UNDER_APP_ID = "File path is not under app id: ";
   public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
   @GET
-  @Path("{filePath:.*}")
+  @Path("manifest")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @GZIP
-  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment, @QueryParam(PARAM_MD5_HASH_ONLY) String asMd5HashOnly) throws IOException;
+  public Response getManifestAll(@QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+
+  @GET
+  @Path("manifest/{filePath:.*}")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  @GZIP
+  public Response getManifest(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+
+  @GET
+  @Path("file/{filePath:.*}")
+  @GZIP
+  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @POST
-  @Path("{filePath:.*}")
+  @Path("file/{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
 

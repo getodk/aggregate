@@ -46,10 +46,10 @@ public class OdkTablesTableList extends FlexTable {
 	private static final String DELETE_BUTTON_HEADING = "Delete";
 
 	private static final int VIEW_TABLE_BUTTON_COLUMN = 2;
-	private static final String VIEW_TABLE_BUTTON_HEADING = "";
+	private static final String VIEW_TABLE_BUTTON_HEADING = "View Data";
 
 	private static final int TABLE_FILES_BUTTON_COLUMN = 3;
-	private static final String TABLE_FILE_BUTTON_HEADING = "";
+	private static final String TABLE_FILE_BUTTON_HEADING = "View Data Files";
 
 
 	public OdkTablesTableList() {

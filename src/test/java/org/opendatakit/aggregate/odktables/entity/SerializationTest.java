@@ -165,6 +165,7 @@ public class SerializationTest {
     TableResource expected = new TableResource(entry);
     expected.setSelfUri("http://localhost:8080/odktables/tables/1");
     expected.setDataUri("http://localhost:8080/odktables/tables/1/rows");
+    expected.setInstanceFilesUri("http://localhost:8080/odktables/tables/1/attachments");
     expected.setPropertiesUri("http://localhost:8080/odktables/tables/1/columns");
     expected.setDefinitionUri("http://localhost:8080/odktables/tables/1/definition");
     expected.setDiffUri("http://localhost:8080/odktables/tables/1/rows/diff");

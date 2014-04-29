@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.client;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.table.OdkTablesViewTableFileInfo;
+import org.opendatakit.aggregate.client.table.OdkTablesViewInstanceFileInfo;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -36,26 +36,22 @@ import com.google.gwt.user.client.ui.ListBox;
 
 /**
  * This class builds the subtab that allows for viewing and managing the files
- * that are associated with ODKTables tables. <br>
- * The idea here is that you will have uploaded files to the table, like an html
- * file with information about how to display a list view for the data in your
- * table. And then you can come to this page to see which files are actually
- * associated with the table, as well as set the keys which will say which file
- * does what.
+ * that are associated with data rows in an ODKTables tables. <br>
  *
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase implements OdkTablesData {
+public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
+        implements OdkTablesData {
 
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
   private FlexTable selectTablePanel;
 
   // the string constants for adding a file
-  private static final String ADD_FILE_TXT = "Add a table file";
+  private static final String ADD_FILE_TXT = "Add an instance (data row) file";
   private static final String ADD_FILE_TOOLTIP_TXT = "Upload a file";
-  private static final String ADD_FILE_BALLOON_TXT = "Upload a file to be associated with a specific table";
+  private static final String ADD_FILE_BALLOON_TXT = "Upload a file to be associated with a specific data row of a table";
   private static final String ADD_FILE_BUTTON_TXT = "<img src=\"images/yellow_plus.png\" />"
       + ADD_FILE_TXT;
 
@@ -78,7 +74,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   // array list so that you can access with indices reliably
   private final ArrayList<TableEntryClient> currentTables;
   // the box that shows the data
-  private OdkTablesViewTableFileInfo tableFileData;
+  private OdkTablesViewInstanceFileInfo tableFileData;
 
   // the current table that is being displayed
   private TableEntryClient currentTable;
@@ -86,10 +82,11 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   /**
    * Sets up the View Table subtab.
    */
-  public OdkTablesManageTableFilesSubTab() {
+  public OdkTablesManageInstanceFilesSubTab() {
 
     addFileButton = new OdkTablesTableIdServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
-        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT, this, this);
+        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT,
+        this, this);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -118,7 +115,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
       }
     });
 
-    tableFileData = new OdkTablesViewTableFileInfo(this);
+    tableFileData = new OdkTablesViewInstanceFileInfo(this);
 
     selectTablePanel = new FlexTable();
     selectTablePanel.getElement().setId("select_table_panel");
@@ -200,7 +197,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   @Override
   public void update() {
 
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
       updateTableList();
       // this causing trouble
       updateTableData();

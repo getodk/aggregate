@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.OdkTablesManageTableFilesSubTab;
+import org.opendatakit.aggregate.client.OdkTablesManageInstanceFilesSubTab;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 
@@ -27,9 +27,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 public class OdkTablesShowTableFilesButton extends AggregateButton implements ClickHandler {
 
   private static final String BUTTON_TXT =
-      "<img src=\"images/green_right_arrow.png\" /> Files Associated with Table";
-  private static final String TOOLTIP_TXT = "Display Files for this Table";
-  private static final String HELP_BALLOON_TXT = "View the files that have " +
+      "<img src=\"images/green_right_arrow.png\" /> Data Files Associated with Table";
+  private static final String TOOLTIP_TXT = "Display Data Files for this Table";
+  private static final String HELP_BALLOON_TXT = "View the data files that have " +
   		"been uploaded for this table.";
 
   // the table id of the button this table is tied to.
@@ -48,11 +48,11 @@ public class OdkTablesShowTableFilesButton extends AggregateButton implements Cl
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    OdkTablesManageTableFilesSubTab fileSubTab =
-        (OdkTablesManageTableFilesSubTab) AggregateUI.getUI()
-        .getSubTab(SubTabs.MANAGEFILES);
+    OdkTablesManageInstanceFilesSubTab fileSubTab =
+        (OdkTablesManageInstanceFilesSubTab) AggregateUI.getUI()
+        .getSubTab(SubTabs.MANAGE_INSTANCE_FILES);
     fileSubTab.setCurrentTable(tableId);
     fileSubTab.update();
-    AggregateUI.getUI().redirectToSubTab(SubTabs.MANAGEFILES);
+    AggregateUI.getUI().redirectToSubTab(SubTabs.MANAGE_INSTANCE_FILES);
   }
 }

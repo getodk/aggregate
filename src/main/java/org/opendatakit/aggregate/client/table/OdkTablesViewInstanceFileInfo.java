@@ -36,13 +36,12 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Displays the entries in the DbTableFileInfo table that pertain to a specific
- * table.
+ * Displays the files associated with individual rows in a table.
  *
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesViewTableFileInfo extends FlexTable {
+public class OdkTablesViewInstanceFileInfo extends FlexTable {
 
   // the table whose info we are currently displaying.
   private TableEntryClient currentTable;
@@ -54,14 +53,16 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   // this is the heading for the delete row button.
   private static final String DELETE_HEADING = "Delete";
 
-  private static final int ODK_CLIENT_VERSION_COLUMN = 1;
-  private static final String ODK_CLIENT_VERSION_HEADING = "Client Version";
-  private static final int FILENAME_COLUMN = 2;
+  private static final int KEY_COLUMN = 1;
+  private static final String KEY_HEADING = "Key";
+  private static final int TABLE_ID_COLUMN = 2;
+  private static final String TABLE_ID_HEADING = "TableId";
+  private static final int FILENAME_COLUMN = 3;
   private static final String FILENAME_HEADING = "Filename";
-  private static final int DOWNLOAD_COLUMN = 3;
+  private static final int DOWNLOAD_COLUMN = 4;
   private static final String DOWNLOAD_HEADING = "Download";
 
-  private static final int numColumns = 4;
+  private static final int numColumns = 5;
 
   // this is just the tab that opened the table
   private AggregateSubTabBase basePanel;
@@ -73,7 +74,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
    * This is the constructor to call when there has not been a table selected.
    * Should this even exist?
    */
-  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab) {
+  public OdkTablesViewInstanceFileInfo(AggregateSubTabBase tableSubTab) {
 
     setColumnHeadings();
 
@@ -87,7 +88,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
     this.currentTable = null;
   }
 
-  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab, TableEntryClient table) {
+  public OdkTablesViewInstanceFileInfo(AggregateSubTabBase tableSubTab, TableEntryClient table) {
     this(tableSubTab);
 
     updateDisplay(table);
@@ -143,13 +144,14 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
       }
     };
 
-    SecureGWT.getServerDataService().getTableFileInfoContents(table.getTableId(), getDataCallback);
+    SecureGWT.getServerDataService().getInstanceFileInfoContents(table.getTableId(), getDataCallback);
   }
 
   private void setColumnHeadings() {
     // create the table headers.
     setText(0, DELETE_COLUMN, DELETE_HEADING);
-    setText(0, ODK_CLIENT_VERSION_COLUMN, ODK_CLIENT_VERSION_HEADING);
+    setText(0, KEY_COLUMN, KEY_HEADING);
+    setText(0, TABLE_ID_COLUMN, TABLE_ID_HEADING);
     setText(0, FILENAME_COLUMN, FILENAME_HEADING);
     setText(0, DOWNLOAD_COLUMN, DOWNLOAD_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
@@ -178,7 +180,8 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
         FileSummaryClient sum = fileSummaries.get(j);
         setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteFileButton(this.basePanel,
             currentTable.getTableId(), sum.getId()));
-        setText(currentRow, ODK_CLIENT_VERSION_COLUMN, sum.getOdkClientVersion());
+        setText(currentRow, KEY_COLUMN, sum.getId());
+        setText(currentRow, TABLE_ID_COLUMN, sum.getTableId());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
         Widget downloadCol;
         if (sum.getDownloadUrl() != null) {

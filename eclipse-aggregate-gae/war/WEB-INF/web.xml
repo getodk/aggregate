@@ -267,6 +267,16 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
 		<url-pattern>/submission</url-pattern>
 	</servlet-mapping>
 
+		<!-- servlet for uploading files associated with ODKTables application -->
+	<servlet>
+	    <servlet-name>appLevelFileUpload</servlet-name>
+	    <servlet-class>org.opendatakit.aggregate.servlet.OdkTablesAppLevelFileUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>appLevelFileUpload</servlet-name>
+	    <url-pattern>/appLevelFileUpload</url-pattern>
+	</servlet-mapping>
+
 		<!-- servlet for uploading files associated with ODKTables tables -->
 	<servlet>
 	    <servlet-name>tableFileUpload</servlet-name>

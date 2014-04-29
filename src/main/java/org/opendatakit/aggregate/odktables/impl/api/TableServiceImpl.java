@@ -175,6 +175,7 @@ public class TableServiceImpl implements TableService {
     URI self = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
     URI properties = ub.clone().path(TableService.class, "getProperties").build(appId, tableId);
     URI data = ub.clone().path(TableService.class, "getData").build(appId, tableId);
+    URI instanceFiles = ub.clone().path(TableService.class, "getInstanceFiles").build(appId, tableId);
     URI diff = ub.clone().path(TableService.class, "getDiff").build(appId, tableId);
     URI acl = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
     URI definition = ub.clone().path(TableService.class, "getDefinition").build(appId, tableId);
@@ -184,6 +185,7 @@ public class TableServiceImpl implements TableService {
     resource.setDefinitionUri(definition.toASCIIString());
     resource.setPropertiesUri(properties.toASCIIString());
     resource.setDataUri(data.toASCIIString());
+    resource.setInstanceFilesUri(instanceFiles.toASCIIString());
     resource.setDiffUri(diff.toASCIIString());
     resource.setAclUri(acl.toASCIIString());
     return resource;

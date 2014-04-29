@@ -20,14 +20,10 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.OdkTablesManageTableFilesSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
-import org.opendatakit.aggregate.constants.common.SubTabs;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -36,16 +32,18 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Displays the entries in the DbTableFileInfo table that pertain to a specific
- * table.
+ * Displays the entries in the DbTableFileInfo table that pertain to
+ * the application and not to any specific table.
+ *
+ * Based upon OdkTablesViewTableFileInfo
  *
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesViewTableFileInfo extends FlexTable {
+public class OdkTablesViewAppLevelFileInfo extends FlexTable {
 
   // the table whose info we are currently displaying.
-  private TableEntryClient currentTable;
+//  private TableEntryClient currentTable;
 
   // that table's info rows
   private ArrayList<FileSummaryClient> fileSummaries;
@@ -69,11 +67,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   // the message to display when there are no rows in the table
   private static String NO_ROWS_MESSAGE = "There are no rows to display.";
 
-  /**
-   * This is the constructor to call when there has not been a table selected.
-   * Should this even exist?
-   */
-  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab) {
+  public OdkTablesViewAppLevelFileInfo(AggregateSubTabBase tableSubTab) {
 
     setColumnHeadings();
 
@@ -82,68 +76,26 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
     getElement().setId("form_management_table");
 
     this.basePanel = tableSubTab;
-
-    // no current table.
-    this.currentTable = null;
   }
 
-  public OdkTablesViewTableFileInfo(AggregateSubTabBase tableSubTab, TableEntryClient table) {
-    this(tableSubTab);
-
-    updateDisplay(table);
-
-    this.currentTable = table;
-  }
-
-  /**
-   * This updates the display to show the contents of the table.
-   */
-  public void updateDisplay(TableEntryClient table) {
-    @SuppressWarnings("unused")
-    TableEntryClient oldTable = this.currentTable;
-
-    this.currentTable = table;
-
-    if (table == null) {
-      this.removeAllRows();
-    } else {
-
-      /*** update the data ***/
-      updateData(table);
-    }
-
-  }
-
-  public void updateData(TableEntryClient table) {
+  public void updateData() {
     // set up the callback object
     AsyncCallback<TableContentsForFilesClient> getDataCallback = new AsyncCallback<TableContentsForFilesClient>() {
       @Override
       public void onFailure(Throwable caught) {
-        if (caught instanceof EntityNotFoundExceptionClient) {
-          // if this happens it is PROBABLY, but not necessarily, because
-          // we've deleted the table.
-          // TODO ensure the correct exception makes it here
-          ((OdkTablesManageTableFilesSubTab) AggregateUI.getUI().getSubTab(SubTabs.MANAGE_TABLE_ID_FILES))
-              .setTabToDislpayZero();
-        } else {
-          AggregateUI.getUI().reportError(caught);
-        }
+        AggregateUI.getUI().reportError(caught);
       }
 
       @Override
       public void onSuccess(TableContentsForFilesClient tcc) {
         removeAllRows();
         setColumnHeadings();
-        // setColumnHeadings(columnNames);
-
         fileSummaries = tcc.files;
         setRows();
-
-        // AggregateUI.getUI().getTimer().refreshNow();
       }
     };
 
-    SecureGWT.getServerDataService().getTableFileInfoContents(table.getTableId(), getDataCallback);
+    SecureGWT.getServerDataService().getAppLevelFileInfoContents(getDataCallback);
   }
 
   private void setColumnHeadings() {
@@ -177,7 +129,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
       for (int j = 0; j < fileSummaries.size(); j++) {
         FileSummaryClient sum = fileSummaries.get(j);
         setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteFileButton(this.basePanel,
-            currentTable.getTableId(), sum.getId()));
+            "", sum.getId()));
         setText(currentRow, ODK_CLIENT_VERSION_COLUMN, sum.getOdkClientVersion());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
         Widget downloadCol;

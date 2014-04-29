@@ -255,6 +255,7 @@ public class UtilTransforms {
         serverResource.getPropertiesETag(), serverResource.getSchemaETag()));
     clientResource.setAclUri(serverResource.getAclUri());
     clientResource.setDataUri(serverResource.getDataUri());
+    clientResource.setInstanceFilesUri(serverResource.getInstanceFilesUri());
     clientResource.setDiffUri(serverResource.getDiffUri());
     clientResource.setPropertiesUri(serverResource.getPropertiesUri());
     clientResource.setSelfUri(serverResource.getSelfUri());

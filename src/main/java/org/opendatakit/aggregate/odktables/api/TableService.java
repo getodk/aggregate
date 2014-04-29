@@ -139,6 +139,16 @@ public interface TableService {
    *
    * @param appId
    * @param tableId
+   * @return {@link InstanceFileService} for file attachments to the rows on this table.
+   * @throws ODKDatastoreException
+   */
+  @Path("{tableId}/attachments")
+  public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
+
+  /**
+   *
+   * @param appId
+   * @param tableId
    * @return {@link DiffService} for the row-changes on this table.
    * @throws ODKDatastoreException
    */
@@ -154,14 +164,4 @@ public interface TableService {
    */
   @Path("{tableId}/acl")
   public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
-
-  /**
-   *
-   * @param appId
-   * @param tableId
-   * @return {@link TableAclService} for ACL management on this table.
-   * @throws ODKDatastoreException
-   */
-  @Path("{tableId}/instances")
-  public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
 }

@@ -36,6 +36,9 @@ public class UIConsts {
   public static final String ENKETO_API_HANDLER_ADDR = "enk/enketoApiHandler";
 
   // url pattern for uploading files associated with ODKTables tables
+  public static final String APP_LEVEL_FILE_UPLOAD_SERVLET_ADDR =
+      "appLevelFileUpload";
+  // url pattern for uploading files associated with ODKTables tables
   public static final String TABLE_FILE_UPLOAD_SERVLET_ADDR =
       "tableFileUpload";
   // url pattern for downloading files associated with odktables tables
