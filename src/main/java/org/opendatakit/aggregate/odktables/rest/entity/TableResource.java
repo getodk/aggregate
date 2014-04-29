@@ -38,6 +38,9 @@ public class TableResource extends TableEntry {
   private String dataUri;
 
   @Element(required = true)
+  private String instanceFilesUri;
+
+  @Element(required = true)
   private String diffUri;
 
   @Element(required = true)
@@ -70,6 +73,10 @@ public class TableResource extends TableEntry {
     return this.dataUri;
   }
 
+  public String getInstanceFilesUri() {
+    return this.instanceFilesUri;
+  }
+
   public String getDiffUri() {
     return this.diffUri;
   }
@@ -96,6 +103,10 @@ public class TableResource extends TableEntry {
 
   public void setDataUri(final String dataUri) {
     this.dataUri = dataUri;
+  }
+
+  public void setInstanceFilesUri(final String instanceFilesUri) {
+    this.instanceFilesUri = instanceFilesUri;
   }
 
   public void setDiffUri(final String diffUri) {
@@ -139,6 +150,11 @@ public class TableResource extends TableEntry {
         return false;
     } else if (!dataUri.equals(other.dataUri))
       return false;
+    if (instanceFilesUri == null) {
+      if (other.instanceFilesUri != null)
+        return false;
+    } else if (!instanceFilesUri.equals(other.instanceFilesUri))
+      return false;
     if (diffUri == null) {
       if (other.diffUri != null)
         return false;
@@ -180,6 +196,7 @@ public class TableResource extends TableEntry {
     result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
     result = prime * result + ((aclUri == null) ? 0 : aclUri.hashCode());
     result = prime * result + ((dataUri == null) ? 0 : dataUri.hashCode());
+    result = prime * result + ((instanceFilesUri == null) ? 0 : instanceFilesUri.hashCode());
     result = prime * result + ((diffUri == null) ? 0 : diffUri.hashCode());
     result = prime * result + ((propertiesUri == null) ? 0 : propertiesUri.hashCode());
     result = prime * result + ((selfUri == null) ? 0 : selfUri.hashCode());
@@ -203,6 +220,8 @@ public class TableResource extends TableEntry {
     builder.append(propertiesUri);
     builder.append(", dataUri=");
     builder.append(dataUri);
+    builder.append(", instanceFilesUri=");
+    builder.append(instanceFilesUri);
     builder.append(", diffUri=");
     builder.append(diffUri);
     builder.append(", aclUri=");

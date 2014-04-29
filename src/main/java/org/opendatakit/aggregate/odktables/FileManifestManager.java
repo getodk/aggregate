@@ -132,12 +132,14 @@ public class FileManifestManager {
         continue;
       }
       entry.filename = pathToFile;
+      entry.contentLength = blobEntitySet.getContentLength(1, cc);
+      entry.contentType = blobEntitySet.getContentType(1, cc);
       entry.md5hash = blobEntitySet.getContentHash(1, cc);
       String urlPartial = cc.getServerURL() + BasicConsts.FORWARDSLASH
           + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
           + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-          + pathToFile;
-      String urlComplete = HtmlUtil.createLinkWithProperties(urlPartial, properties);
+          + odkClientVersion + BasicConsts.FORWARDSLASH+ pathToFile;
+       String urlComplete = HtmlUtil.createLinkWithProperties(urlPartial, properties);
       entry.downloadUrl = urlComplete;
       manifestEntries.add(entry);
     }

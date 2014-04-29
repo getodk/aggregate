@@ -228,7 +228,7 @@ public class RefreshTimer extends Timer {
     		  tabPanel.update();
     	  }
     	  break;
-      case MANAGEFILES:
+      case MANAGE_TABLE_ID_FILES:
         if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
           GWT.log("manage files refresh");
           tabPanel.update();

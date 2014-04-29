@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.odktables.relation;
 
+import java.util.Locale;
+
 import org.opendatakit.common.ermodel.AbstractBlobRelationSet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -34,8 +36,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class DbTableInstanceFiles extends AbstractBlobRelationSet {
 
-  public DbTableInstanceFiles(String dataTableName, CallingContext cc) throws ODKDatastoreException {
-    super(dataTableName, cc);
+  public DbTableInstanceFiles(String tableId, CallingContext cc) throws ODKDatastoreException {
+    super(tableId.toUpperCase(Locale.ENGLISH) + "_ATT", cc);
   }
-
 }
