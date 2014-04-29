@@ -301,6 +301,7 @@ public class EntityConverter {
 
     row.setFormId(entity.getString(DbTable.FORM_ID));
     row.setLocale(entity.getString(DbTable.LOCALE));
+    row.setSavepointType(entity.getString(DbTable.SAVEPOINT_TYPE));
     row.setSavepointTimestamp(entity.getString(DbTable.SAVEPOINT_TIMESTAMP));
     row.setSavepointCreator(entity.getString(DbTable.SAVEPOINT_CREATOR));
 

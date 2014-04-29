@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="it"/>
 	<classpathentry excluding="org/opendatakit/common/testing/gae/*" kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
@@ -47,7 +48,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.9.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javassist-3.12.1.GA.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2014-03-10.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2014-04-29.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxrs-api-3.0.6.Final.jar" sourcepath="C:/Users/Administrator/.m2/repository/org/jboss/resteasy/jaxrs-api/3.0.6.Final/jaxrs-api-3.0.6.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jboss-annotations-api_1.1_spec-1.0.1.Final.jar"/>

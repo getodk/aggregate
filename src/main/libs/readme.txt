@@ -7,7 +7,7 @@ This is a special build of javarosa using the tree at https://bitbucket.org/m.su
 It incorporates multithread-safe KoBo collect changes (from Clayton), abandons J2ME support, 
 exposes bind and prompt attributes, and numerous contributed fixes from SurveyCTO and others.
 
-mvn install:install-file -Dfile=javarosa-libraries-2014-03-10.jar -DgroupId=org.javarosa -DartifactId=javarosa-libraries -Dversion=2014-03-10 -Dpackaging=jar
+mvn install:install-file -Dfile=javarosa-libraries-2014-04-29.jar -DgroupId=org.javarosa -DartifactId=javarosa-libraries -Dversion=2014-04-29 -Dpackaging=jar
 
 odk-httpclient-gae:
 
