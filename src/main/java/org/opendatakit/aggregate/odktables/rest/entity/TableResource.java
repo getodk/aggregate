@@ -32,9 +32,6 @@ public class TableResource extends TableEntry {
   private String definitionUri;
 
   @Element(required = true)
-  private String propertiesUri;
-
-  @Element(required = true)
   private String dataUri;
 
   @Element(required = true)
@@ -46,11 +43,8 @@ public class TableResource extends TableEntry {
   @Element(required = true)
   private String aclUri;
 
-  @Element(required = false)
-  private String displayName;
-
   public TableResource(TableEntry entry) {
-    super(entry.getTableId(), entry.getDataETag(), entry.getPropertiesETag(), entry.getSchemaETag());
+    super(entry.getTableId(), entry.getDataETag(), entry.getSchemaETag());
   }
 
   @SuppressWarnings("unused")
@@ -63,10 +57,6 @@ public class TableResource extends TableEntry {
 
   public String getDefinitionUri() {
     return this.definitionUri;
-  }
-
-  public String getPropertiesUri() {
-    return this.propertiesUri;
   }
 
   public String getDataUri() {
@@ -85,20 +75,12 @@ public class TableResource extends TableEntry {
     return this.aclUri;
   }
 
-  public String getDisplayName() {
-    return this.displayName;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
   }
 
   public void setDefinitionUri(final String definitionUri) {
     this.definitionUri = definitionUri;
-  }
-
-  public void setPropertiesUri(final String propertiesUri) {
-    this.propertiesUri = propertiesUri;
   }
 
   public void setDataUri(final String dataUri) {
@@ -117,10 +99,6 @@ public class TableResource extends TableEntry {
     this.aclUri = aclUri;
   }
 
-  public void setDisplayName(final String displayName) {
-    this.displayName = displayName;
-  }
-
   /*
    * (non-Javadoc)
    *
@@ -135,11 +113,6 @@ public class TableResource extends TableEntry {
     if (!(obj instanceof TableResource))
       return false;
     TableResource other = (TableResource) obj;
-    if (displayName == null) {
-      if (other.displayName != null)
-        return false;
-    } else if (!displayName.equals(other.displayName))
-      return false;
     if (aclUri == null) {
       if (other.aclUri != null)
         return false;
@@ -159,11 +132,6 @@ public class TableResource extends TableEntry {
       if (other.diffUri != null)
         return false;
     } else if (!diffUri.equals(other.diffUri))
-      return false;
-    if (propertiesUri == null) {
-      if (other.propertiesUri != null)
-        return false;
-    } else if (!propertiesUri.equals(other.propertiesUri))
       return false;
     if (selfUri == null) {
       if (other.selfUri != null)
@@ -193,12 +161,10 @@ public class TableResource extends TableEntry {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
     result = prime * result + ((aclUri == null) ? 0 : aclUri.hashCode());
     result = prime * result + ((dataUri == null) ? 0 : dataUri.hashCode());
     result = prime * result + ((instanceFilesUri == null) ? 0 : instanceFilesUri.hashCode());
     result = prime * result + ((diffUri == null) ? 0 : diffUri.hashCode());
-    result = prime * result + ((propertiesUri == null) ? 0 : propertiesUri.hashCode());
     result = prime * result + ((selfUri == null) ? 0 : selfUri.hashCode());
     result = prime * result + ((definitionUri == null) ? 0 : definitionUri.hashCode());
     return result;
@@ -216,8 +182,6 @@ public class TableResource extends TableEntry {
     builder.append(selfUri);
     builder.append(", defintionUri=");
     builder.append(definitionUri);
-    builder.append(", propertiesUri=");
-    builder.append(propertiesUri);
     builder.append(", dataUri=");
     builder.append(dataUri);
     builder.append(", instanceFilesUri=");
@@ -226,8 +190,6 @@ public class TableResource extends TableEntry {
     builder.append(diffUri);
     builder.append(", aclUri=");
     builder.append(aclUri);
-    builder.append(", displayName=");
-    builder.append(displayName);
     builder.append("]");
     return builder.toString();
   }

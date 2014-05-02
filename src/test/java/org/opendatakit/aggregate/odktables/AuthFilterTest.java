@@ -31,7 +31,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.AuthFilter;
@@ -102,9 +101,6 @@ public class AuthFilterTest {
     this.tm = new TableManager(T.appId, userPermissions, cc);
 
     TableEntry te = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
 
     this.am = new TableAclManager(T.appId, tableId, userPermissions, cc);
     List<Scope> scopes = Lists.newArrayList();

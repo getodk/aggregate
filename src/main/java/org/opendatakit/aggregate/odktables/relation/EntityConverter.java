@@ -23,19 +23,16 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
-import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.DataField;
@@ -58,9 +55,8 @@ public class EntityConverter {
   public TableEntry toTableEntry(DbTableEntryEntity entity) {
     String tableId = entity.getId();
     String dataETag = entity.getDataETag();
-    String propertiesETag = entity.getPropertiesETag();
     String schemaETag = entity.getSchemaETag();
-    TableEntry entry = new TableEntry(tableId, dataETag, propertiesETag, schemaETag);
+    TableEntry entry = new TableEntry(tableId, dataETag, schemaETag);
     return entry;
   }
 
@@ -108,30 +104,6 @@ public class EntityConverter {
     return columns;
   }
 
-  public TableProperties toTableProperties(List<DbKeyValueStoreEntity> kvsEntities, String tableId,
-      String schemaETag, String propertiesETag) {
-    ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = toOdkTablesKeyValueStoreEntry(kvsEntities);
-    TableProperties properties = new TableProperties(schemaETag, propertiesETag, tableId, kvsEntries);
-    return properties;
-  }
-
-  public OdkTablesKeyValueStoreEntry toOdkTablesKeyValueStoreEntry(DbKeyValueStoreEntity entity) {
-    String tableId = entity.getTableId();
-    String partition = entity.getPartition();
-    String aspect = entity.getAspect();
-    String key = entity.getKey();
-    String type = entity.getType();
-    String value = entity.getValue();
-    OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
-    entry.tableId = tableId;
-    entry.partition = partition;
-    entry.aspect = aspect;
-    entry.key = key;
-    entry.type = type;
-    entry.value = value;
-    return entry;
-  }
-
   /**
    * Return a TableDefinition based upon the {@link DbTableDefinitionsEntity}
    * parameter, which must have been generated from the
@@ -147,15 +119,6 @@ public class EntityConverter {
     String schemaETag = schemaEntity.getSchemaETag();
     TableDefinition td = new TableDefinition(tableId, schemaETag, null);
     return td;
-  }
-
-  public ArrayList<OdkTablesKeyValueStoreEntry> toOdkTablesKeyValueStoreEntry(
-      List<DbKeyValueStoreEntity> kvsEntities) {
-    ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
-    for (DbKeyValueStoreEntity entity : kvsEntities) {
-      kvsEntries.add(toOdkTablesKeyValueStoreEntry(entity));
-    }
-    return kvsEntries;
   }
 
   /**

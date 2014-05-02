@@ -23,12 +23,10 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesAddTableButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdBox;
-import org.opendatakit.aggregate.client.widgets.OdkTablesTableNameBox;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -48,8 +46,6 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 
 	  // textbox for the tableid
 	  private OdkTablesTableIdBox idBox;
-	  // the textbox for the display name
-	  private OdkTablesTableNameBox displayNameBox;
 
 	  public OdkTablesAddNewTablePopup() {
 	    super();
@@ -58,7 +54,6 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	    addTableButton.addClickHandler(new ExecuteAdd());
 
 	    idBox = new OdkTablesTableIdBox(this);
-	    displayNameBox = new OdkTablesTableNameBox(this);
 
 	    FlexTable layout = new FlexTable();
 
@@ -66,10 +61,8 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	    layout.setWidget(0, 0, message);
 	    layout.setWidget(1, 0, new HTML("TableId:"));
        layout.setWidget(1, 1, idBox);
-       layout.setWidget(2, 0, new HTML("Display Name:"));
-	    layout.setWidget(2, 1, displayNameBox);
-	    layout.setWidget(3, 1, addTableButton);
-	    layout.setWidget(3, 2, new ClosePopupButton(this));
+	    layout.setWidget(2, 1, addTableButton);
+	    layout.setWidget(2, 2, new ClosePopupButton(this));
 
 	    setWidget(layout);
 	  }
@@ -80,15 +73,9 @@ public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 	    public void onClick(ClickEvent event) {
 
 	      String tableId = idBox.getValue();
-	      // displayName should be a JSON encoding of the data entered by the user
-         String displayName = displayNameBox.getValue();
-         if (!(displayName != null && (displayName.startsWith("{") || displayName.startsWith("\""))) ) {
-           displayName = "\"" + displayName + "\"";
-         }
 
          ArrayList<ColumnClient> columns = new ArrayList<ColumnClient>(0);
-         tableDef = new TableDefinitionClient(tableId, columns, displayName,
-             TableTypeClient.DATA);
+         tableDef = new TableDefinitionClient(tableId, columns);
 
 	      // Set up the callback object.
 	      AsyncCallback<TableEntryClient> callback = new AsyncCallback<TableEntryClient>() {

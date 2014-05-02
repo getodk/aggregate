@@ -23,8 +23,7 @@ import org.simpleframework.xml.Root;
  * This represents information about a file so that a phone running ODKTables
  * will be able to check to see if it has the most recent version of the file,
  * and if not will be able to download the file. It is meant to be mostly a
- * struct that is parsed into and recovered from JSON, and work in tandem with
- * {@link OdkTablesKeyValueStoreEntry}.
+ * struct that is parsed into and recovered from JSON.
  *
  * @author sudar.sam@gmail.com
  *

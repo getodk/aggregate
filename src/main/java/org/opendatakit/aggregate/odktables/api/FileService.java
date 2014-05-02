@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -68,11 +69,24 @@ public interface FileService {
   @GET
   @Path("{filePath:.*}")
   @GZIP
-  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException;
 
   @POST
   @Path("{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   public Response putFile(@Context HttpServletRequest req, @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
 
+  /**
+   * Delete only works on full file paths -- you cannot specify a partial path or wildcard (*) path.
+   *
+   * @param appId
+   * @param odkClientVersion
+   * @param segments
+   * @return
+   * @throws IOException
+   * @throws ODKTaskLockException
+   */
+  @DELETE
+  @Path("{filePath:.*}")
+  public Response deleteFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException;
 }

@@ -35,15 +35,13 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
   private static final long serialVersionUID = 81481336521796890L;
   private String selfUri;
   private String definitionUri;
-  private String propertiesUri;
   private String dataUri;
   private String instanceFilesUri;
   private String diffUri;
   private String aclUri;
 
   public TableResourceClient(TableEntryClient entry) {
-    super(entry.getTableId(), entry.getDisplayName(), entry.getDataETag(), entry
-        .getPropertiesETag(), entry.getSchemaETag());
+    super(entry.getTableId(), entry.getDataETag(), entry.getSchemaETag());
   }
 
   @SuppressWarnings("unused")
@@ -57,10 +55,6 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
 
   public String getDefinitionUri() {
     return this.definitionUri;
-  }
-
-  public String getPropertiesUri() {
-    return this.propertiesUri;
   }
 
   public String getDataUri() {
@@ -85,10 +79,6 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
 
   public void setDefinitionUri(final String definitionUri) {
     this.definitionUri = definitionUri;
-  }
-
-  public void setPropertiesUri(final String propertiesUri) {
-    this.propertiesUri = propertiesUri;
   }
 
   public void setDataUri(final String dataUri) {
@@ -141,11 +131,6 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
         return false;
     } else if (!diffUri.equals(other.diffUri))
       return false;
-    if (propertiesUri == null) {
-      if (other.propertiesUri != null)
-        return false;
-    } else if (!propertiesUri.equals(other.propertiesUri))
-      return false;
     if (selfUri == null) {
       if (other.selfUri != null)
         return false;
@@ -171,7 +156,6 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
     result = prime * result + ((dataUri == null) ? 0 : dataUri.hashCode());
     result = prime * result + ((instanceFilesUri == null) ? 0 : instanceFilesUri.hashCode());
     result = prime * result + ((diffUri == null) ? 0 : diffUri.hashCode());
-    result = prime * result + ((propertiesUri == null) ? 0 : propertiesUri.hashCode());
     result = prime * result + ((selfUri == null) ? 0 : selfUri.hashCode());
     return result;
   }
@@ -186,8 +170,6 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
     StringBuilder builder = new StringBuilder();
     builder.append("TableResource [selfUri=");
     builder.append(selfUri);
-    builder.append(", propertiesUri=");
-    builder.append(propertiesUri);
     builder.append(", dataUri=");
     builder.append(dataUri);
     builder.append(", instanceFilesUri=");

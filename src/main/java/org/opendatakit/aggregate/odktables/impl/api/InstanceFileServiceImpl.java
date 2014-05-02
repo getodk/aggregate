@@ -136,7 +136,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   // because we want to get the whole path
   public Response getManifest(@PathParam("filePath") List<PathSegment> segments,
       @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
-    if (segments.size() <= 1) {
+    if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
           .build();
     }
