@@ -46,5 +46,5 @@ package org.opendatakit.aggregate.odktables.rest;
  *
  */
 public enum SyncState {
-  rest, inserting, updating, deleting, conflicting;
+  rest, inserting, updating, deleting, conflicting, rest_pending_files;
 }
