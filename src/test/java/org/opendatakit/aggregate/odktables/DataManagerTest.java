@@ -38,7 +38,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -105,9 +104,6 @@ public class DataManagerTest {
     this.tm = new TableManager(T.appId, userPermissions, cc);
 
     TableEntry te = tm.createTable(T.tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.appId, T.tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), null, T.tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
 
     this.dm = new DataManager(T.appId, T.tableId, userPermissions, cc);
 

@@ -22,6 +22,7 @@ import java.util.Locale;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -48,6 +49,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
@@ -89,7 +91,7 @@ public class FileServiceImpl implements FileService {
   @GET
   @Path("{filePath:.*}")
   // because we want to get the whole path
-  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
+  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException {
     // First we need to get the table id from the path. We're
     // going to be assuming that you're passing the entire path of the file
     // under /sdcard/opendatakit/appId/  e.g., tables/tableid/the/rest/of/path.
@@ -106,6 +108,12 @@ public class FileServiceImpl implements FileService {
     String contentType;
     Long contentLength;
     try {
+      // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
+      if ( !DbTableFileInfo.NO_TABLE_ID.equals(tableId) ) {
+        userPermissions.checkPermission(appId, tableId, TablePermission.READ_PROPERTIES);
+      }
+      // otherwise, it is an app-level file, and that is accessible to anyone with synchronize tables privileges
+
       List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion, tableId, wholePath, cc);
       if (entities.size() > 1) {
         Log log = LogFactory.getLog(DbTableFileInfo.class);
@@ -131,6 +139,9 @@ public class FileServiceImpl implements FileService {
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve attachment and access attributes for: " + wholePath).build();
+    } catch (PermissionDeniedException e) {
+      LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
     }
     // And now prepare everything to be returned to the caller.
     if (fileBlob != null && contentType != null && contentLength != null && contentLength != 0L) {
@@ -159,8 +170,22 @@ public class FileServiceImpl implements FileService {
     String wholePath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
     try {
-      TablesUserPermissionsImpl userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
+      if ( !DbTableFileInfo.NO_TABLE_ID.equals(tableId) ) {
+        userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
+      }
+
+      // 0) Delete anything that is already stored
+
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion, tableId, wholePath, cc);
+      for ( DbTableFileInfoEntity entity : entities ) {
+
+        String uri = entity.getId();
+        DbTableFiles dbTableFiles = new DbTableFiles(cc);
+        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(uri, cc);
+        blobEntitySet.remove(cc);
+        entity.delete(cc);
+      }
 
       // We are going to store the file in two tables: 1) a user-friendly table
       // that relates an app and table id to the name of a file; 2) a table
@@ -209,6 +234,43 @@ public class FileServiceImpl implements FileService {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage()).build();
     } catch (PermissionDeniedException e) {
       LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
+    }
+  }
+
+  @Override
+  @DELETE
+  @Path("{filePath:.*}")
+  // because we want to get the whole path
+  public Response deleteFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException {
+    if (segments.size() < 1) {
+      return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
+    }
+    String tableId = getTableIdFromPathSegments(segments);
+    String wholePath = constructPathFromSegments(segments);
+    try {
+      // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
+      if ( !DbTableFileInfo.NO_TABLE_ID.equals(tableId) ) {
+        userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
+      }
+
+      // if we find nothing, we are happy.
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion, tableId, wholePath, cc);
+      for ( DbTableFileInfoEntity entity : entities ) {
+
+        String uri = entity.getId();
+        DbTableFiles dbTableFiles = new DbTableFiles(cc);
+        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(uri, cc);
+        blobEntitySet.remove(cc);
+        entity.delete(cc);
+      }
+
+      return Response.ok().build();
+    } catch (ODKDatastoreException e) {
+      LOGGER.error(("ODKTables file delete persistence error: " + e.getMessage()));
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage()).build();
+    } catch (PermissionDeniedException e) {
+      LOGGER.error(("ODKTables file delete permissions error: " + e.getMessage()));
       return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
     }
   }

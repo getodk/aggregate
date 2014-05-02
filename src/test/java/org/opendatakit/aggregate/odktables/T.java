@@ -22,67 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Ignore;
-import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
 @Ignore
 public class T {
-
-  public static class OdkTablesKeyValueStoreEntries {
-    public static final OdkTablesKeyValueStoreEntry entryOne;
-    public static final OdkTablesKeyValueStoreEntry entryTwo;
-    public static final OdkTablesKeyValueStoreEntry displayName;
-
-    public static final String entryOnePartition = "tablePartition";
-    public static final String entryOneAspect = "tableAspect";
-    public static final String entryOneKey = "theKey";
-    public static final String entryOneType = "object";
-    public static final String entryOneValue = "objectValue";
-    public static final String entryTwoPartition = "customPartition";
-    public static final String entryTwoAspect = "customAspect";
-    public static final String entryTwoKey = "laClave";
-    public static final String entryTwoType = "string";
-    public static final String entryTwoValue = "thereIsNoPassword";
-
-    public static final String tablePartition = KeyValueStoreConstants.PARTITION_TABLE;
-    public static final String tableAspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-
-    public static final String displayNameKey = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
-    public static final String displayNameType = "object";
-    public static final String displayNameValue = "\"People\"";
-
-    static {
-      entryOne = new OdkTablesKeyValueStoreEntry();
-      entryOne.tableId = T.tableId;
-      entryOne.partition = entryOnePartition;
-      entryOne.aspect = entryOneAspect;
-      entryOne.key = entryOneKey;
-      entryOne.type = entryOneType;
-      entryOne.value = entryOneValue;
-
-      entryTwo = new OdkTablesKeyValueStoreEntry();
-      entryTwo.tableId = T.tableId;
-      entryTwo.partition = entryTwoPartition;
-      entryTwo.aspect = entryTwoAspect;
-      entryTwo.key = entryTwoKey;
-      entryTwo.type = entryTwoType;
-      entryTwo.value = entryTwoValue;
-
-      displayName = new OdkTablesKeyValueStoreEntry();
-      displayName.tableId = T.tableId;
-      displayName.partition = tablePartition;
-      displayName.aspect = tableAspect;
-      displayName.key = displayNameKey;
-      displayName.type = displayNameType;
-      displayName.value = displayNameValue;
-
-    }
-  }
 
   public static class Columns {
 
@@ -160,9 +107,6 @@ public class T {
   public static final String appId = "app1";
   public static final String tableId = "people";
   public static final String tableMetadata = null;
-  public static final String propertiesETag = "propertiesETag";
-
-  public static final ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
   public static final List<Column> columns = new ArrayList<Column>();
   public static final List<Column> columns2 = new ArrayList<Column>();
@@ -170,9 +114,6 @@ public class T {
   public static final List<Row> rows = new ArrayList<Row>();
 
   static {
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.displayName);
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);
     columns.add(T.Columns.column_weight);

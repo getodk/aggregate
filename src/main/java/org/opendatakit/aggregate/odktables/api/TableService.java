@@ -118,17 +118,6 @@ public interface TableService {
    *
    * @param appId
    * @param tableId
-   * @return {@link PropertiesService} for accessing table metadata
-   * @throws ODKDatastoreException
-   */
-  @Path("{tableId}/properties")
-  public PropertiesService getProperties(@PathParam("appId") String appId, @PathParam("tableId") String tableId)
-      throws ODKDatastoreException;
-
-  /**
-   *
-   * @param appId
-   * @param tableId
    * @return {@link DataService} for manipulating row data in this table.
    * @throws ODKDatastoreException
    */

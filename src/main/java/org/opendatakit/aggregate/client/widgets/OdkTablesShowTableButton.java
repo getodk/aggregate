@@ -57,7 +57,7 @@ public class OdkTablesShowTableButton extends AggregateButton
   private String tableId;
 
   public OdkTablesShowTableButton(OdkTablesTableList parentTable,
-      String tableId, String tableName) {
+      String tableId) {
     super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.parentTable = parentTable;
     this.tableId = tableId;

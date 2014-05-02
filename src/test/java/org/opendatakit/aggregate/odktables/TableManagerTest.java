@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.odktables;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -57,8 +55,6 @@ public class TableManagerTest {
   private String tableId2;
   @SuppressWarnings("unused")
   private List<Column> columns;
-  @SuppressWarnings("unused")
-  private String tableProperties;
 
   private class MockCurrentUserPermissions implements TablesUserPermissions {
 
@@ -105,7 +101,6 @@ public class TableManagerTest {
     this.tableId = T.tableId;
     this.tableId2 = T.tableId + "2";
     this.columns = T.columns;
-    this.tableProperties = T.tableMetadata;
   }
 
   @After
@@ -132,14 +127,9 @@ public class TableManagerTest {
   public void testCreateTable() throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, ETagMismatchException {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
-    tableProperties = pm.setProperties(tableProperties);
 
     entry = tm.getTable(tableId);
     assertEquals(tableId, entry.getTableId());
-    assertNotNull(entry.getPropertiesETag());
-    assertEquals(tableProperties.getPropertiesETag(), entry.getPropertiesETag());
     // data eTag is null when table is first created
     assertTrue(null == entry.getDataETag());
   }
@@ -168,19 +158,19 @@ public class TableManagerTest {
 //  @Test(expected = IllegalArgumentException.class)
 //  public void testCreateTableNullTableId() throws ODKEntityPersistException, ODKDatastoreException,
 //      TableAlreadyExistsException {
-//    tm.createTable(null, tableName, columns, tableProperties);
+//    tm.createTable(null, tableName, columns);
 //  }
 //
 //  @Test(expected = IllegalArgumentException.class)
 //  public void testCreateTableNullTableName() throws ODKEntityPersistException,
 //      ODKDatastoreException, TableAlreadyExistsException {
-//    tm.createTable(tableId, null, columns, tableProperties);
+//    tm.createTable(tableId, null, columns);
 //  }
 //
 //  @Test(expected = IllegalArgumentException.class)
 //  public void testCreateTableNullColumns() throws ODKEntityPersistException, ODKDatastoreException,
 //      TableAlreadyExistsException {
-//    tm.createTable(tableId, tableName, null, tableProperties);
+//    tm.createTable(tableId, tableName, null);
 //  }
 
   @Test
@@ -206,15 +196,9 @@ public class TableManagerTest {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
     TableEntry entry2 = tm.createTable(tableId2, T.columns);
-    PropertiesManager pm2 = new PropertiesManager( T.appId, tableId2, userPermissions, cc);
-    TableProperties tableProperties2 = new TableProperties(entry2.getSchemaETag(), null, tableId2, T.kvsEntries);
-    pm2.setProperties(tableProperties2);
     tm.createTable(tableId2, T.columns);
     TableEntry two = tm.getTable(tableId2);
 
@@ -234,17 +218,9 @@ public class TableManagerTest {
     List<TableEntry> expected = new ArrayList<TableEntry>();
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
     TableEntry one = tm.getTable(tableId);
 
-    @SuppressWarnings("unused")
-	TableEntry entry2 = tm.createTable(tableId2, T.columns);
-    PropertiesManager pm2 = new PropertiesManager( T.appId, tableId2, userPermissions, cc);
-    @SuppressWarnings("unused")
-    TableProperties tableProperties2 = new TableProperties(entry.getSchemaETag(), T.propertiesETag, tableId2, T.kvsEntries);
-    pm2.setProperties(tableProperties);
+	 TableEntry entry2 = tm.createTable(tableId2, T.columns);
     tm.createTable(tableId2, T.columns);
     TableEntry two = tm.getTable(tableId2);
 
@@ -265,9 +241,6 @@ public class TableManagerTest {
       TableAlreadyExistsException, PermissionDeniedException, ETagMismatchException {
 
     TableEntry entry = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(entry.getSchemaETag(), null, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
     tm.deleteTable(tableId);
     tm.getTableNullSafe(tableId);
   }

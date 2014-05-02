@@ -130,16 +130,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
   </servlet-mapping>
 
   <servlet>
-      <servlet-name>serverPropertiesServiceImpl</servlet-name>
-      <servlet-class>org.opendatakit.aggregate.server.ServerPropertiesServiceImpl</servlet-class>
-  </servlet>
-
-  <servlet-mapping>
-      <servlet-name>serverPropertiesServiceImpl</servlet-name>
-      <url-pattern>/aggregateui/serverpropertiesservice</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
       <servlet-name>serverTableACLServiceImpl</servlet-name>
       <servlet-class>org.opendatakit.aggregate.server.ServerTableACLServiceImpl</servlet-class>
   </servlet>

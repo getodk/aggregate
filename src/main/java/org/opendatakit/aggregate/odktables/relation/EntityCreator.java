@@ -26,17 +26,15 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
-import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -131,7 +129,7 @@ public class EntityCreator {
    */
   public DbTableFileInfoEntity newTableFileInfoEntity(String odkClientVersion,
       String tableId, String pathToFile,
-      TablesUserPermissionsImpl userPermissions,
+      TablesUserPermissions userPermissions,
       CallingContext cc) throws ODKDatastoreException {
     // first do some preliminary checks
     Validate.notEmpty(pathToFile);
@@ -185,55 +183,6 @@ public class EntityCreator {
     definition.setSchemaETag(schemaETag);
     definition.setDbTableName(dbTableName);
     return definition;
-  }
-
-  /**
-   *
-   * @param tableId
-   * @param partition
-   * @param aspect
-   * @param key
-   * @param type
-   * @param value
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public DbKeyValueStoreEntity newKeyValueStoreEntity(String tableId, String propertiesETag,
-      String partition, String aspect, String key, String type, String value, CallingContext cc)
-      throws ODKDatastoreException {
-    Validate.notEmpty(tableId);
-    Validate.notEmpty(propertiesETag);
-    Validate.notEmpty(partition);
-    Validate.notEmpty(aspect);
-    Validate.notEmpty(key);
-    Validate.notEmpty(type);
-    Validate.notNull(cc);
-
-    DbKeyValueStoreEntity entry = DbKeyValueStore.createNewEntity(cc);
-    entry.setTableId(tableId);
-    entry.setPropertiesETag(propertiesETag);
-    entry.setPartition(partition);
-    entry.setAspect(aspect);
-    entry.setKey(key);
-    entry.setType(type);
-    entry.setValue(value);
-    return entry;
-  }
-
-  public DbKeyValueStoreEntity newKeyValueStoreEntity(OdkTablesKeyValueStoreEntry entry,
-      String propertiesETag, CallingContext cc) throws ODKDatastoreException {
-    Validate.notNull(entry);
-    Validate.notEmpty(propertiesETag);
-    Validate.notNull(cc);
-
-    String tableId = entry.tableId;
-    String partition = entry.partition;
-    String aspect = entry.aspect;
-    String key = entry.key;
-    String type = entry.type;
-    String value = entry.value;
-    return newKeyValueStoreEntity(tableId, propertiesETag, partition, aspect, key, type, value, cc);
   }
 
   /**

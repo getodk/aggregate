@@ -34,22 +34,18 @@ public class TableEntryClientListBox extends AggregateListBox {
   private final ArrayList<TableEntryClient> tables;
 
   public TableEntryClientListBox(ArrayList<TableEntryClient> tables,
-      boolean multipleValueSelection, boolean onlyIncludeTableName, String tooltipText) {
-    this(tables, multipleValueSelection, onlyIncludeTableName, tooltipText, null);
+      boolean multipleValueSelection, String tooltipText) {
+    this(tables, multipleValueSelection, tooltipText, null);
   }
 
   public TableEntryClientListBox(ArrayList<TableEntryClient> tables,
-      boolean multipleValueSelection, boolean onlyIncludeTableName, String tooltipText,
+      boolean multipleValueSelection, String tooltipText,
       String helpBalloonTxt) {
     super(tooltipText, multipleValueSelection, helpBalloonTxt);
     this.tables = tables;
 
     for (TableEntryClient table : tables) {
-      if (onlyIncludeTableName) {
-        addItem(table.getDisplayName(), table.getTableId());
-      } else { // display both
-        addItem(table.getDisplayName() + "--" + table.getTableId(), table.getTableId());
-      }
+        addItem(table.getTableId(), table.getTableId());
     }
   }
 
