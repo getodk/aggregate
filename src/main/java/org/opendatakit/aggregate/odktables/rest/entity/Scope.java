@@ -28,7 +28,7 @@ public class Scope {
   }
 
   public static Scope asScope(String filterType, String filterValue) {
-    if (filterType != null) {
+    if (filterType != null && filterType.length() != 0) {
       Scope.Type type = Scope.Type.valueOf(filterType);
       if (filterType.equals(Scope.Type.DEFAULT)) {
         return new Scope(Scope.Type.DEFAULT, null);
