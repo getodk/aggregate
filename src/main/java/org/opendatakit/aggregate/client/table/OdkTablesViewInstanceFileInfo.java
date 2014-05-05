@@ -53,16 +53,14 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
   // this is the heading for the delete row button.
   private static final String DELETE_HEADING = "Delete";
 
-  private static final int KEY_COLUMN = 1;
-  private static final String KEY_HEADING = "Key";
-  private static final int TABLE_ID_COLUMN = 2;
-  private static final String TABLE_ID_HEADING = "TableId";
-  private static final int FILENAME_COLUMN = 3;
+  private static final int INSTANCE_ID_COLUMN = 1;
+  private static final String INSTANCE_ID_HEADING = "Instance ID";
+  private static final int FILENAME_COLUMN = 2;
   private static final String FILENAME_HEADING = "Filename";
-  private static final int DOWNLOAD_COLUMN = 4;
+  private static final int DOWNLOAD_COLUMN = 3;
   private static final String DOWNLOAD_HEADING = "Download";
 
-  private static final int numColumns = 5;
+  private static final int numColumns = 4;
 
   // this is just the tab that opened the table
   private AggregateSubTabBase basePanel;
@@ -150,8 +148,7 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
   private void setColumnHeadings() {
     // create the table headers.
     setText(0, DELETE_COLUMN, DELETE_HEADING);
-    setText(0, KEY_COLUMN, KEY_HEADING);
-    setText(0, TABLE_ID_COLUMN, TABLE_ID_HEADING);
+    setText(0, INSTANCE_ID_COLUMN, INSTANCE_ID_HEADING);
     setText(0, FILENAME_COLUMN, FILENAME_HEADING);
     setText(0, DOWNLOAD_COLUMN, DOWNLOAD_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
@@ -180,8 +177,8 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
         FileSummaryClient sum = fileSummaries.get(j);
         setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteFileButton(this.basePanel,
             currentTable.getTableId(), sum.getId()));
-        setText(currentRow, KEY_COLUMN, sum.getId());
-        setText(currentRow, TABLE_ID_COLUMN, sum.getTableId());
+        String[] args = sum.getFilename().split("/");
+        setText(currentRow, INSTANCE_ID_COLUMN, args[0]);
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
         Widget downloadCol;
         if (sum.getDownloadUrl() != null) {
