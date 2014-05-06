@@ -4,9 +4,10 @@ They need to be installed into the local M2_REPO repository.
 javarosa-libraries:
 
 This is a special build of javarosa using the tree at https://bitbucket.org/m.sundt/javarosa
-It incorporates multithread-safe KoBo collect changes (from Clayton), round(a,d) function and saving and restoring of bind attributes.
+It incorporates multithread-safe KoBo collect changes (from Clayton), abandons J2ME support, 
+exposes bind and prompt attributes, and numerous contributed fixes from SurveyCTO and others.
 
-mvn install:install-file -Dfile=javarosa-libraries-2013-09-30.jar -DgroupId=org.javarosa -DartifactId=javarosa-libraries -Dversion=2013-09-30 -Dpackaging=jar
+mvn install:install-file -Dfile=javarosa-libraries-2014-04-29.jar -DgroupId=org.javarosa -DartifactId=javarosa-libraries -Dversion=2014-04-29 -Dpackaging=jar
 
 odk-httpclient-gae:
 

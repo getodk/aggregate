@@ -37,6 +37,7 @@ public class ODKTaskLockExceptionMapper implements ExceptionMapper<ODKTaskLockEx
   @Override
   public Response toResponse(ODKTaskLockException e) {
     MediaType type;
+    e.printStackTrace();
     type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
         0) : MediaType.APPLICATION_JSON_TYPE;
 

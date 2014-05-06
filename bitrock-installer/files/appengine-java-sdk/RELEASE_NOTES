@@ -3,6 +3,168 @@ All rights reserved.
 
 App Engine Java SDK - Release Notes
 
+Version 1.9.0
+=============
+- Java 6 applications cannot be deployed to Google App Engine from any version
+  of the SDK. Existing Java 6 applications will continue to run. If you are
+  still relying on a Java 6 application in Google App Engine, we strongly
+  encourage you to start testing and deploying your app using Java 7. Java 7
+  has been certified by Oracle to be fully backwards compatible with Java 6,
+  as well as providing a number of benefits to developers. Java 7 applications
+  will be fully supported in future releases of the App Engine SDK.
+  If you absolutely need to continue to deploy Java 6 applications for
+  compatibility reasons, you can request that your application be whitelisted
+  for Java 6 deployment from http://goo.gl/ycffXq. As we review each whitelist
+  application by hand, please allow 10 working days for review, and note that
+  only billed applications that show a proven incompatibility will be
+  considered for exemption.
+- Newly created App Engine applications now have a Google Cloud Storage bucket
+  created automatically as part of the same Google Cloud Project. For more
+  information please see:
+  https://developers.google.com/appengine/docs/java/googlecloudstorageclient/
+  activate#Using_the_default_Gcs_bucket
+- Modules Service API and application management features are now GA.
+- Removed deprecated ModulesService methods and exceptions:
+    getModulesAsync()
+    getVersionsAsync()
+    getDefaultVersionAsync()
+    getNumInstancesAsync()
+    getVersionHostnameAsync()
+    getInstanceHostnameAsync()
+    startModule() (replaced by startVersion)
+    startModuleAsync() (replaced by startVersionAsync)
+    stopModule() (replaced by stopVersion)
+    stopModuleAsync() (replaced by stopVersionAsync)
+    getModuleHostname() (replaced by getVersionHostname and getInstanceHostname)
+    getModuleHostnameAsync()
+    InvalidInstanceException
+    InvalidModuloeException
+    InvalidVersionException
+- Moved ModulesService from package com.google.appengine.api.labs.modules to
+  package com.google.appengine.api.modules and from appengine-api-labs.jar to
+  appengine-api.jar.
+- The following deprecated methods in com.google.appengine.api.log.LogQuery
+  will be removed in an upcoming release.
+    Builder.withModuleVersions(List<Pair<String, String>> moduleVersionIds)
+    Builder.withServerVersions(List<Pair<String, String>> serverVersionIds)
+    moduleVersions(List<Pair<String, String>> moduleVersions)
+    serverVersions(List<Pair<String, String>> serverVersions)
+    getModuleVersions()
+    getServerVersions()
+  To avoid breakage when these are removed please update your code as per the
+  javadocs and upload the updated version.
+- MapReduce is now a Preview feature. Documentation and getting started guides
+  are now available on
+  https://developers.google.com/appengine/docs/java/dataprocessing/.
+- The size limit on the Search API is now computed and enforced on a per-index
+  basis, rather than for the app as a whole. The per-index limit is now 10GB.
+  There is no fixed limit on the number of indexes, or on the total amount of
+  Search API storage an application may use.
+- Users now have the ability to embed images in emails via the Content-Id
+  attachment header.
+    https://code.google.com/p/googleappengine/issues/detail?id=965
+    https://code.google.com/p/googleappengine/issues/detail?id=10503
+- New App Engine Application Identifiers must now start with a letter,
+  in addition to the existing requirements that the identifier be 6-30
+  characters which are letters, numbers, and hyphens, and not start or end with
+  a hyphen.
+
+Version 1.8.9
+=============
+- Renamed appcfg start to appcfg start_module_version and stop to
+  stop_module_version.
+- The following methods are deprecated in the Modules API and will be removed
+  in an upcoming release:
+    getModulesAsync
+    getVersionsAsync
+    getDefaultVersionAsync
+    getNumInstancesAsync
+    getVersionHostnameAsync
+    getInstanceHostnameAsync
+    startModule (replaced by startVersion)
+    startModuleAsync (replaced by startVersionAsync)
+    stopModule (replaced by stopVersion)
+    stopModuleAsync (replaced by stopVersionAsync)
+    getModuleHostname (replaced by getVersionHostname and getInstanceHostname)
+    getModuleHostnameAsync
+- The following exceptions have been deprecated in the Modules API and will be
+  removed in a following release:
+    InvalidInstanceException
+    InvalidModuloeException
+    InvalidVersionException
+- The following exceptions have been removed in the Modules API:
+    ModuleAlreadyStartedException
+    ModuleAlreadyStoppedException
+- Modules are now supported in the dev_appserver Development Console.
+- Fixed an issue with ID allocation collisions in the Datastore.
+  https://code.google.com/p/googleappengine/issues/detail?id=10134
+
+Version 1.8.8
+=============
+- Dedicated Memcache is now a GA feature. Our deprecation policy applies and
+  customers are encouraged to use this feature in production.
+- Memcache API calls are tracked by a new metric that estimates resource usage,
+  Memcache Compute Units (MCU's).  There is a new quota bucket and
+  dashboard graph corresponding to the metric, as well as an option in the
+  memcache viewer to display top keys by MCU's.
+- Fixed an issue with cloning apps not creating proper service account names.
+    https://code.google.com/p/googleappengine/issues/detail?id=10235
+- Fixed an issue with users receiving errors when uploading large files to GCS.
+    https://code.google.com/p/googleappengine/issues/detail?id=10101
+
+Version 1.8.7
+=============
+- Cloud Endpoints is now a GA feature.
+- Memcache configuration changes and mutations (flush, set, etc.) made from the
+  Admin Console are now recorded in the admin console logs.
+- The max_concurrent_requests setting is now configurable per version/module.
+    http://code.google.com/p/googleappengine/issues/detail?id=7927
+- LogService API functions related to the modules feature will be changing.
+  The following functions will be deprecated and new versions will be provided:
+    LogQuery.getModuleVersions(), LogQuery.moduleVersions() and
+    LogQuery.Builder.withModuleVersions().
+  The following functions will be removed in a future release:
+    LogQuery.getModuleVersions(), LogQuery.moduleVersions(),
+    LogQuery.Builder.withModuleVersions(), LogQuery.getServerVersions(),
+    LogQuery.serverVersions() and LogQuery.Builder.withServerVersions().
+  Serialized LogQuery objects with values set using any of the above removed
+  methods will not be supported in a future release.
+- Fixed an issue with Datastore not correctly validating namespaces with
+  greater than 500 characters.
+- Fixed and issue with vacuum_indexes not working in the SDK.
+    https://code.google.com/p/googleappengine/issues/detail?id=10168
+
+Version 1.8.6
+=============
+- GetAccessToken in the OAuth package is now a GA feature.
+- The LogsService API functions related to the Modules feature will be
+  changing as follows:
+    The following functions will be deprecated and new versions will be
+    provided: LogQuery.getModuleVersions(), LogQuery.moduleVersions() and
+    LogQuery.Builder.withModuleVersions().
+    The following functions will be removed in an upcoming release:
+    LogQuery.getModuleVersions(), LogQuery.moduleVersions() and
+    LogQuery.Builder.withModuleVersions(), LogQuery.getServerVersions(),
+    LogQuery.serverVersions() and LogQuery.Builder.withServerVersions().
+    Serialized LogQuery objects with values set using any of the above removed
+    methods will not be supported in an upcoming release.
+- A memcache size chart has been added to admin console's dashboard.  Access it
+  via the drop-down above the graph.  The chart graphs memcache size over time
+  enabling customers to determine when cache flush events occurred. This is a
+  preview feature.
+- The Cloud Endpoints API @ApiSerializer has been renamed to @ApiTransformer
+  and the Serializer interface has been renamed to Transformer.
+  @ApiSerializationProperty has also been renamed to @ApiResourceProperty.
+- If a customer passes invalid data to a memcache put() call, they now see a
+  more useful error message.
+    https://code.google.com/p/googleappengine/issues/detail?id=8671
+- Fixed an issue with the SDK that allows an invalid Datastore query combination
+  of group by and filter properties.
+- Fixed an issue affecting validation of the size of Datastore property names.
+- Fixed an issue with Datastore query validation for strings with exactly 500
+  characters.
+    https://code.google.com/p/googleappengine/issues/detail?id=10019
+
 Version 1.8.5
 =============
 - The Search API is now a GA feature.

@@ -18,9 +18,11 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.api.T;
 import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer;
 import org.opendatakit.aggregate.odktables.api.perf.PerfTest;
+import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
 import org.simpleframework.xml.Serializer;
@@ -64,7 +66,8 @@ public class MultipleUsersTest implements PerfTest {
               for (int j = 0; j < numCols; j++) {
                 values.put(colName(j), "value_" + j);
               }
-              Row row = Row.forInsert(UUID.randomUUID().toString(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, values);
+              Row row = Row.forInsert(UUID.randomUUID().toString(), T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+                  T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values);
               synchronizer.putRow(tableId, row);
               tryAgain = false;
             } catch (HttpStatusCodeException e) {

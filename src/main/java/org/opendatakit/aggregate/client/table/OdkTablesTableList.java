@@ -39,17 +39,17 @@ import com.google.gwt.user.client.ui.HTML;
 public class OdkTablesTableList extends FlexTable {
 
 	// This will be the column with the table name
-	private static final int TABLE_NAME_COLUMN = 1;
-	private static final String TABLE_NAME_HEADING = "Table Name";
+	private static final int TABLE_ID_COLUMN = 1;
+	private static final String TABLE_ID_HEADING = "Table Id";
 
 	private static final int DELETE_BUTTON_COLUMN = 0;
 	private static final String DELETE_BUTTON_HEADING = "Delete";
 
 	private static final int VIEW_TABLE_BUTTON_COLUMN = 2;
-	private static final String VIEW_TABLE_BUTTON_HEADING = "";
+	private static final String VIEW_TABLE_BUTTON_HEADING = "View Data";
 
 	private static final int TABLE_FILES_BUTTON_COLUMN = 3;
-	private static final String TABLE_FILE_BUTTON_HEADING = "";
+	private static final String TABLE_FILE_BUTTON_HEADING = "View Data Files";
 
 
 	public OdkTablesTableList() {
@@ -71,30 +71,29 @@ public class OdkTablesTableList extends FlexTable {
 
 		removeAllRows();
 		// now create the table headers
-		setText(0, TABLE_NAME_COLUMN, TABLE_NAME_HEADING);
+		setText(0, TABLE_ID_COLUMN, TABLE_ID_HEADING);
 		addStyleName("dataTable");
 		getRowFormatter().addStyleName(0, "titleBar");
 
 		if (tables.size() == 0) {
-			setWidget(1, TABLE_NAME_COLUMN, new HTML("<i> There are no tables to display. </i>"));
+			setWidget(1, TABLE_ID_COLUMN, new HTML("<i> There are no tables to display. </i>"));
 		} else {
 
 			setText(0, DELETE_BUTTON_COLUMN, DELETE_BUTTON_HEADING);
 			setText(0, VIEW_TABLE_BUTTON_COLUMN, VIEW_TABLE_BUTTON_HEADING);
 			setText(0, TABLE_FILES_BUTTON_COLUMN, TABLE_FILE_BUTTON_HEADING);
-			setText(0, TABLE_NAME_COLUMN, TABLE_NAME_HEADING);
+			setText(0, TABLE_ID_COLUMN, TABLE_ID_HEADING);
 
 			for (int i = 0; i < tables.size(); i++) {
 				TableEntryClient table = tables.get(i);
 				// this will maintain the row you're adding to, always +1
 				// because of the title row
 				int j = i + 1;
-				setWidget(j, TABLE_NAME_COLUMN, new HTML("<b>" + table.getDisplayName()+ "</b>"));
+				setWidget(j, TABLE_ID_COLUMN, new HTML("<b>" + table.getTableId()+ "</b>"));
 				setWidget(j, DELETE_BUTTON_COLUMN, new OdkTablesDeleteTableButton(
 						this, table.getTableId()));
 				setWidget(j, VIEW_TABLE_BUTTON_COLUMN,
-				    new OdkTablesShowTableButton(this, table.getTableId(),
-				    table.getDisplayName()));
+				    new OdkTablesShowTableButton(this, table.getTableId()));
 				setWidget(j, TABLE_FILES_BUTTON_COLUMN,
 				    new OdkTablesShowTableFilesButton(this, table.getTableId()));
 

@@ -72,7 +72,7 @@ public class DbTableEntry extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
-  private static final String RELATION_NAME = "TABLE_ENTRY3";
+  private static final String RELATION_NAME = "TABLE_ENTRY4";
 
   /**
    * changes to row values that are in-progress but not complete will be tagged
@@ -86,29 +86,6 @@ public class DbTableEntry extends Relation {
    */
   private static final DataField DATA_ETAG = new DataField("DATA_ETAG", DataType.STRING, true);
   // there is no STALE_DATA_ETAG, as we maintain a history of all changes to the data values
-
-  /**
-   * changes to table properties that are in-progress but not complete are tagged
-   * with the pending properties ETag value.
-   */
-  private static final DataField PENDING_PROPERTIES_ETAG = new DataField("PENDING_PROPERTIES_ETAG",
-      DataType.STRING, true);
-  /**
-   * Upon partial completion of the change, the stale properties ETag gets the old properties ETag value
-   * and the properties ETag value gets the pending properties ETag value, and the pending properties
-   * ETag value is set to null. This signals that the pending properties change is complete, but that there
-   * are stale properties that need to be cleaned up (since we do not remember the history of properties
-   * changes).
-   */
-  private static final DataField PROPERTIES_ETAG = new DataField("PROPERTIES_ETAG",
-      DataType.STRING, true);
-  /**
-   * If the stale properties ETag != null, then we need to scan for all of these
-   * records and delete them. Once everything is deleted, the stale properties ETag should be
-   * set to null.
-   */
-  private static final DataField STALE_PROPERTIES_ETAG = new DataField("STALE_PROPERTIES_ETAG",
-      DataType.STRING, true);
 
   /**
    * When asynchronous schema changes become supported, the task uri is saved in this field.
@@ -156,9 +133,6 @@ public class DbTableEntry extends Relation {
     dataFields = new ArrayList<DataField>();
     dataFields.add(PENDING_DATA_ETAG);
     dataFields.add(DATA_ETAG);
-    dataFields.add(PENDING_PROPERTIES_ETAG);
-    dataFields.add(PROPERTIES_ETAG);
-    dataFields.add(STALE_PROPERTIES_ETAG);
     dataFields.add(URI_SCHEMA_TASK);
     dataFields.add(PENDING_SCHEMA_ETAG);
     dataFields.add(SCHEMA_ETAG);
@@ -203,30 +177,6 @@ public class DbTableEntry extends Relation {
 
     public void setDataETag(String value) {
       e.set(DATA_ETAG, value);
-    }
-
-    public String getPendingPropertiesETag() {
-      return e.getString(PENDING_PROPERTIES_ETAG);
-    }
-
-    public void setPendingPropertiesETag(String value) {
-      e.set(PENDING_PROPERTIES_ETAG, value);
-    }
-
-    public String getPropertiesETag() {
-      return e.getString(PROPERTIES_ETAG);
-    }
-
-    public void setPropertiesETag(String value) {
-      e.set(PROPERTIES_ETAG, value);
-    }
-
-    public String getStalePropertiesETag() {
-      return e.getString(STALE_PROPERTIES_ETAG);
-    }
-
-    public void setStalePropertiesETag(String value) {
-      e.set(STALE_PROPERTIES_ETAG, value);
     }
 
     public String getUriSchemaTask() {

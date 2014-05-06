@@ -75,7 +75,15 @@ public interface ServerDataService extends RemoteService {
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient;
 
-  TableContentsForFilesClient getFileInfoContents(String tableId) throws AccessDeniedException,
+  TableContentsForFilesClient getAppLevelFileInfoContents() throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
+
+  TableContentsForFilesClient getTableFileInfoContents(String tableId) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
+
+  TableContentsForFilesClient getInstanceFileInfoContents(String tableId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient;
 

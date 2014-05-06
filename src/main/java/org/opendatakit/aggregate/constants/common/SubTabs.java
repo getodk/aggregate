@@ -35,7 +35,9 @@ public enum SubTabs implements Serializable {
 	// These fall under the ODKTables Tab
 	CURRENTTABLES("Current Tables", "viewCurrentTables"),
 	VIEWTABLE("View Table", "viewTable"),
-	MANAGEFILES("Manage Table Files", "manageTableFiles");
+   MANAGE_INSTANCE_FILES("Manage Instance Files", "manageInstanceFiles"),
+	MANAGE_TABLE_ID_FILES("Manage Table Files", "manageTableFiles"),
+   MANAGE_APP_LEVEL_FILES("Manage App Level Files", "manageAppLevelFiles");
 
    private String tabLabel;
    private String hashString;

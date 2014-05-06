@@ -16,10 +16,13 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
@@ -56,6 +59,27 @@ public class ServiceUtils {
     String pathInfo = req.getPathInfo();
     String query = req.getQueryString();
     String ace = req.getHeader(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
+    boolean sessionId = req.isRequestedSessionIdValid();
+  }
+
+  @SuppressWarnings("unused")
+  public static void examineRequest(ServletContext sc, HttpServletRequest req, HttpHeaders httpHeaders) {
+    MultivaluedMap<String,String> headers = httpHeaders.getRequestHeaders();
+    StringBuilder b = new StringBuilder();
+    for ( String headerName : headers.keySet() ) {
+      List<String> fieldValues = headers.get(headerName);
+      for (String fieldValue : fieldValues) {
+        b.append(headerName).append(": ").append(fieldValue).append("\n");
+      }
+    }
+    String contentType = req.getContentType();
+    String charEncoding = req.getCharacterEncoding();
+    String headerSet = b.toString();
+    Cookie[] cookies = req.getCookies();
+    String method = req.getMethod();
+    String ctxtPath = req.getContextPath();
+    String pathInfo = req.getPathInfo();
+    String query = req.getQueryString();
     boolean sessionId = req.isRequestedSessionIdValid();
   }
 }

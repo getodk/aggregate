@@ -26,6 +26,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.T;
+import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
@@ -57,7 +58,8 @@ public class SerializationTest {
 
   @Test
   public void testRowForUpdate() throws Exception {
-    Row expected = Row.forUpdate("1", "5", T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.savepoint_creator_2, T.Data.DYLAN.getValues());
+    Row expected = Row.forUpdate("1", "5", T.form_id_2, T.locale_2,  SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_2, T.savepoint_creator_2, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues());
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
@@ -67,7 +69,8 @@ public class SerializationTest {
 
   @Test
   public void testRowInsert() throws Exception {
-    Row expected = Row.forInsert("1", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues());
+    Row expected = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues());
 
     serializer.write(expected, writer);
     String xml = writer.toString();
@@ -89,22 +92,12 @@ public class SerializationTest {
 
   @Test
   public void testTableEntry() throws Exception {
-    TableEntry expected = new TableEntry("1", "data2", "property3", "schema4");
+    TableEntry expected = new TableEntry("1", "data2", "schema4");
     serializer.write(expected, writer);
     String xml = writer.toString();
     System.out.println(xml);
     TableEntry actual = serializer.read(TableEntry.class, xml);
     assertEquals(expected, actual);
-  }
-
-  @Test
-  public void testTableProperties() throws Exception {
-//    TableProperties expected = new TableProperties("0", "1", "2");
-//    serializer.write(expected, writer);
-//    String xml = writer.toString();
-//    System.out.println(xml);
-//    TableProperties actual = serializer.read(TableProperties.class, xml);
-//    assertEquals(expected, actual);
   }
 
   @Test
@@ -119,22 +112,10 @@ public class SerializationTest {
   }
 
   @Test
-  public void testTablePropertiesIsNotStrict() throws Exception {
-//    TableProperties expected = new TableProperties("0", "1", "2");
-//    PropertiesResource resource = new PropertiesResource(expected);
-//    resource.setSelfUri("http://localhost:8080/odktables/tables/1/properties");
-//    resource.setTableUri("http://localhost:8080/odktables/tables/1");
-//    serializer.write(resource, writer);
-//    String xml = writer.toString();
-//    System.out.println(xml);
-//    TableProperties actual = serializer.read(TableProperties.class, xml);
-//    assertEquals(expected, actual);
-  }
-
-  @Test
   public void testRowResource() throws Exception {
     Map<String, String> values = T.Data.DYLAN.getValues();
-    RowResource expected = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, values));
+    RowResource expected = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values));
     expected.setSelfUri("http://localhost:8080/odktables/tables/1/rows/1");
     expected.setTableUri("http://localhost:8080/odktables/tables/1");
 
@@ -157,11 +138,11 @@ public class SerializationTest {
 
   @Test
   public void testTableResource() throws Exception {
-    TableEntry entry = new TableEntry("1", "data2", "property3", "schema4");
+    TableEntry entry = new TableEntry("1", "data2", "schema4");
     TableResource expected = new TableResource(entry);
     expected.setSelfUri("http://localhost:8080/odktables/tables/1");
     expected.setDataUri("http://localhost:8080/odktables/tables/1/rows");
-    expected.setPropertiesUri("http://localhost:8080/odktables/tables/1/columns");
+    expected.setInstanceFilesUri("http://localhost:8080/odktables/tables/1/attachments");
     expected.setDefinitionUri("http://localhost:8080/odktables/tables/1/definition");
     expected.setDiffUri("http://localhost:8080/odktables/tables/1/rows/diff");
     expected.setAclUri("http://localhost:8080/odktables/tables/1/acl");
@@ -170,19 +151,6 @@ public class SerializationTest {
     System.out.println(xml);
     TableResource actual = serializer.read(TableResource.class, xml);
     assertEquals(expected, actual);
-  }
-
-  @Test
-  public void testPropertiesResource() throws Exception {
-//    TableProperties properties = new TableProperties("0", "1", "2");
-//    PropertiesResource expected = new PropertiesResource(properties);
-//    expected.setSelfUri("http://localhost:8080/odktables/tables/1/properties");
-//    expected.setTableUri("http://localhost:8080/odktables/tables/1");
-//    serializer.write(expected, writer);
-//    String xml = writer.toString();
-//    System.out.println(xml);
-//    PropertiesResource actual = serializer.read(PropertiesResource.class, xml);
-//    assertEquals(expected, actual);
   }
 
   @Test
@@ -203,10 +171,12 @@ public class SerializationTest {
   @Test
   public void testListOfRowResource() throws Exception {
     ArrayList<RowResource> expected = new ArrayList<RowResource>();
-    RowResource one = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues()));
+    RowResource one = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues()));
     one.setSelfUri("http://localhost/tables/1/rows/1");
     one.setTableUri("http://localhost/tables/1");
-    RowResource two = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.JOHN.getValues()));
+    RowResource two = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.JOHN.getValues()));
     two.setSelfUri("http://localhost/tables/1/rows/2");
     two.setTableUri("http://localhost/tables/1");
     expected.add(one);

@@ -37,8 +37,6 @@ public class TableDefinitionClient implements Serializable {
   private static final long serialVersionUID = -113634509888543150L;
 
   private String tableId;
-  private String displayName;
-  private TableTypeClient type;
   private ArrayList<ColumnClient> columns;
 
   @SuppressWarnings("unused")
@@ -46,12 +44,9 @@ public class TableDefinitionClient implements Serializable {
     // necessary for gwt serialization
   }
 
-  public TableDefinitionClient(final String tableId, final ArrayList<ColumnClient> columns,
-      final String displayName, final TableTypeClient type) {
+  public TableDefinitionClient(final String tableId, final ArrayList<ColumnClient> columns) {
     this.tableId = tableId;
     this.columns = columns;
-    this.displayName = displayName;
-    this.type = type;
   }
 
   public String getTableId() {
@@ -62,14 +57,6 @@ public class TableDefinitionClient implements Serializable {
     return this.columns;
   }
 
-  public String getDisplayName() {
-    return this.displayName;
-  }
-
-  public TableTypeClient getType() {
-    return this.type;
-  }
-
   public void setColumns(final ArrayList<ColumnClient> columns) {
     this.columns = columns;
   }
@@ -77,6 +64,6 @@ public class TableDefinitionClient implements Serializable {
   @Override
   public String toString() {
     return "TableDefinitionClient[tableId=" + getTableId() + ", columns=" + getColumns().toString()
-        + ", displayName=" + getDisplayName() + ", type=" + getType() + "]";
+        + "]";
   }
 }

@@ -26,17 +26,15 @@ import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
-import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore.DbKeyValueStoreEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -122,19 +120,22 @@ public class EntityCreator {
   /**
    * Create a new {@link DbTableFileInfo} entity.
    *
+   * @param odkClientVersion
    * @param tableId
    * @param pathToFile
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
-  public DbTableFileInfoEntity newTableFileInfoEntity(String tableId, String pathToFile,
-      TablesUserPermissionsImpl userPermissions,
+  public DbTableFileInfoEntity newTableFileInfoEntity(String odkClientVersion,
+      String tableId, String pathToFile,
+      TablesUserPermissions userPermissions,
       CallingContext cc) throws ODKDatastoreException {
     // first do some preliminary checks
     Validate.notEmpty(pathToFile);
     // TODO: check permissions to create a file...
     DbTableFileInfoEntity entity = DbTableFileInfo.createNewEntity(cc);
+    entity.setOdkClientVersion(odkClientVersion);
     entity.setTableId(tableId);
     entity.setPathToFile(pathToFile);
 
@@ -185,55 +186,6 @@ public class EntityCreator {
   }
 
   /**
-   *
-   * @param tableId
-   * @param partition
-   * @param aspect
-   * @param key
-   * @param type
-   * @param value
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public DbKeyValueStoreEntity newKeyValueStoreEntity(String tableId, String propertiesETag,
-      String partition, String aspect, String key, String type, String value, CallingContext cc)
-      throws ODKDatastoreException {
-    Validate.notEmpty(tableId);
-    Validate.notEmpty(propertiesETag);
-    Validate.notEmpty(partition);
-    Validate.notEmpty(aspect);
-    Validate.notEmpty(key);
-    Validate.notEmpty(type);
-    Validate.notNull(cc);
-
-    DbKeyValueStoreEntity entry = DbKeyValueStore.createNewEntity(cc);
-    entry.setTableId(tableId);
-    entry.setPropertiesETag(propertiesETag);
-    entry.setPartition(partition);
-    entry.setAspect(aspect);
-    entry.setKey(key);
-    entry.setType(type);
-    entry.setValue(value);
-    return entry;
-  }
-
-  public DbKeyValueStoreEntity newKeyValueStoreEntity(OdkTablesKeyValueStoreEntry entry,
-      String propertiesETag, CallingContext cc) throws ODKDatastoreException {
-    Validate.notNull(entry);
-    Validate.notEmpty(propertiesETag);
-    Validate.notNull(cc);
-
-    String tableId = entry.tableId;
-    String partition = entry.partition;
-    String aspect = entry.aspect;
-    String key = entry.key;
-    String type = entry.type;
-    String value = entry.value;
-    return newKeyValueStoreEntity(tableId, propertiesETag, partition, aspect, key, type, value, cc);
-  }
-
-  /**
    * Create a new {@link DbTableAcl} entity.
    *
    * @param tableId
@@ -265,13 +217,14 @@ public class EntityCreator {
   }
 
   public void setRowFields(Entity row, String rowETag, String dataETagAtModification,
-      String lastUpdateUser, Scope filterScope,
-      boolean deleted, String formId, String locale,
+      String lastUpdateUser, boolean deleted,
+      Scope filterScope, String formId, String locale, String savepointType,
       String savepointTimestamp, String savepointCreator, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_ETAG, rowETag);
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
     row.set(DbTable.LAST_UPDATE_USER, lastUpdateUser);
+    row.set(DbTable.DELETED, deleted);
 
     // if filterScope is null, don't change the value
     // if filterScope is the empty scope, set both filter type and value to null
@@ -292,10 +245,9 @@ public class EntityCreator {
       }
     }
 
-    row.set(DbTable.DELETED, deleted);
-
     row.set(DbTable.FORM_ID, formId);
     row.set(DbTable.LOCALE, locale);
+    row.set(DbTable.SAVEPOINT_TYPE, savepointType);
     row.set(DbTable.SAVEPOINT_TIMESTAMP, savepointTimestamp);
     row.set(DbTable.SAVEPOINT_CREATOR, savepointCreator);
 
@@ -378,15 +330,16 @@ public class EntityCreator {
     entity.set(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
     entity.set(DbLogTable.CREATE_USER, row.getString(DbTable.CREATE_USER));
     entity.set(DbLogTable.LAST_UPDATE_USER, row.getString(DbTable.LAST_UPDATE_USER));
-    entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
-    entity.set(DbLogTable.FILTER_VALUE, row.getString(DbTable.FILTER_VALUE));
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
 
     // common metadata
-    entity.set(DbLogTable.SAVEPOINT_CREATOR, row.getString(DbTable.SAVEPOINT_CREATOR));
+    entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
+    entity.set(DbLogTable.FILTER_VALUE, row.getString(DbTable.FILTER_VALUE));
     entity.set(DbLogTable.FORM_ID, row.getString(DbTable.FORM_ID));
     entity.set(DbLogTable.LOCALE, row.getString(DbTable.LOCALE));
+    entity.set(DbLogTable.SAVEPOINT_TYPE, row.getString(DbTable.SAVEPOINT_TYPE));
     entity.set(DbLogTable.SAVEPOINT_TIMESTAMP, row.getString(DbTable.SAVEPOINT_TIMESTAMP));
+    entity.set(DbLogTable.SAVEPOINT_CREATOR, row.getString(DbTable.SAVEPOINT_CREATOR));
 
     for (DbColumnDefinitionsEntity column : columns) {
       if (column.getIsUnitOfRetention()) {

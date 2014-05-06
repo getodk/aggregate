@@ -42,19 +42,14 @@ public class TableEntry {
   private String dataETag;
 
   @Element(required = false)
-  private String propertiesETag;
-
-  @Element(required = false)
   private String schemaETag;
 
   protected TableEntry() {
   }
 
-  public TableEntry(final String tableId, final String dataETag, final String propertiesETag,
-      final String schemaETag) {
+  public TableEntry(final String tableId, final String dataETag, final String schemaETag) {
     this.tableId = tableId;
     this.dataETag = dataETag;
-    this.propertiesETag = propertiesETag;
     this.schemaETag = schemaETag;
   }
 
@@ -74,14 +69,6 @@ public class TableEntry {
     this.dataETag = dataETag;
   }
 
-  public String getPropertiesETag() {
-    return propertiesETag;
-  }
-
-  public void setPropertiesETag(String propertiesETag) {
-    this.propertiesETag = propertiesETag;
-  }
-
   public String getSchemaETag() {
     return schemaETag;
   }
@@ -96,7 +83,6 @@ public class TableEntry {
     int result = 1;
     result = prime * result + ((tableId == null) ? 1 : tableId.hashCode());
     result = prime * result + ((dataETag == null) ? 1 : dataETag.hashCode());
-    result = prime * result + ((propertiesETag == null) ? 1 : propertiesETag.hashCode());
     result = prime * result + ((schemaETag == null) ? 1 : schemaETag.hashCode());
     return result;
   }
@@ -115,14 +101,11 @@ public class TableEntry {
     TableEntry other = (TableEntry) obj;
     return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
         && (dataETag == null ? other.dataETag == null : dataETag.equals(other.dataETag))
-        && (propertiesETag == null ? other.propertiesETag == null : propertiesETag
-            .equals(other.propertiesETag))
         && (schemaETag == null ? other.schemaETag == null : schemaETag.equals(other.schemaETag));
   }
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId + ", dataETag=" + dataETag + ", propertiesETag="
-        + propertiesETag + ", schemaETag=" + schemaETag + "]";
+    return "TableEntry [tableId=" + tableId + ", dataETag=" + dataETag + ", schemaETag=" + schemaETag + "]";
   }
 }
