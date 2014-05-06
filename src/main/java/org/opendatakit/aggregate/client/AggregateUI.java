@@ -307,6 +307,7 @@ public class AggregateUI implements EntryPoint {
         if ( w != null && w instanceof OdkTablesTabUI ) {
           w.setVisible(odkTablesVisible);
           ((Widget) mainNav.getTabBar().getTab(i)).setVisible(odkTablesVisible);
+          ((OdkTablesTabUI) w).updateVisibilityOdkTablesAdminSubTabs();
         }
       }
 

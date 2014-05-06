@@ -19,7 +19,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -34,20 +33,9 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
  * @author sudar.sam@gmail.com
  *
  */
-@Path("filemanifest")
+@Path("{appId}/manifest/{odkClientVersion}")
 @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface FileManifestService {
-
-  /**
-   * URL parameter specifying the tableId. Optional. If not present, will return
-   * all the files for the application.
-   */
-  public static final String PARAM_TABLE_ID = "table_id";
-  /**
-   * URL parameter specifying whether or not only the app level files should be
-   * returned. If present, this will override the tableId parameter.
-   */
-  public static final String PARAM_APP_LEVEL_FILES = "app_level_files";
 
   /**
    *
@@ -60,10 +48,23 @@ public interface FileManifestService {
    * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
    */
   @GET
-  @Path("{appId}")
+  @Path("")
   @GZIP
-  public Response /*OdkTablesFileManifest*/ getFileManifest(
-      @PathParam("appId") String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
-      @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel);
+  public Response /*OdkTablesFileManifest*/ getAppLevelFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion);
 
+  /**
+   *
+   * @param servletContext
+   * @param req
+   * @param resp
+   * @param appId
+   * @param tableId
+   * @param appLevel
+   * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
+   */
+  @GET
+  @Path("{tableId}")
+  @GZIP
+  public Response /*OdkTablesFileManifest*/ getTableIdFileManifest(
+      @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId);
 }

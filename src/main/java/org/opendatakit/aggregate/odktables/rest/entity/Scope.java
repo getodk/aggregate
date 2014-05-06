@@ -27,6 +27,24 @@ public class Scope {
     EMPTY_SCOPE.initFields(null, null);
   }
 
+  public static Scope asScope(String filterType, String filterValue) {
+    if (filterType != null && filterType.length() != 0) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        return new Scope(Scope.Type.DEFAULT, null);
+      } else {
+        return new Scope(type, filterValue);
+      }
+    } else {
+      return Scope.EMPTY_SCOPE;
+    }
+  }
+
+  /**
+   * Type of Scope.
+   *
+   * Limited to 10 characters
+   */
   public enum Type {
     DEFAULT, USER, GROUP,
   }

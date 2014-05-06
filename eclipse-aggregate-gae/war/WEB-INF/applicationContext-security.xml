@@ -104,6 +104,7 @@
 		<!-- ODK Tables API -->
 		<intercept-url pattern="/odktables/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
 		<!-- odk tables file upload and download stuff -->
+		<intercept-url pattern="/appLevelFileUpload/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />
 		<intercept-url pattern="/tableFileUpload/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />
 		<intercept-url pattern="/tableFileDownload/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />
 		<intercept-url pattern="/tableKeyValueManifest/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />

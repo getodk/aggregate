@@ -23,8 +23,7 @@ import org.simpleframework.xml.Root;
  * This represents information about a file so that a phone running ODKTables
  * will be able to check to see if it has the most recent version of the file,
  * and if not will be able to download the file. It is meant to be mostly a
- * struct that is parsed into and recovered from JSON, and work in tandem with
- * {@link OdkTablesKeyValueStoreEntry}.
+ * struct that is parsed into and recovered from JSON.
  *
  * @author sudar.sam@gmail.com
  *
@@ -37,6 +36,12 @@ public class OdkTablesFileManifestEntry {
    */
   @Attribute(required = true)
   public String filename;
+
+  @Attribute(required = false)
+  public Long contentLength;
+
+  @Attribute(required = false)
+  public String contentType;
 
   /**
    * This is the md5hash of the file, which will be used for checking whether or
@@ -57,6 +62,8 @@ public class OdkTablesFileManifestEntry {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((filename == null) ? 0 : filename.hashCode());
+    result = prime * result + ((contentLength == null) ? 0 : contentLength.hashCode());
+    result = prime * result + ((contentType == null) ? 0 : contentType.hashCode());
     result = prime * result + ((md5hash == null) ? 0 : md5hash.hashCode());
     result = prime * result + ((downloadUrl == null) ? 0 : downloadUrl.hashCode());
     return result;
@@ -75,6 +82,8 @@ public class OdkTablesFileManifestEntry {
     }
     OdkTablesFileManifestEntry other = (OdkTablesFileManifestEntry) obj;
     return (filename == null ? other.filename == null : filename.equals(other.filename))
+        && (contentLength == null ? other.contentLength == null : contentLength.equals(other.contentLength))
+        && (contentType == null ? other.contentType == null : contentType.equals(other.contentType))
         && (md5hash == null ? other.md5hash == null : md5hash.equals(other.md5hash))
         && (downloadUrl == null ? other.downloadUrl == null : downloadUrl.equals(other.downloadUrl));
   }

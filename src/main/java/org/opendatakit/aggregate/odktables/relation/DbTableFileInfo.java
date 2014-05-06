@@ -56,6 +56,13 @@ public class DbTableFileInfo extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
+  /**
+   * String to stand in for those things in the app's root directory.
+   *
+   * NOTE: This cannot be null -- GAE doesn't like that!
+   */
+  public static final String NO_TABLE_ID = "";
+
   // these are the user-friendly names that are displayed when the user
   // views the contents of this table on the server.
   public static final String UI_ONLY_FILENAME_HEADING = "_FILENAME";
@@ -68,7 +75,8 @@ public class DbTableFileInfo extends Relation {
   // be displayed to the user on the server. The underscore will be truncated.
   // Jul 17, 2013--kind of just playing nice with the underscore thing for now
   // as I add in proper file sync support.
-  public static final DataField TABLE_ID = new DataField("_TABLE_ID", DataType.STRING, true);
+  public static final DataField ODK_CLIENT_VERSION = new DataField("_ODK_CLIENT_VERSION", DataType.STRING, true, 10L);
+  public static final DataField TABLE_ID = new DataField("_TABLE_ID", DataType.STRING, true, 80L);
   public static final DataField PATH_TO_FILE = new DataField("_PATH_TO_FILE", DataType.STRING,
       true, 5120L);
 
@@ -82,13 +90,14 @@ public class DbTableFileInfo extends Relation {
   // fields.
   public static final List<DataField> exposedColumnNames;
 
-  public static final String RELATION_NAME = "TABLE_FILE_INFO2";
+  public static final String RELATION_NAME = "TABLE_FILE_INFO3";
 
   // the list of the datafields/columns
   private static final List<DataField> dataFields;
   static {
     dataFields = new ArrayList<DataField>();
     // can be null because we're
+    dataFields.add(ODK_CLIENT_VERSION);
     dataFields.add(TABLE_ID);
     dataFields.add(PATH_TO_FILE);
     // and add the things from DbTable
@@ -96,6 +105,7 @@ public class DbTableFileInfo extends Relation {
     // TODO: do the appropriate time stamping and things.
     // populate the list with all the column names
     List<DataField> columns = new ArrayList<DataField>();
+    columns.add(ODK_CLIENT_VERSION);
     columns.add(TABLE_ID);
     columns.add(PATH_TO_FILE);
     exposedColumnNames = Collections.unmodifiableList(columns);
@@ -129,6 +139,14 @@ public class DbTableFileInfo extends Relation {
 
     public void setTableId(String value) {
       e.set(TABLE_ID, value);
+    }
+
+    public String getOdkClientVersion() {
+      return e.getString(ODK_CLIENT_VERSION);
+    }
+
+    public void setOdkClientVersion(String value) {
+      e.set(ODK_CLIENT_VERSION, value);
     }
 
     public String getPathToFile() {
@@ -182,10 +200,12 @@ public class DbTableFileInfo extends Relation {
   /**
    * Returns all the entries.
    */
-  public static List<DbTableFileInfoEntity> queryForApp(CallingContext cc)
+  public static List<DbTableFileInfoEntity> queryForAppLevelFiles(String odkClientVersion, CallingContext cc)
       throws ODKDatastoreException {
 
     Query query = getRelation(cc).query("DbTableFileInfo.queryForApp()", cc);
+    query.addFilter(TABLE_ID,  FilterOperation.EQUAL, NO_TABLE_ID);
+    query.addFilter(ODK_CLIENT_VERSION, FilterOperation.EQUAL, odkClientVersion);
 
     List<Entity> list = query.execute();
     List<DbTableFileInfoEntity> results = new ArrayList<DbTableFileInfoEntity>();
@@ -198,7 +218,39 @@ public class DbTableFileInfo extends Relation {
   /**
    * Returns the entries for the passed in table id.
    */
-  public static List<DbTableFileInfoEntity> queryForTableId(String tableId, CallingContext cc)
+  public static List<DbTableFileInfoEntity> queryForTableIdFiles(String odkClientVersion, String tableId, CallingContext cc)
+      throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc);
+    query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
+    query.addFilter(ODK_CLIENT_VERSION, FilterOperation.EQUAL, odkClientVersion);
+
+    List<Entity> list = query.execute();
+    List<DbTableFileInfoEntity> results = new ArrayList<DbTableFileInfoEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableFileInfoEntity(e));
+    }
+    return results;
+  }
+
+  public static List<DbTableFileInfoEntity> queryForAllOdkClientVersionsOfAppLevelFiles(CallingContext cc)
+      throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc);
+    query.addFilter(TABLE_ID, FilterOperation.EQUAL, NO_TABLE_ID);
+
+    List<Entity> list = query.execute();
+    List<DbTableFileInfoEntity> results = new ArrayList<DbTableFileInfoEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableFileInfoEntity(e));
+    }
+    return results;
+  }
+
+  /**
+   * Returns the entries across all odkClientVersions for the passed in table id.
+   */
+  public static List<DbTableFileInfoEntity> queryForAllOdkClientVersionsOfTableIdFiles(String tableId, CallingContext cc)
       throws ODKDatastoreException {
 
     Query query = getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc);
@@ -212,11 +264,12 @@ public class DbTableFileInfo extends Relation {
     return results;
   }
 
-  public static List<DbTableFileInfoEntity> queryForEntity(String tableId, String wholePath,
+  public static List<DbTableFileInfoEntity> queryForEntity(String odkClientVersion, String tableId, String wholePath,
       CallingContext cc) throws ODKDatastoreException {
 
     Query query = getRelation(cc).query("DbTableFileInfo.queryForEntity()", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
+    query.addFilter(ODK_CLIENT_VERSION, FilterOperation.EQUAL, odkClientVersion);
     query.addFilter(PATH_TO_FILE, FilterOperation.EQUAL, wholePath);
 
     List<Entity> list = query.execute();

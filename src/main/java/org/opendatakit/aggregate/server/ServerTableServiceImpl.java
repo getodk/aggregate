@@ -36,7 +36,6 @@ import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
@@ -80,16 +79,12 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       TableManager tm = new TableManager(appId, userPermissions, cc);
       List<TableEntry> entries = tm.getTables();
       for (TableEntry entry : entries) {
-        if (entry.getPropertiesETag() != null) {
-          String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(),
-              entry.getPropertiesETag(), cc);
-          clientEntries.add(UtilTransforms.transform(entry, displayName));
-        }
+        clientEntries.add(UtilTransforms.transform(entry));
       }
       Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
         @Override
         public int compare(TableEntryClient o1, TableEntryClient o2) {
-          return o1.getDisplayName().compareToIgnoreCase(o2.getDisplayName());
+          return o1.getTableId().compareToIgnoreCase(o2.getTableId());
         }
       });
 
@@ -117,12 +112,10 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTableNullSafe(tableId);
-      if (entry == null || entry.getPropertiesETag() == null) {
+      if (entry == null) {
         return null;
       }
-      String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(),
-          entry.getPropertiesETag(), cc);
-      TableEntryClient resource = UtilTransforms.transform(entry, displayName);
+      TableEntryClient resource = UtilTransforms.transform(entry);
       return resource;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();

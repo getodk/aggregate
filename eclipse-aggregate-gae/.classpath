@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry excluding="org/opendatakit/common/testing/gae/" kind="src" path="test"/>
+	<classpathentry excluding="org/opendatakit/common/testing/gae/*" kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjrt-1.6.12.jar"/>
@@ -24,13 +24,15 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-3.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-meta-3.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gin-1.5.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-client-1.16.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-services-drive-v2-rev93-1.16.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-1.16.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-appengine-1.16.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.16.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.16.0-rc.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-appengine-1.16.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-client-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-services-drive-v2-rev116-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-appengine-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-jackson-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-jdo-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-appengine-1.17.0-rc.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-oauth-client-servlet-1.17.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gson-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guava-jdk5-13.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/guice-3.0.jar"/>
@@ -41,16 +43,16 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpcore-4.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpmime-4.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.9.11.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.9.11.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-asl-1.9.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-mapper-asl-1.9.13.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2013-09-30.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javassist-3.12.1.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2014-04-29.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxrs-api-2.3.3.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxrs-api-3.0.6.Final.jar" sourcepath="C:/Users/Administrator/.m2/repository/org/jboss/resteasy/jaxrs-api/3.0.6.Final/jaxrs-api-3.0.6.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jboss-annotations-api_1.1_spec-1.0.1.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jcip-annotations-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/joda-time-2.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jsr250-api-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jsr305-1.3.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/kxml2-2.3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/nekohtml-1.9.15.jar"/>
@@ -59,7 +61,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/opencsv-2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/postgresql-9.0-801.jdbc4.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-2.3.4.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/resteasy-jaxrs-3.0.6.Final.jar" sourcepath="C:/Users/Administrator/.m2/repository/org/jboss/resteasy/resteasy-jaxrs/3.0.6.Final/resteasy-jaxrs-3.0.6.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/scannotation-1.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/simple-xml-2.6.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.6.jar"/>
@@ -83,14 +85,14 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-openid-3.1.3.odk-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/spring-security-web-3.1.3.odk-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/stax-1.2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/stax-api-1.0-2.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/stax-api-1.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/transaction-api-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xalan-2.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xercesImpl-2.11.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xmlsec-1.4.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xml-apis-1.4.01.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xpp3-1.1.4c.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/odk-gae-settings-latest.jar"/>
-	<classpathentry exported="true" kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4">
 		<attributes>
@@ -102,7 +104,8 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/selenium-java-2.33.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/selenium-java-2.37.0.jar"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/gwt-2.5.1"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/appengine-java-sdk-1.9.0"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

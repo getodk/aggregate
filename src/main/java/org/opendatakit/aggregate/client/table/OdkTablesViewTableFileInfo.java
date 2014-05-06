@@ -26,12 +26,9 @@ import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.popups.OdkTablesMediaFileListPopup;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -51,21 +48,16 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   private TableEntryClient currentTable;
 
   // that table's info rows
-  // private List<RowClient> rows;
-
   private ArrayList<FileSummaryClient> fileSummaries;
-
-  // columnnames.
-  private ArrayList<String> columnNames;
 
   private static final int DELETE_COLUMN = 0;
   // this is the heading for the delete row button.
   private static final String DELETE_HEADING = "Delete";
 
+  private static final int ODK_CLIENT_VERSION_COLUMN = 1;
+  private static final String ODK_CLIENT_VERSION_HEADING = "Client Version";
   private static final int FILENAME_COLUMN = 2;
   private static final String FILENAME_HEADING = "Filename";
-  private static final int KEY_COLUMN = 1;
-  private static final String KEY_HEADING = "Key";
   private static final int DOWNLOAD_COLUMN = 3;
   private static final String DOWNLOAD_HEADING = "Download";
 
@@ -74,12 +66,6 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   // this is just the tab that opened the table
   private AggregateSubTabBase basePanel;
 
-  // this is the number of columns that exist for a table as returned
-  // by the server that are NOT user defined.
-  private static final int NUMBER_ADMIN_COLUMNS = 2;
-
-  // the message to display when there is no data in the table.
-  private static String NO_DATA_MESSAGE = "There is no data in this table.";
   // the message to display when there are no rows in the table
   private static String NO_ROWS_MESSAGE = "There are no rows to display.";
 
@@ -137,7 +123,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
           // if this happens it is PROBABLY, but not necessarily, because
           // we've deleted the table.
           // TODO ensure the correct exception makes it here
-          ((OdkTablesManageTableFilesSubTab) AggregateUI.getUI().getSubTab(SubTabs.MANAGEFILES))
+          ((OdkTablesManageTableFilesSubTab) AggregateUI.getUI().getSubTab(SubTabs.MANAGE_TABLE_ID_FILES))
               .setTabToDislpayZero();
         } else {
           AggregateUI.getUI().reportError(caught);
@@ -150,63 +136,24 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
         setColumnHeadings();
         // setColumnHeadings(columnNames);
 
-        fileSummaries = tcc.nonMediaFiles;
+        fileSummaries = tcc.files;
         setRows();
 
         // AggregateUI.getUI().getTimer().refreshNow();
       }
     };
 
-    SecureGWT.getServerDataService().getFileInfoContents(table.getTableId(), getDataCallback);
+    SecureGWT.getServerDataService().getTableFileInfoContents(table.getTableId(), getDataCallback);
   }
 
   private void setColumnHeadings() {
     // create the table headers.
     setText(0, DELETE_COLUMN, DELETE_HEADING);
+    setText(0, ODK_CLIENT_VERSION_COLUMN, ODK_CLIENT_VERSION_HEADING);
     setText(0, FILENAME_COLUMN, FILENAME_HEADING);
-    setText(0, KEY_COLUMN, KEY_HEADING);
     setText(0, DOWNLOAD_COLUMN, DOWNLOAD_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
   }
-
-  /*
-   * This is the method that actually updates the column headings. It is its own
-   * method so that it can be called cleanly in the updateTableData method. If
-   * the code is AFTER the call to SecureGWT, as it was at first, you can get
-   * null pointer exceptions, as the async callback may have not returned.
-   */
-  // private void setColumnHeadings(List<String> columns) {
-  // this.removeAllRows();
-  //
-  // //Window.alert(Integer.toString(columns.size()));
-  //
-  // // If there are no user-defined columns display the message.
-  // // Otherwise set the headings.
-  // if (columns.size() == NUMBER_ADMIN_COLUMNS) {
-  // setText(0, 0, NO_DATA_MESSAGE);
-  // } else {
-  // // set the delete column
-  // setText(0, DELETE_ROW_COLUMN, DELETE_ROW_HEADING);
-  // setText(0, MEDIA_FILE_COLUMN, MEDIA_FILE_HEADING);
-  // // make the headings
-  // int i = 2;
-  // for (String name : this.columnNames) {
-  // // TODO work on ordering the names properly
-  // //
-  // // the rows that come through beginning with "_" are user-defined.
-  // // we only want to display those (as long as you're not displaying
-  // // metadata), so select those, remove them, and add them.
-  // if (name.substring(0, 1).equalsIgnoreCase("_")) {
-  // setText(0, i, name.substring(1, name.length()));
-  // i++;
-  // }
-  // }
-  //
-  //
-  // getRowFormatter().addStyleName(0, "titleBar");
-  // }
-  //
-  // }
 
   /*
    * This will set the row values in the listbox.
@@ -231,7 +178,7 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
         FileSummaryClient sum = fileSummaries.get(j);
         setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteFileButton(this.basePanel,
             currentTable.getTableId(), sum.getId()));
-        setText(currentRow, KEY_COLUMN, sum.getId());
+        setText(currentRow, ODK_CLIENT_VERSION_COLUMN, sum.getOdkClientVersion());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
         Widget downloadCol;
         if (sum.getDownloadUrl() != null) {
@@ -252,57 +199,6 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
         removeRow(getRowCount() - 1);
       }
     }
-
-    // for (FileSummaryClient summary : fileSummaries) {
-    // // the rows that come through beginning with "_" are user-defined.
-    // // we only want to display those (as long as you're not displaying
-    // // metadata), so select those, remove them, and add them.
-    // // i is counter, j is columns. fill row by moving to the right, then
-    // // move on
-    // // currentRow is the actual current row. this is different than the
-    // // counter, b/c
-    // // you can also get deleted rows returned.
-    //
-    // // don't display deleted rows (although the dm doesn't return them at
-    // // this point)
-    // if (!row.isDeleted()) {
-    // // now set the delete button
-    // setWidget(currentRow, 0,
-    // new OdkTablesDeleteFileButton(this.basePanel,
-    // currentTable.getTableId(), row.getRowId()));
-    // int j = 1;
-    // for (String column : columnNames) {
-    // if (column.substring(0, 1).equalsIgnoreCase("_")) {
-    // setWidget(currentRow, j, new HTML(row.getValues().get(column)));
-    // j++;
-    // }
-    //
-    // if (currentRow % 2 == 0) {
-    // getRowFormatter().addStyleName(currentRow, "evenTableRow");
-    // }
-    // }
-    // }
-    // currentRow++;
-    // }
-    // }
-  }
-
-  private class MediaFileListClickHandler implements ClickHandler {
-
-    private String tableId;
-    private String key;
-
-    public MediaFileListClickHandler(String tableId, String key) {
-      this.tableId = tableId;
-      this.key = key;
-    }
-
-    @Override
-    public void onClick(ClickEvent event) {
-      OdkTablesMediaFileListPopup mediaListpopup = new OdkTablesMediaFileListPopup(tableId, key);
-      mediaListpopup.setPopupPositionAndShow(mediaListpopup.getPositionCallBack());
-    }
-
   }
 
 }

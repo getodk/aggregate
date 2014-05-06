@@ -41,6 +41,7 @@ public class FileSummaryClient implements Serializable {
   // need to add and ID and change mediaFiles to numMediaFiles.
   // also should probably add the table name and table id.
   private String id;
+  private String odkClientVersion;
   private String tableId;
   private String downloadUrl;
 
@@ -50,11 +51,12 @@ public class FileSummaryClient implements Serializable {
   }
 
   public FileSummaryClient(String filename, String contentType, Long contentLength,
-      String id, String tableId, String downloadUrl) {
+      String id, String odkClientVersion, String tableId, String downloadUrl) {
     this.filename = filename;
     this.contentType = contentType;
     this.contentLength = contentLength;
     this.id = id;
+    this.odkClientVersion = odkClientVersion;
     this.tableId = tableId;
     this.downloadUrl = downloadUrl;
   }
@@ -73,6 +75,10 @@ public class FileSummaryClient implements Serializable {
 
   public String getId() {
     return id;
+  }
+
+  public String getOdkClientVersion() {
+    return odkClientVersion;
   }
 
   public String getTableId() {

@@ -43,10 +43,12 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
+import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -456,13 +458,63 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
    * adds the correct filename and returns only the non-deleted rows.
    */
   @Override
-  public TableContentsForFilesClient getFileInfoContents(String tableId)
+  public TableContentsForFilesClient getAppLevelFileInfoContents()
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
     TableContentsForFilesClient tcc = new TableContentsForFilesClient();
-    tcc.columnNames = getFileRowInfoColumnNames();
-    tcc.columnNames.add(DbTableFileInfo.UI_ONLY_FILENAME_HEADING);
-    tcc.columnNames.add(DbTableFileInfo.UI_ONLY_TABLENAME_HEADING);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    try {
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
+          .getUriUser(), cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableManager tm = new TableManager(appId, userPermissions, cc);
+      List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfAppLevelFiles(cc);
+      DbTableFiles dbTableFiles = new DbTableFiles(cc);
+
+      ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
+      for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
+        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
+        if (blobEntitySet.getAttachmentCount(cc) != 1) {
+          continue;
+        }
+        String odkClientVersion = entry.getOdkClientVersion();
+        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
+            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
+            + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
+            + odkClientVersion + BasicConsts.FORWARDSLASH + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
+            blobEntitySet.getContentType(1, cc),
+            blobEntitySet.getContentLength(1, cc),
+            entry.getId(), odkClientVersion, "", downloadUrl);
+        completedSummaries.add(sum);
+      }
+      tcc.files = completedSummaries;
+      return tcc;
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new EntityNotFoundExceptionClient(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
+    }
+  }
+
+  /**
+   * This method more or less gets the user-friendly data to be displayed. It
+   * adds the correct filename and returns only the non-deleted rows.
+   */
+  @Override
+  public TableContentsForFilesClient getTableFileInfoContents(String tableId)
+      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
+      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
+    TableContentsForFilesClient tcc = new TableContentsForFilesClient();
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
@@ -474,7 +526,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       if (table == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
       }
-      List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableId(table.getTableId(), cc);
+      List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles(table.getTableId(), cc);
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
 
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
@@ -483,17 +535,76 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         if (blobEntitySet.getAttachmentCount(cc) != 1) {
           continue;
         }
+        String odkClientVersion = entry.getOdkClientVersion();
         String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
             + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH + appId + BasicConsts.FORWARDSLASH
-            + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+            + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
+            + odkClientVersion + BasicConsts.FORWARDSLASH + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
             blobEntitySet.getContentLength(1, cc),
-            entry.getId(), tableId, downloadUrl);
+            entry.getId(), odkClientVersion, tableId, downloadUrl);
         completedSummaries.add(sum);
       }
-      tcc.nonMediaFiles = completedSummaries;
+      tcc.files = completedSummaries;
+      return tcc;
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new EntityNotFoundExceptionClient(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
+    }
+  }
+
+  /**
+   * This method more or less gets the user-friendly data to be displayed. It
+   * adds the correct filename and returns only the non-deleted rows.
+   */
+  @Override
+  public TableContentsForFilesClient getInstanceFileInfoContents(String tableId)
+      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
+      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
+    TableContentsForFilesClient tcc = new TableContentsForFilesClient();
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    try {
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
+          .getUriUser(), cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableManager tm = new TableManager(appId, userPermissions, cc);
+      TableEntry table = tm.getTable(tableId);
+      if (table == null) { // you couldn't find the table
+        throw new ODKEntityNotFoundException();
+      }
+
+      DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
+      List<BinaryContent> contents = blobStore.getAllBinaryContents(cc);
+
+      ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
+      for (BinaryContent entry : contents) {
+        if (entry.getUnrootedFilePath() == null) {
+          continue;
+        }
+        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
+            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
+            + appId + BasicConsts.FORWARDSLASH + "tables" + BasicConsts.FORWARDSLASH
+            + tableId + BasicConsts.FORWARDSLASH
+
+            + "attachments/file"  + BasicConsts.FORWARDSLASH + entry.getUnrootedFilePath() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        FileSummaryClient sum = new FileSummaryClient(entry.getUnrootedFilePath(),
+            entry.getContentType(),
+            entry.getContentLength(),
+            entry.getUri(), null, tableId, downloadUrl);
+        completedSummaries.add(sum);
+      }
+      tcc.files = completedSummaries;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();

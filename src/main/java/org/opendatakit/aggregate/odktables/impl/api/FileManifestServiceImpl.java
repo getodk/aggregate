@@ -19,8 +19,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -51,9 +51,9 @@ public class FileManifestServiceImpl implements FileManifestService {
   private TablesUserPermissions userPermissions;
   private UriInfo info;
 
-  public FileManifestServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
+  public FileManifestServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
       @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
-    ServiceUtils.examineRequest(sc, req);
+    ServiceUtils.examineRequest(sc, req, httpHeaders);
     this.cc = ContextFactory.getCallingContext(sc, req);
     this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
     this.info = info;
@@ -62,28 +62,42 @@ public class FileManifestServiceImpl implements FileManifestService {
   @Override
   @GET
   @GZIP
-  public Response getFileManifest(@PathParam("appId") String appId, @QueryParam(PARAM_TABLE_ID) String tableId,
-      @QueryParam(PARAM_APP_LEVEL_FILES) String appLevel) {
+  public Response getAppLevelFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion) {
     // Now make sure we have an app id.
     if (appId == null || "".equals(appId)) {
       return Response.status(Status.BAD_REQUEST).entity("Invalid request. App id must be present and valid.").build();
     }
-    FileManifestManager manifestManager = new FileManifestManager(appId, cc);
+    FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
     OdkTablesFileManifest manifest = null;
     try {
-      // Now we need to decide what level on this app we're going to use. We
-      // can do table-level, all files, or app-level. The app-level param
-      // trumps the table-level.
-      if (appLevel != null && !"".equals(appLevel)) {
-        // we want just the app-level files.
-        manifest = manifestManager.getManifestForAppLevelFiles();
-      } else if (tableId != null && !"".equals(tableId)) {
-        // we want just the files for the table.
-        manifest = manifestManager.getManifestForTable(tableId);
-      } else {
-        // we want them all!
-        manifest = manifestManager.getManifestForAllAppFiles();
-      }
+      // we want just the app-level files.
+      manifest = manifestManager.getManifestForAppLevelFiles();
+    } catch (ODKDatastoreException e) {
+      Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+      log.error("Datastore exception in getting the file manifest");
+      e.printStackTrace();
+    }
+    if (manifest == null) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
+    } else {
+      return Response.ok(manifest).build();
+    }
+  }
+
+
+  @Override
+  @GET
+  @GZIP
+  public Response getTableIdFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) {
+    // Now make sure we have an app id.
+    if (appId == null || "".equals(appId)) {
+      return Response.status(Status.BAD_REQUEST).entity("Invalid request. App id must be present and valid.").build();
+    }
+    FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
+    OdkTablesFileManifest manifest = null;
+    try {
+      // we want just the files for the table.
+      manifest = manifestManager.getManifestForTable(tableId);
     } catch (ODKDatastoreException e) {
       Log log = LogFactory.getLog(FileManifestServiceImpl.class);
       log.error("Datastore exception in getting the file manifest");

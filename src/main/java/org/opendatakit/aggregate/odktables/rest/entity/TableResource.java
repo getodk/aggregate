@@ -32,10 +32,10 @@ public class TableResource extends TableEntry {
   private String definitionUri;
 
   @Element(required = true)
-  private String propertiesUri;
+  private String dataUri;
 
   @Element(required = true)
-  private String dataUri;
+  private String instanceFilesUri;
 
   @Element(required = true)
   private String diffUri;
@@ -43,11 +43,8 @@ public class TableResource extends TableEntry {
   @Element(required = true)
   private String aclUri;
 
-  @Element(required = false)
-  private String displayName;
-
   public TableResource(TableEntry entry) {
-    super(entry.getTableId(), entry.getDataETag(), entry.getPropertiesETag(), entry.getSchemaETag());
+    super(entry.getTableId(), entry.getDataETag(), entry.getSchemaETag());
   }
 
   @SuppressWarnings("unused")
@@ -62,12 +59,12 @@ public class TableResource extends TableEntry {
     return this.definitionUri;
   }
 
-  public String getPropertiesUri() {
-    return this.propertiesUri;
-  }
-
   public String getDataUri() {
     return this.dataUri;
+  }
+
+  public String getInstanceFilesUri() {
+    return this.instanceFilesUri;
   }
 
   public String getDiffUri() {
@@ -78,10 +75,6 @@ public class TableResource extends TableEntry {
     return this.aclUri;
   }
 
-  public String getDisplayName() {
-    return this.displayName;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
   }
@@ -90,12 +83,12 @@ public class TableResource extends TableEntry {
     this.definitionUri = definitionUri;
   }
 
-  public void setPropertiesUri(final String propertiesUri) {
-    this.propertiesUri = propertiesUri;
-  }
-
   public void setDataUri(final String dataUri) {
     this.dataUri = dataUri;
+  }
+
+  public void setInstanceFilesUri(final String instanceFilesUri) {
+    this.instanceFilesUri = instanceFilesUri;
   }
 
   public void setDiffUri(final String diffUri) {
@@ -104,10 +97,6 @@ public class TableResource extends TableEntry {
 
   public void setAclUri(final String aclUri) {
     this.aclUri = aclUri;
-  }
-
-  public void setDisplayName(final String displayName) {
-    this.displayName = displayName;
   }
 
   /*
@@ -124,11 +113,6 @@ public class TableResource extends TableEntry {
     if (!(obj instanceof TableResource))
       return false;
     TableResource other = (TableResource) obj;
-    if (displayName == null) {
-      if (other.displayName != null)
-        return false;
-    } else if (!displayName.equals(other.displayName))
-      return false;
     if (aclUri == null) {
       if (other.aclUri != null)
         return false;
@@ -139,15 +123,15 @@ public class TableResource extends TableEntry {
         return false;
     } else if (!dataUri.equals(other.dataUri))
       return false;
+    if (instanceFilesUri == null) {
+      if (other.instanceFilesUri != null)
+        return false;
+    } else if (!instanceFilesUri.equals(other.instanceFilesUri))
+      return false;
     if (diffUri == null) {
       if (other.diffUri != null)
         return false;
     } else if (!diffUri.equals(other.diffUri))
-      return false;
-    if (propertiesUri == null) {
-      if (other.propertiesUri != null)
-        return false;
-    } else if (!propertiesUri.equals(other.propertiesUri))
       return false;
     if (selfUri == null) {
       if (other.selfUri != null)
@@ -177,11 +161,10 @@ public class TableResource extends TableEntry {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
     result = prime * result + ((aclUri == null) ? 0 : aclUri.hashCode());
     result = prime * result + ((dataUri == null) ? 0 : dataUri.hashCode());
+    result = prime * result + ((instanceFilesUri == null) ? 0 : instanceFilesUri.hashCode());
     result = prime * result + ((diffUri == null) ? 0 : diffUri.hashCode());
-    result = prime * result + ((propertiesUri == null) ? 0 : propertiesUri.hashCode());
     result = prime * result + ((selfUri == null) ? 0 : selfUri.hashCode());
     result = prime * result + ((definitionUri == null) ? 0 : definitionUri.hashCode());
     return result;
@@ -199,16 +182,14 @@ public class TableResource extends TableEntry {
     builder.append(selfUri);
     builder.append(", defintionUri=");
     builder.append(definitionUri);
-    builder.append(", propertiesUri=");
-    builder.append(propertiesUri);
     builder.append(", dataUri=");
     builder.append(dataUri);
+    builder.append(", instanceFilesUri=");
+    builder.append(instanceFilesUri);
     builder.append(", diffUri=");
     builder.append(diffUri);
     builder.append(", aclUri=");
     builder.append(aclUri);
-    builder.append(", displayName=");
-    builder.append(displayName);
     builder.append("]");
     return builder.toString();
   }

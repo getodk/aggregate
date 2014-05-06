@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.odktables.DataManager;
-import org.opendatakit.aggregate.odktables.PropertiesManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
@@ -43,13 +42,9 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
-import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -94,8 +89,6 @@ public class ServerOdkTablesUtil {
     // altering all of the requisite fields.
     try {
       TableManager tm = new TableManager(appId, userPermissions, cc);
-      String displayName = definition.getDisplayName();
-      TableType type = UtilTransforms.transform(definition.getType());
 
       List<ColumnClient> columns = definition.getColumns();
       List<Column> columnsServer = new ArrayList<Column>();
@@ -103,67 +96,7 @@ public class ServerOdkTablesUtil {
         columnsServer.add(UtilTransforms.transform(column));
       }
       TableEntry entry = tm.createTable(tableId, columnsServer);
-      PropertiesManager pm = new PropertiesManager(appId, tableId, userPermissions, cc);
-      TableProperties tableProperties = pm.getProperties();
-      // TODO:
-      // (1) add table type (Data)
-      // (2) add displayName (displayName)
-      //
-      OdkTablesKeyValueStoreEntry tt;
-      tt = new OdkTablesKeyValueStoreEntry();
-      tt.tableId = tableId;
-      tt.partition = KeyValueStoreConstants.PARTITION_TABLE;
-      tt.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-      tt.key = KeyValueStoreConstants.TABLE_TYPE;
-      tt.type = "string";
-      tt.value = type.name();
-
-      OdkTablesKeyValueStoreEntry tn;
-      tn = new OdkTablesKeyValueStoreEntry();
-      tn.tableId = tableId;
-      tn.partition = KeyValueStoreConstants.PARTITION_TABLE;
-      tn.aspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-      tn.key = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
-      tn.type = "json";
-      tn.value = displayName;
-
-      boolean foundTT = false;
-      boolean foundTN = false;
-      boolean changedTT = false;
-      boolean changedTN = false;
-      ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = tableProperties.getKeyValueStoreEntries();
-      for ( OdkTablesKeyValueStoreEntry kvs : kvsEntries ) {
-        if ( kvs.key == tt.key && kvs.aspect == tt.aspect && kvs.partition == tt.partition ) {
-          foundTT = true;
-          if ( tt.type.equals(kvs.type) && type.name().equals(kvs.value) ) {
-            changedTT = false;
-          } else {
-            kvs.type = tt.type;
-            kvs.value = type.name();
-            changedTT = true;
-          }
-        } else if ( kvs.key == tn.key && kvs.aspect == tn.aspect && kvs.partition == tn.partition ) {
-          foundTN = true;
-          if ( tn.type.equals(kvs.type) && displayName.equals(kvs.value) ) {
-            changedTN = false;
-          } else {
-            kvs.type = tn.type;
-            kvs.value = displayName;
-            changedTN = true;
-          }
-        }
-      }
-      if ( !foundTT ) {
-        kvsEntries.add(tt);
-      }
-      if ( !foundTN ) {
-        kvsEntries.add(tn);
-      }
-      if ( !foundTT || !foundTN || changedTT || changedTN ) {
-        tableProperties.setKeyValueStoreEntries(kvsEntries);
-        pm.setProperties(tableProperties);
-      }
-      TableEntryClient entryClient = UtilTransforms.transform(entry, displayName);
+      TableEntryClient entryClient = UtilTransforms.transform(entry);
       logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
       return entryClient;
     } catch (ODKDatastoreException e) {
@@ -242,7 +175,7 @@ public class ServerOdkTablesUtil {
    * @return
    * @throws ODKDatastoreException
    */
-  public static FileSummaryClient getFileSummaryClientFromRow(Row row, String tableId,
+  public static FileSummaryClient getFileSummaryClientFromRow(Row row, String odkClientVersion, String tableId,
       DbTableFiles blobSetRelation, CallingContext cc) throws ODKDatastoreException {
     String filename = blobSetRelation.getBlobEntitySet(
         row.getValues().get(DbTableFileInfo.PATH_TO_FILE), cc).getUnrootedFilename(1, cc);
@@ -250,7 +183,7 @@ public class ServerOdkTablesUtil {
     String contentType = blobSetRelation.getBlobEntitySet(filename, cc).getContentType(1, cc);
     String id = row.getRowId();
     String downloadUrl = null;
-    FileSummaryClient summary = new FileSummaryClient(filename, contentType, contentLength, id, tableId, downloadUrl);
+    FileSummaryClient summary = new FileSummaryClient(filename, contentType, contentLength, id, odkClientVersion, tableId, downloadUrl);
     return summary;
   }
 }
