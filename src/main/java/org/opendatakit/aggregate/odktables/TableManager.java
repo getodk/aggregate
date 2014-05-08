@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
-import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
@@ -408,15 +407,6 @@ public class TableManager {
    */
   public static void deleteVersionedTable(DbTableEntryEntity tableEntry, boolean deleteCurrent, CallingContext cc) throws ODKDatastoreException, ODKEntityPersistException, ODKOverQuotaException {
 
-    // delete any stale properties
-    if ( tableEntry.getStalePropertiesETag() != null ) {
-      // delete entries
-      DbKeyValueStore.clearAllEntries(tableEntry.getId(), tableEntry.getStalePropertiesETag(), cc);
-      // record deletion success
-      tableEntry.setStalePropertiesETag(null);
-      tableEntry.put(cc);
-    }
-
     // delete stale schema
     if ( tableEntry.getStaleSchemaETag() != null ) {
       // get the column schema
@@ -472,23 +462,19 @@ public class TableManager {
     }
 
     // NOW: remove any pending schema or property changes
-    tableEntry.setStalePropertiesETag(tableEntry.getPendingPropertiesETag());
-    tableEntry.setPendingPropertiesETag(null);
     tableEntry.setStaleSchemaETag(tableEntry.getPendingSchemaETag());
     tableEntry.setPendingSchemaETag(null);
 
-    if ( tableEntry.getStalePropertiesETag() != null || tableEntry.getStaleSchemaETag() != null ) {
+    if ( tableEntry.getStaleSchemaETag() != null ) {
       // move the pending properties and schema to stale
       tableEntry.put(cc);
       // delete them (tail-recursive)
       deleteVersionedTable(tableEntry, deleteCurrent, cc);
     } else if ( deleteCurrent ) {
       // in addition to deleting the non-current cruft, we also need to delete the current data.
-      tableEntry.setStalePropertiesETag(tableEntry.getPropertiesETag());
-      tableEntry.setPropertiesETag(null);
       tableEntry.setStaleSchemaETag(tableEntry.getSchemaETag());
       tableEntry.setSchemaETag(null);
-      if ( tableEntry.getStalePropertiesETag() != null || tableEntry.getStaleSchemaETag() != null ) {
+      if ( tableEntry.getStaleSchemaETag() != null ) {
         // what had been the current schema, properties and row data now needs to be deleted
         tableEntry.put(cc);
         deleteVersionedTable(tableEntry, deleteCurrent, cc);

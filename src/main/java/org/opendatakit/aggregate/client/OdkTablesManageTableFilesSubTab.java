@@ -20,9 +20,11 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTableFileInfo;
-import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
+import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton;
+import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -44,7 +46,7 @@ import com.google.gwt.user.client.ui.ListBox;
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
+public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase implements OdkTablesData {
 
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
@@ -58,7 +60,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
       + ADD_FILE_TXT;
 
   // this is a button for adding a file to be associated with a table.
-  private ServletPopupButton addFileButton;
+  private OdkTablesTableIdServletPopupButton addFileButton;
   /**
    * This will be the box that lets you choose which of the tables you are going
    * to view.
@@ -86,8 +88,8 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
    */
   public OdkTablesManageTableFilesSubTab() {
 
-    addFileButton = new ServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
-        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT);
+    addFileButton = new OdkTablesTableIdServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
+        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT, this, this);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -115,9 +117,6 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
         updateContentsForSelectedTable();
       }
     });
-
-    // now populate the list.
-    updateTableList();
 
     tableFileData = new OdkTablesViewTableFileInfo(this);
 
@@ -200,9 +199,12 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
   // does so by calling other methods.
   @Override
   public void update() {
-    updateTableList();
-    // this causing trouble
-    updateTableData();
+
+    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+      updateTableList();
+      // this causing trouble
+      updateTableData();
+    }
   }
 
   public void addTablesToListBox(ArrayList<TableEntryClient> tables) {
@@ -215,7 +217,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
     tableBox.clear();
     tableBox.addItem(""); // blank holder to start with no selection
     for (int i = 0; i < currentTables.size(); i++) {
-      tableBox.addItem(currentTables.get(i).getDisplayName());
+      tableBox.addItem(currentTables.get(i).getTableId());
     }
   }
 
@@ -236,9 +238,18 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase {
       tableFileData.updateDisplay(currentTable);
 
       selectTablePanel.setHTML(2, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
-      selectTablePanel.setHTML(2, 1, "<h2 id=\table_name\"> " + currentTable.getDisplayName()
+      selectTablePanel.setHTML(2, 1, "<h2 id=\table_name\"> " + currentTable.getTableId()
           + " </h2>");
       add(tableFileData);
+    }
+  }
+
+  @Override
+  public String getTableId() {
+    if ( currentTable == null ) {
+      return null;
+    } else {
+      return currentTable.getTableId();
     }
   }
 

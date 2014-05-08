@@ -45,7 +45,11 @@ public interface ServerDataServiceAsync {
 
   void getTableContents(String tableId, AsyncCallback<TableContentsClient> callback);
 
-  void getFileInfoContents(String tableId, AsyncCallback<TableContentsForFilesClient> callback);
+  void getAppLevelFileInfoContents(AsyncCallback<TableContentsForFilesClient> callback);
+
+  void getTableFileInfoContents(String tableId, AsyncCallback<TableContentsForFilesClient> callback);
+
+  void getInstanceFileInfoContents(String tableId, AsyncCallback<TableContentsForFilesClient> callback);
 
   void deleteTableFile(String tableId, String rowId, AsyncCallback<Void> callback);
 

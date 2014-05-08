@@ -48,14 +48,15 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
   // i'm not sure if this is the correct place/way to be adding mine.
   private static final String ADDR = UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR;
 
+  private static final String TABLE_ID = "table_id";
   /**
    * Title for generated webpage.
    */
-  public static final String TITLE_INFO = "OdkTables File Upload";
+  public static final String TITLE_INFO = "OdkTables TableId-Specific File Upload";
 
   private static final String UPLOAD_PAGE_BODY_START =
 
-  "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Upload a file associated with a table</h2></p>"
+  "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Upload a file associated with a tableId</h2></p>"
       + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
       + "<![endif] -->"
       + "<form id=\"ie_backward_compatible_form\""
@@ -68,7 +69,7 @@ public class OdkTablesTableFileUploadServlet extends ServletUtilBase {
    * "			<td><label for=\"table_name\">Table Name (must be exactly as appears):</label></td>"
    * +
    * "			<td><input id=\"table_name\" type=\"text\" name=\"table_name\" /></td>"
-   */+ "		</tr>\n" + "      <td><label for=\"table_name\">Select Table</label></td>" + "      <td>";
+   */+ "		</tr>\n" + "      <td><label for=\"table_name\">Select TableId</label></td>" + "      <td>";
   private String UPLOAD_PAGE_BODY_MIDDLE_2 = "</td>"
       + "		<tr>"
       + "			<td><label for=\"file_key\">File Key (list, box, etc):</label></td>"

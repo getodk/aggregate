@@ -34,27 +34,47 @@ public class KeyValueStoreConstants {
 
   // Keys for:
   // TABLE_PARTITION, DEFAULT_ASPECT...
-  public static final String TABLE_TYPE = "tableType";
-  public static final String TABLE_ACCESS_CONTROL_TABLE_ID = "accessControlTableId";
+
+  // required for ODK Aggregate displays
+  // json holding a string or a map of (locale -> string)
   public static final String TABLE_DISPLAY_NAME = "displayName";
+
+  // These fields are useful for the spreadsheet view of the data
+  // we may want to use them on ODK Aggregate.
+
+  // json serialization of the list of elementKeys to display
   public static final String TABLE_COL_ORDER = "colOrder";
-  public static final String TABLE_PRIME_COLS = "primeCols";
+  // json serialization of the list of elementKeys to group by
+  public static final String TABLE_GROUP_BY_COLS = "groupByCols";
+  // elementKey of the column to sort by
   public static final String TABLE_SORT_COL = "sortCol";
+  // true if sort order is ascending
+  public static final String TABLE_SORT_ORDER = "sortOrder";
+  // elementKey held fixed during left/right pan
   public static final String TABLE_INDEX_COL = "indexCol";
-  public static final String TABLE_CURRENT_VIEW_TYPE = "currentViewType";
-  public static final String TABLE_SUMMARY_DISPLAY_FORMAT = "summaryDisplayFormat";
-  public static final String TABLE_CURRENT_QUERY = "currentQuery";
 
   // Keys for:
   // COLUMN_PARTITION, dbColName...
+
+  // These may also be useful for the spreadsheet view of the data
+  // we may want to use them on ODK Aggregate.
+
+  // json holding a string or a map of (locale -> string)
   public static final String COLUMN_DISPLAY_NAME = "displayName";
+
+  // boolean value (visible/hidden)
   public static final String COLUMN_DISPLAY_VISIBLE = "displayVisible";
+
+  // json holding a list of maps with 'data_value' and 'display', a nested
+  // map that holds all the display properties, including 'text' which can be
+  // internationalized.
   public static final String COLUMN_DISPLAY_CHOICES_LIST = "displayChoicesList";
+
+  // json holding a string or a map of (locale -> string)
+  // this is used to render the data value (esp. for composite data values)
   public static final String COLUMN_DISPLAY_FORMAT = "displayFormat";
-  public static final String COLUMN_SMS_IN = "smsIn";
-  public static final String COLUMN_SMS_OUT = "smsOut";
-  public static final String COLUMN_SMS_LABEL = "smsLabel";
-  public static final String COLUMN_FOOTER_MODE = "footerMode";
+
+  // json -- format TBD
   public static final String COLUMN_JOINS = "joins";
 
 }

@@ -31,6 +31,8 @@ import org.opendatakit.common.web.CallingContext;
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
+ * This is OBSOLETE and BROKEN!!!!  See the one from the Android codebase.
+ *
  * Holds various things for importing and exporting tables through CSVs.
  * <p>
  * Modified from the same class on the phone.

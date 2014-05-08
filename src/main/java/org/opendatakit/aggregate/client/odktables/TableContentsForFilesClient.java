@@ -37,21 +37,16 @@ public class TableContentsForFilesClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -564495395828330963L;
+  private static final long serialVersionUID = -564495395828330964L;
 
   public TableContentsForFilesClient() {
     // necessary for gwt serialization
   }
 
   /**
-   * The names of the table's columns.
+   * The files for the table. The usage determines whether
+   * these are table-level or instance files.
    */
-  public ArrayList<String> columnNames;
-
-  /**
-   * The non-media files for the table. Any media file associated with the file
-   * will exist in the mediaFiles list for that file.
-   */
-  public ArrayList<FileSummaryClient> nonMediaFiles;
+  public ArrayList<FileSummaryClient> files;
 
 }

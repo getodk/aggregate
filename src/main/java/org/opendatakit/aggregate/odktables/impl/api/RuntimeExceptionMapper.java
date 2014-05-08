@@ -36,6 +36,7 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
   @Override
   public Response toResponse(RuntimeException e) {
     MediaType type;
+    e.printStackTrace();
     type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
         0) : MediaType.APPLICATION_JSON_TYPE;
 

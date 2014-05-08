@@ -23,14 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.interceptor.AggregateRequestInterceptor;
 import org.opendatakit.aggregate.odktables.rest.serialization.OdkJsonHttpMessageConverter;
@@ -193,32 +189,6 @@ public class AggregateSynchronizer {
     } catch (ResourceAccessException e) {
       throw new IOException(e.getMessage());
     }
-  }
-
-  public PropertiesResource setTableProperties(String schemaETag, String propertiesETag, String tableId) throws IOException {
-    TableResource resource = getResource(tableId);
-
-    ArrayList<OdkTablesKeyValueStoreEntry> keyValueStoreEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
-    OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
-    entry.partition = KeyValueStoreConstants.PARTITION_TABLE;
-    entry.aspect = "metadata";
-    entry.key = "my_value";
-    entry.type = "text";
-    entry.value = "aValue";
-    keyValueStoreEntries.add(entry);
-    // put new properties
-    TableProperties properties = new TableProperties(schemaETag, propertiesETag, tableId, keyValueStoreEntries);
-    HttpEntity<TableProperties> entity = new HttpEntity<TableProperties>(properties, requestHeaders);
-    ResponseEntity<PropertiesResource> updatedEntity;
-    try {
-      updatedEntity = rt.exchange(resource.getPropertiesUri(), HttpMethod.PUT, entity,
-          PropertiesResource.class);
-    } catch (ResourceAccessException e) {
-      throw new IOException(e.getMessage());
-    }
-    PropertiesResource propsResource = updatedEntity.getBody();
-
-    return propsResource;
   }
 
   public class InvalidAuthTokenException extends Exception {

@@ -34,23 +34,58 @@ import java.util.SimpleTimeZone;
  */
 public class TableConstants {
 
-  // TODO: should probably have an Aggregate Column object instead that will
-  // allow you to specify type here.
-
-  /*
-   * These are the names of the shared columns. Included here so that they can
-   * be accessed directly by aggregate.
+  /**
+   * Columns in the User data table.
    */
 
-  // tablename is chosen by user...
+  /**
+   * ID is the primary key, as experienced by the user. There may be
+   * multiple rows with this ID due to conflicts and checkpoint states.
+   */
   public static final String ID = "_id";
-  public static final String ROW_ETAG = "_row_etag";
-  public static final String SYNC_STATE = "_sync_state";
-  public static final String CONFLICT_TYPE = "_conflict_type";
 
   /**
-   * (savepoint_timestamp, savepoint_creator, savepoint_type, form_id, locale)
+   * ROW_ETAG defines the the server entity tag (version) of the row.
+   * This is controlled by the server and changes by the client are always
+   * ignored.
+   */
+  public static final String ROW_ETAG = "_row_etag";
+
+  /************************************************
+   * These columns are only on the client device.
+   ************************************************/
+
+  /**
+   * Client side only. One of the {@link SyncState} values.
+   */
+  public static final String SYNC_STATE = "_sync_state";
+
+  /**
+   * Client side only. One of the {@ConflictType} constants.
+   */
+  public static final String CONFLICT_TYPE = "_conflict_type";
+
+  /************************************************
+   * These columns are common across server and client
+   ************************************************/
+
+  /**
+   * Contains the type attribute of a Scope. The Scope describes the access
+   * controls on this row. Changes to this value on the device may or may not
+   * be applied during a sync action (TBD).
+   */
+  public static final String FILTER_TYPE = "_filter_type";
+  /**
+   * Contains the value attribute of a Scope. The Scope describes the access
+   * controls on this row. Changes to this value on the device may or may not
+   * be applied during a sync action (TBD).
+   */
+  public static final String FILTER_VALUE = "_filter_value";
+
+  /**
+   * (form_id, locale, savepoint_type, savepoint_timestamp, savepoint_creator)
    * are the tuple written and managed by ODK Survey when a record is updated.
+   *
    * ODK Tables needs to update these appropriately when a cell is directly
    * edited based upon whether or not the table is 'form-managed' or not. If
    * form-managed, and direct cell editing is allowed, it should set
@@ -60,27 +95,21 @@ public class TableConstants {
    * The value of 'savepoint_creator' is the user that is making the change. This
    * may be a remote SMS user.
    *
-   * Note that the value of 'savepoint_type' must be 'COMPLETE' in order for ODK
-   * Tables to sync the values up to the server, otherwise there is a conflict
-   * resolution step that is enforced on the device. I.e., this is a requirement
-   * before a data row can move off of a device. Hence, we do not need to record
-   * the value of 'savepoint_type' on the server, because it will always be
-   * 'COMPLETE'.
+   * In a table being sync'd, the value of 'savepoint_type' for each row must
+   * either be INCOMPLETE or COMPLETE.  There is a clean-up step before a sync
+   * during which the user is prompted to select whether to mark a checkpoint
+   * (null) savepoint-type as INCOMPLETE or to remove it. Only once that is done
+   * can the sync proceed.
    *
    * In contrast, the row security management, savepoint, form, locale, sync
    * state, and conflict resolution fields are metadata and are not directly
    * exposed to the user.
    */
+  public static final String SAVEPOINT_TYPE = "_savepoint_type";
   public static final String SAVEPOINT_TIMESTAMP = "_savepoint_timestamp";
   public static final String SAVEPOINT_CREATOR = "_savepoint_creator";
   public static final String FORM_ID = "_form_id";
   public static final String LOCALE = "_locale";
-
-  /*
-   * savepoint_type is never sent to the server since it should always be
-   * 'COMPLETE'
-   */
-  public static final String SAVEPOINT_TYPE = "_savepoint_type";
 
   /**
    * This set contains the names of the metadata columns that are present in all
@@ -99,14 +128,16 @@ public class TableConstants {
   static {
     SHARED_COLUMN_NAMES = new HashSet<String>();
     CLIENT_ONLY_COLUMN_NAMES = new HashSet<String>();
+    SHARED_COLUMN_NAMES.add(FILTER_TYPE);
+    SHARED_COLUMN_NAMES.add(FILTER_VALUE);
+    SHARED_COLUMN_NAMES.add(SAVEPOINT_TYPE);
     SHARED_COLUMN_NAMES.add(SAVEPOINT_TIMESTAMP);
     SHARED_COLUMN_NAMES.add(SAVEPOINT_CREATOR);
     SHARED_COLUMN_NAMES.add(FORM_ID);
     SHARED_COLUMN_NAMES.add(LOCALE);
-    CLIENT_ONLY_COLUMN_NAMES.add(ID);
-    CLIENT_ONLY_COLUMN_NAMES.add(SAVEPOINT_TYPE);
-    CLIENT_ONLY_COLUMN_NAMES.add(SYNC_STATE);
+    CLIENT_ONLY_COLUMN_NAMES.add(ID); // somewhat of a misnomer -- this is transmitted and serves as a PK to the record.
     CLIENT_ONLY_COLUMN_NAMES.add(ROW_ETAG); // somewhat of a misnomer -- this is transmitted, but never overwrites server.
+    CLIENT_ONLY_COLUMN_NAMES.add(SYNC_STATE);
     CLIENT_ONLY_COLUMN_NAMES.add(CONFLICT_TYPE);
   }
 

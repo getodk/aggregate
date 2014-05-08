@@ -17,37 +17,36 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- do not upgrade to 1.7.3 - http://code.google.com/p/googleappengine/issues/detail?id=8294 -->
-		<gooogle.appengine.sdk.version>1.8.0</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
+		<gooogle.appengine.sdk.version>1.9.0</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
 		<gae.version>${gooogle.appengine.sdk.version}</gae.version>
 		<google.gdata.version>1.47.1</google.gdata.version>
-		<google.api-client.version>1.16.0-rc</google.api-client.version>
-		<google.api-services-drive.version>v2-rev91-1.16.0-rc</google.api-services-drive.version>
+		<google.api-client.version>1.17.0-rc</google.api-client.version>
+		<google.api-services-drive.version>v2-rev116-1.17.0-rc</google.api-services-drive.version>
 		<google.gwt.version>2.5.1</google.gwt.version>
-        <org.jboss.resteasy.version>2.3.4.Final</org.jboss.resteasy.version>
+        <org.jboss.resteasy.version>3.0.6.Final</org.jboss.resteasy.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
-		<maven.surefire.report.plugin.version>2.12.4</maven.surefire.report.plugin.version>
-		<maven.surefire.plugin.version>2.12.4</maven.surefire.plugin.version>
+		<maven.surefire.report.plugin.version>2.16</maven.surefire.report.plugin.version>
+		<maven.surefire.plugin.version>2.16</maven.surefire.plugin.version>
 		<surefire.argLine>-Xms300m -Xmx3048m -XX:+UseParallelGC -XX:+UseParallelOldGC</surefire.argLine> <!-- need a huge JVM size for GAE datastore -->
-		<maven.failsafe.plugin.version>2.12.4</maven.failsafe.plugin.version>
-		<cargo.maven2.plugin.version>1.3.1</cargo.maven2.plugin.version>
-		<build.helper.maven.plugin.version>1.7</build.helper.maven.plugin.version>
+		<maven.failsafe.plugin.version>2.16</maven.failsafe.plugin.version>
+		<cargo.maven2.plugin.version>1.4.7</cargo.maven2.plugin.version>
+		<build.helper.maven.plugin.version>1.8</build.helper.maven.plugin.version>
 		<gwt.maven.plugin.version>2.5.1</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
 		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
 		<maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
-		<maven.war.plugin.version>2.3</maven.war.plugin.version>
+		<maven.war.plugin.version>2.4</maven.war.plugin.version>
 		<maven.antrun.plugin.version>1.7</maven.antrun.plugin.version>
-		<maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
-		<junit.version>4.10</junit.version>
-		<org.codehaus.jackson.version>1.9.11</org.codehaus.jackson.version>
+		<maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
+		<junit.version>4.11</junit.version>
+		<org.codehaus.jackson.version>1.9.13</org.codehaus.jackson.version>
 		<org.springframework.version>3.1.3.RELEASE</org.springframework.version>
 		<org.slf4j.version>1.6.6</org.slf4j.version>
 		<!-- log4j is not used -->
 		<org.springframework.security.version>3.1.3.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.3.RELEASE -->
 		<openid4java.version>0.9.6.662.odk-SNAPSHOT</openid4java.version>
 		<org.springframework.security.openid.version>3.1.3.odk-SNAPSHOT</org.springframework.security.openid.version>
-		<org.seleniumhq.version>2.33.0</org.seleniumhq.version>
+		<org.seleniumhq.version>2.37.0</org.seleniumhq.version>
 		<!--
 			keystore.propertyfile - define this in your settings.xml - the
 			location of the properties file for the keystore
@@ -84,6 +83,16 @@
 		<!-- main repository -->
 		<repository>
 		  <id>central</id>
+		  <name>Maven Central Repository</name>
+		  <layout>default</layout>
+		  <url>http://repo.maven.apache.org/maven2</url>
+		  <snapshots>
+			<enabled>false</enabled>
+		  </snapshots>
+		</repository>
+		<!-- old main repository (maven-gae-plugin 0.9.6) -->
+		<repository>
+		  <id>old central</id>
 		  <name>Maven Repository Switchboard</name>
 		  <layout>default</layout>
 		  <url>http://repo1.maven.org/maven2</url>
@@ -91,13 +100,13 @@
 			<enabled>false</enabled>
 		  </snapshots>
 		</repository>
-		<!-- java.net maven repo -->
+		<!-- java.net maven repo
 		<repository>
 		<id>maven2-repository.java.net</id>
 			<name>Java.net Repository for Maven</name>
 			<url>http://download.java.net/maven/2/</url>
 			<layout>default</layout>
-		</repository>
+		</repository> -->
 		<!-- spring framework repository -->
         <repository>
           <snapshots>
@@ -120,7 +129,7 @@
 		</repository>
 		<repository>
 		  <id>codehaus-snapshots</id>
-		  <url>https://nexus.codehaus.org/content/repositories/snapshots/</url>
+		  <url>https://nexus.codehaus.org/snapshots/</url>
 		  <snapshots>
 			<enabled>true</enabled>
 		    <updatePolicy>daily</updatePolicy>
@@ -144,16 +153,32 @@
 		<!-- main repository -->
 		<pluginRepository>
 		  <id>central</id>
+		  <name>Maven Central Repository</name>
+		  <layout>default</layout>
+		  <url>http://repo.maven.apache.org/maven2</url>
+		  <snapshots>
+			<enabled>false</enabled>
+		  </snapshots>
+		  <releases>
+			<updatePolicy>never</updatePolicy>
+		  </releases>
+		</pluginRepository>
+		<!-- old main repository (maven-gae-plugin) -->
+		<pluginRepository>
+		  <id>old central</id>
 		  <name>Maven Repository Switchboard</name>
 		  <layout>default</layout>
 		  <url>http://repo1.maven.org/maven2</url>
 		  <snapshots>
 			<enabled>false</enabled>
 		  </snapshots>
+		  <releases>
+			<updatePolicy>never</updatePolicy>
+		  </releases>
 		</pluginRepository>
 		<pluginRepository>
 		  <id>codehaus-snapshots</id>
-		  <url>https://nexus.codehaus.org/content/repositories/snapshots/</url>
+		  <url>https://nexus.codehaus.org/snapshots/</url>
 		  <snapshots>
 			<enabled>true</enabled>
 		    <updatePolicy>daily</updatePolicy>
@@ -177,12 +202,6 @@
           <name>plugins-snapshot</name>
           <url>https://repo.springsource.org/plugins-snapshot</url>
         </pluginRepository>
-		<!-- Repository contains the maven gae plugin -->
-		<pluginRepository>
-			<id>maven-gae-plugin-repo</id>
-			<name>Maven Google App Engine Repository</name>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
 		<dependency>
@@ -522,7 +541,7 @@
 		<dependency>
 		  <groupId>org.javarosa</groupId>
 		  <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>2013-09-30</version>
+		  <version>2014-04-29</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -972,7 +991,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.8</version>
+				<version>2.9</version>
 				<configuration>
 					<buildOutputDirectory>${project.basedir}/build/webapp</buildOutputDirectory>
 				</configuration>
@@ -980,7 +999,7 @@
 			  <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.4</version>
+				<version>2.8</version>
 			  </plugin>
 		</plugins>
 		<pluginManagement>
@@ -1258,7 +1277,7 @@
 						<configuration>
 						  <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
 						  <additionalClasspathElements>
-							<additionalClasspathElement>${selenium.home}/selenium-java-2.33.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.home}/selenium-java-2.37.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/bsh-1.3.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
@@ -1269,15 +1288,15 @@
 							<additionalClasspathElement>${selenium.libs}/commons-jxpath-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-lang3-3.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-logging-1.1.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.9.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/guava-14.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.11.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/guava-15.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-core-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-library-1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-2.12.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.12.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpclient-4.2.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpcore-4.2.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpmime-4.2.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-2.13.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.13.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpclient-4.3.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpcore-4.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpmime-4.3.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/ini4j-0.5.2.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jcommander-1.29.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jetty-websocket-8.1.8.jar</additionalClasspathElement>
@@ -1286,14 +1305,14 @@
 							<additionalClasspathElement>${selenium.libs}/json-20080701.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/junit-dep-4.11.jar</additionalClasspathElement>
 							<additionalClasspathElement>${localRepository}/junit/junit/${junit.version}/junit-${junit.version}.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.17.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.19.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/netty-3.5.7.Final.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/operadriver-1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.0.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/operadriver-1.5.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.0.4.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/serializer-2.7.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/testing-6.8.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/testing-6.8.5.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xalan-2.7.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xercesImpl-2.10.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xml-apis-1.4.01.jar</additionalClasspathElement>
