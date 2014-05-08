@@ -22,12 +22,12 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * A bean class used to capture configuration values about this server
- * deployment, its default mailto: domain and the service domains it 
+ * deployment, its default mailto: domain and the service domains it
  * authorizes.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class Realm implements InitializingBean {
 
@@ -37,7 +37,8 @@ public class Realm implements InitializingBean {
 	private Integer securePort;
 	private String hostname;
 	private String realmString;
-	
+	private boolean isGaeEnvironment = false;
+
 	public Realm() {
 	}
 
@@ -46,7 +47,6 @@ public class Realm implements InitializingBean {
 		if ( realmString == null ) {
 			throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
 		}
-		
 		Log log = LogFactory.getLog(Realm.class);
 		log.info("Version: " + UIConsts.VERSION_STRING);
 		log.info("Hostname: " + hostname);
@@ -55,24 +55,25 @@ public class Realm implements InitializingBean {
 		log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no") );
 		log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no") );
 		log.info("RealmString: " + realmString);
+        log.info("isGaeEnvironment: " + (isGaeEnvironment ? "yes" : "no") );
 	}
-	
+
 	public void setSecureChannelType(String type) {
 		if ( type != null && type.equals("REQUIRES_SECURE_CHANNEL") ) {
 			sslIsAvailable = true;
 		}
 	}
-	
+
 	public boolean isSslAvailable() {
 		return sslIsAvailable;
 	}
-	
+
 	public void setChannelType(String type) {
 		if ( type != null && type.equals("REQUIRES_SECURE_CHANNEL") ) {
 			sslIsRequired = true;
 		}
 	}
-	
+
 	public boolean isSslRequired() {
 		return sslIsRequired;
 	}
@@ -108,4 +109,13 @@ public class Realm implements InitializingBean {
 	public void setRealmString(String realmString) {
 		this.realmString = realmString;
 	}
+
+	public boolean getIsGaeEnvironment() {
+	  return isGaeEnvironment;
+	}
+
+	public void setIsGaeEnvironment(boolean isGaeEnvironment) {
+	  this.isGaeEnvironment = isGaeEnvironment;
+	}
+
 }

@@ -22,92 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Ignore;
-import org.opendatakit.aggregate.odktables.rest.KeyValueStoreConstants;
+import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
+import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
 @Ignore
 public class T {
-
-  public static class OdkTablesKeyValueStoreEntries {
-    public static final OdkTablesKeyValueStoreEntry entryOne;
-    public static final OdkTablesKeyValueStoreEntry entryTwo;
-    public static final OdkTablesKeyValueStoreEntry tableType;
-    public static final OdkTablesKeyValueStoreEntry displayName;
-    public static final OdkTablesKeyValueStoreEntry tableAccessControls;
-
-    public static final String entryOnePartition = "tablePartition";
-    public static final String entryOneAspect = "tableAspect";
-    public static final String entryOneKey = "theKey";
-    public static final String entryOneType = "object";
-    public static final String entryOneValue = "objectValue";
-    public static final String entryTwoPartition = "customPartition";
-    public static final String entryTwoAspect = "customAspect";
-    public static final String entryTwoKey = "laClave";
-    public static final String entryTwoType = "string";
-    public static final String entryTwoValue = "thereIsNoPassword";
-
-    public static final String tablePartition = KeyValueStoreConstants.PARTITION_TABLE;
-    public static final String tableAspect = KeyValueStoreConstants.ASPECT_DEFAULT;
-
-    public static final String displayNameKey = KeyValueStoreConstants.TABLE_DISPLAY_NAME;
-    public static final String displayNameType = "object";
-    public static final String displayNameValue = "\"People\"";
-
-    public static final String tableTypeKey = KeyValueStoreConstants.TABLE_TYPE;
-    public static final String tableTypeType = "string";
-    public static final TableType tableTypeValueAsTableType = TableType.DATA;
-    public static final String tableTypeValue = tableTypeValueAsTableType.name();
-
-    public static final String tableAccessControlTableIdKey = KeyValueStoreConstants.TABLE_ACCESS_CONTROL_TABLE_ID;
-    public static final String tableAccessControlTableIdType = "string";
-    public static final String tableAccessControlTableIdValue = "someId";
-    static {
-      entryOne = new OdkTablesKeyValueStoreEntry();
-      entryOne.tableId = T.tableId;
-      entryOne.partition = entryOnePartition;
-      entryOne.aspect = entryOneAspect;
-      entryOne.key = entryOneKey;
-      entryOne.type = entryOneType;
-      entryOne.value = entryOneValue;
-
-      entryTwo = new OdkTablesKeyValueStoreEntry();
-      entryTwo.tableId = T.tableId;
-      entryTwo.partition = entryTwoPartition;
-      entryTwo.aspect = entryTwoAspect;
-      entryTwo.key = entryTwoKey;
-      entryTwo.type = entryTwoType;
-      entryTwo.value = entryTwoValue;
-
-      tableType = new OdkTablesKeyValueStoreEntry();
-      tableType.tableId = T.tableId;
-      tableType.partition = tablePartition;
-      tableType.aspect = tableAspect;
-      tableType.key = tableTypeKey;
-      tableType.type = tableTypeType;
-      tableType.value = tableTypeValue;
-
-      displayName = new OdkTablesKeyValueStoreEntry();
-      displayName.tableId = T.tableId;
-      displayName.partition = tablePartition;
-      displayName.aspect = tableAspect;
-      displayName.key = displayNameKey;
-      displayName.type = displayNameType;
-      displayName.value = displayNameValue;
-
-      tableAccessControls = new OdkTablesKeyValueStoreEntry();
-      tableAccessControls.tableId = T.tableId;
-      tableAccessControls.partition = tablePartition;
-      tableAccessControls.aspect = tableAspect;
-      tableAccessControls.key = tableAccessControlTableIdKey;
-      tableAccessControls.type = tableAccessControlTableIdType;
-      tableAccessControls.value = tableAccessControlTableIdValue;
-
-    }
-  }
 
   public static class Columns {
 
@@ -185,9 +107,6 @@ public class T {
   public static final String appId = "app1";
   public static final String tableId = "people";
   public static final String tableMetadata = null;
-  public static final String propertiesETag = "propertiesETag";
-
-  public static final ArrayList<OdkTablesKeyValueStoreEntry> kvsEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
 
   public static final List<Column> columns = new ArrayList<Column>();
   public static final List<Column> columns2 = new ArrayList<Column>();
@@ -195,17 +114,14 @@ public class T {
   public static final List<Row> rows = new ArrayList<Row>();
 
   static {
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryOne);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.entryTwo);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableType);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.displayName);
-    kvsEntries.add(T.OdkTablesKeyValueStoreEntries.tableAccessControls);
     columns.add(T.Columns.column_name);
     columns.add(T.Columns.column_age);
     columns.add(T.Columns.column_weight);
     columns2.add(T.Columns.column_name);
     columns2.add(T.Columns.column_age);
-    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.form_id_1, T.locale_1, T.savepoint_timestamp_1, T.savepoint_creator_1, T.Data.DYLAN.getValues()));
-    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.form_id_2, T.locale_2, T.savepoint_timestamp_2, T.savepoint_creator_2, T.Data.JOHN.getValues()));
+    rows.add(Row.forInsert(T.Data.DYLAN.getId(), T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues()));
+    rows.add(Row.forInsert(T.Data.JOHN.getId(), T.form_id_2, T.locale_2, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_2, T.savepoint_creator_2, Scope.EMPTY_SCOPE, T.Data.JOHN.getValues()));
   };
 }

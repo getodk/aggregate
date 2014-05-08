@@ -16,39 +16,29 @@
 
 package org.opendatakit.aggregate.odktables.entity;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
-import org.opendatakit.aggregate.client.odktables.OdkTablesKeyValueStoreEntryClient;
-import org.opendatakit.aggregate.client.odktables.PropertiesResourceClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.RowResourceClient;
 import org.opendatakit.aggregate.client.odktables.ScopeClient;
 import org.opendatakit.aggregate.client.odktables.TableAclClient;
 import org.opendatakit.aggregate.client.odktables.TableAclResourceClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.odktables.TablePropertiesClient;
 import org.opendatakit.aggregate.client.odktables.TableResourceClient;
 import org.opendatakit.aggregate.client.odktables.TableRoleClient;
-import org.opendatakit.aggregate.client.odktables.TableTypeClient;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesKeyValueStoreEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.PropertiesResource;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.rest.entity.TableType;
 import org.opendatakit.common.utils.WebUtils;
 
 /**
@@ -68,92 +58,6 @@ public class UtilTransforms {
         client.getElementName(), client.getElementType(), client.getListChildElementKeys(),
         (client.getIsPersisted() != 0));
     return transformedColumn;
-  }
-
-  public static TableType transform(TableTypeClient clientType) {
-    TableType serverType = TableType.DATA;
-    switch (clientType) {
-    case DATA:
-      serverType = TableType.DATA;
-      break;
-    case SECURITY:
-      serverType = TableType.SECURITY;
-      break;
-    case SHORTCUT:
-      serverType = TableType.SHORTCUT;
-      break;
-    default:
-      log.error("unrecognized client table type type: " + clientType);
-    }
-    return serverType;
-  }
-
-  /**
-   * Transform server-side {@link OdkTablesKeyValueStoreEntry} into
-   * {@link OdkTablesKeyValueStoreEntryClient}.
-   *
-   * @param server
-   * @return
-   */
-  public static OdkTablesKeyValueStoreEntryClient transform(OdkTablesKeyValueStoreEntry server) {
-    OdkTablesKeyValueStoreEntryClient client = new OdkTablesKeyValueStoreEntryClient();
-    client.tableId = server.tableId;
-    client.partition = server.partition;
-    client.aspect = server.aspect;
-    client.key = server.key;
-    client.type = server.type;
-    client.value = server.value;
-    return client;
-  }
-
-  /**
-   * Convenience method. Identical to calling transform on individual entries
-   * and constructing up a list.
-   *
-   * @param serverEntries
-   * @return
-   */
-  public static ArrayList<OdkTablesKeyValueStoreEntryClient> transform(
-      List<OdkTablesKeyValueStoreEntry> serverEntries) {
-    ArrayList<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
-    for (OdkTablesKeyValueStoreEntry serverEntry : serverEntries) {
-      clientEntries.add(transform(serverEntry));
-    }
-    return clientEntries;
-  }
-
-  /**
-   * Transform client-side {@link OdkTablesKeyValueStoreEntryClient} into
-   * {@link OdkTablesKeyValueStoreEntry}.
-   *
-   * @param clientEntry
-   * @return
-   */
-  public static OdkTablesKeyValueStoreEntry transform(OdkTablesKeyValueStoreEntryClient clientEntry) {
-    OdkTablesKeyValueStoreEntry serverEntry = new OdkTablesKeyValueStoreEntry();
-    serverEntry.tableId = clientEntry.tableId;
-    serverEntry.partition = clientEntry.partition;
-    serverEntry.aspect = clientEntry.aspect;
-    serverEntry.key = clientEntry.key;
-    serverEntry.type = clientEntry.type;
-    serverEntry.value = clientEntry.value;
-    return serverEntry;
-  }
-
-  /**
-   * Convenience method. Identical to calling transform on individual entries
-   * and constructing up a list.
-   *
-   * @param serverEntries
-   * @return
-   */
-  public static ArrayList<OdkTablesKeyValueStoreEntry> transformToServerEntries(
-      List<OdkTablesKeyValueStoreEntryClient> clientEntries) {
-    ArrayList<OdkTablesKeyValueStoreEntry> serverEntries = new ArrayList<OdkTablesKeyValueStoreEntry>();
-    for (OdkTablesKeyValueStoreEntryClient clientEntry : clientEntries) {
-      serverEntries.add(transform(clientEntry));
-    }
-    return serverEntries;
   }
 
   /**
@@ -239,9 +143,9 @@ public class UtilTransforms {
   /**
    * Transforms the object into client-side TableEntryClient object.
    */
-  public static TableEntryClient transform(TableEntry serverEntry, String displayName) {
-    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(), displayName,
-        serverEntry.getDataETag(), serverEntry.getPropertiesETag(), serverEntry.getSchemaETag());
+  public static TableEntryClient transform(TableEntry serverEntry) {
+    TableEntryClient clientEntry = new TableEntryClient(serverEntry.getTableId(),
+        serverEntry.getDataETag(), serverEntry.getSchemaETag());
     return clientEntry;
   }
 
@@ -249,41 +153,17 @@ public class UtilTransforms {
    * This method transforms the TableResource into a client-side
    * TableResourceClient object.
    */
-  public static TableResourceClient transform(TableResource serverResource, String displayName) {
+  public static TableResourceClient transform(TableResource serverResource) {
     TableResourceClient clientResource = new TableResourceClient(new TableEntryClient(
-        serverResource.getTableId(), displayName, serverResource.getDataETag(),
-        serverResource.getPropertiesETag(), serverResource.getSchemaETag()));
+        serverResource.getTableId(), serverResource.getDataETag(),
+        serverResource.getSchemaETag()));
     clientResource.setAclUri(serverResource.getAclUri());
     clientResource.setDataUri(serverResource.getDataUri());
+    clientResource.setInstanceFilesUri(serverResource.getInstanceFilesUri());
     clientResource.setDiffUri(serverResource.getDiffUri());
-    clientResource.setPropertiesUri(serverResource.getPropertiesUri());
     clientResource.setSelfUri(serverResource.getSelfUri());
     clientResource.setDefinitionUri(serverResource.getDefinitionUri());
     return clientResource;
-  }
-
-  public static PropertiesResourceClient transform(PropertiesResource serverResource) {
-    TablePropertiesClient tpc = new TablePropertiesClient(serverResource.getSchemaETag(),
-        serverResource.getPropertiesETag(),
-        serverResource.getTableId(), UtilTransforms.transform(serverResource
-            .getKeyValueStoreEntries()));
-    PropertiesResourceClient resourceClient = new PropertiesResourceClient(tpc);
-    resourceClient.setSelfUri(serverResource.getSelfUri());
-    resourceClient.setTableUri(serverResource.getTableUri());
-    return resourceClient;
-  }
-
-  /**
-   * Transform the object into the client-side object.
-   */
-  public static TablePropertiesClient transform(TableProperties serverProperties) {
-    ArrayList<OdkTablesKeyValueStoreEntryClient> clientEntries = new ArrayList<OdkTablesKeyValueStoreEntryClient>();
-    for (OdkTablesKeyValueStoreEntry serverEntry : serverProperties.getKeyValueStoreEntries()) {
-      clientEntries.add(UtilTransforms.transform(serverEntry));
-    }
-    TablePropertiesClient tpClient = new TablePropertiesClient(serverProperties.getSchemaETag(),
-        serverProperties.getPropertiesETag(), serverProperties.getTableId(), clientEntries);
-    return tpClient;
   }
 
   /**

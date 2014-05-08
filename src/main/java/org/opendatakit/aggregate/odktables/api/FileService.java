@@ -18,9 +18,9 @@ package org.opendatakit.aggregate.odktables.api;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -32,8 +32,6 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.annotations.GZIP;
-import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
@@ -53,7 +51,7 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
  * @author sudar.sam@gmail.com
  *
  */
-@Path("/files")
+@Path("{appId}/files/{odkClientVersion}")
 public interface FileService {
 
   /**
@@ -65,16 +63,30 @@ public interface FileService {
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
   public static final String ERROR_MSG_INSUFFICIENT_PATH = "Not Enough Path Segments: must be at least 2.";
   public static final String ERROR_MSG_UNRECOGNIZED_APP_ID = "Unrecognized app id: ";
+  public static final String ERROR_MSG_PATH_NOT_UNDER_APP_ID = "File path is not under app id: ";
   public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
   @GET
   @Path("{filePath:.*}")
   @GZIP
-  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException;
 
   @POST
   @Path("{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
-  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
+  public Response putFile(@Context HttpServletRequest req, @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
 
+  /**
+   * Delete only works on full file paths -- you cannot specify a partial path or wildcard (*) path.
+   *
+   * @param appId
+   * @param odkClientVersion
+   * @param segments
+   * @return
+   * @throws IOException
+   * @throws ODKTaskLockException
+   */
+  @DELETE
+  @Path("{filePath:.*}")
+  public Response deleteFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException;
 }

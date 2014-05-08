@@ -36,20 +36,16 @@ public class TableEntryClient implements Serializable {
   private static final long serialVersionUID = -70945438534365403L;
 
   private String tableId;
-  private String displayName;
   private String dataETag;
-  private String propertiesETag;
   private String schemaETag;
 
   protected TableEntryClient() {
   }
 
-  public TableEntryClient(final String tableId, final String displayName, final String dataETag,
-      final String propertiesETag, final String schemaETag) {
+  public TableEntryClient(final String tableId, final String dataETag,
+      final String schemaETag) {
     this.tableId = tableId;
-    this.displayName = displayName;
     this.dataETag = dataETag;
-    this.propertiesETag = propertiesETag;
     this.schemaETag = schemaETag;
   }
 
@@ -61,28 +57,12 @@ public class TableEntryClient implements Serializable {
     this.tableId = tableId;
   }
 
-  public String getDisplayName() {
-    return this.displayName;
-  }
-
-  public void setDisplayName(final String displayName) {
-    this.displayName = displayName;
-  }
-
   public String getDataETag() {
     return this.dataETag;
   }
 
   public void setDataETag(final String dataETag) {
     this.dataETag = dataETag;
-  }
-
-  public String getPropertiesETag() {
-    return propertiesETag;
-  }
-
-  public void setPropertiesETag(String propertiesETag) {
-    this.propertiesETag = propertiesETag;
   }
 
   public String getSchemaETag() {
@@ -111,14 +91,6 @@ public class TableEntryClient implements Serializable {
       return false;
     }
 
-    if (propertiesETag == null) {
-      if (other.propertiesETag != null) {
-        return false;
-      }
-    } else if (!propertiesETag.equals(other.propertiesETag)) {
-      return false;
-    }
-
     if (schemaETag == null) {
       if (other.schemaETag != null) {
         return false;
@@ -135,14 +107,6 @@ public class TableEntryClient implements Serializable {
       return false;
     }
 
-    if (displayName == null) {
-      if (other.displayName != null) {
-        return false;
-      }
-    } else if (!displayName.equals(other.displayName)) {
-      return false;
-    }
-
     return true;
   }
 
@@ -151,16 +115,14 @@ public class TableEntryClient implements Serializable {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((dataETag == null) ? 0 : dataETag.hashCode());
-    result = prime * result + ((propertiesETag == null) ? 0 : propertiesETag.hashCode());
     result = prime * result + ((schemaETag == null) ? 0 : schemaETag.hashCode());
     result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
-    result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
     return result;
   }
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId + ", displayName=" + displayName + ", dataETag="
-        + dataETag + ", propertiesETag=" + propertiesETag + ", schemaETag=" + schemaETag + "]";
+    return "TableEntry [tableId=" + tableId + ", dataETag="
+        + dataETag + ", schemaETag=" + schemaETag + "]";
   }
 }

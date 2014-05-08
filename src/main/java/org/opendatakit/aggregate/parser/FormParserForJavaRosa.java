@@ -1199,7 +1199,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         treeElement.getName());
     String persistAsColumn = originalPersistAsColumn;
 
-    switch (treeElement.dataType) {
+    switch (treeElement.getDataType()) {
     case org.javarosa.core.model.Constants.DATATYPE_TEXT:
       /**
        * Text question type.
@@ -1295,7 +1295,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
                                                            * type otherwise
                                                            * unknown
                                                            */
-      if (treeElement.repeatable) {
+      if (treeElement.isRepeatable()) {
         // repeatable group...
         opaque.removeColumnName(persistAsTable, persistAsColumn);
         persistAsColumn = null;

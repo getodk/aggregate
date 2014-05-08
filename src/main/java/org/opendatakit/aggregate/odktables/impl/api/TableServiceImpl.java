@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -34,12 +35,11 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
-import org.opendatakit.aggregate.odktables.api.PropertiesService;
+import org.opendatakit.aggregate.odktables.api.InstanceFileService;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
-import org.opendatakit.aggregate.odktables.relation.DbKeyValueStore;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
@@ -62,9 +62,9 @@ public class TableServiceImpl implements TableService {
   private TableManager tm;
   private UriInfo info;
 
-  public TableServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req,
+  public TableServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
       @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
-    ServiceUtils.examineRequest(sc, req);
+    ServiceUtils.examineRequest(sc, req, httpHeaders);
     this.cc = ContextFactory.getCallingContext(sc, req);
     this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
     String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
@@ -78,11 +78,6 @@ public class TableServiceImpl implements TableService {
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : entries) {
       TableResource resource = getResource(appId, entry);
-      if (entry.getPropertiesETag() != null) {
-        String displayName = DbKeyValueStore.getDisplayName(entry.getTableId(),
-            entry.getPropertiesETag(), cc);
-        resource.setDisplayName(displayName);
-      }
       resources.add(resource);
     }
     // TODO: add QueryResumePoint support
@@ -128,12 +123,6 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public PropertiesService getProperties(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
-    PropertiesService service = new PropertiesServiceImpl(appId, tableId, info, userPermissions, cc);
-    return service;
-  }
-
-  @Override
   public DiffService getDiff(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
     DiffService service = new DiffServiceImpl(appId, tableId, info, userPermissions, cc);
     return service;
@@ -142,6 +131,12 @@ public class TableServiceImpl implements TableService {
   @Override
   public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
     TableAclService service = new TableAclServiceImpl(appId, tableId, info, userPermissions, cc);
+    return service;
+  }
+
+  @Override
+  public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException {
+    InstanceFileService service = new InstanceFileServiceImpl(appId, tableId, info, userPermissions, cc);
     return service;
   }
 
@@ -165,8 +160,8 @@ public class TableServiceImpl implements TableService {
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     URI self = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
-    URI properties = ub.clone().path(TableService.class, "getProperties").build(appId, tableId);
     URI data = ub.clone().path(TableService.class, "getData").build(appId, tableId);
+    URI instanceFiles = ub.clone().path(TableService.class, "getInstanceFiles").build(appId, tableId);
     URI diff = ub.clone().path(TableService.class, "getDiff").build(appId, tableId);
     URI acl = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
     URI definition = ub.clone().path(TableService.class, "getDefinition").build(appId, tableId);
@@ -174,8 +169,8 @@ public class TableServiceImpl implements TableService {
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());
     resource.setDefinitionUri(definition.toASCIIString());
-    resource.setPropertiesUri(properties.toASCIIString());
     resource.setDataUri(data.toASCIIString());
+    resource.setInstanceFilesUri(instanceFiles.toASCIIString());
     resource.setDiffUri(diff.toASCIIString());
     resource.setAclUri(acl.toASCIIString());
     return resource;

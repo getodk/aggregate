@@ -25,10 +25,10 @@ import com.google.gwt.user.client.Timer;
  * Background refresh timer that polls the server every 5 seconds for changes to
  * whichever tab is currently selected. If no UI interaction has happened for 5
  * minutes, the refreshes stop.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class RefreshTimer extends Timer {
 
@@ -44,22 +44,22 @@ public class RefreshTimer extends Timer {
   private static final int REFRESH_INTERVAL = 10000; // ms
   // private static final int REFRESH_INTERVAL = 100000; // ms
 
-  // MISC_REFRESH_MULTIPLIER is the multiplier to apply to 
-  // the REFRESH_INTERVAL to slow down the rate at which 
-  // an update occurs from the server.  See code for what 
+  // MISC_REFRESH_MULTIPLIER is the multiplier to apply to
+  // the REFRESH_INTERVAL to slow down the rate at which
+  // an update occurs from the server.  See code for what
   // pages have this multiplier.
   private static final int MISC_REFRESH_MULTIPLIER = 3;
-  
+
   // SUBMISSIONS_REFRESH_MULTIPLIER is the multiplier to apply
   // to the REFRESH_INTERVAL to slow down the rate at which
   // a fresh set of submissions is pulled from the server.
   private static final int SUBMISSIONS_REFRESH_MULTIPLIER = 7;
-  
+
   // PREFERENCES_REFRESH_MULTIPLIER is the multiplier to apply
-  // to the REFRESH_INTERVAL to slow down the rate at which 
+  // to the REFRESH_INTERVAL to slow down the rate at which
   // the preferences data is pulled from the server.
   private static final int PREFERENCES_REFRESH_MULTIPLIER = 6;
-  
+
   // STALL_INTERVALS is the number of intervals of no UI
   // interaction after which the timer will be stopped.
   private static final int UI_STALL_INTERVALS = 18; // 3 min / 10 sec each
@@ -71,10 +71,10 @@ public class RefreshTimer extends Timer {
 
   // intervalsElapsed counts the intervals since a UI interaction
   private int intervalsElapsed = 0;
-  
+
   // intervalsCount counts the total number of intervals since page load or refreshNow()
   private int intervalsCount = 0;
-  
+
   // isActive tracks the active/cancelled state of the timer
   // the GWT timer doesn't provide this information.
   private boolean isActive = false;
@@ -173,7 +173,7 @@ public class RefreshTimer extends Timer {
       return;
     }
     intervalsElapsed++;
-    
+
     if (currentSubTab != null) {
       SubTabInterface tabPanel = aggregateUI.getSubTab(currentSubTab);
       if (tabPanel == null) {
@@ -181,7 +181,7 @@ public class RefreshTimer extends Timer {
         GWT.log("currentSubTab (" + currentSubTab.getHashString()
             + ")could not be found in RefreshTimer.run()");
       }
-      
+
       switch (currentSubTab) {
       case FORMS:
       case TABLES:
@@ -228,7 +228,9 @@ public class RefreshTimer extends Timer {
     		  tabPanel.update();
     	  }
     	  break;
-      case MANAGEFILES:
+      case MANAGE_INSTANCE_FILES:
+      case MANAGE_TABLE_ID_FILES:
+      case MANAGE_APP_LEVEL_FILES:
         if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
           GWT.log("manage files refresh");
           tabPanel.update();

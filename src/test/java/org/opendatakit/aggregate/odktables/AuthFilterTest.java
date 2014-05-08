@@ -26,11 +26,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.TableProperties;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.AuthFilter;
@@ -101,9 +101,6 @@ public class AuthFilterTest {
     this.tm = new TableManager(T.appId, userPermissions, cc);
 
     TableEntry te = tm.createTable(tableId, T.columns);
-    PropertiesManager pm = new PropertiesManager( T.appId, tableId, userPermissions, cc);
-    TableProperties tableProperties = new TableProperties(te.getSchemaETag(), T.propertiesETag, tableId, T.kvsEntries);
-    pm.setProperties(tableProperties);
 
     this.am = new TableAclManager(T.appId, tableId, userPermissions, cc);
     List<Scope> scopes = Lists.newArrayList();
@@ -163,8 +160,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.DEFAULT, null));
     assertTrue(af.hasFilterScope(TablePermission.READ_ROW, row.getRowId(), row.getFilterScope()));
   }
@@ -174,8 +171,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, Maps.<String, String> newHashMap());
     row.setFilterScope(Scope.EMPTY_SCOPE);
     assertFalse(af.hasFilterScope(TablePermission.READ_ROW, row.getRowId(), row.getFilterScope()));
   }
@@ -185,8 +182,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, Maps.<String, String> newHashMap());
     row.setFilterScope(currentUserScope);
     assertTrue(af.hasFilterScope(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope()));
   }
@@ -196,8 +193,8 @@ public class AuthFilterTest {
       ODKDatastoreException {
     am.deleteAcl(currentUserScope);
     am.setAcl(currentUserScope, TableRole.FILTERED_READER);
-    Row row = Row.forInsert("1", T.form_id_1, T.locale_1,
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Maps.<String, String> newHashMap());
+    Row row = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
+        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, Maps.<String, String> newHashMap());
     row.setFilterScope(new Scope(Type.USER, currentUserScope.getValue() + "diff"));
     assertFalse(af.hasFilterScope(TablePermission.UNFILTERED_READ, row.getRowId(), row.getFilterScope()));
   }
