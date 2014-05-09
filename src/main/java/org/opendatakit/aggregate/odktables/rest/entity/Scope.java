@@ -24,7 +24,7 @@ public class Scope {
   public static final Scope EMPTY_SCOPE;
   static {
     EMPTY_SCOPE = new Scope();
-    EMPTY_SCOPE.initFields(null, null);
+    EMPTY_SCOPE.initFields(Scope.Type.DEFAULT, null);
   }
 
   public static Scope asScope(String filterType, String filterValue) {
