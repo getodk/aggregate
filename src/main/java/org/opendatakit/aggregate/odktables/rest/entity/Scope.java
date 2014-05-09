@@ -33,7 +33,9 @@ public class Scope {
       if (filterType.equals(Scope.Type.DEFAULT)) {
         return new Scope(Scope.Type.DEFAULT, null);
       } else {
-        return new Scope(type, filterValue);
+        return new Scope(type,
+            ( filterValue == null || filterValue.length() == 0)
+              ? null : filterValue);
       }
     } else {
       return Scope.EMPTY_SCOPE;
