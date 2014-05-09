@@ -212,7 +212,8 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   }
 
   /**
-   * Gets the element_names of the columns.
+   * Gets the element_keys of the columns.
+   * The element_names are insufficient for displaying the row contents.
    *
    * @return List<String> of the column names
    * @throws PermissionDeniedExceptionClient
@@ -230,9 +231,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTable(tableId);
-      ArrayList<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId,
+      ArrayList<String> elementKeys = DbColumnDefinitions.queryForDbColumnNames(tableId,
           entry.getSchemaETag(), cc);
-      return columnNames;
+      return elementKeys;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new EntityNotFoundExceptionClient(e);

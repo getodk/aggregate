@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.opendatakit.common.ermodel.Entity;
@@ -238,8 +239,9 @@ public class DbColumnDefinitions extends Relation {
   }
 
   /**
-   * Return the ELEMENT_NAMEs for the given table. Currently returns all, even
-   * the non-unit-of-retention ones.
+   * Return the actual database column names for the given table.
+   * Sort them so that complex type elements are together
+   * (they will be because of their common prefix).
    *
    * @param tableId
    * @param schemaETag
@@ -247,17 +249,19 @@ public class DbColumnDefinitions extends Relation {
    * @return
    * @throws ODKDatastoreException
    */
-  public static ArrayList<String> queryForColumnNames(String tableId, String schemaETag,
+  public static ArrayList<String> queryForDbColumnNames(String tableId, String schemaETag,
       CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbColumnDefinitions.queryForColumnNames", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
     query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaETag);
+    query.addFilter(IS_UNIT_OF_RETENTION, FilterOperation.EQUAL, true);
 
-    List<?> results = query.getDistinct(ELEMENT_NAME);
+    List<?> results = query.getDistinct(ELEMENT_KEY);
     ArrayList<String> list = new ArrayList<String>();
     for (Object o : results) {
       list.add((String) o);
     }
+    Collections.sort(list);
     return list;
   }
 
