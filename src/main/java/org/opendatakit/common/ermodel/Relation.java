@@ -624,7 +624,7 @@ public class Relation {
       switch (f.getDataType()) {
       case INTEGER:
         try {
-          backingObject.setLongField(f, (value == null) ? null : Long.parseLong(value));
+          backingObject.setLongField(f, (value == null || value.length() == 0) ? null : Long.parseLong(value));
         } catch (NumberFormatException e) {
           throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
               + f.getName());
@@ -632,7 +632,7 @@ public class Relation {
         break;
       case DECIMAL:
         try {
-          backingObject.setNumericField(f, (value == null) ? null : new BigDecimal(value));
+          backingObject.setNumericField(f, (value == null || value.length() == 0) ? null : new BigDecimal(value));
         } catch (NumberFormatException e) {
           throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
               + f.getName());
