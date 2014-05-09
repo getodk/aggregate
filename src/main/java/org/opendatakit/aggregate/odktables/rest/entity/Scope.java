@@ -24,7 +24,7 @@ public class Scope {
   public static final Scope EMPTY_SCOPE;
   static {
     EMPTY_SCOPE = new Scope();
-    EMPTY_SCOPE.initFields(null, null);
+    EMPTY_SCOPE.initFields(Type.DEFAULT, null);
   }
 
   public static Scope asScope(String filterType, String filterValue) {
@@ -33,7 +33,11 @@ public class Scope {
       if (filterType.equals(Scope.Type.DEFAULT)) {
         return new Scope(Scope.Type.DEFAULT, null);
       } else {
-        return new Scope(type, filterValue);
+        if ((filterValue == null) || (filterValue.length() <= 0)) {
+          return new Scope(type, null);
+        } else {
+          return new Scope(type, filterValue);
+        }
       }
     } else {
       return Scope.EMPTY_SCOPE;
