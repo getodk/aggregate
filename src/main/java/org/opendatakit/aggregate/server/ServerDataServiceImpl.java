@@ -38,6 +38,7 @@ import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
@@ -178,7 +179,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   }
 
   @Override
-  public void deleteRow(String tableId, String rowId) throws AccessDeniedException,
+  public void deleteRow(String tableId, String rowId, String rowETag) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -188,7 +189,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
           .getUriUser(), cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
-      dm.deleteRow(rowId);
+      dm.deleteRow(rowId, rowETag);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new EntityNotFoundExceptionClient(e);
@@ -207,6 +208,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (BadColumnNameException e) {
       e.printStackTrace();
       throw new BadColumnNameExceptionClient(e);
+    } catch (ETagMismatchException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
 
   }

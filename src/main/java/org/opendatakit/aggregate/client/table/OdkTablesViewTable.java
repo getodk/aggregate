@@ -262,7 +262,7 @@ public class OdkTablesViewTable extends FlexTable {
         if (!row.isDeleted()) {
           // now set the delete button
           setWidget(currentRow, 0, new OdkTablesDeleteRowButton(this,
-              currentTable.getTableId(), row.getRowId()));
+              currentTable.getTableId(), row.getRowId(), row.getRowETag()));
           int j = 1;
           for (String column : columnNames) {
             setWidget(currentRow, j, new HTML(row.getValues().get(column)));

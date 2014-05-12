@@ -35,7 +35,7 @@ public interface ServerDataServiceAsync {
   void createOrUpdateRow(String tableId, String rowId, RowClient row,
       AsyncCallback<RowClient> callback);
 
-  void deleteRow(String tableId, String rowId, AsyncCallback<Void> callback);
+  void deleteRow(String tableId, String rowId, String rowETag, AsyncCallback<Void> callback);
 
   void getColumnNames(String tableId, AsyncCallback<ArrayList<String>> callback);
 
