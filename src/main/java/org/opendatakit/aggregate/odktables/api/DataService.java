@@ -23,6 +23,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -40,6 +41,8 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DataService {
+
+  public static final String QUERY_ROW_ETAG = "row_etag";
 
   /**
    *
@@ -94,17 +97,19 @@ public interface DataService {
   /**
    *
    * @param rowId
+   * @param rowETag -- the row's ETag as known to the client (must match on server)
    * @return String dataETag on the table that marks this row as deleted.
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
    * @throws BadColumnNameException
+   * @throws ETagMismatchException
    */
   @DELETE
   @Path("{rowId}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*String*/ deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException;
+  public Response /*String*/ deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException,
+      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException;
 
 }

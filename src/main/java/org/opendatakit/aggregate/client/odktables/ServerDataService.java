@@ -54,7 +54,7 @@ public interface ServerDataService extends RemoteService {
       PermissionDeniedExceptionClient, ETagMismatchExceptionClient, BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient;
 
-  void deleteRow(String tableId, String rowId) throws AccessDeniedException,
+  void deleteRow(String tableId, String rowId, String rowETag) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient;
 

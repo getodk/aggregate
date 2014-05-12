@@ -338,8 +338,11 @@ public class DataManagerTest {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    dm.deleteRow(T.Data.DYLAN.getId());
-    dm.deleteRow(T.Data.JOHN.getId());
+    Row tmp;
+    tmp = dm.getRow(T.Data.DYLAN.getId());
+    dm.deleteRow(T.Data.DYLAN.getId(), tmp.getRowETag());
+    tmp = dm.getRow(T.Data.JOHN.getId());
+    dm.deleteRow(T.Data.JOHN.getId(), tmp.getRowETag());
     // this may actually require accessing the task lock to force a flush of the delete
     // under the new GAE development environment datastore.  Try sleeping for now...
     try {
@@ -419,10 +422,10 @@ public class DataManagerTest {
 //  }
 
   @Ignore
-  private void clearRows() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException {
+  private void clearRows() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
     List<Row> rows = dm.getRows();
     for ( Row old : rows ) {
-      dm.deleteRow(old.getRowId());
+      dm.deleteRow(old.getRowId(), old.getRowETag());
     }
   }
 

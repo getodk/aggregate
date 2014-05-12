@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -77,9 +78,9 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public Response deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException, ODKTaskLockException,
-      PermissionDeniedException, InconsistentStateException, BadColumnNameException {
-    String dataETagOnTableOfModification = dm.deleteRow(rowId);
+  public Response deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException, ODKTaskLockException,
+      PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
+    String dataETagOnTableOfModification = dm.deleteRow(rowId, rowETag);
     return Response.ok(dataETagOnTableOfModification).build();
   }
 

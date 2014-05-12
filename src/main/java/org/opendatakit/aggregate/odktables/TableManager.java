@@ -27,11 +27,15 @@ import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumn
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
+import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
+import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.relation.RUtil;
@@ -42,6 +46,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -424,6 +429,20 @@ public class TableManager {
         if ( logTableRelation != null ) {
           logTableRelation.dropRelation(cc);
         }
+        // delete the blob store
+        DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableEntry.getId(), cc);
+        blobStore.dropBlobEntitySet(cc);
+
+        // delete app-level files specific to this table
+        List<DbTableFileInfoEntity> entries = DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles(tableEntry.getId(), cc);
+        for ( DbTableFileInfoEntity entry : entries ) {
+          DbTableFiles tableFiles = new DbTableFiles(cc);
+          BlobEntitySet set = tableFiles.getBlobEntitySet(entry.getId(), cc);
+          set.remove(cc);
+          // and delete the entry that referred to this blobEntitySet
+          entry.delete(cc);
+        }
+
         // delete the user-defined columns
         for (DbColumnDefinitionsEntity colDef : colDefs) {
           colDef.delete(cc);
