@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 University of Washington
+ * Copyright (C) 2014 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,32 +20,34 @@ import org.opendatakit.aggregate.client.AggregateSubTabBase;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 
-public class OdkTablesDeleteFileButton extends AggregateButton {
+public class OdkTablesDeleteTableFileButton extends AggregateButton {
 
 
 	  private static final String BUTTON_TXT = "<img src=\"images/red_x.png\" />";
 	  private static final String TOOLTIP_TXT = "Delete File";
 	  private static final String HELP_BALLOON_TXT = "Completely delete this file.";
 
-	  private String rowId;
-	  private String tableId;
+     private final String odkClientApiVersion;
+	  private final String tableId;
+     private final String filePath;
 
 	  private AggregateSubTabBase basePanel;
 
-	  public OdkTablesDeleteFileButton(AggregateSubTabBase basePanel,
-	      String tableId, String rowId) {
+	  public OdkTablesDeleteTableFileButton(AggregateSubTabBase basePanel,
+	      String odkClientApiVersion, String tableId, String filePath) {
 	    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
 	    this.basePanel = basePanel;
+	    this.odkClientApiVersion = odkClientApiVersion;
 	    this.tableId = tableId;
-	    this.rowId = rowId;
+	    this.filePath = filePath;
 	  }
 
 	  @Override
 	  public void onClick(ClickEvent event) {
 	    super.onClick(event);
 
-	    OdkTablesConfirmDeleteFilePopup popup =
-	        new OdkTablesConfirmDeleteFilePopup(basePanel, tableId, rowId);
+	    OdkTablesConfirmDeleteTableFilePopup popup =
+	        new OdkTablesConfirmDeleteTableFilePopup(basePanel, odkClientApiVersion, tableId, filePath);
 	    popup.setPopupPositionAndShow(popup.getPositionCallBack());
 	  }
 

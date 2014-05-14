@@ -61,14 +61,6 @@ public interface ServerDataService extends RemoteService {
   ArrayList<String> getColumnNames(String tableId) throws DatastoreFailureException,
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, RequestFailureException;
 
-  ArrayList<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
-      RequestFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient;
-
-  ArrayList<FileSummaryClient> getMedialFilesKey(String tableId, String key)
-      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
-
   ArrayList<String> getFileRowInfoColumnNames();
 
   TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
@@ -87,7 +79,15 @@ public interface ServerDataService extends RemoteService {
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient;
 
-  void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
+  void deleteAppLevelFile(String odkClientApiVersion, String filepath) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
+
+  void deleteTableFile(String odkClientApiVersion, String tableId, String filepath) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
+
+  void deleteInstanceFile(String tableId, String rowId, String filepath) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient;
 
