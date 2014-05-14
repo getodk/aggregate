@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 University of Washington
+ * Copyright (C) 2014 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,25 +37,24 @@ import com.google.gwt.user.client.ui.HTML;
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesConfirmDeleteFilePopup extends AbstractPopupBase {
+public class OdkTablesConfirmDeleteAppLevelFilePopup extends AbstractPopupBase {
 
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Delete File";
   private static final String TOOLTIP_TXT = "Delete this file";
   private static final String HELP_BALLOON_TXT = "Delete this file.";
 
-  // the table to delete from
-  private final String tableId;
-  // the row you're deleting
-  private final String rowId;
+  private final String odkClientApiVersion;
+  // the file you're deleting
+  private final String filePath;
 
   @SuppressWarnings("unused")
   private AggregateSubTabBase basePanel;
 
-  public OdkTablesConfirmDeleteFilePopup(AggregateSubTabBase basePanel, String tableId, String rowId) {
+  public OdkTablesConfirmDeleteAppLevelFilePopup(AggregateSubTabBase basePanel, String odkClientApiVersion, String filePath) {
     super();
     this.basePanel = basePanel;
-    this.tableId = tableId;
-    this.rowId = rowId;
+    this.odkClientApiVersion = odkClientApiVersion;
+    this.filePath = filePath;
 
     AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     deleteButton.addClickHandler(new ExecuteDelete());
@@ -89,7 +88,7 @@ public class OdkTablesConfirmDeleteFilePopup extends AbstractPopupBase {
         }
       };
       // Make the call to the form service.
-      SecureGWT.getServerDataService().deleteTableFile(tableId, rowId, callback);
+      SecureGWT.getServerDataService().deleteAppLevelFile(odkClientApiVersion, filePath, callback);
       hide();
     }
   }

@@ -26,7 +26,7 @@ import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
-import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteFileButton;
+import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteInstanceFileButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -175,11 +175,13 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
 
       for (int j = 0; j < fileSummaries.size(); j++) {
         FileSummaryClient sum = fileSummaries.get(j);
-        setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteFileButton(this.basePanel,
-            currentTable.getTableId(), sum.getId()));
+        setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteInstanceFileButton(this.basePanel,
+            currentTable.getTableId(), sum.getId(), sum.getFilename()));
+        String filename = sum.getFilename();
         String[] args = sum.getFilename().split("/");
+        filename = filename.substring(args[0].length()+1);
         setText(currentRow, INSTANCE_ID_COLUMN, args[0]);
-        setText(currentRow, FILENAME_COLUMN, sum.getFilename());
+        setText(currentRow, FILENAME_COLUMN, filename);
         Widget downloadCol;
         if (sum.getDownloadUrl() != null) {
           Anchor downloadLink = new Anchor();
