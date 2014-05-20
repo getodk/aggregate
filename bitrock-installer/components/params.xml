@@ -970,13 +970,13 @@ If you are replacing an existing application already on appspot, the application
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>
-            <customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
+            <customErrorMessage>You must have a Java 1.7 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
             <promptUser>0</promptUser>
             <validVersionList>
                 <validVersion>
                     <bitness></bitness>
                     <maxVersion></maxVersion>
-                    <minVersion>1.6</minVersion>
+                    <minVersion>1.7</minVersion>
                     <requireJDK>0</requireJDK>
                     <vendor></vendor>
                 </validVersion>
