@@ -34,13 +34,20 @@ public class OdkTablesTabUI extends AggregateTabBase {
     addSubTab(new OdkTablesManageTableFilesSubTab(), SubTabs.MANAGE_TABLE_ID_FILES);
     addSubTab(new OdkTablesManageAppLevelFilesSubTab(), SubTabs.MANAGE_APP_LEVEL_FILES);
 
-    updateVisibilityOdkTablesAdminSubTabs();
+    updateVisibilityOdkTablesSubTabs();
 
     // register handler to manage tab selection change (and selecting our tab)
     registerClickHandlers(Tabs.ODKTABLES, baseUI);
   }
 
-  public void updateVisibilityOdkTablesAdminSubTabs() {
+  public void updateVisibilityOdkTablesSubTabs() {
+
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      changeVisibilityOdkTablesSyncSubTabs(true);
+    } else {
+      changeVisibilityOdkTablesSyncSubTabs(false);
+    }
 
     if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
@@ -51,6 +58,54 @@ public class OdkTablesTabUI extends AggregateTabBase {
 
   }
 
+  private void changeVisibilityOdkTablesSyncSubTabs(boolean outcome) {
+
+    // hide the current files sub-tab
+    {
+      SubTabInterface odkTablesCurrentTables = getSubTab(SubTabs.CURRENTTABLES);
+      OdkTablesCurrentTablesSubTab subTab = ((OdkTablesCurrentTablesSubTab) odkTablesCurrentTables);
+      if (subTab != null) {
+        subTab.setVisible(outcome);
+        if ( outcome ) {
+          subTab.update();
+        }
+      }
+    }
+    // hide the table data sub-tab
+    {
+      SubTabInterface odkTablesTableData = getSubTab(SubTabs.VIEWTABLE);
+      OdkTablesViewTableSubTab subTab = ((OdkTablesViewTableSubTab) odkTablesTableData);
+      if (subTab != null) {
+        subTab.setVisible(outcome);
+        if ( outcome ) {
+          subTab.update();
+        }
+      }
+    }
+    // hide the table attachments sub-tab
+    {
+      SubTabInterface odkTablesTableAttachments = getSubTab(SubTabs.MANAGE_INSTANCE_FILES);
+      OdkTablesManageInstanceFilesSubTab subTab = ((OdkTablesManageInstanceFilesSubTab) odkTablesTableAttachments);
+      if (subTab != null) {
+        subTab.setVisible(outcome);
+        if ( outcome ) {
+          subTab.update();
+        }
+      }
+    }
+
+    for (int i = 0; i < subTabPosition.size(); i++) {
+      if (subTabPosition.get(i).equals(SubTabs.CURRENTTABLES) ||
+          subTabPosition.get(i).equals(SubTabs.VIEWTABLE) ||
+          subTabPosition.get(i).equals(SubTabs.MANAGE_INSTANCE_FILES)) {
+        Widget w = ((Widget) this.getTabBar().getTab(i));
+        if (w != null) {
+          w.setVisible(outcome);
+        }
+      }
+    }
+  }
+
   private void changeVisibilityOdkTablesAdminSubTabs(boolean outcome) {
 
     // hide the app-level files sub-tab
@@ -59,6 +114,9 @@ public class OdkTablesTabUI extends AggregateTabBase {
       OdkTablesManageAppLevelFilesSubTab subTab = ((OdkTablesManageAppLevelFilesSubTab) odkTablesAdmin);
       if (subTab != null) {
         subTab.setVisible(outcome);
+        if ( outcome ) {
+          subTab.update();
+        }
       }
     }
     // hide the app-level files sub-tab
@@ -67,6 +125,9 @@ public class OdkTablesTabUI extends AggregateTabBase {
       OdkTablesManageTableFilesSubTab subTab = ((OdkTablesManageTableFilesSubTab) odkTablesAdmin);
       if (subTab != null) {
         subTab.setVisible(outcome);
+        if ( outcome ) {
+          subTab.update();
+        }
       }
     }
 

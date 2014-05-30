@@ -307,7 +307,7 @@ public class AggregateUI implements EntryPoint {
         if ( w != null && w instanceof OdkTablesTabUI ) {
           w.setVisible(odkTablesVisible);
           ((Widget) mainNav.getTabBar().getTab(i)).setVisible(odkTablesVisible);
-          ((OdkTablesTabUI) w).updateVisibilityOdkTablesAdminSubTabs();
+          ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
         }
       }
 
@@ -320,6 +320,29 @@ public class AggregateUI implements EntryPoint {
           } else {
             adminTab.hideOdkTablesSubTab();
           }
+        } else {
+          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
+        }
+      }
+    } else {
+      AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
+      if ( odkTables != null ) {
+        odkTables.setVisible(false);
+      }
+      for (int i = 0; i < mainNav.getWidgetCount(); i++) {
+        Widget w = mainNav.getWidget(i);
+        if ( w != null && w instanceof OdkTablesTabUI ) {
+          w.setVisible(false);
+          ((Widget) mainNav.getTabBar().getTab(i)).setVisible(false);
+          ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
+        }
+      }
+
+      if ( authorizedForTab(Tabs.ADMIN) ) {
+        AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
+        if (AminTab != null && AminTab instanceof AdminTabUI) {
+          AdminTabUI adminTab = (AdminTabUI) AminTab;
+          adminTab.hideOdkTablesSubTab();
         } else {
           AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
         }

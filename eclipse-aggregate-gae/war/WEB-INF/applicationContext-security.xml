@@ -55,6 +55,12 @@
 
 		<intercept-url pattern="/aggregateui/securityadminservice" access="hasRole('ROLE_SITE_ACCESS_ADMIN')" />
 
+		<intercept-url pattern="/aggregateui/odktablesadmin" access="hasRole('ROLE_ADMINISTER_TABLES')" />
+		<intercept-url pattern="/aggregateui/serverdataservice" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<intercept-url pattern="/aggregateui/serverdiffservice" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<intercept-url pattern="/aggregateui/servertableservice" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<intercept-url pattern="/aggregateui/servertableaclservice" access="hasRole('ROLE_ADMINISTER_TABLES')" />
+
 		<!--  grant clients access to all GWT code (/aggregateui), images, javascripts, resources, css -->
 		<intercept-url pattern="/aggregateui/**" access="true" />
 		<intercept-url pattern="/images/**" access="true" />

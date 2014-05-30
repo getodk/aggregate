@@ -54,12 +54,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 @Path("{appId}/files/{odkClientVersion}")
 public interface FileService {
 
-  /**
-   * The url of the servlet that for downloading and uploading files. This must
-   * be appended to the odk table service.
-   */
-  public static final String SERVLET_PATH = "files";
-
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
   public static final String ERROR_MSG_INSUFFICIENT_PATH = "Not Enough Path Segments: must be at least 2.";
   public static final String ERROR_MSG_UNRECOGNIZED_APP_ID = "Unrecognized app id: ";

@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -76,35 +77,39 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
    */
   @Override
   public void update() {
-    SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
 
-      @Override
-      public void onFailure(Throwable caught) {
-        if (caught instanceof AccessDeniedException) {
-          // swallow it...
+        @Override
+        public void onFailure(Throwable caught) {
+          if (caught instanceof AccessDeniedException) {
+            // swallow it...
+            AggregateUI.getUI().clearError();
+            ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
+            tableList.updateTableList(tables);
+            tableList.setVisible(true);
+
+            // for some reason this line was making a crazy number of
+            // refreshes when you were just sitting on the page.
+            // AggregateUI.getUI().getTimer().refreshNow();
+          } else {
+            AggregateUI.getUI().reportError(caught);
+          }
+        }
+
+        @Override
+        public void onSuccess(ArrayList<TableEntryClient> tables) {
           AggregateUI.getUI().clearError();
-          ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
           tableList.updateTableList(tables);
           tableList.setVisible(true);
 
           // for some reason this line was making a crazy number of
           // refreshes when you were just sitting on the page.
           // AggregateUI.getUI().getTimer().refreshNow();
-        } else {
-          AggregateUI.getUI().reportError(caught);
         }
-      }
-
-      @Override
-      public void onSuccess(ArrayList<TableEntryClient> tables) {
-        AggregateUI.getUI().clearError();
-        tableList.updateTableList(tables);
-        tableList.setVisible(true);
-
-        // for some reason this line was making a crazy number of
-        // refreshes when you were just sitting on the page.
-        // AggregateUI.getUI().getTimer().refreshNow();
-      }
-    });
+      });
+    }
   }
+
 }

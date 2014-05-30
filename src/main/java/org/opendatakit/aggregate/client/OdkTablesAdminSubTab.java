@@ -21,6 +21,7 @@ import org.opendatakit.aggregate.client.table.OdkAdminListTable;
 import org.opendatakit.aggregate.client.widgets.AddTablesAdminButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -51,29 +52,33 @@ public class OdkTablesAdminSubTab extends AggregateSubTabBase {
   @Override
   public void update() {
 
-    // Set up the callback object.
-    AsyncCallback<OdkTablesAdmin[]> callback = new AsyncCallback<OdkTablesAdmin[]>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        if ( caught instanceof AccessDeniedException ) {
-          // swallow it...
-          AggregateUI.getUI().clearError();
-          OdkTablesAdmin[] admins = new OdkTablesAdmin[0];
-          listOfAdmins.updateAdmin(admins);
-        } else {
-          AggregateUI.getUI().reportError(caught);
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+
+      // Set up the callback object.
+      AsyncCallback<OdkTablesAdmin[]> callback = new AsyncCallback<OdkTablesAdmin[]>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          if (caught instanceof AccessDeniedException) {
+            // swallow it...
+            AggregateUI.getUI().clearError();
+            OdkTablesAdmin[] admins = new OdkTablesAdmin[0];
+            listOfAdmins.updateAdmin(admins);
+          } else {
+            AggregateUI.getUI().reportError(caught);
+          }
         }
-      }
 
-      @Override
-      public void onSuccess(OdkTablesAdmin[] admins) {
-        AggregateUI.getUI().clearError();
-        listOfAdmins.updateAdmin(admins);
-      }
-    };
-    // Make the call to the form service.
-    SecureGWT.getOdkTablesAdminService().listAdmin(callback);
+        @Override
+        public void onSuccess(OdkTablesAdmin[] admins) {
+          AggregateUI.getUI().clearError();
+          listOfAdmins.updateAdmin(admins);
+        }
+      };
+      // Make the call to the form service.
+      SecureGWT.getOdkTablesAdminService().listAdmin(callback);
 
+    }
   }
 
 }
