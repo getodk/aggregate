@@ -19,6 +19,8 @@ package org.opendatakit.aggregate.server;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -346,23 +348,52 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfAppLevelFiles(cc);
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
 
+      UriBuilder ub;
+      try {
+        ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+        throw new RequestFailureException(e);
+      }
+      ub.path(FileService.class);
+
+      String appSegment = ServiceUtils.encodeSegment(appId);
+
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
         BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
         if (blobEntitySet.getAttachmentCount(cc) != 1) {
           continue;
         }
+
         String odkClientVersion = entry.getOdkClientVersion();
-        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-            + odkClientVersion + BasicConsts.FORWARDSLASH + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        String odkClientSegment = ServiceUtils.encodeSegment(odkClientVersion);
+
+        String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
+        String[] fullArgs = new String[pathSegments.length+2];
+        fullArgs[0] = appSegment;
+        fullArgs[1] = odkClientSegment;
+        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+          fullArgs[i+2] = ServiceUtils.encodeSegment(pathSegments[i]);
+        }
+
+        UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
+        URI getFile = tmp.build(fullArgs, true);
+        String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
             blobEntitySet.getContentLength(1, cc),
             entry.getId(), odkClientVersion, "", downloadUrl);
         completedSummaries.add(sum);
       }
+      Collections.sort(completedSummaries, new Comparator<FileSummaryClient>(){
+
+        @Override
+        public int compare(FileSummaryClient arg0, FileSummaryClient arg1) {
+          return arg0.getFilename().compareTo(arg1.getFilename());
+        }});
+
       tcc.files = completedSummaries;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
@@ -403,23 +434,53 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles(table.getTableId(), cc);
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
 
+      UriBuilder ub;
+      try {
+        ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+        throw new RequestFailureException(e);
+      }
+      ub.path(FileService.class);
+
+      String appSegment = ServiceUtils.encodeSegment(appId);
+
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
         BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
         if (blobEntitySet.getAttachmentCount(cc) != 1) {
           continue;
         }
+
         String odkClientVersion = entry.getOdkClientVersion();
-        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-            + odkClientVersion + BasicConsts.FORWARDSLASH + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        String odkClientSegment = ServiceUtils.encodeSegment(odkClientVersion);
+
+        String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
+        String[] fullArgs = new String[pathSegments.length+2];
+        fullArgs[0] = appSegment;
+        fullArgs[1] = odkClientSegment;
+        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+          fullArgs[i+2] = ServiceUtils.encodeSegment(pathSegments[i]);
+        }
+
+        UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
+        URI getFile = tmp.build(fullArgs, true);
+        String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
             blobEntitySet.getContentLength(1, cc),
             entry.getId(), odkClientVersion, tableId, downloadUrl);
         completedSummaries.add(sum);
       }
+
+      Collections.sort(completedSummaries, new Comparator<FileSummaryClient>(){
+
+        @Override
+        public int compare(FileSummaryClient arg0, FileSummaryClient arg1) {
+          return arg0.getFilename().compareTo(arg1.getFilename());
+        }});
+
       tcc.files = completedSummaries;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
@@ -504,6 +565,14 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         sum.setInstanceId(entry.getTopLevelAuri());
         completedSummaries.add(sum);
       }
+
+      Collections.sort(completedSummaries, new Comparator<FileSummaryClient>(){
+
+        @Override
+        public int compare(FileSummaryClient arg0, FileSummaryClient arg1) {
+          return arg0.getFilename().compareTo(arg1.getFilename());
+        }});
+
       tcc.files = completedSummaries;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
