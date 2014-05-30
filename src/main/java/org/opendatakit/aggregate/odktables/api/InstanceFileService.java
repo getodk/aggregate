@@ -66,31 +66,26 @@ public interface InstanceFileService {
   public static final String SERVLET_PATH = "files";
 
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
-  public static final String ERROR_MSG_INSUFFICIENT_PATH = "Not Enough Path Segments: must be at least 2.";
+  public static final String ERROR_MSG_INVALID_ROW_ID = "Invalid RowId.";
+  public static final String ERROR_MSG_INSUFFICIENT_PATH = "Not Enough Path Segments: must be at least 1.";
   public static final String ERROR_MSG_UNRECOGNIZED_APP_ID = "Unrecognized app id: ";
   public static final String ERROR_MSG_PATH_NOT_UNDER_APP_ID = "File path is not under app id: ";
   public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
   @GET
-  @Path("manifest")
+  @Path("{rowId}/manifest")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @GZIP
-  public Response getManifestAll(@QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getManifest(@PathParam("rowId") String rowId, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @GET
-  @Path("manifest/{filePath:.*}")
-  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  @Path("{rowId}/file/{filePath:.*}")
   @GZIP
-  public Response getManifest(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
-
-  @GET
-  @Path("file/{filePath:.*}")
-  @GZIP
-  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getFile(@PathParam("rowId") String rowId, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @POST
-  @Path("file/{filePath:.*}")
+  @Path("{rowId}/file/{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
-  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
+  public Response putFile(@Context HttpServletRequest req, @PathParam("rowId") String rowId, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
 
 }

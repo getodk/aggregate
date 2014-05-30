@@ -27,7 +27,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.annotations.GZIP;
+import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
@@ -95,8 +97,8 @@ public interface TableService {
    * @throws PermissionDeniedException
    */
   @DELETE
-  @Path("{tableId}")
-  public Response /*void*/ deleteTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException,
+  @Path("{tableId}/{schemaETag}/definition")
+  public Response /*void*/ deleteTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException,
       ODKTaskLockException, PermissionDeniedException;
 
   /**
@@ -107,12 +109,13 @@ public interface TableService {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
+   * @throws AppNameMismatchException
    */
   @GET
-  @Path("{tableId}/definition")
+  @Path("{tableId}/{schemaETag}/definition")
   @GZIP
-  public Response /*TableDefinitionResource*/ getDefinition(@PathParam("appId") String appId, @PathParam("tableId") String tableId)
-      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
+  public Response /*TableDefinitionResource*/ getDefinition(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag)
+      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, AppNameMismatchException;
 
   /**
    *
@@ -120,9 +123,12 @@ public interface TableService {
    * @param tableId
    * @return {@link DataService} for manipulating row data in this table.
    * @throws ODKDatastoreException
+   * @throws SchemaETagMismatchException
+   * @throws PermissionDeniedException
+   * @throws AppNameMismatchException
    */
-  @Path("{tableId}/rows")
-  public DataService getData(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
+  @Path("{tableId}/{schemaETag}/rows")
+  public DataService getData(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException;
 
   /**
    *
@@ -130,9 +136,12 @@ public interface TableService {
    * @param tableId
    * @return {@link InstanceFileService} for file attachments to the rows on this table.
    * @throws ODKDatastoreException
+   * @throws SchemaETagMismatchException
+   * @throws PermissionDeniedException
+   * @throws AppNameMismatchException
    */
-  @Path("{tableId}/attachments")
-  public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
+  @Path("{tableId}/{schemaETag}/attachments")
+  public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException;
 
   /**
    *
@@ -140,9 +149,12 @@ public interface TableService {
    * @param tableId
    * @return {@link DiffService} for the row-changes on this table.
    * @throws ODKDatastoreException
+   * @throws SchemaETagMismatchException
+   * @throws PermissionDeniedException
+   * @throws AppNameMismatchException
    */
-  @Path("{tableId}/diff")
-  public DiffService getDiff(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
+  @Path("{tableId}/{schemaETag}/diff")
+  public DiffService getDiff(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException;
 
   /**
    *
@@ -150,7 +162,8 @@ public interface TableService {
    * @param tableId
    * @return {@link TableAclService} for ACL management on this table.
    * @throws ODKDatastoreException
+   * @throws AppNameMismatchException
    */
   @Path("{tableId}/acl")
-  public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
+  public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException, AppNameMismatchException;
 }

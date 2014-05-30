@@ -15,6 +15,9 @@
  */
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -24,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
 /**
@@ -81,5 +85,48 @@ public class ServiceUtils {
     String pathInfo = req.getPathInfo();
     String query = req.getQueryString();
     boolean sessionId = req.isRequestedSessionIdValid();
+  }
+
+  /**
+   * Handles properly decoding a path segment of a URL for use over the wire.
+   * Converts URL segment back into arbitrary characters.
+   *
+   * @param encodedSegment
+   * @return decodedSegment
+   */
+  public static String decodeSegment(String segment) {
+    // the Android side uses UTF-8 encoding. This may or may not be appropriate...
+    String encoding = CharEncoding.UTF_8;
+    String decodedSegment;
+    try {
+      decodedSegment = URLDecoder.decode(segment, encoding);
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("Should be able to encode with " + encoding);
+    }
+    return decodedSegment;
+  }
+
+  /**
+   * Handles properly encoding a path segment of a URL for use over the wire.
+   * Converts arbitrary characters into those appropriate for a segment in a
+   * URL path.
+   *
+   * @param segment
+   * @return encodedSegment
+   */
+  public static String encodeSegment(String segment) {
+    // the segment can have URI-inappropriate characters. Encode it first...
+    // the Android side uses UTF-8 encoding. This may or may not be appropriate...
+//    String encodedSegment = Uri.encode(segment, null);
+    String encoding = CharEncoding.UTF_8;
+    String encodedSegment;
+    try {
+      encodedSegment = URLEncoder.encode(segment, encoding);
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("Should be able to encode with " + encoding);
+    }
+    return encodedSegment;
   }
 }

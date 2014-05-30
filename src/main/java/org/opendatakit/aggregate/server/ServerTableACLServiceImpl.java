@@ -36,12 +36,13 @@ import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -367,30 +368,35 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
   }
 
   private TableAclResourceClient getResource(TableAcl acl, TableAclManager am, UriInfo info) {
+    String appId = am.getAppId();
     String tableId = am.getTableId();
     Scope.Type type = acl.getScope().getType();
     String value = acl.getScope().getValue();
     if (value == null)
       value = "null";
 
+    String appSegment = ServiceUtils.encodeSegment(appId);
+    String tableSegment = ServiceUtils.encodeSegment(tableId);
+    String valueSegment = ServiceUtils.encodeSegment(value);
+
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    UriBuilder selfBuilder = ub.clone().path(TableService.class, "getAcl");
+    UriBuilder selfBuilder = ub.clone().path(TableService.class).path(TableService.class, "getAcl");
     URI self;
     switch (type) {
     case USER:
-      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(tableId, value);
+      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appSegment, tableSegment, valueSegment);
       break;
     case GROUP:
-      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(tableId, value);
+      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appSegment, tableSegment, valueSegment);
       break;
     case DEFAULT:
     default:
-      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(tableId);
+      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appSegment, tableSegment);
       break;
     }
-    URI acls = ub.clone().path(TableService.class, "getAcl").build(tableId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
+    URI acls = ub.clone().path(TableService.class).path(TableService.class, "getAcl").build(appSegment, tableSegment);
+    URI table = ub.clone().path(TableService.class).path(TableService.class, "getTable").build(appSegment, tableSegment);
 
     TableAclResource resource = new TableAclResource(acl);
     resource.setSelfUri(self.toASCIIString());

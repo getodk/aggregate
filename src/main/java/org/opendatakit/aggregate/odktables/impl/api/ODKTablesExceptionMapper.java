@@ -24,11 +24,13 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
@@ -50,7 +52,10 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     if (msg == null) {
       msg = e.toString();
     }
-    if (e instanceof BadColumnNameException) {
+    if (e instanceof AppNameMismatchException) {
+      return Response.status(Status.PRECONDITION_FAILED)
+        .entity(new Error(ErrorType.APP_NAME_MISMATCH, msg)).type(type).build();
+    } else if (e instanceof BadColumnNameException) {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_COLUMN_NAME, msg))
           .type(type).build();
     } else if (e instanceof ETagMismatchException) {
@@ -62,6 +67,9 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     } else if (e instanceof PermissionDeniedException) {
       return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
           .type(type).build();
+    } else if (e instanceof SchemaETagMismatchException) {
+      return Response.status(Status.PRECONDITION_FAILED)
+          .entity(new Error(ErrorType.SCHEMA_ETAG_MISMATCH, msg)).type(type).build();
     } else if (e instanceof TableAlreadyExistsException) {
       return Response.status(Status.CONFLICT).entity(new Error(ErrorType.TABLE_EXISTS, msg))
           .type(type).build();

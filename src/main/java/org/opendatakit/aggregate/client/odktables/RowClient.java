@@ -36,7 +36,7 @@ public class RowClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = -33968399625514663L;
+  private static final long serialVersionUID = -3396839962551463L;
 
   private String rowId;
 
@@ -53,6 +53,8 @@ public class RowClient implements Serializable {
   private String formId;
 
   private String locale;
+
+  private String savepointType;
 
   private String savepointTimestampIso8601Date;
 
@@ -96,6 +98,7 @@ public class RowClient implements Serializable {
     this.createUser = null;
     this.lastUpdateUser = null;
     this.filterScope = null;
+    this.savepointType = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestampIso8601Date = null;
@@ -131,6 +134,26 @@ public class RowClient implements Serializable {
     return this.values;
   }
 
+  public String getSavepointType() {
+    return this.savepointType;
+  }
+
+  public String getSavepointCreator() {
+    return this.savepointCreator;
+  }
+
+  public String getFormId() {
+    return this.formId;
+  }
+
+  public String getLocale() {
+    return this.locale;
+  }
+
+  public String getSavepointTimestampIso8601Date() {
+    return this.savepointTimestampIso8601Date;
+  }
+
   public void setRowId(final String rowId) {
     this.rowId = rowId;
   }
@@ -159,20 +182,8 @@ public class RowClient implements Serializable {
     this.values = values;
   }
 
-  public String getSavepointCreator() {
-    return this.savepointCreator;
-  }
-
-  public String getFormId() {
-    return this.formId;
-  }
-
-  public String getLocale() {
-    return this.locale;
-  }
-
-  public String getSavepointTimestampIso8601Date() {
-    return this.savepointTimestampIso8601Date;
+  public void setSavepointType(String savepointType) {
+    this.savepointType = savepointType;
   }
 
   public void setSavepointCreator(String savepointCreator) {
@@ -213,6 +224,7 @@ public class RowClient implements Serializable {
     result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
+    result = prime * result + ((savepointType == null) ? 0 : savepointType.hashCode());
     result = prime * result + ((savepointTimestampIso8601Date == null) ? 0 : savepointTimestampIso8601Date.hashCode());
     result = prime * result + ((savepointCreator == null) ? 0 : savepointCreator.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
@@ -234,16 +246,22 @@ public class RowClient implements Serializable {
       return false;
     RowClient other = (RowClient) obj;
 
-    if (rowId == null) {
-      if (other.rowId != null)
-        return false;
-    } else if (!rowId.equals(other.rowId))
-      return false;
-
     if (rowETag == null) {
       if (other.rowETag != null)
         return false;
     } else if (!rowETag.equals(other.rowETag))
+      return false;
+
+    if (savepointTimestampIso8601Date == null) {
+      if (other.savepointTimestampIso8601Date != null)
+        return false;
+    } else if (!savepointTimestampIso8601Date.equals(other.savepointTimestampIso8601Date))
+      return false;
+
+    if (rowId == null) {
+      if (other.rowId != null)
+        return false;
+    } else if (!rowId.equals(other.rowId))
       return false;
 
     if (deleted != other.deleted)
@@ -277,6 +295,12 @@ public class RowClient implements Serializable {
       if (other.locale != null)
         return false;
     } else if (!locale.equals(other.locale))
+      return false;
+
+    if (savepointType == null) {
+      if (other.savepointType != null)
+        return false;
+    } else if (!savepointType.equals(other.savepointType))
       return false;
 
     if (savepointTimestampIso8601Date == null) {
@@ -323,6 +347,8 @@ public class RowClient implements Serializable {
     builder.append(formId);
     builder.append(", locale=");
     builder.append(locale);
+    builder.append(", savepointType=");
+    builder.append(savepointType);
     builder.append(", savepointTimestampIso8601Date=");
     builder.append(savepointTimestampIso8601Date);
     builder.append(", savepointCreator=");

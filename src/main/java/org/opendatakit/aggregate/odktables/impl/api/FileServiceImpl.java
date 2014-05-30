@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,6 +36,7 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
@@ -42,7 +44,6 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
@@ -52,6 +53,7 @@ import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -64,7 +66,7 @@ public class FileServiceImpl implements FileService {
 
   private static final Log LOGGER = LogFactory.getLog(FileServiceImpl.class);
 
-  private static final String PATH_DELIMITER = "/";
+  private static final String ERROR_APP_ID_DIFFERS = "AppName differs";
 
   /**
    * The name of the folder that contains the files associated with a table in
@@ -76,6 +78,7 @@ public class FileServiceImpl implements FileService {
   private static final String ASSETS_FOLDER = "assets";
   private static final String CSV_FOLDER = "csv";
   private CallingContext cc;
+  private String appId;
   private TablesUserPermissions userPermissions;
   private UriInfo info;
 
@@ -83,6 +86,7 @@ public class FileServiceImpl implements FileService {
       @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     this.cc = ContextFactory.getCallingContext(sc, req);
+    this.appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
     this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
     this.info = info;
   }
@@ -92,6 +96,12 @@ public class FileServiceImpl implements FileService {
   @Path("{filePath:.*}")
   // because we want to get the whole path
   public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException {
+    appId = ServiceUtils.decodeSegment(appId);
+    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
+    if ( !this.appId.equals(appId) ) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
+    }
     // First we need to get the table id from the path. We're
     // going to be assuming that you're passing the entire path of the file
     // under /sdcard/opendatakit/appId/  e.g., tables/tableid/the/rest/of/path.
@@ -163,6 +173,12 @@ public class FileServiceImpl implements FileService {
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   // because we want to get the whole path
   public Response putFile(@Context HttpServletRequest req, @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments,  @GZIP byte[] content) throws IOException, ODKTaskLockException {
+    appId = ServiceUtils.decodeSegment(appId);
+    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
+    if ( !this.appId.equals(appId) ) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
+    }
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
@@ -223,10 +239,17 @@ public class FileServiceImpl implements FileService {
       // 3) persist the user-friendly table entry about the blob
       tableFileInfoRow.put(cc);
 
-      String locationUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-          + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-          + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-          + odkClientVersion + BasicConsts.FORWARDSLASH + wholePath;
+      UriBuilder ub = info.getBaseUriBuilder();
+      String[] pathSegments = wholePath.split(BasicConsts.FORWARDSLASH);
+      String[] fullArgs = new String[pathSegments.length+2];
+      fullArgs[0] = appId;
+      fullArgs[1] = odkClientVersion;
+      for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+        fullArgs[i+2] = pathSegments[i];
+      }
+      URI self = ub.clone().path(FileService.class).path(FileService.class, "getFile").build(fullArgs, true);
+      String locationUrl = self.toASCIIString();
+
       return Response.status((outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) ? Status.ACCEPTED : Status.CREATED)
                   .header("Location",locationUrl).build();
     } catch (ODKDatastoreException e) {
@@ -243,6 +266,12 @@ public class FileServiceImpl implements FileService {
   @Path("{filePath:.*}")
   // because we want to get the whole path
   public Response deleteFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException {
+    appId = ServiceUtils.decodeSegment(appId);
+    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
+    if ( !this.appId.equals(appId) ) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
+    }
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
@@ -293,9 +322,9 @@ public class FileServiceImpl implements FileService {
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (PathSegment segment : segments) {
-      sb.append(segment.toString());
+      sb.append(ServiceUtils.decodeSegment(segment.getPath()));
       if (i < segments.size() - 1) {
-        sb.append(PATH_DELIMITER);
+        sb.append(BasicConsts.FORWARDSLASH);
       }
       i++;
     }
@@ -325,11 +354,13 @@ public class FileServiceImpl implements FileService {
    */
   private String getTableIdFromPathSegments(List<PathSegment> segments) {
     String tableId = DbTableFileInfo.NO_TABLE_ID;
-    if ((segments.size() >= 2) && segments.get(0).toString().equals(TABLES_FOLDER)) {
-      tableId = segments.get(1).toString();
-    } else if ((segments.size() == 3) && segments.get(0).toString().equals(ASSETS_FOLDER)) {
-      if (segments.get(1).toString().equals(CSV_FOLDER)) {
-        String fileName = segments.get(2).toString();
+    String firstFolder = ServiceUtils.decodeSegment(segments.get(0).getPath());
+    if ((segments.size() >= 2) && firstFolder.equals(TABLES_FOLDER)) {
+      tableId = ServiceUtils.decodeSegment(segments.get(1).getPath());
+    } else if ((segments.size() == 3) && firstFolder.equals(ASSETS_FOLDER)) {
+      String secondFolder = ServiceUtils.decodeSegment(segments.get(1).getPath());
+      if (secondFolder.equals(CSV_FOLDER)) {
+        String fileName = ServiceUtils.decodeSegment(segments.get(2).getPath());
         String splits[] = fileName.split("\\.");
         if ( splits[splits.length-1].toLowerCase(Locale.ENGLISH).equals("csv") ) {
           tableId = splits[0];
