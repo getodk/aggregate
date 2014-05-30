@@ -75,9 +75,9 @@ public class DiffServiceImpl implements DiffService {
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class).path(TableService.class, "getData").path(DataService.class, "getRow")
+    URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
         .build(appSegment, tableSegment, schemaSegment, rowSegment);
-    URI table = ub.clone().path(TableService.class).path(TableService.class, "getTable").build(appSegment, tableSegment);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
     RowResource resource = new RowResource(row);
     resource.setSelfUri(self.toASCIIString());
     resource.setTableUri(table.toASCIIString());

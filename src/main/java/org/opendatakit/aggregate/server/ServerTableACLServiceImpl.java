@@ -381,7 +381,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    UriBuilder selfBuilder = ub.clone().path(TableService.class).path(TableService.class, "getAcl");
+    UriBuilder selfBuilder = ub.clone().path(TableService.class, "getAcl");
     URI self;
     switch (type) {
     case USER:
@@ -395,8 +395,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
       self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appSegment, tableSegment);
       break;
     }
-    URI acls = ub.clone().path(TableService.class).path(TableService.class, "getAcl").build(appSegment, tableSegment);
-    URI table = ub.clone().path(TableService.class).path(TableService.class, "getTable").build(appSegment, tableSegment);
+    URI acls = ub.clone().path(TableService.class, "getAcl").build(appSegment, tableSegment);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
 
     TableAclResource resource = new TableAclResource(acl);
     resource.setSelfUri(self.toASCIIString());

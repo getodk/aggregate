@@ -465,6 +465,15 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
       List<BinaryContent> contents = blobStore.getAllBinaryContents(cc);
 
+      UriBuilder ub;
+      try {
+        ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+        throw new RequestFailureException(e);
+      }
+      ub.path(TableService.class);
+
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (BinaryContent entry : contents) {
         if (entry.getUnrootedFilePath() == null) {
@@ -473,14 +482,6 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
 
         // the instanceId is the top-level auri for this record
         String rowSegment = ServiceUtils.encodeSegment(entry.getTopLevelAuri());
-
-        UriBuilder ub;
-        try {
-          ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
-        } catch (URISyntaxException e) {
-          e.printStackTrace();
-          throw new RequestFailureException(e);
-        }
 
         String[] pathSegments = entry.getUnrootedFilePath().split(BasicConsts.FORWARDSLASH);
         String[] fullArgs = new String[pathSegments.length+4];
@@ -492,7 +493,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
           fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
         }
 
-        UriBuilder tmp = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
+        UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
         URI getFile = tmp.build(fullArgs, true);
         String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
 
