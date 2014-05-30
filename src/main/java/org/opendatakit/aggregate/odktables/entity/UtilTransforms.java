@@ -74,6 +74,7 @@ public class UtilTransforms {
     serverRow.setValues(client.getValues());
     serverRow.setFormId(client.getFormId());
     serverRow.setLocale(client.getLocale());
+    serverRow.setSavepointType(client.getSavepointType());
     String isoDateStr = client.getSavepointTimestampIso8601Date();
     Date isoDate = (isoDateStr == null) ? null : WebUtils.parseDate(isoDateStr);
     String nanoTime = (isoDate == null) ? null : TableConstants.nanoSecondsFromMillis(isoDate.getTime());
@@ -200,6 +201,7 @@ public class UtilTransforms {
     // sync'd metadata
     row.setFormId(serverRow.getFormId());
     row.setLocale(serverRow.getLocale());
+    row.setSavepointType(serverRow.getSavepointType());
     String savepointTimestamp = serverRow.getSavepointTimestamp();
     Long time = TableConstants.milliSecondsFromNanos(savepointTimestamp);
     row.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(time)));
@@ -223,6 +225,7 @@ public class UtilTransforms {
     // sync'd metadata
     rowClient.setFormId(serverResource.getFormId());
     rowClient.setLocale(serverResource.getLocale());
+    rowClient.setSavepointType(serverResource.getSavepointType());
     String savepointTimestamp = serverResource.getSavepointTimestamp();
     Long time = TableConstants.milliSecondsFromNanos(savepointTimestamp);
     rowClient.setSavepointTimestampIso8601Date(time == null ? null : WebUtils.iso8601Date(new Date(

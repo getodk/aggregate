@@ -24,7 +24,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.impl.api.FileServiceImpl;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
@@ -35,9 +34,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntr
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.HtmlUtil;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Manages the manifest of files.
@@ -135,12 +132,6 @@ public class FileManifestManager {
       entry.contentLength = blobEntitySet.getContentLength(1, cc);
       entry.contentType = blobEntitySet.getContentType(1, cc);
       entry.md5hash = blobEntitySet.getContentHash(1, cc);
-      String urlPartial = cc.getServerURL() + BasicConsts.FORWARDSLASH
-          + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-          + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-          + odkClientVersion + BasicConsts.FORWARDSLASH+ pathToFile;
-       String urlComplete = HtmlUtil.createLinkWithProperties(urlPartial, properties);
-      entry.downloadUrl = urlComplete;
       manifestEntries.add(entry);
     }
     return manifestEntries;

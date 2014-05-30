@@ -662,7 +662,7 @@ NOTE: During subsequent upgrades, any changes to this text will invalidate all t
             <description>Please enter a valid Gmail account or Google Apps account:</description>
             <explanation>The user with this account will always have full permissions on the system.  
 
-The first time ODK Aggregate runs, only this user is allowed access to the system. Upon first logging in, they will be asked to complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system.
+The first time ODK Aggregate runs, only this user is allowed to log onto the system. Upon first logging in, they will be asked to complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system.
 </explanation>
             <value></value>
             <default></default>

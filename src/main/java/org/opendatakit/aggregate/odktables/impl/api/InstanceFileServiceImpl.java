@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,15 +34,15 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.InstanceFileService;
+import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
@@ -49,9 +50,9 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.ermodel.BlobEntitySet;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -70,8 +71,6 @@ public class InstanceFileServiceImpl implements InstanceFileService {
    */
   public static final String NO_TABLE_ID = "";
 
-  private static final String PATH_DELIMITER = "/";
-
   private static final String ERROR_FILE_VERSION_DIFFERS = "File on server does not match file being uploaded. Aborting upload. ";
 
   /**
@@ -80,212 +79,255 @@ public class InstanceFileServiceImpl implements InstanceFileService {
    *
    * @see #getTableIdFromPathSegments(List)
    */
-  private CallingContext cc;
-  private TablesUserPermissions userPermissions;
-  private UriInfo info;
-  private String appId;
-  private String tableId;
+  private final CallingContext cc;
+  private final TablesUserPermissions userPermissions;
+  private final UriInfo info;
+  private final String appId;
+  private final String tableId;
+  private final String schemaETag;
 
-  public InstanceFileServiceImpl(String appId, String tableId, UriInfo info,
+  public InstanceFileServiceImpl(String appId, String tableId, String schemaETag, UriInfo info,
       TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     this.cc = cc;
     this.appId = appId;
     this.tableId = tableId;
+    this.schemaETag = schemaETag;
     this.info = info;
     this.userPermissions = userPermissions;
   }
 
   @Override
   @GET
-  @Path("manifest")
+  @Path("{rowId}/manifest")
   @Produces({ MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8,
       ApiConstants.MEDIA_APPLICATION_XML_UTF8 })
-  // because we want to get the whole path
-  public Response getManifestAll(@QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
-      throws IOException {
-    // Now construct the path relative to this tableId's instances directory
-    String partialPath = constructPathFromSegments(new ArrayList<PathSegment>());
+  @GZIP
+  public Response getManifest(@PathParam("rowId") String rowId,
+      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
+    rowId = ServiceUtils.decodeSegment(rowId);
+    // The appId and tableId are from the surrounding TableService.
+    // The rowId is already pulled out.
+    // The segments are just rest/of/path in the full app-centric
+    // path of:
+    // appid/data/attachments/tableid/instances/instanceId/rest/of/path
+    String appSegment = ServiceUtils.encodeSegment(appId);
+    String tableSegment = ServiceUtils.encodeSegment(tableId);
+    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
+    String rowSegment = ServiceUtils.encodeSegment(rowId);
+
+    UriBuilder ub = info.getBaseUriBuilder();
+    UriBuilder full = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest");
+    URI self = full.build(appSegment, tableSegment, schemaSegment, rowSegment);
+    String manifestUrl = self.toASCIIString();
 
     try {
-      OdkTablesFileManifest manifest = getManifestBase(partialPath);
-      if (manifest == null) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.")
-            .build();
-      } else {
-        ResponseBuilder rBuild = Response.ok(manifest);
-        if (asAttachment != null && !"".equals(asAttachment)) {
-          // Set the filename we're downloading to the disk.
-          rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
-              + asAttachment + "\"");
+      userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
+
+      ArrayList<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
+      DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
+      BlobEntitySet instance = blobStore.getBlobEntitySet(rowId, cc);
+
+      int count = instance.getAttachmentCount(cc);
+      for ( int i = 1 ; i <= count ; ++i ) {
+        OdkTablesFileManifestEntry entry = new OdkTablesFileManifestEntry();
+        entry.filename = instance.getUnrootedFilename(i, cc);
+        entry.contentLength = instance.getContentLength(i, cc);
+        entry.contentType = instance.getContentType(i, cc);
+        entry.md5hash = instance.getContentHash(i, cc);
+
+        String[] pathSegments = entry.filename.split(BasicConsts.FORWARDSLASH);
+        String[] fullArgs = new String[pathSegments.length+4];
+        fullArgs[0] = appSegment;
+        fullArgs[1] = tableSegment;
+        fullArgs[2] = schemaSegment;
+        fullArgs[3] = rowSegment;
+        for ( int j = 0 ; j < pathSegments.length ; ++j ) {
+          fullArgs[j+4] = ServiceUtils.encodeSegment(pathSegments[j]);
         }
-        return rBuild.status(Status.OK).build();
+
+        URI getFile = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile").build(fullArgs, true);
+        String locationUrl = getFile.toASCIIString();
+        entry.downloadUrl = locationUrl;
+
+        manifestEntries.add(entry);
       }
+      OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
+
+      ResponseBuilder rBuild = Response.ok(manifest);
+      if (asAttachment != null && !"".equals(asAttachment)) {
+        // Set the filename we're downloading to the disk.
+        rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
+            + "manifest.json" + "\"");
+      }
+      return rBuild.status(Status.OK).build();
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity("Unable to retrieve manifest of attachments for: " + partialPath).build();
+          .entity("Unable to retrieve manifest of attachments for: " + manifestUrl).build();
+    } catch (PermissionDeniedException e) {
+      LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
     }
   }
 
-  @Override
+
   @GET
-  @Path("manifest/{filePath:.*}")
-  @Produces({ MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8,
-      ApiConstants.MEDIA_APPLICATION_XML_UTF8 })
+  @Path("{rowId}/file/{filePath:.*}")
+  @GZIP
   // because we want to get the whole path
-  public Response getManifest(@PathParam("filePath") List<PathSegment> segments,
+  public Response getFile(@PathParam("rowId") String rowId,
+      @PathParam("filePath") List<PathSegment> segments,
       @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
-    if (segments.size() < 1) {
-      return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
+    rowId = ServiceUtils.decodeSegment(rowId);
+    // The appId and tableId are from the surrounding TableService.
+    // The rowId is already pulled out.
+    // The segments are just rest/of/path in the full app-centric
+    // path of:
+    // appid/data/attachments/tableid/instances/instanceId/rest/of/path
+    if (rowId == null || rowId.length() == 0) {
+      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INVALID_ROW_ID)
           .build();
     }
-    // Now construct the path relative to this tableId's instances directory
-    String partialPath = constructPathFromSegments(segments);
-
-    try {
-      OdkTablesFileManifest manifest = getManifestBase(partialPath);
-      if (manifest == null) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR)
-            .entity("Unable to retrieve manifest of attachments for: " + partialPath).build();
-      } else {
-        ResponseBuilder rBuild = Response.ok(manifest);
-        if (asAttachment != null && !"".equals(asAttachment)) {
-          // Set the filename we're downloading to the disk.
-          rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
-              + asAttachment + "\"");
-        }
-        return rBuild.status(Status.OK).build();
-      }
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity("Unable to retrieve manifest of attachments for: " + partialPath).build();
-    }
-  }
-
-  // because we want to get the whole path
-  private OdkTablesFileManifest getManifestBase(String partialPath) throws IOException,
-      ODKDatastoreException {
-    // The appId and tableId are from the surrounding TableService.
-    // The partialPath is just instanceId/rest/of/path
-    // portion of the full app-centric path:
-    // appid/tables/tableid/instances/instanceId/rest/of/path
-
-    ArrayList<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
-    DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
-    List<BinaryContent> matchingContent;
-    if ( partialPath == null || partialPath.length() == 0 ) {
-      matchingContent = blobStore.getAllBinaryContents(cc);
-    } else {
-      matchingContent = blobStore.getAllMatchingPathPrefixBinaryContents(partialPath, cc);
-    }
-    for (BinaryContent bc : matchingContent) {
-      OdkTablesFileManifestEntry entry = new OdkTablesFileManifestEntry();
-      entry.filename = bc.getUnrootedFilePath();
-      entry.contentLength = bc.getContentLength();
-      entry.contentType = bc.getContentType();
-      entry.md5hash = bc.getContentHash();
-      entry.downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-          + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-          + appId + BasicConsts.FORWARDSLASH + "tables" + BasicConsts.FORWARDSLASH
-          + tableId + BasicConsts.FORWARDSLASH + "attachments/file/" + entry.filename;
-      manifestEntries.add(entry);
-    }
-    OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-    return manifest;
-  }
-
-  @Override
-  @GET
-  @Path("file/{filePath:.*}")
-  // because we want to get the whole path
-  public Response getFile(@PathParam("filePath") List<PathSegment> segments,
-      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
-    // The appId and tableId are from the surrounding TableService.
-    // The segments are just instanceId/rest/of/path in the full app-centric
-    // path of:
-    // appid/tables/tableid/instances/instanceId/rest/of/path
-    if (segments.size() <= 1) {
-      return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
+    if (segments.size() < 1) {
+      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
           .build();
     }
     // Now construct the whole path.
     String partialPath = constructPathFromSegments(segments);
 
-    String fullPath = appId + "/tables/" + tableId + "/instances/" + partialPath;
+    String appSegment = ServiceUtils.encodeSegment(appId);
+    String tableSegment = ServiceUtils.encodeSegment(tableId);
+    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
+    String rowSegment = ServiceUtils.encodeSegment(rowId);
 
-    byte[] fileBlob;
-    String contentType;
-    Long contentLength;
+    UriBuilder ub = info.getBaseUriBuilder();
+
+    String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
+    String[] fullArgs = new String[pathSegments.length+4];
+    fullArgs[0] = appSegment;
+    fullArgs[1] = tableSegment;
+    fullArgs[2] = schemaSegment;
+    fullArgs[3] = rowSegment;
+    for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+      fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
+    }
+
+    UriBuilder tmp = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
+    URI getFile = tmp.build(fullArgs, true);
+    String locationUrl = getFile.toASCIIString();
+
     try {
+      userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
+
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
-      BlobEntitySet blobEntitySet = blobStore.getBlobEntitySet(partialPath, cc);
-      // We should only ever have one, as wholePath is the primary key.
-      if (blobEntitySet.getAttachmentCount(cc) > 1) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR)
-            .entity("More than one file specified for: " + partialPath).build();
+      BlobEntitySet instance = blobStore.getBlobEntitySet(rowId, cc);
+
+      int count = instance.getAttachmentCount(cc);
+      for (int i = 1; i <= count; ++i) {
+        String path = instance.getUnrootedFilename(i, cc);
+        if (path != null && path.equals(partialPath)) {
+          byte[] fileBlob = instance.getBlob(i, cc);
+          String contentType = instance.getContentType(i, cc);
+          Long contentLength = instance.getContentLength(i, cc);
+
+          // And now prepare everything to be returned to the caller.
+          if (fileBlob != null && contentType != null && contentLength != null
+              && contentLength != 0L) {
+            ResponseBuilder rBuild = Response.ok(fileBlob, contentType);
+            if (asAttachment != null && !"".equals(asAttachment)) {
+              // Set the filename we're downloading to the disk.
+              rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
+                  + partialPath + "\"");
+            }
+            return rBuild.status(Status.OK).build();
+          } else {
+            return Response.status(Status.NOT_FOUND)
+                .entity("File content not yet available for: " + locationUrl).build();
+          }
+
+        }
       }
-      if (blobEntitySet.getAttachmentCount(cc) < 1) {
-        return Response.status(Status.NOT_FOUND).entity("No file found for path: " + fullPath)
-            .build();
-      }
-      fileBlob = blobEntitySet.getBlob(1, cc);
-      contentType = blobEntitySet.getContentType(1, cc);
-      contentLength = blobEntitySet.getContentLength(1, cc);
+      return Response.status(Status.NOT_FOUND).entity("No file found for: " + locationUrl).build();
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity("Unable to retrieve attachment and access attributes for: " + fullPath).build();
-    }
-    // And now prepare everything to be returned to the caller.
-    if (fileBlob != null && contentType != null && contentLength != null && contentLength != 0L) {
-      ResponseBuilder rBuild = Response.ok(fileBlob, contentType);
-      if (asAttachment != null && !"".equals(asAttachment)) {
-        // Set the filename we're downloading to the disk.
-        rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + fullPath
-            + "\"");
-      }
-      return rBuild.status(Status.OK).build();
-    } else {
-      return Response.status(Status.NOT_FOUND)
-          .entity("File content not yet available for: " + fullPath).build();
+          .entity("Unable to retrieve attachment and access attributes for: " + locationUrl)
+          .build();
+    } catch (PermissionDeniedException e) {
+      LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
     }
   }
 
   @Override
   @POST
-  @Path("file/{filePath:.*}")
+  @Path("{rowId}/file/{filePath:.*}")
   @Consumes({ MediaType.MEDIA_TYPE_WILDCARD })
   // because we want to get the whole path
-  public Response putFile(@Context HttpServletRequest req,
+  public Response putFile(@Context HttpServletRequest req, @PathParam("rowId") String rowId,
       @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException,
       ODKTaskLockException {
-    if (segments.size() <= 1) {
-      return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
+    rowId = ServiceUtils.decodeSegment(rowId);
+
+    if (segments.size() < 1) {
+      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
           .build();
     }
     // The appId and tableId are from the surrounding TableService.
-    // The segments are just instanceId/rest/of/path in the full app-centric
+    // The rowId is already pulled out.
+    // The segments are just rest/of/path in the full app-centric
     // path of:
-    // appid/tables/tableid/instances/instanceId/rest/of/path
+    // appid/data/attachments/tableid/instances/instanceId/rest/of/path
     String partialPath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
+    String md5Hash = CommonFieldsBase.newMD5HashUri(content);
     try {
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
 
+      String appSegment = ServiceUtils.encodeSegment(appId);
+      String tableSegment = ServiceUtils.encodeSegment(tableId);
+      String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
+      String rowSegment = ServiceUtils.encodeSegment(rowId);
+
+      UriBuilder ub = info.getBaseUriBuilder();
+
+      String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
+      String[] fullArgs = new String[pathSegments.length+4];
+      fullArgs[0] = appSegment;
+      fullArgs[1] = tableSegment;
+      fullArgs[2] = schemaSegment;
+      fullArgs[3] = rowSegment;
+      for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+        fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
+      }
+
+      UriBuilder tmp = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
+      URI getFile = tmp.build(fullArgs, true);
+      String locationUrl = getFile.toASCIIString();
+
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
-      BlobEntitySet instance = blobStore.newBlobEntitySet(partialPath, cc);
-      BlobSubmissionOutcome outcome = instance.addBlob(content, contentType, partialPath, false, cc);
+      BlobEntitySet instance = blobStore.newBlobEntitySet(rowId, cc);
+      int count = instance.getAttachmentCount(cc);
+      for (int i = 1; i <= count; ++i) {
+        String path = instance.getUnrootedFilename(i, cc);
+        if (path != null && path.equals(partialPath)) {
+          // we already have this in our store -- check that it is identical.
+          // if not, we have a problem!!!
+          if (md5Hash.equals(instance.getContentHash(i, cc))) {
+            return Response.status(Status.CREATED).header("Location", locationUrl).build();
+          } else {
+            return Response.status(Status.BAD_REQUEST)
+                .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath).build();
+          }
+        }
+      }
+      BlobSubmissionOutcome outcome = instance
+          .addBlob(content, contentType, partialPath, false, cc);
       if (outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) {
         return Response.status(Status.BAD_REQUEST)
             .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath).build();
       }
-
-      String locationUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH + appId
-          + BasicConsts.FORWARDSLASH + "tables" + BasicConsts.FORWARDSLASH + tableId
-          + BasicConsts.FORWARDSLASH + "attachments/file/" + partialPath;
-
       return Response.status(Status.CREATED).header("Location", locationUrl).build();
     } catch (ODKDatastoreException e) {
       LOGGER.error(("ODKTables file upload persistence error: " + e.getMessage()));
@@ -315,9 +357,9 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (PathSegment segment : segments) {
-      sb.append(segment.toString());
+      sb.append(ServiceUtils.decodeSegment(segment.getPath()));
       if (i < segments.size() - 1) {
-        sb.append(PATH_DELIMITER);
+        sb.append(BasicConsts.FORWARDSLASH);
       }
       i++;
     }

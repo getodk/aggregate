@@ -42,11 +42,13 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DiffServiceImpl implements DiffService {
-  private DataManager dm;
-  private UriInfo info;
+  private final String schemaETag;
+  private final DataManager dm;
+  private final UriInfo info;
 
-  public DiffServiceImpl(String appId, String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+  public DiffServiceImpl(String appId, String tableId, String schemaETag, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
+    this.schemaETag = schemaETag;
     this.dm = new DataManager(appId, tableId, userPermissions, cc);
     this.info = info;
   }
@@ -54,6 +56,7 @@ public class DiffServiceImpl implements DiffService {
   @Override
   public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+    dataETag = ServiceUtils.decodeSegment(dataETag);
     List<Row> rows;
     rows = dm.getRowsSince(dataETag);
     RowResourceList rowResourceList = new RowResourceList(getResources(rows));
@@ -64,11 +67,17 @@ public class DiffServiceImpl implements DiffService {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
     String rowId = row.getRowId();
+
+    String appSegment = ServiceUtils.encodeSegment(appId);
+    String tableSegment = ServiceUtils.encodeSegment(tableId);
+    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
+    String rowSegment = ServiceUtils.encodeSegment(rowId);
+
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-        .build(appId, tableId, rowId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    URI self = ub.clone().path(TableService.class).path(TableService.class, "getData").path(DataService.class, "getRow")
+        .build(appSegment, tableSegment, schemaSegment, rowSegment);
+    URI table = ub.clone().path(TableService.class).path(TableService.class, "getTable").build(appSegment, tableSegment);
     RowResource resource = new RowResource(row);
     resource.setSelfUri(self.toASCIIString());
     resource.setTableUri(table.toASCIIString());

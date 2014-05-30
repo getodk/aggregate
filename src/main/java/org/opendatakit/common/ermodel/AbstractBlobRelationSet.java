@@ -24,7 +24,6 @@ import org.opendatakit.common.datamodel.RefBlob;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
-import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
@@ -399,24 +398,6 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
     Query q = cc.getDatastore().createQuery(ctntRelation, "getAllContents", cc.getCurrentUser());
     List<BinaryContent> bc = (List<BinaryContent>) q.executeQuery();
     return bc;
-  }
-
-  public List<BinaryContent> getAllMatchingPathPrefixBinaryContents(String pathPrefix, CallingContext cc) throws ODKDatastoreException {
-    // first try for an exact match
-    Query q = cc.getDatastore().createQuery(ctntRelation, "getAllContents", cc.getCurrentUser());
-    q.addFilter(ctntRelation.unrootedFilePath, FilterOperation.EQUAL, pathPrefix);
-    List<BinaryContent> bcExact = (List<BinaryContent>) q.executeQuery();
-    // now try for a partial match
-    q = cc.getDatastore().createQuery(ctntRelation, "getAllContents", cc.getCurrentUser());
-    if ( !pathPrefix.endsWith("/") ) {
-      pathPrefix = pathPrefix + "/";
-    }
-    q.addFilter(ctntRelation.unrootedFilePath, FilterOperation.GREATER_THAN_OR_EQUAL, pathPrefix);
-    String endPrefix = pathPrefix.substring(0,pathPrefix.length()-1) + "0";  // ('/'+1) == '0' in ASCII
-    q.addFilter(ctntRelation.unrootedFilePath, FilterOperation.LESS_THAN, endPrefix);
-    List<BinaryContent> bc = (List<BinaryContent>) q.executeQuery();
-    bcExact.addAll(bc);
-    return bcExact;
   }
 
   @SuppressWarnings("unused")

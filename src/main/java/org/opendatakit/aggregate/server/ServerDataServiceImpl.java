@@ -16,10 +16,13 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.UriBuilder;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
@@ -36,11 +39,14 @@ import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.FileService;
+import org.opendatakit.aggregate.odktables.api.InstanceFileService;
+import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
@@ -452,6 +458,10 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         throw new ODKEntityNotFoundException();
       }
 
+      String appSegment = ServiceUtils.encodeSegment(appId);
+      String tableSegment = ServiceUtils.encodeSegment(tableId);
+      String schemaSegment = ServiceUtils.encodeSegment(table.getSchemaETag());
+
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
       List<BinaryContent> contents = blobStore.getAllBinaryContents(cc);
 
@@ -460,16 +470,37 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         if (entry.getUnrootedFilePath() == null) {
           continue;
         }
-        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + appId + BasicConsts.FORWARDSLASH + "tables" + BasicConsts.FORWARDSLASH
-            + tableId + BasicConsts.FORWARDSLASH
 
-            + "attachments/file"  + BasicConsts.FORWARDSLASH + entry.getUnrootedFilePath() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        // the instanceId is the top-level auri for this record
+        String rowSegment = ServiceUtils.encodeSegment(entry.getTopLevelAuri());
+
+        UriBuilder ub;
+        try {
+          ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
+        } catch (URISyntaxException e) {
+          e.printStackTrace();
+          throw new RequestFailureException(e);
+        }
+
+        String[] pathSegments = entry.getUnrootedFilePath().split(BasicConsts.FORWARDSLASH);
+        String[] fullArgs = new String[pathSegments.length+4];
+        fullArgs[0] = appSegment;
+        fullArgs[1] = tableSegment;
+        fullArgs[2] = schemaSegment;
+        fullArgs[3] = rowSegment;
+        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+          fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
+        }
+
+        UriBuilder tmp = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
+        URI getFile = tmp.build(fullArgs, true);
+        String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+
         FileSummaryClient sum = new FileSummaryClient(entry.getUnrootedFilePath(),
             entry.getContentType(),
             entry.getContentLength(),
             entry.getUri(), null, tableId, downloadUrl);
+        sum.setInstanceId(entry.getTopLevelAuri());
         completedSummaries.add(sum);
       }
       tcc.files = completedSummaries;

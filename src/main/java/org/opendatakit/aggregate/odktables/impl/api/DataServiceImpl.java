@@ -43,11 +43,13 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DataServiceImpl implements DataService {
-  private DataManager dm;
-  private UriInfo info;
+  private final String schemaETag;
+  private final DataManager dm;
+  private final UriInfo info;
 
-  public DataServiceImpl(String appId, String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+  public DataServiceImpl(String appId, String tableId, String schemaETag, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
+    this.schemaETag = schemaETag;
     this.dm = new DataManager(appId, tableId, userPermissions, cc);
     this.info = info;
   }
@@ -62,6 +64,7 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public Response getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+    rowId = ServiceUtils.decodeSegment(rowId);
     Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
     return Response.ok(resource).build();
@@ -71,6 +74,7 @@ public class DataServiceImpl implements DataService {
   public Response createOrUpdateRow(@PathParam("rowId") String rowId, Row row) throws ODKTaskLockException,
       ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
       BadColumnNameException, InconsistentStateException {
+    rowId = ServiceUtils.decodeSegment(rowId);
     row.setRowId(rowId);
     Row newRow = dm.insertOrUpdateRow(row);
     RowResource resource = getResource(newRow);
@@ -80,6 +84,8 @@ public class DataServiceImpl implements DataService {
   @Override
   public Response deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
+    rowId = ServiceUtils.decodeSegment(rowId);
+    rowETag = ServiceUtils.decodeSegment(rowETag);
     String dataETagOnTableOfModification = dm.deleteRow(rowId, rowETag);
     return Response.ok(dataETagOnTableOfModification).build();
   }
@@ -88,11 +94,17 @@ public class DataServiceImpl implements DataService {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
     String rowId = row.getRowId();
+    // segments need to be cleansed of URI-inappropriate characters...
+    String appSegment = ServiceUtils.encodeSegment(appId);
+    String tableSegment = ServiceUtils.encodeSegment(tableId);
+    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
+    String rowSegment = ServiceUtils.encodeSegment(rowId);
+
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-        .build(appId, tableId, rowId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    URI self = ub.clone().path(TableService.class).path(TableService.class, "getData").path(DataService.class, "getRow")
+        .build(appSegment, tableSegment, schemaSegment, rowSegment);
+    URI table = ub.clone().path(TableService.class).path(TableService.class, "getTable").build(appSegment, tableSegment);
     RowResource resource = new RowResource(row);
     resource.setSelfUri(self.toASCIIString());
     resource.setTableUri(table.toASCIIString());
