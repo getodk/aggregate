@@ -117,7 +117,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     String rowSegment = ServiceUtils.encodeSegment(rowId);
 
     UriBuilder ub = info.getBaseUriBuilder();
-    UriBuilder full = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest");
+    ub.path(TableService.class);
+    UriBuilder full = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest");
     URI self = full.build(appSegment, tableSegment, schemaSegment, rowSegment);
     String manifestUrl = self.toASCIIString();
 
@@ -202,6 +203,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     String rowSegment = ServiceUtils.encodeSegment(rowId);
 
     UriBuilder ub = info.getBaseUriBuilder();
+    ub.path(TableService.class);
 
     String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
     String[] fullArgs = new String[pathSegments.length+4];
@@ -213,7 +215,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
       fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
     }
 
-    UriBuilder tmp = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
+    UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
     URI getFile = tmp.build(fullArgs, true);
     String locationUrl = getFile.toASCIIString();
 
@@ -291,6 +293,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
       String rowSegment = ServiceUtils.encodeSegment(rowId);
 
       UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(TableService.class);
 
       String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
       String[] fullArgs = new String[pathSegments.length+4];
@@ -302,7 +305,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
       }
 
-      UriBuilder tmp = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
+      UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
       URI getFile = tmp.build(fullArgs, true);
       String locationUrl = getFile.toASCIIString();
 

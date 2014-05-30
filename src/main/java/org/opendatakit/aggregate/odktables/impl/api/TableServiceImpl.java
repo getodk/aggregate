@@ -232,8 +232,8 @@ public class TableServiceImpl implements TableService {
     TableDefinitionResource definitionResource = new TableDefinitionResource(definition);
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI selfUri = ub.clone().path(TableService.class).path(TableService.class, "getDefinition").build(appSegment, tableSegment, schemaSegment);
-    URI tableUri = ub.clone().path(TableService.class).path(TableService.class, "getTable").build(appSegment, tableSegment);
+    URI selfUri = ub.clone().path(TableService.class, "getDefinition").build(appSegment, tableSegment, schemaSegment);
+    URI tableUri = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
     definitionResource.setSelfUri(selfUri.toASCIIString());
     definitionResource.setTableUri(tableUri.toASCIIString());
     return Response.ok(definitionResource).build();
@@ -249,12 +249,12 @@ public class TableServiceImpl implements TableService {
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class).path(TableService.class, "getTable").build(appSegment, tableSegment);
-    URI data = ub.clone().path(TableService.class).path(TableService.class, "getData").build(appSegment, tableSegment, schemaSegment);
-    URI instanceFiles = ub.clone().path(TableService.class).path(TableService.class, "getInstanceFiles").build(appSegment, tableSegment, schemaSegment);
-    URI diff = ub.clone().path(TableService.class).path(TableService.class, "getDiff").build(appSegment, tableSegment, schemaSegment);
-    URI acl = ub.clone().path(TableService.class).path(TableService.class, "getAcl").build(appSegment, tableSegment);
-    URI definition = ub.clone().path(TableService.class).path(TableService.class, "getDefinition").build(appSegment, tableSegment, schemaSegment);
+    URI self = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
+    URI data = ub.clone().path(TableService.class, "getData").build(appSegment, tableSegment, schemaSegment);
+    URI instanceFiles = ub.clone().path(TableService.class, "getInstanceFiles").build(appSegment, tableSegment, schemaSegment);
+    URI diff = ub.clone().path(TableService.class, "getDiff").build(appSegment, tableSegment, schemaSegment);
+    URI acl = ub.clone().path(TableService.class, "getAcl").build(appSegment, tableSegment);
+    URI definition = ub.clone().path(TableService.class, "getDefinition").build(appSegment, tableSegment, schemaSegment);
 
     TableResource resource = new TableResource(entry);
     resource.setSelfUri(self.toASCIIString());
