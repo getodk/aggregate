@@ -52,10 +52,14 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
   private static final String INSTANCE_ID_HEADING = "Row ID";
   private static final int FILENAME_COLUMN = 1;
   private static final String FILENAME_HEADING = "Filename";
-  private static final int DOWNLOAD_COLUMN = 2;
+  private static final int CONTENT_LENGTH_COLUMN = 2;
+  private static final String CONTENT_LENGTH_HEADING = "Size";
+  private static final int CONTENT_TYPE_COLUMN = 3;
+  private static final String CONTENT_TYPE_HEADING = "Content Type";
+  private static final int DOWNLOAD_COLUMN = 4;
   private static final String DOWNLOAD_HEADING = "Download";
 
-  private static final int numColumns = 3;
+  private static final int numColumns = 5;
 
   // this is just the tab that opened the table
   private AggregateSubTabBase basePanel;
@@ -144,6 +148,8 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
     // create the table headers.
     setText(0, INSTANCE_ID_COLUMN, INSTANCE_ID_HEADING);
     setText(0, FILENAME_COLUMN, FILENAME_HEADING);
+    setText(0, CONTENT_LENGTH_COLUMN, CONTENT_LENGTH_HEADING);
+    setText(0, CONTENT_TYPE_COLUMN, CONTENT_TYPE_HEADING);
     setText(0, DOWNLOAD_COLUMN, DOWNLOAD_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
   }
@@ -173,6 +179,10 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
         String instanceId = sum.getInstanceId();
         setText(currentRow, INSTANCE_ID_COLUMN, instanceId);
         setText(currentRow, FILENAME_COLUMN, filename);
+        getFlexCellFormatter().setStyleName(currentRow, FILENAME_COLUMN, "dataLeft");
+        setText(currentRow, CONTENT_LENGTH_COLUMN, sum.getContentLength().toString());
+        getFlexCellFormatter().setStyleName(currentRow, CONTENT_LENGTH_COLUMN, "dataRight");
+        setText(currentRow, CONTENT_TYPE_COLUMN, sum.getContentType());
         Widget downloadCol;
         if (sum.getDownloadUrl() != null) {
           Anchor downloadLink = new Anchor();

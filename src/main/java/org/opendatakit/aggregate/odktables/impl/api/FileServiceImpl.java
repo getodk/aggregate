@@ -240,14 +240,21 @@ public class FileServiceImpl implements FileService {
       tableFileInfoRow.put(cc);
 
       UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(FileService.class);
+
       String[] pathSegments = wholePath.split(BasicConsts.FORWARDSLASH);
-      String[] fullArgs = new String[pathSegments.length+2];
+      String[] fullArgs = new String[3];
       fullArgs[0] = appId;
       fullArgs[1] = odkClientVersion;
+      StringBuilder b = new StringBuilder();
       for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-        fullArgs[i+2] = pathSegments[i];
+        if ( i != 0 ) {
+          b.append(BasicConsts.FORWARDSLASH);
+        }
+        b.append(ServiceUtils.encodeSegment(pathSegments[i]));
       }
-      URI self = ub.clone().path(FileService.class).path(FileService.class, "getFile").build(fullArgs, true);
+      fullArgs[2] = b.toString();
+      URI self = ub.clone().path(FileService.class, "getFile").build(fullArgs, false);
       String locationUrl = self.toASCIIString();
 
       return Response.status((outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) ? Status.ACCEPTED : Status.CREATED)

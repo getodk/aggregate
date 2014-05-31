@@ -93,17 +93,23 @@ public class FileManifestServiceImpl implements FileManifestService {
     if (manifest == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
     } else {
+      UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(FileService.class);
       // now supply the downloadUrl...
       for ( OdkTablesFileManifestEntry entry : manifest.getEntries() ) {
-        UriBuilder ub = info.getBaseUriBuilder();
-        String[] segments = entry.filename.split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[segments.length+2];
+        String[] pathSegments = entry.filename.split(BasicConsts.FORWARDSLASH);
+        String[] fullArgs = new String[3];
         fullArgs[0] = appId;
         fullArgs[1] = odkClientVersion;
-        for ( int i = 0 ; i < segments.length ; ++i ) {
-          fullArgs[i+2] = segments[i];
+        StringBuilder b = new StringBuilder();
+        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+          if ( i != 0 ) {
+            b.append(BasicConsts.FORWARDSLASH);
+          }
+          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
         }
-        URI self = ub.clone().path(FileService.class).path(FileService.class, "getFile").build(fullArgs, true);
+        fullArgs[2] = b.toString();
+        URI self = ub.clone().path(FileService.class, "getFile").build(fullArgs, false);
         entry.downloadUrl = self.toASCIIString();
       }
 
@@ -136,17 +142,23 @@ public class FileManifestServiceImpl implements FileManifestService {
     if (manifest == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
     } else {
+      UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(FileService.class);
       // now supply the downloadUrl...
       for ( OdkTablesFileManifestEntry entry : manifest.getEntries() ) {
-        UriBuilder ub = info.getBaseUriBuilder();
-        String[] segments = entry.filename.split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[segments.length+2];
+        String[] pathSegments = entry.filename.split(BasicConsts.FORWARDSLASH);
+        String[] fullArgs = new String[3];
         fullArgs[0] = appId;
         fullArgs[1] = odkClientVersion;
-        for ( int i = 0 ; i < segments.length ; ++i ) {
-          fullArgs[i+2] = segments[i];
+        StringBuilder b = new StringBuilder();
+        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
+          if ( i != 0 ) {
+            b.append(BasicConsts.FORWARDSLASH);
+          }
+          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
         }
-        URI self = ub.clone().path(FileService.class).path(FileService.class, "getFile").build(fullArgs, true);
+        fullArgs[2] = b.toString();
+        URI self = ub.clone().path(FileService.class, "getFile").build(fullArgs, false);
         entry.downloadUrl = self.toASCIIString();
       }
 

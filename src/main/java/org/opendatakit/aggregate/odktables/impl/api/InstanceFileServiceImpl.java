@@ -138,16 +138,21 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         entry.md5hash = instance.getContentHash(i, cc);
 
         String[] pathSegments = entry.filename.split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[pathSegments.length+4];
+        String[] fullArgs = new String[5];
         fullArgs[0] = appSegment;
         fullArgs[1] = tableSegment;
         fullArgs[2] = schemaSegment;
         fullArgs[3] = rowSegment;
+        StringBuilder b = new StringBuilder();
         for ( int j = 0 ; j < pathSegments.length ; ++j ) {
-          fullArgs[j+4] = ServiceUtils.encodeSegment(pathSegments[j]);
+          if ( j != 0 ) {
+            b.append(BasicConsts.FORWARDSLASH);
+          }
+          b.append(ServiceUtils.encodeSegment(pathSegments[j]));
         }
+        fullArgs[4] = b.toString();
 
-        URI getFile = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile").build(fullArgs, true);
+        URI getFile = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile").build(fullArgs, false);
         String locationUrl = getFile.toASCIIString();
         entry.downloadUrl = locationUrl;
 
@@ -206,17 +211,22 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     ub.path(TableService.class);
 
     String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
-    String[] fullArgs = new String[pathSegments.length+4];
+    String[] fullArgs = new String[5];
     fullArgs[0] = appSegment;
     fullArgs[1] = tableSegment;
     fullArgs[2] = schemaSegment;
     fullArgs[3] = rowSegment;
+    StringBuilder b = new StringBuilder();
     for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-      fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
+      if ( i != 0 ) {
+        b.append(BasicConsts.FORWARDSLASH);
+      }
+      b.append(ServiceUtils.encodeSegment(pathSegments[i]));
     }
+    fullArgs[4] = b.toString();
 
     UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
-    URI getFile = tmp.build(fullArgs, true);
+    URI getFile = tmp.build(fullArgs, false);
     String locationUrl = getFile.toASCIIString();
 
     try {
@@ -296,17 +306,22 @@ public class InstanceFileServiceImpl implements InstanceFileService {
       ub.path(TableService.class);
 
       String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
-      String[] fullArgs = new String[pathSegments.length+4];
+      String[] fullArgs = new String[5];
       fullArgs[0] = appSegment;
       fullArgs[1] = tableSegment;
       fullArgs[2] = schemaSegment;
       fullArgs[3] = rowSegment;
-      for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-        fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
+      StringBuilder b = new StringBuilder();
+      for ( int j = 0 ; j < pathSegments.length ; ++j ) {
+        if ( j != 0 ) {
+          b.append(BasicConsts.FORWARDSLASH);
+        }
+        b.append(ServiceUtils.encodeSegment(pathSegments[j]));
       }
+      fullArgs[4] = b.toString();
 
       UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
-      URI getFile = tmp.build(fullArgs, true);
+      URI getFile = tmp.build(fullArgs, false);
       String locationUrl = getFile.toASCIIString();
 
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);

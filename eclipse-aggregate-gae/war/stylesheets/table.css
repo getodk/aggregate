@@ -1,10 +1,15 @@
 .evenTableRow td {
 	background-color: #dfdfdf;
 }
+.dataTable .dataLeft {
+	text-align: left;
+}
+.dataTable .dataRight {
+	text-align: right;
+}
 .dataTable td {
 	padding: 0px 1px 0px 1px;
 	text-align: center;
-	align: center;
 }
 .titleBar td {
 	padding-left: 6px;
@@ -24,7 +29,6 @@
 .exportTable td {
 	padding: 3px 10px 3px 10px;
 	text-align: center;
-	align: center;
 }
 
 .disabledTableRow td {
@@ -41,6 +45,6 @@
 	border-collapse: collapse;
 	border-width: 1px;
 	border-style: solid;
-	border_color: #07115A;
+	border-color: #07115A;
 	width:100%;
 }
