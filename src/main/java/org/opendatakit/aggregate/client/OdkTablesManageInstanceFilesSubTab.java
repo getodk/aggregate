@@ -20,7 +20,6 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewInstanceFileInfo;
-import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
