@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,6 @@ import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
@@ -367,7 +367,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     }
   }
 
-  private TableAclResourceClient getResource(TableAcl acl, TableAclManager am, UriInfo info) {
+  private TableAclResourceClient getResource(TableAcl acl, TableAclManager am, UriInfo info) throws RequestFailureException {
     String appId = am.getAppId();
     String tableId = am.getTableId();
     Scope.Type type = acl.getScope().getType();
@@ -375,38 +375,39 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     if (value == null)
       value = "null";
 
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String valueSegment = ServiceUtils.encodeSegment(value);
-
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     UriBuilder selfBuilder = ub.clone().path(TableService.class, "getAcl");
     URI self;
     switch (type) {
     case USER:
-      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appSegment, tableSegment, valueSegment);
+      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
       break;
     case GROUP:
-      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appSegment, tableSegment, valueSegment);
+      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
       break;
     case DEFAULT:
     default:
-      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appSegment, tableSegment);
+      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
       break;
     }
-    URI acls = ub.clone().path(TableService.class, "getAcl").build(appSegment, tableSegment);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
+    URI acls = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
 
     TableAclResource resource = new TableAclResource(acl);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setAclUri(acls.toASCIIString());
-    resource.setTableUri(table.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setAclUri(acls.toURL().toExternalForm());
+      resource.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Unable to convert to URL");
+    }
     return UtilTransforms.transform(resource);
   }
 
   private ArrayList<TableAclResourceClient> getResources(List<TableAcl> acls, TableAclManager am,
-      UriInfo info) {
+      UriInfo info) throws RequestFailureException {
     ArrayList<TableAclResourceClient> resources = new ArrayList<TableAclResourceClient>();
     for (TableAcl acl : acls) {
       resources.add(getResource(acl, am, info));

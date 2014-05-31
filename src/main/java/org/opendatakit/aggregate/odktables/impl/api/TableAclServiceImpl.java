@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +75,6 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response getUserAcl(String odkTablesUserId) throws ODKDatastoreException,
       PermissionDeniedException {
-    odkTablesUserId = ServiceUtils.decodeSegment(odkTablesUserId);
     if (odkTablesUserId.equals("null")) {
       odkTablesUserId = null;
     }
@@ -86,7 +86,6 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response getGroupAcl(String groupId) throws ODKDatastoreException,
       PermissionDeniedException {
-    groupId = ServiceUtils.decodeSegment(groupId);
     TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
     TableAclResource resource = getResource(acl);
     return Response.ok(resource).build();
@@ -102,7 +101,6 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response setUserAcl(String odkTablesUserId, TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException {
-    odkTablesUserId = ServiceUtils.decodeSegment(odkTablesUserId);
     if (odkTablesUserId.equals("null"))
       odkTablesUserId = null;
     acl = am.setAcl(new Scope(Scope.Type.USER, odkTablesUserId), acl.getRole());
@@ -113,7 +111,6 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response setGroupAcl(String groupId, TableAcl acl) throws ODKDatastoreException,
       PermissionDeniedException {
-    groupId = ServiceUtils.decodeSegment(groupId);
     acl = am.setAcl(new Scope(Scope.Type.GROUP, groupId), acl.getRole());
     TableAclResource resource = getResource(acl);
     return Response.ok(resource).build();
@@ -135,7 +132,6 @@ public class TableAclServiceImpl implements TableAclService {
 
   @Override
   public Response deleteUserAcl(String odkTablesUserId) throws ODKDatastoreException, PermissionDeniedException {
-    odkTablesUserId = ServiceUtils.decodeSegment(odkTablesUserId);
     am.deleteAcl(new Scope(Scope.Type.USER, odkTablesUserId));
     return Response.ok().build();
   }
@@ -143,7 +139,6 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response deleteGroupAcl(String groupId) throws ODKDatastoreException,
       PermissionDeniedException {
-    groupId = ServiceUtils.decodeSegment(groupId);
     am.deleteAcl(new Scope(Scope.Type.GROUP, groupId));
     return Response.ok().build();
   }
@@ -155,9 +150,6 @@ public class TableAclServiceImpl implements TableAclService {
     String value = acl.getScope().getValue();
     if (value == null)
       value = "null";
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String valueSegment = ServiceUtils.encodeSegment(value);
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
@@ -165,23 +157,28 @@ public class TableAclServiceImpl implements TableAclService {
     URI self;
     switch (type) {
     case USER:
-      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appSegment, tableSegment, valueSegment);
+      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
       break;
     case GROUP:
-      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appSegment, tableSegment, valueSegment);
+      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
       break;
     case DEFAULT:
     default:
-      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appSegment, tableSegment);
+      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
       break;
     }
-    URI acls = ub.clone().path(TableService.class, "getAcl").build(appSegment, tableSegment);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
+    URI acls = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
 
     TableAclResource resource = new TableAclResource(acl);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setAclUri(acls.toASCIIString());
-    resource.setTableUri(table.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setAclUri(acls.toURL().toExternalForm());
+      resource.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert to URL");
+    }
     return resource;
   }
 

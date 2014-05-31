@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +82,6 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public Response getTables(@PathParam("appId") String appId) throws ODKDatastoreException {
-    appId = ServiceUtils.decodeSegment(appId);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -100,8 +100,6 @@ public class TableServiceImpl implements TableService {
   @Override
   public Response getTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException,
       PermissionDeniedException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -114,8 +112,6 @@ public class TableServiceImpl implements TableService {
   @Override
   public Response createTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId, TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -132,9 +128,6 @@ public class TableServiceImpl implements TableService {
   @Override
   public Response deleteTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
-    schemaETag = ServiceUtils.decodeSegment(schemaETag);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -153,9 +146,6 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public DataService getData(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
-    schemaETag = ServiceUtils.decodeSegment(schemaETag);
     if ( !this.appId.equals(appId) ) {
       throw new AppNameMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + appId);
     }
@@ -169,9 +159,6 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public DiffService getDiff(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
-    schemaETag = ServiceUtils.decodeSegment(schemaETag);
     if ( !this.appId.equals(appId) ) {
       throw new AppNameMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + appId);
     }
@@ -185,8 +172,6 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException, AppNameMismatchException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
     if ( !this.appId.equals(appId) ) {
       throw new AppNameMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + appId);
     }
@@ -196,9 +181,6 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
-    schemaETag = ServiceUtils.decodeSegment(schemaETag);
     if ( !this.appId.equals(appId) ) {
       throw new AppNameMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + appId);
     }
@@ -212,9 +194,6 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public Response getDefinition(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, AppNameMismatchException {
-    appId = ServiceUtils.decodeSegment(appId);
-    tableId = ServiceUtils.decodeSegment(tableId);
-    schemaETag = ServiceUtils.decodeSegment(schemaETag);
     if ( !this.appId.equals(appId) ) {
       throw new AppNameMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + appId);
     }
@@ -225,17 +204,18 @@ public class TableServiceImpl implements TableService {
           .entity(ERROR_SCHEMA_DIFFERS + "\n" + definition.getSchemaETag()).build();
     }
 
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
-
     TableDefinitionResource definitionResource = new TableDefinitionResource(definition);
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI selfUri = ub.clone().path(TableService.class, "getDefinition").build(appSegment, tableSegment, schemaSegment);
-    URI tableUri = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
-    definitionResource.setSelfUri(selfUri.toASCIIString());
-    definitionResource.setTableUri(tableUri.toASCIIString());
+    URI selfUri = ub.clone().path(TableService.class, "getDefinition").build(appId, tableId, schemaETag);
+    URI tableUri = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    try {
+      definitionResource.setSelfUri(selfUri.toURL().toExternalForm());
+      definitionResource.setTableUri(tableUri.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unable to convert to URL");
+    }
     return Response.ok(definitionResource).build();
   }
 
@@ -243,26 +223,26 @@ public class TableServiceImpl implements TableService {
     String tableId = entry.getTableId();
     String schemaETag = entry.getSchemaETag();
 
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
-
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
-    URI data = ub.clone().path(TableService.class, "getData").build(appSegment, tableSegment, schemaSegment);
-    URI instanceFiles = ub.clone().path(TableService.class, "getInstanceFiles").build(appSegment, tableSegment, schemaSegment);
-    URI diff = ub.clone().path(TableService.class, "getDiff").build(appSegment, tableSegment, schemaSegment);
-    URI acl = ub.clone().path(TableService.class, "getAcl").build(appSegment, tableSegment);
-    URI definition = ub.clone().path(TableService.class, "getDefinition").build(appSegment, tableSegment, schemaSegment);
+    URI self = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    URI data = ub.clone().path(TableService.class, "getData").build(appId, tableId, schemaETag);
+    URI instanceFiles = ub.clone().path(TableService.class, "getInstanceFiles").build(appId, tableId, schemaETag);
+    URI diff = ub.clone().path(TableService.class, "getDiff").build(appId, tableId, schemaETag);
+    URI acl = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
+    URI definition = ub.clone().path(TableService.class, "getDefinition").build(appId, tableId, schemaETag);
 
     TableResource resource = new TableResource(entry);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setDefinitionUri(definition.toASCIIString());
-    resource.setDataUri(data.toASCIIString());
-    resource.setInstanceFilesUri(instanceFiles.toASCIIString());
-    resource.setDiffUri(diff.toASCIIString());
-    resource.setAclUri(acl.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setDefinitionUri(definition.toURL().toExternalForm());
+      resource.setDataUri(data.toURL().toExternalForm());
+      resource.setInstanceFilesUri(instanceFiles.toURL().toExternalForm());
+      resource.setDiffUri(diff.toURL().toExternalForm());
+      resource.setAclUri(acl.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
     return resource;
   }
 

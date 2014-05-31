@@ -105,22 +105,12 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   @GZIP
   public Response getManifest(@PathParam("rowId") String rowId,
       @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
-    rowId = ServiceUtils.decodeSegment(rowId);
-    // The appId and tableId are from the surrounding TableService.
-    // The rowId is already pulled out.
-    // The segments are just rest/of/path in the full app-centric
-    // path of:
-    // appid/data/attachments/tableid/instances/instanceId/rest/of/path
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
-    String rowSegment = ServiceUtils.encodeSegment(rowId);
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     UriBuilder full = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest");
-    URI self = full.build(appSegment, tableSegment, schemaSegment, rowSegment);
-    String manifestUrl = self.toASCIIString();
+    URI self = full.build(appId, tableId, schemaETag, rowId);
+    String manifestUrl = self.toURL().toExternalForm();
 
     try {
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
@@ -139,21 +129,21 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
         String[] pathSegments = entry.filename.split(BasicConsts.FORWARDSLASH);
         String[] fullArgs = new String[5];
-        fullArgs[0] = appSegment;
-        fullArgs[1] = tableSegment;
-        fullArgs[2] = schemaSegment;
-        fullArgs[3] = rowSegment;
+        fullArgs[0] = appId;
+        fullArgs[1] = tableId;
+        fullArgs[2] = schemaETag;
+        fullArgs[3] = rowId;
         StringBuilder b = new StringBuilder();
         for ( int j = 0 ; j < pathSegments.length ; ++j ) {
           if ( j != 0 ) {
             b.append(BasicConsts.FORWARDSLASH);
           }
-          b.append(ServiceUtils.encodeSegment(pathSegments[j]));
+          b.append(pathSegments[j]);
         }
         fullArgs[4] = b.toString();
 
         URI getFile = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile").build(fullArgs, false);
-        String locationUrl = getFile.toASCIIString();
+        String locationUrl = getFile.toURL().toExternalForm();
         entry.downloadUrl = locationUrl;
 
         manifestEntries.add(entry);
@@ -185,7 +175,6 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   public Response getFile(@PathParam("rowId") String rowId,
       @PathParam("filePath") List<PathSegment> segments,
       @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
-    rowId = ServiceUtils.decodeSegment(rowId);
     // The appId and tableId are from the surrounding TableService.
     // The rowId is already pulled out.
     // The segments are just rest/of/path in the full app-centric
@@ -202,32 +191,27 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     // Now construct the whole path.
     String partialPath = constructPathFromSegments(segments);
 
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
-    String rowSegment = ServiceUtils.encodeSegment(rowId);
-
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
 
     String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
     String[] fullArgs = new String[5];
-    fullArgs[0] = appSegment;
-    fullArgs[1] = tableSegment;
-    fullArgs[2] = schemaSegment;
-    fullArgs[3] = rowSegment;
+    fullArgs[0] = appId;
+    fullArgs[1] = tableId;
+    fullArgs[2] = schemaETag;
+    fullArgs[3] = rowId;
     StringBuilder b = new StringBuilder();
     for ( int i = 0 ; i < pathSegments.length ; ++i ) {
       if ( i != 0 ) {
         b.append(BasicConsts.FORWARDSLASH);
       }
-      b.append(ServiceUtils.encodeSegment(pathSegments[i]));
+      b.append(pathSegments[i]);
     }
     fullArgs[4] = b.toString();
 
     UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
     URI getFile = tmp.build(fullArgs, false);
-    String locationUrl = getFile.toASCIIString();
+    String locationUrl = getFile.toURL().toExternalForm();
 
     try {
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
@@ -280,7 +264,6 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   public Response putFile(@Context HttpServletRequest req, @PathParam("rowId") String rowId,
       @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException,
       ODKTaskLockException {
-    rowId = ServiceUtils.decodeSegment(rowId);
 
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
@@ -297,32 +280,27 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     try {
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
 
-      String appSegment = ServiceUtils.encodeSegment(appId);
-      String tableSegment = ServiceUtils.encodeSegment(tableId);
-      String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
-      String rowSegment = ServiceUtils.encodeSegment(rowId);
-
       UriBuilder ub = info.getBaseUriBuilder();
       ub.path(TableService.class);
 
       String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
       String[] fullArgs = new String[5];
-      fullArgs[0] = appSegment;
-      fullArgs[1] = tableSegment;
-      fullArgs[2] = schemaSegment;
-      fullArgs[3] = rowSegment;
+      fullArgs[0] = appId;
+      fullArgs[1] = tableId;
+      fullArgs[2] = schemaETag;
+      fullArgs[3] = rowId;
       StringBuilder b = new StringBuilder();
       for ( int j = 0 ; j < pathSegments.length ; ++j ) {
         if ( j != 0 ) {
           b.append(BasicConsts.FORWARDSLASH);
         }
-        b.append(ServiceUtils.encodeSegment(pathSegments[j]));
+        b.append(pathSegments[j]);
       }
       fullArgs[4] = b.toString();
 
       UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
       URI getFile = tmp.build(fullArgs, false);
-      String locationUrl = getFile.toASCIIString();
+      String locationUrl = getFile.toURL().toExternalForm();
 
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
       BlobEntitySet instance = blobStore.newBlobEntitySet(rowId, cc);
@@ -375,7 +353,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (PathSegment segment : segments) {
-      sb.append(ServiceUtils.decodeSegment(segment.getPath()));
+      sb.append(segment.getPath());
       if (i < segments.size() - 1) {
         sb.append(BasicConsts.FORWARDSLASH);
       }

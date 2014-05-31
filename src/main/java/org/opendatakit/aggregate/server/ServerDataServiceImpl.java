@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.impl.api.ServiceUtils;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
@@ -357,8 +357,6 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       }
       ub.path(FileService.class);
 
-      String appSegment = ServiceUtils.encodeSegment(appId);
-
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
         BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
@@ -367,24 +365,29 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         }
 
         String odkClientVersion = entry.getOdkClientVersion();
-        String odkClientSegment = ServiceUtils.encodeSegment(odkClientVersion);
 
         String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
         String[] fullArgs = new String[3];
-        fullArgs[0] = appSegment;
-        fullArgs[1] = odkClientSegment;
+        fullArgs[0] = appId;
+        fullArgs[1] = odkClientVersion;
         StringBuilder b = new StringBuilder();
         for ( int i = 0 ; i < pathSegments.length ; ++i ) {
           if ( i != 0 ) {
             b.append(BasicConsts.FORWARDSLASH);
           }
-          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
+          b.append(pathSegments[i]);
         }
         fullArgs[2] = b.toString();
 
         UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
         URI getFile = tmp.build(fullArgs, false);
-        String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        String downloadUrl;
+        try {
+          downloadUrl = getFile.toURL().toExternalForm() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new RequestFailureException("Unable to convert to URL");
+        }
 
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
@@ -448,8 +451,6 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       }
       ub.path(FileService.class);
 
-      String appSegment = ServiceUtils.encodeSegment(appId);
-
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
         BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
@@ -458,24 +459,29 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         }
 
         String odkClientVersion = entry.getOdkClientVersion();
-        String odkClientSegment = ServiceUtils.encodeSegment(odkClientVersion);
 
         String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
         String[] fullArgs = new String[3];
-        fullArgs[0] = appSegment;
-        fullArgs[1] = odkClientSegment;
+        fullArgs[0] = appId;
+        fullArgs[1] = odkClientVersion;
         StringBuilder b = new StringBuilder();
         for ( int i = 0 ; i < pathSegments.length ; ++i ) {
           if ( i != 0 ) {
             b.append(BasicConsts.FORWARDSLASH);
           }
-          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
+          b.append(pathSegments[i]);
         }
         fullArgs[2] = b.toString();
 
         UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
         URI getFile = tmp.build(fullArgs, false);
-        String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        String downloadUrl;
+        try {
+          downloadUrl = getFile.toURL().toExternalForm() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new RequestFailureException("Unable to convert to URL");
+        }
 
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
@@ -528,10 +534,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       if (table == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
       }
-
-      String appSegment = ServiceUtils.encodeSegment(appId);
-      String tableSegment = ServiceUtils.encodeSegment(tableId);
-      String schemaSegment = ServiceUtils.encodeSegment(table.getSchemaETag());
+      String schemaETag = table.getSchemaETag();
 
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
       List<BinaryContent> contents = blobStore.getAllBinaryContents(cc);
@@ -551,21 +554,21 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
           continue;
         }
 
-        // the instanceId is the top-level auri for this record
-        String rowSegment = ServiceUtils.encodeSegment(entry.getTopLevelAuri());
+        // the rowId is the top-level auri for this record
+        String rowId = entry.getTopLevelAuri();
 
         String[] pathSegments = entry.getUnrootedFilePath().split(BasicConsts.FORWARDSLASH);
         String[] fullArgs = new String[5];
-        fullArgs[0] = appSegment;
-        fullArgs[1] = tableSegment;
-        fullArgs[2] = schemaSegment;
-        fullArgs[3] = rowSegment;
+        fullArgs[0] = appId;
+        fullArgs[1] = tableId;
+        fullArgs[2] = schemaETag;
+        fullArgs[3] = rowId;
         StringBuilder b = new StringBuilder();
         for ( int i = 0 ; i < pathSegments.length ; ++i ) {
           if ( i != 0 ) {
             b.append(BasicConsts.FORWARDSLASH);
           }
-          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
+          b.append(pathSegments[i]);
         }
         fullArgs[4] = b.toString();
 

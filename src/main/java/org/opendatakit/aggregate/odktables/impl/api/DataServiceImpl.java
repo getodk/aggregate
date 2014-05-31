@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,6 @@ public class DataServiceImpl implements DataService {
 
   @Override
   public Response getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
-    rowId = ServiceUtils.decodeSegment(rowId);
     Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
     return Response.ok(resource).build();
@@ -74,7 +74,6 @@ public class DataServiceImpl implements DataService {
   public Response createOrUpdateRow(@PathParam("rowId") String rowId, Row row) throws ODKTaskLockException,
       ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
       BadColumnNameException, InconsistentStateException {
-    rowId = ServiceUtils.decodeSegment(rowId);
     row.setRowId(rowId);
     Row newRow = dm.insertOrUpdateRow(row);
     RowResource resource = getResource(newRow);
@@ -84,8 +83,6 @@ public class DataServiceImpl implements DataService {
   @Override
   public Response deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
-    rowId = ServiceUtils.decodeSegment(rowId);
-    rowETag = ServiceUtils.decodeSegment(rowETag);
     String dataETagOnTableOfModification = dm.deleteRow(rowId, rowETag);
     return Response.ok(dataETagOnTableOfModification).build();
   }
@@ -94,20 +91,20 @@ public class DataServiceImpl implements DataService {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
     String rowId = row.getRowId();
-    // segments need to be cleansed of URI-inappropriate characters...
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
-    String rowSegment = ServiceUtils.encodeSegment(rowId);
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-        .build(appSegment, tableSegment, schemaSegment, rowSegment);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
+        .build(appId, tableId, schemaETag, rowId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
     RowResource resource = new RowResource(row);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setTableUri(table.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert URL ");
+    }
     return resource;
   }
 

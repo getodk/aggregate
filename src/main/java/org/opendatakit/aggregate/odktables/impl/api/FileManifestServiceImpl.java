@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 
 import javax.servlet.ServletContext;
@@ -74,8 +75,6 @@ public class FileManifestServiceImpl implements FileManifestService {
   @GET
   @GZIP
   public Response getAppLevelFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion) {
-    appId = ServiceUtils.decodeSegment(appId);
-    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -106,11 +105,16 @@ public class FileManifestServiceImpl implements FileManifestService {
           if ( i != 0 ) {
             b.append(BasicConsts.FORWARDSLASH);
           }
-          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
+          b.append(pathSegments[i]);
         }
         fullArgs[2] = b.toString();
         URI self = ub.clone().path(FileService.class, "getFile").build(fullArgs, false);
-        entry.downloadUrl = self.toASCIIString();
+        try {
+          entry.downloadUrl = self.toURL().toExternalForm();
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unable to convert to URL");
+        }
       }
 
       return Response.ok(manifest).build();
@@ -122,9 +126,6 @@ public class FileManifestServiceImpl implements FileManifestService {
   @GET
   @GZIP
   public Response getTableIdFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) {
-    appId = ServiceUtils.decodeSegment(appId);
-    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
-    tableId = ServiceUtils.decodeSegment(tableId);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -155,11 +156,16 @@ public class FileManifestServiceImpl implements FileManifestService {
           if ( i != 0 ) {
             b.append(BasicConsts.FORWARDSLASH);
           }
-          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
+          b.append(pathSegments[i]);
         }
         fullArgs[2] = b.toString();
         URI self = ub.clone().path(FileService.class, "getFile").build(fullArgs, false);
-        entry.downloadUrl = self.toASCIIString();
+        try {
+          entry.downloadUrl = self.toURL().toExternalForm();
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unable to convert to URL");
+        }
       }
 
       return Response.ok(manifest).build();

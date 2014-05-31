@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,6 @@ public class DiffServiceImpl implements DiffService {
   @Override
   public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
-    dataETag = ServiceUtils.decodeSegment(dataETag);
     List<Row> rows;
     rows = dm.getRowsSince(dataETag);
     RowResourceList rowResourceList = new RowResourceList(getResources(rows));
@@ -68,19 +68,19 @@ public class DiffServiceImpl implements DiffService {
     String tableId = dm.getTableId();
     String rowId = row.getRowId();
 
-    String appSegment = ServiceUtils.encodeSegment(appId);
-    String tableSegment = ServiceUtils.encodeSegment(tableId);
-    String schemaSegment = ServiceUtils.encodeSegment(schemaETag);
-    String rowSegment = ServiceUtils.encodeSegment(rowId);
-
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(TableService.class);
     URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-        .build(appSegment, tableSegment, schemaSegment, rowSegment);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appSegment, tableSegment);
+        .build(appId, tableId, schemaETag, rowId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
     RowResource resource = new RowResource(row);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setTableUri(table.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert URL ");
+    }
     return resource;
   }
 

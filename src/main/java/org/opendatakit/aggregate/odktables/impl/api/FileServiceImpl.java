@@ -96,8 +96,6 @@ public class FileServiceImpl implements FileService {
   @Path("{filePath:.*}")
   // because we want to get the whole path
   public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException {
-    appId = ServiceUtils.decodeSegment(appId);
-    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -173,8 +171,6 @@ public class FileServiceImpl implements FileService {
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
   // because we want to get the whole path
   public Response putFile(@Context HttpServletRequest req, @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments,  @GZIP byte[] content) throws IOException, ODKTaskLockException {
-    appId = ServiceUtils.decodeSegment(appId);
-    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -251,11 +247,11 @@ public class FileServiceImpl implements FileService {
         if ( i != 0 ) {
           b.append(BasicConsts.FORWARDSLASH);
         }
-        b.append(ServiceUtils.encodeSegment(pathSegments[i]));
+        b.append(pathSegments[i]);
       }
       fullArgs[2] = b.toString();
       URI self = ub.clone().path(FileService.class, "getFile").build(fullArgs, false);
-      String locationUrl = self.toASCIIString();
+      String locationUrl = self.toURL().toExternalForm();
 
       return Response.status((outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) ? Status.ACCEPTED : Status.CREATED)
                   .header("Location",locationUrl).build();
@@ -273,8 +269,6 @@ public class FileServiceImpl implements FileService {
   @Path("{filePath:.*}")
   // because we want to get the whole path
   public Response deleteFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException {
-    appId = ServiceUtils.decodeSegment(appId);
-    odkClientVersion = ServiceUtils.decodeSegment(odkClientVersion);
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();
@@ -329,7 +323,7 @@ public class FileServiceImpl implements FileService {
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (PathSegment segment : segments) {
-      sb.append(ServiceUtils.decodeSegment(segment.getPath()));
+      sb.append(segment.getPath());
       if (i < segments.size() - 1) {
         sb.append(BasicConsts.FORWARDSLASH);
       }
@@ -360,14 +354,15 @@ public class FileServiceImpl implements FileService {
    * @return
    */
   private String getTableIdFromPathSegments(List<PathSegment> segments) {
+    String[] pathParts = constructPathFromSegments(segments).split(BasicConsts.FORWARDSLASH);
     String tableId = DbTableFileInfo.NO_TABLE_ID;
-    String firstFolder = ServiceUtils.decodeSegment(segments.get(0).getPath());
+    String firstFolder = pathParts[0];
     if ((segments.size() >= 2) && firstFolder.equals(TABLES_FOLDER)) {
-      tableId = ServiceUtils.decodeSegment(segments.get(1).getPath());
+      tableId = pathParts[1];
     } else if ((segments.size() == 3) && firstFolder.equals(ASSETS_FOLDER)) {
-      String secondFolder = ServiceUtils.decodeSegment(segments.get(1).getPath());
+      String secondFolder = pathParts[1];
       if (secondFolder.equals(CSV_FOLDER)) {
-        String fileName = ServiceUtils.decodeSegment(segments.get(2).getPath());
+        String fileName = pathParts[2];
         String splits[] = fileName.split("\\.");
         if ( splits[splits.length-1].toLowerCase(Locale.ENGLISH).equals("csv") ) {
           tableId = splits[0];
