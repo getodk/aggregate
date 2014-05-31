@@ -370,15 +370,20 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         String odkClientSegment = ServiceUtils.encodeSegment(odkClientVersion);
 
         String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[pathSegments.length+2];
+        String[] fullArgs = new String[3];
         fullArgs[0] = appSegment;
         fullArgs[1] = odkClientSegment;
+        StringBuilder b = new StringBuilder();
         for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-          fullArgs[i+2] = ServiceUtils.encodeSegment(pathSegments[i]);
+          if ( i != 0 ) {
+            b.append(BasicConsts.FORWARDSLASH);
+          }
+          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
         }
+        fullArgs[2] = b.toString();
 
         UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
-        URI getFile = tmp.build(fullArgs, true);
+        URI getFile = tmp.build(fullArgs, false);
         String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
 
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
@@ -456,15 +461,20 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         String odkClientSegment = ServiceUtils.encodeSegment(odkClientVersion);
 
         String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[pathSegments.length+2];
+        String[] fullArgs = new String[3];
         fullArgs[0] = appSegment;
         fullArgs[1] = odkClientSegment;
+        StringBuilder b = new StringBuilder();
         for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-          fullArgs[i+2] = ServiceUtils.encodeSegment(pathSegments[i]);
+          if ( i != 0 ) {
+            b.append(BasicConsts.FORWARDSLASH);
+          }
+          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
         }
+        fullArgs[2] = b.toString();
 
         UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
-        URI getFile = tmp.build(fullArgs, true);
+        URI getFile = tmp.build(fullArgs, false);
         String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
 
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
@@ -545,17 +555,22 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         String rowSegment = ServiceUtils.encodeSegment(entry.getTopLevelAuri());
 
         String[] pathSegments = entry.getUnrootedFilePath().split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[pathSegments.length+4];
+        String[] fullArgs = new String[5];
         fullArgs[0] = appSegment;
         fullArgs[1] = tableSegment;
         fullArgs[2] = schemaSegment;
         fullArgs[3] = rowSegment;
+        StringBuilder b = new StringBuilder();
         for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-          fullArgs[i+4] = ServiceUtils.encodeSegment(pathSegments[i]);
+          if ( i != 0 ) {
+            b.append(BasicConsts.FORWARDSLASH);
+          }
+          b.append(ServiceUtils.encodeSegment(pathSegments[i]));
         }
+        fullArgs[4] = b.toString();
 
         UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
-        URI getFile = tmp.build(fullArgs, true);
+        URI getFile = tmp.build(fullArgs, false);
         String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
 
         FileSummaryClient sum = new FileSummaryClient(entry.getUnrootedFilePath(),

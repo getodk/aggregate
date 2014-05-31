@@ -33,6 +33,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -58,10 +60,14 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   private static final String ODK_CLIENT_VERSION_HEADING = "Client Version";
   private static final int FILENAME_COLUMN = 2;
   private static final String FILENAME_HEADING = "Filename";
-  private static final int DOWNLOAD_COLUMN = 3;
+  private static final int CONTENT_LENGTH_COLUMN = 3;
+  private static final String CONTENT_LENGTH_HEADING = "Size";
+  private static final int CONTENT_TYPE_COLUMN = 4;
+  private static final String CONTENT_TYPE_HEADING = "Content Type";
+  private static final int DOWNLOAD_COLUMN = 5;
   private static final String DOWNLOAD_HEADING = "Download";
 
-  private static final int numColumns = 4;
+  private static final int numColumns = 6;
 
   // this is just the tab that opened the table
   private AggregateSubTabBase basePanel;
@@ -151,6 +157,8 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
     setText(0, DELETE_COLUMN, DELETE_HEADING);
     setText(0, ODK_CLIENT_VERSION_COLUMN, ODK_CLIENT_VERSION_HEADING);
     setText(0, FILENAME_COLUMN, FILENAME_HEADING);
+    setText(0, CONTENT_LENGTH_COLUMN, CONTENT_LENGTH_HEADING);
+    setText(0, CONTENT_TYPE_COLUMN, CONTENT_TYPE_HEADING);
     setText(0, DOWNLOAD_COLUMN, DOWNLOAD_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
   }
@@ -180,6 +188,10 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
             sum.getOdkClientVersion(), currentTable.getTableId(), sum.getFilename()));
         setText(currentRow, ODK_CLIENT_VERSION_COLUMN, sum.getOdkClientVersion());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
+        getFlexCellFormatter().setStyleName(currentRow, FILENAME_COLUMN, "dataLeft");
+        setText(currentRow, CONTENT_LENGTH_COLUMN, sum.getContentLength().toString());
+        getFlexCellFormatter().setStyleName(currentRow, CONTENT_LENGTH_COLUMN, "dataRight");
+        setText(currentRow, CONTENT_TYPE_COLUMN, sum.getContentType());
         Widget downloadCol;
         if (sum.getDownloadUrl() != null) {
           Anchor downloadLink = new Anchor();
