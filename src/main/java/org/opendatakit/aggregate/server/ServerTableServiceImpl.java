@@ -55,7 +55,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
   /**
 	 *
 	 */
-  private static final long serialVersionUID = 3291707708959185034L;
+  private static final long serialVersionUID = 329170770895918034L;
   private static final Log logger = LogFactory.getLog(ServerTableServiceImpl.class);
 
   @Override
