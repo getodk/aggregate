@@ -36,8 +36,9 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
