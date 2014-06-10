@@ -22,17 +22,17 @@ mvn install:install-file -Dfile=openid4java-parent-pom.xml -DgroupId=org.openid4
 
 mvn install:install-file -Dfile=openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar -DgroupId=org.openid4java -DartifactId=openid4java-nodeps -Dversion=0.9.6.662.odk-SNAPSHOT -Dpackaging=jar
 
-spring-security-openid-3.1.3.odk-SNAPSHOT:
+spring-security-openid-3.2.4.odk-SNAPSHOT:
 
-mvn install:install-file -Dfile=spring-security-crypto-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-crypto -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-crypto-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-crypto -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-config-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-config -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-config-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-config -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-core-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-core -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-core-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-core -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-web-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-web -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-web-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-web -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar
 
-mvn install:install-file -Dfile=spring-security-openid-3.1.3.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-openid -Dversion=3.1.3.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=spring-security-openid-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-openid -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar
 
 odk-tomcatutil:
 
