@@ -56,7 +56,7 @@ public class NamingTest {
     assertEquals("a", ns.trimName("age", 1));
     assertEquals("a", ns.trimName("ages", 1));
 
-    assertEquals("ag", ns.trimName("a", 2));
+    assertEquals("a", ns.trimName("a", 2));
     assertEquals("ag", ns.trimName("ag", 2));
     assertEquals("ag", ns.trimName("age", 2));
     assertEquals("ag", ns.trimName("ages", 2));
