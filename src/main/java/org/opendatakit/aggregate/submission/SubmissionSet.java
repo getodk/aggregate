@@ -312,8 +312,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						List<? extends CommonFieldsBase> rows = query.executeQuery();
 						if (rows.size() != 1) {
 							throw new IllegalStateException(
-									  "Expected exactly one match in phantom reconstruction! *meta-instance-id*: " +
-									  uriTopLevel + " uriParent: " + uriParent + " rows.size(): " + rows.size());
+									  "Expected exactly one match in phantom reconstruction! " +
+									  " SELECT * FROM " + mBaseRelation.getTableName() +
+									      " WHERE _TOP_LEVEL_AURI = " + uriTopLevel +
+									      " AND _PARENT_AURI = " + uriParent + " => expected 1 row but found " + rows.size());
 						}
 						mBackingObject = (DynamicBase) rows.get(0);
 						dbEntities.put(m.getDDRelationName(), mBackingObject);
