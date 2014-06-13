@@ -70,12 +70,13 @@ public class NamingTest {
     assertEquals("r7T", ns.trimName("reallyLoT", 3));
     assertEquals("r8T", ns.trimName("reallyLonT", 3));
     assertEquals("r9T", ns.trimName("reallyLongT", 3));
-    assertEquals("re9T", ns.trimName("reallyLongNT", 3));
-    assertEquals("r11T", ns.trimName("reallyLongNaT", 3));
-    assertEquals("r12T", ns.trimName("reallyLongNamT", 3));
-    assertEquals("r13T", ns.trimName("reallyLongNameT", 3));
-    assertEquals("r14T", ns.trimName("reallyLongNamesT", 3));
-    assertEquals("r15T", ns.trimName("reallyLongNamersT", 3));
+    assertEquals("rea", ns.trimName("reallyLongNT", 3));
+    assertEquals("re9T", ns.trimName("reallyLongNT", 4));
+    assertEquals("r11T", ns.trimName("reallyLongNaT", 4));
+    assertEquals("r12T", ns.trimName("reallyLongNamT", 4));
+    assertEquals("r13T", ns.trimName("reallyLongNameT", 4));
+    assertEquals("r14T", ns.trimName("reallyLongNamesT", 4));
+    assertEquals("r15T", ns.trimName("reallyLongNamersT", 4));
     String value;
     String tv;
     value = "r" + "12345678901234567890123456789012345678901234567890"
@@ -87,6 +88,11 @@ public class NamingTest {
         + "1234567890123456789012345678901234567890123456789" + "T";
     tv = ns.trimName(value, 4);
     assertEquals("r99T", tv);
+
+    value = "r" + "12345678901234567890123456789012345678901234567890"
+        + "12345678901234567890123456789012345678901234567890" + "T";
+    tv = ns.trimName(value, 4);
+    assertEquals("r123", tv);
 
     value = "r" + "e2345678901234567890123456789012345678901234567890"
         + "12345678901234567890123456789012345678901234567890" + "T";
