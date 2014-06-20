@@ -55,11 +55,11 @@ public class DiffServiceImpl implements DiffService {
   }
 
   @Override
-  public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag) throws ODKDatastoreException,
+  public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(QUERY_RESUME_PARAMETER) String resumeParameter) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRowsSince(dataETag);
-    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+    RowResourceList rowResourceList = new RowResourceList(getResources(rows), null);
     return Response.ok(rowResourceList).build();
   }
 

@@ -35,12 +35,21 @@ import org.simpleframework.xml.Root;
 @Default(value = DefaultType.FIELD, required = false)
 public class TableEntry {
 
+  /**
+   * The tableId this entry describes.
+   */
   @Element(required = true)
   private String tableId;
 
+  /**
+   * The ETag of the most recently modified data row
+   */
   @Element(required = false)
   private String dataETag;
 
+  /**
+   * The ETag of the TableDefinition
+   */
   @Element(required = false)
   private String schemaETag;
 
