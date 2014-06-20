@@ -25,9 +25,15 @@ import org.simpleframework.xml.Root;
 @Default(DefaultType.FIELD)
 public class RowResource extends Row {
 
+  /**
+   * The URL that returns this RowResource.
+   */
   @Element(required = true)
   private String selfUri;
 
+  /**
+   * The URL that returns the TableResource for this row's table.
+   */
   @Element(required = true)
   private String tableUri;
 

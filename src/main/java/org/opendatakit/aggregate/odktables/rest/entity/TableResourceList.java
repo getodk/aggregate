@@ -33,6 +33,10 @@ import org.simpleframework.xml.Root;
 @Root
 public class TableResourceList {
 
+  /**
+   * Optional resumeParameter, if the list of tables
+   * is too long to return all at once.
+   */
   @Element(required = false)
   private String resumeParameter;
 
@@ -56,6 +60,7 @@ public class TableResourceList {
    * @param entries
    */
   public TableResourceList(ArrayList<TableResource> entries, String resumeParameter) {
+    this.resumeParameter = resumeParameter;
     if (entries == null) {
       this.entries = new ArrayList<TableResource>();
     } else {

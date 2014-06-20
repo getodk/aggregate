@@ -39,15 +39,23 @@ public class Column implements Serializable {
 	 */
   private static final long serialVersionUID = -6624997293167731653L;
 
+  /**
+   * The tableId containing this elementKey
+   */
   @Attribute(required = true)
   private String tableId;
 
   /**
-   * The fully qualified key for this element. If this is a retained field, then
-   * this is the element's database column name. For composite types whose
-   * elements are individually retained (e.g., geopoint), this would be the
-   * elementName of the geopoint (e.g., 'myLocation' concatenated with '_' and
-   * this elementName (e.g., 'myLocation_latitude').
+   * The fully qualified key for this element. If this is a retained field,
+   * (see isUnitOfRetention, below) then this is the element's database
+   * column name. For composite types whose elements are individually retained
+   * (e.g., geopoint), this would be the elementName of the geopoint (e.g.,
+   * 'myLocation' concatenated with '_' and this elementName (e.g.,
+   * 'myLocation_latitude').
+   *
+   * Never longer than 58 characters.
+   * Never a SQL or SQLite reserved word
+   * Satisfies this regex: '^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)*$'
    */
   @Attribute(required = true)
   private String elementKey;
@@ -56,19 +64,93 @@ public class Column implements Serializable {
    * The name by which this element is referred. For composite types whose
    * elements are individually retained (e.g., geopoint), this would be simply
    * 'latitude'
+   *
+   * Never longer than 58 characters.
+   * Never a SQL or SQLite reserved word
+   * Satisfies this regex: '^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)*$'
    */
   @Attribute(required = true)
   private String elementName;
 
   /**
-   * This must be a name() of one of Tables's ColumnTypes.
+   * This is the ColumnType of the field. It is either:
+   *    integer
+   *    number
+   *    configpath
+   *    rowpath
+   *    array
+   *    array(len)
+   *    string
+   *    string(len)
+   *    typename
+   *    typename(len)
+   *
+   *    Where:
+   *
+   *    'typename' is any other alpha-numeric name (user-definable data type).
+   *
+   *    The (len) attribute, if present, identifies the VARCHAR storage
+   *    requirements for the field when the field is a unit of retention
+   *    (see isUnitOfRetention below). Ignored if not a unit of retention.
+   *
+   *    The server stores:
+   *
+   *      integer as a 32-bit integer.
+   *
+   *      number as a double-precision floating point value.
+   *
+   *      configpath indicates that it is a relative path to a file under the 'config'
+   *             directory in the 'new' directory structure. i.e., the relative path is
+   *             rooted from:
+   *                 /sdcard/opendatakit/{appId}/config/
+   *
+   *      rowpath indicates that it is a relative path to a file under the row's attachment
+   *             directory in the 'new' directory structure. i.e., the relative path is
+   *             rooted from:
+   *                 /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}/
+   *
+   *      array is a JSON serialization expecting one child element key
+   *            that defines the data type in the array.  Array fields
+   *            MUST be units of retention (isUnitOfRetention == true).
+   *
+   *      string is a string value
+   *
+   *      anything else, if it has no child element key, it is a string
+   *            (simple user-defined data type).
+   *
+   *      anything else, if it has one or more child element keys, is a
+   *            JSON serialization of an object containing those keys
+   *            (complex user-defined data type).
+   *
    */
   @Attribute(required = false)
   private String elementType;
 
+  /**
+   * JSON serialization of an array of strings. Each value in the
+   * array identifies an elementKey of a nested field within this
+   * elementKey. If there are one or more nested fields, then the
+   * value stored in this elementKey is a JSON serialization of
+   * either an array or an object. Otherwise, it is either an
+   * integer, number or string field.
+   *
+   * If the elementType is 'array', the serialization is an
+   * array and the nested field is retrieved via a subscript.
+   *
+   * Otherwise, the serialization is an object and the nested
+   * field is retrieved via the elementName of that field.
+   */
   @Attribute(required = false)
   private String listChildElementKeys;
 
+  /**
+   * If true, then this elementKey is a column in the backing
+   * database table. If false, then either the elementKey is a
+   * component of an enclosing object that is a column in the
+   * backing database table, or, each of its child element keys
+   * or their descendants are columns in the backing database
+   * table.
+   */
   @Attribute(required = true)
   private int isUnitOfRetention;
 

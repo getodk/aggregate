@@ -56,10 +56,10 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public Response getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+  public Response getRows(@QueryParam(QUERY_RESUME_PARAMETER) String resumeParameter) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     List<Row> rows;
     rows = dm.getRows();
-    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+    RowResourceList rowResourceList = new RowResourceList(getResources(rows), null);
     return Response.ok(rowResourceList).build();
   }
 

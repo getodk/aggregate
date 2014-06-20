@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
 
+import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
@@ -33,6 +34,13 @@ import org.simpleframework.xml.Root;
 public class RowResourceList {
 
   /**
+   * Optional resumeParameter, if the list of rows
+   * is too long to return all at once.
+   */
+  @Element(required = false)
+  private String resumeParameter;
+
+  /**
    * The entries in the manifest.
    */
   @ElementList(inline = true, required = false)
@@ -43,6 +51,7 @@ public class RowResourceList {
    */
   public RowResourceList() {
     this.entries = new ArrayList<RowResource>();
+    this.resumeParameter = null;
   }
 
   /**
@@ -50,12 +59,21 @@ public class RowResourceList {
    *
    * @param entries
    */
-  public RowResourceList(ArrayList<RowResource> entries) {
+  public RowResourceList(ArrayList<RowResource> entries, String resumeParameter) {
+    this.resumeParameter = resumeParameter;
     if ( entries == null ) {
       this.entries = new ArrayList<RowResource>();
     } else {
       this.entries = entries;
     }
+  }
+
+  public String getResumeParameter() {
+    return resumeParameter;
+  }
+
+  public void setResumeParameter(String resumeParameter) {
+    this.resumeParameter = resumeParameter;
   }
 
   public ArrayList<RowResource> getEntries() {
@@ -70,6 +88,7 @@ public class RowResourceList {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((resumeParameter == null) ? 0 : resumeParameter.hashCode());
     result = prime * result + ((entries == null) ? 0 : entries.hashCode());
     return result;
   }
@@ -86,8 +105,10 @@ public class RowResourceList {
       return false;
     }
     RowResourceList other = (RowResourceList) obj;
-    return (entries == null ? other.entries == null : (entries.size() == other.entries.size()
-        && entries.containsAll(other.entries) && other.entries.containsAll(entries)));
+    return ((resumeParameter == null) ? other.resumeParameter == null : (resumeParameter
+        .equals(other.resumeParameter)))
+        && ((entries == null ? other.entries == null : (entries.size() == other.entries.size()
+            && entries.containsAll(other.entries) && other.entries.containsAll(entries))));
   }
 
 }

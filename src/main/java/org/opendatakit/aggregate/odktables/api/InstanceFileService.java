@@ -76,7 +76,7 @@ public interface InstanceFileService {
   @Path("{rowId}/manifest")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @GZIP
-  public Response getManifest(@PathParam("rowId") String rowId, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response /* OdkTablesFileManifest */ getManifest(@PathParam("rowId") String rowId, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @GET
   @Path("{rowId}/file/{filePath:.*}")

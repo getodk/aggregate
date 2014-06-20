@@ -25,21 +25,43 @@ import org.simpleframework.xml.Root;
 @Default(value = DefaultType.FIELD, required = true)
 public class TableResource extends TableEntry {
 
+  /**
+   * URLs for various other parts of the API
+   */
+
+  /**
+   * Get this same TableResource.
+   */
   @Element(required = true)
   private String selfUri;
 
+  /**
+   * Get the TableDefinition for this tableId
+   */
   @Element(required = true)
   private String definitionUri;
 
+  /**
+   * Path prefix for data row interactions
+   */
   @Element(required = true)
   private String dataUri;
 
+  /**
+   * Path prefix for data row attachment interactions
+   */
   @Element(required = true)
   private String instanceFilesUri;
 
+  /**
+   * Path prefix for differencing (changes-since) service.
+   */
   @Element(required = true)
   private String diffUri;
 
+  /**
+   * Path prefix for permissions / access-control service.
+   */
   @Element(required = true)
   private String aclUri;
 

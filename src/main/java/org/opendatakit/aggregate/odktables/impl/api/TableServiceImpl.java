@@ -24,6 +24,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -81,7 +82,7 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response getTables(@PathParam("appId") String appId) throws ODKDatastoreException {
+  public Response getTables(@PathParam("appId") String appId, @QueryParam(QUERY_RESUME_PARAMETER) String resumeParameter) throws ODKDatastoreException {
     if ( !this.appId.equals(appId) ) {
       return Response.status(Status.BAD_REQUEST)
           .entity(ERROR_APP_ID_DIFFERS + "\n" + appId).build();

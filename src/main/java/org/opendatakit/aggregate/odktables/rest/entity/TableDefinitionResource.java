@@ -27,9 +27,15 @@ import org.simpleframework.xml.Root;
 @Default(DefaultType.FIELD)
 public class TableDefinitionResource extends TableDefinition {
 
+  /**
+   * Get this same TableDefinitionResource.
+   */
   @Element(required = true)
   private String selfUri;
 
+  /**
+   * Get the TableResource for this tableId.
+   */
   @Element(required = true)
   private String tableUri;
 

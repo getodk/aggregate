@@ -23,6 +23,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -43,8 +44,11 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface TableService {
 
+  public static final String QUERY_RESUME_PARAMETER = "resume";
+
   /**
    *
+   * @param resumeParameter - null or a value from the TableResourceList of a previous call
    * @param appId
    *
    * @return {@link TableResourceList} of all tables the user has access to.
@@ -53,7 +57,7 @@ public interface TableService {
   @GET
   @Path("")
   @GZIP
-  public Response /*TableResourceList*/ getTables(@PathParam("appId") String appId) throws ODKDatastoreException;
+  public Response /*TableResourceList*/ getTables(@PathParam("appId") String appId, @QueryParam(QUERY_RESUME_PARAMETER) String resumeParameter) throws ODKDatastoreException;
 
   /**
    *

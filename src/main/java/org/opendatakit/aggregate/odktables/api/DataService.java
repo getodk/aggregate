@@ -42,10 +42,12 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DataService {
 
+  public static final String QUERY_RESUME_PARAMETER = "resume";
   public static final String QUERY_ROW_ETAG = "row_etag";
 
   /**
    *
+   * @param resumeParameter - null or a value from the RowResourceList of a previous call
    * @return {@link RowResourceList} containing the rows being returned.
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -56,7 +58,7 @@ public interface DataService {
   @GET
   @Path("")
   @GZIP
-  public Response /*RowResourceList*/ getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
+  public Response /*RowResourceList*/ getRows(@QueryParam(QUERY_RESUME_PARAMETER) String resumeParameter) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
   /**
    *
