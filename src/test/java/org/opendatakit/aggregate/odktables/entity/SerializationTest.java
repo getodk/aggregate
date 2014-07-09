@@ -181,7 +181,7 @@ public class SerializationTest {
     two.setTableUri("http://localhost/tables/1");
     expected.add(one);
     expected.add(two);
-    RowResourceList rrl = new RowResourceList(expected);
+    RowResourceList rrl = new RowResourceList(expected, null);
     serializer.write(rrl, writer);
     String xml = writer.toString();
     System.out.println(xml);
