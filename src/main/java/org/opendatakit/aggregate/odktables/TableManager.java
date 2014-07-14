@@ -27,15 +27,15 @@ import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumn
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
-import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
-import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
+import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.relation.RUtil;
@@ -47,7 +47,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.BlobEntitySet;
-import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.PersistenceUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -125,7 +125,7 @@ public class TableManager {
      *
      * Query query =
      * DbTableEntry.getRelation(cc).query("TableManager.getTables(List<Scope>)",
-     * cc); query.include(CommonFieldsBase.URI_COLUMN_NAME, tableIds);
+     * cc); query.include(PersistConsts.URI_COLUMN_NAME, tableIds);
      * List<Entity> entries = query.execute(); return getTableEntries(entries);
      */
     // List<TableEntry> tables = getTables();
@@ -315,7 +315,7 @@ public class TableManager {
         return existing;
       }
 
-      String pendingSchemaETag = CommonFieldsBase.newUri();
+      String pendingSchemaETag = PersistenceUtils.newUri();
 
       if ( tableEntry == null ) {
         // create table. "entities" will store all of the things we will need to
