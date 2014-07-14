@@ -42,7 +42,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
-import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.PersistenceUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -533,7 +533,7 @@ public class DataManager {
         boolean newRowId = false;
         if (rowId == null) {
           newRowId = true;
-          rowId = CommonFieldsBase.newUri();
+          rowId = PersistenceUtils.newUri();
           row.setRowId(rowId);
         }
         boolean nullIncomingScope = false;
@@ -616,7 +616,7 @@ public class DataManager {
         // OK we are able to update or insert the record -- mark as pending change.
 
         // get new dataETag
-        String dataETagAtModification = CommonFieldsBase.newUri();
+        String dataETagAtModification = PersistenceUtils.newUri();
         entry.setPendingDataETag(dataETagAtModification);
         entry.put(cc);
 
@@ -624,7 +624,7 @@ public class DataManager {
         String previousRowETag = row.getRowETag();
 
         // update the fields in the DbTable entity...
-        creator.setRowFields(entity, CommonFieldsBase.newUri(), dataETagAtModification,
+        creator.setRowFields(entity, PersistenceUtils.newUri(), dataETagAtModification,
             userPermissions.getOdkTablesUserId(), false, scope, row.getFormId(), row.getLocale(),
             row.getSavepointType(), row.getSavepointTimestamp(), row.getSavepointCreator(), row.getValues(), columns);
 
@@ -775,7 +775,7 @@ public class DataManager {
         }
 
         // get new dataETag
-        dataETagAtModification = CommonFieldsBase.newUri();
+        dataETagAtModification = PersistenceUtils.newUri();
         entry.setPendingDataETag(dataETagAtModification);
         entry.put(cc);
 
@@ -783,7 +783,7 @@ public class DataManager {
         String previousRowETag = entity.getString(DbTable.ROW_ETAG);
 
         // update the row ETag and deletion status
-        entity.set(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
+        entity.set(DbTable.ROW_ETAG, PersistenceUtils.newUri());
         entity.set(DbTable.DELETED, true);
 
         // create log table entry
