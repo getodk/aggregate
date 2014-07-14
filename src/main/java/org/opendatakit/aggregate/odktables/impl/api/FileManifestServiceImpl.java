@@ -40,8 +40,6 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -66,8 +64,8 @@ public class FileManifestServiceImpl implements FileManifestService {
       @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     this.cc = ContextFactory.getCallingContext(sc, req);
-    this.appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
-    this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
+    this.userPermissions = ContextFactory.getTablesUserPermissions(this.cc.getCurrentUser().getUriUser(), cc);
+    this.appId = ContextFactory.getOdkTablesAppId(cc);
     this.info = info;
   }
 

@@ -52,8 +52,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
