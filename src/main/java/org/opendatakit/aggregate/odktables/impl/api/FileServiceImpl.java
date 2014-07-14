@@ -86,8 +86,8 @@ public class FileServiceImpl implements FileService {
       @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     this.cc = ContextFactory.getCallingContext(sc, req);
-    this.appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
-    this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
+    this.userPermissions = ContextFactory.getTablesUserPermissions(this.cc.getCurrentUser().getUriUser(), cc);
+    this.appId = ContextFactory.getOdkTablesAppId(cc);
     this.info = info;
   }
 
