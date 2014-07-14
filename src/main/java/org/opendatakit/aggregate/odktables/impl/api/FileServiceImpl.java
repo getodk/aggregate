@@ -52,8 +52,6 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
