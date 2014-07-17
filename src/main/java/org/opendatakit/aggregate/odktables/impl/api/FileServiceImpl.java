@@ -52,8 +52,6 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -86,8 +84,8 @@ public class FileServiceImpl implements FileService {
       @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     this.cc = ContextFactory.getCallingContext(sc, req);
-    this.appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
-    this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
+    this.userPermissions = ContextFactory.getTablesUserPermissions(this.cc.getCurrentUser().getUriUser(), cc);
+    this.appId = ContextFactory.getOdkTablesAppId(cc);
     this.info = info;
   }
 
