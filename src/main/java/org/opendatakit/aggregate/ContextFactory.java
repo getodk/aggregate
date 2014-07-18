@@ -44,10 +44,10 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 /**
  * Server Context creates a singleton for application context to prevent
  * unnecessary construction
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class ContextFactory {
 
@@ -220,11 +220,11 @@ public class ContextFactory {
     return new CallingContextImpl(context);
   }
 
-  public static TablesUserPermissions getTablesUserPermissions(String user, CallingContext cc) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
-    return new TablesUserPermissionsImpl(user, cc);
+  public static TablesUserPermissions getTablesUserPermissions(CallingContext cc) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
+    return new TablesUserPermissionsImpl(cc);
  }
- 
+
  public static String getOdkTablesAppId(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     return ServerPreferencesProperties.getOdkTablesAppId(cc);
- } 
+ }
 }

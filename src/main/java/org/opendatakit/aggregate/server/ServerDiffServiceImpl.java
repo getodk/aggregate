@@ -57,8 +57,7 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       List<Row> rows;

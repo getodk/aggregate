@@ -236,10 +236,12 @@ class OdkTablesUserInfoTable extends CommonFieldsBase {
    *           if the value cannot be set, most likely due to overflow.
    */
   public void setOdkTablesUserId(String odkTablesUserId) {
-    if (!(odkTablesUserId.startsWith(SecurityUtils.MAILTO_COLON) || odkTablesUserId
-        .startsWith(SecurityUtils.USERNAME_COLON))) {
+    if (!(odkTablesUserId.startsWith(SecurityUtils.MAILTO_COLON) ||
+          odkTablesUserId.startsWith(SecurityUtils.USERNAME_COLON) ||
+          odkTablesUserId.equals(User.ANONYMOUS_USER))) {
       throw new IllegalArgumentException("ODK Tables User Id does not start with "
-          + SecurityUtils.MAILTO_COLON + " or " + SecurityUtils.USERNAME_COLON);
+          + SecurityUtils.MAILTO_COLON + " or " + SecurityUtils.USERNAME_COLON
+          + " or is not " + User.ANONYMOUS_USER);
     }
     if (!setStringField(ODK_TABLES_USER_ID, odkTablesUserId)) {
       throw new IllegalArgumentException("overflow external odkTablesUserId");
