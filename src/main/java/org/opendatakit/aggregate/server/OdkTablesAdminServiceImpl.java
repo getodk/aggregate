@@ -17,7 +17,8 @@
 package org.opendatakit.aggregate.server;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -28,15 +29,19 @@ import org.opendatakit.aggregate.client.preferences.OdkTablesAdminService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
+import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.security.server.SecurityServiceUtil;
+import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
+import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
+import org.springframework.security.core.GrantedAuthority;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -63,30 +68,39 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
       if ( user.isAnonymous() ) {
         throw new AccessDeniedException("Anonymous users cannot access ODK Tables administration settings");
       }
-      Map<String, UserSecurityInfo> uriUSImap = SecurityServiceUtil.getUriUserSecurityInfoMap(
-          false, cc);
       ArrayList<OdkTablesAdmin> results = new ArrayList<OdkTablesAdmin>();
-      for (String uri : uriUSImap.keySet()) {
-        if ( uri.equals(User.ANONYMOUS_USER) || uri.equals(User.DAEMON_USER) ) {
-          // don't care about these...
-          continue;
-        }
-        try {
-          TablesUserPermissions tablesUser = new TablesUserPermissionsImpl(uri, cc);
-          UserSecurityInfo info = uriUSImap.get(uri);
 
-          OdkTablesAdmin holder = new OdkTablesAdmin();
+      Query q = RegisteredUsersTable.createQuery(cc.getDatastore(), "SecurityServiceUtil.getAllUsers", cc.getCurrentUser());
+      RegisteredUsersTable.applyNaturalOrdering(q, cc);
 
-          holder.setUriUser(uri);
-          holder.setOdkTablesUserId(tablesUser.getOdkTablesUserId());
-          holder.setPhoneNumber(tablesUser.getPhoneNumber());
-          holder.setXBearerCode(tablesUser.getXBearerCode());
-          holder.setName(info.getCanonicalName());
+      List<? extends CommonFieldsBase> l = q.executeQuery();
 
-          results.add(holder);
-        } catch (PermissionDeniedException e) {
-          // ignore -- this user is not an odkTables user...
-        }
+      for ( CommonFieldsBase cb : l ) {
+         RegisteredUsersTable t = (RegisteredUsersTable) cb;
+
+         String uriUser = t.getUri();
+         if ( uriUser.equals(User.ANONYMOUS_USER) || uriUser.equals(User.DAEMON_USER) ) {
+           // don't care about these...
+           continue;
+         }
+         Set<GrantedAuthority> grants = UserGrantedAuthority.getGrantedAuthorities(uriUser, cc.getDatastore(), cc.getCurrentUser());
+
+         TablesUserPermissions tablesUser = new TablesUserPermissionsImpl(cc, uriUser, grants);
+
+         String canonicalName = t.getUsername();
+         if ( canonicalName == null ) {
+           canonicalName = t.getEmail().substring(EmailParser.K_MAILTO.length());
+         }
+
+        OdkTablesAdmin holder = new OdkTablesAdmin();
+
+        holder.setUriUser(uriUser);
+        holder.setOdkTablesUserId(tablesUser.getOdkTablesUserId());
+        holder.setPhoneNumber(tablesUser.getPhoneNumber());
+        holder.setXBearerCode(tablesUser.getXBearerCode());
+        holder.setName(canonicalName);
+
+        results.add(holder);
       }
       return results.toArray(new OdkTablesAdmin[results.size()]);
 
@@ -96,6 +110,9 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKTaskLockException e) {
       e.printStackTrace();
       throw new RequestFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new AccessDeniedException(e);
     }
   }
 
@@ -162,8 +179,11 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
           failure = true;
           continue;
         }
+        Set<GrantedAuthority> grants =
+            UserGrantedAuthority.getGrantedAuthorities(theUser.getUri(), cc.getDatastore(), cc.getCurrentUser());
+
         @SuppressWarnings("unused")
-        TablesUserPermissionsImpl usePermissions = new TablesUserPermissionsImpl(theUser.getUri(), cc);
+        TablesUserPermissionsImpl usePermissions = new TablesUserPermissionsImpl(cc, theUser.getUri(), grants);
       } catch (ODKDatastoreException e) {
         // If you've gotten here there was a datastore problem
         e.printStackTrace();

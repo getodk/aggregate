@@ -65,8 +65,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls();
@@ -89,8 +88,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls(Scope.Type.USER);
@@ -113,8 +111,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       List<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
@@ -137,8 +134,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
@@ -162,8 +158,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
@@ -188,8 +183,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
@@ -213,8 +207,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.DEFAULT, null),
@@ -243,8 +236,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
@@ -275,8 +267,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.GROUP, groupId),
@@ -304,8 +295,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.DEFAULT, null));
@@ -327,8 +317,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, odkTablesUserId));
@@ -350,8 +339,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, groupId));

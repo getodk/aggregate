@@ -90,8 +90,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       List<Row> rows = dm.getRows();
@@ -124,8 +123,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     try {
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       Row row = dm.getRow(rowId);
@@ -166,8 +164,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     TablesUserPermissions userPermissions;
     try {
-      userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
 
       return ServerOdkTablesUtil.createOrUpdateRow(appId, tableId, rowId, row, userPermissions, cc);
@@ -193,8 +190,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       dm.deleteRow(rowId, rowETag);
@@ -238,8 +234,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTable(tableId);
@@ -341,8 +336,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfAppLevelFiles(cc);
@@ -431,8 +425,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
@@ -526,8 +519,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
@@ -615,8 +607,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       // TODO: add permissions check
@@ -653,8 +644,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       // TODO: add permissions check
@@ -693,8 +683,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);

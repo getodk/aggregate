@@ -71,7 +71,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       }
       TablesUserPermissions userPermissions = null;
       try {
-        userPermissions = new TablesUserPermissionsImpl(user.getUriUser(), cc);
+        userPermissions = new TablesUserPermissionsImpl(cc);
       } catch (PermissionDeniedException e) {
         return clientEntries;
       }
@@ -108,7 +108,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       if (user.isAnonymous()) {
         throw new AccessDeniedException("Anonymous users cannot access ODK Tables datasets");
       }
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(user.getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTableNullSafe(tableId);
@@ -151,7 +151,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       if (user.isAnonymous()) {
         throw new AccessDeniedException("Anonymous users cannot create ODK Tables datasets");
       }
-      userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser().getUriUser(), cc);
+      userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       return ServerOdkTablesUtil.createTable(appId, tableId, definition, userPermissions, cc);
     } catch (ODKDatastoreException e) {
@@ -179,7 +179,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       if (user.isAnonymous()) {
         throw new AccessDeniedException("Anonymous users cannot delete ODK Tables datasets");
       }
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(user.getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       tm.deleteTable(tableId);
