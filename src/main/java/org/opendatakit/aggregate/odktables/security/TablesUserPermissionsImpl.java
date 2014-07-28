@@ -36,7 +36,7 @@ import com.google.common.collect.Lists;
 public class TablesUserPermissionsImpl implements TablesUserPermissions {
 
   private final CallingContext cc;
-  private final OdkTablesUserInfoTable userInfo;
+  private final OdkTablesUserInfo userInfo;
   private final Map<String, AuthFilter> authFilters = new HashMap<String, AuthFilter>();
 
 
