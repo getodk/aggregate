@@ -54,7 +54,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  * @author mitchellsundt@gmail.com
  *
  */
-public class OdkTablesUserInfoTable extends CommonFieldsBase {
+public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTablesUserInfo {
 
   /**
    * The name of the table into which this data is persisted.
@@ -295,23 +295,17 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase {
     return getStringField(URI_USER);
   }
 
-  /**
-   * Get the external userid
-   */
+  @Override
   public String getOdkTablesUserId() {
     return getStringField(ODK_TABLES_USER_ID);
   }
 
-  /**
-   * Get the Phone Number
-   */
+  @Override
   public String getPhoneNumber() {
     return getStringField(PHONE_NUMBER);
   }
 
-  /**
-   * Get the X-Bearer-Code
-   */
+  @Override
   public String getXBearerCode() {
     return getStringField(X_BEARER_CODE);
   }
