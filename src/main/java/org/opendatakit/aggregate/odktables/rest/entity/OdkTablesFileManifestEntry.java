@@ -16,8 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This represents information about a file so that a phone running ODKTables
@@ -28,33 +27,31 @@ import org.simpleframework.xml.Root;
  * @author sudar.sam@gmail.com
  *
  */
-@Root
 public class OdkTablesFileManifestEntry {
 
   /**
    * This is the name of the file.
    */
-  @Attribute(required = true)
   public String filename;
 
-  @Attribute(required = false)
+  @JsonProperty(required = false)
   public Long contentLength;
 
-  @Attribute(required = false)
+  @JsonProperty(required = false)
   public String contentType;
 
   /**
    * This is the md5hash of the file, which will be used for checking whether or
    * not the version of the file on the phone is current.
    */
-  @Attribute(required = true)
+  @JsonProperty(required = false)
   public String md5hash;
 
   /**
    * This is the url from which the current version of the file can be
    * downloaded.
    */
-  @Attribute(required = true)
+  @JsonProperty(required = false)
   public String downloadUrl;
 
   @Override
@@ -82,7 +79,8 @@ public class OdkTablesFileManifestEntry {
     }
     OdkTablesFileManifestEntry other = (OdkTablesFileManifestEntry) obj;
     return (filename == null ? other.filename == null : filename.equals(other.filename))
-        && (contentLength == null ? other.contentLength == null : contentLength.equals(other.contentLength))
+        && (contentLength == null ? other.contentLength == null : contentLength
+            .equals(other.contentLength))
         && (contentType == null ? other.contentType == null : contentType.equals(other.contentType))
         && (md5hash == null ? other.md5hash == null : md5hash.equals(other.md5hash))
         && (downloadUrl == null ? other.downloadUrl == null : downloadUrl.equals(other.downloadUrl));

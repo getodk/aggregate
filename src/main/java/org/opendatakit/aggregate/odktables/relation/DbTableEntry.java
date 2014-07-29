@@ -144,7 +144,7 @@ public class DbTableEntry extends Relation {
   public static class DbTableEntryEntity {
     Entity e;
 
-    DbTableEntryEntity(Entity e) {
+    public DbTableEntryEntity(Entity e) {
       this.e = e;
     }
 

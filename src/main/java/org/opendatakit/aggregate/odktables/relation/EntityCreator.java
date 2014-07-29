@@ -16,9 +16,8 @@
 
 package org.opendatakit.aggregate.odktables.relation;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.logging.Log;
@@ -32,6 +31,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEnt
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -112,7 +112,6 @@ public class EntityCreator {
     entity.setElementName(column.getElementName());
     entity.setElementType(column.getElementType());
     entity.setListChildElementKeys(column.getListChildElementKeys());
-    entity.setIsUnitOfRetention(column.getIsUnitOfRetention() != 0);
 
     return entity;
   }
@@ -219,7 +218,7 @@ public class EntityCreator {
   public void setRowFields(Entity row, String rowETag, String dataETagAtModification,
       String lastUpdateUser, boolean deleted,
       Scope filterScope, String formId, String locale, String savepointType,
-      String savepointTimestamp, String savepointCreator, Map<String, String> values, List<DbColumnDefinitionsEntity> columns)
+      String savepointTimestamp, String savepointCreator, ArrayList<DataKeyValue> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_ETAG, rowETag);
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
@@ -251,9 +250,9 @@ public class EntityCreator {
     row.set(DbTable.SAVEPOINT_TIMESTAMP, savepointTimestamp);
     row.set(DbTable.SAVEPOINT_CREATOR, savepointCreator);
 
-    for (Entry<String, String> entry : values.entrySet()) {
-      String value = entry.getValue();
-      String name = entry.getKey();
+    for (DataKeyValue kv : values ) {
+      String value = kv.value;
+      String name = kv.column;
       // There are three possbilities here.
       // 1) The key is a shared metadata column that SHOULD be synched.
       // 2) The key is a client only metadata column that should NOT be synched
@@ -274,7 +273,7 @@ public class EntityCreator {
           // of the Tables-only columns. Otherwise it's an error.
           log.error("bad column name: " + name);
           throw new BadColumnNameException("Bad column name " + name);
-        } else if (column.getIsUnitOfRetention()) {
+        } else if (column.isUnitOfRetention()) {
           row.setAsString(column.getElementKey().toUpperCase(), value);
         }
       }
@@ -342,7 +341,7 @@ public class EntityCreator {
     entity.set(DbLogTable.SAVEPOINT_CREATOR, row.getString(DbTable.SAVEPOINT_CREATOR));
 
     for (DbColumnDefinitionsEntity column : columns) {
-      if (column.getIsUnitOfRetention()) {
+      if (column.isUnitOfRetention()) {
         String value = row.getAsString(column.getElementKey().toUpperCase());
         entity.setAsString(column.getElementKey().toUpperCase(), value);
       }

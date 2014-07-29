@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendatakit</groupId>
     <artifactId>aggregate-gae-specific</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <relativePath>../gae-pom.xml</relativePath>
   </parent>
   <artifactId>gae-unit-tests</artifactId>

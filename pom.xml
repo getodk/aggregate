@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opendatakit</groupId>
 	<artifactId>aggregate</artifactId>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
   	<organization>
 		<name>Open Data Kit</name>
@@ -20,10 +20,10 @@
 		<gooogle.appengine.sdk.version>1.9.0</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
 		<gae.version>${gooogle.appengine.sdk.version}</gae.version>
 		<google.gdata.version>1.47.1</google.gdata.version>
-		<google.api-client.version>1.17.0-rc</google.api-client.version>
-		<google.api-services-drive.version>v2-rev116-1.17.0-rc</google.api-services-drive.version>
+		<google.api-client.version>1.18.0-rc</google.api-client.version>
+		<google.api-services-drive.version>v2-rev131-1.18.0-rc</google.api-services-drive.version>
 		<google.gwt.version>2.5.1</google.gwt.version>
-        <org.jboss.resteasy.version>3.0.6.Final</org.jboss.resteasy.version>
+		<org.apache.wink.version>1.4</org.apache.wink.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.16</maven.surefire.report.plugin.version>
 		<maven.surefire.plugin.version>2.16</maven.surefire.plugin.version>
@@ -39,12 +39,15 @@
 		<maven.antrun.plugin.version>1.7</maven.antrun.plugin.version>
 		<maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
 		<junit.version>4.11</junit.version>
-		<com.fasterxml.jackson.version>2.4.0</com.fasterxml.jackson.version>
+		<com.fasterxml.jackson.base.version>2.4.1</com.fasterxml.jackson.base.version>
+		<com.fasterxml.jackson.core.version>2.4.1.1</com.fasterxml.jackson.core.version>
+		<com.fasterxml.jackson.version>2.4.1.3</com.fasterxml.jackson.version>
+		<org.codehaus.woodstox.version>4.1.4</org.codehaus.woodstox.version> <!-- used by jackson2 XML serializer -->
 		<org.springframework.version>4.0.5.RELEASE</org.springframework.version>
 		<org.slf4j.version>1.7.7</org.slf4j.version>
 		<!-- log4j is not used -->
-		<org.springframework.security.version>3.2.4.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.3.RELEASE -->
-		<openid4java.version>0.9.6.662.odk-SNAPSHOT</openid4java.version>
+		<org.springframework.security.version>3.2.4.odk-SNAPSHOT</org.springframework.security.version>
+		<openid4java.version>0.9.6.662.1.odk-SNAPSHOT</openid4java.version>
 		<org.springframework.security.openid.version>3.2.4.odk-SNAPSHOT</org.springframework.security.openid.version>
 		<org.seleniumhq.version>2.37.0</org.seleniumhq.version>
 		<!--
@@ -204,13 +207,13 @@
         </pluginRepository>
 	</pluginRepositories>
 	<dependencies>
-		<dependency>
+<!--		<dependency>
 		  <groupId>aopalliance</groupId>
 		  <artifactId>aopalliance</artifactId>
 		  <version>1.0</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 		  <groupId>com.google.appengine</groupId>
 		  <artifactId>appengine-api-1.0-sdk</artifactId>
@@ -232,7 +235,7 @@
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
 			<version>1.6.12</version>
@@ -241,11 +244,11 @@
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.6.12</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
-			<version>0.7.1.RELEASE</version>
+			<version>0.8.0.RELEASE</version>
 		  <exclusions>
 		    <exclusion>
 			  <groupId>com.google.guava</groupId>
@@ -264,14 +267,14 @@
 		<dependency> <!-- required by spring-security odk-SNAPSHOT -->
 		  <groupId>commons-codec</groupId>
 		  <artifactId>commons-codec</artifactId>
-		  <version>1.6</version> <!-- note: 1.7 requires java 1.6 -->
+		  <version>1.9</version> <!-- note: java 1.6 -->
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 		  <groupId>commons-fileupload</groupId>
 		  <artifactId>commons-fileupload</artifactId>
-		  <version>1.2.2</version>
+		  <version>1.3.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -285,14 +288,14 @@
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
 		  <artifactId>commons-lang3</artifactId>
-		  <version>3.1</version>
+		  <version>3.3.2</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 		  <groupId>commons-logging</groupId>
 		  <artifactId>commons-logging</artifactId>
-		  <version>1.1.1</version>
+		  <version>1.1.3</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
  			<exclusions>
@@ -307,6 +310,10 @@
 		  <artifactId>ehcache</artifactId>
 		  <version>2.8.3</version>
  			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
@@ -423,8 +430,8 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.guava</groupId>
-		  <artifactId>guava-jdk5</artifactId>
-		  <version>13.0</version>
+		  <artifactId>guava</artifactId>
+		  <version>17.0</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -444,7 +451,7 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.http-client</groupId>
-		  <artifactId>google-http-client-jackson</artifactId>
+		  <artifactId>google-http-client-jackson2</artifactId>
 		  <version>${google.api-client.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
@@ -519,22 +526,22 @@
 			<artifactId>httpmime</artifactId>
 			<version>4.2.2</version>
 		</dependency>
-		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
+<!--		<dependency> < !- - needed by spring-security odk-SNAPSHOT - ->
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
 			<version>3.4.4</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 		  <groupId>com.fasterxml.jackson.core</groupId>
 		  <artifactId>jackson-annotations</artifactId>
-		  <version>${com.fasterxml.jackson.version}</version>
+		  <version>${com.fasterxml.jackson.base.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 		  <groupId>com.fasterxml.jackson.core</groupId>
 		  <artifactId>jackson-core</artifactId>
-		  <version>${com.fasterxml.jackson.version}</version>
+		  <version>${com.fasterxml.jackson.core.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -544,6 +551,53 @@
 		  <version>${com.fasterxml.jackson.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
+			<exclusions>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+			  </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson.dataformat</groupId>
+		  <artifactId>jackson-dataformat-xml</artifactId>
+		  <version>${com.fasterxml.jackson.base.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+			<exclusions>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+			  </exclusion>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+			  </exclusion>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+			  </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson.jaxrs</groupId>
+		  <artifactId>jackson-jaxrs-json-provider</artifactId>
+		  <version>${com.fasterxml.jackson.base.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson.jaxrs</groupId>
+		  <artifactId>jackson-jaxrs-xml-provider</artifactId>
+		  <version>${com.fasterxml.jackson.base.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+			<exclusions>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+			  </exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>org.javarosa</groupId>
@@ -574,7 +628,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.18</version>
+			<version>5.1.31</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -596,7 +650,7 @@
 		<dependency>
 		  <groupId>org.opendatakit</groupId>
 		  <artifactId>odk-httpclient-gae</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>1.1</version>
+		  <version>1.1.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -604,13 +658,6 @@
 			<groupId>org.opendatakit</groupId>
 			<artifactId>odk-tomcatutil</artifactId> <!-- see src/main/libs/readme.txt -->
 			<version>1.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>2.3</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -828,14 +875,19 @@
 			<artifactId>transaction-api</artifactId>
 			<version>1.1</version>
 		</dependency>
+		<dependency>
+		  <groupId>org.codehaus.woodstox</groupId>
+		  <artifactId>woodstox-core-asl</artifactId>
+		  <version>${org.codehaus.woodstox.version}</version>
+		</dependency>
 		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
 			<groupId>xalan</groupId>
 			<artifactId>xalan</artifactId>
-			<version>2.7.0</version>	
+			<version>2.7.1</version>	
 			<exclusions>
 				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -852,11 +904,15 @@
 		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
 			<groupId>org.apache.santuario</groupId>
 			<artifactId>xmlsec</artifactId>
-			<version>1.4.6</version>
+			<version>1.5.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -866,27 +922,36 @@
 			<version>1.1.4c</version>
 		</dependency>
         <!-- for odktables api -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-            <version>${org.jboss.resteasy.version}</version>
-			<!-- filter out unwanted jars -->
-			<exclusions>
-				<exclusion>
-					<groupId>commons-httpclient</groupId>
-					<artifactId>commons-httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
+		<!-- <dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+			<version>${org.apache.cxf.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.simpleframework</groupId>
-            <artifactId>simple-xml</artifactId>
-            <version>2.6.2</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-core</artifactId>
+			<version>${org.apache.cxf.version}</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-common</artifactId>
+			<version>${org.apache.wink.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-server</artifactId>
+			<version>${org.apache.wink.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jaxrs_1.1_spec</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.2</version>
+		</dependency>
         <!-- /for odktables api -->
 		<!-- Test dependencies (mainly for gae) -->
 		<dependency>
@@ -1002,7 +1067,19 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>2.8</version>
-			  </plugin>
+				<executions>
+					<execution>
+						<id>analyze</id>
+						<goals>
+							<goal>analyze-only</goal>
+						</goals>
+						<configuration>
+							<failOnWarning>false</failOnWarning>
+							<outputXML>true</outputXML>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<!-- these are referenced by other projects -->
@@ -1079,12 +1156,14 @@
 							<groupId>javax.validation</groupId>
 							<artifactId>validation-api</artifactId>
 							<version>1.0.0.GA</version>
+							<type>jar</type>
 						</dependency>
 						<dependency>
 							<groupId>javax.validation</groupId>
 							<artifactId>validation-api</artifactId>
 							<version>1.0.0.GA</version>
 							<classifier>sources</classifier>
+							<type>jar</type>
 						</dependency>
 					</dependencies>
 					<executions>

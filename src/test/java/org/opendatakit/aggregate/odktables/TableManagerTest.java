@@ -26,6 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.TableManager.WebsafeTables;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
@@ -119,8 +120,8 @@ public class TableManagerTest {
 
   @Test
   public void testGetTablesEmpty() throws ODKDatastoreException {
-    List<TableEntry> entries = tm.getTables();
-    assertTrue(entries.isEmpty());
+    WebsafeTables result = tm.getTables(null, 2000);
+    assertTrue(result.tables.isEmpty());
   }
 
   @Test
@@ -205,7 +206,8 @@ public class TableManagerTest {
     expected.add(one);
     expected.add(two);
 
-    List<TableEntry> actual = tm.getTables();
+    WebsafeTables result = tm.getTables(null, 2000);
+    List<TableEntry> actual = result.tables;
     assertEquals(2, actual.size());
 
     Util.assertCollectionSameElements(expected, actual);
@@ -231,7 +233,8 @@ public class TableManagerTest {
     expected.add(one);
     expected.add(two);
 
-    List<TableEntry> actual = tm.getTables(Lists.newArrayList(scope));
+    WebsafeTables result = tm.getTables(Lists.newArrayList(scope), null, 2000);
+    List<TableEntry> actual = result.tables;
 
     Util.assertCollectionSameElements(expected, actual);
   }

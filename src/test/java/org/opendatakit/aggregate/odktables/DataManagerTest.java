@@ -29,11 +29,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
@@ -48,8 +50,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
-
-import com.google.common.collect.Maps;
 
 public class DataManagerTest {
 
@@ -122,8 +122,8 @@ public class DataManagerTest {
 
   @Test
   public void testGetRowsEmpty() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
-    List<Row> rows = dm.getRows();
-    assertTrue(rows.isEmpty());
+    WebsafeRows websafeResult = dm.getRows(null, 2000);
+    assertTrue(websafeResult.rows.isEmpty());
   }
 
   @Test
@@ -172,7 +172,8 @@ public class DataManagerTest {
     for ( Row r : rows ) {
       expectedRows.add(dm.insertOrUpdateRow(r));
     }
-    List<Row> actualRows = dm.getRows();
+    WebsafeRows websafeResult = dm.getRows(null, 2000);
+    List<Row> actualRows = websafeResult.rows;
     for (int i = 0; i < rows.size(); i++) {
       Row expected = rows.get(i);
       Row actual = actualRows.get(i);
@@ -229,7 +230,9 @@ public class DataManagerTest {
       expectedChanges.add(dm.insertOrUpdateRow(r));
     }
     Row expected = expectedChanges.get(0);
-    expected.getValues().put(T.Columns.column_age.getElementKey(), "24");
+    Map<String,String> evalues = Row.convertToMap(expected.getValues());
+    evalues.put(T.Columns.column_age.getElementKey(), "24");
+    expected.setValues(Row.convertFromMap(evalues));
     Row actual = dm.insertOrUpdateRow(expected);
     assertFalse(expected.getRowETag().equals(actual.getRowETag()));
     expected.setRowETag(actual.getRowETag());
@@ -260,9 +263,10 @@ public class DataManagerTest {
     }
     Row row = expectedChanges.get(0);
     row.setRowETag(CommonFieldsBase.newUri());
-    Map<String,String> values = row.getValues();
-    values.put(T.Columns.column_age.getElementKey(), "40");
-    row.setValues(values);
+
+    Map<String,String> evalues = Row.convertToMap(row.getValues());
+    evalues.put(T.Columns.column_age.getElementKey(), "40");
+    row.setValues(Row.convertFromMap(evalues));
     dm.insertOrUpdateRow(row);
   }
 
@@ -284,7 +288,7 @@ public class DataManagerTest {
     Row actual = Row.forUpdate(expected.getRowId(), expected.getRowETag(),
         T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_1, T.savepoint_creator_1, new Scope(Type.USER, T.user),
-        Maps.<String, String> newHashMap());
+        null);
     actual = dm.insertOrUpdateRow(actual);
     expected.setRowETag(actual.getRowETag());
     expected.setDataETagAtModification(actual.getDataETagAtModification());
@@ -302,7 +306,7 @@ public class DataManagerTest {
         .forUpdate(row.getRowId(), row.getRowETag(),
             T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
             T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE,
-            Maps.<String, String> newHashMap());
+            null);
     actual.setFilterScope(Scope.EMPTY_SCOPE);
     actual = dm.insertOrUpdateRow(actual);
     row.setRowETag(actual.getRowETag());
@@ -316,8 +320,8 @@ public class DataManagerTest {
       ETagMismatchException, PermissionDeniedException, InconsistentStateException {
     Row row = rows.get(0);
     row = dm.insertOrUpdateRow(row);
-    Map<String, String> values = Maps.newHashMap();
-    values.put(T.Columns.name + "diff", "value");
+    ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
+    values.add(new DataKeyValue(T.Columns.name + "diff", "value"));
     row = Row.forUpdate(row.getRowId(), row.getRowETag(), T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values);
     @SuppressWarnings("unused")
@@ -350,7 +354,8 @@ public class DataManagerTest {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    List<Row> rows = dm.getRows();
+    WebsafeRows websafeResult = dm.getRows(null, 2000);
+    List<Row> rows = websafeResult.rows;
     assertTrue(rows.isEmpty());
   }
 
@@ -367,7 +372,9 @@ public class DataManagerTest {
     Map<String, Row> expected = new HashMap<String, Row>();
 
     for (Row row : changes) {
-      row.getValues().put(T.Columns.column_age.getElementKey(), "99");
+      Map<String,String> evalues = Row.convertToMap(row.getValues());
+      evalues.put(T.Columns.column_age.getElementKey(), "99");
+      row.setValues(Row.convertFromMap(evalues));
     }
 
     List<Row> round2changes = new ArrayList<Row>();
@@ -380,7 +387,10 @@ public class DataManagerTest {
     }
 
     Row row = round2changes.get(0);
-    row.getValues().put(T.Columns.column_age.getElementKey(), "444");
+
+    Map<String,String> evalues = Row.convertToMap(row.getValues());
+    evalues.put(T.Columns.column_age.getElementKey(), "444");
+    row.setValues(Row.convertFromMap(evalues));
 
     List<Row> round3changes = new ArrayList<Row>();
     round3changes.add(dm.insertOrUpdateRow(row));
@@ -388,7 +398,8 @@ public class DataManagerTest {
     row = round3changes.get(0);
     expected.put(row.getRowId(), row);
 
-    List<Row> actual = dm.getRowsSince(beginETag);
+    WebsafeRows websafeRows = dm.getRowsSince(beginETag, null, 2000);
+    List<Row> actual = websafeRows.rows;
     Util.assertCollectionSameElements(expected.values(), actual);
   }
 
@@ -423,7 +434,8 @@ public class DataManagerTest {
 
   @Ignore
   private void clearRows() throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
-    List<Row> rows = dm.getRows();
+    WebsafeRows websafeResult = dm.getRows(null, 2000);
+    List<Row> rows = websafeResult.rows;
     for ( Row old : rows ) {
       dm.deleteRow(old.getRowId(), old.getRowETag());
     }
@@ -433,7 +445,7 @@ public class DataManagerTest {
   private List<Row> setupTestRows() throws ODKEntityPersistException, ODKDatastoreException,
       ODKTaskLockException, ETagMismatchException, BadColumnNameException, PermissionDeniedException, InconsistentStateException {
     clearRows();
-    Map<String, String> values = Maps.newHashMap();
+    ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
     List<Row> rows = new ArrayList<Row>();
 
     Row row = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
@@ -460,10 +472,11 @@ public class DataManagerTest {
     for ( Row r : rows ) {
       changes.add(dm.insertOrUpdateRow(r));
     }
-    values.put(T.Columns.column_name.getElementKey(), "some name");
+    ArrayList<DataKeyValue> newValues = new ArrayList<DataKeyValue>(values);
+    newValues.add(new DataKeyValue(T.Columns.column_name.getElementKey(), "some name"));
 
     for (Row update : changes) {
-      update.setValues(values);
+      update.setValues(newValues);
       update.setFilterScope(null);
     }
 

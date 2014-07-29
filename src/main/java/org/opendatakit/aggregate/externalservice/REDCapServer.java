@@ -270,7 +270,9 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           // handle metadata specially
         } else {
           switch (element.getElementType()) {
-
+          case METADATA: 
+            // This keeps lint warnings down...
+            break;
           case STRING: {
             StringSubmissionType str = (StringSubmissionType) value;
             String strValue = str.getValue();
@@ -280,7 +282,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
               study_id = strValue;
             } else if (strValue != null) {
               b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml(strValue)).append("</")
+                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
                   .append(element.getElementName()).append(">");
             }
           }
@@ -299,7 +301,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
                   g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE), g.get(Calendar.SECOND));
 
               b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml(strValue)).append("</")
+                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
                   .append(element.getElementName()).append(">");
 
             }
@@ -318,7 +320,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
                   g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH));
 
               b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml(strValue)).append("</")
+                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
                   .append(element.getElementName()).append(">");
             }
           }
@@ -336,7 +338,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
                   g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE));
 
               b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml(strValue)).append("</")
+                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
                   .append(element.getElementName()).append(">");
             }
           }
@@ -348,7 +350,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
               String strValue = longVal.getValue().toString();
 
               b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml(strValue)).append("</")
+                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
                   .append(element.getElementName()).append(">");
             }
           }
@@ -360,7 +362,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
               String strValue = dec.getValue().toString();
 
               b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml(strValue)).append("</")
+                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
                   .append(element.getElementName()).append(">");
             }
           }
@@ -373,19 +375,19 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             GeoPoint coors = submissionValue.getValue();
             if (coors.getLatitude() != null) {
               b.append("<").append("gps_lat_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml(coors.getLatitude().toString())).append("</")
+                  .append(StringEscapeUtils.escapeXml10(coors.getLatitude().toString())).append("</")
                   .append("gps_lat_" + strippedElementName).append(">");
 
               b.append("<").append("gps_lon_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml(coors.getLongitude().toString()))
+                  .append(StringEscapeUtils.escapeXml10(coors.getLongitude().toString()))
                   .append("</").append("gps_lon_" + strippedElementName).append(">");
 
               b.append("<").append("gps_alt_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml(coors.getAltitude().toString())).append("</")
+                  .append(StringEscapeUtils.escapeXml10(coors.getAltitude().toString())).append("</")
                   .append("gps_alt_" + strippedElementName).append(">");
 
               b.append("<").append("gps_acc_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml(coors.getAccuracy().toString())).append("</")
+                  .append(StringEscapeUtils.escapeXml10(coors.getAccuracy().toString())).append("</")
                   .append("gps_acc_" + strippedElementName).append(">");
             }
           }
@@ -406,7 +408,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             BooleanSubmissionType bType = (BooleanSubmissionType) value;
             if (bType.getValue() != null) {
               b.append("<").append(strippedElementName + "___" + bType.getValue().toString())
-                  .append(">").append(StringEscapeUtils.escapeXml("1")).append("</")
+                  .append(">").append(StringEscapeUtils.escapeXml10("1")).append("</")
                   .append(strippedElementName + "___" + bType.getValue().toString()).append(">");
             }
           }
@@ -420,7 +422,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             ChoiceSubmissionType choice = (ChoiceSubmissionType) value;
             for (String choiceVal : choice.getValue()) {
               b.append("<").append(formatElementName + "___" + choiceVal).append(">")
-                  .append(StringEscapeUtils.escapeXml("1")).append("</")
+                  .append(StringEscapeUtils.escapeXml10("1")).append("</")
                   .append(formatElementName + "___" + choiceVal).append(">");
             }
           }
@@ -447,7 +449,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
       }
 
       String submissionsListString = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><records><item><study_id>"
-          + StringEscapeUtils.escapeXml(study_id) + "</study_id>" + b.toString();
+          + StringEscapeUtils.escapeXml10(study_id) + "</study_id>" + b.toString();
 
       List<NameValuePair> eparams = new ArrayList<NameValuePair>();
       eparams.add(new BasicNameValuePair("token", getApiKey()));

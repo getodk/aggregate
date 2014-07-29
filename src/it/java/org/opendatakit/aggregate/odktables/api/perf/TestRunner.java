@@ -113,6 +113,7 @@ public class TestRunner {
     // System.out.println("Google OAuth2 token: ");
     Scanner scanner = new Scanner(System.in);
     // String token = scanner.nextLine();
+    scanner.close();
     AggregateSynchronizer synchronizer = new AggregateSynchronizer(aggregateUrl, "");
 
     // List<Integer> numRowsValues = Lists.newArrayList(100, 1000);//, 10000);

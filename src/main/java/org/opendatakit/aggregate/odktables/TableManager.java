@@ -27,15 +27,15 @@ import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumn
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
-import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
-import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
+import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.relation.RUtil;
@@ -47,7 +47,12 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.BlobEntitySet;
+import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.Query;
+import org.opendatakit.common.ermodel.Query.WebsafeQueryResult;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.Query.Direction;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -62,6 +67,27 @@ import org.opendatakit.common.web.CallingContext;
  *
  */
 public class TableManager {
+
+  public static class WebsafeTables {
+    public final List<TableEntry> tables;
+
+    public final String websafeRefetchCursor;
+    public final String websafeBackwardCursor;
+    public final String websafeResumeCursor;
+    public final boolean hasMore;
+    public final boolean hasPrior;
+
+    public WebsafeTables(List<TableEntry> tables,
+        String websafeRefetchCursor, String websafeBackwardCursor, String websafeResumeCursor,
+        boolean hasMore, boolean hasPrior) {
+      this.tables = tables;
+      this.websafeRefetchCursor = websafeRefetchCursor;
+      this.websafeBackwardCursor = websafeBackwardCursor;
+      this.websafeResumeCursor = websafeResumeCursor;
+      this.hasMore = hasMore;
+      this.hasPrior = hasPrior;
+    }
+  }
 
   private CallingContext cc;
   private EntityConverter converter;
@@ -84,15 +110,32 @@ public class TableManager {
    * @return a list of all table entries.
    * @throws ODKDatastoreException
    */
-  public List<TableEntry> getTables() throws ODKDatastoreException {
-    List<TableEntry> tables = converter.toTableEntries(DbTableEntry.query(cc));
+  public WebsafeTables getTables(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
     List<TableEntry> filteredList = new ArrayList<TableEntry>();
+
+    // TODO: properly return exactly fetchLimit results when we are paginating
+    // right now, this will read fetchLimit results, then filter it down to the
+    // set of tables the user is eligible to see.
+
+    Query query = DbTableEntry.getRelation(cc).query("DbTableEntry.query", cc);
+    query.addSort(DbTableEntry.getRelation(cc).getDataField(CommonFieldsBase.URI_COLUMN_NAME),
+        (startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
+    WebsafeQueryResult result = query.execute(startCursor, fetchLimit);
+    List<DbTableEntryEntity> results = new ArrayList<DbTableEntryEntity>();
+    for (Entity e : result.entities) {
+      results.add(new DbTableEntryEntity(e));
+    }
+    List<TableEntry> tables = converter.toTableEntries(results);
     for (TableEntry e : tables) {
       if (userPermissions.hasPermission(appId, e.getTableId(), TablePermission.READ_TABLE_ENTRY)) {
         filteredList.add(e);
       }
     }
-    return filteredList;
+
+    return new WebsafeTables(filteredList,
+        result.websafeRefetchCursor,
+        result.websafeBackwardCursor,
+        result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
   /**
@@ -104,7 +147,7 @@ public class TableManager {
    * @return a list of table entries which the given scopes are allowed to see
    * @throws ODKDatastoreException
    */
-  public List<TableEntry> getTables(List<Scope> scopes) throws ODKDatastoreException {
+  public WebsafeTables getTables(List<Scope> scopes, QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
     // TODO: rework to use getTables() to get everything, then filter out
     // the non-accessible tables. Eliminate the queryNotEqual() what we
     // want to do is get the full ACL of each table, and see if the scope
@@ -129,7 +172,7 @@ public class TableManager {
      * List<Entity> entries = query.execute(); return getTableEntries(entries);
      */
     // List<TableEntry> tables = getTables();
-    return getTables();
+    return getTables(null, 2000);
   }
 
   /**
@@ -337,10 +380,17 @@ public class TableManager {
        * write out the initial ACL
        */
       if ( tableEntry.getSchemaETag() == null ) {
-        // remove anything we already set... (late clean-up)
-        List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
-        for (DbTableAclEntity acl : acls) {
-          acl.delete(cc);
+        QueryResumePoint start = null;
+        for (;;) {
+          // remove anything we already set... (late clean-up)
+          WebsafeQueryResult result = DbTableAcl.queryTableIdAcls(tableId, start, 2000, cc);
+          for (Entity acl : result.entities) {
+            acl.delete(cc);
+          }
+          if ( !result.hasMore || (result.websafeResumeCursor == null)) {
+            break;
+          }
+          start = QueryResumePoint.fromWebsafeCursor(result.websafeResumeCursor);
         }
         // write out the owner record
         DbTableAclEntity ownerAcl = creator.newTableAclEntity(tableId, new Scope(Scope.Type.USER,
@@ -501,13 +551,23 @@ public class TableManager {
         // we have completely deleted all schemas, properties and row data
         // delete the ACLs
         List<DbTableAclEntity> heldBack = new ArrayList<DbTableAclEntity>();
-        List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableEntry.getId(), cc);
-        for (DbTableAclEntity acl : acls) {
-          if ( TableRole.valueOf(acl.getRole()).equals(TableRole.OWNER) ) {
-            heldBack.add(acl);
-          } else {
-            acl.delete(cc);
+
+        QueryResumePoint start = null;
+        for (;;) {
+          // remove anything we already set... (late clean-up)
+          WebsafeQueryResult result = DbTableAcl.queryTableIdAcls(tableEntry.getId(), start, 2000, cc);
+          for (Entity e : result.entities) {
+            DbTableAclEntity acl = new DbTableAclEntity(e);
+            if ( TableRole.valueOf(acl.getRole()).equals(TableRole.OWNER) ) {
+              heldBack.add(acl);
+            } else {
+              acl.delete(cc);
+            }
           }
+          if ( !result.hasMore || (result.websafeResumeCursor == null)) {
+            break;
+          }
+          start = QueryResumePoint.fromWebsafeCursor(result.websafeResumeCursor);
         }
         // delete the table entry itself
         tableEntry.delete(cc);

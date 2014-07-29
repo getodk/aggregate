@@ -33,32 +33,32 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * Formats xml tags <name>value</name> with proper escaping for 
+ * Formats xml tags <name>value</name> with proper escaping for
  * reconstructing the submission xml that Collect may have used
- * when submitting data.  
- * 
- * NOTE: This class does not use the Row object for the 
+ * when submitting data.
+ *
+ * NOTE: This class does not use the Row object for the
  * reconstruction, but instead writes to the XmlFormatter
  * output stream directly.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class XmlElementFormatter implements ElementFormatter {
 	XmlFormatter xmlFormatter;
-  
+
 	String prefix = "";
-	
+
   /**
    * Construct a XML Element Formatter
- * @param xmlFormatter 
-   * 
+ * @param xmlFormatter
+   *
    */
   public XmlElementFormatter(XmlFormatter xmlFormatter) {
 	  this.xmlFormatter = xmlFormatter;
   }
-  
+
   public void setPrefix(String prefix) {
     this.prefix = prefix;
   }
@@ -71,7 +71,7 @@ public class XmlElementFormatter implements ElementFormatter {
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
-    if( blobSubmission == null || 
+    if( blobSubmission == null ||
     	(blobSubmission.getAttachmentCount(cc) == 0) ||
     	(blobSubmission.getContentHash(1, cc) == null) ) {
    	    addToXmlValueToRow(null, element.getElementName(), row);
@@ -165,10 +165,10 @@ public class XmlElementFormatter implements ElementFormatter {
   }
 
   private void addToXmlValueToRow(Object value, String propertyName, Row row) {
-    
+
     if (value != null) {
       String xmlString = HtmlUtil.createBeginTag(prefix + propertyName);
-      xmlString += StringEscapeUtils.escapeXml(value.toString());
+      xmlString += StringEscapeUtils.escapeXml10(value.toString());
       xmlString += HtmlUtil.createEndTag(prefix + propertyName);
       xmlFormatter.writeXml(xmlString);
     } else {

@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables.entity;
 
 import java.util.Date;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,9 +55,8 @@ public class UtilTransforms {
    * Transform the object into a server-side Column object.
    */
   public static Column transform(ColumnClient client) {
-    Column transformedColumn = new Column(client.getTableId(), client.getElementKey(),
-        client.getElementName(), client.getElementType(), client.getListChildElementKeys(),
-        (client.getIsPersisted() != 0));
+    Column transformedColumn = new Column(client.getElementKey(),
+        client.getElementName(), client.getElementType(), client.getListChildElementKeys());
     return transformedColumn;
   }
 
@@ -71,7 +71,8 @@ public class UtilTransforms {
     serverRow.setLastUpdateUser(client.getLastUpdateUser());
     serverRow.setRowETag(client.getRowETag());
     serverRow.setRowId(client.getRowId());
-    serverRow.setValues(client.getValues());
+    HashMap<String,String> cvalues = client.getValues();
+    serverRow.setValues(Row.convertFromMap(cvalues));
     serverRow.setFormId(client.getFormId());
     serverRow.setLocale(client.getLocale());
     serverRow.setSavepointType(client.getSavepointType());
@@ -208,7 +209,7 @@ public class UtilTransforms {
     row.setSavepointCreator(serverRow.getSavepointCreator());
 
     // data
-    row.setValues(serverRow.getValues());
+    row.setValues(Row.convertToMap(serverRow.getValues()));
     return row;
   }
 
@@ -233,7 +234,7 @@ public class UtilTransforms {
     rowClient.setSavepointCreator(serverResource.getSavepointCreator());
 
     // data
-    rowClient.setValues(serverResource.getValues());
+    rowClient.setValues(Row.convertToMap(serverResource.getValues()));
 
     // manipulator URIs
     RowResourceClient resource = new RowResourceClient(rowClient);

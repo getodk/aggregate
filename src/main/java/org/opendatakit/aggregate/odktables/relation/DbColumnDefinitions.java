@@ -52,7 +52,7 @@ public class DbColumnDefinitions extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
-  private static final String RELATION_NAME = "COLUMN_DEFINITIONS2";
+  private static final String RELATION_NAME = "COLUMN_DEFINITIONS3";
 
   // these are the column names in the COLUMN table
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
@@ -64,8 +64,6 @@ public class DbColumnDefinitions extends Relation {
   private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE", DataType.STRING, true);
   private static final DataField LIST_CHILD_ELEMENT_KEYS = new DataField("LIST_CHILD_ELEMENT_KEYS",
       DataType.STRING, true, 4096L);
-  private static final DataField IS_UNIT_OF_RETENTION = new DataField("IS_UNIT_OF_RETENTION",
-      DataType.BOOLEAN, false);
 
   private static final List<DataField> dataFields;
   static {
@@ -76,7 +74,6 @@ public class DbColumnDefinitions extends Relation {
     dataFields.add(ELEMENT_NAME);
     dataFields.add(ELEMENT_TYPE);
     dataFields.add(LIST_CHILD_ELEMENT_KEYS);
-    dataFields.add(IS_UNIT_OF_RETENTION);
   }
 
   public static class DbColumnDefinitionsEntity {
@@ -150,12 +147,16 @@ public class DbColumnDefinitions extends Relation {
       e.set(LIST_CHILD_ELEMENT_KEYS, value);
     }
 
-    public Boolean getIsUnitOfRetention() {
-      return e.getBoolean(IS_UNIT_OF_RETENTION);
-    }
-
-    public void setIsUnitOfRetention(Boolean value) {
-      e.set(IS_UNIT_OF_RETENTION, value);
+    public boolean isUnitOfRetention() {
+      String listChild = getListChildElementKeys();
+      String type = getElementType();
+      if ( "array".equals(type) ) {
+        return true;
+      }
+      if ( listChild == null || listChild.length() == 0 || "[]".equals(listChild) ) {
+        return true;
+      }
+      return false;
     }
 
     /**
@@ -172,9 +173,6 @@ public class DbColumnDefinitions extends Relation {
         return false;
       }
       if (!this.getElementType().equals(e.getElementType())) {
-        return false;
-      }
-      if (!this.getIsUnitOfRetention().equals(e.getIsUnitOfRetention())) {
         return false;
       }
       if (this.getListChildElementKeys() == null) {
@@ -251,15 +249,14 @@ public class DbColumnDefinitions extends Relation {
    */
   public static ArrayList<String> queryForDbColumnNames(String tableId, String schemaETag,
       CallingContext cc) throws ODKDatastoreException {
-    Query query = getRelation(cc).query("DbColumnDefinitions.queryForColumnNames", cc);
-    query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
-    query.addFilter(SCHEMA_ETAG, FilterOperation.EQUAL, schemaETag);
-    query.addFilter(IS_UNIT_OF_RETENTION, FilterOperation.EQUAL, true);
 
-    List<?> results = query.getDistinct(ELEMENT_KEY);
+    List<DbColumnDefinitionsEntity> columns = query(tableId, schemaETag, cc);
+
     ArrayList<String> list = new ArrayList<String>();
-    for (Object o : results) {
-      list.add((String) o);
+    for (DbColumnDefinitionsEntity e : columns) {
+      if ( e.isUnitOfRetention() ) {
+        list.add(e.getElementKey());
+      }
     }
     Collections.sort(list);
     return list;

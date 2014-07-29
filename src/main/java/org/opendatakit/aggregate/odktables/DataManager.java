@@ -42,7 +42,10 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
+import org.opendatakit.common.ermodel.Query.WebsafeQueryResult;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.Query.Direction;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -58,6 +61,29 @@ import org.opendatakit.common.web.CallingContext;
  */
 
 public class DataManager {
+
+
+  public static class WebsafeRows {
+    public final List<Row> rows;
+
+    public final String websafeRefetchCursor;
+    public final String websafeBackwardCursor;
+    public final String websafeResumeCursor;
+    public final boolean hasMore;
+    public final boolean hasPrior;
+
+    public WebsafeRows(List<Row> rows,
+        String websafeRefetchCursor, String websafeBackwardCursor, String websafeResumeCursor,
+        boolean hasMore, boolean hasPrior) {
+      this.rows = rows;
+      this.websafeRefetchCursor = websafeRefetchCursor;
+      this.websafeBackwardCursor = websafeBackwardCursor;
+      this.websafeResumeCursor = websafeResumeCursor;
+      this.hasMore = hasMore;
+      this.hasPrior = hasPrior;
+    }
+  }
+
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
   private EntityConverter converter;
@@ -173,12 +199,12 @@ public class DataManager {
    * @throws InconsistentStateException
    * @throws BadColumnNameException
    */
-  public List<Row> getRows() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, InconsistentStateException, BadColumnNameException {
+  public WebsafeRows getRows(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, InconsistentStateException, BadColumnNameException {
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     List<DbColumnDefinitionsEntity> columns = null;
-    List<Entity> entities = null;
+    WebsafeQueryResult result = null;
     LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
@@ -198,19 +224,21 @@ public class DataManager {
 
       revertPendingChanges( entry, columns, table, logTable);
 
+
       Query query = buildRowsQuery(table);
-      entities = query.execute();
+      query.addSort(table.getDataField(CommonFieldsBase.URI_COLUMN_NAME), Direction.ASCENDING);
+      result = query.execute(startCursor, fetchLimit);
 
     } finally {
       propsLock.release();
     }
 
-    if ( entities == null || columns == null ) {
+    if ( result.entities == null || columns == null ) {
       throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
     }
 
     ArrayList<Row> rows = new ArrayList<Row>();
-    for (Entity entity : entities) {
+    for (Entity entity : result.entities) {
       Row row = converter.toRow(entity, columns);
       if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
@@ -218,7 +246,10 @@ public class DataManager {
         rows.add(row);
       }
     }
-    return rows;
+    return new WebsafeRows(rows,
+        result.websafeRefetchCursor,
+        result.websafeBackwardCursor,
+        result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
   /**
@@ -242,12 +273,12 @@ public class DataManager {
    * @throws PermissionDeniedException
    * @throws BadColumnNameException
    */
-  public List<Row> getRowsSince(String dataETag) throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException, PermissionDeniedException, BadColumnNameException {
+  public WebsafeRows getRowsSince(String dataETag, QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException, PermissionDeniedException, BadColumnNameException {
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     List<DbColumnDefinitionsEntity> columns = null;
-    List<Entity> entities = null;
+    WebsafeQueryResult result = null;
     LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
@@ -279,24 +310,24 @@ public class DataManager {
 
       Query query;
       if (sequenceValue == null) {
-        query = buildRowsFromBeginningQuery(logTable, entry);
+        query = buildRowsFromBeginningQuery(logTable, entry, (startCursor == null ? true : startCursor.isForwardCursor()));
       } else {
-        query = buildRowsSinceQuery(logTable, sequenceValue);
+        query = buildRowsSinceQuery(logTable, sequenceValue, (startCursor == null ? true : startCursor.isForwardCursor()));
       }
 
-      entities = query.execute();
+      result = query.execute(startCursor, fetchLimit);
     } finally {
       propsLock.release();
     }
 
-    if ( entities == null || columns == null ) {
+    if ( result.entities == null || columns == null ) {
       throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
     }
 
     // TODO: properly handle reporting of rows that the user no longer has
     // access to because of a access / permissions change for that user and / or row.
     ArrayList<Row> rows = new ArrayList<Row>();
-    for (Entity entity : entities) {
+    for (Entity entity : result.entities) {
       Row row = converter.toRowFromLogTable(entity, columns);
       if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
@@ -304,7 +335,10 @@ public class DataManager {
         rows.add(row);
       }
     }
-    return computeDiff(rows);
+    return new WebsafeRows(computeDiff(rows),
+        result.websafeRefetchCursor,
+        result.websafeBackwardCursor,
+        result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
   /**
@@ -336,10 +370,14 @@ public class DataManager {
    *         beginning
    * @throws ODKDatastoreException
    */
-  private Query buildRowsFromBeginningQuery(DbLogTable logTable, DbTableEntryEntity entry) throws ODKDatastoreException {
+  private Query buildRowsFromBeginningQuery(DbLogTable logTable, DbTableEntryEntity entry, boolean isForwardCursor) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsBeginningFromQuery", cc);
     query.greaterThanOrEqual(DbLogTable.SEQUENCE_VALUE, entry.getAprioriDataSequenceValue());
-    query.sortAscending(DbLogTable.SEQUENCE_VALUE);
+    if ( isForwardCursor ) {
+      query.sortAscending(DbLogTable.SEQUENCE_VALUE);
+    } else {
+      query.sortDescending(DbLogTable.SEQUENCE_VALUE);
+    }
     return query;
   }
 
@@ -349,10 +387,14 @@ public class DataManager {
    *         sequenceValue
    * @throws ODKDatastoreException
    */
-  private Query buildRowsSinceQuery(DbLogTable logTable, String sequenceValue) throws ODKDatastoreException {
+  private Query buildRowsSinceQuery(DbLogTable logTable, String sequenceValue, boolean isForwardCursor) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
     query.greaterThan(DbLogTable.SEQUENCE_VALUE, sequenceValue);
-    query.sortAscending(DbLogTable.SEQUENCE_VALUE);
+    if ( isForwardCursor ) {
+      query.sortAscending(DbLogTable.SEQUENCE_VALUE);
+    } else {
+      query.sortDescending(DbLogTable.SEQUENCE_VALUE);
+    }
     return query;
   }
 

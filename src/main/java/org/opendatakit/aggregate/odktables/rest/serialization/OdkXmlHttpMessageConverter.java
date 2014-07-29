@@ -31,8 +31,6 @@ import java.util.TimeZone;
 import javax.ws.rs.core.Context;
 
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -42,6 +40,8 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Implementation of
@@ -60,14 +60,13 @@ public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Obj
 
   private static final String DEFAULT_ENCODING = "utf-8";
 
-  private Serializer serializer;
+  private XmlMapper serializer = new XmlMapper();
 
   @Context
   private HttpHeaders requestHeaders;
 
   public OdkXmlHttpMessageConverter() {
     super(MediaType.APPLICATION_XML, MediaType.TEXT_XML, new MediaType("application", "*+xml"));
-    serializer = SimpleXMLSerializerForAggregate.getSerializer();
   }
 
   @Override
@@ -88,7 +87,7 @@ public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Obj
     stream = inputMessage.getBody();
     InputStreamReader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
     try {
-      Object result = this.serializer.read(clazz, r);
+      Object result = this.serializer.readValue(r, clazz);
       if (!clazz.isInstance(result)) {
         throw new TypeMismatchException(result, clazz);
       }
@@ -127,7 +126,7 @@ public class OdkXmlHttpMessageConverter extends AbstractHttpMessageConverter<Obj
       headers
       .setContentType(new MediaType("text", "xml", Charset.forName(ApiConstants.UTF8_ENCODE)));
       Writer writer = new OutputStreamWriter(rawStream, Charset.forName(ApiConstants.UTF8_ENCODE));
-      this.serializer.write(o, writer);
+      this.serializer.writeValue(writer, o);
     } catch (Exception ex) {
       throw new HttpMessageNotWritableException("Could not write [" + o + "]", ex);
     }

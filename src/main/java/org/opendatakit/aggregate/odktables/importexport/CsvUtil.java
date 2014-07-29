@@ -21,14 +21,13 @@ import java.util.List;
 
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
-import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.ImportFromCSVExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
+import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
 import org.opendatakit.common.web.CallingContext;
-
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * This is OBSOLETE and BROKEN!!!!  See the one from the Android codebase.
@@ -135,11 +134,14 @@ public class CsvUtil {
    * false; } }
    */
 
-  private boolean importTable(CSVReader reader, String tableName, List<ColumnClient> columns,
+  private boolean importTable(RFC4180CsvReader reader, String tableName, List<ColumnClient> columns,
       boolean includeTs, boolean includePn, CallingContext cc) throws BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, ETagMismatchExceptionClient,
       ImportFromCSVExceptionClient {
     return false; // unimplemented and out of date.
+    // NOTE: this reader will return null if the row is empty.
+    // Compatible with Excel on Mac and Windows.
+    //
     // int tsIndex = includeTs ? 0 : -1;
     // int pnIndex = includePn ? (includeTs ? 1 : 0) : -1;
     // int startIndex = (includeTs ? 1 : 0) + (includePn ? 1 : 0);

@@ -31,7 +31,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
@@ -40,9 +39,10 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
  * (instance attachments) from the phone.
  * <p>
  * The general idea is that the interaction with the actual files will occur at
- * /odktables/{appId}/tables/{tableId}/instances/{instanceId}/subpathToFile.
+ * /odktables/{appId}/tables/{tableId}/attachments/{schemaETag}/{rowId}/subpathToFile.
  * <p>
- * The interface only supports puts and gets -- no directory listings.
+ * The interface only supports puts gets and directory listings at the rowId
+ * level.
  * <p>
  * Files will thus be referred to by their unrooted path relative to the
  * /sdcard/opendatakit/{appId}/ directory on the device.
@@ -73,19 +73,17 @@ public interface InstanceFileService {
   public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
   @GET
-  @Path("{rowId}/manifest")
+  @Path("manifest")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  @GZIP
-  public Response getManifest(@PathParam("rowId") String rowId, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getManifest(@QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @GET
-  @Path("{rowId}/file/{filePath:.*}")
-  @GZIP
-  public Response getFile(@PathParam("rowId") String rowId, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  @Path("file/{filePath:.*}")
+  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @POST
-  @Path("{rowId}/file/{filePath:.*}")
+  @Path("file/{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
-  public Response putFile(@Context HttpServletRequest req, @PathParam("rowId") String rowId, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
+  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException, ODKTaskLockException;
 
 }

@@ -16,73 +16,84 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementMap;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-@Root(strict = false)
 public class Row {
 
-  @Element(name = "id", required = false)
+  @JacksonXmlProperty(localName = "id")
+  @JsonProperty(value = "id", required = false)
   private String rowId;
 
-  @Element(name = "rowETag", required = false)
+  @JsonProperty(required = false)
   private String rowETag;
 
-  @Element(name = "dataETagAtModification", required = false)
+  @JsonProperty(required = false)
   private String dataETagAtModification;
 
-  @Element(required = false)
+  @JsonProperty(required = false)
   private boolean deleted;
 
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String createUser;
 
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String lastUpdateUser;
 
   /**
    * OdkTables metadata column.
    */
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String formId;
 
   /**
    * OdkTables metadata column.
    */
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String locale;
 
   /**
    * OdkTables metadata column.
    */
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String savepointType;
 
   /**
    * OdkTables metadata column.
    */
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String savepointTimestamp;
 
   /**
    * OdkTables metadata column.
    */
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String savepointCreator;
 
   /**
    * FilterScope is passed down to device.
    */
-  @Element(required = false)
+  @JsonProperty(required = false)
   private Scope filterScope;
 
-  @ElementMap(entry = "entry", key = "column", attribute = true, inline = true)
-  private Map<String, String> values;
+  /**
+   * Array of user-defined column name to
+   * the string representation of its value.
+   * Sorted by ascending column name.
+   */
+  @JsonProperty(required = false)
+  @JacksonXmlElementWrapper(localName="orderedColumns")
+  @JacksonXmlProperty(localName="value")
+  private ArrayList<DataKeyValue> orderedColumns;
 
   /**
    * Construct a row for insertion. This is used by the remote client (ODK
@@ -91,9 +102,9 @@ public class Row {
    * @param rowId
    * @param values
    */
-  public static Row forInsert(String rowId, String formId, String locale,
-      String savepointType, String savepointTimestamp, String savepointCreator,
-      Scope filterScope, Map<String, String> values) {
+  public static Row forInsert(String rowId, String formId, String locale, String savepointType,
+      String savepointTimestamp, String savepointCreator, Scope filterScope,
+      ArrayList<DataKeyValue> values) {
     Row row = new Row();
     row.rowId = rowId;
     row.formId = formId;
@@ -102,7 +113,18 @@ public class Row {
     row.savepointTimestamp = savepointTimestamp;
     row.savepointCreator = savepointCreator;
     row.filterScope = filterScope;
-    row.values = values;
+    if ( values == null ) {
+      row.orderedColumns = new ArrayList<DataKeyValue>();
+    } else {
+      Collections.sort(values, new Comparator<DataKeyValue>(){
+
+        @Override
+        public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+          return arg0.column.compareTo(arg1.column);
+        }});
+
+      row.orderedColumns = values;
+    }
     return row;
   }
 
@@ -114,9 +136,9 @@ public class Row {
    * @param rowETag
    * @param values
    */
-  public static Row forUpdate(String rowId, String rowETag, String formId,
-      String locale, String savepointType, String savepointTimestamp,
-      String savepointCreator, Scope filterScope, Map<String, String> values) {
+  public static Row forUpdate(String rowId, String rowETag, String formId, String locale,
+      String savepointType, String savepointTimestamp, String savepointCreator, Scope filterScope,
+      ArrayList<DataKeyValue> values) {
     Row row = new Row();
     row.rowId = rowId;
     row.rowETag = rowETag;
@@ -126,8 +148,41 @@ public class Row {
     row.savepointTimestamp = savepointTimestamp;
     row.savepointCreator = savepointCreator;
     row.filterScope = filterScope;
-    row.values = values;
+    if ( values == null ) {
+      row.orderedColumns = new ArrayList<DataKeyValue>();
+    } else {
+      Collections.sort(values, new Comparator<DataKeyValue>(){
+
+        @Override
+        public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+          return arg0.column.compareTo(arg1.column);
+        }});
+
+      row.orderedColumns = values;
+    }
     return row;
+  }
+
+  public static final ArrayList<DataKeyValue> convertFromMap(Map<String,String> cvalues) {
+    ArrayList<DataKeyValue> svalues = new ArrayList<DataKeyValue>();
+    for ( String key : cvalues.keySet() ) {
+      svalues.add(new DataKeyValue(key, cvalues.get(key)));
+    }
+    Collections.sort(svalues, new Comparator<DataKeyValue>(){
+
+      @Override
+      public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+        return arg0.column.compareTo(arg1.column);
+      }});
+    return svalues;
+  }
+
+  public static final HashMap<String,String> convertToMap(ArrayList<DataKeyValue> svalues) {
+    HashMap<String,String> cvalues = new HashMap<String,String>();
+    for ( DataKeyValue kv : svalues ) {
+      cvalues.put(kv.column, kv.value);
+    }
+    return cvalues;
   }
 
   public Row() {
@@ -144,7 +199,24 @@ public class Row {
     this.savepointTimestamp = null;
     this.savepointCreator = null;
     this.filterScope = null;
-    this.values = new HashMap<String, String>();
+    this.orderedColumns = new ArrayList<DataKeyValue>();
+  }
+
+  protected Row(Row r) {
+    this.rowId = r.rowId;
+    this.rowETag = r.rowETag;
+    this.dataETagAtModification = r.dataETagAtModification;
+    this.deleted = r.deleted;
+    this.createUser = r.createUser;
+    this.lastUpdateUser = r.lastUpdateUser;
+    // data coming up from client
+    this.formId = r.formId;
+    this.locale = r.locale;
+    this.savepointType = r.savepointType;
+    this.savepointTimestamp = r.savepointTimestamp;
+    this.savepointCreator = r.savepointCreator;
+    this.filterScope = r.filterScope;
+    this.orderedColumns = r.orderedColumns;
   }
 
   public String getRowId() {
@@ -195,8 +267,9 @@ public class Row {
     return this.savepointTimestamp;
   }
 
-  public Map<String, String> getValues() {
-    return this.values;
+  @JsonIgnore
+  public ArrayList<DataKeyValue> getValues() {
+    return this.orderedColumns;
   }
 
   public void setRowId(final String rowId) {
@@ -243,8 +316,16 @@ public class Row {
     this.savepointType = savepointType;
   }
 
-  public void setValues(final Map<String, String> values) {
-    this.values = values;
+  @JsonIgnore
+  public void setValues(final ArrayList<DataKeyValue> values) {
+    Collections.sort(values, new Comparator<DataKeyValue>(){
+
+      @Override
+      public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+        return arg0.column.compareTo(arg1.column);
+      }});
+
+    this.orderedColumns = values;
   }
 
   /**
@@ -274,7 +355,7 @@ public class Row {
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
     result = prime * result + ((savepointType == null) ? 0 : savepointType.hashCode());
     result = prime * result + ((savepointTimestamp == null) ? 0 : savepointTimestamp.hashCode());
-    result = prime * result + ((values == null) ? 0 : values.hashCode());
+    result = prime * result + ((orderedColumns == null) ? 0 : orderedColumns.hashCode());
     return result;
   }
 
@@ -307,7 +388,7 @@ public class Row {
             .equals(other.savepointType))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
             .equals(other.savepointTimestamp))
-        && (values == null ? other.values == null : values.equals(other.values));
+        && (orderedColumns == null ? other.orderedColumns == null : orderedColumns.equals(other.orderedColumns));
   }
 
   /**
@@ -315,7 +396,8 @@ public class Row {
    * the end user are matched across the two data records.
    * <p>
    * Ignore the following fields when making this comparison:
-   * <ul><li>rowETag</li>
+   * <ul>
+   * <li>rowETag</li>
    * <li>dataETagAtModification</li>
    * <li>createUser</li>
    * <li>lastUpdateUser</li>
@@ -325,7 +407,8 @@ public class Row {
    * @return
    */
   public boolean hasMatchingSignificantFieldValues(Row other) {
-    if ( other == null ) return false;
+    if (other == null)
+      return false;
     return (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (deleted == other.deleted)
         && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
@@ -337,7 +420,7 @@ public class Row {
             .equals(other.savepointTimestamp))
         && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
             .equals(other.savepointCreator))
-        && (values == null ? other.values == null : values.equals(other.values));
+        && (orderedColumns == null ? other.orderedColumns == null : orderedColumns.equals(other.orderedColumns));
   }
 
   /*
@@ -372,8 +455,8 @@ public class Row {
     builder.append(savepointTimestamp);
     builder.append(", savepointCreator=");
     builder.append(savepointCreator);
-    builder.append(", values=");
-    builder.append(values);
+    builder.append(", orderedValues=");
+    builder.append(orderedColumns);
     builder.append("]");
     return builder.toString();
   }

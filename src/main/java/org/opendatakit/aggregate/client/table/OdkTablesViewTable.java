@@ -153,6 +153,27 @@ public class OdkTablesViewTable extends FlexTable {
 
       }
     };
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
 
     SecureGWT.getServerDataService().getTableContents(table.getTableId(),
         getDataCallback);

@@ -18,19 +18,13 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-@Root
-@Default(DefaultType.FIELD)
+@JacksonXmlRootElement(localName="tableDefinitionResource")
 public class TableDefinitionResource extends TableDefinition {
 
-  @Element(required = true)
   private String selfUri;
 
-  @Element(required = true)
   private String tableUri;
 
   @SuppressWarnings("unused")

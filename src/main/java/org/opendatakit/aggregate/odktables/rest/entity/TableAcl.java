@@ -16,16 +16,11 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
 
-@Root
-public class TableAcl {
+public class TableAcl implements Comparable<TableAcl> {
 
-  @Element
   private Scope scope;
 
-  @Element
   private TableRole role;
 
   public TableAcl(TableRole role) {
@@ -116,6 +111,19 @@ public class TableAcl {
     builder.append(role);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override
+  public int compareTo(TableAcl arg0) {
+    if ( arg0 == null ) {
+      return -1;
+    }
+    int outcome = this.getRole().compareTo(arg0.getRole());
+    if ( outcome != 0 ) {
+      return outcome;
+    }
+    outcome = this.getScope().compareTo(arg0.getScope());
+    return outcome;
   }
 
 }

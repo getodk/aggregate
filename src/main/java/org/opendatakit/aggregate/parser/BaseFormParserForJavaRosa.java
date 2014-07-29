@@ -1075,6 +1075,11 @@ public class BaseFormParserForJavaRosa {
           case XFORMS_DIFFERENT:
             bigdiff = true;
             break;
+          case XFORMS_SHARE_INSTANCE:
+            // the other possibility... 
+            break;
+          default:
+              throw new IllegalStateException("Unexpected return values");
           }
         } else {
           // consider children not found as big differences

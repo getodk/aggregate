@@ -18,8 +18,9 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
 
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
 /**
@@ -27,23 +28,26 @@ import org.simpleframework.xml.Root;
  * Proper XML documents can contain only one root node.
  * This wrapping class provides that root node.
  *
+ * Removed all JAXB annotations -- these cause issues on Android 4.2 and earlier.
+ *
  * @author mitchellsundt@gmail.com
  *
  */
-@Root
+@JacksonXmlRootElement(localName="manifest")
 public class OdkTablesFileManifest {
 
   /**
    * The entries in the manifest.
    */
-  @ElementList(inline = true, required = false)
-  private ArrayList<OdkTablesFileManifestEntry> entries;
+  @JacksonXmlElementWrapper(useWrapping=false)
+  @JacksonXmlProperty(localName="file")
+  private ArrayList<OdkTablesFileManifestEntry> files;
 
   /**
    * Constructor used by Jackson
    */
   public OdkTablesFileManifest() {
-    this.entries = new ArrayList<OdkTablesFileManifestEntry>();
+    this.files = new ArrayList<OdkTablesFileManifestEntry>();
   }
 
   /**
@@ -51,27 +55,27 @@ public class OdkTablesFileManifest {
    *
    * @param entries
    */
-  public OdkTablesFileManifest(ArrayList<OdkTablesFileManifestEntry> entries) {
-    if ( entries == null ) {
-      this.entries = new ArrayList<OdkTablesFileManifestEntry>();
+  public OdkTablesFileManifest(ArrayList<OdkTablesFileManifestEntry> files) {
+    if ( files == null ) {
+      this.files = new ArrayList<OdkTablesFileManifestEntry>();
     } else {
-      this.entries = entries;
+      this.files = files;
     }
   }
 
-  public ArrayList<OdkTablesFileManifestEntry> getEntries() {
-    return entries;
+  public ArrayList<OdkTablesFileManifestEntry> getFiles() {
+    return files;
   }
 
-  public void setEntries(ArrayList<OdkTablesFileManifestEntry> entries) {
-    this.entries = entries;
+  public void setFiles(ArrayList<OdkTablesFileManifestEntry> files) {
+    this.files = files;
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((entries == null) ? 0 : entries.hashCode());
+    result = prime * result + ((files == null) ? 0 : files.hashCode());
     return result;
   }
 
@@ -87,10 +91,10 @@ public class OdkTablesFileManifest {
       return false;
     }
     OdkTablesFileManifest other = (OdkTablesFileManifest) obj;
-    return (entries == null ? other.entries == null :
-      ( entries.size() == other.entries.size() &&
-        entries.containsAll(other.entries) &&
-        other.entries.containsAll(entries)));
+    return (files == null ? other.files == null :
+      ( files.size() == other.files.size() &&
+          files.containsAll(other.files) &&
+        other.files.containsAll(files)));
   }
 
 }
