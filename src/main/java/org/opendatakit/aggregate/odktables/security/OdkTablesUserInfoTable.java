@@ -16,8 +16,16 @@
 
 package org.opendatakit.aggregate.odktables.security;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.odktables.FileManifestManager;
+import org.opendatakit.aggregate.odktables.LockTemplate;
+import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -26,9 +34,16 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.opendatakit.common.security.SecurityBeanDefs;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
+import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * This table holds the ODK Tables-specific settings for a user.
@@ -39,7 +54,7 @@ import org.opendatakit.common.web.CallingContext;
  * @author mitchellsundt@gmail.com
  *
  */
-class OdkTablesUserInfoTable extends CommonFieldsBase {
+public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTablesUserInfo {
 
   /**
    * The name of the table into which this data is persisted.
@@ -190,6 +205,89 @@ class OdkTablesUserInfoTable extends CommonFieldsBase {
         + " OdkTablesUserInfoTable records matching " + uriUser);
   }
 
+  public static final boolean deleteOdkTablesUser(String uriUser, CallingContext cc)
+      throws ODKDatastoreException {
+    OdkTablesUserInfoTable userToDelete = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser, cc);
+    cc.getDatastore().deleteEntity(userToDelete.getEntityKey(), cc.getCurrentUser());
+    // TODO: delete the ACLs for this user???
+    return true;
+  }
+
+  
+  public static final OdkTablesUserInfoTable getOdkTablesUserInfo(String uriUser, Set<GrantedAuthority> grants, CallingContext cc)
+      throws ODKDatastoreException, ODKTaskLockException, ODKEntityPersistException,
+      ODKOverQuotaException, PermissionDeniedException {
+    Datastore ds = cc.getDatastore();
+
+    OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
+
+    Log log = LogFactory.getLog(FileManifestManager.class);
+
+    log.info("TablesUserPermissionsImpl: " + uriUser);
+
+    RoleHierarchy rh = (RoleHierarchy) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
+    Collection<? extends GrantedAuthority> roles = rh.getReachableGrantedAuthorities(grants);
+    boolean hasSynchronize = roles.contains(new SimpleGrantedAuthority(
+        GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name()));
+    boolean hasAdminister = roles.contains(new SimpleGrantedAuthority(
+        GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name()));
+
+    if (hasSynchronize || hasAdminister) {
+
+      String uriForUser = null;
+      String externalUID = null;
+
+      if (uriUser.equals(User.ANONYMOUS_USER)) {
+        externalUID = User.ANONYMOUS_USER;
+        uriForUser = User.ANONYMOUS_USER;
+      } else {
+
+        RegisteredUsersTable user = RegisteredUsersTable.getUserByUri(uriUser, ds,
+            cc.getCurrentUser());
+        // Determine the external UID that will identify this user
+        externalUID = null;
+        if (user.getEmail() != null) {
+          externalUID = user.getEmail();
+        } else if (user.getUsername() != null) {
+          externalUID = SecurityUtils.USERNAME_COLON + user.getUsername();
+        }
+        uriForUser = uriUser;
+      }
+
+      OdkTablesUserInfoTable odkTablesUserInfo = null;
+      odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriForUser, cc);
+      if (odkTablesUserInfo == null) {
+        //
+        // GAIN LOCK
+        LockTemplate tablesUserPermissions = new LockTemplate(externalUID,
+            ODKTablesTaskLockType.TABLES_USER_PERMISSION_CREATION, cc);
+        try {
+          tablesUserPermissions.acquire();
+          // attempt to re-fetch the record.
+          // If this succeeds, then we had multiple suitors; the other one beat
+          // us.
+          odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriForUser, cc);
+          if (odkTablesUserInfo != null) {
+            return odkTablesUserInfo;
+          }
+          // otherwise, create a record
+          odkTablesUserInfo = ds.createEntityUsingRelation(prototype, cc.getCurrentUser());
+          odkTablesUserInfo.setUriUser(uriForUser);
+          odkTablesUserInfo.setOdkTablesUserId(externalUID);
+          odkTablesUserInfo.persist(cc);
+          return odkTablesUserInfo;
+        } finally {
+          tablesUserPermissions.release();
+        }
+      } else {
+        return odkTablesUserInfo;
+      }
+    } else {
+      throw new PermissionDeniedException("User does not have access to ODK Tables");
+    }
+  }
+
+  
   /**
    * Get the aggregate userid.
    */
@@ -197,23 +295,17 @@ class OdkTablesUserInfoTable extends CommonFieldsBase {
     return getStringField(URI_USER);
   }
 
-  /**
-   * Get the external userid
-   */
+  @Override
   public String getOdkTablesUserId() {
     return getStringField(ODK_TABLES_USER_ID);
   }
 
-  /**
-   * Get the Phone Number
-   */
+  @Override
   public String getPhoneNumber() {
     return getStringField(PHONE_NUMBER);
   }
 
-  /**
-   * Get the X-Bearer-Code
-   */
+  @Override
   public String getXBearerCode() {
     return getStringField(X_BEARER_CODE);
   }
