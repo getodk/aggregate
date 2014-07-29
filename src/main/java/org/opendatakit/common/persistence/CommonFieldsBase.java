@@ -39,13 +39,13 @@ import org.opendatakit.common.security.User;
  */
 public abstract class CommonFieldsBase {
 
-  public static final int AUDIT_COLUMN_COUNT = 4;
+  public static final int AUDIT_COLUMN_COUNT = PersistConsts.AUDIT_COLUMN_COUNT;
 
-  public static final String URI_COLUMN_NAME = "_URI";
-  public static final String LAST_UPDATE_DATE_COLUMN_NAME = "_LAST_UPDATE_DATE";
-  public static final String LAST_UPDATE_URI_USER_COLUMN_NAME = "_LAST_UPDATE_URI_USER";
-  public static final String CREATION_DATE_COLUMN_NAME = "_CREATION_DATE";
-  public static final String CREATOR_URI_USER_COLUMN_NAME = "_CREATOR_URI_USER";
+  public static final String URI_COLUMN_NAME = PersistConsts.URI_COLUMN_NAME;
+  public static final String LAST_UPDATE_DATE_COLUMN_NAME = PersistConsts.LAST_UPDATE_DATE_COLUMN_NAME;
+  public static final String LAST_UPDATE_URI_USER_COLUMN_NAME = PersistConsts.LAST_UPDATE_URI_USER_COLUMN_NAME;
+  public static final String CREATION_DATE_COLUMN_NAME = PersistConsts.CREATION_DATE_COLUMN_NAME;
+  public static final String CREATOR_URI_USER_COLUMN_NAME = PersistConsts.CREATOR_URI_USER_COLUMN_NAME;
 
   /** standard audit fields */
 

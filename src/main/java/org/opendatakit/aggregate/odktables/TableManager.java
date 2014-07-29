@@ -168,7 +168,7 @@ public class TableManager {
      *
      * Query query =
      * DbTableEntry.getRelation(cc).query("TableManager.getTables(List<Scope>)",
-     * cc); query.include(CommonFieldsBase.URI_COLUMN_NAME, tableIds);
+     * cc); query.include(PersistConsts.URI_COLUMN_NAME, tableIds);
      * List<Entity> entries = query.execute(); return getTableEntries(entries);
      */
     // List<TableEntry> tables = getTables();
@@ -358,7 +358,7 @@ public class TableManager {
         return existing;
       }
 
-      String pendingSchemaETag = CommonFieldsBase.newUri();
+      String pendingSchemaETag = PersistenceUtils.newUri();
 
       if ( tableEntry == null ) {
         // create table. "entities" will store all of the things we will need to

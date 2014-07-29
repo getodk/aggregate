@@ -22,16 +22,38 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName="tableResource")
 public class TableResource extends TableEntry {
 
+  /**
+   * URLs for various other parts of the API
+   */
+
+  /**
+   * Get this same TableResource.
+   */
   private String selfUri;
 
+  /**
+   * Get the TableDefinition for this tableId
+   */
   private String definitionUri;
 
+  /**
+   * Path prefix for data row interactions
+   */
   private String dataUri;
 
+  /**
+   * Path prefix for data row attachment interactions
+   */
   private String instanceFilesUri;
 
+  /**
+   * Path prefix for differencing (changes-since) service.
+   */
   private String diffUri;
 
+  /**
+   * Path prefix for permissions / access-control service.
+   */
   private String aclUri;
 
   public TableResource(TableEntry entry) {

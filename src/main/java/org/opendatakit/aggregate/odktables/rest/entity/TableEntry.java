@@ -30,11 +30,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class TableEntry {
 
+  /**
+   * The tableId this entry describes.
+   */
   private String tableId;
 
+  /**
+   * The ETag of the most recently modified data row
+   */
   @JsonProperty(required = false)
   private String dataETag;
 
+  /**
+   * The ETag of the TableDefinition
+   */
   @JsonProperty(required = false)
   private String schemaETag;
 

@@ -36,7 +36,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.PersistenceUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -146,9 +146,9 @@ public class EntityCreator {
     entity.setStringField(DbTable.LAST_UPDATE_USER, userPermissions.getOdkTablesUserId());
     // TODO: should DATA_ETAG_AT_MODIFICATION also be from the TableEntry
     // record? Or tracked?
-    entity.setStringField(DbTable.DATA_ETAG_AT_MODIFICATION, CommonFieldsBase.newUri());
+    entity.setStringField(DbTable.DATA_ETAG_AT_MODIFICATION, PersistenceUtils.newUri());
     entity.setBooleanField(DbTable.DELETED, false);
-    entity.setStringField(DbTable.ROW_ETAG, CommonFieldsBase.newUri());
+    entity.setStringField(DbTable.ROW_ETAG, PersistenceUtils.newUri());
     // TODO is this the right kind of scope to be setting? one wonders...
     entity.setStringField(DbTable.FILTER_VALUE, (String) null);
     entity.setStringField(DbTable.FILTER_TYPE, (String) null);
