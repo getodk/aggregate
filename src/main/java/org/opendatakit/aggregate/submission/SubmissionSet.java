@@ -280,11 +280,11 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					.getTopLevelAuri());
 		}
 		dbEntities.put(group.getFormDataModel().getDDRelationName(), row);
-		recursivelyGetEntities(row.getUri(), group.getFormDataModel(), datastore, user);
+		recursivelyGetEntities(topLevelTableKey.getKey(), row.getUri(), group.getFormDataModel(), datastore, user);
 		buildSubmissionFields(group, cc);
 	}
 
-	private void recursivelyGetEntities(String uriParent, FormDataModel groupDataModel,
+	private void recursivelyGetEntities(String uriTopLevel, String uriParent, FormDataModel groupDataModel,
 			Datastore datastore, User user) throws ODKDatastoreException {
 		DynamicCommonFieldsBase groupRelation = (DynamicCommonFieldsBase) groupDataModel.getBackingObjectPrototype();
 		for (FormDataModel m : groupDataModel.getChildren()) {
@@ -312,7 +312,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 						List<? extends CommonFieldsBase> rows = query.executeQuery();
 						if (rows.size() != 1) {
 							throw new IllegalStateException(
-									"Expected exactly one match in phantom reconstruction!");
+									  "Expected exactly one match in phantom reconstruction! " +
+									  " SELECT * FROM " + mBaseRelation.getTableName() +
+									      " WHERE _TOP_LEVEL_AURI = " + uriTopLevel +
+									      " AND _PARENT_AURI = " + uriParent + " => expected 1 row but found " + rows.size());
 						}
 						mBackingObject = (DynamicBase) rows.get(0);
 						dbEntities.put(m.getDDRelationName(), mBackingObject);
@@ -320,7 +323,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 					nestedGroupUriParent = mBackingObject.getUri();
 				}
 				// and ensure that we create the other datastores...
-				recursivelyGetEntities(nestedGroupUriParent, m, datastore, user);
+				recursivelyGetEntities(uriTopLevel, nestedGroupUriParent, m, datastore, user);
 			}
 		}
 	}

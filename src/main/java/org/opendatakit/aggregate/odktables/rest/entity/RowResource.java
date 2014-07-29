@@ -22,8 +22,14 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName="rowResource")
 public class RowResource extends Row {
 
+  /**
+   * The URL that returns this RowResource.
+   */
   private String selfUri;
 
+  /**
+   * The URL that returns the TableResource for this row's table.
+   */
   private String tableUri;
 
   @SuppressWarnings("unused")

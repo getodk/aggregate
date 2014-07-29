@@ -30,7 +30,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class OdkTablesFileManifestEntry {
 
   /**
-   * This is the name of the file.
+   * This is the name of the file relative to
+   * the either the 'config' directory (for
+   * app-level and table-level files) or the
+   * row's attachments directory (for row-level
+   * attachments).
+   *
+   * I.e., for the new directory structure,
+   * if the manifest holds configpath files, it is under:
+   *   /sdcard/opendatakit/{appId}/config
+   * if the manifest holds rowpath files, it is under:
+   *   /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}
    */
   public String filename;
 
@@ -41,8 +51,9 @@ public class OdkTablesFileManifestEntry {
   public String contentType;
 
   /**
-   * This is the md5hash of the file, which will be used for checking whether or
-   * not the version of the file on the phone is current.
+   * This is the md5hash of the file, which will be used
+   * for checking whether or not the version of the file
+   * on the phone is current.
    */
   @JsonProperty(required = false)
   public String md5hash;

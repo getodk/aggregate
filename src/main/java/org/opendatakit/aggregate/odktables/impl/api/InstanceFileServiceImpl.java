@@ -46,7 +46,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.ermodel.BlobEntitySet;
-import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.PersistenceUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -230,7 +230,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     // appid/data/attachments/tableid/instances/instanceId/rest/of/path
     String partialPath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
-    String md5Hash = CommonFieldsBase.newMD5HashUri(content);
+    String md5Hash = PersistenceUtils.newMD5HashUri(content);
     try {
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
 

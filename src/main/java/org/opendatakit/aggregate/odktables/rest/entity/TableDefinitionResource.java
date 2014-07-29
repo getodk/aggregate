@@ -23,8 +23,14 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName="tableDefinitionResource")
 public class TableDefinitionResource extends TableDefinition {
 
+  /**
+   * Get this same TableDefinitionResource.
+   */
   private String selfUri;
 
+  /**
+   * Get the TableResource for this tableId.
+   */
   private String tableUri;
 
   @SuppressWarnings("unused")
