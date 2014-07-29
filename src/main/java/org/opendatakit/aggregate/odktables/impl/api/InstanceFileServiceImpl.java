@@ -132,7 +132,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
             + "manifest.json" + "\"");
       }
-      return rBuild.status(Status.OK).build();
+      return rBuild.build();
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       return Response.status(Status.INTERNAL_SERVER_ERROR)
