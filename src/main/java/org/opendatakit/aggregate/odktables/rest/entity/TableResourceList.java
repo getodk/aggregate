@@ -130,11 +130,21 @@ public class TableResourceList {
       return false;
     }
     TableResourceList other = (TableResourceList) obj;
-    return ((tables == null ? other.tables == null : (tables.size() == other.tables.size() && tables.containsAll(other.tables)))) &&
+    boolean simpleResult = (tables == null ? other.tables == null : (other.tables != null && tables.size() == other.tables.size())) &&
             (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
             (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
             (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
             (hasMoreResults == other.hasMoreResults) &&
             (hasPriorResults == other.hasPriorResults);
+    
+    if ( !simpleResult ) {
+      return false;
+    }
+    
+    if ( tables == null ) {
+      return true;
+    }
+    
+    return tables.containsAll(other.tables);
   }
 }

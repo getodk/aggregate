@@ -371,7 +371,7 @@ public class Row {
       return false;
     }
     Row other = (Row) obj;
-    return (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
+    boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (rowETag == null ? other.rowETag == null : rowETag.equals(other.rowETag))
         && (dataETagAtModification == null ? other.dataETagAtModification == null
             : dataETagAtModification.equals(dataETagAtModification))
@@ -388,7 +388,22 @@ public class Row {
             .equals(other.savepointType))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
             .equals(other.savepointTimestamp))
-        && (orderedColumns == null ? other.orderedColumns == null : orderedColumns.equals(other.orderedColumns));
+        && ( orderedColumns == null ? other.orderedColumns == null : 
+            (other.orderedColumns != null && orderedColumns.size() == other.orderedColumns.size()));
+    if ( !simpleMatch ) {
+      return false;
+    }
+    if ( orderedColumns == null ) {
+      return true;
+    }
+
+    // columns are ordered... compare one-to-one
+    for ( int i = 0 ; i < orderedColumns.size() ; ++i ) {
+      if ( !orderedColumns.get(i).equals(other.orderedColumns.get(i)) ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -409,7 +424,7 @@ public class Row {
   public boolean hasMatchingSignificantFieldValues(Row other) {
     if (other == null)
       return false;
-    return (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
+    boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (deleted == other.deleted)
         && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
@@ -420,7 +435,22 @@ public class Row {
             .equals(other.savepointTimestamp))
         && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
             .equals(other.savepointCreator))
-        && (orderedColumns == null ? other.orderedColumns == null : orderedColumns.equals(other.orderedColumns));
+        && ( orderedColumns == null ? other.orderedColumns == null : 
+            (other.orderedColumns != null && orderedColumns.size() == other.orderedColumns.size()));
+    if ( !simpleMatch ) {
+      return false;
+    }
+    if ( orderedColumns == null ) {
+      return true;
+    }
+    
+    // columns are ordered... compare one-to-one
+    for ( int i = 0 ; i < orderedColumns.size() ; ++i ) {
+      if ( !orderedColumns.get(i).equals(other.orderedColumns.get(i)) ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /*

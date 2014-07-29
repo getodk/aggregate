@@ -91,10 +91,10 @@ public class OdkTablesFileManifest {
       return false;
     }
     OdkTablesFileManifest other = (OdkTablesFileManifest) obj;
-    return (files == null ? other.files == null :
-      ( files.size() == other.files.size() &&
-          files.containsAll(other.files) &&
-        other.files.containsAll(files)));
+    return (files == null) ? (other.files == null) :
+      ( other.files != null && 
+        files.size() == other.files.size() &&
+        files.containsAll(other.files) );
   }
 
 }
