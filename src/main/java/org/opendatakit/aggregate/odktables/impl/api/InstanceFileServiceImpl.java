@@ -21,15 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -39,13 +33,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.odktables.api.InstanceFileService;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
+import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
-import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -84,31 +78,27 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   private final UriInfo info;
   private final String appId;
   private final String tableId;
+  private final String rowId;
   private final String schemaETag;
 
-  public InstanceFileServiceImpl(String appId, String tableId, String schemaETag, UriInfo info,
+  public InstanceFileServiceImpl(String appId, String tableId, String schemaETag, String rowId, UriInfo info,
       TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     this.cc = cc;
     this.appId = appId;
     this.tableId = tableId;
+    this.rowId = rowId;
     this.schemaETag = schemaETag;
     this.info = info;
     this.userPermissions = userPermissions;
   }
 
   @Override
-  @GET
-  @Path("{rowId}/manifest")
-  @Produces({ MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8,
-      ApiConstants.MEDIA_APPLICATION_XML_UTF8 })
-  @GZIP
-  public Response getManifest(@PathParam("rowId") String rowId,
-      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
+  public Response getManifest(@QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
 
     UriBuilder ub = info.getBaseUriBuilder();
-    ub.path(TableService.class);
-    UriBuilder full = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest");
+    ub.path(OdkTables.class, "getTablesService");
+    UriBuilder full = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest");
     URI self = full.build(appId, tableId, schemaETag, rowId);
     String manifestUrl = self.toURL().toExternalForm();
 
@@ -127,22 +117,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         entry.contentType = instance.getContentType(i, cc);
         entry.md5hash = instance.getContentHash(i, cc);
 
-        String[] pathSegments = entry.filename.split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[5];
-        fullArgs[0] = appId;
-        fullArgs[1] = tableId;
-        fullArgs[2] = schemaETag;
-        fullArgs[3] = rowId;
-        StringBuilder b = new StringBuilder();
-        for ( int j = 0 ; j < pathSegments.length ; ++j ) {
-          if ( j != 0 ) {
-            b.append(BasicConsts.FORWARDSLASH);
-          }
-          b.append(pathSegments[j]);
-        }
-        fullArgs[4] = b.toString();
-
-        URI getFile = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile").build(fullArgs, false);
+        URI getFile = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
+              .build(appId, tableId, schemaETag, rowId, entry.filename);
         String locationUrl = getFile.toURL().toExternalForm();
         entry.downloadUrl = locationUrl;
 
@@ -168,12 +144,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   }
 
 
-  @GET
-  @Path("{rowId}/file/{filePath:.*}")
-  @GZIP
-  // because we want to get the whole path
-  public Response getFile(@PathParam("rowId") String rowId,
-      @PathParam("filePath") List<PathSegment> segments,
+  @Override
+  public Response getFile(@PathParam("filePath") List<PathSegment> segments,
       @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
     // The appId and tableId are from the surrounding TableService.
     // The rowId is already pulled out.
@@ -192,25 +164,11 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     String partialPath = constructPathFromSegments(segments);
 
     UriBuilder ub = info.getBaseUriBuilder();
-    ub.path(TableService.class);
+    ub.path(OdkTables.class, "getTablesService");
 
-    String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
-    String[] fullArgs = new String[5];
-    fullArgs[0] = appId;
-    fullArgs[1] = tableId;
-    fullArgs[2] = schemaETag;
-    fullArgs[3] = rowId;
-    StringBuilder b = new StringBuilder();
-    for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-      if ( i != 0 ) {
-        b.append(BasicConsts.FORWARDSLASH);
-      }
-      b.append(pathSegments[i]);
-    }
-    fullArgs[4] = b.toString();
+    URI getFile = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
+          .build(appId, tableId, schemaETag, rowId, partialPath);
 
-    UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
-    URI getFile = tmp.build(fullArgs, false);
     String locationUrl = getFile.toURL().toExternalForm();
 
     try {
@@ -236,7 +194,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
               rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
                   + partialPath + "\"");
             }
-            return rBuild.status(Status.OK).build();
+            return rBuild.build();
           } else {
             return Response.status(Status.NOT_FOUND)
                 .entity("File content not yet available for: " + locationUrl).build();
@@ -257,12 +215,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   }
 
   @Override
-  @POST
-  @Path("{rowId}/file/{filePath:.*}")
-  @Consumes({ MediaType.MEDIA_TYPE_WILDCARD })
-  // because we want to get the whole path
-  public Response putFile(@Context HttpServletRequest req, @PathParam("rowId") String rowId,
-      @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException,
+  public Response putFile(@Context HttpServletRequest req,
+      @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException,
       ODKTaskLockException {
 
     if (segments.size() < 1) {
@@ -281,25 +235,11 @@ public class InstanceFileServiceImpl implements InstanceFileService {
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
 
       UriBuilder ub = info.getBaseUriBuilder();
-      ub.path(TableService.class);
+      ub.path(OdkTables.class, "getTablesService");
 
-      String[] pathSegments = partialPath.split(BasicConsts.FORWARDSLASH);
-      String[] fullArgs = new String[5];
-      fullArgs[0] = appId;
-      fullArgs[1] = tableId;
-      fullArgs[2] = schemaETag;
-      fullArgs[3] = rowId;
-      StringBuilder b = new StringBuilder();
-      for ( int j = 0 ; j < pathSegments.length ; ++j ) {
-        if ( j != 0 ) {
-          b.append(BasicConsts.FORWARDSLASH);
-        }
-        b.append(pathSegments[j]);
-      }
-      fullArgs[4] = b.toString();
+      URI getFile = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
+            .build(appId, tableId, schemaETag, rowId, partialPath);
 
-      UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
-      URI getFile = tmp.build(fullArgs, false);
       String locationUrl = getFile.toURL().toExternalForm();
 
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);

@@ -42,10 +42,10 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * Xml formatter for a given submission. Should roughly recreate the submission
  * xml as sent up from collect.  Does not respect namespaces of original Xml.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class XmlFormatter implements SubmissionFormatter {
 
@@ -66,13 +66,13 @@ public class XmlFormatter implements SubmissionFormatter {
   public void writeXml(String xml) {
     output.write(xml);
   }
-  
+
   class XmlFormElementModelVisitor implements FormElementModelVisitor {
 
     private static final String META_TAG = "meta";
 
     private static final String OPENROSA_META_TAG = "orx:meta";
-    
+
     Submission sub;
     List<SubmissionSet> nesting = new ArrayList<SubmissionSet>();
 
@@ -120,7 +120,7 @@ public class XmlFormatter implements SubmissionFormatter {
           //
           // add what could be considered the form's metadata...
           //
-          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))
+          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml10(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))
               + "\"");
           if (form.isEncryptedForm()) {
             attributeRow.addFormattedValue("encrypted=\"yes\"");
@@ -145,10 +145,10 @@ public class XmlFormatter implements SubmissionFormatter {
             output.append(value);
           }
           output.append(">");
-          
+
           // add the top-level submission set as the top set in the nesting stack.
           nesting.add(sub);
-          
+
         } else if (element.getElementType() == FormElementModel.ElementType.GROUP ) {
           if ( element.getElementName().equals(META_TAG) ) {
             if ( firstMeta && ++metaDepth != 0 ) {
@@ -211,7 +211,7 @@ public class XmlFormatter implements SubmissionFormatter {
     for (Submission sub : submissions) {
       FormElementModel fem = sub.getFormElementModel();
       XmlFormElementModelVisitor visitor = new XmlFormElementModelVisitor(sub);
-      
+
       fem.depthFirstTraversal(visitor, cc);
     }
   }

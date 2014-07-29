@@ -17,9 +17,26 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import org.apache.commons.lang3.Validate;
-import org.simpleframework.xml.Element;
 
-public class Scope {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class Scope implements Comparable<Scope> {
+
+  /**
+   * Type of Scope.
+   *
+   * Limited to 10 characters
+   */
+  public enum Type {
+    DEFAULT, USER, GROUP,
+  }
+
+  @JsonProperty(required = false)
+  private Type type;
+
+  @JsonProperty(required = false)
+  private String value;
+
 
   public static final Scope EMPTY_SCOPE;
   static {
@@ -33,29 +50,13 @@ public class Scope {
       if (filterType.equals(Scope.Type.DEFAULT)) {
         return new Scope(Scope.Type.DEFAULT, null);
       } else {
-        return new Scope(type,
-            ( filterValue == null || filterValue.length() == 0)
-              ? null : filterValue);
+        return new Scope(type, (filterValue == null || filterValue.length() == 0) ? null
+            : filterValue);
       }
     } else {
       return Scope.EMPTY_SCOPE;
     }
   }
-
-  /**
-   * Type of Scope.
-   *
-   * Limited to 10 characters
-   */
-  public enum Type {
-    DEFAULT, USER, GROUP,
-  }
-
-  @Element(required = false)
-  private Type type;
-
-  @Element(required = false)
-  private String value;
 
   /**
    * Constructs a new Scope.
@@ -166,6 +167,21 @@ public class Scope {
     builder.append(value);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override
+  public int compareTo(Scope arg0) {
+    if ( arg0 == null ) {
+      return -1;
+    }
+    
+    int outcome = type.name().compareTo(arg0.type.name());
+    if ( outcome != 0 ) {
+      return outcome;
+    }
+    outcome = (value == null) ? 
+        ((arg0.value == null) ? 0 : -1) : value.compareTo(arg0.value);
+    return outcome;
   }
 
 }

@@ -396,6 +396,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
 
   public List<BinaryContent> getAllBinaryContents(CallingContext cc) throws ODKDatastoreException {
     Query q = cc.getDatastore().createQuery(ctntRelation, "getAllContents", cc.getCurrentUser());
+    @SuppressWarnings("unchecked")
     List<BinaryContent> bc = (List<BinaryContent>) q.executeQuery();
     return bc;
   }

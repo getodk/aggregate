@@ -4,12 +4,12 @@
     <parent>
 		<groupId>org.opendatakit</groupId>
 		<artifactId>aggregate</artifactId>
-		<version>1.0</version>
+		<version>1.0.1</version>
 		<relativePath>../pom.xml</relativePath>
     </parent>
 	<groupId>org.opendatakit</groupId>
 	<artifactId>ODKAggregateInstaller</artifactId>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	<name>ODK_Aggregate</name>
 	<description>Generate an installer for ODKAggregate.</description>
 	<organization>

@@ -17,14 +17,13 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Ignore;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
@@ -40,12 +39,12 @@ public class T {
     public static final String weight = "weight";
     public static final String columnType_String = "colTypeString";
     public static final String columnType_Int = "colTypeInt";
-    public static final Column column_name = new Column(name, name + elementKey_suffix, name
-        + elementName_suffix, "NONE", null, true);
-    public static final Column column_age = new Column(age, age + elementKey_suffix, age
-        + elementName_suffix, "NONE", null, true);
-    public static final Column column_weight = new Column(weight, weight + elementKey_suffix,
-        weight + elementName_suffix, "NONE", null, true);
+    public static final Column column_name = new Column(name + elementKey_suffix, name
+        + elementName_suffix, "NONE", null);
+    public static final Column column_age = new Column(age + elementKey_suffix, age
+        + elementName_suffix, "NONE", null);
+    public static final Column column_weight = new Column(weight + elementKey_suffix,
+        weight + elementName_suffix, "NONE", null);
   }
 
   public static final String savepoint_creator_1 = null;
@@ -65,12 +64,12 @@ public class T {
     private final String age;
     private final String weight;
 
-    public Map<String, String> getValues() {
-      final java.util.HashMap<java.lang.String, java.lang.String> map = new HashMap<String, String>();
-      map.put(Columns.column_name.getElementKey(), name);
-      map.put(Columns.column_age.getElementKey(), age);
-      map.put(Columns.column_weight.getElementKey(), weight);
-      return map;
+    public ArrayList<DataKeyValue> getValues() {
+      final ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
+      values.add(new DataKeyValue(Columns.column_name.getElementKey(), name));
+      values.add(new DataKeyValue(Columns.column_age.getElementKey(), age));
+      values.add(new DataKeyValue(Columns.column_weight.getElementKey(), weight));
+      return values;
     }
 
     @java.lang.SuppressWarnings("all")

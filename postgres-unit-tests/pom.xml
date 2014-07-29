@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendatakit</groupId>
     <artifactId>aggregate-postgresql-specific</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <relativePath>../postgresql-pom.xml</relativePath>
   </parent>
   <artifactId>postgres-unit-tests</artifactId>

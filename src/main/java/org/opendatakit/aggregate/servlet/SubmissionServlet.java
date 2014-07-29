@@ -306,7 +306,7 @@ public class SubmissionServlet extends ServletUtilBase {
           //
           // add what could be considered the form's metadata...
           //
-          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))
+          attributeRow.addFormattedValue("id=\"" + StringEscapeUtils.escapeXml10(form.getFormId().replace(ParserConsts.FORWARD_SLASH_SUBSTITUTION, ParserConsts.FORWARD_SLASH))
               + "\"");
           if (form.isEncryptedForm()) {
             attributeRow.addFormattedValue("encrypted=\"yes\"");
@@ -316,7 +316,7 @@ public class SubmissionServlet extends ServletUtilBase {
               cc);
 
           out.write("<submissionMetadata xmlns=\""
-              + StringEscapeUtils.escapeXml(ParserConsts.NAMESPACE_ODK) + "\"");
+              + StringEscapeUtils.escapeXml10(ParserConsts.NAMESPACE_ODK) + "\"");
           Iterator<String> itrAttributes = attributeRow.getFormattedValues().iterator();
           while (itrAttributes.hasNext()) {
             out.write(" ");

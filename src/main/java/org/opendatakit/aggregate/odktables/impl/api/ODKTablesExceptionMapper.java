@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
+import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
@@ -58,6 +59,8 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     } else if (e instanceof BadColumnNameException) {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_COLUMN_NAME, msg))
           .type(type).build();
+    } else if (e instanceof NotModifiedException) {
+      return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, headers.getRequestHeaders().getFirst(HttpHeaders.IF_NONE_MATCH)).build();
     } else if (e instanceof ETagMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
           .entity(new Error(ErrorType.ETAG_MISMATCH, msg)).type(type).build();

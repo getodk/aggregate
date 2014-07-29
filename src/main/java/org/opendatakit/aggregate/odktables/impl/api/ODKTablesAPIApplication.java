@@ -26,12 +26,15 @@ import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLMessage
 
 public class ODKTablesAPIApplication extends Application {
 
+//  public static class JSONTableDefinitionReaderWriter extends SimpleJSONMessageReaderWriter<TableDefinition> {};
+//  public static class XMLTableDefinitionReaderWriter extends SimpleXMLMessageReaderWriter<TableDefinition> {};
+
   @Override
   public Set<Class<?>> getClasses() {
     final java.util.HashSet<java.lang.Class<?>> classes = new HashSet<Class<?>>();
-    classes.add(TableServiceImpl.class);
-    classes.add(FileServiceImpl.class);
-    classes.add(FileManifestServiceImpl.class);
+    classes.add(OdkTablesImpl.class);
+//    classes.add(JSONTableDefinitionReaderWriter.class);
+//    classes.add(XMLTableDefinitionReaderWriter.class);
     classes.add(SimpleJSONMessageReaderWriter.class);
     classes.add(SimpleXMLMessageReaderWriter.class);
     classes.add(ODKDatastoreExceptionMapper.class);
@@ -39,8 +42,6 @@ public class ODKTablesAPIApplication extends Application {
     classes.add(ODKTaskLockExceptionMapper.class);
     classes.add(IOExceptionMapper.class);
     classes.add(RuntimeExceptionMapper.class);
-    classes.add(AppEngineContentEncodingSuppressionRequestFilter.class);
-    classes.add(AppEngineContentEncodingSuppressionResponseFilter.class);
     return classes;
   }
 }

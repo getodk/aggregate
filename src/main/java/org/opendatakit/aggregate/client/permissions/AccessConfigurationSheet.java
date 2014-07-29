@@ -154,11 +154,6 @@ public class AccessConfigurationSheet extends Composite {
         return (key.getType() != UserType.ANONYMOUS);
       }
 
-      if (auth == GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES) {
-        // anonymous user cannot synchronize tables
-        return (key.getType() != UserType.ANONYMOUS);
-      }
-
       if (auth == GrantedAuthorityName.GROUP_DATA_COLLECTORS) {
         // data collectors can only be ODK accounts...
         return (key.getUsername() != null);
@@ -197,8 +192,10 @@ public class AccessConfigurationSheet extends Composite {
           return false;
         }
         // TODO: relax this
-        // table synchronizers must have a gmail (OAuth2) account
-        return (info.getUsername() == null);
+        // table synchronizers must be anonymous
+        // or have a gmail (OAuth2) account
+        return (info.getType() == UserType.ANONYMOUS) ||
+            (info.getUsername() == null);
       case GROUP_ADMINISTER_TABLES:
         if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
           return false;
@@ -376,7 +373,7 @@ public class AccessConfigurationSheet extends Composite {
           // don't allow Google users to be data collectors
           i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
         } else {
-          // TODO: relax thisx
+          // TODO: relax this
           // don't allow non-Google users to synchronize tables
           i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
         }

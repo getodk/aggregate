@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.api;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -26,12 +25,14 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
@@ -51,7 +52,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
  * @author sudar.sam@gmail.com
  *
  */
-@Path("{appId}/files/{odkClientVersion}")
 public interface FileService {
 
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
@@ -61,26 +61,28 @@ public interface FileService {
   public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
   @GET
-  @Path("{filePath:.*}")
-  @GZIP
-  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException;
+  @Path("{odkClientVersion}/{filePath:.*}")
+  public Response getFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException;
 
   @POST
-  @Path("{filePath:.*}")
+  @Path("{odkClientVersion}/{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
-  public Response putFile(@Context HttpServletRequest req, @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @GZIP byte[] content) throws IOException, ODKTaskLockException;
+  public Response putFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException;
 
   /**
    * Delete only works on full file paths -- you cannot specify a partial path or wildcard (*) path.
    *
-   * @param appId
    * @param odkClientVersion
    * @param segments
    * @return
    * @throws IOException
    * @throws ODKTaskLockException
+   * @throws ODKOverQuotaException
+   * @throws ODKEntityNotFoundException
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
   @DELETE
-  @Path("{filePath:.*}")
-  public Response deleteFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException;
+  @Path("{odkClientVersion}/{filePath:.*}")
+  public Response deleteFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException, ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException;
 }

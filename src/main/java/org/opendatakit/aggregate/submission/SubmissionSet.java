@@ -874,6 +874,17 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 			// string -- in case they are long strings
 			// repeat -- nesting abstraction for a list of submission sets
 			switch (m.getElementType()) {
+			case BOOLEAN:
+			case DECIMAL:
+			case GEOPOINT:
+         case GROUP:
+			case INTEGER:
+			case JRDATE:
+			case JRDATETIME:
+			case JRTIME:
+			case METADATA:
+			  // This case keeps lint warnings down.
+			  break;
 			case SELECT1:
 			case SELECTN:
 			case BINARY:

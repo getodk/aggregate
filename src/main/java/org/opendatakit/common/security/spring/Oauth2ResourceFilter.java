@@ -285,6 +285,9 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
      } catch ( IOException e ) {
        logger.error(e.toString());
        return nullData;
+     } catch ( Exception e ) {
+       logger.error(e.toString());
+       return nullData;
      }
  }
 

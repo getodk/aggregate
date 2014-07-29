@@ -16,31 +16,22 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-@Root
-@Default(value = DefaultType.FIELD, required = true)
+
+@JacksonXmlRootElement(localName="tableResource")
 public class TableResource extends TableEntry {
 
-  @Element(required = true)
   private String selfUri;
 
-  @Element(required = true)
   private String definitionUri;
 
-  @Element(required = true)
   private String dataUri;
 
-  @Element(required = true)
   private String instanceFilesUri;
 
-  @Element(required = true)
   private String diffUri;
 
-  @Element(required = true)
   private String aclUri;
 
   public TableResource(TableEntry entry) {

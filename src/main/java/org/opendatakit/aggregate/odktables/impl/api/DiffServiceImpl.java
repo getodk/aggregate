@@ -27,8 +27,11 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.odktables.DataManager;
+import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
+import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -37,6 +40,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -55,11 +59,13 @@ public class DiffServiceImpl implements DiffService {
   }
 
   @Override
-  public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag) throws ODKDatastoreException,
+  public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
-    List<Row> rows;
-    rows = dm.getRowsSince(dataETag);
-    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    WebsafeRows websafeResult = dm.getRowsSince(dataETag, QueryResumePoint.fromWebsafeCursor(cursor), limit);
+    RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
+        websafeResult.websafeRefetchCursor, websafeResult.websafeBackwardCursor, websafeResult.websafeResumeCursor,
+        websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(rowResourceList).build();
   }
 
@@ -69,10 +75,10 @@ public class DiffServiceImpl implements DiffService {
     String rowId = row.getRowId();
 
     UriBuilder ub = info.getBaseUriBuilder();
-    ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
+    ub.path(OdkTables.class, "getTablesService");
+    URI self = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getData").path(DataService.class, "getRow")
         .build(appId, tableId, schemaETag, rowId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    URI table = ub.clone().build(appId, tableId);
     RowResource resource = new RowResource(row);
     try {
       resource.setSelfUri(self.toURL().toExternalForm());

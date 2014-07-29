@@ -41,8 +41,11 @@ import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
+import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.InstanceFileService;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
+import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
@@ -90,11 +93,22 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
-      List<Row> rows = dm.getRows();
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      WebsafeRows websafeResult = dm.getRows(null, 2000);
+      List<Row> rows = websafeResult.rows;
       return transformRows(rows);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -124,8 +138,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     try {
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       Row row = dm.getRow(rowId);
@@ -166,8 +179,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     TablesUserPermissions userPermissions;
     try {
-      userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
 
       return ServerOdkTablesUtil.createOrUpdateRow(appId, tableId, rowId, row, userPermissions, cc);
@@ -193,8 +205,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       dm.deleteRow(rowId, rowETag);
@@ -238,8 +249,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTable(tableId);
@@ -341,8 +351,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfAppLevelFiles(cc);
@@ -355,7 +364,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         e.printStackTrace();
         throw new RequestFailureException(e);
       }
-      ub.path(FileService.class);
+      ub.path(OdkTables.class, "getFilesService");
 
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
@@ -366,21 +375,8 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
 
         String odkClientVersion = entry.getOdkClientVersion();
 
-        String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[3];
-        fullArgs[0] = appId;
-        fullArgs[1] = odkClientVersion;
-        StringBuilder b = new StringBuilder();
-        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-          if ( i != 0 ) {
-            b.append(BasicConsts.FORWARDSLASH);
-          }
-          b.append(pathSegments[i]);
-        }
-        fullArgs[2] = b.toString();
-
         UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
-        URI getFile = tmp.build(fullArgs, false);
+        URI getFile = tmp.build(appId, odkClientVersion, entry.getPathToFile());
         String downloadUrl;
         try {
           downloadUrl = getFile.toURL().toExternalForm() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
@@ -431,8 +427,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
@@ -449,7 +444,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         e.printStackTrace();
         throw new RequestFailureException(e);
       }
-      ub.path(FileService.class);
+      ub.path(OdkTables.class, "getFilesService");
 
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
@@ -460,21 +455,8 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
 
         String odkClientVersion = entry.getOdkClientVersion();
 
-        String[] pathSegments = entry.getPathToFile().split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[3];
-        fullArgs[0] = appId;
-        fullArgs[1] = odkClientVersion;
-        StringBuilder b = new StringBuilder();
-        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-          if ( i != 0 ) {
-            b.append(BasicConsts.FORWARDSLASH);
-          }
-          b.append(pathSegments[i]);
-        }
-        fullArgs[2] = b.toString();
-
         UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
-        URI getFile = tmp.build(fullArgs, false);
+        URI getFile = tmp.build(appId, odkClientVersion, entry.getPathToFile());
         String downloadUrl;
         try {
           downloadUrl = getFile.toURL().toExternalForm() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
@@ -526,8 +508,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
@@ -546,7 +527,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         e.printStackTrace();
         throw new RequestFailureException(e);
       }
-      ub.path(TableService.class);
+      ub.path(OdkTables.class, "getTablesService");
 
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (BinaryContent entry : contents) {
@@ -557,23 +538,8 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         // the rowId is the top-level auri for this record
         String rowId = entry.getTopLevelAuri();
 
-        String[] pathSegments = entry.getUnrootedFilePath().split(BasicConsts.FORWARDSLASH);
-        String[] fullArgs = new String[5];
-        fullArgs[0] = appId;
-        fullArgs[1] = tableId;
-        fullArgs[2] = schemaETag;
-        fullArgs[3] = rowId;
-        StringBuilder b = new StringBuilder();
-        for ( int i = 0 ; i < pathSegments.length ; ++i ) {
-          if ( i != 0 ) {
-            b.append(BasicConsts.FORWARDSLASH);
-          }
-          b.append(pathSegments[i]);
-        }
-        fullArgs[4] = b.toString();
-
-        UriBuilder tmp = ub.clone().path(TableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile");
-        URI getFile = tmp.build(fullArgs, false);
+        UriBuilder tmp = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class,"getInstanceFiles").path(InstanceFileService.class, "getFile");
+        URI getFile = tmp.build(appId, tableId, schemaETag, rowId, entry.getUnrootedFilePath());
         String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
 
         FileSummaryClient sum = new FileSummaryClient(entry.getUnrootedFilePath(),
@@ -615,8 +581,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       // TODO: add permissions check
@@ -653,8 +618,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       // TODO: add permissions check
@@ -693,8 +657,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);

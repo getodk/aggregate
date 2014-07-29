@@ -14,13 +14,13 @@ odk-httpclient-gae:
 This can be installed by pulling the Aggregate (Components) sources
 and running 'mvn install' in the GaeHttpClient project.  Or,
 
-mvn install:install-file -Dfile=odk-httpclient-gae-1.1.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.1 -Dpackaging=jar
+mvn install:install-file -Dfile=odk-httpclient-gae-1.1.1.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.1.1 -Dpackaging=jar
 
-openid4java-nodeps-0.9.6.662.odk-SNAPSHOT:
+openid4java-nodeps-0.9.6.662.1.odk-SNAPSHOT:
 
-mvn install:install-file -Dfile=openid4java-parent-pom.xml -DgroupId=org.openid4java -DartifactId=openid4java-parent -Dversion=0.9.6.662.odk-SNAPSHOT -Dpackaging=pom
+mvn install:install-file -Dfile=openid4java-parent-pom.xml -DgroupId=org.openid4java -DartifactId=openid4java-parent -Dversion=0.9.6.662.1.odk-SNAPSHOT -Dpackaging=pom
 
-mvn install:install-file -Dfile=openid4java-nodeps-0.9.6.662.odk-SNAPSHOT.jar -DgroupId=org.openid4java -DartifactId=openid4java-nodeps -Dversion=0.9.6.662.odk-SNAPSHOT -Dpackaging=jar
+mvn install:install-file -Dfile=openid4java-nodeps-0.9.6.662.1.odk-SNAPSHOT.jar -DgroupId=org.openid4java -DartifactId=openid4java-nodeps -Dversion=0.9.6.662.1.odk-SNAPSHOT -Dpackaging=jar
 
 spring-security-openid-3.2.4.odk-SNAPSHOT:
 

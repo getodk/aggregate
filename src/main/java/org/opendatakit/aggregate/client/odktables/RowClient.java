@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.client.odktables;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This object represents a Row on the client side of the code. It is based
@@ -60,7 +59,7 @@ public class RowClient implements Serializable {
 
   private String savepointCreator;
 
-  private Map<String, String> values;
+  private HashMap<String,String> values;
 
   /**
    * Construct a row for insertion.
@@ -68,7 +67,7 @@ public class RowClient implements Serializable {
    * @param rowId
    * @param values
    */
-  public static RowClient forInsert(String rowId, Map<String, String> values) {
+  public static RowClient forInsert(String rowId, HashMap<String,String> values) {
     RowClient row = new RowClient();
     row.rowId = rowId;
     row.values = values;
@@ -83,7 +82,7 @@ public class RowClient implements Serializable {
    * @param rowETag
    * @param values
    */
-  public static RowClient forUpdate(String rowId, String rowETag, Map<String, String> values) {
+  public static RowClient forUpdate(String rowId, String rowETag, HashMap<String,String> values) {
     RowClient row = new RowClient();
     row.rowId = rowId;
     row.rowETag = rowETag;
@@ -103,7 +102,22 @@ public class RowClient implements Serializable {
     this.locale = null;
     this.savepointTimestampIso8601Date = null;
     this.savepointCreator = null;
-    this.values = new HashMap<String, String>();
+    this.values = new HashMap<String,String>();
+  }
+
+  public RowClient(RowClient r) {
+    this.rowId = r.rowId;
+    this.rowETag = r.rowETag;
+    this.deleted = r.deleted;
+    this.createUser = r.createUser;
+    this.lastUpdateUser = r.lastUpdateUser;
+    this.filterScope = r.filterScope;
+    this.savepointType = r.savepointType;
+    this.formId = r.formId;
+    this.locale = r.locale;
+    this.savepointTimestampIso8601Date = r.savepointTimestampIso8601Date;
+    this.savepointCreator = r.savepointCreator;
+    this.values = r.values;
   }
 
   public String getRowId() {
@@ -130,7 +144,7 @@ public class RowClient implements Serializable {
     return filterScope;
   }
 
-  public Map<String, String> getValues() {
+  public HashMap<String,String> getValues() {
     return this.values;
   }
 
@@ -178,7 +192,7 @@ public class RowClient implements Serializable {
     this.filterScope = filterScope;
   }
 
-  public void setValues(final Map<String, String> values) {
+  public void setValues(final HashMap<String,String> values) {
     this.values = values;
   }
 

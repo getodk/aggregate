@@ -50,11 +50,11 @@ import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author adam.lerer@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallbackFormatter {
 
@@ -86,7 +86,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
     public String getImgUrl() {
       return imgUrl;
     }
-    
+
   }
 
   private static final String LIMITATION_MSG = "limitation: image and title must be in the submission (top-level) or must be in the same repeat group as the gps";
@@ -111,7 +111,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
 
   private boolean imgInGpsRepeat;
   private boolean titleInGpsRepeat;
-  
+
   public KmlFormatterWithFilters(IForm xform, String webServerUrl, FormElementModel gpsField,
       FormElementModel titleField, FormElementModel imgField, PrintWriter printWriter,
       FilterGroup filterGroup, CallingContext cc) {
@@ -136,7 +136,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
     gpsElement = gpsField;
     titleElement = titleField;
     imgElement = imgField;
-    
+
     // Verify that nesting constraints hold.
     //
     topElement = form.getTopLevelGroupElement();
@@ -167,15 +167,15 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
       if (!imgParent.equals(topElement) && !imgParent.equals(gpsParent)) {
         throw new IllegalStateException(LIMITATION_MSG);
       }
-    } 
+    }
   }
 
   @Override
   public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
-    output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE, 
-        StringEscapeUtils.escapeXml(form.getFormId()), 
-        StringEscapeUtils.escapeXml(form.getViewableName()),
-        StringEscapeUtils.escapeXml(form.getViewableName())));
+    output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE,
+        StringEscapeUtils.escapeXml10(form.getFormId()),
+        StringEscapeUtils.escapeXml10(form.getViewableName()),
+        StringEscapeUtils.escapeXml10(form.getViewableName())));
     output.write(generateStyle(imgElement != null));
   }
 
@@ -194,22 +194,22 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
         // since both gpsParent equals top element, title & imageURL must be in submission
         String title = getTitle(sub);
         String imageURL = getImageUrl(sub);
-        
+
         GeoPoint geopoint = getGeoPoint(sub);
         Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
-        placemarks.append(generateFormattedPlacemark(row, StringEscapeUtils.escapeXml(id),
-            StringEscapeUtils.escapeXml(title), imageURL, geopoint));
+        placemarks.append(generateFormattedPlacemark(row, StringEscapeUtils.escapeXml10(id),
+            StringEscapeUtils.escapeXml10(title), imageURL, geopoint));
       } else {
         // clear previous rows generated
         rowsForGpsInRepeats = new ArrayList<GpsRepeatRowData>();
-       
+
         // the call back will populate rowsForGpsInRepeats
         sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
         for (GpsRepeatRowData repeatData : rowsForGpsInRepeats) {
           String title = titleInGpsRepeat ? repeatData.getTitle() : getTitle(sub);
           String imageURL = imgInGpsRepeat ? repeatData.getImgUrl() : getImageUrl(sub);
           placemarks.append(generateFormattedPlacemark(repeatData.getRow(), StringEscapeUtils
-              .escapeXml(id), StringEscapeUtils.escapeXml(title), imageURL, repeatData
+              .escapeXml10(id), StringEscapeUtils.escapeXml10(title), imageURL, repeatData
               .getGeoPoint()));
         }
       }
@@ -279,7 +279,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
 
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
       FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
-    
+
     for (SubmissionSet repeatSet : repeats) {
       Row rowFromRepeat = repeatSet.getFormattedValuesAsRow(null, elemFormatter, false, cc);
       if (repeatElement.equals(gpsParent)) {
@@ -295,7 +295,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
       }
     }
   }
-  
+
   private String generateStyle(boolean hasImage) {
     String styleHtml = KmlConsts.OPEN_TABLE_W_PARENT_TABLE_FORMAT;
     styleHtml += wrapInBothRowNData(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2,
@@ -310,8 +310,8 @@ public class KmlFormatterWithFilters implements SubmissionFormatter, RepeatCallb
   }
 
   private String generateDataElement(String name, String value) {
-    return String.format(KmlConsts.KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml(name),
-        StringEscapeUtils.escapeXml(value));
+    return String.format(KmlConsts.KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml10(name),
+        StringEscapeUtils.escapeXml10(value));
   }
 
   private String wrapVariable(String variable) {

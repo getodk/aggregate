@@ -32,6 +32,9 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.common.ermodel.Entity;
+import org.opendatakit.common.ermodel.Query.WebsafeQueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -43,6 +46,30 @@ import org.opendatakit.common.web.CallingContext;
  *
  */
 public class TableAclManager {
+  
+
+  public static class WebsafeAcls {
+    public final List<TableAcl> acls;
+
+    public final String websafeRefetchCursor;
+    public final String websafeBackwardCursor;
+    public final String websafeResumeCursor;
+    public final boolean hasMore;
+    public final boolean hasPrior;
+
+    public WebsafeAcls(List<TableAcl> acls,
+        String websafeRefetchCursor, String websafeBackwardCursor, String websafeResumeCursor,
+        boolean hasMore, boolean hasPrior) {
+      this.acls = acls;
+      this.websafeRefetchCursor = websafeRefetchCursor;
+      this.websafeBackwardCursor = websafeBackwardCursor;
+      this.websafeResumeCursor = websafeResumeCursor;
+      this.hasMore = hasMore;
+      this.hasPrior = hasPrior;
+    }
+  }
+
+  
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
   private EntityConverter converter;
@@ -103,10 +130,21 @@ public class TableAclManager {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    */
-  public ArrayList<TableAcl> getAcls() throws ODKDatastoreException, PermissionDeniedException {
+  public WebsafeAcls getAcls(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException, PermissionDeniedException {
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ACL);
-    List<DbTableAclEntity> acls = DbTableAcl.queryTableIdAcls(tableId, cc);
-    return converter.toTableAcls(acls);
+    
+    WebsafeQueryResult result = DbTableAcl.queryTableIdAcls(tableId, startCursor, fetchLimit, cc);
+    
+
+    List<DbTableAclEntity> results = new ArrayList<DbTableAclEntity>();
+    for (Entity e : result.entities) {
+      results.add(new DbTableAclEntity(e));
+    }
+
+    return new WebsafeAcls( converter.toTableAcls(results),
+            result.websafeRefetchCursor,
+            result.websafeBackwardCursor,
+            result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
   /**
@@ -118,12 +156,21 @@ public class TableAclManager {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    */
-  public ArrayList<TableAcl> getAcls(Scope.Type type) throws ODKDatastoreException, PermissionDeniedException {
+  public WebsafeAcls getAcls(Scope.Type type, QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException, PermissionDeniedException {
     Validate.notNull(type);
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ACL);
 
-    List<DbTableAclEntity> acls = DbTableAcl.queryTableIdScopeTypeAcls(tableId, type.name(), cc);
-    return converter.toTableAcls(acls);
+    WebsafeQueryResult result = DbTableAcl.queryTableIdScopeTypeAcls(tableId, type.name(), startCursor, fetchLimit, cc);
+
+    List<DbTableAclEntity> results = new ArrayList<DbTableAclEntity>();
+    for (Entity e : result.entities) {
+      results.add(new DbTableAclEntity(e));
+    }
+    
+    return new WebsafeAcls( converter.toTableAcls(results),
+        result.websafeRefetchCursor,
+        result.websafeBackwardCursor,
+        result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
   /**
