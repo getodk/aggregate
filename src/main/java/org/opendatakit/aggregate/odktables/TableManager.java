@@ -51,6 +51,7 @@ import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Query.WebsafeQueryResult;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.PersistenceUtils;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
