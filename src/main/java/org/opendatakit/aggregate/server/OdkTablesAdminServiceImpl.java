@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdminService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.security.OdkTablesUserInfoTable;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -131,7 +132,7 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
         throw new AccessDeniedException("Anonymous users cannot alter ODK Tables administration settings");
       }
       // First turn the string ID into an EntityKey so it can be deleted
-      TablesUserPermissionsImpl.deleteUser(uriUser, cc);
+      OdkTablesUserInfoTable.deleteOdkTablesUser(uriUser, cc);
     } catch (ODKDatastoreException e) {
       // If you've gotten here there was a datastore problem
       e.printStackTrace();

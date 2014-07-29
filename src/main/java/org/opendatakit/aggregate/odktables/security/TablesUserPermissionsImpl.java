@@ -16,125 +16,37 @@
 
 package org.opendatakit.aggregate.odktables.security;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.odktables.FileManifestManager;
-import org.opendatakit.aggregate.odktables.LockTemplate;
-import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
-import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.SecurityUtils;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
-import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.google.common.collect.Lists;
 
 public class TablesUserPermissionsImpl implements TablesUserPermissions {
 
   private final CallingContext cc;
-  private final OdkTablesUserInfoTable userInfo;
+  private final OdkTablesUserInfo userInfo;
   private final Map<String, AuthFilter> authFilters = new HashMap<String, AuthFilter>();
 
-  public static final boolean deleteUser(String uriUser, CallingContext cc)
-      throws ODKDatastoreException {
-    OdkTablesUserInfoTable userToDelete = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser, cc);
-    cc.getDatastore().deleteEntity(userToDelete.getEntityKey(), cc.getCurrentUser());
-    // TODO: delete the ACLs for this user???
-    return true;
-  }
 
   public TablesUserPermissionsImpl(CallingContext cc, String uriUser, Set<GrantedAuthority> grants)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     this.cc = cc;
-    Datastore ds = cc.getDatastore();
-
-    OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
-
-    Log log = LogFactory.getLog(FileManifestManager.class);
-
-    log.info("TablesUserPermissionsImpl: " + uriUser);
-
-    RoleHierarchy rh = (RoleHierarchy) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
-    Collection<? extends GrantedAuthority> roles = rh.getReachableGrantedAuthorities(grants);
-    boolean hasSynchronize = roles.contains(new SimpleGrantedAuthority(
-        GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name()));
-    boolean hasAdminister = roles.contains(new SimpleGrantedAuthority(
-        GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name()));
-
-    if (hasSynchronize || hasAdminister) {
-
-      String uriForUser = null;
-      String externalUID = null;
-
-      if (uriUser.equals(User.ANONYMOUS_USER)) {
-        externalUID = User.ANONYMOUS_USER;
-        uriForUser = User.ANONYMOUS_USER;
-      } else {
-
-        RegisteredUsersTable user = RegisteredUsersTable.getUserByUri(uriUser, ds,
-            cc.getCurrentUser());
-        // Determine the external UID that will identify this user
-        externalUID = null;
-        if (user.getEmail() != null) {
-          externalUID = user.getEmail();
-        } else if (user.getUsername() != null) {
-          externalUID = SecurityUtils.USERNAME_COLON + user.getUsername();
-        }
-        uriForUser = uriUser;
-      }
-
-      OdkTablesUserInfoTable odkTablesUserInfo = null;
-      odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriForUser, cc);
-      if (odkTablesUserInfo == null) {
-        //
-        // GAIN LOCK
-        LockTemplate tablesUserPermissions = new LockTemplate(externalUID,
-            ODKTablesTaskLockType.TABLES_USER_PERMISSION_CREATION, cc);
-        try {
-          tablesUserPermissions.acquire();
-          // attempt to re-fetch the record.
-          // If this succeeds, then we had multiple suitors; the other one beat
-          // us.
-          odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriForUser, cc);
-          if (odkTablesUserInfo != null) {
-            userInfo = odkTablesUserInfo;
-            return;
-          }
-          // otherwise, create a record
-          odkTablesUserInfo = ds.createEntityUsingRelation(prototype, cc.getCurrentUser());
-          odkTablesUserInfo.setUriUser(uriForUser);
-          odkTablesUserInfo.setOdkTablesUserId(externalUID);
-          odkTablesUserInfo.persist(cc);
-          userInfo = odkTablesUserInfo;
-        } finally {
-          tablesUserPermissions.release();
-        }
-      } else {
-        userInfo = odkTablesUserInfo;
-      }
-    } else {
-      throw new PermissionDeniedException("User does not have access to ODK Tables");
-    }
+    this.userInfo = OdkTablesUserInfoTable.getOdkTablesUserInfo(uriUser, grants, cc);
   }
 
+ 
   public TablesUserPermissionsImpl(CallingContext cc) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException {
     this(cc, cc.getCurrentUser().getUriUser(), cc.getCurrentUser().getDirectAuthorities());
