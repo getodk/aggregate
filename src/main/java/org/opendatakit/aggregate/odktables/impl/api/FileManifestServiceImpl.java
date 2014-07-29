@@ -26,6 +26,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
 import org.opendatakit.aggregate.odktables.api.FileManifestService;
 import org.opendatakit.aggregate.odktables.api.FileService;
@@ -47,21 +48,22 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FileManifestServiceImpl implements FileManifestService {
 
-  private final UriInfo info;
-  private final String appId;
   private final CallingContext cc;
+  private final String appId;
+  private final UriInfo info;
+  private TablesUserPermissions userPermissions;
+
 
   public FileManifestServiceImpl(UriInfo info, String appId, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException {
-    this.info = info;
-    this.appId = appId;
+      throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     this.cc = cc;
+    this.appId = appId;
+    this.info = info;
+    this.userPermissions = ContextFactory.getTablesUserPermissions(cc);
   }
 
   @Override
   public Response getAppLevelFileManifest(@PathParam("odkClientVersion") String odkClientVersion) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
-
-    TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
     OdkTablesFileManifest manifest = null;
@@ -95,8 +97,6 @@ public class FileManifestServiceImpl implements FileManifestService {
 
   @Override
   public Response getTableIdFileManifest(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
-
-    TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
     OdkTablesFileManifest manifest = null;

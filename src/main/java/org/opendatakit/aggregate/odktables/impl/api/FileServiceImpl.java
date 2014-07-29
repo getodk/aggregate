@@ -34,6 +34,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
@@ -70,24 +71,25 @@ public class FileServiceImpl implements FileService {
   private final ServletContext sc;
   private final HttpServletRequest req;
   private final HttpHeaders headers;
-  private final UriInfo info;
-  private final String appId;
   private final CallingContext cc;
+  private final String appId;
+  private final UriInfo info;
+  private TablesUserPermissions userPermissions;
 
   public FileServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers, UriInfo info, String appId, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException {
+      throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     this.sc = sc;
     this.req = req;
     this.headers = headers;
-    this.info = info;
-    this.appId = appId;
     this.cc = cc;
+    this.appId = appId;
+    this.info = info;
+    this.userPermissions = ContextFactory.getTablesUserPermissions(cc);
+
   }
 
   @Override
   public Response getFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
-
-    TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     // First we need to get the table id from the path. We're
     // going to be assuming that you're passing the entire path of the file
@@ -156,8 +158,6 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response putFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments,  byte[] content) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
-
-    TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
@@ -238,8 +238,6 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response deleteFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
-
-    TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();

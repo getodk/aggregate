@@ -35,13 +35,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class RowResourceList {
 
   /**
-   * Optional resumeParameter, if the list of rows
-   * is too long to return all at once.
-   */
-  @Element(required = false)
-  private String resumeParameter;
-
-  /**
    * The entries in the manifest.
    */
   @JsonProperty(required = false)
@@ -83,7 +76,6 @@ public class RowResourceList {
    */
   public RowResourceList() {
     this.rows = new ArrayList<RowResource>();
-    this.resumeParameter = null;
   }
 
   /**
@@ -107,12 +99,6 @@ public class RowResourceList {
 
   public ArrayList<RowResource> getRows() {
     return rows;
-  }
-
-  public void setResumeParameter(String resumeParameter) {
-    this.resumeParameter = resumeParameter;
-  }
-
   }
 
   public void setRows(ArrayList<RowResource> rows) {

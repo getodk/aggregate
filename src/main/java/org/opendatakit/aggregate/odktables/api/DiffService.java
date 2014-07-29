@@ -32,7 +32,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 public interface DiffService {
 
-  public static final String QUERY_RESUME_PARAMETER = "resume";
   public static final String QUERY_DATA_ETAG = "data_etag";
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
@@ -40,7 +39,8 @@ public interface DiffService {
   /**
    *
    * @param dataETag
-   * @param resumeParameter - null or a value from the RowResourceList of a previous call
+   * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
+   * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
    * @return {@link RowResourceList} of row changes since the dataETag value
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -51,6 +51,5 @@ public interface DiffService {
   @GET
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowResourceList*/ getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
-                                                   @QueryParam(QUERY_RESUME_PARAMETER) String resumeParameter)
       throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 }

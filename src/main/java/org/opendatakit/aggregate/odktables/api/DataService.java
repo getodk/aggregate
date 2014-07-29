@@ -40,14 +40,14 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 public interface DataService {
 
-  public static final String QUERY_RESUME_PARAMETER = "resume";
   public static final String QUERY_ROW_ETAG = "row_etag";
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
    *
-   * @param resumeParameter - null or a value from the RowResourceList of a previous call
+   * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
+   * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
    * @return {@link RowResourceList} containing the rows being returned.
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
