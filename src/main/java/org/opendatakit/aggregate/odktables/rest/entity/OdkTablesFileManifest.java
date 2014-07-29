@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -38,6 +39,7 @@ public class OdkTablesFileManifest {
 
   /**
    * The entries in the manifest.
+   * Ordered by filename and md5hash.
    */
   @JacksonXmlElementWrapper(useWrapping=false)
   @JacksonXmlProperty(localName="file")
@@ -60,6 +62,7 @@ public class OdkTablesFileManifest {
       this.files = new ArrayList<OdkTablesFileManifestEntry>();
     } else {
       this.files = files;
+      Collections.sort(this.files);
     }
   }
 
@@ -69,6 +72,7 @@ public class OdkTablesFileManifest {
 
   public void setFiles(ArrayList<OdkTablesFileManifestEntry> files) {
     this.files = files;
+    Collections.sort(this.files);
   }
 
   @Override
@@ -91,10 +95,22 @@ public class OdkTablesFileManifest {
       return false;
     }
     OdkTablesFileManifest other = (OdkTablesFileManifest) obj;
-    return (files == null) ? (other.files == null) :
-      ( other.files != null && 
-        files.size() == other.files.size() &&
-        files.containsAll(other.files) );
+    boolean simpleResult = (files == null) ? (other.files == null) :
+      ( other.files != null &&  files.size() == other.files.size());
+    if ( !simpleResult ) {
+      return false;
+    }
+    if ( files == null ) {
+      return true;
+    }
+    
+    // files are in sorted order -- compare linearly
+    for ( int i = 0 ; i < files.size() ; ++i ) {
+      if ( !files.get(i).equals(other.files.get(i)) ) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }

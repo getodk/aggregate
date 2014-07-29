@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -64,6 +65,7 @@ public class TableResourceList {
 
   /**
    * The entries in the manifest.
+   * This is and ordered list by tableId.
    */
   @JsonProperty(required = false)
   @JacksonXmlElementWrapper(useWrapping=false)
@@ -89,6 +91,7 @@ public class TableResourceList {
       this.tables = new ArrayList<TableResource>();
     } else {
       this.tables = tables;
+      Collections.sort(this.tables);
     }
     this.webSafeRefetchCursor = refetchCursor;
     this.webSafeBackwardCursor = backCursor;
@@ -103,6 +106,7 @@ public class TableResourceList {
 
   public void setTables(ArrayList<TableResource> tables) {
     this.tables = tables;
+    Collections.sort(this.tables);
   }
 
   @Override
@@ -145,6 +149,12 @@ public class TableResourceList {
       return true;
     }
     
-    return tables.containsAll(other.tables);
+    // tables is a sorted list. Compare linearly...
+    for ( int i = 0 ; i < tables.size() ; ++i ) {
+      if ( !tables.get(i).equals(other.tables.get(i)) ) {
+        return false;
+      }
+    }
+    return true;
   }
 }
