@@ -141,10 +141,26 @@ public class TableAclResourceList {
       return false;
     }
     TableAclResourceList other = (TableAclResourceList) obj;
-    return ((webSafeResumeCursor == null) ? other.webSafeResumeCursor == null : (webSafeResumeCursor
+    boolean simpleResult = ((webSafeResumeCursor == null) ? other.webSafeResumeCursor == null : (webSafeResumeCursor
         .equals(other.webSafeResumeCursor)))
-        && ((orderedAcls == null ? other.orderedAcls == null : (orderedAcls.size() == other.orderedAcls.size()
-        && orderedAcls.containsAll(other.orderedAcls))));
+        && (orderedAcls == null ? other.orderedAcls == null : 
+            (other.orderedAcls != null && orderedAcls.size() == other.orderedAcls.size()));
+    
+    if ( !simpleResult ) {
+      return false;
+    }
+    
+    if ( orderedAcls == null ) {
+      return true;
+    }
+    
+    // acls are ordered... compare in order
+    for ( int i = 0 ; i < orderedAcls.size(); ++i ) {
+      if ( ! orderedAcls.get(i).equals(other.orderedAcls.get(i)) ) {
+        return false;
+      }
+    }
+    return true;
   }
 
 }

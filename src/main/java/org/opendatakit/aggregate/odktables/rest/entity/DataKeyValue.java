@@ -30,7 +30,7 @@ public class DataKeyValue {
   public boolean equals(Object obj) {
     if ( obj != null && obj instanceof DataKeyValue ) {
       DataKeyValue kv = (DataKeyValue) obj;
-      return (column == kv.column && value == kv.value);
+      return column.equals(kv.column) && value.equals(kv.value);
     }
     return false;
   }

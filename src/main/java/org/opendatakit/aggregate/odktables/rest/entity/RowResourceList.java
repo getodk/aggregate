@@ -170,12 +170,21 @@ public class RowResourceList {
       return false;
     }
     RowResourceList other = (RowResourceList) obj;
-    return (rows == null ? other.rows == null : (rows.size() == other.rows.size() && rows.containsAll(other.rows))) &&
+    boolean simpleResult = (rows == null ? other.rows == null : (other.rows != null && rows.size() == other.rows.size())) &&
         (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
         (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
         (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
         (hasMoreResults == other.hasMoreResults) &&
         (hasPriorResults == other.hasPriorResults);
+    if ( !simpleResult ) {
+      return false;
+    }
+    
+    if ( rows == null ) {
+      return true;
+    }
+    
+    return rows.containsAll(other.rows);
   }
 
 }
