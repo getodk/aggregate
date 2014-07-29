@@ -109,6 +109,46 @@ public class TableResourceList {
     Collections.sort(this.tables);
   }
 
+  public String getWebSafeRefetchCursor() {
+    return webSafeRefetchCursor;
+  }
+
+  public void setWebSafeRefetchCursor(String webSafeRefetchCursor) {
+    this.webSafeRefetchCursor = webSafeRefetchCursor;
+  }
+
+  public String getWebSafeBackwardCursor() {
+    return webSafeBackwardCursor;
+  }
+
+  public void setWebSafeBackwardCursor(String webSafeBackwardCursor) {
+    this.webSafeBackwardCursor = webSafeBackwardCursor;
+  }
+
+  public String getWebSafeResumeCursor() {
+    return webSafeResumeCursor;
+  }
+
+  public void setWebSafeResumeCursor(String webSafeResumeCursor) {
+    this.webSafeResumeCursor = webSafeResumeCursor;
+  }
+
+  public boolean isHasMoreResults() {
+    return hasMoreResults;
+  }
+
+  public void setHasMoreResults(boolean hasMoreResults) {
+    this.hasMoreResults = hasMoreResults;
+  }
+
+  public boolean isHasPriorResults() {
+    return hasPriorResults;
+  }
+
+  public void setHasPriorResults(boolean hasPriorResults) {
+    this.hasPriorResults = hasPriorResults;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
