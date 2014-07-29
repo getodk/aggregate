@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesFileManifestEntry {
+public class OdkTablesFileManifestEntry implements Comparable<OdkTablesFileManifestEntry> {
 
   /**
    * This is the name of the file relative to
@@ -95,6 +95,33 @@ public class OdkTablesFileManifestEntry {
         && (contentType == null ? other.contentType == null : contentType.equals(other.contentType))
         && (md5hash == null ? other.md5hash == null : md5hash.equals(other.md5hash))
         && (downloadUrl == null ? other.downloadUrl == null : downloadUrl.equals(other.downloadUrl));
+  }
+
+  @Override
+  public int compareTo(OdkTablesFileManifestEntry other) {
+    if ( filename == null ) {
+      if ( other.filename != null ) {
+        return -1;
+      }
+    } else if ( other.filename == null ) {
+      return 1;
+    }
+    
+    int cmp = filename.compareTo(other.filename);
+    if ( cmp != 0 ) {
+      return cmp;
+    }
+
+    if ( md5hash == null ) {
+      if ( other.md5hash != null ) {
+        return -1;
+      }
+    } else if ( other.md5hash == null ) {
+      return 1;
+    }
+    
+    cmp = md5hash.compareTo(other.md5hash);
+    return cmp;
   }
 
 }
