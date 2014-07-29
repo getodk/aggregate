@@ -120,12 +120,56 @@ public class TableAclResourceList {
       }});
   }
 
+  public String getWebSafeRefetchCursor() {
+    return webSafeRefetchCursor;
+  }
+
+  public void setWebSafeRefetchCursor(String webSafeRefetchCursor) {
+    this.webSafeRefetchCursor = webSafeRefetchCursor;
+  }
+
+  public String getWebSafeBackwardCursor() {
+    return webSafeBackwardCursor;
+  }
+
+  public void setWebSafeBackwardCursor(String webSafeBackwardCursor) {
+    this.webSafeBackwardCursor = webSafeBackwardCursor;
+  }
+
+  public String getWebSafeResumeCursor() {
+    return webSafeResumeCursor;
+  }
+
+  public void setWebSafeResumeCursor(String webSafeResumeCursor) {
+    this.webSafeResumeCursor = webSafeResumeCursor;
+  }
+
+  public boolean isHasMoreResults() {
+    return hasMoreResults;
+  }
+
+  public void setHasMoreResults(boolean hasMoreResults) {
+    this.hasMoreResults = hasMoreResults;
+  }
+
+  public boolean isHasPriorResults() {
+    return hasPriorResults;
+  }
+
+  public void setHasPriorResults(boolean hasPriorResults) {
+    this.hasPriorResults = hasPriorResults;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((webSafeResumeCursor == null) ? 0 : webSafeResumeCursor.hashCode());
     result = prime * result + ((orderedAcls == null) ? 0 : orderedAcls.hashCode());
+    result = prime * result + ((webSafeRefetchCursor == null) ? 0 : webSafeRefetchCursor.hashCode());
+    result = prime * result + ((webSafeBackwardCursor == null) ? 0 : webSafeBackwardCursor.hashCode());
+    result = prime * result + ((webSafeResumeCursor == null) ? 0 : webSafeResumeCursor.hashCode());
+    result = prime * result + (hasMoreResults ? 0 : 1);
+    result = prime * result + (hasPriorResults ? 0 : 1);
     return result;
   }
 
@@ -141,10 +185,13 @@ public class TableAclResourceList {
       return false;
     }
     TableAclResourceList other = (TableAclResourceList) obj;
-    boolean simpleResult = ((webSafeResumeCursor == null) ? other.webSafeResumeCursor == null : (webSafeResumeCursor
-        .equals(other.webSafeResumeCursor)))
-        && (orderedAcls == null ? other.orderedAcls == null : 
-            (other.orderedAcls != null && orderedAcls.size() == other.orderedAcls.size()));
+    boolean simpleResult = (orderedAcls == null ? other.orderedAcls == null : 
+            (other.orderedAcls != null && orderedAcls.size() == other.orderedAcls.size())) &&
+    (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
+    (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
+    (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
+    (hasMoreResults == other.hasMoreResults) &&
+    (hasPriorResults == other.hasPriorResults);
     
     if ( !simpleResult ) {
       return false;
