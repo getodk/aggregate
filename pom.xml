@@ -12,6 +12,8 @@
 	<name>ODK Aggregate</name>
 	<properties>
 	    <toplevel.directory>${project.basedir}/../</toplevel.directory>
+		<!-- must match the gae version below and the build/build.xml ant script defn -->
+		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.7</gae.home>
 		<!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
 		<selenium.home>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2</selenium.home>
 		<selenium.libs>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2/libs</selenium.libs>
@@ -21,7 +23,7 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.9.0</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
+		<gooogle.appengine.sdk.version>1.9.7</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
 		<gae.version>${gooogle.appengine.sdk.version}</gae.version>
 		<google.gdata.version>1.47.1</google.gdata.version>
 		<google.api-client.version>1.18.0-rc</google.api-client.version>
