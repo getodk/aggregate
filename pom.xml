@@ -13,11 +13,10 @@
 	<properties>
 	    <toplevel.directory>${project.basedir}/../</toplevel.directory>
 		<!-- must match the gae version below and the build/build.xml ant script defn -->
-		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.7</gae.home>
+		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.7/appengine-java-sdk-1.9.7</gae.home>
 		<!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
 		<selenium.home>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2</selenium.home>
 		<selenium.libs>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2/libs</selenium.libs>
-		<catalina.zip>${project.basedir}/../build/apache-tomcat-6.0.41.zip</catalina.zip>
 	    <war.directory>${project.basedir}/../eclipse-aggregate-gae/war</war.directory>
 		<scriptSourceDirectory>${project.basedir}/../src/it/scripts</scriptSourceDirectory>
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
@@ -28,7 +27,7 @@
 		<google.gdata.version>1.47.1</google.gdata.version>
 		<google.api-client.version>1.18.0-rc</google.api-client.version>
 		<google.api-services-drive.version>v2-rev131-1.18.0-rc</google.api-services-drive.version>
-		<google.gwt.version>2.5.1</google.gwt.version>
+		<google.gwt.version>2.6.1</google.gwt.version>
 		<org.apache.wink.version>1.4</org.apache.wink.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.16</maven.surefire.report.plugin.version>
@@ -37,7 +36,7 @@
 		<maven.failsafe.plugin.version>2.16</maven.failsafe.plugin.version>
 		<cargo.maven2.plugin.version>1.4.7</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.8</build.helper.maven.plugin.version>
-		<gwt.maven.plugin.version>2.5.1</gwt.maven.plugin.version>
+		<gwt.maven.plugin.version>2.6.1</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
 		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
 		<maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
@@ -1438,10 +1437,12 @@
 					  <container>
 						<containerId>tomcat6x</containerId>
 						<log>${project.build.directory}/cargo-tree/tomcat6x/cargo.log</log>
-						<zipUrlInstaller>
-						  <url>${catalina.zip}</url>
+						<artifactInstaller>
+						  <groupId>org.apache.tomcat</groupId>
+						  <artifactId>tomcat</artifactId>
+						  <version>7.0.54</version>
 						  <extractDir>${project.build.directory}/tomcat6x</extractDir>
-						</zipUrlInstaller>
+						</artifactInstaller>
 						<dependencies>
 							<dependency>
 								<groupId>mysql</groupId>
