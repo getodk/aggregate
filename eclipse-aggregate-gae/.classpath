@@ -83,7 +83,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-collections-3.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jdo2-api-2.3-eb.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xmlsec-1.5.1.jar"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-common-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-common/src/main/java"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-server-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-server/src/main/java"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
@@ -92,7 +91,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxb-api-2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxb-impl-2.2.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/geronimo-annotation_1.1_spec-1.0.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-client-1.18.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-api-services-drive-v2-rev131-1.18.0-rc.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/google-http-client-1.18.0-rc.jar"/>
@@ -117,5 +115,7 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/gwt-2.6.1"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
