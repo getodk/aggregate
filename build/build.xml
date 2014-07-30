@@ -1,0 +1,36 @@
+<project name="SetupJenkinsMaven" default="dist" basedir=".">
+    <description>
+        simple Ant script to run maven install commands for 
+		libraries that are not present in any external repository.
+    </description>
+	
+	<target name="init-os">
+		<condition property="os.windows">
+			<os family="windows"/>
+		</condition>
+		<condition property="os.unix">
+			<os family="unix"/>
+		</condition>
+	</target>
+
+	<target name="get-tomcat-windows" depends="init-os" if="os.windows">
+		<!-- this assumes an 64-bit x86 architecture -->
+		<get src="http://www.eng.lsu.edu/mirrors/apache/tomcat/tomcat-6/v6.0.41/bin/apache-tomcat-6.0.41-windows-x64.zip" 
+			dest="apache-tomcat-6.0.41.zip"
+			skipexisting="true"/>
+	</target>
+	
+	<target name="get-tomcat-unix" depends="init-os" if="os.unix">
+		<get src="http://apache.mirrors.hoobly.com/tomcat/tomcat-6/v6.0.41/bin/apache-tomcat-6.0.41.zip" 
+			dest="apache-tomcat-6.0.41.zip"
+			skipexisting="true"/>
+	</target>
+	
+	<target name="dist" depends="get-tomcat-windows,get-tomcat-unix" >
+		<get src="http://selenium-release.storage.googleapis.com/2.42/selenium-java-2.42.2.zip" 
+			dest="selenium-java-2.42.2.zip"
+			skipexisting="true"/>
+		<unzip src="selenium-java-2.42.2.zip" dest="selenium-java-2.42.2" overwrite="false"/>
+	</target>
+  	
+</project>
