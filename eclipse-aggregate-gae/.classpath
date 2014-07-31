@@ -50,7 +50,7 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/selenium-java-2.37.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/selenium-java-2.42.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/woodstox-core-asl-4.1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-api-1.7.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/slf4j-jcl-1.7.7.jar"/>

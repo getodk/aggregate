@@ -1435,13 +1435,13 @@
 					<configuration>
 					  <wait>false</wait>
 					  <container>
-						<containerId>tomcat6x</containerId>
-						<log>${project.build.directory}/cargo-tree/tomcat6x/cargo.log</log>
+						<containerId>tomcat7x</containerId>
+						<log>${project.build.directory}/cargo-tree/tomcat7x/cargo.log</log>
 						<artifactInstaller>
 						  <groupId>org.apache.tomcat</groupId>
 						  <artifactId>tomcat</artifactId>
 						  <version>7.0.54</version>
-						  <extractDir>${project.build.directory}/tomcat6x</extractDir>
+						  <extractDir>${project.build.directory}/tomcat7x</extractDir>
 						</artifactInstaller>
 						<dependencies>
 							<dependency>
@@ -1452,9 +1452,10 @@
 					  </container>
 					  <configuration>
 						<type>standalone</type>
-						<home>${project.build.directory}/tomcat6x-container</home>
+						<home>${project.build.directory}/tomcat7x-container</home>
 						<properties>
 						  <cargo.servlet.port>${test.server.port}</cargo.servlet.port>
+						  <cargo.tomcat.useHttpOnly>false</cargo.tomcat.useHttpOnly>
 						</properties>
 					  </configuration>
 					  <deployables>

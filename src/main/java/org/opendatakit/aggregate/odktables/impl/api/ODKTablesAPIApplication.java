@@ -21,22 +21,19 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
+import org.opendatakit.aggregate.odktables.entity.serialization.SimpleHTMLMessageWriter;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleJSONMessageReaderWriter;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLMessageReaderWriter;
 
 public class ODKTablesAPIApplication extends Application {
 
-//  public static class JSONTableDefinitionReaderWriter extends SimpleJSONMessageReaderWriter<TableDefinition> {};
-//  public static class XMLTableDefinitionReaderWriter extends SimpleXMLMessageReaderWriter<TableDefinition> {};
-
   @Override
   public Set<Class<?>> getClasses() {
     final java.util.HashSet<java.lang.Class<?>> classes = new HashSet<Class<?>>();
     classes.add(OdkTablesImpl.class);
-//    classes.add(JSONTableDefinitionReaderWriter.class);
-//    classes.add(XMLTableDefinitionReaderWriter.class);
     classes.add(SimpleJSONMessageReaderWriter.class);
     classes.add(SimpleXMLMessageReaderWriter.class);
+    classes.add(SimpleHTMLMessageWriter.class);
     classes.add(ODKDatastoreExceptionMapper.class);
     classes.add(ODKTablesExceptionMapper.class);
     classes.add(ODKTaskLockExceptionMapper.class);
