@@ -1502,6 +1502,12 @@
 						</goals>
 						<configuration>
 						  <background>true</background>
+						  <systemProperties>
+							<property>
+							  <name>webdriver.firefox.bin</name>
+							  <value>${firefox.executable}</value>
+							</property>
+						  </systemProperties>
 						</configuration>
 					  </execution>
 					  <execution>
