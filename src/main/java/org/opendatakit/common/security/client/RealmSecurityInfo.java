@@ -29,11 +29,13 @@ public class RealmSecurityInfo implements Serializable {
   /**
    * 
    */
-  private static final long serialVersionUID = -4307350533653978280L;
+  private static final long serialVersionUID = -430735053365397828L;
 
   String basicAuthHashEncoding;
   String realmString;
   String superUserEmail;
+  String superUsername;
+  boolean isSuperUsernamePasswordSet;
   String changeUserPasswordURL;
 
   public RealmSecurityInfo() {
@@ -53,6 +55,22 @@ public class RealmSecurityInfo implements Serializable {
 
   public void setSuperUserEmail(String superUserEmail) {
     this.superUserEmail = superUserEmail;
+  }
+
+  public String getSuperUsername() {
+    return superUsername;
+  }
+
+  public void setSuperUsername(String superUsername) {
+    this.superUsername = superUsername;
+  }
+
+  public void setSuperUsernamePasswordSet(boolean isSuperUsernamePasswordSet) {
+    this.isSuperUsernamePasswordSet = isSuperUsernamePasswordSet;
+  }
+
+  public boolean isSuperUsernamePasswordSet() {
+    return isSuperUsernamePasswordSet;
   }
 
   public String getRealmString() {

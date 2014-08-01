@@ -108,10 +108,32 @@ a,a:visited,a:hover {
 	overflow: scroll;
 }
 
+.not_secure_message {
+	color: red;
+	font-weight: bold;
+	font-height: 24px;
+	text-align: center;
+	background: #EEEEEE;
+}
+
+#not_secure_content {
+	position: absolute;
+	z-index: 1000;
+	width: 100%;
+	left: 0px;
+	top: 0px;
+}
+
 .error_message {
 	color: red;
 	text-align: center;
+	background: #EEEEEE;
+}
+
+#error_content {
 	position: absolute;
+	z-index: 1000;
+	width: 100%;
 	left: 0px;
 	top: 0px;
 }

@@ -61,6 +61,8 @@ import com.google.gwt.user.client.ui.Widget;
 public class AggregateUI implements EntryPoint {
 
   private UrlHash hash;
+  private Label notSecureMsgLabel;
+  private FlowPanel notSecurePanel;
   private Label errorMsgLabel;
   private FlowPanel errorPanel;
 
@@ -121,9 +123,19 @@ public class AggregateUI implements EntryPoint {
     singleton = null;
     timer = new RefreshTimer(this);
 
+    // define the not-secure message info...
+    notSecureMsgLabel = new Label();
+    notSecureMsgLabel.setStyleName("not_secure_message");
+
+    notSecurePanel = new FlowPanel();
+    notSecurePanel.add(notSecureMsgLabel);
+    notSecurePanel.setVisible(false);
+    
     // define the error message info...
     errorMsgLabel = new Label();
     errorMsgLabel.setStyleName("error_message");
+
+    // put the not-secure and error messages in an error panel
     errorPanel = new FlowPanel();
     errorPanel.add(errorMsgLabel);
     errorPanel.setVisible(false);
@@ -160,6 +172,7 @@ public class AggregateUI implements EntryPoint {
     layoutPanel.add(mainNav);
     layoutPanel.getElement().setId("layout_panel");
 
+    RootPanel.get("not_secure_content").add(notSecurePanel);
     RootPanel.get("error_content").add(errorPanel);
     RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
     RootPanel.get("dynamic_content").add(settingsBar);
@@ -255,6 +268,7 @@ public class AggregateUI implements EntryPoint {
                   @Override
                   public void onSuccess(RealmSecurityInfo result) {
                     realmInfo = result;
+                    updateNotSecureInfo();
                     if (realmInfo != null && userInfo != null) {
                       commonUserInfoUpdateCompleteAction();
                     }
@@ -265,6 +279,7 @@ public class AggregateUI implements EntryPoint {
           @Override
           public void onSuccess(RealmSecurityInfo result) {
             realmInfo = result;
+            updateNotSecureInfo();
             // it worked the first time! Now do the user info request.
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
@@ -591,6 +606,13 @@ public class AggregateUI implements EntryPoint {
     return userInfo;
   }
 
+  public void updateNotSecureInfo() {
+    if ( realmInfo != null && !realmInfo.isSuperUsernamePasswordSet() ) {
+      notSecureMsgLabel.setText("This server and its data are not secure! Please change the super-user's password!");
+      notSecurePanel.setVisible(true);
+    }
+  }
+  
   public RealmSecurityInfo getRealmInfo() {
     if (realmInfo == null) {
       GWT.log("AggregateUI.getRealmInfo: realmInfo is null");
@@ -611,6 +633,7 @@ public class AggregateUI implements EntryPoint {
             @Override
             public void onSuccess(RealmSecurityInfo result) {
               realmInfo = result;
+              updateNotSecureInfo();
             }
           });
     }
@@ -689,11 +712,9 @@ public class AggregateUI implements EntryPoint {
     } else {
       textMessage = context + t.getMessage();
     }
-    int lines = 1 + (textMessage.length() / 80);
     errorMsgLabel.setText(textMessage);
-    errorPanel.setVisible(true);
-    errorPanel.setHeight(Integer.toString(lines) + "em");
     displayErrorPanel();
+    resize();
     Window.alert(textMessage);
   }
 
