@@ -207,13 +207,17 @@ public class AccessConfigurationSheet extends Composite {
         }
         return true;
       case GROUP_SITE_ADMINS:
-        String email = info.getEmail();
-        if (email == null)
-          return true;
         // don't let the designated super-user un-check their
         // site admin privileges.
+        String email = info.getEmail();
         String superUserEmail = AggregateUI.getUI().getRealmInfo().getSuperUserEmail();
-        return !superUserEmail.equals(email);
+        String username = info.getUsername();
+        String superUsername = AggregateUI.getUI().getRealmInfo().getSuperUsername();
+        if ( ( email != null && superUserEmail != null && superUserEmail.equals(email) ) ||
+             ( username != null && superUsername != null && superUsername.equals(username) ) ) {
+          return false;
+        }
+        return true;
       default:
         return false;
       }
@@ -411,13 +415,16 @@ public class AccessConfigurationSheet extends Composite {
       // enable only if it is a registered user
       if (info.getType() != UserType.REGISTERED)
         return false;
-      // enable if the user has no email (isn't a Google account)
+      // enable only if the user is not the superUser. 
       String email = info.getEmail();
-      if (email == null)
-        return true;
       String superUserEmail = AggregateUI.getUI().getRealmInfo().getSuperUserEmail();
-      // enable only if the user is not the superuser.
-      return !email.equals(superUserEmail);
+      String username = info.getUsername();
+      String superUsername = AggregateUI.getUI().getRealmInfo().getSuperUsername();
+      if ( ( email != null && superUserEmail != null && superUserEmail.equals(email) ) ||
+           ( username != null && superUsername != null && superUsername.equals(username) ) ) {
+        return false;
+      }
+      return true;
     }
   };
 

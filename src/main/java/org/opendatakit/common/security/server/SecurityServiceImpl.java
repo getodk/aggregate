@@ -91,7 +91,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException {
+  public RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException, DatastoreFailureException {
 
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -106,6 +106,13 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements
         .getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
     r.setBasicAuthHashEncoding(mde.getAlgorithm());
     r.setSuperUserEmail(cc.getUserService().getSuperUserEmail());
+    r.setSuperUsername(cc.getUserService().getSuperUserUsername());
+    try {
+      r.setSuperUsernamePasswordSet(cc.getUserService().isSuperUsernamePasswordSet(cc));
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException("Unable to access datastore");
+    }
     // User interface layer uses this URL to submit password changes securely
     r.setChangeUserPasswordURL(cc.getSecureServerURL() + BasicConsts.FORWARDSLASH
         + UserManagePasswordsServlet.ADDR);

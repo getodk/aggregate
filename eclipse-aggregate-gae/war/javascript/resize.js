@@ -21,17 +21,41 @@ function setHeights() {
 		var helpTreeHeight = $("#help_tree").height();
 		helpPanelHeight = Math.min(helpTreeHeight, height / 2);
 	}
-    var tab1Height = $(".tab_measure_1").first().height();
     var imagePosition = $("#odk_aggregate_logo").position();
-    var imageTop = imagePosition.top;
     var imageHeight = $("#odk_aggregate_logo").outerHeight(true);
 
+    var navBarHelpLoginHeight = $("#nav_bar_help_login").height();
+    
+    var maxExtrasHeight = helpPanelHeight;
+    maxExtrasHeight = (imageHeight < maxExtrasHeight) ? maxExtrasHeight : imageHeight;
+    maxExtrasHeight = (navBarHelpLoginHeight < maxExtrasHeight) ? maxExtrasHeight : navBarHelpLoginHeight;
+    
+    var imageOffset = (maxExtrasHeight - imageHeight) / 2;
+    var navBarOffset = (maxExtrasHeight - navBarHelpLoginHeight) / 2;
+    var helpPanelOffset = (maxExtrasHeight - helpPanelHeight) / 2;
+    
+    var tab1Height = $(".tab_measure_1").first().height();
+
     // compute and set the offset for the top of the layout_panel
-    console.log("imageTop " + imageTop + " height " + imageHeight + " tab1Height " + tab1Height);
-    var layoutPanelTop = imageHeight + imageTop - tab1Height;
+    console.log("helpPanelHeight " + helpPanelHeight + " imageHeight " + imageHeight + " tab1Height " + tab1Height);
+    var layoutPanelTop = maxExtrasHeight - tab1Height;
     if ( layoutPanelTop < 0 ) layoutPanelTop = 0;
+    // push down to leave room for error messages
+    var allAlertMessagesHeight = 0;
+    var errorMessageOffset = 0;
+    if ( $("#not_secure_content").is(':visible') || $("#error_content").is(':visible') ) {
+    	errorMessageOffset = $("#not_secure_content").height();
+    	allAlertMessagesHeight = $("#not_secure_content").height() + $("#error_content").height();
+    }
+    layoutPanelTop = layoutPanelTop + allAlertMessagesHeight;
     console.log("layoutPanelTop " + layoutPanelTop);
     $("#layout_panel").offset({top: layoutPanelTop});
+    $("#odk_aggregate_logo").offset({top: allAlertMessagesHeight + imageOffset});
+    $("#nav_bar_help_login").offset({top: allAlertMessagesHeight + navBarOffset});
+    $("#help_panel").offset({top: allAlertMessagesHeight + helpPanelOffset});
+    if ( $("#error_content").is(':visible') ) {
+      $("#error_content").offset({top: errorMessageOffset});
+    }
 
     // now get remaining height and resize everything
 	var layoutHeight = height - $("#layout_panel").offset().top - helpPanelHeight - 1;
@@ -43,7 +67,7 @@ function setHeights() {
 	// All tabs
 	$("html").height(height);
 	$("body").height(height);
-	$("#dynamic_content").height(height);
+	$("#dynamic_content").height(height-allAlertMessagesHeight);
 	$("#mainNav").height(layoutHeight);
 	$("#layout_panel").height(layoutHeight);
 	if (helpPanel.length) {
