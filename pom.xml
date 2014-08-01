@@ -1409,6 +1409,7 @@
 							<include>**/integration/**</include>
 						  </includes>
 						  <systemPropertyVariables>
+							<webdriver.firefox.bin>${firefox.executable}</webdriver.firefox.bin>
 							<project.artifactId>${project.artifactId}</project.artifactId>
 							<test.forms.dir>${itFormsDirectory}</test.forms.dir>
 							<test.submissions.dir>${itSubmissionsDirectory}</test.submissions.dir>
@@ -1502,12 +1503,6 @@
 						</goals>
 						<configuration>
 						  <background>true</background>
-						  <systemProperties>
-							<property>
-							  <name>webdriver.firefox.bin</name>
-							  <value>${firefox.executable}</value>
-							</property>
-						  </systemProperties>
 						</configuration>
 					  </execution>
 					  <execution>
