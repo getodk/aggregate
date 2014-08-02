@@ -1410,7 +1410,7 @@
 						  </includes>
 						  <!-- pass through the DISPLAY environment variable -->
 						  <environmentVariables>
-							<DISPLAY>${env.DISPLAY}</DISPLAY>
+							<DISPLAY>${unix.display}</DISPLAY>
 						  </environmentVariables>
 						  <systemPropertyVariables>
 							<webdriver.firefox.bin>${firefox.executable}</webdriver.firefox.bin>
