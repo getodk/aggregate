@@ -1408,6 +1408,10 @@
 						  <includes>
 							<include>**/integration/**</include>
 						  </includes>
+						  <!-- pass through the DISPLAY environment variable -->
+						  <environmentVariables>
+							<DISPLAY>${env.DISPLAY}</DISPLAY>
+						  </environmentVariables>
 						  <systemPropertyVariables>
 							<webdriver.firefox.bin>${firefox.executable}</webdriver.firefox.bin>
 							<project.artifactId>${project.artifactId}</project.artifactId>
