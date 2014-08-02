@@ -3,6 +3,7 @@ package org.opendatakit.aggregate.integration;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,6 +41,8 @@ public class TestUploadForm {
     FirefoxProfile profile = new FirefoxProfile();
     profile.setEnableNativeEvents(false);
     profile.setPreference("network.negotiate-auth.trusteduris", hostname);
+    Random r = new Random();
+    profile.setPreference(FirefoxProfile.PORT_PREFERENCE, r.nextInt(50) + 7000);
     driver = new FirefoxDriver(profile);
     driver.manage().timeouts().implicitlyWait(TIMEOUT_INTERVAL_MS, TimeUnit.MILLISECONDS);
     driver.get(fullRootUrl);
@@ -124,6 +127,6 @@ public class TestUploadForm {
 
   @AfterClass
   public static void tearDown() throws Exception {
-    driver.close();
+    driver.quit();
   }
 }
