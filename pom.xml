@@ -73,6 +73,8 @@
 		<module>odk-postgres-unit-settings</module>
 		
 		<!-- aggregate-gae-specific -->
+		<module>gae-unit-tests</module>
+		<!-- aggregate-gae-specific -->
 		<module>aggregate-gae</module>
 		<!-- aggregate-postgresql-specific -->
 		<module>aggregate-postgres</module>
@@ -84,8 +86,6 @@
 		<module>mysql-unit-tests</module>
 		<!-- odk tables client libraries -->
 		<module>odk-tables-api</module>
-		<!-- aggregate-gae-specific -->
-		<module>gae-unit-tests</module>
 	</modules>
 	<repositories>
 		<!-- main repository -->
