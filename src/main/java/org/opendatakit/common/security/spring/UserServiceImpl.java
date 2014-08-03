@@ -115,6 +115,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 
   public void setSuperUserUsername(String superUserUsername) {
     this.superUserUsername = superUserUsername;
+    this.superUserUsernameRecord = null;
   }
 
   @Override

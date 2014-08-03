@@ -105,6 +105,7 @@ public final class ExecuteChangePasswordButton extends AggregateButton implement
       }
     }
     popup.hide();
+    AggregateUI.getUI().forceUpdateNotSecureInfo();
   }
 
   public void onError(String echo, String error) {
