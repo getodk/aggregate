@@ -3,6 +3,89 @@ All rights reserved.
 
 App Engine Java SDK - Release Notes
 
+Version 1.9.7
+=============
+- Added memcache historical hit ratio to Admin Console dashboard.
+- Fixed an issue with sockets connections timing out after 2 minutes.
+- Fixed an issue that could cause a StackOverflowError in apps when loading
+  the code of a class as a resource using ClassLoader.getResource.
+    https://code.google.com/p/googleappengine/issues/detail?id=10413
+- Fixed an issue with the dev_appserver caller-class check in Runtime.invoke()
+  which was looking too far up the stack and therefore refusing Method.invoke()
+  calls from another class in the same package.
+    https://code.google.com/p/googleappengine/issues/detail?id=10539
+
+Version 1.9.6
+=============
+- Fixed an issue with the dev_appserver Search API for atom fields that contain
+  whitespace or punctuation characters in their values (e.g., email addresses).
+    https://code.google.com/p/googleappengine/issues/detail?id=7962
+    https://code.google.com/p/googleappengine/issues/detail?id=10251
+- Fixed an issue with PermGen running out of space when using DeferredTasks
+  in the dev_appserver.
+    https://code.google.com/p/googleappengine/issues/detail?id=8377
+- Fixed an issue with date-valued HTTP headers such as If-Modified-Since
+  getting a ClassCastException.
+    https://code.google.com/p/googleappengine/issues/detail?id=8415
+- Fixed an issue with Datastore cursors in dev_appserver getting the wrong
+  cursor value for keys only queries.
+    https://code.google.com/p/googleappengine/issues/detail?id=10943
+
+Version 1.9.5
+=============
+- Fixed an issue with the Search API where searching for geo points whose
+  distance from a fixed point is greater than some value returns documents that
+  do not include that field.
+- Fixed an issue with appstats generating a ClassCastException in the
+  dev_appserver.
+    https://code.google.com/p/googleappengine/issues/detail?id=6071
+    https://code.google.com/p/googleappengine/issues/detail?id=7052
+    https://code.google.com/p/googleappengine/issues/detail?id=10661
+- Fixed an issue with the dev_appserver Search API not finding atoms with
+  spaces in them.
+    https://code.google.com/p/googleappengine/issues/detail?id=7962
+    https://code.google.com/p/googleappengine/issues/detail?id=10251
+- Fixed an issue with the Search API where querying for a field that does not
+  exist returns an error instead of returning zero matches on that field.
+    https://code.google.com/p/googleappengine/issues/detail?id=10407
+
+Version 1.9.4
+=============
+- Speed up memcache API deserialization by using Class.forName instead of
+  ClassLoader.loadClass.
+- Added client side deployment logging to Java appcfg, which will improve
+  deployment performance of Java Applications.
+- Fixed an issue with Datastore Queries containing nonexisting fields returning
+  no results instead of an error.
+- Fixed an issue with Datastore String properties so they are now <=500
+  characters, not <500 characters.
+- Fixed an issue with the Search API where it does not correctly parse
+  expressions that use the subtraction operator without surrounding
+  whitespaces.
+- Fixed an issue with 4-byte UTF-8 character web requests not forming correctly
+  in POST data.
+    https://code.google.com/p/googleappengine/issues/detail?id=8603
+
+Version 1.9.3
+=============
+- Various internal bug fixes. No new features for Java SDK 1.9.3.
+
+Version 1.9.2
+=============
+- We are pleased to announce the availability of Dedicated Memcache service
+  to our customers in the EU.
+
+Version 1.9.1
+=============
+- The Performance Settings section of the Application settings page in the
+  Admin Console, Backends API and all backends related management tools are now
+  deprecated and will be removed in a future release. Users of Backends are
+  recommended to migrate to the App Engine Modules API, which provides a more
+  flexible implementation of the same functionality. These settings are now all
+  configurable via Modules configuration files.
+  See the Modules documentation for more information:
+  https://developers.google.com/appengine/docs/java/modules/#Java_Configuration
+
 Version 1.9.0
 =============
 - Java 6 applications cannot be deployed to Google App Engine from any version
