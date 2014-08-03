@@ -15,24 +15,21 @@ function onWindowResize() {
 function setHeights() {
 	var height = $(window).height();
 
-	var helpPanel = $("#help_panel");
-	var helpPanelHeight = helpPanel.length ? helpPanel.height() : 0;
-	if (helpPanel.length) {
-		var helpTreeHeight = $("#help_tree").height();
-		helpPanelHeight = Math.min(helpTreeHeight, height / 2);
+	var helpPanelHeight = 0;
+	if ( $("#help_panel").is(':visible') ) {
+		helpPanelHeight = $("#help_tree").height();
 	}
+
     var imagePosition = $("#odk_aggregate_logo").position();
     var imageHeight = $("#odk_aggregate_logo").outerHeight(true);
 
     var navBarHelpLoginHeight = $("#nav_bar_help_login").height();
     
-    var maxExtrasHeight = helpPanelHeight;
-    maxExtrasHeight = (imageHeight < maxExtrasHeight) ? maxExtrasHeight : imageHeight;
+    var maxExtrasHeight = imageHeight;
     maxExtrasHeight = (navBarHelpLoginHeight < maxExtrasHeight) ? maxExtrasHeight : navBarHelpLoginHeight;
     
     var imageOffset = (maxExtrasHeight - imageHeight) / 2;
     var navBarOffset = (maxExtrasHeight - navBarHelpLoginHeight) / 2;
-    var helpPanelOffset = (maxExtrasHeight - helpPanelHeight) / 2;
     
     var tab1Height = $(".tab_measure_1").first().height();
 
@@ -49,17 +46,22 @@ function setHeights() {
     }
     layoutPanelTop = layoutPanelTop + allAlertMessagesHeight;
     console.log("layoutPanelTop " + layoutPanelTop);
-    $("#layout_panel").offset({top: layoutPanelTop});
-    $("#odk_aggregate_logo").offset({top: allAlertMessagesHeight + imageOffset});
-    $("#nav_bar_help_login").offset({top: allAlertMessagesHeight + navBarOffset});
-    $("#help_panel").offset({top: allAlertMessagesHeight + helpPanelOffset});
+    $("#layout_panel").offset({top: layoutPanelTop });
+    $("#odk_aggregate_logo").offset({top: allAlertMessagesHeight + imageOffset });
+    $("#nav_bar_help_login").offset({top: allAlertMessagesHeight + navBarOffset });
     if ( $("#error_content").is(':visible') ) {
       $("#error_content").offset({top: errorMessageOffset});
     }
 
-    // now get remaining height and resize everything
-	var layoutHeight = height - $("#layout_panel").offset().top - helpPanelHeight - 1;
+    if ( $("#help_panel").is(':visible') ) {
+        $("#help_panel").height(helpPanelHeight);
+    }
+
     var tab2Height = $(".tab_measure_2").first().height();
+    // now get remaining height and resize everything
+    var minLayoutHeight = $("#layout_panel").height;
+    var maxLayoutHeight = height - $("#layout_panel").offset().top - helpPanelHeight - 1;
+    var layoutHeight = (minLayoutHeight > maxLayoutHeight) ? minLayoutHeight : maxLayoutHeight;
     var contentHeight = layoutHeight - tab1Height - tab2Height;
 	var filterContentHeight = contentHeight - $("#submission_nav_table").height();
 	var filterPaginationHeight = $("#filter_submission_pagination").height();
@@ -70,12 +72,13 @@ function setHeights() {
 	$("#dynamic_content").height(height-allAlertMessagesHeight);
 	$("#mainNav").height(layoutHeight);
 	$("#layout_panel").height(layoutHeight);
-	if (helpPanel.length) {
-	    helpPanel.height(helpPanelHeight);
-    }
 	$(".second_level_menu").height(layoutHeight - tab1Height);
 	$(".tab_content").height(contentHeight);
 
+    if ( $("#help_panel").is(':visible') ) {
+        $("#help_panel").offset({top: ($("#layout_panel").offset().bottom +  /* border width */ 1) });
+    }
+    
 	// Submissions tab
 	$("#filters_container").height(filterContentHeight - /* border width */ 1);
 	$("#submission_container").height(filterContentHeight - filterPaginationHeight - /* border width */ 1);

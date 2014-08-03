@@ -146,14 +146,20 @@ public class AggregateUI implements EntryPoint {
 
     wrappingLayoutPanel = new FlowPanel(); // vertical
     wrappingLayoutPanel.setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+
     layoutPanel = new HorizontalPanel();
-    helpPanel = new ScrollPanel();
 
     mainNav = new DecoratedTabPanel();
     mainNav.getElement().setId("mainNav");
     mainNav.addSelectionHandler(new RefreshSelectionHandler<Integer>());
 
-    settingsBar = new NavLinkBar();
+    // add to layout
+    layoutPanel.add(mainNav);
+    layoutPanel.getElement().setId("layout_panel");
+
+    wrappingLayoutPanel.add(layoutPanel);
+
+    helpPanel = new ScrollPanel();
 
     // Create help panel
     Tree helpTree = new Tree();
@@ -165,19 +171,18 @@ public class AggregateUI implements EntryPoint {
 
     helpPanel.add(helpTree);
     helpPanel.getElement().setId("help_panel");
+    helpPanel.setVisible(false);
 
-    wrappingLayoutPanel.add(layoutPanel);
+    wrappingLayoutPanel.add(helpPanel);
 
-    // add to layout
-    layoutPanel.add(mainNav);
-    layoutPanel.getElement().setId("layout_panel");
-
+    settingsBar = new NavLinkBar();
+    
     RootPanel.get("not_secure_content").add(notSecurePanel);
     RootPanel.get("error_content").add(errorPanel);
-    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
-    RootPanel.get("dynamic_content").add(settingsBar);
     RootPanel.get("dynamic_content").add(
         new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" class=\"gwt-Image\" />"));
+    RootPanel.get("dynamic_content").add(settingsBar);
+    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
   }
 
   private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
@@ -686,12 +691,12 @@ public class AggregateUI implements EntryPoint {
   }
 
   public void displayHelpPanel() {
-    wrappingLayoutPanel.add(helpPanel);
+    helpPanel.setVisible(true);
     resize();
   }
 
   public void hideHelpPanel() {
-    wrappingLayoutPanel.remove(helpPanel);
+    helpPanel.setVisible(false);
     resize();
   }
 
