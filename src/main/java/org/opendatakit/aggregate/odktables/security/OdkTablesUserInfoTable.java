@@ -214,7 +214,7 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
   }
 
   
-  public static final OdkTablesUserInfoTable getOdkTablesUserInfo(String uriUser, Set<GrantedAuthority> grants, CallingContext cc)
+  public static synchronized final OdkTablesUserInfoTable getOdkTablesUserInfo(String uriUser, Set<GrantedAuthority> grants, CallingContext cc)
       throws ODKDatastoreException, ODKTaskLockException, ODKEntityPersistException,
       ODKOverQuotaException, PermissionDeniedException {
     Datastore ds = cc.getDatastore();
