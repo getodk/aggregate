@@ -218,11 +218,13 @@ a,a:visited,a:hover {
 	padding: 3px;
 	text-align: right;
 	float: left;
+	z-index: 1001;
 }
 
 #nav_bar_help_login_item {
 	padding: 2px 2px 2px 2px;
 	float: left;
+	z-index: 1001;
 }
 
 #filter_desc_title {
