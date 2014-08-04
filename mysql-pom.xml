@@ -73,7 +73,7 @@
 						<execution>
 							<!--  Tears down whatever we set up in the mysql-setup execution -->
 							<id>mysql-teardown</id>
-							<phase>post-integration-test</phase>
+							<phase>verify</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
