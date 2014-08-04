@@ -27,10 +27,10 @@ import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Relation;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -156,7 +156,7 @@ public class DbTable extends Relation {
     Validate.notNull(cc);
 
     Query query = table.query("DbTable.query", cc);
-    query.include(CommonFieldsBase.URI_COLUMN_NAME, rowIds);
+    query.include(PersistConsts.URI_COLUMN_NAME, rowIds);
     List<Entity> entities = query.execute();
     return entities;
   }

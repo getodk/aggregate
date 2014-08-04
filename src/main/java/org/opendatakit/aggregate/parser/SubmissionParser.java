@@ -467,6 +467,9 @@ public class SubmissionParser {
         // throw new ODKParseException();
       }
       switch (m.getElementType()) {
+      case METADATA:
+        // This keeps lint warnings down
+        break;
       case GROUP:
         // need to recurse on these elements keeping the same
         // submissionSet...

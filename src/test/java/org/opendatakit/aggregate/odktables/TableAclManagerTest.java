@@ -19,11 +19,10 @@ package org.opendatakit.aggregate.odktables;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendatakit.aggregate.odktables.TableAclManager.WebsafeAcls;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
@@ -110,8 +109,8 @@ public class TableAclManagerTest {
 
   @Test
   public void testGetAclsEmpty() throws ODKDatastoreException, PermissionDeniedException {
-    List<TableAcl> acls = am.getAcls();
-    assertEquals(1, acls.size());
+    WebsafeAcls result = am.getAcls(null, 2000);
+    assertEquals(1, result.acls.size());
   }
 
   @Test
@@ -119,8 +118,8 @@ public class TableAclManagerTest {
     am.setAcl(scope, role);
     scope.setValue(scope.getValue() + "diff");
     am.setAcl(scope, role);
-    List<TableAcl> acls = am.getAcls();
-    assertEquals(3, acls.size());
+    WebsafeAcls result = am.getAcls(null, 2000);
+    assertEquals(3, result.acls.size());
   }
 
   @Test
@@ -128,8 +127,8 @@ public class TableAclManagerTest {
     am.setAcl(scope, role);
     scope.setValue(scope.getValue() + "diff");
     am.setAcl(scope, role);
-    List<TableAcl> acls = am.getAcls(Scope.Type.USER);
-    assertEquals(3, acls.size());
+    WebsafeAcls result = am.getAcls(Scope.Type.USER, null, 2000);
+    assertEquals(3, result.acls.size());
   }
 
   @Test
@@ -137,8 +136,8 @@ public class TableAclManagerTest {
     am.setAcl(scope, role);
     scope.setValue(scope.getValue() + "diff");
     am.setAcl(scope, role);
-    List<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
-    assertEquals(0, acls.size());
+    WebsafeAcls result = am.getAcls(Scope.Type.GROUP, null, 2000);
+    assertEquals(0, result.acls.size());
   }
 
   @Test

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
@@ -73,7 +74,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       "<form id=\"service_account_form\""
       + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
       + " action=\"";// emit the ADDR
-  private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY = "\">"
 	  + "<div style=\"overflow: auto;\"><h2>Google API Credentials</h2>"
 	  + "<p>Please refer to the documentation at <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">Service Account Configuration</a>.</p>"
       + "<h2>Google Simple API Key</h2>"
@@ -81,30 +82,33 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       + "	  <table id=\"uploadTable\">"
       + "	  	<tr>"
       + "	  		<td><label for=\"simple_api_key\">Simple API Key:</label></td>"
-      + "	  		<td><input id=\"simple_api_key\" type=\"text\" size=\"80\" name=\"simple_api_key\" /></td>"
-      + "	  	</tr>\n"
-      + "<tr><td colspan=\"2\"><h2>Google API Service Account information</h2></td></tr>"
-      + "<tr><td colspan=\"2\"><p>Google API Service accounts are required when "
-      +                  "publishing to Google Spreadsheets and Google FusionTables.</p></td></tr>"
-      + "	  	<tr>"
-      + "	  		<td><label for=\"private_key_file\">Private key file (.p12 file):</label></td>"
-      + "	  		<td><input id=\"private_key_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
-      + "	  			name=\"private_key_file\" /></td>"
-      + "	  	</tr>\n"
-      + "	  	<tr>"
-      + "	  		<td><label for=\"client_id\">Client ID:</label></td>"
-      + "	  		<td><input id=\"client_id\" type=\"text\" size=\"80\" name=\"client_id\" /></td>"
-      + "	  	</tr>"
-      + "      <tr>"
-      + "         <td><label for=\"service_account_email\">Email address:</label></td>"
-      + "         <td><input id=\"service_account_email\" type=\"text\" size=\"80\" name=\"service_account_email\" /></td>"
+      + "	  		<td><input id=\"simple_api_key\" type=\"text\" size=\"80\" name=\"simple_api_key\" >";
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_ID = "</input></td>"
+       + "      </tr>\n"
+       + "<tr><td colspan=\"2\"><h2>Google API Service Account information</h2></td></tr>"
+       + "<tr><td colspan=\"2\"><p>Google API Service accounts are required when "
+       +                  "publishing to Google Spreadsheets and Google FusionTables.</p></td></tr>"
+       + "      <tr>"
+       + "         <td><label for=\"private_key_file\">Private key file (.p12 file):</label></td>"
+       + "         <td><input id=\"private_key_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
+       + "            name=\"private_key_file\" /></td>"
+       + "      </tr>\n"
+       + "      <tr>"
+       + "         <td><label for=\"client_id\">Client ID:</label></td>"
+       + "         <td><input id=\"client_id\" type=\"text\" size=\"80\" name=\"client_id\" >";
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_EMAIL = "</input></td>"
+       + "      </tr>"
+       + "      <tr>"
+       + "         <td><label for=\"service_account_email\">Email address:</label></td>"
+       + "         <td><input id=\"service_account_email\" type=\"text\" size=\"80\" name=\"service_account_email\" >";
+  private static final String UPLOAD_PAGE_BODY_END = "</input></td>"
       + "      </tr>"
-      + "	  	<tr>"
-      + "	  		<td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Google Credentials\" /></td>"
-      + "	  		<td />"
-      + "	  	</tr>"
-      + "	  </table>\n"
-      + "	  </form>"
+      + "      <tr>"
+      + "         <td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Google Credentials\" /></td>"
+      + "         <td />"
+      + "      </tr>"
+      + "     </table>\n"
+      + "     </form>"
       + "<br></div>\n";
 
   private static final Log logger = LogFactory.getLog(ServiceAccountPrivateKeyUploadServlet.class);
@@ -135,10 +139,42 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
 
     // header info
     beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
+    
+    String simpleApiKey;
+    String clientId;
+    String clientEmail;
+    try {
+      simpleApiKey = ServerPreferencesProperties.getGoogleSimpleApiKey(cc);
+      clientId = ServerPreferencesProperties.getServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_CLIENT_ID);
+      clientEmail = ServerPreferencesProperties.getServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_SERVICE_ACCOUNT_EMAIL);
+    } catch (ODKEntityNotFoundException e) {
+      logger.warn("Get service account information error: " + e.getMessage());
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
+        return;
+    } catch (ODKOverQuotaException e) {
+      logger.error("Get service account information error: " + e.getMessage());
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          ErrorConsts.QUOTA_EXCEEDED + "\n" + e.getMessage());
+      return;
+    }
+    
     PrintWriter out = resp.getWriter();
     out.write(UPLOAD_PAGE_BODY_START);
     out.write(cc.getWebApplicationURL(ADDR));
-    out.write(UPLOAD_PAGE_BODY_MIDDLE);
+    out.write(UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY);
+    if ( simpleApiKey != null ) {
+      out.write(StringEscapeUtils.escapeHtml4(simpleApiKey));
+    }
+    out.write(UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_ID);
+    if ( clientId != null ) {
+      out.write(StringEscapeUtils.escapeHtml4(clientId));
+    }
+    out.write(UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_EMAIL);
+    if ( clientEmail != null ) {
+      out.write(StringEscapeUtils.escapeHtml4(clientEmail));
+    }
+    out.write(UPLOAD_PAGE_BODY_END);
     finishBasicHtmlResponse(resp);
   }
 
@@ -203,7 +239,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
         ServerPreferencesProperties.setGoogleSimpleApiKey(cc, simpleApiKey);
         ServerPreferencesProperties.setServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_CLIENT_ID, clientId);
         ServerPreferencesProperties.setServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_SERVICE_ACCOUNT_EMAIL, serviceAccountEmail);
-        ServerPreferencesProperties.setServerPreferencesProperty(cc, ServerPreferencesProperties.PRIVATE_KEY_FILE_CONTENTS, Base64.encodeBase64String(p12FileContent));
+        ServerPreferencesProperties.setServerPreferencesProperty(cc, ServerPreferencesProperties.PRIVATE_KEY_FILE_CONTENTS, new String(Base64.encodeBase64(p12FileContent), HtmlConsts.UTF8_ENCODE));
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
         resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);

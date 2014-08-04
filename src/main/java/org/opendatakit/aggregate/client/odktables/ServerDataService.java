@@ -54,20 +54,12 @@ public interface ServerDataService extends RemoteService {
       PermissionDeniedExceptionClient, ETagMismatchExceptionClient, BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient;
 
-  void deleteRow(String tableId, String rowId) throws AccessDeniedException,
+  void deleteRow(String tableId, String rowId, String rowETag) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient;
 
   ArrayList<String> getColumnNames(String tableId) throws DatastoreFailureException,
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, RequestFailureException;
-
-  ArrayList<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
-      RequestFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient;
-
-  ArrayList<FileSummaryClient> getMedialFilesKey(String tableId, String key)
-      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient;
 
   ArrayList<String> getFileRowInfoColumnNames();
 
@@ -87,7 +79,15 @@ public interface ServerDataService extends RemoteService {
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient;
 
-  void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
+  void deleteAppLevelFile(String odkClientApiVersion, String filepath) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
+
+  void deleteTableFile(String odkClientApiVersion, String tableId, String filepath) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient;
+
+  void deleteInstanceFile(String tableId, String rowId, String filepath) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient;
 

@@ -88,7 +88,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "        Your web browser must have JavaScript enabled"
       + "        in order for this application to display correctly."
       + "      </div>"
-      + "    </noscript>" + "	<div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
+      + "    </noscript>" + "	<div id=\"not_secure_content\"></div><br><div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
  	  + "  </body>"
       + "</html>";
 

@@ -512,7 +512,7 @@ public class Relation {
 
     @Override
     public void set(DataField field, Integer value) {
-      backingObject.setLongField(verify(field), (value == null) ? value : Long.valueOf(value));
+      backingObject.setLongField(verify(field), (value == null) ? null : Long.valueOf(value));
     }
 
     @Override
@@ -556,7 +556,7 @@ public class Relation {
     @Override
     public void set(String fieldName, Integer value) {
       DataField field = getDataField(fieldName);
-      backingObject.setLongField(verify(field), (value == null) ? value : Long.valueOf(value));
+      backingObject.setLongField(verify(field), (value == null) ? null : Long.valueOf(value));
     }
 
     @Override
@@ -624,7 +624,7 @@ public class Relation {
       switch (f.getDataType()) {
       case INTEGER:
         try {
-          backingObject.setLongField(f, (value == null) ? null : Long.parseLong(value));
+          backingObject.setLongField(f, (value == null || value.length() == 0) ? null : Long.parseLong(value));
         } catch (NumberFormatException e) {
           throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
               + f.getName());
@@ -632,7 +632,7 @@ public class Relation {
         break;
       case DECIMAL:
         try {
-          backingObject.setNumericField(f, (value == null) ? null : new BigDecimal(value));
+          backingObject.setNumericField(f, (value == null || value.length() == 0) ? null : new BigDecimal(value));
         } catch (NumberFormatException e) {
           throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
               + f.getName());
@@ -700,7 +700,7 @@ public class Relation {
      * @return
      */
     private final DataField verify(DataField fieldName) {
-      if (!Relation.this.fieldSet.contains(fieldName)) {
+      if (!backingObject.getFieldList().contains(fieldName)) {
         throw new IllegalArgumentException("FieldName: " + fieldName.getName()
             + " is not identical to the one specified in this relation " + fieldName.toString());
       }
@@ -853,7 +853,7 @@ public class Relation {
    * @return field
    */
   public final DataField verify(DataField field) {
-    if (!fieldSet.contains(field)) {
+    if (prototype != null && !prototype.getFieldList().contains(field)) {
       throw new IllegalArgumentException("FieldName: " + field.getName()
           + " is not identical to the one specified in this relation " + field.toString());
     }

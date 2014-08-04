@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -19,10 +19,10 @@ package org.opendatakit.common.web.constants;
 
 /**
  * HTML Constants used in ODK aggregate to create proper HTML
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class HtmlConsts {
 
@@ -122,29 +122,30 @@ public final class HtmlConsts {
 	/**
 	 * Constant for "image/jpeg" content type for response message
 	 */
-	public static final String RESP_TYPE_IMAGE_JPEG = "image/jpeg";	
+	public static final String RESP_TYPE_IMAGE_JPEG = "image/jpeg";
 	  /**
     * Constant for "image/png" content type for response message
     */
-   public static final String RESP_TYPE_IMAGE_PNG = "image/png";	
+   public static final String RESP_TYPE_IMAGE_PNG = "image/png";
 	/**
 	 * Constant for "text/xml" content type for response message
 	 */
 	public static final String RESP_TYPE_XML = "text/xml; charset=utf-8";
-	
+
 	  /**
     * Constant for "text/csv" content type for response message
     */
    public static final String RESP_TYPE_CSV = "text/csv; charset=utf-8";
 
    public static final String RESP_TYPE_KML = "application/vnd.google-earth.kml+xml; charset=utf-8";
-   
+
    public static final String RESP_TYPE_JSON = "application/json; charset=utf-8";
-   
+
 	/**
 	 * Encoding scheme for servlets
 	 */
 	public static final String UTF8_ENCODE = "UTF-8";
+	public static final String US_ASCII_ENCODE = "US_ASCII";
 	// types of posts
 	public static final String MULTIPART_FORM_DATA = "multipart/form-data";
 	public static final String POST = "POST";

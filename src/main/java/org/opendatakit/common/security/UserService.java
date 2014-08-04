@@ -66,4 +66,12 @@ public interface UserService {
    */
   public boolean isSuperUser(CallingContext cc) throws ODKDatastoreException;
 
+  /**
+   * If the superUsername is defined, returns true if the 
+   * password for that account is something other than 'aggregate'
+   * 
+   * @return true if superUsername account password is not 'aggregate'
+   */
+  public boolean isSuperUsernamePasswordSet(CallingContext cc) throws ODKDatastoreException;
+
 }

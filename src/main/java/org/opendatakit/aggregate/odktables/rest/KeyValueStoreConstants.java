@@ -53,6 +53,21 @@ public class KeyValueStoreConstants {
   // elementKey held fixed during left/right pan
   public static final String TABLE_INDEX_COL = "indexCol";
 
+  // used by Survey when publishing via the legacy ODK 1.x pipeline:
+
+  // the elementKey to use as the instanceName field for the submission
+  public static final String XML_INSTANCE_NAME = "xmlInstanceName";
+  // the root element to use for the XML submission
+  public static final String XML_ROOT_ELEMENT_NAME = "xmlRootElementName";
+  // the deviceId property to use in the metadata block
+  public static final String XML_DEVICE_ID_PROPERTY_NAME = "xmlDeviceIdPropertyName";
+  // the userId property to use in the metadata block
+  public static final String XML_USER_ID_PROPERTY_NAME = "xmlUserIdPropertyName";
+  // the public encryption key to use for encrypting the data
+  public static final String XML_BASE64_RSA_PUBLIC_KEY = "xmlBase64RsaPublicKey";
+  // the URL to use when submitting the data
+  public static final String XML_SUBMISSION_URL = "xmlSubmissionUrl";
+
   // Keys for:
   // COLUMN_PARTITION, dbColName...
 

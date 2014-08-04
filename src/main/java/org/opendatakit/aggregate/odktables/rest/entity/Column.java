@@ -18,8 +18,8 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.io.Serializable;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The XML document that represents a column. This is the XML representation of
@@ -27,11 +27,12 @@ import org.simpleframework.xml.Root;
  * {@link org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions}
  * table.
  *
+ * Removed all JAXB annotations -- these cause issues on Android 4.2 and earlier.
+ *
  * @author dylan price?
  * @author sudar.sam@gmail.com
  *
  */
-@Root
 public class Column implements Serializable {
 
   /**
@@ -39,39 +40,113 @@ public class Column implements Serializable {
 	 */
   private static final long serialVersionUID = -6624997293167731653L;
 
-  @Attribute(required = true)
-  private String tableId;
-
   /**
-   * The fully qualified key for this element. If this is a retained field, then
-   * this is the element's database column name. For composite types whose
-   * elements are individually retained (e.g., geopoint), this would be the
-   * elementName of the geopoint (e.g., 'myLocation' concatenated with '_' and
-   * this elementName (e.g., 'myLocation_latitude').
+   * The tableId containing this elementKey
    */
-  @Attribute(required = true)
+  /**
+   * The fully qualified key for this element. If this is a retained field,
+   * (see isUnitOfRetention, below) then this is the element's database
+   * column name. For composite types whose elements are individually retained
+   * (e.g., geopoint), this would be the elementName of the geopoint (e.g.,
+   * 'myLocation' concatenated with '_' and this elementName (e.g.,
+   * 'myLocation_latitude').
+   *
+   * Never longer than 58 characters.
+   * Never a SQL or SQLite reserved word
+   * Satisfies this regex: '^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)*$'
+   */
   private String elementKey;
 
   /**
    * The name by which this element is referred. For composite types whose
    * elements are individually retained (e.g., geopoint), this would be simply
    * 'latitude'
+   *
+   * Never longer than 58 characters.
+   * Never a SQL or SQLite reserved word
+   * Satisfies this regex: '^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)*$'
    */
-  @Attribute(required = true)
+  @JsonProperty(required = false)
   private String elementName;
 
   /**
-   * This must be a name() of one of Tables's ColumnTypes.
+   * This is the ColumnType of the field. It is either:
+   *    integer
+   *    number
+   *    configpath
+   *    rowpath
+   *    array
+   *    array(len)
+   *    string
+   *    string(len)
+   *    typename
+   *    typename(len)
+   *
+   *    Where:
+   *
+   *    'typename' is any other alpha-numeric name (user-definable data type).
+   *
+   *    The (len) attribute, if present, identifies the VARCHAR storage
+   *    requirements for the field when the field is a unit of retention
+   *    (see isUnitOfRetention below). Ignored if not a unit of retention.
+   *
+   *    The server stores:
+   *
+   *      integer as a 32-bit integer.
+   *
+   *      number as a double-precision floating point value.
+   *
+   *      configpath indicates that it is a relative path to a file under the 'config'
+   *             directory in the 'new' directory structure. i.e., the relative path is
+   *             rooted from:
+   *                 /sdcard/opendatakit/{appId}/config/
+   *
+   *      rowpath indicates that it is a relative path to a file under the row's attachment
+   *             directory in the 'new' directory structure. i.e., the relative path is
+   *             rooted from:
+   *                 /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}/
+   *
+   *      array is a JSON serialization expecting one child element key
+   *            that defines the data type in the array.  Array fields
+   *            MUST be units of retention (isUnitOfRetention == true).
+   *
+   *      string is a string value
+   *
+   *      anything else, if it has no child element key, it is a string
+   *            (simple user-defined data type).
+   *
+   *      anything else, if it has one or more child element keys, is a
+   *            JSON serialization of an object containing those keys
+   *            (complex user-defined data type).
+   *
    */
-  @Attribute(required = false)
   private String elementType;
 
-  @Attribute(required = false)
+  /**
+   * JSON serialization of an array of strings. Each value in the
+   * array identifies an elementKey of a nested field within this
+   * elementKey. If there are one or more nested fields, then the
+   * value stored in this elementKey is a JSON serialization of
+   * either an array or an object. Otherwise, it is either an
+   * integer, number or string field.
+   *
+   * If the elementType is 'array', the serialization is an
+   * array and the nested field is retrieved via a subscript.
+   *
+   * Otherwise, the serialization is an object and the nested
+   * field is retrieved via the elementName of that field.
+   */
+  @JsonProperty(required = false)
   private String listChildElementKeys;
 
-  @Attribute(required = true)
-  private int isUnitOfRetention;
-
+  /**
+   * If true, then this elementKey is a column in the backing
+   * database table. If false, then either the elementKey is a
+   * component of an enclosing object that is a column in the
+   * backing database table, or, each of its child element keys
+   * or their descendants are columns in the backing database
+   * table.
+   */
   @SuppressWarnings("unused")
   private Column() {
   }
@@ -91,18 +166,12 @@ public class Column implements Serializable {
    * @param listChildElementKeys
    * @param isUnitOfRetention
    */
-  public Column(final String tableId, final String elementKey, final String elementName,
-      final String elementType, final String listChildElementKeys, final Boolean isUnitOfRetention) {
-    this.tableId = tableId;
+  public Column(final String elementKey, final String elementName,
+      final String elementType, final String listChildElementKeys) {
     this.elementKey = elementKey;
     this.elementName = elementName;
     this.elementType = elementType;
     this.listChildElementKeys = listChildElementKeys;
-    this.isUnitOfRetention = isUnitOfRetention ? 1 : 0;
-  }
-
-  public String getTableId() {
-    return this.tableId;
   }
 
   public String getElementKey() {
@@ -124,29 +193,35 @@ public class Column implements Serializable {
     return this.listChildElementKeys;
   }
 
-  public int getIsUnitOfRetention() {
-    return this.isUnitOfRetention;
+  @JsonIgnore
+  public boolean isUnitOfRetention() {
+    String listChild = getListChildElementKeys();
+    String type = getElementType();
+    if ( "array".equals(type) ) {
+      return true;
+    }
+    if ( listChild == null || listChild.length() == 0 || "[]".equals(listChild) ) {
+      return true;
+    }
+    return false;
   }
 
   @Override
   public String toString() {
-    return "Column(tableId=" + getTableId() + ", elementKey=" + this.getElementKey()
+    return "Column(elementKey=" + this.getElementKey()
         + ", elementName=" + this.getElementName() + ", elementType= " + this.getElementType()
-        + ", listChildElementKeys=" + this.getListChildElementKeys() + ", isUnitOfRetention="
-        + this.getIsUnitOfRetention() + ")";
+        + ", listChildElementKeys=" + this.getListChildElementKeys() + ")";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((tableId == null) ? 0 : tableId.hashCode());
     result = prime * result + ((elementKey == null) ? 0 : elementKey.hashCode());
     result = prime * result + ((elementName == null) ? 0 : elementName.hashCode());
     result = prime * result + ((elementType == null) ? 0 : elementType.hashCode());
     result = prime * result
         + ((listChildElementKeys == null) ? 0 : listChildElementKeys.hashCode());
-    result = prime * result + isUnitOfRetention;
     return result;
   }
 
@@ -162,12 +237,10 @@ public class Column implements Serializable {
       return false;
     }
     Column other = (Column) obj;
-    return (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (elementKey == null ? other.elementKey == null : elementKey.equals(other.elementKey))
+    return (elementKey == null ? other.elementKey == null : elementKey.equals(other.elementKey))
         && (elementName == null ? other.elementName == null : elementName.equals(other.elementName))
         && (elementType == null ? other.elementType == null : elementType.equals(other.elementType))
         && (listChildElementKeys == null ? other.listChildElementKeys == null
-            : listChildElementKeys.equals(other.listChildElementKeys))
-        && (isUnitOfRetention == other.isUnitOfRetention);
+            : listChildElementKeys.equals(other.listChildElementKeys));
   }
 }

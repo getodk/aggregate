@@ -17,12 +17,14 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * Represents the XML format of a table definition. This is essentially all the
@@ -33,27 +35,27 @@ import org.simpleframework.xml.Root;
  * @author sudar.sam@gmail.com
  *
  */
-@Root
-@Default(value = DefaultType.FIELD, required = false)
+@JacksonXmlRootElement(localName="tableDefinition")
 public class TableDefinition {
 
   /**
    * Schema version ETag for the tableId's database schema.
    */
-  @Element(name = "schemaETag", required = false)
+  @JsonProperty(required = false)
   private String schemaETag;
 
   /**
    * Unique tableId
    */
-  @Element(name = "tableId", required = true)
   private String tableId;
 
   /**
    * The columns in the table.
    */
-  @ElementList(inline = true, required = false)
-  private ArrayList<Column> columns;
+  @JsonProperty(required = false)
+  @JacksonXmlElementWrapper(localName="orderedColumns")
+  @JacksonXmlProperty(localName="column")
+  private ArrayList<Column> orderedColumns;
 
   // ss: trying to subsume this information into the kvs.
   // @Element(required = false)
@@ -85,9 +87,15 @@ public class TableDefinition {
     this.tableId = tableId;
     this.schemaETag = schemaETag;
     if ( columns == null ) {
-      this.columns = new ArrayList<Column>();
+      this.orderedColumns = new ArrayList<Column>();
     } else {
-      this.columns = columns;
+      this.orderedColumns = columns;
+      Collections.sort(orderedColumns, new Comparator<Column>(){
+
+        @Override
+        public int compare(Column arg0, Column arg1) {
+          return arg0.getElementKey().compareTo(arg1.getElementKey());
+        }});
     }
   }
 
@@ -103,15 +111,23 @@ public class TableDefinition {
     return this.tableId;
   }
 
+  @JsonIgnore
   public ArrayList<Column> getColumns() {
-    return this.columns;
+    return this.orderedColumns;
   }
 
+  @JsonIgnore
   public void setColumns(final ArrayList<Column> columns) {
     if ( columns == null ) {
-      this.columns = new ArrayList<Column>();
+      this.orderedColumns = new ArrayList<Column>();
     } else {
-      this.columns = columns;
+      this.orderedColumns = columns;
+      Collections.sort(orderedColumns, new Comparator<Column>(){
+
+        @Override
+        public int compare(Column arg0, Column arg1) {
+          return arg0.getElementKey().compareTo(arg1.getElementKey());
+        }});
     }
   }
 
@@ -119,7 +135,7 @@ public class TableDefinition {
   public String toString() {
     return "TableDefinition [schemaETag=" + schemaETag
         + ", tableId=" + tableId
-        + ", columns=" + columns
+        + ", orderedColumns=" + orderedColumns
         + "]";
   }
 
@@ -129,7 +145,7 @@ public class TableDefinition {
     int result = 1;
     result = prime * result + ((schemaETag == null) ? 1 : schemaETag.hashCode());
     result = prime * result + ((tableId == null) ? 1 : tableId.hashCode());
-    result = prime * result + ((columns == null) ? 1 : columns.hashCode());
+    result = prime * result + ((orderedColumns == null) ? 1 : orderedColumns.hashCode());
     return result;
   }
 
@@ -147,7 +163,7 @@ public class TableDefinition {
     TableDefinition other = (TableDefinition) obj;
     return (schemaETag == null ? other.schemaETag == null : schemaETag.equals(other.schemaETag))
         && (tableId == null ? other.tableId == null : tableId.equals(other.tableId))
-        && (columns == null ? other.columns == null : columns.equals(other.columns));
+        && (orderedColumns == null ? other.orderedColumns == null : orderedColumns.equals(other.orderedColumns));
   }
 
 }

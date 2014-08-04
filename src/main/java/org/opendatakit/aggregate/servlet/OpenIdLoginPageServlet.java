@@ -36,14 +36,14 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 /**
  * Simple servlet to display the openId login page. Invalidates the user's
  * session before displaying the page.
- * 
+ *
  * @author user
- * 
+ *
  */
 public class OpenIdLoginPageServlet extends ServletUtilBase {
 
   /**
-	 * 
+	 *
 	 */
   private static final long serialVersionUID = -1036419513113652548L;
   private static final Log logger = LogFactory.getLog(OpenIdLoginPageServlet.class);
@@ -92,7 +92,7 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
     while ( redirectParamString.startsWith("/") ) {
       redirectParamString = redirectParamString.substring(1);
     }
-    
+
     logger.info("Invalidating login session " + req.getSession().getId());
     // Invalidate session.
     HttpSession s = req.getSession();

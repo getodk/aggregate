@@ -17,11 +17,13 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * This holds a list of {@link TableResource}. Proper XML documents can contain
@@ -30,24 +32,52 @@ import org.simpleframework.xml.Root;
  * @author mitchellsundt@gmail.com
  *
  */
-@Root
+@JacksonXmlRootElement(localName="tableResourceList")
 public class TableResourceList {
 
-  @Element(required = false)
-  private String resumeParameter;
+  /**
+   * pass this in to return this same result set.
+   */
+  @JsonProperty(required = false)
+  private String webSafeRefetchCursor;
+
+  /**
+   * Alternatively, the user can obtain the elements preceding the contents of the
+   * result set by constructing a 'backward query' with the same filter criteria
+   * but all sort directions inverted and pass the webSafeBackwardCursor
+   * to obtain the preceding elements.
+   */
+  @JsonProperty(required = false)
+  private String webSafeBackwardCursor;
+
+  /**
+   * together with the initial query, pass this in to
+   * return the next set of results
+   */
+  @JsonProperty(required = false)
+  private String webSafeResumeCursor;
+
+  @JsonProperty(required = false)
+  private boolean hasMoreResults;
+
+  @JsonProperty(required = false)
+  private boolean hasPriorResults;
 
   /**
    * The entries in the manifest.
+   * This is and ordered list by tableId.
    */
-  @ElementList(inline = true, required = false)
-  private ArrayList<TableResource> entries;
+  @JsonProperty(required = false)
+  @JacksonXmlElementWrapper(useWrapping=false)
+  @JacksonXmlProperty(localName="tableResource")
+  private ArrayList<TableResource> tables;
 
   /**
    * Constructor used by Jackson
    */
   public TableResourceList() {
-    this.entries = new ArrayList<TableResource>();
-    this.resumeParameter = null;
+    this.tables = new ArrayList<TableResource>();
+    this.webSafeResumeCursor = null;
   }
 
   /**
@@ -55,36 +85,80 @@ public class TableResourceList {
    *
    * @param entries
    */
-  public TableResourceList(ArrayList<TableResource> entries, String resumeParameter) {
-    if (entries == null) {
-      this.entries = new ArrayList<TableResource>();
+  public TableResourceList(ArrayList<TableResource> tables,
+      String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
+    if (tables == null) {
+      this.tables = new ArrayList<TableResource>();
     } else {
-      this.entries = entries;
+      this.tables = tables;
+      Collections.sort(this.tables);
     }
+    this.webSafeRefetchCursor = refetchCursor;
+    this.webSafeBackwardCursor = backCursor;
+    this.webSafeResumeCursor = resumeCursor;
+    this.hasMoreResults = hasMore;
+    this.hasPriorResults = hasPrior;
   }
 
-  public String getResumeParameter() {
-    return resumeParameter;
+  public List<TableResource> getTables() {
+    return tables;
   }
 
-  public void setResumeParameter(String resumeParameter) {
-    this.resumeParameter = resumeParameter;
+  public void setTables(ArrayList<TableResource> tables) {
+    this.tables = tables;
+    Collections.sort(this.tables);
   }
 
-  public List<TableResource> getEntries() {
-    return entries;
+  public String getWebSafeRefetchCursor() {
+    return webSafeRefetchCursor;
   }
 
-  public void setEntries(ArrayList<TableResource> entries) {
-    this.entries = entries;
+  public void setWebSafeRefetchCursor(String webSafeRefetchCursor) {
+    this.webSafeRefetchCursor = webSafeRefetchCursor;
+  }
+
+  public String getWebSafeBackwardCursor() {
+    return webSafeBackwardCursor;
+  }
+
+  public void setWebSafeBackwardCursor(String webSafeBackwardCursor) {
+    this.webSafeBackwardCursor = webSafeBackwardCursor;
+  }
+
+  public String getWebSafeResumeCursor() {
+    return webSafeResumeCursor;
+  }
+
+  public void setWebSafeResumeCursor(String webSafeResumeCursor) {
+    this.webSafeResumeCursor = webSafeResumeCursor;
+  }
+
+  public boolean isHasMoreResults() {
+    return hasMoreResults;
+  }
+
+  public void setHasMoreResults(boolean hasMoreResults) {
+    this.hasMoreResults = hasMoreResults;
+  }
+
+  public boolean isHasPriorResults() {
+    return hasPriorResults;
+  }
+
+  public void setHasPriorResults(boolean hasPriorResults) {
+    this.hasPriorResults = hasPriorResults;
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((resumeParameter == null) ? 0 : resumeParameter.hashCode());
-    result = prime * result + ((entries == null) ? 0 : entries.hashCode());
+    result = prime * result + ((tables == null) ? 0 : tables.hashCode());
+    result = prime * result + ((webSafeRefetchCursor == null) ? 0 : webSafeRefetchCursor.hashCode());
+    result = prime * result + ((webSafeBackwardCursor == null) ? 0 : webSafeBackwardCursor.hashCode());
+    result = prime * result + ((webSafeResumeCursor == null) ? 0 : webSafeResumeCursor.hashCode());
+    result = prime * result + (hasMoreResults ? 0 : 1);
+    result = prime * result + (hasPriorResults ? 0 : 1);
     return result;
   }
 
@@ -100,9 +174,27 @@ public class TableResourceList {
       return false;
     }
     TableResourceList other = (TableResourceList) obj;
-    return ((resumeParameter == null) ? other.resumeParameter == null : (resumeParameter
-        .equals(other.resumeParameter)))
-        && ((entries == null ? other.entries == null : (entries.size() == other.entries.size()
-            && entries.containsAll(other.entries) && other.entries.containsAll(entries))));
+    boolean simpleResult = (tables == null ? other.tables == null : (other.tables != null && tables.size() == other.tables.size())) &&
+            (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
+            (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
+            (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
+            (hasMoreResults == other.hasMoreResults) &&
+            (hasPriorResults == other.hasPriorResults);
+    
+    if ( !simpleResult ) {
+      return false;
+    }
+    
+    if ( tables == null ) {
+      return true;
+    }
+    
+    // tables is a sorted list. Compare linearly...
+    for ( int i = 0 ; i < tables.size() ; ++i ) {
+      if ( !tables.get(i).equals(other.tables.get(i)) ) {
+        return false;
+      }
+    }
+    return true;
   }
 }

@@ -21,10 +21,13 @@ import java.util.List;
 
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
+import org.opendatakit.common.ermodel.Query.WebsafeQueryResult;
 import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
+import org.opendatakit.common.persistence.Query.Direction;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
@@ -71,7 +74,7 @@ public class DbTableAcl extends Relation {
   public static class DbTableAclEntity {
     Entity e;
 
-    DbTableAclEntity(Entity e) {
+    public DbTableAclEntity(Entity e) {
       this.e = e;
     }
 
@@ -145,31 +148,41 @@ public class DbTableAcl extends Relation {
     return new DbTableAclEntity(getRelation(cc).newEntity(cc));
   }
 
-  public static List<DbTableAclEntity> queryTableIdAcls(String tableId, CallingContext cc)
+  public static WebsafeQueryResult queryTableIdAcls(String tableId, QueryResumePoint startCursor, int fetchLimit, CallingContext cc)
       throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbTableAcl.query()", cc);
     query.equal(DbTableAcl.TABLE_ID, tableId);
-
-    List<Entity> list = query.execute();
-    List<DbTableAclEntity> results = new ArrayList<DbTableAclEntity>();
-    for (Entity e : list) {
-      results.add(new DbTableAclEntity(e));
+    if ( startCursor == null || startCursor.isForwardCursor() ) {
+      query.addSort(DbTableAcl.ROLE, Direction.ASCENDING);
+      query.addSort(DbTableAcl.SCOPE_TYPE, Direction.ASCENDING);
+      query.addSort(DbTableAcl.SCOPE_VALUE, Direction.ASCENDING);
+    } else {
+      query.addSort(DbTableAcl.ROLE,  Direction.DESCENDING);
+      query.addSort(DbTableAcl.SCOPE_TYPE, Direction.DESCENDING);
+      query.addSort(DbTableAcl.SCOPE_VALUE, Direction.DESCENDING);
     }
-    return results;
+
+    WebsafeQueryResult result = query.execute(startCursor, fetchLimit);
+    return result;
   }
 
-  public static List<DbTableAclEntity> queryTableIdScopeTypeAcls(String tableId, String scopeType,
-      CallingContext cc) throws ODKDatastoreException {
+  public static WebsafeQueryResult queryTableIdScopeTypeAcls(String tableId, String scopeType,
+      QueryResumePoint startCursor, int fetchLimit, CallingContext cc) throws ODKDatastoreException {
     Query query = getRelation(cc).query("DbTableAcl.query()", cc);
     query.equal(DbTableAcl.TABLE_ID, tableId);
     query.equal(DbTableAcl.SCOPE_TYPE, scopeType);
-
-    List<Entity> list = query.execute();
-    List<DbTableAclEntity> results = new ArrayList<DbTableAclEntity>();
-    for (Entity e : list) {
-      results.add(new DbTableAclEntity(e));
+    if ( startCursor == null || startCursor.isForwardCursor() ) {
+      query.addSort(DbTableAcl.ROLE, Direction.ASCENDING);
+      query.addSort(DbTableAcl.SCOPE_TYPE, Direction.ASCENDING);
+      query.addSort(DbTableAcl.SCOPE_VALUE, Direction.ASCENDING);
+    } else {
+      query.addSort(DbTableAcl.ROLE,  Direction.DESCENDING);
+      query.addSort(DbTableAcl.SCOPE_TYPE, Direction.DESCENDING);
+      query.addSort(DbTableAcl.SCOPE_VALUE, Direction.DESCENDING);
     }
-    return results;
+
+    WebsafeQueryResult result = query.execute(startCursor, fetchLimit);
+    return result;
   }
 
   /**

@@ -16,141 +16,98 @@
 
 package org.opendatakit.aggregate.odktables.api;
 
+import java.io.IOException;
+
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
-import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-@Path("{appId}/tables")
-@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface TableService {
+
+  public static final String CURSOR_PARAMETER = "cursor";
+  public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
    *
-   * @param appId
+   * Get all tables on the server. Invoked from OdkTables implementation class.
    *
    * @return {@link TableResourceList} of all tables the user has access to.
    * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
    */
-  @GET
-  @Path("")
-  @GZIP
-  public Response /*TableResourceList*/ getTables(@PathParam("appId") String appId) throws ODKDatastoreException;
+  public Response /*TableResourceList*/ getTables(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
 
   /**
+   * Get a particular tableId (supplied in implementation constructor)
    *
-   * @param appId
-   * @param tableId
    * @return {@link TableResource} of the requested table.
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
+   * @throws ODKTaskLockException
    */
   @GET
-  @Path("{tableId}")
-  @GZIP
-  public Response /*TableResource*/ getTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException,
-      PermissionDeniedException;
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*TableResource*/ getTable() throws ODKDatastoreException,
+      PermissionDeniedException, ODKTaskLockException;
 
   /**
+   * Create a particular tableId (supplied in implementation constructor)
    *
-   * @param appId
-   * @param tableId
    * @param definition
    * @return {@link TableResource} of the table. This may already exist (with identical schema) or be newly created.
    * @throws ODKDatastoreException
    * @throws TableAlreadyExistsException
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
+   * @throws IOException
    */
   @PUT
-  @Path("{tableId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  @GZIP
-  public Response /*TableResource*/ createTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId, @GZIP TableDefinition definition)
-      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException;
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*TableResource*/ createTable(TableDefinition definition )
+      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, IOException;
 
   /**
+   * Get the realized verison of this table.
    *
-   * @param appId
-   * @param tableId
-   * @return successful status code if successful.
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   * @throws PermissionDeniedException
-   */
-  @DELETE
-  @Path("{tableId}")
-  public Response /*void*/ deleteTable(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException;
-
-  /**
-   *
-   * @param appId
-   * @param tableId
-   * @return {@link TableDefinitionResource} for the schema of this table.
+   * @param schemaETag
+   * @return
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
+   * @throws SchemaETagMismatchException
+   * @throws AppNameMismatchException
    * @throws ODKTaskLockException
    */
-  @GET
-  @Path("{tableId}/definition")
-  @GZIP
-  public Response /*TableDefinitionResource*/ getDefinition(@PathParam("appId") String appId, @PathParam("tableId") String tableId)
-      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException;
+  @Path("ref/{schemaETag}")
+  public RealizedTableService getRealizedTable(@PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException;
 
   /**
+   * ACL manager for a particular tableId (supplied in implementation constructor)
    *
-   * @param appId
-   * @param tableId
-   * @return {@link DataService} for manipulating row data in this table.
-   * @throws ODKDatastoreException
-   */
-  @Path("{tableId}/rows")
-  public DataService getData(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
-
-  /**
-   *
-   * @param appId
-   * @param tableId
-   * @return {@link InstanceFileService} for file attachments to the rows on this table.
-   * @throws ODKDatastoreException
-   */
-  @Path("{tableId}/attachments")
-  public InstanceFileService getInstanceFiles(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
-
-  /**
-   *
-   * @param appId
-   * @param tableId
-   * @return {@link DiffService} for the row-changes on this table.
-   * @throws ODKDatastoreException
-   */
-  @Path("{tableId}/diff")
-  public DiffService getDiff(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
-
-  /**
-   *
-   * @param appId
-   * @param tableId
    * @return {@link TableAclService} for ACL management on this table.
    * @throws ODKDatastoreException
+   * @throws AppNameMismatchException
+   * @throws ODKTaskLockException
+   * @throws PermissionDeniedException
    */
-  @Path("{tableId}/acl")
-  public TableAclService getAcl(@PathParam("appId") String appId, @PathParam("tableId") String tableId) throws ODKDatastoreException;
+  @Path("acl")
+  public TableAclService getAcl() throws ODKDatastoreException, AppNameMismatchException, PermissionDeniedException, ODKTaskLockException;
 }

@@ -1,4 +1,4 @@
-<!ELEMENT appengine-web-app (application, version?, source-language?, server?,
+<!ELEMENT appengine-web-app (application?, version?, source-language?, server?,
                              instance-class?, automatic-scaling?,
                              manual-scaling?, basic-scaling?, static-files?,
                              resource-files?, system-properties?, vm-settings?,
@@ -9,7 +9,7 @@
                              static-error-handlers?, warmup-requests-enabled?,
                              threadsafe?, servers?, code-lock?, vm?, pagespeed?,
                              class-loader-config?, url-stream-handler?,
-                             use-google-connector-j?)>
+                             use-google-connector-j?, vm-health-check?)>
 <!ATTLIST appengine-web-app
           xmlns CDATA #REQUIRED>
 <!ELEMENT application (#PCDATA)>
@@ -23,6 +23,16 @@
 <!ELEMENT max-pending-latency (#PCDATA)>
 <!ELEMENT min-idle-instances (#PCDATA)>
 <!ELEMENT max-idle-instances (#PCDATA)>
+<!ELEMENT vm-health-check (enable-health-check?, check-interval-sec?,
+                           timeout-sec?, unhealthy-threshold?,
+                           healthy-threshold?, restart-threshold?, host?)>
+<!ELEMENT enable-health-check (#PCDATA)>
+<!ELEMENT check-interval-sec (#PCDATA)>
+<!ELEMENT timeout-sec (#PCDATA)>
+<!ELEMENT unhealthy-threshold (#PCDATA)>
+<!ELEMENT healthy-threshold (#PCDATA)>
+<!ELEMENT restart-threshold (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
 <!ELEMENT manual-scaling (instances)>
 <!ELEMENT instances (#PCDATA)>
 <!ELEMENT basic-scaling (max-instances, idle-timeout?)>

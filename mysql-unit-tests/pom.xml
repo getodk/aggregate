@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendatakit</groupId>
     <artifactId>aggregate-mysql-specific</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <relativePath>../mysql-pom.xml</relativePath>
   </parent>
   <artifactId>mysql-unit-tests</artifactId>

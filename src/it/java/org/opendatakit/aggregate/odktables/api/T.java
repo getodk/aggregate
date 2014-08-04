@@ -1,13 +1,13 @@
 package org.opendatakit.aggregate.odktables.api;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import org.junit.Ignore;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
@@ -51,9 +51,9 @@ public class T {
     public static final String name = "name";
     public static final String age = "age";
     public static final String weight = "weight";
-    public static final Column column_name = new Column(tableId, name, name, "STRING", null, true);
-    public static final Column column_age = new Column(tableId, age, age, "INTEGER", null, true);
-    public static final Column column_weight = new Column(tableId, weight, weight, "INTEGER", null, true);
+    public static final Column column_name = new Column(name, name, "STRING", null);
+    public static final Column column_age = new Column(age, age, "INTEGER", null);
+    public static final Column column_weight = new Column(weight, weight, "INTEGER", null);
   }
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"),
@@ -63,12 +63,13 @@ public class T {
     private final String age;
     private final String weight;
 
-    public Map<String, String> getValues() {
-      final java.util.HashMap<java.lang.String, java.lang.String> map = new HashMap<String, String>();
-      map.put(Columns.name, name);
-      map.put(Columns.age, age);
-      map.put(Columns.weight, weight);
-      return map;
+    public ArrayList<DataKeyValue> getValues() {
+      final ArrayList<DataKeyValue> alist = new ArrayList<DataKeyValue>();
+      // in order...
+      alist.add(new DataKeyValue(Columns.age, age));
+      alist.add(new DataKeyValue(Columns.name, name));
+      alist.add(new DataKeyValue(Columns.weight, weight));
+      return alist;
     }
 
     @java.lang.SuppressWarnings("all")

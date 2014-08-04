@@ -3,18 +3,12 @@ xmlns="http://java.sun.com/xml/ns/javaee"
 xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 version="2.5"
-xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.0.xsd">
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:odk-settings.xml,/WEB-INF/applicationContext-security.xml</param-value>
 	</context-param>
-
-    <context-param>
-        <param-name>resteasy.servlet.mapping.prefix</param-name>
-        <param-value>/odktables</param-value>
-        <!-- Must match the prefix set in the url-pattern of the ODKTables servlet-mapping below. -->
-    </context-param>
 
 	<security-constraint>
         <web-resource-collection>
@@ -501,17 +495,30 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee   http://java.sun.com/xml/
     <!-- servlet for odktables api -->
     <servlet>
         <servlet-name>ODKTables</servlet-name>
-        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.opendatakit.aggregate.odktables.impl.api.ODKTablesAPIApplication</param-value>
-        </init-param>
+		<servlet-class>org.apache.wink.server.internal.servlet.RestServlet</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>org.opendatakit.aggregate.odktables.impl.api.ODKTablesAPIApplication</param-value>
+		</init-param>
+		<init-param>
+		    <param-name>propertiesLocation</param-name>
+		    <param-value>security.properties</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>ODKTables</servlet-name>
         <url-pattern>/odktables/*</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+		<servlet-name>odktablesRest</servlet-name>
+		<servlet-class>org.apache.wink.server.internal.servlet.AdminServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>odktablesRest</servlet-name>
+		<url-pattern>/view/odktablesRest</url-pattern>
+	</servlet-mapping>
 
     <servlet>
     	<servlet-name>RemoteApi</servlet-name>

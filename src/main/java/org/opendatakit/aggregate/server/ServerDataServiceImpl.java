@@ -16,10 +16,16 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.UriBuilder;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
@@ -35,9 +41,15 @@ import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.TableManager;
+import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.api.FileService;
+import org.opendatakit.aggregate.odktables.api.InstanceFileService;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
+import org.opendatakit.aggregate.odktables.api.RealizedTableService;
+import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
+import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
@@ -81,11 +93,22 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
-      List<Row> rows = dm.getRows();
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      WebsafeRows websafeResult = dm.getRows(null, 2000);
+      List<Row> rows = websafeResult.rows;
       return transformRows(rows);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -115,8 +138,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     try {
       HttpServletRequest req = this.getThreadLocalRequest();
       CallingContext cc = ContextFactory.getCallingContext(this, req);
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
       Row row = dm.getRow(rowId);
@@ -157,8 +179,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     TablesUserPermissions userPermissions;
     try {
-      userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
 
       return ServerOdkTablesUtil.createOrUpdateRow(appId, tableId, rowId, row, userPermissions, cc);
@@ -178,17 +199,16 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   }
 
   @Override
-  public void deleteRow(String tableId, String rowId) throws AccessDeniedException,
+  public void deleteRow(String tableId, String rowId, String rowETag) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try { // Must use try so that you can catch the ODK specific errors.
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
-      dm.deleteRow(rowId);
+      dm.deleteRow(rowId, rowETag);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new EntityNotFoundExceptionClient(e);
@@ -207,12 +227,16 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     } catch (BadColumnNameException e) {
       e.printStackTrace();
       throw new BadColumnNameExceptionClient(e);
+    } catch (ETagMismatchException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
     }
 
   }
 
   /**
-   * Gets the element_names of the columns.
+   * Gets the element_keys of the columns.
+   * The element_names are insufficient for displaying the row contents.
    *
    * @return List<String> of the column names
    * @throws PermissionDeniedExceptionClient
@@ -225,14 +249,13 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTable(tableId);
-      ArrayList<String> columnNames = DbColumnDefinitions.queryForColumnNames(tableId,
+      ArrayList<String> elementKeys = DbColumnDefinitions.queryForDbColumnNames(tableId,
           entry.getSchemaETag(), cc);
-      return columnNames;
+      return elementKeys;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new EntityNotFoundExceptionClient(e);
@@ -292,143 +315,6 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   }
 
   /**
-   * This returns the non-media files rows from the DbTableFileInfo table about
-   * the files for a certain table. In other words, this returns the files that
-   * were uploaded NOT through the "upload additional media files" link on the
-   * file upload servlets. This does not include their associated media files.
-   * <p>
-   * NB: this does NOT use the same {@link Datamanager} class as the rest of the
-   * DataService methods, as this is considered accessing a unique table that is
-   * part of the back-end, rather than one of the tables that is created by the
-   * user.
-   *
-   * @param tableId
-   *          the string uid of the table whose files you want
-   */
-  @Override
-  public ArrayList<FileSummaryClient> getNonMediaFiles(String tableId) throws AccessDeniedException,
-      RequestFailureException, PermissionDeniedExceptionClient,
-      EntityNotFoundExceptionClient {
-    throw new IllegalStateException("Not implemented");
-    // this is commented out after we changed the file around.
-    // TODO: update this.
-    // HttpServletRequest req = this.getThreadLocalRequest();
-    // CallingContext cc = ContextFactory.getCallingContext(this, req);
-    // try {
-    // DbTableFiles blobSetRelation = new DbTableFiles(cc);
-    // List<Row> rows = EntityConverter.toRowsFromFileInfo(
-    // DbTableFileInfo.queryForNonMediaFiles(tableId, cc));
-    // List<FileSummaryClient> nonMediaFiles =
-    // new ArrayList<FileSummaryClient>();
-    // for (Row row : rows) {
-    // FileSummaryClient summary = ServerOdkTablesUtil
-    // .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
-    // nonMediaFiles.add(summary);
-    // }
-    // return nonMediaFiles;
-    // } catch (ODKEntityNotFoundException e) {
-    // e.printStackTrace();
-    // throw new EntityNotFoundExceptionClient(e);
-    // } catch (ODKDatastoreException e) {
-    // e.printStackTrace();
-    // throw new DatastoreFailureException(e);
-    // }
-  }
-
-  @Override
-  public ArrayList<FileSummaryClient> getMedialFilesKey(String tableId, String key)
-      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
-      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
-    throw new IllegalStateException("Not implemented");
-    // this is commented out after we changed the file around.
-    // TODO: see if we actually need this.
-    // HttpServletRequest req = this.getThreadLocalRequest();
-    // CallingContext cc = ContextFactory.getCallingContext(this, req);
-    // try {
-    // DbTableFiles blobSetRelation = new DbTableFiles(cc);
-    // List<Row> rows = EntityConverter.toRowsFromFileInfo(
-    // DbTableFileInfo.queryForMediaFiles(tableId, key, cc));
-    // List<FileSummaryClient> mediaFiles =
-    // new ArrayList<FileSummaryClient>();
-    // for (Row row : rows) {
-    // FileSummaryClient summary = ServerOdkTablesUtil
-    // .getFileSummaryClientFromRow(row, tableId, blobSetRelation, cc);
-    // mediaFiles.add(summary);
-    // }
-    // return mediaFiles;
-    // } catch (ODKEntityNotFoundException e) {
-    // e.printStackTrace();
-    // throw new EntityNotFoundExceptionClient(e);
-    // } catch (ODKDatastoreException e) {
-    // e.printStackTrace();
-    // throw new DatastoreFailureException(e);
-    // }
-  }
-
-  // TODO make this work. atm isn't working.
-  // public List<OdkTablesKeyValueStoreEntry> testFileGets(String tableId)
-  // throws PermissionDeniedExceptionClient, DatastoreFailureException,
-  // RequestFailureException,
-  // EntityNotFoundExceptionClient, AccessDeniedException,
-  // JsonGenerationException, IOException {
-  // HttpServletRequest req = this.getThreadLocalRequest();
-  // CallingContext cc = ContextFactory.getCallingContext(this, req);
-  //
-  // try {
-  // List<RowClient> infoRows = getNonMediaFiles(tableId);
-  // TableManager tm = new TableManager(cc);
-  // TableEntry table = tm.getTable(tableId);
-  // String tableName = table.getTableName();
-  // DbTableFiles blobSetRelation = new DbTableFiles(cc);
-  // List<OdkTablesKeyValueStoreEntry> entries = new
-  // ArrayList<OdkTablesKeyValueStoreEntry>();
-  // for (RowClient row : infoRows) {
-  // // we only want the non-deleted rows
-  // if (!row.isDeleted()) {
-  // // the KeyValueStoreEntry object is the same for every entry. However,
-  // // for files you need to create a FileManifestEntry for the value.
-  // OdkTablesKeyValueStoreEntry entry = new OdkTablesKeyValueStoreEntry();
-  // entry.tableId = tableId;
-  // entry.tableName = tableName;
-  // entry.key = row.getValues().get(DbTableFileInfo.KEY);
-  // entry.type = row.getValues().get(DbTableFileInfo.VALUE_TYPE);
-  // // if it's a file, make the file manifest entry.
-  // if (entry.type.equalsIgnoreCase(DbTableFileInfo.Type.FILE.name)) {
-  // OdkTablesFileManifestEntry fileEntry = new OdkTablesFileManifestEntry();
-  // fileEntry.filename = blobSetRelation.getBlobEntitySet(
-  // row.getValues().get(DbTableFileInfo.VALUE), cc).getUnrootedFilename(1, cc);
-  // fileEntry.md5hash = blobSetRelation.getBlobEntitySet(
-  // row.getValues().get(DbTableFileInfo.VALUE), cc).getContentHash(1, cc);
-  // // now generate the download url. look at XFormsManifestXmlTable as
-  // // an
-  // // example of how Mitch did it.
-  // Map<String, String> properties = new HashMap<String, String>();
-  // properties.put(ServletConsts.BLOB_KEY,
-  // row.getValues().get(DbTableFileInfo.VALUE));
-  // properties.put(ServletConsts.AS_ATTACHMENT, "true");
-  // String url = cc.getServerURL() + BasicConsts.FORWARDSLASH
-  // + OdkTablesTableFileDownloadServlet.ADDR;
-  // fileEntry.downloadUrl = HtmlUtil.createLinkWithProperties(url, properties);
-  // // now convert this object to json and set it to the entry's value.
-  // ObjectMapper mapper = new ObjectMapper();
-  // entry.value = mapper.writeValueAsString(fileEntry);
-  // } else {
-  // // if it's not a file, we just set the value. as input.
-  // entry.value = row.getValues().get(DbTableFileInfo.VALUE);
-  // }
-  // // and now add the completed entry to the list of entries
-  // entries.add(entry);
-  //
-  // }
-  // }
-  // return entries;
-  // } catch (ODKDatastoreException e) {
-  // e.printStackTrace();
-  // throw new DatastoreFailureException(e);
-  // }
-  // }
-
-  /**
    * Get the list of columns that are in the DbTableFileInfo table. This is
    * defined in server code and thus is never in danger of throwing
    * DatastoreExceptions.
@@ -465,12 +351,20 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfAppLevelFiles(cc);
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
+
+      UriBuilder ub;
+      try {
+        ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+        throw new RequestFailureException(e);
+      }
+      ub.path(OdkTables.class, "getFilesService");
 
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
@@ -478,17 +372,32 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
         if (blobEntitySet.getAttachmentCount(cc) != 1) {
           continue;
         }
+
         String odkClientVersion = entry.getOdkClientVersion();
-        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-            + odkClientVersion + BasicConsts.FORWARDSLASH + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+
+        UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
+        URI getFile = tmp.build(appId, odkClientVersion, entry.getPathToFile());
+        String downloadUrl;
+        try {
+          downloadUrl = getFile.toURL().toExternalForm() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new RequestFailureException("Unable to convert to URL");
+        }
+
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
             blobEntitySet.getContentLength(1, cc),
             entry.getId(), odkClientVersion, "", downloadUrl);
         completedSummaries.add(sum);
       }
+      Collections.sort(completedSummaries, new Comparator<FileSummaryClient>(){
+
+        @Override
+        public int compare(FileSummaryClient arg0, FileSummaryClient arg1) {
+          return arg0.getFilename().compareTo(arg1.getFilename());
+        }});
+
       tcc.files = completedSummaries;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
@@ -518,8 +427,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
@@ -529,23 +437,48 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles(table.getTableId(), cc);
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
 
+      UriBuilder ub;
+      try {
+        ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+        throw new RequestFailureException(e);
+      }
+      ub.path(OdkTables.class, "getFilesService");
+
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
         BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
         if (blobEntitySet.getAttachmentCount(cc) != 1) {
           continue;
         }
+
         String odkClientVersion = entry.getOdkClientVersion();
-        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-            + odkClientVersion + BasicConsts.FORWARDSLASH + entry.getPathToFile() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+
+        UriBuilder tmp = ub.clone().path(FileService.class, "getFile");
+        URI getFile = tmp.build(appId, odkClientVersion, entry.getPathToFile());
+        String downloadUrl;
+        try {
+          downloadUrl = getFile.toURL().toExternalForm() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new RequestFailureException("Unable to convert to URL");
+        }
+
         FileSummaryClient sum = new FileSummaryClient(entry.getPathToFile(),
             blobEntitySet.getContentType(1, cc),
             blobEntitySet.getContentLength(1, cc),
             entry.getId(), odkClientVersion, tableId, downloadUrl);
         completedSummaries.add(sum);
       }
+
+      Collections.sort(completedSummaries, new Comparator<FileSummaryClient>(){
+
+        @Override
+        public int compare(FileSummaryClient arg0, FileSummaryClient arg1) {
+          return arg0.getFilename().compareTo(arg1.getFilename());
+        }});
+
       tcc.files = completedSummaries;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
@@ -575,35 +508,55 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
       if (table == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
       }
+      String schemaETag = table.getSchemaETag();
 
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
       List<BinaryContent> contents = blobStore.getAllBinaryContents(cc);
+
+      UriBuilder ub;
+      try {
+        ub = UriBuilder.fromUri(new URI(cc.getServerURL() + BasicConsts.FORWARDSLASH + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH));
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+        throw new RequestFailureException(e);
+      }
+      ub.path(OdkTables.class, "getTablesService");
 
       ArrayList<FileSummaryClient> completedSummaries = new ArrayList<FileSummaryClient>();
       for (BinaryContent entry : contents) {
         if (entry.getUnrootedFilePath() == null) {
           continue;
         }
-        String downloadUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-            + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-            + appId + BasicConsts.FORWARDSLASH + "tables" + BasicConsts.FORWARDSLASH
-            + tableId + BasicConsts.FORWARDSLASH
 
-            + "attachments/file"  + BasicConsts.FORWARDSLASH + entry.getUnrootedFilePath() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+        // the rowId is the top-level auri for this record
+        String rowId = entry.getTopLevelAuri();
+
+        UriBuilder tmp = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class,"getInstanceFiles").path(InstanceFileService.class, "getFile");
+        URI getFile = tmp.build(appId, tableId, schemaETag, rowId, entry.getUnrootedFilePath());
+        String downloadUrl = getFile.toASCIIString() + "?" + FileService.PARAM_AS_ATTACHMENT + "=true";
+
         FileSummaryClient sum = new FileSummaryClient(entry.getUnrootedFilePath(),
             entry.getContentType(),
             entry.getContentLength(),
             entry.getUri(), null, tableId, downloadUrl);
+        sum.setInstanceId(entry.getTopLevelAuri());
         completedSummaries.add(sum);
       }
+
+      Collections.sort(completedSummaries, new Comparator<FileSummaryClient>(){
+
+        @Override
+        public int compare(FileSummaryClient arg0, FileSummaryClient arg1) {
+          return arg0.getFilename().compareTo(arg1.getFilename());
+        }});
+
       tcc.files = completedSummaries;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
@@ -621,61 +574,118 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     }
   }
 
-  /**
-   * Deletes the file from the datastore. Currently just marks the row as
-   * deleted. It assumes that only one person will be accessing these files at
-   * the same, and doesn't lock to try and prevent concurrent access or anything
-   * along those lines.
-   * <p>
-   * This is largely based on the {@link DataManager} deleteRow method.
-   */
   @Override
-  public void deleteTableFile(String tableId, String rowId) throws AccessDeniedException,
+  public void deleteAppLevelFile(String odkClientApiVersion, String filepath) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient {
-    throw new IllegalStateException("Not implemented");
-    // commented out when we changed the file loading.
-    // TODO: re-envision, fix.
-    // HttpServletRequest req = this.getThreadLocalRequest();
-    // CallingContext cc = ContextFactory.getCallingContext(this, req);
-    // try {
-    // Relation tableInfo = DbTableFileInfo.getRelation(cc);
-    // Entity entry = tableInfo.getEntity(rowId, cc);
-    // String key = entry.getAsString(DbTableFileInfo.KEY);
-    // // we also want to delete all the media files for this table. So get
-    // // them.
-    // List<FileSummaryClient> mediaFiles = getMedialFilesKey(tableId, key);
-    // // first we want to get a new etag
-    // String dataETag = entry.getString(DbTableEntry.DATA_ETAG);
-    // dataETag = Long.toString(System.currentTimeMillis());
-    // entry.set(DbTableEntry.DATA_ETAG, dataETag);
-    // entry.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
-    // entry.set(DbTable.DELETED, true);
-    //
-    // /*
-    // * // get the row and mark it as deleted List<String> rowIds = new
-    // * ArrayList<String>(); rowIds.add(rowId); List<Entity> rows =
-    // * DbTable.query(tableInfo, rowIds, cc); // there should only be on row as
-    // * currently implemented for (Entity row : rows) {
-    // * row.set(DbTable.ROW_VERSION, CommonFieldsBase.newUri());
-    // * row.set(DbTable.DELETED, true); }
-    // */
-    //
-    // // TODO log rows for deleting files
-    //
-    // // update db
-    // // Relation.putEntities(rows, cc);
-    // entry.put(cc);
-    // // and now do the same for each of the media files.
-    // for (FileSummaryClient sum : mediaFiles) {
-    // deleteTableFile(sum.getTableId(), sum.getId());
-    // }
-    //
-    // } catch (ODKDatastoreException e) {
-    // e.printStackTrace();
-    // throw new DatastoreFailureException(e);
-    // }
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    try {
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableManager tm = new TableManager(appId, userPermissions, cc);
+      // TODO: add permissions check
+      List<DbTableFileInfo.DbTableFileInfoEntity> entities =
+          DbTableFileInfo.queryForEntity(odkClientApiVersion, DbTableFileInfo.NO_TABLE_ID, filepath, cc);
+      DbTableFiles dbTableFiles = new DbTableFiles(cc);
 
+      for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
+
+        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
+        blobEntitySet.remove(cc);
+        entry.delete(cc);
+      }
+      return;
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new EntityNotFoundExceptionClient(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
+    }
+  }
+
+  @Override
+  public void deleteTableFile(String odkClientApiVersion, String tableId, String filepath) throws AccessDeniedException,
+      RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
+      EntityNotFoundExceptionClient {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    try {
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableManager tm = new TableManager(appId, userPermissions, cc);
+      // TODO: add permissions check
+      List<DbTableFileInfo.DbTableFileInfoEntity> entities =
+          DbTableFileInfo.queryForEntity(odkClientApiVersion, tableId, filepath, cc);
+      DbTableFiles dbTableFiles = new DbTableFiles(cc);
+
+      for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
+
+        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
+        blobEntitySet.remove(cc);
+        entry.delete(cc);
+      }
+      return;
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new EntityNotFoundExceptionClient(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
+    }
+  }
+
+  @Override
+  public void deleteInstanceFile(String tableId, String rowId, String filepath)
+      throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
+      PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
+
+    TableContentsForFilesClient tcc = new TableContentsForFilesClient();
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    try {
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
+      String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+      TableManager tm = new TableManager(appId, userPermissions, cc);
+      TableEntry table = tm.getTable(tableId);
+      if (table == null) { // you couldn't find the table
+        throw new ODKEntityNotFoundException();
+      }
+      if( !filepath.startsWith(rowId + "/")) {
+        throw new RequestFailureException("filename does not start with the instanceId");
+      }
+
+      DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
+      BlobEntitySet blobEntitySet = blobStore.getBlobEntitySet(filepath, cc);
+
+      blobEntitySet.remove(cc);
+      return;
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new EntityNotFoundExceptionClient(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new DatastoreFailureException(e);
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw new PermissionDeniedExceptionClient(e);
+    }
   }
 
 }

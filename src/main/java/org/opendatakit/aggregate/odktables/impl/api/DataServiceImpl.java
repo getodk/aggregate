@@ -16,17 +16,22 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.odktables.DataManager;
+import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.api.DataService;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
+import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
@@ -36,26 +41,31 @@ import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DataServiceImpl implements DataService {
-  private DataManager dm;
-  private UriInfo info;
+  private final String schemaETag;
+  private final DataManager dm;
+  private final UriInfo info;
 
-  public DataServiceImpl(String appId, String tableId, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+  public DataServiceImpl(String appId, String tableId, String schemaETag, UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
+    this.schemaETag = schemaETag;
     this.dm = new DataManager(appId, tableId, userPermissions, cc);
     this.info = info;
   }
 
   @Override
-  public Response getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
-    List<Row> rows;
-    rows = dm.getRows();
-    RowResourceList rowResourceList = new RowResourceList(getResources(rows));
+  public Response getRows(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    WebsafeRows websafeResult = dm.getRows(QueryResumePoint.fromWebsafeCursor(cursor), limit);
+    RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
+        websafeResult.websafeRefetchCursor, websafeResult.websafeBackwardCursor, websafeResult.websafeResumeCursor,
+        websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(rowResourceList).build();
   }
 
@@ -77,9 +87,9 @@ public class DataServiceImpl implements DataService {
   }
 
   @Override
-  public Response deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException, ODKTaskLockException,
-      PermissionDeniedException, InconsistentStateException, BadColumnNameException {
-    String dataETagOnTableOfModification = dm.deleteRow(rowId);
+  public Response deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException, ODKTaskLockException,
+      PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
+    String dataETagOnTableOfModification = dm.deleteRow(rowId, rowETag);
     return Response.ok(dataETagOnTableOfModification).build();
   }
 
@@ -87,14 +97,20 @@ public class DataServiceImpl implements DataService {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
     String rowId = row.getRowId();
+
     UriBuilder ub = info.getBaseUriBuilder();
-    ub.path(TableService.class);
-    URI self = ub.clone().path(TableService.class, "getData").path(DataService.class, "getRow")
-        .build(appId, tableId, rowId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    ub.path(OdkTables.class, "getTablesService");
+    URI self = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getData").path(DataService.class, "getRow")
+        .build(appId, tableId, schemaETag, rowId);
+    URI table = ub.clone().build(appId, tableId);
     RowResource resource = new RowResource(row);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setTableUri(table.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert URL ");
+    }
     return resource;
   }
 

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewInstanceFileInfo;
-import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
@@ -48,15 +47,6 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
   // that tells you to select a table
   private FlexTable selectTablePanel;
 
-  // the string constants for adding a file
-  private static final String ADD_FILE_TXT = "Add an instance (data row) file";
-  private static final String ADD_FILE_TOOLTIP_TXT = "Upload a file";
-  private static final String ADD_FILE_BALLOON_TXT = "Upload a file to be associated with a specific data row of a table";
-  private static final String ADD_FILE_BUTTON_TXT = "<img src=\"images/yellow_plus.png\" />"
-      + ADD_FILE_TXT;
-
-  // this is a button for adding a file to be associated with a table.
-  private OdkTablesTableIdServletPopupButton addFileButton;
   /**
    * This will be the box that lets you choose which of the tables you are going
    * to view.
@@ -83,10 +73,6 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
    * Sets up the View Table subtab.
    */
   public OdkTablesManageInstanceFilesSubTab() {
-
-    addFileButton = new OdkTablesTableIdServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
-        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT,
-        this, this);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -121,11 +107,6 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
     selectTablePanel.getElement().setId("select_table_panel");
     selectTablePanel.setHTML(0, 0, "<h2 id=\"table_name\"> Select a Table </h2>");
     selectTablePanel.setWidget(0, 1, tableBox);
-    selectTablePanel.setWidget(1, 0, addFileButton);
-
-    // deletedRowsCheckBox = new OdkTablesDisplayDeletedRowsCheckBox(this,
-    // displayDeleted);
-    // selectTablePanel.setWidget(0, 2, deletedRowsCheckBox);
 
     topPanel = new HorizontalPanel();
     topPanel.add(selectTablePanel);

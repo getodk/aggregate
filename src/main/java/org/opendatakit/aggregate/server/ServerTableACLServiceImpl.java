@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.server;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,8 @@ import org.opendatakit.aggregate.client.odktables.TableAclClient;
 import org.opendatakit.aggregate.client.odktables.TableAclResourceClient;
 import org.opendatakit.aggregate.client.odktables.TableRoleClient;
 import org.opendatakit.aggregate.odktables.TableAclManager;
+import org.opendatakit.aggregate.odktables.TableAclManager.WebsafeAcls;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
@@ -40,8 +43,8 @@ import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -64,12 +67,20 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
-      List<TableAcl> acls = am.getAcls();
-      return transformTableAclList(acls);
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      WebsafeAcls websafeCursor = am.getAcls(null, 2000);
+      return transformTableAclList(websafeCursor.acls);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
@@ -88,12 +99,20 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
-      List<TableAcl> acls = am.getAcls(Scope.Type.USER);
-      return transformTableAclList(acls);
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      WebsafeAcls websafeCursor = am.getAcls(Scope.Type.USER, null, 2000);
+      return transformTableAclList(websafeCursor.acls);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
@@ -112,12 +131,20 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
-      List<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
-      return transformTableAclList(acls);
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      // TODO: make the UI support pagination
+      WebsafeAcls websafeCursor = am.getAcls(Scope.Type.GROUP, null, 2000);
+      return transformTableAclList(websafeCursor.acls);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
@@ -136,8 +163,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
@@ -161,8 +187,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
@@ -187,8 +212,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
@@ -212,8 +236,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.DEFAULT, null),
@@ -242,8 +265,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       if (odkTablesUserId.equals("null"))
@@ -274,8 +296,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       acl = UtilTransforms.transform(am.setAcl(new Scope(Scope.Type.GROUP, groupId),
@@ -303,8 +324,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.DEFAULT, null));
@@ -326,8 +346,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, odkTablesUserId));
@@ -349,8 +368,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableAclManager am = new TableAclManager(appId, tableId, userPermissions, cc);
       am.deleteAcl(new Scope(Scope.Type.USER, groupId));
@@ -366,7 +384,8 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     }
   }
 
-  private TableAclResourceClient getResource(TableAcl acl, TableAclManager am, UriInfo info) {
+  private TableAclResourceClient getResource(TableAcl acl, TableAclManager am, UriInfo info) throws RequestFailureException {
+    String appId = am.getAppId();
     String tableId = am.getTableId();
     Scope.Type type = acl.getScope().getType();
     String value = acl.getScope().getValue();
@@ -374,33 +393,38 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
       value = "null";
 
     UriBuilder ub = info.getBaseUriBuilder();
-    ub.path(TableService.class);
+    ub.path(OdkTables.class, "getTablesService");
     UriBuilder selfBuilder = ub.clone().path(TableService.class, "getAcl");
     URI self;
     switch (type) {
     case USER:
-      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(tableId, value);
+      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
       break;
     case GROUP:
-      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(tableId, value);
+      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
       break;
     case DEFAULT:
     default:
-      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(tableId);
+      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
       break;
     }
-    URI acls = ub.clone().path(TableService.class, "getAcl").build(tableId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(tableId);
+    URI acls = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
+    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
 
     TableAclResource resource = new TableAclResource(acl);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setAclUri(acls.toASCIIString());
-    resource.setTableUri(table.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setAclUri(acls.toURL().toExternalForm());
+      resource.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Unable to convert to URL");
+    }
     return UtilTransforms.transform(resource);
   }
 
   private ArrayList<TableAclResourceClient> getResources(List<TableAcl> acls, TableAclManager am,
-      UriInfo info) {
+      UriInfo info) throws RequestFailureException {
     ArrayList<TableAclResourceClient> resources = new ArrayList<TableAclResourceClient>();
     for (TableAcl acl : acls) {
       resources.add(getResource(acl, am, info));
