@@ -296,11 +296,11 @@ Full Maven Development Environment Configuration
 For Postgres, run these commands:
 
 ----postgres-script-start-----
-create database "odk_test";
-create schema "odk_test";
-create user "odk_test" with unencrypted password 'odk_test';
-grant all privileges on database "odk_test" to "odk_test";
-alter database "odk_test" owner to "odk_test";
+create database "odk_unit";
+create schema "odk_unit";
+create user "odk_unit" with unencrypted password 'odk_unit';
+grant all privileges on database "odk_unit" to "odk_unit";
+alter database "odk_unit" owner to "odk_unit";
 ----postgres-script-end-------
 
 From the Postgres SQL shell (psql) commandline client,
@@ -316,11 +316,11 @@ are in the file postgres.sql, you can type:
 (6a)
 For MySQL, run this script:
 
-UPDATE mysql.user SET Password=PASSWORD('odk_test') WHERE User='root';
+UPDATE mysql.user SET Password=PASSWORD('odk_unit') WHERE User='root';
 FLUSH PRIVILEGES;
-CREATE USER 'odk_test'@'localhost' IDENTIFIED BY 'odk_test';
-CREATE DATABASE odk_test;
-GRANT ALL PRIVILEGES ON odk_test.* TO 'odk_test'@'localhost' WITH GRANT OPTION;
+CREATE USER 'odk_unit'@'localhost' IDENTIFIED BY 'odk_unit';
+CREATE DATABASE odk_unit;
+GRANT ALL PRIVILEGES ON odk_unit.* TO 'odk_unit'@'localhost' WITH GRANT OPTION;
 
 (6b)
 For MySQL, download and copy the MySQL Connector J jar into the Tomcat /lib
