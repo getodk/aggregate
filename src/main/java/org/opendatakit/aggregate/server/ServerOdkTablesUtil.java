@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.exception.TableAlreadyExistsExceptionClient;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
-import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
@@ -40,8 +39,6 @@ import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
-import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
@@ -163,27 +160,5 @@ public class ServerOdkTablesUtil {
       e.printStackTrace();
       throw new ETagMismatchExceptionClient(e);
     }
-  }
-
-  /**
-   * Create a FileSummaryClient object from a row that originated from
-   * EntityConverter.
-   *
-   * @param row
-   * @param blobSetRelation
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static FileSummaryClient getFileSummaryClientFromRow(Row row, String odkClientVersion, String tableId,
-      DbTableFiles blobSetRelation, CallingContext cc) throws ODKDatastoreException {
-    String filename = blobSetRelation.getBlobEntitySet(
-        row.getValues().get(DbTableFileInfo.PATH_TO_FILE), cc).getUnrootedFilename(1, cc);
-    Long contentLength = blobSetRelation.getBlobEntitySet(filename, cc).getContentLength(1, cc);
-    String contentType = blobSetRelation.getBlobEntitySet(filename, cc).getContentType(1, cc);
-    String id = row.getRowId();
-    String downloadUrl = null;
-    FileSummaryClient summary = new FileSummaryClient(filename, contentType, contentLength, id, odkClientVersion, tableId, downloadUrl);
-    return summary;
   }
 }

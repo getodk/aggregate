@@ -16,15 +16,19 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.odktables.TableAclManager;
+import org.opendatakit.aggregate.odktables.TableAclManager.WebsafeAcls;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -33,6 +37,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResourceList;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
@@ -49,25 +54,34 @@ public class TableAclServiceImpl implements TableAclService {
   }
 
   @Override
-  public Response getAcls() throws ODKDatastoreException, PermissionDeniedException {
-    ArrayList<TableAcl> acls = am.getAcls();
-    TableAclResourceList list = new TableAclResourceList(getResources(acls));
+  public Response getAcls(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException {
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    WebsafeAcls websafeResult = am.getAcls(QueryResumePoint.fromWebsafeCursor(cursor), limit);
+    TableAclResourceList list = new TableAclResourceList(getResources(websafeResult.acls),
+        websafeResult.websafeRefetchCursor, websafeResult.websafeBackwardCursor, websafeResult.websafeResumeCursor,
+        websafeResult.hasMore, websafeResult.hasPrior);
+     return Response.ok(list).build();
+  }
+
+  @Override
+  public Response getUserAcls(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
+      PermissionDeniedException {
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    WebsafeAcls websafeResult = am.getAcls(Scope.Type.USER, QueryResumePoint.fromWebsafeCursor(cursor), limit);
+    TableAclResourceList list = new TableAclResourceList(getResources(websafeResult.acls),
+        websafeResult.websafeRefetchCursor, websafeResult.websafeBackwardCursor, websafeResult.websafeResumeCursor,
+        websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(list).build();
   }
 
   @Override
-  public Response getUserAcls() throws ODKDatastoreException,
+  public Response getGroupAcls(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException {
-    ArrayList<TableAcl> acls = am.getAcls(Scope.Type.USER);
-    TableAclResourceList list = new TableAclResourceList(getResources(acls));
-    return Response.ok(list).build();
-  }
-
-  @Override
-  public Response getGroupAcls() throws ODKDatastoreException,
-      PermissionDeniedException {
-    ArrayList<TableAcl> acls = am.getAcls(Scope.Type.GROUP);
-    TableAclResourceList list = new TableAclResourceList(getResources(acls));
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    WebsafeAcls websafeResult = am.getAcls(Scope.Type.GROUP, QueryResumePoint.fromWebsafeCursor(cursor), limit);
+    TableAclResourceList list = new TableAclResourceList(getResources(websafeResult.acls),
+        websafeResult.websafeRefetchCursor, websafeResult.websafeBackwardCursor, websafeResult.websafeResumeCursor,
+        websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(list).build();
   }
 
@@ -138,7 +152,7 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response deleteGroupAcl(String groupId) throws ODKDatastoreException,
       PermissionDeniedException {
-    am.deleteAcl(new Scope(Scope.Type.USER, groupId));
+    am.deleteAcl(new Scope(Scope.Type.GROUP, groupId));
     return Response.ok().build();
   }
 
@@ -151,7 +165,7 @@ public class TableAclServiceImpl implements TableAclService {
       value = "null";
 
     UriBuilder ub = info.getBaseUriBuilder();
-    ub.path(TableService.class);
+    ub.path(OdkTables.class, "getTablesService");
     UriBuilder selfBuilder = ub.clone().path(TableService.class, "getAcl");
     URI self;
     switch (type) {
@@ -170,9 +184,14 @@ public class TableAclServiceImpl implements TableAclService {
     URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
 
     TableAclResource resource = new TableAclResource(acl);
-    resource.setSelfUri(self.toASCIIString());
-    resource.setAclUri(acls.toASCIIString());
-    resource.setTableUri(table.toASCIIString());
+    try {
+      resource.setSelfUri(self.toURL().toExternalForm());
+      resource.setAclUri(acls.toURL().toExternalForm());
+      resource.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert to URL");
+    }
     return resource;
   }
 

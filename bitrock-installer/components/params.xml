@@ -657,12 +657,12 @@ NOTE: During subsequent upgrades, any changes to this text will invalidate all t
             <width>30</width>
         </stringParameter>
         <stringParameter>
-            <name>email</name>
-            <title>Super-user E-mail Address</title>
-            <description>Please enter a valid Gmail account or Google Apps account:</description>
+            <name>username</name>
+            <title>Super-user ODK Aggregate Username</title>
+            <description>Please enter an ODK Aggregate Username:</description>
             <explanation>The user with this account will always have full permissions on the system.  
 
-The first time ODK Aggregate runs, only this user is allowed access to the system. Upon first logging in, they will be asked to complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system.
+The first time ODK Aggregate runs, only this user is allowed to log onto the system. Upon first logging in, they should change their password and complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system.
 </explanation>
             <value></value>
             <default></default>
@@ -672,15 +672,15 @@ The first time ODK Aggregate runs, only this user is allowed access to the syste
                 <if>
                     <actionList>
                         <throwError>
-                            <text>Bad email address: ${email}.
-Please enter a complete Email address (e.g., username@gmail.com).</text>
+                            <text>Bad username.
+Please enter a name starting with a letter and containing only letters and numbers.</text>
                         </throwError>
                     </actionList>
                     <conditionRuleList>
                         <regExMatch>
                             <logic>does_not_match</logic>
-                            <pattern>[^@ ]+@[^@ .]+\.[^@ ]+</pattern>
-                            <text>${email}</text>
+                            <pattern>[a-zA-Z][a-zA-Z0-9]*</pattern>
+                            <text>${username}</text>
                         </regExMatch>
                     </conditionRuleList>
                 </if>
@@ -884,8 +884,8 @@ If you are replacing an existing application already on appspot, the application
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
-                    <key>email</key>
-                    <value>${email}</value>
+                    <key>username</key>
+                    <value>${username}</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${installdir}/.options</file>
@@ -970,13 +970,13 @@ If you are replacing an existing application already on appspot, the application
     </postInstallationActionList>
     <preInstallationActionList>
         <autodetectJava>
-            <customErrorMessage>You must have a Java 1.6 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
+            <customErrorMessage>You must have a Java 1.7 JRE installed.  Go to http://www.java.com/getjava/index.jsp</customErrorMessage>
             <promptUser>0</promptUser>
             <validVersionList>
                 <validVersion>
                     <bitness></bitness>
                     <maxVersion></maxVersion>
-                    <minVersion>1.6</minVersion>
+                    <minVersion>1.7</minVersion>
                     <requireJDK>0</requireJDK>
                     <vendor></vendor>
                 </validVersion>

@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.ServerDiffService;
 import org.opendatakit.aggregate.odktables.DataManager;
+import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -57,13 +58,24 @@ public class ServerDiffServiceImpl extends RemoteServiceServlet implements Serve
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser()
-          .getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
-      List<Row> rows;
-      rows = dm.getRowsSince(dataETag);
-      return transformRows(rows);
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      // TODO: paginate this
+      WebsafeRows websafeRows = dm.getRowsSince(dataETag, null, 2000);
+      return transformRows(websafeRows.rows);
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);

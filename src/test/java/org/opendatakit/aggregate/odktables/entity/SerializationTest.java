@@ -21,12 +21,12 @@ import static org.junit.Assert.assertEquals;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
@@ -36,23 +36,17 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.convert.Registry;
-import org.simpleframework.xml.convert.RegistryStrategy;
-import org.simpleframework.xml.core.Persister;
-import org.simpleframework.xml.strategy.Strategy;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class SerializationTest {
 
-  private Serializer serializer;
+  private XmlMapper serializer;
   private StringWriter writer;
 
   @Before
   public void setUp() throws Exception {
-    Registry registry = new Registry();
-    Strategy strategy = new RegistryStrategy(registry);
-    serializer = new Persister(strategy);
-
+    serializer = new XmlMapper();
     writer = new StringWriter();
   }
 
@@ -60,10 +54,10 @@ public class SerializationTest {
   public void testRowForUpdate() throws Exception {
     Row expected = Row.forUpdate("1", "5", T.form_id_2, T.locale_2,  SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_2, T.savepoint_creator_2, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues());
-    serializer.write(expected, writer);
+    serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
-    Row actual = serializer.read(Row.class, xml);
+    Row actual = serializer.readValue(xml, Row.class);
     assertEquals(expected, actual);
   }
 
@@ -72,11 +66,11 @@ public class SerializationTest {
     Row expected = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues());
 
-    serializer.write(expected, writer);
+    serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
 
-    Row actual = serializer.read(Row.class, xml);
+    Row actual = serializer.readValue(xml, Row.class);
     assertEquals(expected, actual);
   }
 
@@ -93,10 +87,10 @@ public class SerializationTest {
   @Test
   public void testTableEntry() throws Exception {
     TableEntry expected = new TableEntry("1", "data2", "schema4");
-    serializer.write(expected, writer);
+    serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
-    TableEntry actual = serializer.read(TableEntry.class, xml);
+    TableEntry actual = serializer.readValue(xml, TableEntry.class);
     assertEquals(expected, actual);
   }
 
@@ -104,25 +98,25 @@ public class SerializationTest {
   public void testTableAcl() throws Exception {
     TableAcl expected = new TableAcl(TableRole.FILTERED_READER);
     expected.setScope(new Scope(Scope.Type.USER, "0"));
-    serializer.write(expected, writer);
+    serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
-    TableAcl actual = serializer.read(TableAcl.class, xml);
+    TableAcl actual = serializer.readValue(xml, TableAcl.class);
     assertEquals(expected, actual);
   }
 
   @Test
   public void testRowResource() throws Exception {
-    Map<String, String> values = T.Data.DYLAN.getValues();
+    ArrayList<DataKeyValue> values = T.Data.DYLAN.getValues();
     RowResource expected = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values));
     expected.setSelfUri("http://localhost:8080/odktables/tables/1/rows/1");
     expected.setTableUri("http://localhost:8080/odktables/tables/1");
 
-    serializer.write(expected, writer);
+    serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
-    RowResource actual = serializer.read(RowResource.class, xml);
+    RowResource actual = serializer.readValue(xml, RowResource.class);
     assertEquals(expected, actual);
   }
 
@@ -146,10 +140,10 @@ public class SerializationTest {
     expected.setDefinitionUri("http://localhost:8080/odktables/tables/1/definition");
     expected.setDiffUri("http://localhost:8080/odktables/tables/1/rows/diff");
     expected.setAclUri("http://localhost:8080/odktables/tables/1/acl");
-    serializer.write(expected, writer);
+    serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
-    TableResource actual = serializer.read(TableResource.class, xml);
+    TableResource actual = serializer.readValue(xml, TableResource.class);
     assertEquals(expected, actual);
   }
 
@@ -161,10 +155,10 @@ public class SerializationTest {
     expected.setSelfUri("http://localhost:8080/odktables/tables/1/acl/user/0");
     expected.setTableUri("http://localhost:8080/odktables/tables/1");
     expected.setAclUri("http://localhost:8080/odktables/tables/1/acl");
-    serializer.write(expected, writer);
+    serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
-    TableAclResource actual = serializer.read(TableAclResource.class, xml);
+    TableAclResource actual = serializer.readValue(xml, TableAclResource.class);
     assertEquals(expected, actual);
   }
 
@@ -181,12 +175,12 @@ public class SerializationTest {
     two.setTableUri("http://localhost/tables/1");
     expected.add(one);
     expected.add(two);
-    RowResourceList rrl = new RowResourceList(expected);
-    serializer.write(rrl, writer);
+    RowResourceList rrl = new RowResourceList(expected, null, null, null, false, false);
+    serializer.writeValue(writer, rrl);
     String xml = writer.toString();
     System.out.println(xml);
-    RowResourceList rrList = serializer.read(RowResourceList.class, xml);
-    List<RowResource> actual = rrList.getEntries();
+    RowResourceList rrList = serializer.readValue(xml, RowResourceList.class);
+    List<RowResource> actual = rrList.getRows();
     assertEquals(expected, actual);
   }
 

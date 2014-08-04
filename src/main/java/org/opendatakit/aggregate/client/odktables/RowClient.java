@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.client.odktables;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This object represents a Row on the client side of the code. It is based
@@ -36,7 +35,7 @@ public class RowClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = -33968399625514663L;
+  private static final long serialVersionUID = -3396839962551463L;
 
   private String rowId;
 
@@ -54,11 +53,13 @@ public class RowClient implements Serializable {
 
   private String locale;
 
+  private String savepointType;
+
   private String savepointTimestampIso8601Date;
 
   private String savepointCreator;
 
-  private Map<String, String> values;
+  private HashMap<String,String> values;
 
   /**
    * Construct a row for insertion.
@@ -66,7 +67,7 @@ public class RowClient implements Serializable {
    * @param rowId
    * @param values
    */
-  public static RowClient forInsert(String rowId, Map<String, String> values) {
+  public static RowClient forInsert(String rowId, HashMap<String,String> values) {
     RowClient row = new RowClient();
     row.rowId = rowId;
     row.values = values;
@@ -81,7 +82,7 @@ public class RowClient implements Serializable {
    * @param rowETag
    * @param values
    */
-  public static RowClient forUpdate(String rowId, String rowETag, Map<String, String> values) {
+  public static RowClient forUpdate(String rowId, String rowETag, HashMap<String,String> values) {
     RowClient row = new RowClient();
     row.rowId = rowId;
     row.rowETag = rowETag;
@@ -96,11 +97,27 @@ public class RowClient implements Serializable {
     this.createUser = null;
     this.lastUpdateUser = null;
     this.filterScope = null;
+    this.savepointType = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestampIso8601Date = null;
     this.savepointCreator = null;
-    this.values = new HashMap<String, String>();
+    this.values = new HashMap<String,String>();
+  }
+
+  public RowClient(RowClient r) {
+    this.rowId = r.rowId;
+    this.rowETag = r.rowETag;
+    this.deleted = r.deleted;
+    this.createUser = r.createUser;
+    this.lastUpdateUser = r.lastUpdateUser;
+    this.filterScope = r.filterScope;
+    this.savepointType = r.savepointType;
+    this.formId = r.formId;
+    this.locale = r.locale;
+    this.savepointTimestampIso8601Date = r.savepointTimestampIso8601Date;
+    this.savepointCreator = r.savepointCreator;
+    this.values = r.values;
   }
 
   public String getRowId() {
@@ -127,8 +144,28 @@ public class RowClient implements Serializable {
     return filterScope;
   }
 
-  public Map<String, String> getValues() {
+  public HashMap<String,String> getValues() {
     return this.values;
+  }
+
+  public String getSavepointType() {
+    return this.savepointType;
+  }
+
+  public String getSavepointCreator() {
+    return this.savepointCreator;
+  }
+
+  public String getFormId() {
+    return this.formId;
+  }
+
+  public String getLocale() {
+    return this.locale;
+  }
+
+  public String getSavepointTimestampIso8601Date() {
+    return this.savepointTimestampIso8601Date;
   }
 
   public void setRowId(final String rowId) {
@@ -155,24 +192,12 @@ public class RowClient implements Serializable {
     this.filterScope = filterScope;
   }
 
-  public void setValues(final Map<String, String> values) {
+  public void setValues(final HashMap<String,String> values) {
     this.values = values;
   }
 
-  public String getSavepointCreator() {
-    return this.savepointCreator;
-  }
-
-  public String getFormId() {
-    return this.formId;
-  }
-
-  public String getLocale() {
-    return this.locale;
-  }
-
-  public String getSavepointTimestampIso8601Date() {
-    return this.savepointTimestampIso8601Date;
+  public void setSavepointType(String savepointType) {
+    this.savepointType = savepointType;
   }
 
   public void setSavepointCreator(String savepointCreator) {
@@ -213,6 +238,7 @@ public class RowClient implements Serializable {
     result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
+    result = prime * result + ((savepointType == null) ? 0 : savepointType.hashCode());
     result = prime * result + ((savepointTimestampIso8601Date == null) ? 0 : savepointTimestampIso8601Date.hashCode());
     result = prime * result + ((savepointCreator == null) ? 0 : savepointCreator.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
@@ -234,16 +260,22 @@ public class RowClient implements Serializable {
       return false;
     RowClient other = (RowClient) obj;
 
-    if (rowId == null) {
-      if (other.rowId != null)
-        return false;
-    } else if (!rowId.equals(other.rowId))
-      return false;
-
     if (rowETag == null) {
       if (other.rowETag != null)
         return false;
     } else if (!rowETag.equals(other.rowETag))
+      return false;
+
+    if (savepointTimestampIso8601Date == null) {
+      if (other.savepointTimestampIso8601Date != null)
+        return false;
+    } else if (!savepointTimestampIso8601Date.equals(other.savepointTimestampIso8601Date))
+      return false;
+
+    if (rowId == null) {
+      if (other.rowId != null)
+        return false;
+    } else if (!rowId.equals(other.rowId))
       return false;
 
     if (deleted != other.deleted)
@@ -277,6 +309,12 @@ public class RowClient implements Serializable {
       if (other.locale != null)
         return false;
     } else if (!locale.equals(other.locale))
+      return false;
+
+    if (savepointType == null) {
+      if (other.savepointType != null)
+        return false;
+    } else if (!savepointType.equals(other.savepointType))
       return false;
 
     if (savepointTimestampIso8601Date == null) {
@@ -323,6 +361,8 @@ public class RowClient implements Serializable {
     builder.append(formId);
     builder.append(", locale=");
     builder.append(locale);
+    builder.append(", savepointType=");
+    builder.append(savepointType);
     builder.append(", savepointTimestampIso8601Date=");
     builder.append(savepointTimestampIso8601Date);
     builder.append(", savepointCreator=");

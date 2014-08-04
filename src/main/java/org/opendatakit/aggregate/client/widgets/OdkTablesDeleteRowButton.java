@@ -28,16 +28,18 @@ public class OdkTablesDeleteRowButton extends AggregateButton implements ClickHa
   private static final String TOOLTIP_TXT = "Delete Table";
   private static final String HELP_BALLOON_TXT = "Completely delete this table.";
 
-  private String rowId;
-  private String tableId;
+  private final String tableId;
+  private final String rowId;
+  private final String rowETag;
   // the view table window that this button belongs in.
   private OdkTablesViewTable parentView;
 
-  public OdkTablesDeleteRowButton(OdkTablesViewTable parent, String tableId, String rowId) {
+  public OdkTablesDeleteRowButton(OdkTablesViewTable parent, String tableId, String rowId, String rowETag) {
     super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.parentView = parent;
     this.tableId = tableId;
     this.rowId = rowId;
+    this.rowETag = rowETag;
   }
 
   @Override
@@ -45,7 +47,7 @@ public class OdkTablesDeleteRowButton extends AggregateButton implements ClickHa
     super.onClick(event);
 
     OdkTablesConfirmDeleteRowPopup popup =
-        new OdkTablesConfirmDeleteRowPopup(this.parentView, tableId, rowId);
+        new OdkTablesConfirmDeleteRowPopup(this.parentView, tableId, rowId, rowETag);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }
 

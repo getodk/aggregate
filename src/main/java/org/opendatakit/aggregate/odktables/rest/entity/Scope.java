@@ -17,28 +17,10 @@
 package org.opendatakit.aggregate.odktables.rest.entity;
 
 import org.apache.commons.lang3.Validate;
-import org.simpleframework.xml.Element;
 
-public class Scope {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-  public static final Scope EMPTY_SCOPE;
-  static {
-    EMPTY_SCOPE = new Scope();
-    EMPTY_SCOPE.initFields(null, null);
-  }
-
-  public static Scope asScope(String filterType, String filterValue) {
-    if (filterType != null && filterType.length() != 0) {
-      Scope.Type type = Scope.Type.valueOf(filterType);
-      if (filterType.equals(Scope.Type.DEFAULT)) {
-        return new Scope(Scope.Type.DEFAULT, null);
-      } else {
-        return new Scope(type, filterValue);
-      }
-    } else {
-      return Scope.EMPTY_SCOPE;
-    }
-  }
+public class Scope implements Comparable<Scope> {
 
   /**
    * Type of Scope.
@@ -49,11 +31,32 @@ public class Scope {
     DEFAULT, USER, GROUP,
   }
 
-  @Element(required = false)
+  @JsonProperty(required = false)
   private Type type;
 
-  @Element(required = false)
+  @JsonProperty(required = false)
   private String value;
+
+
+  public static final Scope EMPTY_SCOPE;
+  static {
+    EMPTY_SCOPE = new Scope();
+    EMPTY_SCOPE.initFields(Scope.Type.DEFAULT, null);
+  }
+
+  public static Scope asScope(String filterType, String filterValue) {
+    if (filterType != null && filterType.length() != 0) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        return new Scope(Scope.Type.DEFAULT, null);
+      } else {
+        return new Scope(type, (filterValue == null || filterValue.length() == 0) ? null
+            : filterValue);
+      }
+    } else {
+      return Scope.EMPTY_SCOPE;
+    }
+  }
 
   /**
    * Constructs a new Scope.
@@ -164,6 +167,21 @@ public class Scope {
     builder.append(value);
     builder.append("]");
     return builder.toString();
+  }
+
+  @Override
+  public int compareTo(Scope arg0) {
+    if ( arg0 == null ) {
+      return -1;
+    }
+    
+    int outcome = type.name().compareTo(arg0.type.name());
+    if ( outcome != 0 ) {
+      return outcome;
+    }
+    outcome = (value == null) ? 
+        ((arg0.value == null) ? 0 : -1) : value.compareTo(arg0.value);
+    return outcome;
   }
 
 }

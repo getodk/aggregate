@@ -135,6 +135,10 @@ public class DatastoreImpl implements Datastore {
         nBytes += 24;
         ++nColumns;
         break;
+      case BOOLEAN:
+        nBytes += 8;
+        ++nColumns;
+        break;
       case INTEGER:
         d.setNumericPrecision(DEFAULT_INT_NUMERIC_PRECISION);
         nBytes += 8;

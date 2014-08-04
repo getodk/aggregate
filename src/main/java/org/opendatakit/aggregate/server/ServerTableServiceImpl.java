@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,6 +32,7 @@ import org.opendatakit.aggregate.client.odktables.ServerTableService;
 import org.opendatakit.aggregate.client.odktables.TableDefinitionClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.odktables.TableManager;
+import org.opendatakit.aggregate.odktables.TableManager.WebsafeTables;
 import org.opendatakit.aggregate.odktables.entity.UtilTransforms;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -55,7 +55,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
   /**
 	 *
 	 */
-  private static final long serialVersionUID = 3291707708959185034L;
+  private static final long serialVersionUID = 329170770895918034L;
   private static final Log logger = LogFactory.getLog(ServerTableServiceImpl.class);
 
   @Override
@@ -71,14 +71,14 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       }
       TablesUserPermissions userPermissions = null;
       try {
-        userPermissions = new TablesUserPermissionsImpl(user.getUriUser(), cc);
+        userPermissions = new TablesUserPermissionsImpl(cc);
       } catch (PermissionDeniedException e) {
         return clientEntries;
       }
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
-      List<TableEntry> entries = tm.getTables();
-      for (TableEntry entry : entries) {
+      WebsafeTables result = tm.getTables(null, 2000);
+      for (TableEntry entry : result.tables) {
         clientEntries.add(UtilTransforms.transform(entry));
       }
       Collections.sort(clientEntries, new Comparator<TableEntryClient>() {
@@ -108,7 +108,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       if (user.isAnonymous()) {
         throw new AccessDeniedException("Anonymous users cannot access ODK Tables datasets");
       }
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(user.getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTableNullSafe(tableId);
@@ -151,7 +151,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       if (user.isAnonymous()) {
         throw new AccessDeniedException("Anonymous users cannot create ODK Tables datasets");
       }
-      userPermissions = new TablesUserPermissionsImpl(cc.getCurrentUser().getUriUser(), cc);
+      userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       return ServerOdkTablesUtil.createTable(appId, tableId, definition, userPermissions, cc);
     } catch (ODKDatastoreException e) {
@@ -179,7 +179,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       if (user.isAnonymous()) {
         throw new AccessDeniedException("Anonymous users cannot delete ODK Tables datasets");
       }
-      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(user.getUriUser(), cc);
+      TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       tm.deleteTable(tableId);

@@ -16,34 +16,28 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
-import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.api.FileService;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
@@ -51,10 +45,10 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -63,8 +57,6 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 public class FileServiceImpl implements FileService {
 
   private static final Log LOGGER = LogFactory.getLog(FileServiceImpl.class);
-
-  private static final String PATH_DELIMITER = "/";
 
   /**
    * The name of the folder that contains the files associated with a table in
@@ -75,23 +67,30 @@ public class FileServiceImpl implements FileService {
   private static final String TABLES_FOLDER = "tables";
   private static final String ASSETS_FOLDER = "assets";
   private static final String CSV_FOLDER = "csv";
-  private CallingContext cc;
-  private TablesUserPermissions userPermissions;
-  private UriInfo info;
 
-  public FileServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
-      @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
-    ServiceUtils.examineRequest(sc, req, httpHeaders);
-    this.cc = ContextFactory.getCallingContext(sc, req);
-    this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
+  private final ServletContext sc;
+  private final HttpServletRequest req;
+  private final HttpHeaders headers;
+  private final CallingContext cc;
+  private final String appId;
+  private final UriInfo info;
+  private TablesUserPermissions userPermissions;
+
+  public FileServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers, UriInfo info, String appId, CallingContext cc)
+      throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+    this.sc = sc;
+    this.req = req;
+    this.headers = headers;
+    this.cc = cc;
+    this.appId = appId;
     this.info = info;
+    this.userPermissions = ContextFactory.getTablesUserPermissions(cc);
+
   }
 
   @Override
-  @GET
-  @Path("{filePath:.*}")
-  // because we want to get the whole path
-  public Response getFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException {
+  public Response getFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
+
     // First we need to get the table id from the path. We're
     // going to be assuming that you're passing the entire path of the file
     // under /sdcard/opendatakit/appId/  e.g., tables/tableid/the/rest/of/path.
@@ -158,11 +157,8 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  @POST
-  @Path("{filePath:.*}")
-  @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
-  // because we want to get the whole path
-  public Response putFile(@Context HttpServletRequest req, @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments,  @GZIP byte[] content) throws IOException, ODKTaskLockException {
+  public Response putFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments,  byte[] content) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
+
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
@@ -223,10 +219,12 @@ public class FileServiceImpl implements FileService {
       // 3) persist the user-friendly table entry about the blob
       tableFileInfoRow.put(cc);
 
-      String locationUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH
-          + ServletConsts.ODK_TABLES_SERVLET_BASE_PATH + BasicConsts.FORWARDSLASH
-          + appId + BasicConsts.FORWARDSLASH + FileService.SERVLET_PATH + BasicConsts.FORWARDSLASH
-          + odkClientVersion + BasicConsts.FORWARDSLASH + wholePath;
+      UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(OdkTables.class, "getFilesService");
+      URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion, wholePath);
+
+      String locationUrl = self.toURL().toExternalForm();
+
       return Response.status((outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) ? Status.ACCEPTED : Status.CREATED)
                   .header("Location",locationUrl).build();
     } catch (ODKDatastoreException e) {
@@ -239,10 +237,8 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  @DELETE
-  @Path("{filePath:.*}")
-  // because we want to get the whole path
-  public Response deleteFile(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException {
+  public Response deleteFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
+
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
@@ -293,9 +289,9 @@ public class FileServiceImpl implements FileService {
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (PathSegment segment : segments) {
-      sb.append(segment.toString());
+      sb.append(segment.getPath());
       if (i < segments.size() - 1) {
-        sb.append(PATH_DELIMITER);
+        sb.append(BasicConsts.FORWARDSLASH);
       }
       i++;
     }
@@ -324,12 +320,15 @@ public class FileServiceImpl implements FileService {
    * @return
    */
   private String getTableIdFromPathSegments(List<PathSegment> segments) {
+    String[] pathParts = constructPathFromSegments(segments).split(BasicConsts.FORWARDSLASH);
     String tableId = DbTableFileInfo.NO_TABLE_ID;
-    if ((segments.size() >= 2) && segments.get(0).toString().equals(TABLES_FOLDER)) {
-      tableId = segments.get(1).toString();
-    } else if ((segments.size() == 3) && segments.get(0).toString().equals(ASSETS_FOLDER)) {
-      if (segments.get(1).toString().equals(CSV_FOLDER)) {
-        String fileName = segments.get(2).toString();
+    String firstFolder = pathParts[0];
+    if ((segments.size() >= 2) && firstFolder.equals(TABLES_FOLDER)) {
+      tableId = pathParts[1];
+    } else if ((segments.size() == 3) && firstFolder.equals(ASSETS_FOLDER)) {
+      String secondFolder = pathParts[1];
+      if (secondFolder.equals(CSV_FOLDER)) {
+        String fileName = pathParts[2];
         String splits[] = fileName.split("\\.");
         if ( splits[splits.length-1].toLowerCase(Locale.ENGLISH).equals("csv") ) {
           tableId = splits[0];

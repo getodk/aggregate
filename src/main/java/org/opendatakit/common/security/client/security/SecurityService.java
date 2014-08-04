@@ -46,6 +46,7 @@ public interface SecurityService extends RemoteService {
 	 * @param xsrfString
 	 * @return information needed for building CredentialsInfo records and URLs.
 	 * @throws AccessDeniedException
+	 * @throws DatastoreFailureException 
 	 */
-	RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException;
+	RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException, DatastoreFailureException;
 }

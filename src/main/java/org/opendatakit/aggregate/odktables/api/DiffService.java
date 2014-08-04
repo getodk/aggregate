@@ -17,13 +17,11 @@
 package org.opendatakit.aggregate.odktables.api;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -32,14 +30,17 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DiffService {
 
   public static final String QUERY_DATA_ETAG = "data_etag";
+  public static final String CURSOR_PARAMETER = "cursor";
+  public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
    *
    * @param dataETag
+   * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
+   * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
    * @return {@link RowResourceList} of row changes since the dataETag value
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -48,8 +49,7 @@ public interface DiffService {
    * @throws BadColumnNameException
    */
   @GET
-  @Path("")
-  @GZIP
-  public Response /*RowResourceList*/ getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag)
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowResourceList*/ getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
       throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 }

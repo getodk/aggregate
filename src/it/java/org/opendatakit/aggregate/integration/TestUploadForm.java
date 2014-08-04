@@ -3,11 +3,13 @@ package org.opendatakit.aggregate.integration;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -39,6 +41,8 @@ public class TestUploadForm {
     FirefoxProfile profile = new FirefoxProfile();
     profile.setEnableNativeEvents(false);
     profile.setPreference("network.negotiate-auth.trusteduris", hostname);
+    Random r = new Random();
+    profile.setPreference(FirefoxProfile.PORT_PREFERENCE, r.nextInt(50) + 7000);
     driver = new FirefoxDriver(profile);
     driver.manage().timeouts().implicitlyWait(TIMEOUT_INTERVAL_MS, TimeUnit.MILLISECONDS);
     driver.get(fullRootUrl);
@@ -53,14 +57,14 @@ public class TestUploadForm {
 
     // wait for login process to complete...
     try {
-      Thread.sleep(7000);
+      Thread.sleep(10000);
     } catch (Exception e) {
     }
 
     Wait mainload = new Wait() {
       public boolean until() {
         try {
-          List<WebElement> elements = driver.findElementsByClassName("gwt-Label");
+          List<WebElement> elements = driver.findElements(By.className("gwt-Label"));
           for (WebElement e : elements) {
             if (e.getText().equals("Form Management"))
               return true;
@@ -81,7 +85,7 @@ public class TestUploadForm {
     Wait newload = new Wait() {
       public boolean until() {
         try {
-          List<WebElement> elements = driver.findElementsByTagName("h2");
+          List<WebElement> elements = driver.findElements(By.tagName("h2"));
           for (WebElement e : elements) {
             if (e.getText().equals("Upload one form into ODK Aggregate"))
               return true;
@@ -95,7 +99,7 @@ public class TestUploadForm {
     newload.wait("Upload page did not render", TIMEOUT_INTERVAL_MS, RETRY_INTERVAL_MS);
     File form = new File(formsDir + "/landUse.xml");
     driver.findElementById("form_def_file").sendKeys(form.getCanonicalPath());
-    WebElement theUploadButton = driver.findElementById("upload_form");
+    WebElement theUploadButton = driver.findElement(By.id("upload_form"));
     if (theUploadButton == null) {
       throw new IllegalStateException("could not find the upload button");
     }
@@ -105,7 +109,7 @@ public class TestUploadForm {
     Wait reload = new Wait() {
       public boolean until() {
         try {
-          List<WebElement> ps = driver.findElementsByTagName("p");
+          List<WebElement> ps = driver.findElements(By.tagName("p"));
           for (WebElement e : ps) {
             if (e.getText().equals("Successful form upload."))
               return true;
@@ -123,6 +127,6 @@ public class TestUploadForm {
 
   @AfterClass
   public static void tearDown() throws Exception {
-    driver.close();
+    driver.quit();
   }
 }

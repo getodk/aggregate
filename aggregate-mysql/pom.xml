@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendatakit</groupId>
     <artifactId>aggregate-mysql-specific</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <relativePath>../mysql-pom.xml</relativePath>
   </parent>
   <artifactId>aggregate-mysql</artifactId>
@@ -171,40 +171,4 @@
 		  </plugin>
 		</plugins>
 	</reporting>
-  <profiles>
-    <profile>
-       <!-- This tries to use xvfb only in headless Linux environments --> 
-      <id>Linux</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-		<property>
-			<name>headless.operation</name>
-			<value>yes</value>
-		</property>
-      </activation>
-      <build>
-        <plugins>
-				<!--  Binding to the package phase is a hack to ensure	
-                      Xvfb is run before the Selenium server is started -->
-   <!--       <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>selenium-maven-plugin</artifactId>
-            <version>1.1</version>
-            <executions>
-              <execution>
-                <id>xvfb</id>
-                <phase>package</phase>
-				<configuration>
-					<xvfbExecutable></xvfbExecutable>
-				</configuration>
-                <goals>
-                  <goal>xvfb</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin> -->
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

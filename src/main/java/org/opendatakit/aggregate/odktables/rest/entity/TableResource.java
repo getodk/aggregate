@@ -16,31 +16,44 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-@Root
-@Default(value = DefaultType.FIELD, required = true)
+
+@JacksonXmlRootElement(localName="tableResource")
 public class TableResource extends TableEntry {
 
-  @Element(required = true)
+  /**
+   * URLs for various other parts of the API
+   */
+
+  /**
+   * Get this same TableResource.
+   */
   private String selfUri;
 
-  @Element(required = true)
+  /**
+   * Get the TableDefinition for this tableId
+   */
   private String definitionUri;
 
-  @Element(required = true)
+  /**
+   * Path prefix for data row interactions
+   */
   private String dataUri;
 
-  @Element(required = true)
+  /**
+   * Path prefix for data row attachment interactions
+   */
   private String instanceFilesUri;
 
-  @Element(required = true)
+  /**
+   * Path prefix for differencing (changes-since) service.
+   */
   private String diffUri;
 
-  @Element(required = true)
+  /**
+   * Path prefix for permissions / access-control service.
+   */
   private String aclUri;
 
   public TableResource(TableEntry entry) {

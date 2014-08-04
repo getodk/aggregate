@@ -45,7 +45,7 @@
   </xs:complexType>
   <xs:complexType name="appengine-web-appType">
     <xs:all>
-      <xs:element type="xs:string" name="application"/>
+      <xs:element type="xs:string" name="application" minOccurs="0"/>
       <xs:element type="xs:string" name="version" minOccurs="0"/>
       <xs:element type="xs:string" name="source-language" minOccurs="0"/>
       <xs:element type="xs:string" name="module" minOccurs="0"/>
@@ -57,6 +57,7 @@
       <xs:element type="ns:resource-filesType" name="resource-files" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="ns:system-propertiesType" name="system-properties" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="ns:vm-settingsType" name="vm-settings" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
+      <xs:element type="ns:vm-health-checkType" name="vm-health-check" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="ns:env-variablesType" name="env-variables" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="xs:boolean" name="ssl-enabled" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="xs:boolean" name="sessions-enabled" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
@@ -114,6 +115,18 @@
       <xs:element type="xs:string" name="max-pending-latency" minOccurs="0"/>
       <xs:element type="xs:string" name="min-idle-instances" minOccurs="0"/>
       <xs:element type="xs:string" name="max-idle-instances" minOccurs="0"/>
+      <xs:element type="xs:string" name="max-concurrent-requests" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="vm-health-checkType">
+    <xs:all>
+      <xs:element type="xs:boolean" name="enable-health-check" minOccurs="0"/>
+      <xs:element type="xs:unsignedInt" name="check-interval-sec" minOccurs="0"/>
+      <xs:element type="xs:unsignedInt" name="timeout-sec" minOccurs="0"/>
+      <xs:element type="xs:unsignedInt" name="unhealthy-threshold" minOccurs="0"/>
+      <xs:element type="xs:unsignedInt" name="healthy-threshold" minOccurs="0"/>
+      <xs:element type="xs:unsignedInt" name="restart-threshold" minOccurs="0"/>
+      <xs:element type="xs:string" name="host" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="manual-scaling-type">

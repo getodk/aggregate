@@ -22,9 +22,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
  * Servlet for downloading a manifest of files to the phone for the correct app
@@ -33,38 +37,36 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
  * @author sudar.sam@gmail.com
  *
  */
-@Path("{appId}/manifest/{odkClientVersion}")
-@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface FileManifestService {
 
   /**
    *
-   * @param servletContext
-   * @param req
-   * @param resp
-   * @param appId
-   * @param tableId
-   * @param appLevel
+   * @param odkClientVersion
    * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
+   * @throws ODKOverQuotaException
+   * @throws ODKEntityNotFoundException
+   * @throws ODKTaskLockException
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
   @GET
-  @Path("")
-  @GZIP
-  public Response /*OdkTablesFileManifest*/ getAppLevelFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion);
+  @Path("{odkClientVersion}")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*OdkTablesFileManifest*/ getAppLevelFileManifest(@PathParam("odkClientVersion") String odkClientVersion) throws ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
 
   /**
    *
-   * @param servletContext
-   * @param req
-   * @param resp
-   * @param appId
+   * @param odkClientVersion
    * @param tableId
-   * @param appLevel
    * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
+   * @throws ODKOverQuotaException
+   * @throws ODKEntityNotFoundException
+   * @throws ODKTaskLockException
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
    */
   @GET
-  @Path("{tableId}")
-  @GZIP
-  public Response /*OdkTablesFileManifest*/ getTableIdFileManifest(
-      @PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId);
+  @Path("{odkClientVersion}/{tableId}")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*OdkTablesFileManifest*/ getTableIdFileManifest(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) throws ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
 }

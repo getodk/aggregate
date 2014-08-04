@@ -16,20 +16,16 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Root
-@Default(DefaultType.FIELD)
 public class TableAclResource extends TableAcl {
 
-  @Element(required = true)
   private String selfUri;
-  @Element(required = false)
+
+  @JsonProperty(required = false)
   private String aclUri;
-  @Element(required = false)
+
+  @JsonProperty(required = false)
   private String tableUri;
 
   @SuppressWarnings("unused")

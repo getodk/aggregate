@@ -16,6 +16,7 @@
 package org.opendatakit.common.persistence.engine.gae;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.opendatakit.common.persistence.ITaskLockType;
@@ -34,6 +35,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Transaction;
 
 /**
@@ -68,8 +71,11 @@ public class TaskLockImpl implements TaskLock {
       Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
       Query query = new Query(KIND, entityGroupKey);
       query.setAncestor(entityGroupKey);
-      query.addFilter( FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
-      query.addFilter( TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
+      query.setFilter(
+        new Query.CompositeFilter( CompositeFilterOperator.AND, Arrays.<Filter>asList(
+            new Query.FilterPredicate( FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId ),
+            new Query.FilterPredicate( TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName() )
+            )));
       PreparedQuery pquery = ds.prepare(query);
 
       Iterable<Entity> entities = pquery.asIterable();
@@ -395,8 +401,11 @@ public class TaskLockImpl implements TaskLock {
       Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
       Query query = new Query(KIND, entityGroupKey);
       query.setAncestor(entityGroupKey);
-      query.addFilter( FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId);
-      query.addFilter( TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName());
+      query.setFilter(
+          new Query.CompositeFilter( CompositeFilterOperator.AND, Arrays.<Filter>asList(
+              new Query.FilterPredicate( FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId ),
+              new Query.FilterPredicate( TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL, taskType.getName() )
+              )));
       PreparedQuery pquery = ds.prepare(query);
       Iterable<Entity> entities = pquery.asIterable();
       // There may be expired locks in the database.

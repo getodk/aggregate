@@ -54,11 +54,22 @@ public class OdkTablesViewTable extends FlexTable {
   // this is the heading for the delete row button.
   private static final String DELETE_ROW_HEADING = "Delete";
 
+  // these are far right
+  private static final String SAVEPOINT_TYPE = "Status";
+  private static final String FORM_ID = "Form Id";
+  private static final String LOCALE = "Locale";
+  private static final String SAVEPOINT_TIMESTAMP = "Last Updated At";
+  private static final String SAVEPOINT_CREATOR = "Last Updated By";
+  private static final String ROW_ID = "Row ID";
+  private static final String ROW_ETAG = "Row ETag";
+  private static final String FILTER_TYPE = "Filter Type";
+  private static final String FILTER_VALUE = "Filter Value";
+
   private AggregateSubTabBase tableSubTab;
 
   // this is the number of columns that exist for a table as returned
   // by the server that are NOT user defined.
-  private static final int NUMBER_ADMIN_COLUMNS = 2;
+  private static final int NUMBER_ADMIN_COLUMNS = 10;
 
   // the message to display when there is no data in the table.
   private static String NO_DATA_MESSAGE = "There is no data in this table.";
@@ -142,6 +153,27 @@ public class OdkTablesViewTable extends FlexTable {
 
       }
     };
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
+    // TODO: paginate this
 
     SecureGWT.getServerDataService().getTableContents(table.getTableId(),
         getDataCallback);
@@ -219,6 +251,15 @@ public class OdkTablesViewTable extends FlexTable {
         setText(0, i, name);
         i++;
       }
+      setText(0, i++, SAVEPOINT_TYPE);
+      setText(0, i++, FORM_ID);
+      setText(0, i++, LOCALE);
+      setText(0, i++, SAVEPOINT_TIMESTAMP);
+      setText(0, i++, SAVEPOINT_CREATOR);
+      setText(0, i++, ROW_ID);
+      setText(0, i++, ROW_ETAG);
+      setText(0, i++, FILTER_TYPE);
+      setText(0, i++, FILTER_VALUE);
 
       getRowFormatter().addStyleName(0, "titleBar");
     }
@@ -262,15 +303,24 @@ public class OdkTablesViewTable extends FlexTable {
         if (!row.isDeleted()) {
           // now set the delete button
           setWidget(currentRow, 0, new OdkTablesDeleteRowButton(this,
-              currentTable.getTableId(), row.getRowId()));
+              currentTable.getTableId(), row.getRowId(), row.getRowETag()));
           int j = 1;
           for (String column : columnNames) {
             setWidget(currentRow, j, new HTML(row.getValues().get(column)));
             j++;
+          }
+          setWidget(currentRow, j++, new HTML(row.getSavepointType()));
+          setWidget(currentRow, j++, new HTML(row.getFormId()));
+          setWidget(currentRow, j++, new HTML(row.getLocale()));
+          setWidget(currentRow, j++, new HTML(row.getSavepointTimestampIso8601Date()));
+          setWidget(currentRow, j++, new HTML(row.getSavepointCreator()));
+          setWidget(currentRow, j++, new HTML(row.getRowId()));
+          setWidget(currentRow, j++, new HTML(row.getRowETag()));
+          setWidget(currentRow, j++, new HTML(row.getFilterScope().getType().name()));
+          setWidget(currentRow, j++, new HTML(row.getFilterScope().getValue()));
 
-            if (currentRow % 2 == 0) {
-              getRowFormatter().addStyleName(currentRow, "evenTableRow");
-            }
+          if (currentRow % 2 == 0) {
+            getRowFormatter().addStyleName(currentRow, "evenTableRow");
           }
         }
         currentRow++;

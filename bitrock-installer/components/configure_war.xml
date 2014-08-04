@@ -325,8 +325,8 @@
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
-                    <key>security.server.superUser</key>
-                    <value>mailto:${email}</value>
+                    <key>security.server.superUsername</key>
+                    <value>${username}</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
@@ -563,7 +563,7 @@ Tomcat installation.
 ${html_steps_end_item}${html_steps_begin_item}
 start Apache (if not already started)
 ${html_steps_end_item}${html_steps_begin_item}
-visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; and go to the Management / Permissions tab to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; Log in using the super-user's Aggregate username with password <tt>aggregate</tt> and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
 ${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
 If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
 rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
@@ -631,7 +631,7 @@ Tomcat installation.
 ${html_steps_end_item}${html_steps_begin_item}
 start Apache (if not already started)
 ${html_steps_end_item}${html_steps_begin_item}
-visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; and go to the Management / Permissions tab to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; Log in using the super-user's Aggregate username with password <tt>aggregate</tt> and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
 ${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
 If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
 rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
@@ -651,7 +651,7 @@ ${html_steps_end}</text>
             <text>${html_steps_begin}
 ${html_steps_begin_item}Browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;uploadAggregateToAppEngine.hta&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance and the password for that account. 
 ${html_steps_end_item}${html_steps_begin_item}
-Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with password <tt>aggregate</tt> and go to the Site Admin / Permissions tab to change that password and to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>

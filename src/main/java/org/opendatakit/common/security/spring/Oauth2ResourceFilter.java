@@ -50,13 +50,14 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.common.utils.HttpClientFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * If the session does not already have an Authentication element,
@@ -282,6 +283,9 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
            }
          }
      } catch ( IOException e ) {
+       logger.error(e.toString());
+       return nullData;
+     } catch ( Exception e ) {
        logger.error(e.toString());
        return nullData;
      }
