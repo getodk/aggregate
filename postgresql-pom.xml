@@ -73,7 +73,7 @@
 						<execution>
 							<!--  Tears down whatever we set up in the postgres-setup execution -->
 							<id>postgresql-teardown</id>
-							<phase>post-integration-test</phase>
+							<phase>verify</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>
