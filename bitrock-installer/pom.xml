@@ -74,6 +74,28 @@
 								<delete file="${project.basedir}/files/ODKAggregate.war" />
 								<touch file="${project.basedir}/files/appengine-web.xml" />
 								<delete file="${project.basedir}/files/appengine-web.xml" />
+								<!-- delete the exploded war directory -->
+								<mkdir dir="${project.build.directory}/exploded-war" />
+								<delete includeemptydirs="true">
+									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
+								</delete>
+								<!-- delete all but the most recent war file -->
+								<resources id="mostRecent">
+									<first>
+										<sort>
+										  <fileset dir="${project.basedir}" includes="*.war" />
+										  <reverse xmlns="antlib:org.apache.tools.ant.types.resources.comparators">
+											<date />
+										  </reverse>
+										</sort>
+									</first>
+								</resources>
+								<delete>
+								  <difference>
+									<fileset dir="${project.basedir}" includes="*.war" />
+									<resources refid="mostRecent"/>
+								  </difference>
+								</delete>
 							</target>
 						</configuration>
 						<goals>
