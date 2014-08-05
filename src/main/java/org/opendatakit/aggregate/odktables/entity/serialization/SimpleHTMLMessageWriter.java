@@ -103,7 +103,7 @@ public class SimpleHTMLMessageWriter<T> implements MessageBodyWriter<T> {
       String ifNoneMatchTag = headers.getRequestHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
       if ( ifNoneMatchTag != null && ifNoneMatchTag.equals(eTag) ) {
         // return UNMODIFIED...
-        throw new NotModifiedException();
+        throw new NotModifiedException(ifNoneMatchTag);
       } else {
         OutputStream rawStr = rawStream;
         if ( emitGZIPContentEncodingKey ) {
