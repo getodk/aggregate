@@ -76,6 +76,7 @@ a,a:visited,a:hover {
 	padding: 3px;
 	border: 2px solid #777984;
 	background: url("images/mostly_opaque.png");
+	z-index: 2000;
 }
 
 /**
@@ -86,6 +87,7 @@ a,a:visited,a:hover {
 	background-color: #F5F5F5;
 	opacity: 0.6;
 	filter: alpha(opacity=30);
+	z-index: 1500;
 }
 
 #filters_data {
