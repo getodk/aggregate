@@ -74,7 +74,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       "<form id=\"service_account_form\""
       + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
       + " action=\"";// emit the ADDR
-  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY = "\">"
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY = "\" >"
 	  + "<div style=\"overflow: auto;\"><h2>Google API Credentials</h2>"
 	  + "<p>Please refer to the documentation at <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">Service Account Configuration</a>.</p>"
       + "<h2>Google Simple API Key</h2>"
@@ -82,8 +82,8 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       + "	  <table id=\"uploadTable\">"
       + "	  	<tr>"
       + "	  		<td><label for=\"simple_api_key\">Simple API Key:</label></td>"
-      + "	  		<td><input id=\"simple_api_key\" type=\"text\" size=\"80\" name=\"simple_api_key\" >";
-  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_ID = "</input></td>"
+      + "	  		<td><input id=\"simple_api_key\" type=\"text\" size=\"80\" name=\"simple_api_key\" value=\"";
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_ID = "\" /></td>"
        + "      </tr>\n"
        + "<tr><td colspan=\"2\"><h2>Google API Service Account information</h2></td></tr>"
        + "<tr><td colspan=\"2\"><p>Google API Service accounts are required when "
@@ -95,13 +95,13 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
        + "      </tr>\n"
        + "      <tr>"
        + "         <td><label for=\"client_id\">Client ID:</label></td>"
-       + "         <td><input id=\"client_id\" type=\"text\" size=\"80\" name=\"client_id\" >";
-  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_EMAIL = "</input></td>"
+       + "         <td><input id=\"client_id\" type=\"text\" size=\"80\" name=\"client_id\" value=\"";
+  private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_EMAIL = "\" /></td>"
        + "      </tr>"
        + "      <tr>"
        + "         <td><label for=\"service_account_email\">Email address:</label></td>"
-       + "         <td><input id=\"service_account_email\" type=\"text\" size=\"80\" name=\"service_account_email\" >";
-  private static final String UPLOAD_PAGE_BODY_END = "</input></td>"
+       + "         <td><input id=\"service_account_email\" type=\"text\" size=\"80\" name=\"service_account_email\" value=\"";
+  private static final String UPLOAD_PAGE_BODY_END = "\" /></td>"
       + "      </tr>"
       + "      <tr>"
       + "         <td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Google Credentials\" /></td>"
