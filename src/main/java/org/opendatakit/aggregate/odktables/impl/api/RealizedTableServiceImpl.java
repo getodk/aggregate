@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -46,6 +47,8 @@ import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 
 public class RealizedTableServiceImpl implements RealizedTableService {
@@ -82,6 +85,11 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   @Override
   public Response deleteTable() throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException {
+
+    TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
+    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+      throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
+    }
 
     tm.deleteTable(tableId);
     logger.info("tableId: " + tableId);
