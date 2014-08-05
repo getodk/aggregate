@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -54,6 +55,8 @@ import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 
 public class TableServiceImpl implements TableService {
@@ -128,6 +131,11 @@ public class TableServiceImpl implements TableService {
   @Override
   public Response createTable(TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, IOException {
+
+    TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
+    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+      throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
+    }
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 

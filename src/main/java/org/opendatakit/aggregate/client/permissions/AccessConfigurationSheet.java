@@ -149,11 +149,6 @@ public class AccessConfigurationSheet extends Composite {
         return (key.getType() != UserType.ANONYMOUS);
       }
 
-      if (auth == GrantedAuthorityName.GROUP_ADMINISTER_TABLES) {
-        // anonymous user cannot synchronize tables
-        return (key.getType() != UserType.ANONYMOUS);
-      }
-
       if (auth == GrantedAuthorityName.GROUP_DATA_COLLECTORS) {
         // data collectors can only be ODK accounts...
         return (key.getUsername() != null);

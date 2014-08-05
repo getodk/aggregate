@@ -20,20 +20,14 @@ public class NotModifiedException extends ODKTablesException {
 
   private static final long serialVersionUID = 1L;
 
-  public NotModifiedException() {
+  private final String eTag;
+
+  public NotModifiedException(String eTag) {
     super();
+    this.eTag = eTag;
   }
 
-  public NotModifiedException(String message) {
-    super(message);
+  public String getETag() {
+    return eTag;
   }
-
-  public NotModifiedException(Throwable cause) {
-    super(cause);
-  }
-
-  public NotModifiedException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
 }

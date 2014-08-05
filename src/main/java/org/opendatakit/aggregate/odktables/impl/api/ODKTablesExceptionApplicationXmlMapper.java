@@ -16,35 +16,23 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
-import java.io.IOException;
-
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.rest.entity.Error;
-import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
+import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 
-public class IOExceptionMapper implements ExceptionMapper<IOException> {
+@Produces({ MediaType.APPLICATION_XML })
+@Provider
+public class ODKTablesExceptionApplicationXmlMapper implements ExceptionMapper<ODKTablesException> {
 
-  private final MediaType type;
-
-  public IOExceptionMapper(MediaType type) {
-    this.type = type;
-  }
+  ODKTablesExceptionMapper mapper = new ODKTablesExceptionMapper(MediaType.APPLICATION_XML_TYPE);
 
   @Override
-  public Response toResponse(IOException e) {
-    e.printStackTrace();
-
-    String msg = e.getMessage();
-    if (msg == null) {
-      msg = e.toString();
-    }
-
-    return Response.status(Status.INTERNAL_SERVER_ERROR)
-        .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();
+  public Response toResponse(ODKTablesException e) {
+    return mapper.toResponse(e);
   }
 
 }
