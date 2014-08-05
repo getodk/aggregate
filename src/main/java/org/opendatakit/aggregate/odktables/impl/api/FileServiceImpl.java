@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +51,8 @@ import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
+import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -159,6 +162,11 @@ public class FileServiceImpl implements FileService {
   @Override
   public Response putFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments,  byte[] content) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
+    TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
+    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+      throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
+    }
+    
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
@@ -238,6 +246,11 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response deleteFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
+
+    TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
+    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+      throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
+    }
 
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
