@@ -26,4 +26,6 @@ public interface PreferenceServiceAsync {
 
   void setFasterBackgroundActionsDisabled(Boolean disabled, AsyncCallback<Void> callback);
 
+  void setOdkAppName(String appName, AsyncCallback<Void> callback);
+
 }

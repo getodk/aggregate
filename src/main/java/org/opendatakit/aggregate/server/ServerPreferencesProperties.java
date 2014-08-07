@@ -91,7 +91,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
         getEnketoApiUrl(cc), getEnketoApiToken(cc), getOdkTablesEnabled(cc),
-        getFasterBackgroundActionsDisabled(cc));
+        getOdkTablesAppId(cc), getFasterBackgroundActionsDisabled(cc));
   }
 
   /**

@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 public class PreferenceSummary implements Serializable {
 
-  private static final long serialVersionUID = -5344882762820967968L;
+  private static final long serialVersionUID = -534488276282096798L;
 
   private String googleSimpleApiKey;
 
@@ -32,6 +32,8 @@ public class PreferenceSummary implements Serializable {
 
   private Boolean odkTablesEnabled;
 
+  private String appName;
+  
   private Boolean fasterBackgroundActionsDisabled;
 
   public PreferenceSummary() {
@@ -40,12 +42,13 @@ public class PreferenceSummary implements Serializable {
 
   public PreferenceSummary(String googleSimpleApiKey, String googleApiClientId,
       String enketoApiUrl, String enketoApiToken, Boolean odkTablesEnabled,
-      Boolean fasterBackgroundActionsDisabled) {
+      String appName, Boolean fasterBackgroundActionsDisabled) {
     this.googleSimpleApiKey = googleSimpleApiKey;
     this.googleApiClientId = googleApiClientId;
     this.enketoApiUrl = enketoApiUrl;
     this.enketoApiToken = enketoApiToken;
     this.odkTablesEnabled = odkTablesEnabled;
+    this.appName = appName;
     this.fasterBackgroundActionsDisabled = fasterBackgroundActionsDisabled;
   }
 
@@ -67,6 +70,10 @@ public class PreferenceSummary implements Serializable {
 
   public Boolean getOdkTablesEnabled() {
     return odkTablesEnabled;
+  }
+
+  public String getAppName() {
+    return appName;
   }
 
   public Boolean getFasterBackgroundActionsDisabled() {
