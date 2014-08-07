@@ -163,7 +163,6 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
   * @return The parsed parameters, or null if no OAuth authorization header was supplied.
   */
  protected String parseHeaderToken(HttpServletRequest request) {
-    @SuppressWarnings("unchecked")
     Enumeration<String> headers = request.getHeaders("Authorization");
     while (headers.hasMoreElements()) {
        String value = headers.nextElement();

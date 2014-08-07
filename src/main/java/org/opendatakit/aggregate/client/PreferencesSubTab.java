@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client;
 
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
+import org.opendatakit.aggregate.client.widgets.ChangeAppNameButton;
 import org.opendatakit.aggregate.client.widgets.DisableFasterBackgroundActionsCheckbox;
 import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
@@ -37,13 +38,15 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private static final String UNDEFINED_STYLE = "undefinedValue";
   private static final String DEFINED_STYLE = "definedValue";
 
+  private static final String VERSION_LABEL = "<h2>Version Information</h2>";
+  private static final String VERSION_STRING_STYLE = "app_version_string";
+  
   private static final String GOOGLE_API_CREDENTIALS_LABEL = "<h2>Google API Credentials</h2>";
   private static final String GOOGLE_API_CREDENTIALS_INFO = "<p>See <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">http://opendatakit.org/use/aggregate/oauth2-service-account/</a> for instructions on obtaining and supplying these values.</p>";
   private static final String GOOGLE_API_KEY_LABEL = "<h3>Simple API Access Key</h3>";
   private static final String GOOGLE_API_KEY_INFO = "<p>Recommended for accessing Google Maps.</p>";
   private static final String GOOGLE_API_CLIENT_ID_LABEL = "<h3>Google OAuth2 Credentials</h3>";
   private static final String GOOGLE_API_CLIENT_ID_INFO = "<p>Necessary for publishing to Google Spreadsheets and Fusion Tables</p>";
-  private static final String FEATURES_LABEL = "<h2>Aggregate Features</h2>";
 
   private static final String NEW_SERVICE_ACCOUNT_TXT = "Change Google API Credentials";
   private static final String NEW_SERVICE_ACCOUNT_TOOLTIP_TXT = "Upload NEW Google Simple API Key and Oauth2 Service Account information.";
@@ -64,12 +67,25 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private static final String NEW_ENKETO_SERVICE_ACCOUNT_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> "
       + NEW_ENKETO_SERVICE_ACCOUNT_TXT;
 
+  private static final String ODK_TABLES_FEATURES_LABEL = "<h2>ODK 2.0 Features</h2>";
+  
+  //external: enable 2.0 features checkbox
+  
+  private static final String ODK_TABLES_APP_NAME_LABEL = "<h3>ODK 2.0 Application Name</h3>";
+  private static final String ODK_TABLES_APP_NAME_INFO = "<p>The Application Name used by the ODK 2.0 client application -- the name of the Android directory under <tt>/sdcard/opendatakit</tt>.</p>";
+
+  private static final String FEATURES_LABEL = "<h2>Aggregate Features</h2>";
+
+  // external: slower background publishing checkbox
+  
   private Label simpleApiKey;
   private Label googleApiClientId;
 
   private Label enketoApiUrl;
   private Label enketoApiToken;
   private EnableOdkTablesCheckbox odkTablesEnable;
+  private Label appName;
+  private ChangeAppNameButton changeAppNameButton;
   private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
 
   private PreferencesCompletionCallback settingsChange = new PreferencesCompletionCallback() {
@@ -78,6 +94,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
       setCredentialValues();
       disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
       odkTablesEnable.updateValue(Preferences.getOdkTablesEnabled());
+      appName.setText(Preferences.getAppName());
     }
 
     @Override
@@ -90,10 +107,10 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     // vertical
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
-    HTML labelVersion = new HTML("<h2>Version Information</h2>");
+    HTML labelVersion = new HTML(VERSION_LABEL);
     add(labelVersion);
     Label version = new Label();
-    version.setStylePrimaryName("app_version_string");
+    version.setStylePrimaryName(VERSION_STRING_STYLE);
     version.setText(UIConsts.VERSION_STRING);
     add(version);
 
@@ -177,6 +194,31 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     // add(new
     // UpdateGoogleClientCredentialsButton(googleApiClientId.getText()));
 
+    HTML tablesFeatures = new HTML(ODK_TABLES_FEATURES_LABEL);
+    add(tablesFeatures);
+
+    odkTablesEnable = new EnableOdkTablesCheckbox(Preferences.getOdkTablesEnabled(), settingsChange);
+    add(odkTablesEnable);
+
+    HTML br = new HTML("<br>");
+    add(br);
+
+    HTML labelAppName = new HTML(ODK_TABLES_APP_NAME_LABEL);
+    labelAppName.setStylePrimaryName(INDENTED_STYLE);
+    add(labelAppName);
+
+    appName = new Label();
+    appName.setStylePrimaryName(INDENTED_ENTRY_STYLE);
+    add(appName);
+
+    HTML labelAppNameInfo = new HTML(ODK_TABLES_APP_NAME_INFO);
+    labelAppNameInfo.setStylePrimaryName(INDENTED_STYLE);
+    add(labelAppNameInfo);
+
+    changeAppNameButton = new ChangeAppNameButton(settingsChange);
+    changeAppNameButton.setStylePrimaryName(INDENTED_STYLE);
+    add(changeAppNameButton);
+    
     HTML features = new HTML(FEATURES_LABEL);
     add(features);
 
@@ -184,11 +226,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
         Preferences.getFasterBackgroundActionsDisabled(), settingsChange);
     add(disableFasterBackgroundActions);
 
-    HTML br = new HTML("<br>");
-    add(br);
-
-    odkTablesEnable = new EnableOdkTablesCheckbox(Preferences.getOdkTablesEnabled(), settingsChange);
-    add(odkTablesEnable);
   }
 
   @Override

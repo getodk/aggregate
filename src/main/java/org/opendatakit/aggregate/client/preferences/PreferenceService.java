@@ -37,4 +37,6 @@ public interface PreferenceService extends RemoteService {
   void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  
+  void setOdkAppName(String appName) throws AccessDeniedException, RequestFailureException, DatastoreFailureException; 
 }
