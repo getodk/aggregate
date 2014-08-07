@@ -75,9 +75,9 @@
 								<touch file="${project.basedir}/files/appengine-web.xml" />
 								<delete file="${project.basedir}/files/appengine-web.xml" />
 								<!-- delete the exploded war directory -->
-								<mkdir dir="${project.build.directory}/exploded-war" />
+								<mkdir dir="${project.build.directory}" />
 								<delete includeemptydirs="true">
-									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
+									<fileset dir="${project.build.directory}" includes="**/*" />
 								</delete>
 								<!-- delete all but the most recent war file -->
 								<resources id="mostRecent">
