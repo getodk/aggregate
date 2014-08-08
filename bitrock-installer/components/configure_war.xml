@@ -325,7 +325,12 @@
                 </propertiesFileSet>
                 <propertiesFileSet>
                     <file>${temp_dir}/conf/common/security.properties</file>
-                    <key>security.server.superUsername</key>
+                    <key>security.server.superUser</key>
+                    <value></value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/common/security.properties</file>
+                    <key>security.server.superUserUsername</key>
                     <value>${username}</value>
                 </propertiesFileSet>
                 <propertiesFileSet>
