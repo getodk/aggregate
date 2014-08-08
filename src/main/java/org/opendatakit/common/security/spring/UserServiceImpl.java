@@ -73,8 +73,12 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
     if (superUserEmail == null) {
       throw new IllegalStateException("superUserEmail must be configured");
     }
-    if (!superUserEmail.startsWith(SecurityUtils.MAILTO_COLON)
-        || !superUserEmail.contains(SecurityUtils.AT_SIGN)) {
+    if ( superUserEmail.length() == 0 ) {
+      superUserEmail = null;
+    }
+    if ( superUserEmail != null &&
+        (!superUserEmail.startsWith(SecurityUtils.MAILTO_COLON)
+          || !superUserEmail.contains(SecurityUtils.AT_SIGN))) {
       throw new IllegalStateException("superUserEmail is malformed. "
           + "Must be of the form 'mailto:user@gmail.com' or other supported OpenID provider.");
     }
