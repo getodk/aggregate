@@ -393,6 +393,9 @@ public class SecurityServiceUtil {
    */
   public static final EmailParser.Email getSuperUserEmail(CallingContext cc) {
     String suEmail = cc.getUserService().getSuperUserEmail();
+    if ( suEmail == null ) {
+      return null;
+    }
     return new EmailParser.Email(suEmail.substring(SecurityUtils.MAILTO_COLON.length(),
         suEmail.indexOf(SecurityUtils.AT_SIGN)), suEmail);
   }
