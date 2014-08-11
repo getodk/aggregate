@@ -58,6 +58,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   // other keys...
   private static final String SITE_KEY = "SITE_KEY";
+  private static final String LAST_KNOWN_REALM_STRING = "LAST_KNOWN_REALM_STRING";
 
   public static final String GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN = "GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN";
 
@@ -123,6 +124,17 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static void setSiteKey(CallingContext cc, String siteKey)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, SITE_KEY, siteKey);
+  }
+
+  public static String getLastKnownRealmString(CallingContext cc) throws ODKEntityNotFoundException,
+      ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, LAST_KNOWN_REALM_STRING);
+    return value;
+  }
+
+  public static void setLastKnownRealmString(CallingContext cc, String lastKnownRealmString)
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
+    setServerPreferencesProperty(cc, LAST_KNOWN_REALM_STRING, lastKnownRealmString);
   }
 
   public static String getGoogleSimpleApiKey(CallingContext cc) throws ODKEntityNotFoundException,
