@@ -669,8 +669,7 @@ public class SecurityServiceUtil {
     } catch (Exception e) {
       mde = null;
     }
-    List<RegisteredUsersTable> suList = RegisteredUsersTable.assertSuperUsers(cc.getUserService(),
-        mde, cc.getDatastore());
+    List<RegisteredUsersTable> suList = RegisteredUsersTable.assertSuperUsers(mde, cc);
 
     Set<String> uriUsers;
 
