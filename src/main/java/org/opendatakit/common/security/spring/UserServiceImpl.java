@@ -171,7 +171,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
     } catch (Exception e) {
       mde = null;
     }
-    List<RegisteredUsersTable> tList = RegisteredUsersTable.assertSuperUsers(this, mde, datastore);
+    List<RegisteredUsersTable> tList = RegisteredUsersTable.assertSuperUsers(mde, cc);
 
     String uriUser = cc.getCurrentUser().getUriUser();
     for (RegisteredUsersTable t : tList) {

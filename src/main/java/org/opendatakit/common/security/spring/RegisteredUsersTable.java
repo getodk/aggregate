@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -31,6 +32,9 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.UserService;
@@ -449,6 +453,38 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 		}
 	}
 	
+	private static final boolean resetSuperUserPasswordIfNecessary(RegisteredUsersTable t, boolean newUser, MessageDigestPasswordEncoder mde, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException, ODKEntityNotFoundException {
+	  String localSuperUser = t.getUsername();
+	  String currentRealmString = cc.getUserService().getCurrentRealm().getRealmString();
+	  String lastKnownRealmString = ServerPreferencesProperties.getLastKnownRealmString(cc);
+	  if ( !newUser && lastKnownRealmString != null && lastKnownRealmString.equals(currentRealmString) ) {
+	    // no need to reset the passwords
+	    return false;
+	  }
+	  // The realm string has changed, so we need to reset the password.
+     RealmSecurityInfo r = new RealmSecurityInfo();
+     r.setRealmString(currentRealmString);
+     r.setBasicAuthHashEncoding(mde.getAlgorithm());
+
+     CredentialsInfo credential;
+     try {
+        credential = CredentialsInfoBuilder.build(localSuperUser, r, "aggregate");
+     } catch (NoSuchAlgorithmException e) {
+        e.printStackTrace();
+        throw new IllegalStateException("unrecognized algorithm");
+     }
+     t.setDigestAuthPassword(credential.getDigestAuthHash());
+     t.setBasicAuthPassword(credential.getBasicAuthHash());
+     t.setBasicAuthSalt(credential.getBasicAuthSalt());
+     // done setting the password...persist it...
+     t.setIsRemoved(false);
+     cc.getDatastore().putEntity(t, cc.getCurrentUser());
+     // remember the current realm string
+     ServerPreferencesProperties.setLastKnownRealmString(cc, currentRealmString);
+     logger.warn("Reset password of the local superuser record: " + t.getUri() + " identified by: " + t.getUsername());
+     return true;
+	}
+	
 	/**
 	 * Attempts to find user records matching the local ODK Aggregate username and the 
 	 * e-mail address of the super-user.  There can only be at most one of each.  For
@@ -465,9 +501,11 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 	 * @return list of the superUsers of record.
 	 * @throws ODKDatastoreException
 	 */
-	public static final List<RegisteredUsersTable> assertSuperUsers(UserService userService, MessageDigestPasswordEncoder mde, Datastore datastore) throws ODKDatastoreException {
+	public static final List<RegisteredUsersTable> assertSuperUsers(MessageDigestPasswordEncoder mde, CallingContext cc) throws ODKDatastoreException {
 		List<RegisteredUsersTable> tList = new ArrayList<RegisteredUsersTable>();
 
+      UserService userService = cc.getUserService();
+      Datastore datastore = cc.getDatastore();
 		boolean changesMade = false;
 		try {
 			// deal with the superUserEmail...
@@ -488,9 +526,9 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 					t.setFullName(e.getFullName());
 					t.setEmail(e.getEmail());
 					datastore.putEntity(t, user);
+               logger.warn("Created a new superuser email record: " + t.getUri() + " identified by: " + t.getEmail());
+               changesMade = true;
 					tList.add(t);
-					changesMade = true;
-					logger.warn("Created a new superuser email record: " + t.getUri() + " identified by: " + t.getEmail());
 				}
 			}
 			// deal with the superUserUsername...
@@ -499,6 +537,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 				User user = userService.getDaemonAccountUser();
 				RegisteredUsersTable t = RegisteredUsersTable.getUserByUsername(localSuperUser, userService, datastore);
 				if ( t != null ) {
+				  changesMade = resetSuperUserPasswordIfNecessary(t, false, mde, cc);
 					tList.add(t);
 				} else {
 					RegisteredUsersTable prototype = assertRelation(datastore, user);
@@ -510,27 +549,10 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 					t.setUsername(localSuperUser);
 					t.setEmail(null);
 					t.setFullName(localSuperUser);
-					// and figure out password
-					RealmSecurityInfo r = new RealmSecurityInfo();
-					r.setRealmString(userService.getCurrentRealm().getRealmString());
-					r.setBasicAuthHashEncoding(mde.getAlgorithm());
-
-					CredentialsInfo credential;
-					try {
-						credential = CredentialsInfoBuilder.build(localSuperUser, r, "aggregate");
-					} catch (NoSuchAlgorithmException e) {
-						e.printStackTrace();
-						throw new IllegalStateException("unrecognized algorithm");
-					}
-					t.setDigestAuthPassword(credential.getDigestAuthHash());
-					t.setBasicAuthPassword(credential.getBasicAuthHash());
-					t.setBasicAuthSalt(credential.getBasicAuthSalt());
-					// done setting the password...persist it...
-					t.setIsRemoved(false);
-					datastore.putEntity(t, user);
+               datastore.putEntity(t, user);
+               logger.warn("Created a new local superuser record: " + t.getUri() + " identified by: " + t.getUsername());
+					changesMade = resetSuperUserPasswordIfNecessary(t, true, mde, cc);
 					tList.add(t);
-					changesMade = true;
-					logger.warn("Created a new local superuser record: " + t.getUri() + " identified by: " + t.getUsername());
 				}
 			}
 		} finally {
