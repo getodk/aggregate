@@ -66,9 +66,6 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     try {
       ArrayList<TableEntryClient> clientEntries = new ArrayList<TableEntryClient>();
       User user = cc.getCurrentUser();
-      if (user.isAnonymous()) {
-        throw new AccessDeniedException("Anonymous users cannot view ODK Tables datasets");
-      }
       TablesUserPermissions userPermissions = null;
       try {
         userPermissions = new TablesUserPermissionsImpl(cc);
@@ -105,9 +102,6 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
       User user = cc.getCurrentUser();
-      if (user.isAnonymous()) {
-        throw new AccessDeniedException("Anonymous users cannot access ODK Tables datasets");
-      }
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
@@ -148,9 +142,6 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     TablesUserPermissions userPermissions = null;
     try {
       User user = cc.getCurrentUser();
-      if (user.isAnonymous()) {
-        throw new AccessDeniedException("Anonymous users cannot create ODK Tables datasets");
-      }
       userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       return ServerOdkTablesUtil.createTable(appId, tableId, definition, userPermissions, cc);
@@ -176,9 +167,6 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {
       User user = cc.getCurrentUser();
-      if (user.isAnonymous()) {
-        throw new AccessDeniedException("Anonymous users cannot delete ODK Tables datasets");
-      }
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);

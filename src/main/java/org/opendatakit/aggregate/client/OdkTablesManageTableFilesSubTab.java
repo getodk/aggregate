@@ -124,7 +124,9 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
     selectTablePanel.getElement().setId("select_table_panel");
     selectTablePanel.setHTML(0, 0, "<h2 id=\"table_name\"> Select a Table </h2>");
     selectTablePanel.setWidget(0, 1, tableBox);
-    selectTablePanel.setWidget(1, 0, addFileButton);
+    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+      selectTablePanel.setWidget(1, 0, addFileButton);
+    }
 
     // deletedRowsCheckBox = new OdkTablesDisplayDeletedRowsCheckBox(this,
     // displayDeleted);
@@ -200,7 +202,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   @Override
   public void update() {
 
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
       updateTableList();
       // this causing trouble
       updateTableData();
