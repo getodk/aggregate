@@ -42,17 +42,16 @@ public class OdkTablesTabUI extends AggregateTabBase {
 
   public void updateVisibilityOdkTablesSubTabs() {
 
+    /**
+     * Admin tabs are still visible, but they have all
+     * delete and add features disabled.
+     */
     if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
       changeVisibilityOdkTablesSyncSubTabs(true);
-    } else {
-      changeVisibilityOdkTablesSyncSubTabs(false);
-    }
-
-    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
-        .contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       changeVisibilityOdkTablesAdminSubTabs(true);
     } else {
+      changeVisibilityOdkTablesSyncSubTabs(false);
       changeVisibilityOdkTablesAdminSubTabs(false);
     }
 
