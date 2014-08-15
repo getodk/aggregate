@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteRowButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -302,8 +303,12 @@ public class OdkTablesViewTable extends FlexTable {
         // this point)
         if (!row.isDeleted()) {
           // now set the delete button
-          setWidget(currentRow, 0, new OdkTablesDeleteRowButton(this,
-              currentTable.getTableId(), row.getRowId(), row.getRowETag()));
+          OdkTablesDeleteRowButton deleteButton = new OdkTablesDeleteRowButton(this,
+              currentTable.getTableId(), row.getRowId(), row.getRowETag());
+          if ( !AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+            deleteButton.setEnabled(false);
+          }
+          setWidget(currentRow, 0, deleteButton);
           int j = 1;
           for (String column : columnNames) {
             setWidget(currentRow, j, new HTML(row.getValues().get(column)));
