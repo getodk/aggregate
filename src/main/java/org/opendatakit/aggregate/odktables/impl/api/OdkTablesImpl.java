@@ -12,7 +12,6 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -27,7 +26,7 @@ public class OdkTablesImpl implements OdkTables {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
-    String preferencesAppId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+    String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
 
     if ( !preferencesAppId.equals(appId) ) {
       throw new AppNameMismatchException("AppName (" + appId + ") differs");
@@ -43,7 +42,7 @@ public class OdkTablesImpl implements OdkTables {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
-    String preferencesAppId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+    String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
 
     if ( !preferencesAppId.equals(appId) ) {
       throw new AppNameMismatchException("AppName (" + appId + ") differs");
@@ -59,7 +58,7 @@ public class OdkTablesImpl implements OdkTables {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
-    String preferencesAppId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+    String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
 
     if ( !preferencesAppId.equals(appId) ) {
       throw new AppNameMismatchException("AppName (" + appId + ") differs");
@@ -76,7 +75,7 @@ public class OdkTablesImpl implements OdkTables {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
-    String preferencesAppId = ServerPreferencesProperties.getOdkTablesAppId(cc);
+    String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
 
     if ( !preferencesAppId.equals(appId) ) {
       throw new AppNameMismatchException("AppName (" + appId + ") differs");
