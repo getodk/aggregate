@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteTableFileButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -182,8 +183,13 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
 
       for (int j = 0; j < fileSummaries.size(); j++) {
         FileSummaryClient sum = fileSummaries.get(j);
-        setWidget(currentRow, DELETE_COLUMN, new OdkTablesDeleteTableFileButton(this.basePanel,
-            sum.getOdkClientVersion(), currentTable.getTableId(), sum.getFilename()));
+        OdkTablesDeleteTableFileButton deleteButton = 
+            new OdkTablesDeleteTableFileButton(this.basePanel,
+                sum.getOdkClientVersion(), currentTable.getTableId(), sum.getFilename());
+        if ( !AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+          deleteButton.setEnabled(false);
+        }
+        setWidget(currentRow, DELETE_COLUMN, deleteButton);
         setText(currentRow, ODK_CLIENT_VERSION_COLUMN, sum.getOdkClientVersion());
         setText(currentRow, FILENAME_COLUMN, sum.getFilename());
         getFlexCellFormatter().setStyleName(currentRow, FILENAME_COLUMN, "dataLeft");
