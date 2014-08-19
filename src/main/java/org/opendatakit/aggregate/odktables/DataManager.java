@@ -227,7 +227,8 @@ public class DataManager {
 
 
       Query query = buildRowsQuery(table);
-      query.addSort(table.getDataField(CommonFieldsBase.URI_COLUMN_NAME), Direction.ASCENDING);
+      query.addSort(table.getDataField(CommonFieldsBase.CREATION_DATE_COLUMN_NAME), 
+          (startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
       result = query.execute(startCursor, fetchLimit);
 
     } finally {
