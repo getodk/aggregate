@@ -474,7 +474,7 @@ public class Query {
    */
   public WebsafeQueryResult execute(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
     try {
-      QueryResult result = query.executeQuery(null, fetchLimit);
+      QueryResult result = query.executeQuery(startCursor, fetchLimit);
 
       List<? extends CommonFieldsBase> list = result.getResultList();
       List<Entity> entities = new ArrayList<Entity>();
