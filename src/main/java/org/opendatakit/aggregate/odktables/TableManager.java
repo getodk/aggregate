@@ -119,7 +119,7 @@ public class TableManager {
     // set of tables the user is eligible to see.
 
     Query query = DbTableEntry.getRelation(cc).query("DbTableEntry.query", cc);
-    query.addSort(DbTableEntry.getRelation(cc).getDataField(CommonFieldsBase.URI_COLUMN_NAME),
+    query.addSort(DbTableEntry.getRelation(cc).getDataField(CommonFieldsBase.CREATION_DATE_COLUMN_NAME),
         (startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
     WebsafeQueryResult result = query.execute(startCursor, fetchLimit);
     List<DbTableEntryEntity> results = new ArrayList<DbTableEntryEntity>();
@@ -173,7 +173,7 @@ public class TableManager {
      * List<Entity> entries = query.execute(); return getTableEntries(entries);
      */
     // List<TableEntry> tables = getTables();
-    return getTables(null, 2000);
+    return getTables(startCursor, fetchLimit);
   }
 
   /**
