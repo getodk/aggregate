@@ -44,6 +44,7 @@ import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 public class DiffServiceImpl implements DiffService {
@@ -62,9 +63,11 @@ public class DiffServiceImpl implements DiffService {
   public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
-    WebsafeRows websafeResult = dm.getRowsSince(dataETag, QueryResumePoint.fromWebsafeCursor(cursor), limit);
+    WebsafeRows websafeResult = dm.getRowsSince(dataETag, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
-        websafeResult.websafeRefetchCursor, websafeResult.websafeBackwardCursor, websafeResult.websafeResumeCursor,
+        WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
+        WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
+        WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(rowResourceList).build();
   }

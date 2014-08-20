@@ -14,6 +14,8 @@
 package org.opendatakit.common.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,7 +27,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -80,6 +86,67 @@ public class WebUtils {
 
   private WebUtils() {
   };
+
+  /**
+   * Safely encode a string for use as a query parameter.
+   * 
+   * @param rawString
+   * @return encoded string
+   */
+  public static String safeEncode(String rawString) {
+    if ( rawString == null || rawString.length() == 0 ) {
+      return null;
+    }
+    
+    try {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      GZIPOutputStream gzip = new GZIPOutputStream(out);
+      gzip.write(rawString.getBytes(CharEncoding.UTF_8));
+      gzip.finish();
+      gzip.close();
+      String candidate = Base64.encodeBase64URLSafeString(out.toByteArray());
+      return candidate;
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    }
+  }
+
+  /**
+   * Decode a safeEncode() string.
+   * 
+   * @param encodedWebsafeString
+   * @return rawString
+   */
+  public static String safeDecode(String encodedWebsafeString) {
+    if ( encodedWebsafeString == null || encodedWebsafeString.length() == 0 ) {
+      return encodedWebsafeString;
+    }
+    
+    try {
+      ByteArrayInputStream in = new ByteArrayInputStream(Base64.decodeBase64(encodedWebsafeString.getBytes(CharEncoding.UTF_8)));
+      GZIPInputStream gzip = new GZIPInputStream(in);
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      int ch = gzip.read();
+      while ( ch >= 0 ) {
+        out.write(ch);
+        ch = gzip.read();
+      }
+      gzip.close();
+      out.flush();
+      out.close();
+      return new String(out.toByteArray(), CharEncoding.UTF_8);
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    }
+  }
 
   /**
    * Parse a string into a boolean value. Any of:

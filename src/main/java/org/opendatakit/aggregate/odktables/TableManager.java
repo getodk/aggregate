@@ -60,6 +60,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Manages creating, deleting, and getting tables.
@@ -121,6 +122,9 @@ public class TableManager {
     Query query = DbTableEntry.getRelation(cc).query("DbTableEntry.query", cc);
     query.addSort(DbTableEntry.getRelation(cc).getDataField(CommonFieldsBase.CREATION_DATE_COLUMN_NAME),
         (startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
+    // we need the filter to activate the sort...
+    query.addFilter(DbTableEntry.getRelation(cc).getDataField(CommonFieldsBase.CREATION_DATE_COLUMN_NAME),
+        org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
     WebsafeQueryResult result = query.execute(startCursor, fetchLimit);
     List<DbTableEntryEntity> results = new ArrayList<DbTableEntryEntity>();
     for (Entity e : result.entities) {
