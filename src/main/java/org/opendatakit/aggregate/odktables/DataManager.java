@@ -52,6 +52,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Manages read, insert, update, and delete operations on the rows of a table.
@@ -228,6 +229,9 @@ public class DataManager {
       Query query = buildRowsQuery(table);
       query.addSort(table.getDataField(CommonFieldsBase.CREATION_DATE_COLUMN_NAME), 
           (startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
+      // we need the filter to activate the sort...
+      query.addFilter(table.getDataField(CommonFieldsBase.CREATION_DATE_COLUMN_NAME),
+          org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
       result = query.execute(startCursor, fetchLimit);
 
     } finally {
