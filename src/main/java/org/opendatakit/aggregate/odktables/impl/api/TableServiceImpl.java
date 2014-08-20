@@ -57,6 +57,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 public class TableServiceImpl implements TableService {
@@ -103,7 +104,7 @@ public class TableServiceImpl implements TableService {
     TableManager tm = new TableManager(appId, userPermissions, cc);
 
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
-    WebsafeTables websafeResult = tm.getTables(QueryResumePoint.fromWebsafeCursor(cursor), limit);
+    WebsafeTables websafeResult = tm.getTables(QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : websafeResult.tables) {
       TableResource resource = getResource(info, appId, entry);
@@ -111,7 +112,9 @@ public class TableServiceImpl implements TableService {
     }
     // TODO: add QueryResumePoint support
     TableResourceList tableResourceList = new TableResourceList(resources,
-        websafeResult.websafeRefetchCursor, websafeResult.websafeBackwardCursor, websafeResult.websafeResumeCursor,
+        WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
+        WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
+        WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(tableResourceList).build();
   }
