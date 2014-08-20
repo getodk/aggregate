@@ -63,7 +63,6 @@ import org.opendatakit.common.web.CallingContext;
 
 public class DataManager {
 
-
   public static class WebsafeRows {
     public final List<Row> rows;
 
