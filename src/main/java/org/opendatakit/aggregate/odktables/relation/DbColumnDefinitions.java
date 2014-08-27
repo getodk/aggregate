@@ -16,9 +16,12 @@
 
 package org.opendatakit.aggregate.odktables.relation;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
@@ -31,6 +34,10 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This defines the columns in a given schemaETag storage representation of that
@@ -76,9 +83,12 @@ public class DbColumnDefinitions extends Relation {
     dataFields.add(LIST_CHILD_ELEMENT_KEYS);
   }
 
+  public static final ObjectMapper mapper = new ObjectMapper();
+
   public static class DbColumnDefinitionsEntity {
 
     Entity e;
+    private boolean isUnitOfRetention = true;
 
     DbColumnDefinitionsEntity(Entity e) {
       this.e = e;
@@ -143,20 +153,38 @@ public class DbColumnDefinitions extends Relation {
       return e.getString(LIST_CHILD_ELEMENT_KEYS);
     }
 
+    public ArrayList<String> getArrayListChildElementKeys() {
+      String listChildren = getListChildElementKeys();
+      if ( listChildren == null || listChildren.length() == 0 ) {
+        return new ArrayList<String>();
+      } else {
+        ArrayList<String> childElementKeys;
+        try {
+          childElementKeys = mapper.readValue(listChildren, ArrayList.class);
+        } catch (JsonParseException e) {
+          e.printStackTrace();
+          return new ArrayList<String>();
+        } catch (JsonMappingException e) {
+          e.printStackTrace();
+          return new ArrayList<String>();
+        } catch (IOException e) {
+          e.printStackTrace();
+          return new ArrayList<String>();
+        }
+        return childElementKeys;
+      }
+    }
+
     public void setListChildElementKeys(String value) {
       e.set(LIST_CHILD_ELEMENT_KEYS, value);
     }
 
     public boolean isUnitOfRetention() {
-      String listChild = getListChildElementKeys();
-      String type = getElementType();
-      if ( "array".equals(type) ) {
-        return true;
-      }
-      if ( listChild == null || listChild.length() == 0 || "[]".equals(listChild) ) {
-        return true;
-      }
-      return false;
+      return isUnitOfRetention;
+    }
+    
+    private void setNotUnitOfRetention() {
+      isUnitOfRetention = false;
     }
 
     /**
@@ -233,8 +261,62 @@ public class DbColumnDefinitions extends Relation {
     for (Entity e : list) {
       results.add(new DbColumnDefinitionsEntity(e));
     }
+    markUnitOfRetention(results);
     return results;
   }
+  
+  /**
+   * This code needs to parallel that of the javascript in ODK Survey and the java
+   * code in ODK Tables and the ODK Database layer.
+   * 
+   * @param defnList
+   */
+  public static void markUnitOfRetention(List<DbColumnDefinitionsEntity> defnList) {
+    // for all arrays, mark all descendants of the array as not-retained
+    // because they are all folded up into the json representation of the array
+    Map<String, DbColumnDefinitionsEntity> defn = new HashMap<String, DbColumnDefinitionsEntity>();
+    for ( DbColumnDefinitionsEntity colDefn : defnList ) {
+      defn.put(colDefn.getElementKey(), colDefn );
+    }
+    
+    for (DbColumnDefinitionsEntity colDefn : defnList) {
+      if (!colDefn.isUnitOfRetention()) {
+        // this has already been processed
+        continue;
+      }
+      if ("array".equals(colDefn.getElementType())) {
+        ArrayList<String> childElementKeys = colDefn.getArrayListChildElementKeys();
+        ArrayList<String> scratchArray = new ArrayList<String>();
+        while (!childElementKeys.isEmpty()) {
+          for (String childKey : childElementKeys) {
+            DbColumnDefinitionsEntity subDefn = defn.get(childKey);
+            if (!subDefn.isUnitOfRetention()) {
+              // this has already been processed
+              continue;
+            }
+            subDefn.setNotUnitOfRetention();
+            if (subDefn.getListChildElementKeys() != null) {
+              scratchArray.addAll(subDefn.getArrayListChildElementKeys());
+            }
+          }
+          childElementKeys = scratchArray;
+        }
+      }
+    }
+    // and mark any non-arrays with multiple fields as not retained
+    for (DbColumnDefinitionsEntity colDefn : defnList) {
+      if (!colDefn.isUnitOfRetention()) {
+        // this has already been processed
+        continue;
+      }
+      if (!"array".equals(colDefn.getElementType())) {
+        if (!colDefn.getArrayListChildElementKeys().isEmpty()) {
+          colDefn.setNotUnitOfRetention();
+        }
+      }
+    }
+  }
+
 
   /**
    * Return the actual database column names for the given table.

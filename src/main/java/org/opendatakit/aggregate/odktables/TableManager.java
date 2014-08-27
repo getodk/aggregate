@@ -432,7 +432,12 @@ public class TableManager {
       for (DbColumnDefinitionsEntity e : colDefs) {
         e.put(cc);
       }
-
+      /**
+       * Update the isUnitOfRetention field for these so they can be used
+       * to create the data tables on the server.
+       */
+      DbColumnDefinitions.markUnitOfRetention(colDefs);
+      
       /**
        * Instantiate the actual tables
        */
