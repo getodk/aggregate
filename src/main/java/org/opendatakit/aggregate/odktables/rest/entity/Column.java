@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 
 import java.io.Serializable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -45,8 +44,8 @@ public class Column implements Serializable {
    */
   /**
    * The fully qualified key for this element. If this is a retained field,
-   * (see isUnitOfRetention, below) then this is the element's database
-   * column name. For composite types whose elements are individually retained
+   * then this is the element's database column name. For composite types 
+   * whose elements are individually retained
    * (e.g., geopoint), this would be the elementName of the geopoint (e.g.,
    * 'myLocation' concatenated with '_' and this elementName (e.g.,
    * 'myLocation_latitude').
@@ -87,8 +86,8 @@ public class Column implements Serializable {
    *    'typename' is any other alpha-numeric name (user-definable data type).
    *
    *    The (len) attribute, if present, identifies the VARCHAR storage
-   *    requirements for the field when the field is a unit of retention
-   *    (see isUnitOfRetention below). Ignored if not a unit of retention.
+   *    requirements for the field when the field is a unit of retention.
+   *    Ignored if not a unit of retention.
    *
    *    The server stores:
    *
@@ -108,7 +107,7 @@ public class Column implements Serializable {
    *
    *      array is a JSON serialization expecting one child element key
    *            that defines the data type in the array.  Array fields
-   *            MUST be units of retention (isUnitOfRetention == true).
+   *            MUST be a unit of retention (or be nested within one).
    *
    *      string is a string value
    *
@@ -138,7 +137,7 @@ public class Column implements Serializable {
    */
   @JsonProperty(required = false)
   private String listChildElementKeys;
-
+  
   /**
    * If true, then this elementKey is a column in the backing
    * database table. If false, then either the elementKey is a
@@ -164,7 +163,6 @@ public class Column implements Serializable {
    * @param elementName
    * @param elementType
    * @param listChildElementKeys
-   * @param isUnitOfRetention
    */
   public Column(final String elementKey, final String elementName,
       final String elementType, final String listChildElementKeys) {
@@ -192,20 +190,7 @@ public class Column implements Serializable {
   public String getListChildElementKeys() {
     return this.listChildElementKeys;
   }
-
-  @JsonIgnore
-  public boolean isUnitOfRetention() {
-    String listChild = getListChildElementKeys();
-    String type = getElementType();
-    if ( "array".equals(type) ) {
-      return true;
-    }
-    if ( listChild == null || listChild.length() == 0 || "[]".equals(listChild) ) {
-      return true;
-    }
-    return false;
-  }
-
+  
   @Override
   public String toString() {
     return "Column(elementKey=" + this.getElementKey()
