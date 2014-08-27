@@ -27,18 +27,18 @@ package org.opendatakit.aggregate.odktables.rest;
  *
  * <pre>
  * insert:
- *     state = INSERTING
+ *     state = new_row
  *
  * update:
- *     if state == REST:
- *        state = UPDATING
+ *     if state == synced:
+ *        state = changed
  *
  * delete:
- *     if state == REST or state == UPDATING:
- *        state = DELETING
+ *     if state == synced or state == changed:
+ *        state = deleted
  *        don't actually delete yet (defer until sync)
- *     else if state == INSERTING:
- *        actually delete
+ *     else if state == new_row:
+ *        actually delete row in database
  * </pre>
  * </p>
  *
@@ -46,5 +46,5 @@ package org.opendatakit.aggregate.odktables.rest;
  *
  */
 public enum SyncState {
-  rest, inserting, updating, deleting, conflicting, rest_pending_files;
+  synced, new_row, changed, deleted, in_conflict, synced_pending_files;
 }
