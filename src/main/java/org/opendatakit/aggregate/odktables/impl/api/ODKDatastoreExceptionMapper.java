@@ -16,13 +16,10 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
@@ -31,18 +28,17 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 
-@Provider
 public class ODKDatastoreExceptionMapper implements ExceptionMapper<ODKDatastoreException> {
 
-  @Context
-  private HttpHeaders headers;
+  private final MediaType type;
+  
+  public ODKDatastoreExceptionMapper(MediaType type) {
+    this.type = type;
+  }
 
   @Override
   public Response toResponse(ODKDatastoreException e) {
-    MediaType type;
     e.printStackTrace();
-    type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
-        0) : MediaType.APPLICATION_JSON_TYPE;
 
     String msg = e.getMessage();
     if (msg == null) {

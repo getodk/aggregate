@@ -23,10 +23,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -38,11 +38,16 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-@Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
 public interface DataService {
+
+  public static final String QUERY_ROW_ETAG = "row_etag";
+  public static final String CURSOR_PARAMETER = "cursor";
+  public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
    *
+   * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
+   * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
    * @return {@link RowResourceList} containing the rows being returned.
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -51,9 +56,8 @@ public interface DataService {
    * @throws BadColumnNameException
    */
   @GET
-  @Path("")
-  @GZIP
-  public Response /*RowResourceList*/ getRows() throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowResourceList*/ getRows(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
   /**
    *
@@ -67,7 +71,7 @@ public interface DataService {
    */
   @GET
   @Path("{rowId}")
-  @GZIP
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowResource*/ getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
@@ -86,25 +90,27 @@ public interface DataService {
   @PUT
   @Path("{rowId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  @GZIP
-  public Response /*RowResource*/ createOrUpdateRow(@PathParam("rowId") String rowId, @GZIP Row row)
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowResource*/ createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
       PermissionDeniedException, BadColumnNameException, InconsistentStateException;
 
   /**
    *
    * @param rowId
+   * @param rowETag -- the row's ETag as known to the client (must match on server)
    * @return String dataETag on the table that marks this row as deleted.
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
    * @throws BadColumnNameException
+   * @throws ETagMismatchException
    */
   @DELETE
   @Path("{rowId}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*String*/ deleteRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException;
+  public Response /*String*/ deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException,
+      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException;
 
 }

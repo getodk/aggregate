@@ -296,11 +296,11 @@ Full Maven Development Environment Configuration
 For Postgres, run these commands:
 
 ----postgres-script-start-----
-create database "odk_test";
-create schema "odk_test";
-create user "odk_test" with unencrypted password 'odk_test';
-grant all privileges on database "odk_test" to "odk_test";
-alter database "odk_test" owner to "odk_test";
+create database "odk_unit";
+create schema "odk_unit";
+create user "odk_unit" with unencrypted password 'odk_unit';
+grant all privileges on database "odk_unit" to "odk_unit";
+alter database "odk_unit" owner to "odk_unit";
 ----postgres-script-end-------
 
 From the Postgres SQL shell (psql) commandline client,
@@ -316,11 +316,11 @@ are in the file postgres.sql, you can type:
 (6a)
 For MySQL, run this script:
 
-UPDATE mysql.user SET Password=PASSWORD('odk_test') WHERE User='root';
+UPDATE mysql.user SET Password=PASSWORD('odk_unit') WHERE User='root';
 FLUSH PRIVILEGES;
-CREATE USER 'odk_test'@'localhost' IDENTIFIED BY 'odk_test';
-CREATE DATABASE odk_test;
-GRANT ALL PRIVILEGES ON odk_test.* TO 'odk_test'@'localhost' WITH GRANT OPTION;
+CREATE USER 'odk_unit'@'localhost' IDENTIFIED BY 'odk_unit';
+CREATE DATABASE odk_unit;
+GRANT ALL PRIVILEGES ON odk_unit.* TO 'odk_unit'@'localhost' WITH GRANT OPTION;
 
 (6b)
 For MySQL, download and copy the MySQL Connector J jar into the Tomcat /lib
@@ -334,20 +334,25 @@ to perform a full build.
 
 (7) Register libraries in Maven: (this is also required for Eclipse builds)
 
-The libraries to be registered in maven are in the src/main/libs directory.
-See the readme there for the maven commands to upload those files into your
-local repository.  In some cases, these are cutting edge Google libraries that
-may no longer need to be manually installed (once they get published to maven).
+Run the ANT script (build.xml) under:
+
+src/main/libs/ -- registers various jars into your local maven repo.
+
+To run, just cd to this directory and type 'ant'
+
+See the src/main/libs/readme.txt for information about these jars.
 
 (8a) Download and install Firefox ESR 24. This is a slowly-upgrading version
 of Firefox, since the upgrade cycle of Firefox is too rapid for Selenium
 (our UI testing framework) to keep up.
 
-(8) Download the Java Selenium Client Driver ( http://seleniumhq.org/download/ )
-Since we use Firefox ESR 24, we need to use 2.37, available here: 
-https://code.google.com/p/selenium/downloads/detail?name=selenium-java-2.37.0.zip
-The Maven pom.xml expects version 2.37.0.  Explode the zip and make note of 
-the directory.
+(8) Download tomcat 6 and selenium java client for full-stack integration / web UI tests.
+
+Run the ANT script (build.xml) under:
+
+build/   -- downloads a Tomcat 6 zip and selenium java client (for full-stack integration / web UI tests)
+
+To run, just cd to this directory and type 'ant'
  
 (9) Edit Maven's settings.xml file (this is in the .m2 directory).
 
@@ -379,14 +384,11 @@ A minimal file is:
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
 		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.1\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
-		<selenium.home>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.37.0</selenium.home>
-		<selenium.libs>C:\\Users\\Administrator\\Documents\\selenium\\selenium-2.37.0\\libs</selenium.libs>
 		<test.server.hostname>YOUR.FULLY.QUALIFIED.HOSTNAME.AND.ORG</test.server.hostname>
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
 		<test.server.gae.monitor.port>7075</test.server.gae.monitor.port>
 		<firefox.executable></firefox.executable>
-		<catalina.zip>file:///C:\\Users\\Administrator\\.m2\\apache-tomcat-6.0.35-windows-x64.zip</catalina.zip>
 	  </properties>
   	</profile>
   </profiles>

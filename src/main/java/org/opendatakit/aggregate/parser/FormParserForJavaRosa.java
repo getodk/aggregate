@@ -1353,6 +1353,20 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
 
     // and patch up the tree elements that have multiple fields...
     switch (et) {
+    case BINARY_CONTENT_REF_BLOB:
+    case BOOLEAN:
+    case DECIMAL:
+    case INTEGER:
+    case JRDATE:
+    case JRDATETIME:
+    case JRTIME:
+    case PHANTOM:
+    case REF_BLOB:
+    case SELECT1:
+    case SELECTN:
+    case STRING:
+      // This case keeps lint messages down...
+      break;
     case BINARY:
       // binary elements have two additional tables associated with them
       // -- the _REF and _BLB tables (in addition to _BIN above).

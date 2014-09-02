@@ -18,34 +18,30 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.io.IOException;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 
-@Provider
 public class IOExceptionMapper implements ExceptionMapper<IOException> {
 
-  @Context
-  private HttpHeaders headers;
+  private final MediaType type;
+
+  public IOExceptionMapper(MediaType type) {
+    this.type = type;
+  }
 
   @Override
   public Response toResponse(IOException e) {
-    MediaType type;
     e.printStackTrace();
-    type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
-        0) : MediaType.APPLICATION_JSON_TYPE;
 
-        String msg = e.getMessage();
-        if (msg == null) {
-          msg = e.toString();
-        }
+    String msg = e.getMessage();
+    if (msg == null) {
+      msg = e.toString();
+    }
 
     return Response.status(Status.INTERNAL_SERVER_ERROR)
         .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();

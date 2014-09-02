@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -14,6 +14,8 @@
 package org.opendatakit.common.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,7 +27,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -36,9 +42,9 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Useful methods for parsing boolean and date values and formatting dates.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WebUtils {
 
@@ -61,7 +67,7 @@ public class WebUtils {
   private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
 
   /**
-   * Date format pattern used to parse HTTP date headers in ANSI C 
+   * Date format pattern used to parse HTTP date headers in ANSI C
    * <code>asctime()</code> format.
    * copied from apache.commons.lang.DateUtils
    */
@@ -82,6 +88,67 @@ public class WebUtils {
   };
 
   /**
+   * Safely encode a string for use as a query parameter.
+   * 
+   * @param rawString
+   * @return encoded string
+   */
+  public static String safeEncode(String rawString) {
+    if ( rawString == null || rawString.length() == 0 ) {
+      return null;
+    }
+    
+    try {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      GZIPOutputStream gzip = new GZIPOutputStream(out);
+      gzip.write(rawString.getBytes(CharEncoding.UTF_8));
+      gzip.finish();
+      gzip.close();
+      String candidate = Base64.encodeBase64URLSafeString(out.toByteArray());
+      return candidate;
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    }
+  }
+
+  /**
+   * Decode a safeEncode() string.
+   * 
+   * @param encodedWebsafeString
+   * @return rawString
+   */
+  public static String safeDecode(String encodedWebsafeString) {
+    if ( encodedWebsafeString == null || encodedWebsafeString.length() == 0 ) {
+      return encodedWebsafeString;
+    }
+    
+    try {
+      ByteArrayInputStream in = new ByteArrayInputStream(Base64.decodeBase64(encodedWebsafeString.getBytes(CharEncoding.UTF_8)));
+      GZIPInputStream gzip = new GZIPInputStream(in);
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      int ch = gzip.read();
+      while ( ch >= 0 ) {
+        out.write(ch);
+        ch = gzip.read();
+      }
+      gzip.close();
+      out.flush();
+      out.close();
+      return new String(out.toByteArray(), CharEncoding.UTF_8);
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
+    }
+  }
+
+  /**
    * Parse a string into a boolean value. Any of:
    * <ul>
    * <li>ok</li>
@@ -91,13 +158,13 @@ public class WebUtils {
    * <li>y</li>
    * </ul>
    * are interpretted as boolean true.
-   * 
+   *
    * @param value
    * @return
    */
   public static final Boolean parseBoolean(String value) {
     Boolean b = null;
-    if (value != null) {
+    if (value != null && value.length() != 0) {
       b = Boolean.parseBoolean(value);
       if (value.compareToIgnoreCase("ok") == 0) {
         b = Boolean.TRUE;
@@ -142,7 +209,7 @@ public class WebUtils {
    * Parse a string into a datetime value. Tries the common Http formats, the
    * iso8601 format (used by Javarosa), the default formatting from
    * Date.toString(), and a time-only format.
-   * 
+   *
    * @param value
    * @return
    */
@@ -154,22 +221,22 @@ public class WebUtils {
 
     String[] localizedParsePatterns = new String[] {
         // try the common HTTP date formats that have time zones
-        PATTERN_RFC1123, 
-        PATTERN_RFC1036, 
+        PATTERN_RFC1123,
+        PATTERN_RFC1036,
         PATTERN_DATE_TOSTRING };
 
     String[] localizedNoTzParsePatterns = new String[] {
         // ones without timezones... (will assume UTC)
-        PATTERN_ASCTIME }; 
-    
+        PATTERN_ASCTIME };
+
     String[] tzParsePatterns = new String[] {
         PATTERN_ISO8601,
-        PATTERN_ISO8601_DATE, 
+        PATTERN_ISO8601_DATE,
         PATTERN_ISO8601_TIME };
-    
+
     String[] noTzParsePatterns = new String[] {
         // ones without timezones... (will assume UTC)
-        PATTERN_ISO8601_WITHOUT_ZONE, 
+        PATTERN_ISO8601_WITHOUT_ZONE,
         PATTERN_NO_DATE_TIME_ONLY,
         PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH,
         PATTERN_GOOGLE_DOCS };
@@ -256,7 +323,7 @@ public class WebUtils {
    * <li>thisUrl => THIS_URL</li>
    * <li>myFirstObject => MY_FIRST_OBJECT</li>
    * </ul>
-   * 
+   *
    * @param name
    * @return
    */
@@ -283,7 +350,7 @@ public class WebUtils {
 
   /**
    * Return the GoogleDocs datetime string representation of a datetime.
-   * 
+   *
    * @param d
    * @return
    */
@@ -297,7 +364,7 @@ public class WebUtils {
 
   /**
    * Return the GoogleDocs date string representation of a date-only datetime.
-   * 
+   *
    * @param d
    * @return
    */
@@ -308,10 +375,10 @@ public class WebUtils {
     asGoogleDocDateOnly.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGoogleDocDateOnly.format(d);
   }
-  
+
   /**
    * Return the ISO8601 string representation of a date.
-   * 
+   *
    * @param d
    * @return
    */
@@ -323,7 +390,7 @@ public class WebUtils {
     asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTiso8601.format(d);
   }
-  
+
   /**
    * Return the RFC1123 string representation of a date.
    * @param d
@@ -345,7 +412,7 @@ public class WebUtils {
     SimpleDateFormat purgeDateFormat = new SimpleDateFormat(PURGE_DATE_FORMAT);
     return purgeDateFormat.format(d);
   }
-  
+
   public static final Date parsePurgeDateString(String str) throws ParseException {
     if ( str == null ) {
       return null;
@@ -354,11 +421,11 @@ public class WebUtils {
     SimpleDateFormat purgeDateFormat = new SimpleDateFormat(PURGE_DATE_FORMAT);
     return purgeDateFormat.parse(str);
   }
-  
+
   /**
    * Return a string with utf-8 characters replaced with backslash-uxxxx codes.
    * Useful for debugging.
-   * 
+   *
    * @param str
    * @return printable rendition of non-ASCII utf-8 characters.
    */
@@ -385,18 +452,18 @@ public class WebUtils {
     if ( e != null ) {
         return WebUtils.readResponseHelper(e.getContent());
     }
-    
+
     return BasicConsts.EMPTY_STRING;
   }
-  
+
   public static String readGoogleResponse(com.google.api.client.http.HttpResponse resp ) throws IOException {
     if (resp != null ) {
         return WebUtils.readResponseHelper(resp.getContent());
-    } 
-    
+    }
+
     return BasicConsts.EMPTY_STRING;
   }
-  
+
   private static String readResponseHelper(InputStream content) {
     StringBuffer response = new StringBuffer();
 
@@ -439,6 +506,6 @@ public class WebUtils {
     }
     return response.toString();
   }
-  
+
 
 }

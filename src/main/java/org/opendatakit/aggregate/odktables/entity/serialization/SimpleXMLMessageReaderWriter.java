@@ -16,17 +16,22 @@
 
 package org.opendatakit.aggregate.odktables.entity.serialization;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -38,22 +43,23 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
+import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
+import org.opendatakit.aggregate.odktables.impl.api.AppEngineHandlersFactory.GZIPRequestHandler;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-import org.opendatakit.aggregate.odktables.rest.serialization.SimpleXMLSerializerForAggregate;
-import org.simpleframework.xml.Serializer;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 @Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML })
 @Consumes({ MediaType.TEXT_XML, MediaType.APPLICATION_XML })
 @Provider
-public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
-    MessageBodyWriter<Object> {
+public class SimpleXMLMessageReaderWriter<T> implements MessageBodyReader<T>,
+    MessageBodyWriter<T> {
 
-  private static final Serializer serializer;
-  static {
-    serializer = SimpleXMLSerializerForAggregate.getSerializer();
-  }
+  private static final XmlMapper mapper = new XmlMapper();
   private static final String DEFAULT_ENCODING = "utf-8";
-
+  
+  @Context
+  ServletContext context;
   @Context
   HttpHeaders headers;
 
@@ -72,42 +78,88 @@ public class SimpleXMLMessageReaderWriter implements MessageBodyReader<Object>,
   }
 
   @Override
-  public Object readFrom(Class<Object> aClass, Type genericType, Annotation[] annotations,
+  public T readFrom(Class<T> aClass, Type genericType, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, String> map, InputStream stream)
       throws IOException, WebApplicationException {
-    String charset = getCharsetAsString(mediaType);
-    if (!charset.equalsIgnoreCase(DEFAULT_ENCODING)) {
-      throw new IllegalArgumentException("charset for the request is not utf-8");
-    }
+    String encoding = getCharsetAsString(mediaType);
     try {
-      Reader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
-      return serializer.read(aClass, r);
+      if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
+        throw new IllegalArgumentException("charset for the request is not utf-8");
+      }
+      InputStream instr = stream;
+
+      String tmp = (String) context.getAttribute(GZIPRequestHandler.noUnGZIPContentEncodingKey);
+      boolean noUnGZIPContentEncodingKey = tmp == null ? false : Boolean.valueOf(tmp);
+
+      if ( !noUnGZIPContentEncodingKey ) {
+        instr = new GZIPInputStream(stream);
+      }
+
+      InputStreamReader r = new InputStreamReader(instr,
+          Charset.forName(ApiConstants.UTF8_ENCODE));
+      return mapper.readValue(r, aClass);
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
   @Override
-  public void writeTo(Object o, Class<?> aClass, Type type, Annotation[] annotations,
+  public void writeTo(T o, Class<?> aClass, Type type, Annotation[] annotations,
       MediaType mediaType, MultivaluedMap<String, Object> map, OutputStream rawStream)
       throws IOException, WebApplicationException {
     String encoding = getCharsetAsString(mediaType);
-    if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
-      throw new IllegalArgumentException("charset for the response is not utf-8");
-    }
     try {
-      if (mediaType.getParameters().get("charset") == null) {
-        mediaType.getParameters().put("charset", DEFAULT_ENCODING);
+      if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
+        throw new IllegalArgumentException("charset for the response is not utf-8");
       }
-      Writer writer = new OutputStreamWriter(rawStream, Charset.forName(ApiConstants.UTF8_ENCODE));
-      serializer.write(o, writer);
+      // write it to a byte array
+      ByteArrayOutputStream bas = new ByteArrayOutputStream(8192);
+      OutputStreamWriter w = new OutputStreamWriter(bas,
+          Charset.forName(ApiConstants.UTF8_ENCODE));
+      mapper.writeValue(w, o);
+      // get the array and compute md5 hash
+      byte[] bytes = bas.toByteArray();
+      String eTag;
+      try {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(bytes);
+
+        byte[] messageDigest = md.digest();
+
+        BigInteger number = new BigInteger(1, messageDigest);
+        String md5 = number.toString(16);
+        while (md5.length() < 32)
+          md5 = "0" + md5;
+        eTag = "md5_" + md5;
+      } catch (NoSuchAlgorithmException e) {
+        throw new IllegalStateException("Unexpected problem computing md5 hash", e);
+      }
+      map.putSingle(HttpHeaders.ETAG, eTag);
+
+      String tmp = (String) context.getAttribute(GZIPRequestHandler.emitGZIPContentEncodingKey);
+      boolean emitGZIPContentEncodingKey = (tmp == null) ? false : Boolean.valueOf(tmp);
+
+      String ifNoneMatchTag = headers.getRequestHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
+      if ( ifNoneMatchTag != null && ifNoneMatchTag.equals(eTag) ) {
+        // return UNMODIFIED...
+        throw new NotModifiedException(ifNoneMatchTag);
+      } else {
+        OutputStream rawStr = rawStream;
+        if ( emitGZIPContentEncodingKey ) {
+          map.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
+          rawStr = new GZIPOutputStream(rawStream);
+        }
+
+        rawStr.write(bytes);
+      }
+
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
   @Override
-  public long getSize(Object arg0, Class<?> arg1, Type arg2, Annotation[] arg3, MediaType arg4) {
+  public long getSize(T arg0, Class<?> arg1, Type arg2, Annotation[] arg3, MediaType arg4) {
     return -1;
   }
 

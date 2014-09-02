@@ -41,14 +41,7 @@ public class RowResourceClient extends RowClient implements Serializable {
   }
 
   public RowResourceClient(RowClient row) {
-    super();
-    setRowId(row.getRowId());
-    setRowETag(row.getRowETag());
-    setDeleted(row.isDeleted());
-    setCreateUser(row.getCreateUser());
-    setLastUpdateUser(row.getLastUpdateUser());
-    setFilterScope(row.getFilterScope());
-    setValues(row.getValues());
+    super(row);
   }
 
   public String getSelfUri() {

@@ -16,10 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A TableEntry defines very only the tableId, the tableKey (for now), and ETags
@@ -31,17 +28,23 @@ import org.simpleframework.xml.Root;
  * @author sudar.sam@gmail.com
  *
  */
-@Root
-@Default(value = DefaultType.FIELD, required = false)
-public class TableEntry {
+public class TableEntry implements Comparable<TableEntry> {
 
-  @Element(required = true)
+  /**
+   * The tableId this entry describes.
+   */
   private String tableId;
 
-  @Element(required = false)
+  /**
+   * The ETag of the most recently modified data row
+   */
+  @JsonProperty(required = false)
   private String dataETag;
 
-  @Element(required = false)
+  /**
+   * The ETag of the TableDefinition
+   */
+  @JsonProperty(required = false)
   private String schemaETag;
 
   protected TableEntry() {
@@ -106,6 +109,39 @@ public class TableEntry {
 
   @Override
   public String toString() {
-    return "TableEntry [tableId=" + tableId + ", dataETag=" + dataETag + ", schemaETag=" + schemaETag + "]";
+    return "TableEntry [tableId=" + tableId + ", dataETag=" + dataETag + ", schemaETag="
+        + schemaETag + "]";
+  }
+
+  @Override
+  public int compareTo(TableEntry o) {
+    if ( tableId == null ) {
+      if ( o.tableId != null ) {
+        return -1;
+      }
+    } else if ( o.tableId == null ) {
+      return 1;
+    }
+    int cmp = tableId.compareTo(o.tableId);
+    if ( cmp != 0 ) {
+      return cmp;
+    }
+    
+    // schemaETags never collide unless everything 
+    // is identical...
+    
+    if ( schemaETag == null ) {
+      if ( o.schemaETag != null ) {
+        return -1;
+      }
+    } else if ( o.schemaETag == null ) {
+      return 1;
+    }
+    cmp = schemaETag.compareTo(o.schemaETag);
+    if ( cmp != 0 ) {
+      return cmp;
+    }
+    
+    return 0;
   }
 }

@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -103,9 +104,6 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
       }
     });
 
-    // now populate the list.
-    updateTableList();
-
     tableData = new OdkTablesViewTable(this);
 
     selectTablePanel = new FlexTable();
@@ -183,9 +181,11 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase {
   // does so by calling other methods.
   @Override
   public void update() {
-    updateTableList();
-    updateTableData();
-
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      updateTableList();
+      updateTableData();
+    }
   }
 
   public void addTablesToListBox(ArrayList<TableEntryClient> tables) {

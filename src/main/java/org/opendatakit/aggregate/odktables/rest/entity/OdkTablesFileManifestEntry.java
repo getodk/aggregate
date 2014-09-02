@@ -16,8 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This represents information about a file so that a phone running ODKTables
@@ -28,33 +27,42 @@ import org.simpleframework.xml.Root;
  * @author sudar.sam@gmail.com
  *
  */
-@Root
-public class OdkTablesFileManifestEntry {
+public class OdkTablesFileManifestEntry implements Comparable<OdkTablesFileManifestEntry> {
 
   /**
-   * This is the name of the file.
+   * This is the name of the file relative to
+   * the either the 'config' directory (for
+   * app-level and table-level files) or the
+   * row's attachments directory (for row-level
+   * attachments).
+   *
+   * I.e., for the new directory structure,
+   * if the manifest holds configpath files, it is under:
+   *   /sdcard/opendatakit/{appId}/config
+   * if the manifest holds rowpath files, it is under:
+   *   /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}
    */
-  @Attribute(required = true)
   public String filename;
 
-  @Attribute(required = false)
+  @JsonProperty(required = false)
   public Long contentLength;
 
-  @Attribute(required = false)
+  @JsonProperty(required = false)
   public String contentType;
 
   /**
-   * This is the md5hash of the file, which will be used for checking whether or
-   * not the version of the file on the phone is current.
+   * This is the md5hash of the file, which will be used
+   * for checking whether or not the version of the file
+   * on the phone is current.
    */
-  @Attribute(required = true)
+  @JsonProperty(required = false)
   public String md5hash;
 
   /**
    * This is the url from which the current version of the file can be
    * downloaded.
    */
-  @Attribute(required = true)
+  @JsonProperty(required = false)
   public String downloadUrl;
 
   @Override
@@ -82,10 +90,38 @@ public class OdkTablesFileManifestEntry {
     }
     OdkTablesFileManifestEntry other = (OdkTablesFileManifestEntry) obj;
     return (filename == null ? other.filename == null : filename.equals(other.filename))
-        && (contentLength == null ? other.contentLength == null : contentLength.equals(other.contentLength))
+        && (contentLength == null ? other.contentLength == null : contentLength
+            .equals(other.contentLength))
         && (contentType == null ? other.contentType == null : contentType.equals(other.contentType))
         && (md5hash == null ? other.md5hash == null : md5hash.equals(other.md5hash))
         && (downloadUrl == null ? other.downloadUrl == null : downloadUrl.equals(other.downloadUrl));
+  }
+
+  @Override
+  public int compareTo(OdkTablesFileManifestEntry other) {
+    if ( filename == null ) {
+      if ( other.filename != null ) {
+        return -1;
+      }
+    } else if ( other.filename == null ) {
+      return 1;
+    }
+    
+    int cmp = filename.compareTo(other.filename);
+    if ( cmp != 0 ) {
+      return cmp;
+    }
+
+    if ( md5hash == null ) {
+      if ( other.md5hash != null ) {
+        return -1;
+      }
+    } else if ( other.md5hash == null ) {
+      return 1;
+    }
+    
+    cmp = md5hash.compareTo(other.md5hash);
+    return cmp;
   }
 
 }

@@ -38,15 +38,19 @@ public class OdkTablesConfirmDeleteRowPopup extends AbstractPopupBase {
 	  private final String tableId;
 	  // the row you're deleting
 	  private final String rowId;
+	  // and the ETag for the row
+	  private final String rowETag;
 	  // the ViewTable view that you are interacting with
 	  private OdkTablesViewTable parentView;
 
 	  public OdkTablesConfirmDeleteRowPopup(OdkTablesViewTable parent,
-	      String tableId, String rowId) {
+	      String tableId, String rowId, String rowETag) {
 	    super();
 	    this.parentView = parent;
 	    this.tableId = tableId;
 	    this.rowId = rowId;
+	    this.rowETag = rowETag;
+
 
 	    AggregateButton deleteButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT,
 	        HELP_BALLOON_TXT);
@@ -83,7 +87,7 @@ public class OdkTablesConfirmDeleteRowPopup extends AbstractPopupBase {
 	        }
 	      };
 	      // Make the call to the form service.
-	      SecureGWT.getServerDataService().deleteRow(tableId, rowId, callback);
+	      SecureGWT.getServerDataService().deleteRow(tableId, rowId, rowETag, callback);
 	      hide();
 	    }
 	  }

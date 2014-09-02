@@ -16,106 +16,40 @@
 
 package org.opendatakit.aggregate.odktables.security;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendatakit.aggregate.odktables.LockTemplate;
-import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
-import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
-import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.SecurityUtils;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
-import org.opendatakit.common.security.spring.RegisteredUsersTable;
-import org.opendatakit.common.security.spring.UserGrantedAuthority;
 import org.opendatakit.common.web.CallingContext;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.google.common.collect.Lists;
 
 public class TablesUserPermissionsImpl implements TablesUserPermissions {
 
   private final CallingContext cc;
-  private final RegisteredUsersTable user;
-  private final OdkTablesUserInfoTable userInfo;
+  private final OdkTablesUserInfo userInfo;
   private final Map<String, AuthFilter> authFilters = new HashMap<String, AuthFilter>();
 
 
-  public static final boolean deleteUser(String uriUser, CallingContext cc) throws ODKDatastoreException {
-    OdkTablesUserInfoTable userToDelete =
-        OdkTablesUserInfoTable.getCurrentUserInfo(uriUser, cc);
-    cc.getDatastore().deleteEntity(userToDelete.getEntityKey(), cc.getCurrentUser());
-    // TODO: delete the ACLs for this user???
-    return true;
+  public TablesUserPermissionsImpl(CallingContext cc, String uriUser, Set<GrantedAuthority> grants)
+      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+    this.cc = cc;
+    this.userInfo = OdkTablesUserInfoTable.getOdkTablesUserInfo(uriUser, grants, cc);
   }
 
-  public TablesUserPermissionsImpl(String uriUser, CallingContext cc) throws ODKDatastoreException,
+ 
+  public TablesUserPermissionsImpl(CallingContext cc) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException {
-    this.cc = cc;
-    Datastore ds = cc.getDatastore();
-    if ( uriUser.equals(User.ANONYMOUS_USER) ) {
-      throw new PermissionDeniedException("User does not have access to ODK Tables");
-    }
-    user = RegisteredUsersTable.getUserByUri(uriUser, ds, cc.getCurrentUser());
-    OdkTablesUserInfoTable odkTablesUserInfo = null;
-    odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser, cc);
-    if (odkTablesUserInfo == null) {
-      OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
-      Set<GrantedAuthority> grants = UserGrantedAuthority.getGrantedAuthorities(uriUser, ds,
-          cc.getCurrentUser());
-
-      RoleHierarchy rh = (RoleHierarchy) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
-      Collection<? extends GrantedAuthority> roles = rh.getReachableGrantedAuthorities(grants);
-      if (roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES
-          .name()))
-          || roles.contains(new SimpleGrantedAuthority(GrantedAuthorityName.ROLE_ADMINISTER_TABLES
-              .name()))) {
-        //
-        // Determine the external UID that will identify this user
-        String externalUID = null;
-        if (user.getEmail() != null) {
-          externalUID = user.getEmail();
-        } else if (user.getUsername() != null) {
-          externalUID = SecurityUtils.USERNAME_COLON + user.getUsername();
-        }
-        // GAIN LOCK
-        LockTemplate tablesUserPermissions = new LockTemplate(externalUID, ODKTablesTaskLockType.TABLES_USER_PERMISSION_CREATION, cc);
-        try {
-          tablesUserPermissions.acquire();
-          // attempt to re-fetch the record.
-          // If this succeeds, then we had multiple suitors; the other one beat us.
-          odkTablesUserInfo = OdkTablesUserInfoTable.getCurrentUserInfo(uriUser, cc);
-          if ( odkTablesUserInfo != null ) {
-            userInfo = odkTablesUserInfo;
-            return;
-          }
-          // otherwise, create a record
-          odkTablesUserInfo = ds.createEntityUsingRelation(prototype, cc.getCurrentUser());
-          odkTablesUserInfo.setUriUser(uriUser);
-          odkTablesUserInfo.setOdkTablesUserId(externalUID);
-          odkTablesUserInfo.persist(cc);
-          userInfo = odkTablesUserInfo;
-        } finally {
-          tablesUserPermissions.release();
-        }
-      } else {
-        throw new PermissionDeniedException("User does not have access to ODK Tables");
-      }
-    } else {
-      userInfo = odkTablesUserInfo;
-    }
+    this(cc, cc.getCurrentUser().getUriUser(), cc.getCurrentUser().getDirectAuthorities());
   }
 
   /*
@@ -207,7 +141,8 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
   }
 
   @Override
-  public boolean hasFilterScope(String appId, String tableId, TablePermission permission, String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException {
+  public boolean hasFilterScope(String appId, String tableId, TablePermission permission,
+      String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException {
     AuthFilter authFilter = getAuthFilter(appId, tableId);
     if (authFilter != null) {
       return authFilter.hasFilterScope(permission, rowId, filterScope);

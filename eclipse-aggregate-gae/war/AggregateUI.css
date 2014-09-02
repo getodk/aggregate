@@ -76,6 +76,7 @@ a,a:visited,a:hover {
 	padding: 3px;
 	border: 2px solid #777984;
 	background: url("images/mostly_opaque.png");
+	z-index: 2000;
 }
 
 /**
@@ -86,6 +87,7 @@ a,a:visited,a:hover {
 	background-color: #F5F5F5;
 	opacity: 0.6;
 	filter: alpha(opacity=30);
+	z-index: 1500;
 }
 
 #filters_data {
@@ -108,10 +110,32 @@ a,a:visited,a:hover {
 	overflow: scroll;
 }
 
+.not_secure_message {
+	color: red;
+	font-weight: bold;
+	font-height: 24px;
+	text-align: center;
+	background: #EEEEEE;
+}
+
+#not_secure_content {
+	position: absolute;
+	z-index: 1000;
+	width: 100%;
+	left: 0px;
+	top: 0px;
+}
+
 .error_message {
 	color: red;
 	text-align: center;
+	background: #EEEEEE;
+}
+
+#error_content {
 	position: absolute;
+	z-index: 1000;
+	width: 100%;
 	left: 0px;
 	top: 0px;
 }
@@ -196,11 +220,13 @@ a,a:visited,a:hover {
 	padding: 3px;
 	text-align: right;
 	float: left;
+	z-index: 1001;
 }
 
 #nav_bar_help_login_item {
 	padding: 2px 2px 2px 2px;
 	float: left;
+	z-index: 1001;
 }
 
 #filter_desc_title {

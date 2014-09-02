@@ -18,8 +18,6 @@ package org.opendatakit.aggregate.client.odktables;
 
 import java.io.Serializable;
 
-import org.simpleframework.xml.Element;
-
 /**
  * <p>This is the client-side version of Scope within odktables entity.</p>
  * <p>
@@ -48,10 +46,8 @@ public class ScopeClient implements Serializable {
     DEFAULT, USER, GROUP,
   }
 
-  @Element(required = false)
   private Type type;
 
-  @Element(required = false)
   private String value;
 
   /**

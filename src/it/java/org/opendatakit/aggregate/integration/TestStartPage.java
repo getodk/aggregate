@@ -3,12 +3,14 @@ package org.opendatakit.aggregate.integration;
 import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.TimeUnit;
-
 import java.util.List;
+import java.util.Random;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -40,6 +42,8 @@ public class TestStartPage {
     FirefoxProfile profile = new FirefoxProfile();
     profile.setEnableNativeEvents(false);
     profile.setPreference("network.negotiate-auth.trusteduris", hostname);
+    Random r = new Random();
+    profile.setPreference(FirefoxProfile.PORT_PREFERENCE, r.nextInt(50) + 7000);
     driver = new FirefoxDriver(profile);
     driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     driver.get(fullRootUrl);
@@ -48,7 +52,7 @@ public class TestStartPage {
 
     // wait for login process to complete...
     try {
-      Thread.sleep(7000);
+      Thread.sleep(10000);
     } catch (Exception e) {
     }
 
@@ -56,7 +60,7 @@ public class TestStartPage {
     Wait mainload = new Wait() {
       public boolean until() {
         try {
-          List<WebElement> elements = driver.findElementsByClassName("gwt-Label");
+          List<WebElement> elements = driver.findElements(By.className("gwt-Label"));
           for (WebElement e : elements) {
             if (e.getText().equals("Form Management"))
               return true;
@@ -78,14 +82,14 @@ public class TestStartPage {
 
     // wait for login process to complete...
     try {
-      Thread.sleep(7000);
+      Thread.sleep(10000);
     } catch (Exception e) {
     }
 
     Wait mainload = new Wait() {
       public boolean until() {
         try {
-          List<WebElement> elements = driver.findElementsByClassName("gwt-Label");
+          List<WebElement> elements = driver.findElements(By.className("gwt-Label"));
           for (WebElement e : elements) {
             if (e.getText().equals("Form Management"))
               return true;
@@ -105,6 +109,6 @@ public class TestStartPage {
 
   @AfterClass
   public static void tearDown() throws Exception {
-    driver.close();
+    driver.quit();
   }
 }

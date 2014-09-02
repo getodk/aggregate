@@ -21,12 +21,12 @@ import java.util.Map;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
- * Static methods to serialize and deserialize a Map<String,String> to an 
+ * Static methods to serialize and deserialize a Map<String,String> to an
  * xml-formatted string.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class PropertyMapSerializer {
 	private static final String K_XML_END_PARAMETERS = "</parameters>\n";
@@ -37,12 +37,12 @@ public final class PropertyMapSerializer {
 
 	/**
 	 * Deserialize the XML representation for a key-value map.
-	 * 
+	 *
 	 * @param parameterDocument
 	 * @return parameter map as a Map<String,String> key-value map.
 	 */
 	public static Map<String,String> deserializeRequestParameters(String parameterDocument) {
-		Map<String,String> parameters = new HashMap<String,String>();	
+		Map<String,String> parameters = new HashMap<String,String>();
 		if ( parameterDocument == null ) return parameters;
 		if ( !parameterDocument.startsWith(K_XML_BEGIN_PARAMETERS)) {
 			throw new IllegalArgumentException("bad parameter list -- not beginning with " +
@@ -83,7 +83,7 @@ public final class PropertyMapSerializer {
 
 	/**
 	 * Serialize a key-value map into an XML-formatted document.
-	 * 
+	 *
 	 * @param value - a Map<String,String> of key-value pairs.
 	 * @return the XML document representing the serialization of that key-value map.
 	 */
@@ -95,9 +95,9 @@ public final class PropertyMapSerializer {
 		b.append(K_XML_BEGIN_PARAMETERS);
 		for ( Map.Entry<String, String> e : value.entrySet()) {
 			b.append(K_XML_BEGIN_PARAMETER_BEGIN_KEY);
-			b.append(StringEscapeUtils.escapeXml(e.getKey()));
+			b.append(StringEscapeUtils.escapeXml10(e.getKey()));
 			b.append(K_XML_END_KEY_BEGIN_VALUE);
-			b.append(StringEscapeUtils.escapeXml(e.getValue()));
+			b.append(StringEscapeUtils.escapeXml10(e.getValue()));
 			b.append(K_XML_END_VALUE_END_PARAMETER);
 		}
 		b.append(K_XML_END_PARAMETERS);

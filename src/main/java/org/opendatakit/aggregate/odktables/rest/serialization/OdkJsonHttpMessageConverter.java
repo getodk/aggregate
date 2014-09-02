@@ -31,9 +31,6 @@ import java.util.TimeZone;
 
 import javax.ws.rs.core.Context;
 
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.type.JavaType;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -41,7 +38,11 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 
 /**
  * Implementation of
@@ -52,7 +53,7 @@ import org.springframework.http.converter.json.MappingJacksonHttpMessageConverte
  *
  * @author mitchellsundt@gmail.com
  */
-public class OdkJsonHttpMessageConverter extends MappingJacksonHttpMessageConverter {
+public class OdkJsonHttpMessageConverter extends  MappingJackson2HttpMessageConverter {
 
   @Context
   private HttpHeaders requestHeaders;
@@ -61,7 +62,7 @@ public class OdkJsonHttpMessageConverter extends MappingJacksonHttpMessageConver
 
   public OdkJsonHttpMessageConverter(boolean ignoreContentEncoding) {
     super();
-    getObjectMapper().disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
+    getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
   }
 
@@ -78,7 +79,7 @@ public class OdkJsonHttpMessageConverter extends MappingJacksonHttpMessageConver
       // Android RestTemplate already does GZIP decoding before it gets to this message converter
       stream = inputMessage.getBody();
       InputStreamReader r = new InputStreamReader(stream, Charset.forName(ApiConstants.UTF8_ENCODE));
-      JavaType javaType = getJavaType(clazz);
+      JavaType javaType = getJavaType(clazz, null);
       return this.getObjectMapper().readValue(r, javaType);
     } catch (Exception ex) {
       throw new HttpMessageNotReadableException("Could not read [" + clazz + "] JSON: "

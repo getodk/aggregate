@@ -61,7 +61,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Permission;
 import com.google.gdata.util.ServiceException;
@@ -69,9 +69,9 @@ import com.google.gdata.util.ServiceException;
 /**
  * Refactoring and base implementation using the new gdata APIs for accessing
  * Google Spreadsheet, Fusion Table and Map Engine.
- * 
+ *
  * @author wbrunette@gmail.com
- * 
+ *
  */
 public abstract class GoogleOauth2ExternalService extends AbstractExternalService {
 
@@ -144,7 +144,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
             "No OAuth2 credentials. Have you supplied any OAuth2 credentials on the Site Admin / Preferences page?");
       }
 
-      byte[] privateKeyBytes = Base64.decodeBase64(privateKeyString);
+      byte[] privateKeyBytes = Base64.decodeBase64(privateKeyString.getBytes(UTF_CHARSET));
 
       // TODO: CHANGE TO MORE OPTIMAL METHOD
       KeyStore ks = null;

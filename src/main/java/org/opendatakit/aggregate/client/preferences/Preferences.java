@@ -45,6 +45,8 @@ public class Preferences {
   private static String enketoApiToken;
 
   private static Boolean odkTablesEnabled;
+  
+  private static String appName;
 
   private static Boolean fasterBackgroundActionsDisabled;
 
@@ -80,6 +82,7 @@ public class Preferences {
       @SuppressWarnings("unused")
       Boolean oldTablesValue = odkTablesEnabled;
       odkTablesEnabled = summary.getOdkTablesEnabled();
+      appName = summary.getAppName();
       fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
 
       --nesting;
@@ -147,6 +150,13 @@ public class Preferences {
     return Boolean.FALSE;
   }
 
+
+  public static String getAppName() {
+    if (appName != null && appName.length() != 0) {
+      return appName;
+    }
+    return "tables";
+  }
 
   public static Boolean getFasterBackgroundActionsDisabled() {
     if (fasterBackgroundActionsDisabled != null) {

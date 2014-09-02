@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opendatakit</groupId>
 	<artifactId>aggregate</artifactId>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
   	<organization>
 		<name>Open Data Kit</name>
@@ -12,18 +12,23 @@
 	<name>ODK Aggregate</name>
 	<properties>
 	    <toplevel.directory>${project.basedir}/../</toplevel.directory>
+		<!-- must match the gae version below and the build/build.xml ant script defn -->
+		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.7/appengine-java-sdk-1.9.7</gae.home>
+		<!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
+		<selenium.home>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2</selenium.home>
+		<selenium.libs>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2/libs</selenium.libs>
 	    <war.directory>${project.basedir}/../eclipse-aggregate-gae/war</war.directory>
 		<scriptSourceDirectory>${project.basedir}/../src/it/scripts</scriptSourceDirectory>
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.9.0</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
+		<gooogle.appengine.sdk.version>1.9.7</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
 		<gae.version>${gooogle.appengine.sdk.version}</gae.version>
 		<google.gdata.version>1.47.1</google.gdata.version>
-		<google.api-client.version>1.17.0-rc</google.api-client.version>
-		<google.api-services-drive.version>v2-rev116-1.17.0-rc</google.api-services-drive.version>
-		<google.gwt.version>2.5.1</google.gwt.version>
-        <org.jboss.resteasy.version>3.0.6.Final</org.jboss.resteasy.version>
+		<google.api-client.version>1.18.0-rc</google.api-client.version>
+		<google.api-services-drive.version>v2-rev131-1.18.0-rc</google.api-services-drive.version>
+		<google.gwt.version>2.6.1</google.gwt.version>
+		<org.apache.wink.version>1.4</org.apache.wink.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.16</maven.surefire.report.plugin.version>
 		<maven.surefire.plugin.version>2.16</maven.surefire.plugin.version>
@@ -31,7 +36,7 @@
 		<maven.failsafe.plugin.version>2.16</maven.failsafe.plugin.version>
 		<cargo.maven2.plugin.version>1.4.7</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.8</build.helper.maven.plugin.version>
-		<gwt.maven.plugin.version>2.5.1</gwt.maven.plugin.version>
+		<gwt.maven.plugin.version>2.6.1</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
 		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
 		<maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
@@ -39,14 +44,17 @@
 		<maven.antrun.plugin.version>1.7</maven.antrun.plugin.version>
 		<maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
 		<junit.version>4.11</junit.version>
-		<org.codehaus.jackson.version>1.9.13</org.codehaus.jackson.version>
-		<org.springframework.version>3.1.3.RELEASE</org.springframework.version>
-		<org.slf4j.version>1.6.6</org.slf4j.version>
+		<com.fasterxml.jackson.base.version>2.4.1</com.fasterxml.jackson.base.version>
+		<com.fasterxml.jackson.core.version>2.4.1.1</com.fasterxml.jackson.core.version>
+		<com.fasterxml.jackson.version>2.4.1.3</com.fasterxml.jackson.version>
+		<org.codehaus.woodstox.version>4.1.4</org.codehaus.woodstox.version> <!-- used by jackson2 XML serializer -->
+		<org.springframework.version>4.0.5.RELEASE</org.springframework.version>
+		<org.slf4j.version>1.7.7</org.slf4j.version>
 		<!-- log4j is not used -->
-		<org.springframework.security.version>3.1.3.odk-SNAPSHOT</org.springframework.security.version> <!-- could do 3.1.3.RELEASE -->
-		<openid4java.version>0.9.6.662.odk-SNAPSHOT</openid4java.version>
-		<org.springframework.security.openid.version>3.1.3.odk-SNAPSHOT</org.springframework.security.openid.version>
-		<org.seleniumhq.version>2.37.0</org.seleniumhq.version>
+		<org.springframework.security.version>3.2.4.odk-SNAPSHOT</org.springframework.security.version>
+		<openid4java.version>0.9.6.662.1.odk-SNAPSHOT</openid4java.version>
+		<org.springframework.security.openid.version>3.2.4.odk-SNAPSHOT</org.springframework.security.openid.version>
+		<org.seleniumhq.version>2.42.2</org.seleniumhq.version>
 		<!--
 			keystore.propertyfile - define this in your settings.xml - the
 			location of the properties file for the keystore
@@ -65,7 +73,7 @@
 		<module>odk-postgres-unit-settings</module>
 		
 		<!-- aggregate-gae-specific -->
-		<module>aggregate-gae</module>
+		<module>gae-unit-tests</module>
 		<!-- aggregate-postgresql-specific -->
 		<module>aggregate-postgres</module>
 		<!-- aggregate-mysql-specific -->
@@ -77,7 +85,7 @@
 		<!-- odk tables client libraries -->
 		<module>odk-tables-api</module>
 		<!-- aggregate-gae-specific -->
-		<module>gae-unit-tests</module>
+		<module>aggregate-gae</module>
 	</modules>
 	<repositories>
 		<!-- main repository -->
@@ -204,13 +212,13 @@
         </pluginRepository>
 	</pluginRepositories>
 	<dependencies>
-		<dependency>
+<!--		<dependency>
 		  <groupId>aopalliance</groupId>
 		  <artifactId>aopalliance</artifactId>
 		  <version>1.0</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 		  <groupId>com.google.appengine</groupId>
 		  <artifactId>appengine-api-1.0-sdk</artifactId>
@@ -232,7 +240,7 @@
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
 			<version>1.6.12</version>
@@ -241,11 +249,11 @@
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.6.12</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.jolbox</groupId>
 			<artifactId>bonecp</artifactId>
-			<version>0.7.1.RELEASE</version>
+			<version>0.8.0.RELEASE</version>
 		  <exclusions>
 		    <exclusion>
 			  <groupId>com.google.guava</groupId>
@@ -264,14 +272,14 @@
 		<dependency> <!-- required by spring-security odk-SNAPSHOT -->
 		  <groupId>commons-codec</groupId>
 		  <artifactId>commons-codec</artifactId>
-		  <version>1.6</version> <!-- note: 1.7 requires java 1.6 -->
+		  <version>1.9</version> <!-- note: java 1.6 -->
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 		  <groupId>commons-fileupload</groupId>
 		  <artifactId>commons-fileupload</artifactId>
-		  <version>1.2.2</version>
+		  <version>1.3.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -285,14 +293,14 @@
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
 		  <artifactId>commons-lang3</artifactId>
-		  <version>3.1</version>
+		  <version>3.3.2</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 		  <groupId>commons-logging</groupId>
 		  <artifactId>commons-logging</artifactId>
-		  <version>1.1.1</version>
+		  <version>1.1.3</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
  			<exclusions>
@@ -305,8 +313,12 @@
         <dependency> <!-- required by spring-security odk-SNAPSHOT -->
 		  <groupId>net.sf.ehcache</groupId>
 		  <artifactId>ehcache</artifactId>
-		  <version>1.6.2</version>
+		  <version>2.8.3</version>
  			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
@@ -423,8 +435,8 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.guava</groupId>
-		  <artifactId>guava-jdk5</artifactId>
-		  <version>13.0</version>
+		  <artifactId>guava</artifactId>
+		  <version>17.0</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -444,7 +456,7 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.http-client</groupId>
-		  <artifactId>google-http-client-jackson</artifactId>
+		  <artifactId>google-http-client-jackson2</artifactId>
 		  <version>${google.api-client.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
@@ -519,24 +531,78 @@
 			<artifactId>httpmime</artifactId>
 			<version>4.2.2</version>
 		</dependency>
-		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
+<!--		<dependency> < !- - needed by spring-security odk-SNAPSHOT - ->
 			<groupId>com.ibm.icu</groupId>
 			<artifactId>icu4j</artifactId>
 			<version>3.4.4</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
-		  <groupId>org.codehaus.jackson</groupId>
-		  <artifactId>jackson-core-asl</artifactId>
-		  <version>${org.codehaus.jackson.version}</version>
+		  <groupId>com.fasterxml.jackson.core</groupId>
+		  <artifactId>jackson-annotations</artifactId>
+		  <version>${com.fasterxml.jackson.base.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
-		  <groupId>org.codehaus.jackson</groupId>
-		  <artifactId>jackson-mapper-asl</artifactId>
-		  <version>${org.codehaus.jackson.version}</version>
+		  <groupId>com.fasterxml.jackson.core</groupId>
+		  <artifactId>jackson-core</artifactId>
+		  <version>${com.fasterxml.jackson.core.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson.core</groupId>
+		  <artifactId>jackson-databind</artifactId>
+		  <version>${com.fasterxml.jackson.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+			<exclusions>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+			  </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson.dataformat</groupId>
+		  <artifactId>jackson-dataformat-xml</artifactId>
+		  <version>${com.fasterxml.jackson.base.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+			<exclusions>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+			  </exclusion>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+			  </exclusion>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+			  </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson.jaxrs</groupId>
+		  <artifactId>jackson-jaxrs-json-provider</artifactId>
+		  <version>${com.fasterxml.jackson.base.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+		</dependency>
+		<dependency>
+		  <groupId>com.fasterxml.jackson.jaxrs</groupId>
+		  <artifactId>jackson-jaxrs-xml-provider</artifactId>
+		  <version>${com.fasterxml.jackson.base.version}</version>
+		  <type>jar</type>
+		  <scope>compile</scope>
+			<exclusions>
+			  <exclusion>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+			  </exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>org.javarosa</groupId>
@@ -567,7 +633,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.18</version>
+			<version>5.1.31</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -589,7 +655,7 @@
 		<dependency>
 		  <groupId>org.opendatakit</groupId>
 		  <artifactId>odk-httpclient-gae</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>1.1</version>
+		  <version>1.1.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -597,13 +663,6 @@
 			<groupId>org.opendatakit</groupId>
 			<artifactId>odk-tomcatutil</artifactId> <!-- see src/main/libs/readme.txt -->
 			<version>1.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>2.3</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -661,11 +720,6 @@
 		  <version>${org.springframework.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-asm</artifactId>
-			<version>${org.springframework.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -826,14 +880,19 @@
 			<artifactId>transaction-api</artifactId>
 			<version>1.1</version>
 		</dependency>
+		<dependency>
+		  <groupId>org.codehaus.woodstox</groupId>
+		  <artifactId>woodstox-core-asl</artifactId>
+		  <version>${org.codehaus.woodstox.version}</version>
+		</dependency>
 		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
 			<groupId>xalan</groupId>
 			<artifactId>xalan</artifactId>
-			<version>2.7.0</version>	
+			<version>2.7.1</version>	
 			<exclusions>
 				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -850,11 +909,15 @@
 		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
 			<groupId>org.apache.santuario</groupId>
 			<artifactId>xmlsec</artifactId>
-			<version>1.4.6</version>
+			<version>1.5.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -864,27 +927,36 @@
 			<version>1.1.4c</version>
 		</dependency>
         <!-- for odktables api -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-            <version>${org.jboss.resteasy.version}</version>
-			<!-- filter out unwanted jars -->
-			<exclusions>
-				<exclusion>
-					<groupId>commons-httpclient</groupId>
-					<artifactId>commons-httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-			</exclusions>
+		<!-- <dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+			<version>${org.apache.cxf.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.simpleframework</groupId>
-            <artifactId>simple-xml</artifactId>
-            <version>2.6.2</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-core</artifactId>
+			<version>${org.apache.cxf.version}</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-common</artifactId>
+			<version>${org.apache.wink.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-server</artifactId>
+			<version>${org.apache.wink.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jaxrs_1.1_spec</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.2</version>
+		</dependency>
         <!-- /for odktables api -->
 		<!-- Test dependencies (mainly for gae) -->
 		<dependency>
@@ -1000,7 +1072,19 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>2.8</version>
-			  </plugin>
+				<executions>
+					<execution>
+						<id>analyze</id>
+						<goals>
+							<goal>analyze-only</goal>
+						</goals>
+						<configuration>
+							<failOnWarning>false</failOnWarning>
+							<outputXML>true</outputXML>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<!-- these are referenced by other projects -->
@@ -1077,12 +1161,14 @@
 							<groupId>javax.validation</groupId>
 							<artifactId>validation-api</artifactId>
 							<version>1.0.0.GA</version>
+							<type>jar</type>
 						</dependency>
 						<dependency>
 							<groupId>javax.validation</groupId>
 							<artifactId>validation-api</artifactId>
 							<version>1.0.0.GA</version>
 							<classifier>sources</classifier>
+							<type>jar</type>
 						</dependency>
 					</dependencies>
 					<executions>
@@ -1277,26 +1363,26 @@
 						<configuration>
 						  <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
 						  <additionalClasspathElements>
-							<additionalClasspathElement>${selenium.home}/selenium-java-2.37.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.home}/selenium-java-2.42.2.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/bsh-1.3.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/commons-codec-1.6.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-codec-1.9.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-collections-3.2.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-exec-1.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/commons-io-2.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-io-2.4.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-jxpath-1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/commons-lang3-3.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/commons-logging-1.1.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-lang3-3.2.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-logging-1.1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.11.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/guava-15.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-core-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-library-1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-2.13.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.13.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpclient-4.3.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpcore-4.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpmime-4.3.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-2.14.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.14.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpclient-4.3.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpcore-4.3.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpmime-4.3.2.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/ini4j-0.5.2.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jcommander-1.29.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jetty-websocket-8.1.8.jar</additionalClasspathElement>
@@ -1305,16 +1391,16 @@
 							<additionalClasspathElement>${selenium.libs}/json-20080701.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/junit-dep-4.11.jar</additionalClasspathElement>
 							<additionalClasspathElement>${localRepository}/junit/junit/${junit.version}/junit-${junit.version}.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.19.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.20.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/netty-3.5.7.Final.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/operadriver-1.5.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.0.4.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.1.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/serializer-2.7.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/testing-6.8.5.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/testng-6.8.5.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xalan-2.7.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/xercesImpl-2.10.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/xercesImpl-2.11.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/xml-apis-1.4.01.jar</additionalClasspathElement>
 						  </additionalClasspathElements>
 						  <testSourceDirectory>${project.parent.basedir}/src/it/java</testSourceDirectory>
@@ -1322,7 +1408,12 @@
 						  <includes>
 							<include>**/integration/**</include>
 						  </includes>
+						  <!-- pass through the DISPLAY environment variable -->
+						  <environmentVariables>
+							<DISPLAY>${unix.display}</DISPLAY>
+						  </environmentVariables>
 						  <systemPropertyVariables>
+							<webdriver.firefox.bin>${firefox.executable}</webdriver.firefox.bin>
 							<project.artifactId>${project.artifactId}</project.artifactId>
 							<test.forms.dir>${itFormsDirectory}</test.forms.dir>
 							<test.submissions.dir>${itSubmissionsDirectory}</test.submissions.dir>
@@ -1349,12 +1440,14 @@
 					<configuration>
 					  <wait>false</wait>
 					  <container>
-						<containerId>tomcat6x</containerId>
-						<log>${project.build.directory}/cargo-tree/tomcat6x/cargo.log</log>
-						<zipUrlInstaller>
-						  <url>${catalina.zip}</url>
-						  <extractDir>${project.build.directory}/tomcat6x</extractDir>
-						</zipUrlInstaller>
+						<containerId>tomcat7x</containerId>
+						<log>${project.build.directory}/cargo-tree/tomcat7x/cargo.log</log>
+						<artifactInstaller>
+						  <groupId>org.apache.tomcat</groupId>
+						  <artifactId>tomcat</artifactId>
+						  <version>7.0.54</version>
+						  <extractDir>${project.build.directory}/tomcat7x</extractDir>
+						</artifactInstaller>
 						<dependencies>
 							<dependency>
 								<groupId>mysql</groupId>
@@ -1364,9 +1457,10 @@
 					  </container>
 					  <configuration>
 						<type>standalone</type>
-						<home>${project.build.directory}/tomcat6x-container</home>
+						<home>${project.build.directory}/tomcat7x-container</home>
 						<properties>
 						  <cargo.servlet.port>${test.server.port}</cargo.servlet.port>
+						  <cargo.tomcat.useHttpOnly>false</cargo.tomcat.useHttpOnly>
 						</properties>
 					  </configuration>
 					  <deployables>

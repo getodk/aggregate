@@ -599,8 +599,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   public boolean hasRelation(String schema, String tableName, User user) {
     dam.recordQueryUsage(TableDefinition.INFORMATION_SCHEMA_COLUMNS, 1);
     String qs = TableDefinition.TABLE_EXISTS_QUERY;
-    int columnCount = getJdbcConnection().queryForInt(qs, new Object[] { schema, tableName });
-    return (columnCount != 0);
+    Integer columnCount = getJdbcConnection().queryForObject(qs, new Object[] { schema, tableName }, Integer.class);
+    return (columnCount != null && columnCount != 0);
   }
 
   @Override

@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>org.opendatakit</groupId>
 		<artifactId>aggregate</artifactId>
-		<version>1.0</version>
+		<version>1.0.1</version>
 		<relativePath>pom.xml</relativePath>
 	</parent>
 	<artifactId>aggregate-postgresql-specific</artifactId>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
 	<name>ODK Aggregate PostgreSQL Specific</name>
 	<modules>
@@ -73,7 +73,7 @@
 						<execution>
 							<!--  Tears down whatever we set up in the postgres-setup execution -->
 							<id>postgresql-teardown</id>
-							<phase>post-integration-test</phase>
+							<phase>verify</phase>
 							<goals>
 							  <goal>run</goal>
 							</goals>

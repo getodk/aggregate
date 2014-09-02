@@ -33,3 +33,7 @@ syntax: glob
 eclipse-aggregate-mysql/war/aggregateui/**
 eclipse-aggregate-mysql/war/WEB-INF/classes/**
 eclipse-aggregate-mysql/war/WEB-INF/deploy/**
+src/main/libs/gdata-src.java-1.47.1**
+build/apache-tomcat-**
+build/selenium-java-**
+build/appengine-java-sdk-**

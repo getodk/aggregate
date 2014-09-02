@@ -1,0 +1,53 @@
+<project name="SetupMaven" default="dist" basedir=".">
+    <description>
+        simple Ant script to run maven install commands for 
+		libraries that are not present in any external repository.
+    </description>
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="./ant-contrib-0.6.jar"/>
+		</classpath>
+	</taskdef>
+
+	<target name="mvn_cmd">
+		<exec dir="." executable="cmd" osfamily="windows">
+			<arg line="/c ${mvncmd}" />
+		</exec>
+		<exec dir="." executable="sh" osfamily="unix">
+			<arg line="-c '${mvncmd}'" />
+		</exec>
+	</target>
+	
+	<target name="dist_local">
+		<loadfile property="local-file-content" srcFile="mvn_local_installs"/>
+		<foreach
+			target="mvn_cmd"
+			list="${local-file-content}"
+			delimiter="${line.separator}"
+			param="mvncmd"/>
+	</target>
+	
+	<target name="dist_gdata">
+		<get src="http://gdata-java-client.googlecode.com/files/gdata-src.java-1.47.1.zip" 
+			dest="gdata-src.java-1.47.1.zip"
+			skipexisting="true"/>
+		<unzip src="gdata-src.java-1.47.1.zip" dest="gdata-src.java-1.47.1" overwrite="true"/>
+		<!-- do not know how to operate within a subdirectory, so force the gdata jars into this one -->
+		<copy todir="." overwrite="true" force="true">
+			<fileset dir="gdata-src.java-1.47.1/gdata/java/lib"/>
+		</copy>
+		<loadfile property="gdata-file-content" srcFile="mvn_gdata_installs"/>
+		<foreach
+			target="mvn_cmd"
+			list="${gdata-file-content}"
+			delimiter="${line.separator}"
+			param="mvncmd"/>
+		<!-- and clean up -->
+		<delete verbose="true">
+			<fileset dir="." includes="gdata*.jar"/>
+		</delete>
+	</target>
+		
+	<target name="dist" depends="dist_local,dist_gdata"/>
+  	
+</project>

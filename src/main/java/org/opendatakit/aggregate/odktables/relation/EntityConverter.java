@@ -17,9 +17,7 @@
 package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
@@ -28,6 +26,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDe
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
+import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
@@ -81,14 +80,12 @@ public class EntityConverter {
    * Convert a {@link DbColumnDefinitions} entity to a {@link Column}
    */
   public Column toColumn(DbColumnDefinitionsEntity entity) {
-    String tableId = entity.getTableId();
     String elementKey = entity.getElementKey();
     String elementName = entity.getElementName();
     String elementTypeStr = entity.getElementType();
     String listChildElementKeys = entity.getListChildElementKeys();
-    Boolean isUnitOfRetention = entity.getIsUnitOfRetention();
-    Column column = new Column(tableId, elementKey, elementName, elementTypeStr,
-        listChildElementKeys, isUnitOfRetention);
+    Column column = new Column(elementKey, elementName, elementTypeStr,
+        listChildElementKeys);
     return column;
   }
 
@@ -166,7 +163,7 @@ public class EntityConverter {
    * with some rework on the server, could become mutable).
    */
   public DataField toField(DbColumnDefinitionsEntity entity) {
-    if (!entity.getIsUnitOfRetention()) {
+    if (!entity.isUnitOfRetention()) {
       throw new IllegalArgumentException(
           "Attempt to get DataField for a non-persisted elementKey (" + entity.getElementKey()
               + ")");
@@ -190,7 +187,7 @@ public class EntityConverter {
   public List<DataField> toFields(List<DbColumnDefinitionsEntity> entities) {
     List<DataField> fields = new ArrayList<DataField>();
     for (DbColumnDefinitionsEntity entity : entities)
-      if (entity.getIsUnitOfRetention()) {
+      if (entity.isUnitOfRetention()) {
         fields.add(toField(entity));
       }
     return fields;
@@ -291,11 +288,11 @@ public class EntityConverter {
     row.setLastUpdateUser(entity.getStringField(DbTable.LAST_UPDATE_USER));
     row.setFilterScope(getDbTableFileInfoFilterScope(entity));
     // this will be the actual values of the row
-    Map<String, String> values = new HashMap<String, String>();
+    ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
     for (DataField column : DbTableFileInfo.exposedColumnNames) {
       Validate.isTrue(column.getDataType() == DataType.STRING);
       String value = entity.getStringField(column);
-      values.put(column.getName(), value);
+      values.add(new DataKeyValue(column.getName(), value));
     }
     row.setValues(values);
     return row;
@@ -349,13 +346,13 @@ public class EntityConverter {
     return row;
   }
 
-  public Map<String, String> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
-    Map<String, String> values = new HashMap<String, String>();
+  public ArrayList<DataKeyValue> getRowValues(Entity entity, List<DbColumnDefinitionsEntity> columns) {
+    ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
     for (DbColumnDefinitionsEntity column : columns) {
-      if (column.getIsUnitOfRetention()) {
+      if (column.isUnitOfRetention()) {
         String name = column.getElementKey();
         String value = entity.getAsString(name.toUpperCase());
-        values.put(name, value);
+        values.add(new DataKeyValue(name, value));
       }
     }
     return values;

@@ -27,6 +27,8 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
+import org.opendatakit.common.persistence.QueryResult;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 /**
@@ -35,6 +37,27 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
  * @author the.dylan.price@gmail.com
  */
 public class Query {
+
+  public static class WebsafeQueryResult {
+    public final List<Entity> entities;
+    public final String websafeRefetchCursor;
+    public final String websafeBackwardCursor;
+    public final String websafeResumeCursor;
+    public final boolean hasMore;
+    public final boolean hasPrior;
+
+    public WebsafeQueryResult(List<Entity> entities,
+        String websafeRefetchCursor, String websafeBackwardCursor, String websafeResumeCursor,
+        boolean hasMore, boolean hasPrior) {
+      this.entities = entities;
+      this.websafeRefetchCursor = websafeRefetchCursor;
+      this.websafeBackwardCursor = websafeBackwardCursor;
+      this.websafeResumeCursor = websafeResumeCursor;
+      this.hasMore = hasMore;
+      this.hasPrior = hasPrior;
+    }
+  }
+
   /**
    * The Relation to query.
    */
@@ -440,6 +463,37 @@ public class Query {
       return entities;
     } catch (ODKDatastoreException e) {
       return Collections.emptyList();
+    }
+  }
+
+  /**
+   * Execute the query and return a list of all results.
+   *
+   * @return a list of all the entities which matched the query.
+   * @throws ODKDatastoreException
+   */
+  public WebsafeQueryResult execute(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
+    try {
+      QueryResult result = query.executeQuery(startCursor, fetchLimit);
+
+      List<? extends CommonFieldsBase> list = result.getResultList();
+      List<Entity> entities = new ArrayList<Entity>();
+      for (CommonFieldsBase b : list) {
+        entities.add(relation.new EntityImpl((RelationImpl) b));
+      }
+      String safeStartCursor = result.getStartCursor() == null ? null : result.getStartCursor().asWebsafeCursor();
+      String safeBackwardCursor = result.getBackwardCursor() == null ? null : result.getBackwardCursor().asWebsafeCursor();
+      String safeResumeCursor = result.getResumeCursor() == null ? null : result.getResumeCursor().asWebsafeCursor();
+
+      return new WebsafeQueryResult( entities,
+          safeStartCursor,
+          safeBackwardCursor,
+          safeResumeCursor,
+          result.hasMoreResults(), result.hasPriorResults() );
+    } catch (ODKDatastoreException e) {
+      return new WebsafeQueryResult( new ArrayList<Entity>(),
+          null, null, null,
+          false, false );
     }
   }
 

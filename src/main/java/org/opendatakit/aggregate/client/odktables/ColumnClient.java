@@ -31,7 +31,6 @@ public class ColumnClient implements Serializable {
    */
   private static final long serialVersionUID = 668434593121197884L;
 
-  private String tableId;
   private String elementKey;
   private String elementName;
   private String elementType; // should be the string name() from Tables-side
@@ -52,22 +51,17 @@ public class ColumnClient implements Serializable {
    * @param displayName
    * @param type
    */
-  public ColumnClient(final String tableId, final String elementKey, final String elementName,
+  public ColumnClient(final String elementKey, final String elementName,
       final String elementType, final String listChildElementKeys, final int isPersisted,
       final String joins) {
     // ss: not sure what this was.leaving it out for now.
     // String nameToBeEntered = displayName.toLowerCase().replace(" ", "_");
-    this.tableId = tableId;
     this.elementKey = elementKey;
     this.elementName = elementName;
     this.elementType = elementType;
     this.listChildElementKeys = listChildElementKeys;
     this.isPersisted = isPersisted;
     this.joins = joins;
-  }
-
-  public String getTableId() {
-    return this.tableId;
   }
 
   public String getElementKey() {
@@ -95,7 +89,7 @@ public class ColumnClient implements Serializable {
   }
 
   public String toString() {
-    return "Column(tableId=" + this.getTableId() + ", elementKey=" + this.getElementKey()
+    return "Column(elementKey=" + this.getElementKey()
         + ", elementName=" + this.getElementName() + ", elementType=" + this.getElementType()
         + ", listChildElementKeys=" + this.getListChildElementKeys() + ", isPersisted="
         + this.getIsPersisted() + ", joins=" + this.getJoins() + ")";
