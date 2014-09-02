@@ -16,41 +16,43 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
+import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
+import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 
-@Provider
 public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesException> {
 
-  @Context
-  private HttpHeaders headers;
-
+  MediaType type;
+  
+  ODKTablesExceptionMapper(MediaType type) {
+    this.type = type;
+  }
   @Override
   public Response toResponse(ODKTablesException e) {
-    MediaType type;
     e.printStackTrace();
-    type = (headers.getAcceptableMediaTypes().size() != 0) ? headers.getAcceptableMediaTypes().get(
-        0) : MediaType.APPLICATION_JSON_TYPE;
 
     String msg = e.getMessage();
     if (msg == null) {
       msg = e.toString();
     }
-    if (e instanceof BadColumnNameException) {
+    if (e instanceof AppNameMismatchException) {
+      return Response.status(Status.PRECONDITION_FAILED)
+        .entity(new Error(ErrorType.APP_NAME_MISMATCH, msg)).type(type).build();
+    } else if (e instanceof BadColumnNameException) {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_COLUMN_NAME, msg))
           .type(type).build();
     } else if (e instanceof ETagMismatchException) {
@@ -59,9 +61,14 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     } else if (e instanceof InconsistentStateException) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();
+    } else if (e instanceof NotModifiedException) {
+      return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, ((NotModifiedException) e).getETag()).build();
     } else if (e instanceof PermissionDeniedException) {
       return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
           .type(type).build();
+    } else if (e instanceof SchemaETagMismatchException) {
+      return Response.status(Status.PRECONDITION_FAILED)
+          .entity(new Error(ErrorType.SCHEMA_ETAG_MISMATCH, msg)).type(type).build();
     } else if (e instanceof TableAlreadyExistsException) {
       return Response.status(Status.CONFLICT).entity(new Error(ErrorType.TABLE_EXISTS, msg))
           .type(type).build();

@@ -16,19 +16,20 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-@Root
-@Default(DefaultType.FIELD)
+
+@JacksonXmlRootElement(localName="rowResource")
 public class RowResource extends Row {
 
-  @Element(required = true)
+  /**
+   * The URL that returns this RowResource.
+   */
   private String selfUri;
 
-  @Element(required = true)
+  /**
+   * The URL that returns the TableResource for this row's table.
+   */
   private String tableUri;
 
   @SuppressWarnings("unused")
@@ -36,21 +37,7 @@ public class RowResource extends Row {
   }
 
   public RowResource(Row row) {
-    super();
-    setRowId(row.getRowId());
-    setRowETag(row.getRowETag());
-    setDataETagAtModification(row.getDataETagAtModification());
-    setDeleted(row.isDeleted());
-    setCreateUser(row.getCreateUser());
-    setLastUpdateUser(row.getLastUpdateUser());
-    setFilterScope(row.getFilterScope());
-    // sync'd metadata
-    setFormId(row.getFormId());
-    setLocale(row.getLocale());
-    setSavepointTimestamp(row.getSavepointTimestamp());
-    setSavepointCreator(row.getSavepointCreator());
-    // data
-    setValues(row.getValues());
+    super(row);
   }
 
   public String getSelfUri() {

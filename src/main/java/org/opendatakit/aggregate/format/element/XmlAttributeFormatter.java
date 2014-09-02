@@ -35,15 +35,15 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * Emits attribute=\"value\" string for a list of properties.
  * Escapes value but does not handle non-XML-compliant attribute names.
  * Used for metadata fields.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class XmlAttributeFormatter implements ElementFormatter {
 
   /**
    * Construct a XML Element Formatter
-   * 
+   *
    */
   public XmlAttributeFormatter() {
   }
@@ -70,7 +70,7 @@ public class XmlAttributeFormatter implements ElementFormatter {
 		return m.getElementName();
 	}
   }
-  
+
   @Override
   public void formatUid(String uri, String propertyName, Row row) {
     // unneeded so unimplemented
@@ -79,7 +79,7 @@ public class XmlAttributeFormatter implements ElementFormatter {
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
-    if( blobSubmission == null || 
+    if( blobSubmission == null ||
     	(blobSubmission.getAttachmentCount(cc) == 0) ||
     	(blobSubmission.getContentHash(1, cc) == null) ) {
     	addToXmlValueToRow(null, asAttributeName(element), row);
@@ -168,7 +168,7 @@ public class XmlAttributeFormatter implements ElementFormatter {
 
   private void addToXmlValueToRow(Object value, String propertyName, Row row) {
     if (value != null) {
-      String xmlString = propertyName + "=\"" + StringEscapeUtils.escapeXml(value.toString()) + "\"";
+      String xmlString = propertyName + "=\"" + StringEscapeUtils.escapeXml10(value.toString()) + "\"";
       row.addFormattedValue(xmlString);
     }
   }

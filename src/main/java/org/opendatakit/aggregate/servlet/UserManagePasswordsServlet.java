@@ -118,6 +118,11 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 
       try {
         SecurityServiceUtil.setUserCredentials(credential, cc);
+        
+        String superUsername = cc.getUserService().getSuperUserUsername();
+        if ( superUsername.equals(username) ) {
+          cc.getUserService().reloadPermissions();
+        }
         outcome = "OK";
       } catch (AccessDeniedException e1) {
         outcome = "Bad username";

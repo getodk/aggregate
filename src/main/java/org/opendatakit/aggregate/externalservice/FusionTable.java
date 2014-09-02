@@ -29,10 +29,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -64,14 +60,19 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 // TODO: upgrade to the fusion table service api
 // http://code.google.com/p/google-api-java-client/wiki/APIs#Fusion_Tables_API
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class FusionTable extends GoogleOauth2ExternalService implements ExternalService {
   private static final int MAX_INSERT_STRING_LEN = 30000;
@@ -97,7 +98,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
 
   /**
    * Common base initialization of a FusionTable (both new and existing).
-   * 
+   *
    * @param entity
    * @param formServiceCursor
    * @param form
@@ -116,7 +117,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   /**
    * Continuation of the creation of a brand new FusionTable. Needed because
    * entity must be passed into two objects in the constructor.
-   * 
+   *
    * @param entity
    * @param form
    * @param externalServiceOption
@@ -151,7 +152,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   /**
    * Reconstruct a FusionTable definition from its persisted representation in
    * the datastore.
-   * 
+   *
    * @param formServiceCursor
    * @param form
    * @param cc
@@ -170,7 +171,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
 
   /**
    * Create a brand new FusionTable
-   * 
+   *
    * @param form
    * @param externalServiceOption
    * @param ownerUserEmail
@@ -192,7 +193,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   /**
    * Helper function to create a FusionTable parameter table (missing the
    * not-yet-created tableId).
-   * 
+   *
    * @param ownerEmail
    * @param cc
    * @return
@@ -605,7 +606,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   /**
    * Private class that turns a submission into the formatted strings to be
    * batched
-   * 
+   *
    */
 
   private class FusionTableFormattedSubmission {
@@ -699,7 +700,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
 
   /**
    * Private class that determines how to break up the submission into batches
-   * 
+   *
    */
   private class SubmissionBatcher {
 
@@ -746,10 +747,10 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     /**
      * Get string for batch insert, removes the string so not available after
      * the first call
-     * 
-     * 
+     *
+     *
      * @param tableId
-     * 
+     *
      * @return string and remove from batch temp storage
      */
     String getBatchInsertString(String tableId) {
@@ -773,10 +774,10 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     /**
      * Processes the next group of submissions producing the strings for group
      * inserts
-     * 
+     *
      * Throws an exception if all strings have not been removed as assuming if
      * not removed, never got transmitted
-     * 
+     *
      * @return true if more submissions need to be processed to be sent, false
      *         if all submissions have been processed
      * @throws ODKExternalServiceException

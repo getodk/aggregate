@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -43,20 +43,21 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
   private static final boolean isWorkingZigZagEqualityFiltering = false;
-  
+
   static final Map<FilterOperation, FilterOperator> operationMap = new HashMap<FilterOperation, FilterOperator>();
 
   static {
@@ -196,7 +197,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       return new SimpleFilterTracker(attribute, op, value);
     }
   }
-  
+
   @Override
   public void addFilter(DataField attribute, FilterOperation op, Object value) {
     filterList.add(constructFilter(attribute, op, value));
@@ -235,7 +236,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   /**
-   * 
+   *
    * @param dominantSortAttr
    * @param startCursorFilter
    * @return true if there is at least one filter criteria against the dominant sort attribute
@@ -256,12 +257,12 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
     return false;
   }
-  
+
   /**
    * If there is no filter criteria on the dominant sort attribute, we need
    * to query the database to find the min/max value for the attribute and then
    * apply that to the query.  This is a work-around for broken GAE functionality.
-   * 
+   *
    * @return null if no records in table; otherwise, produce the needed filter.
    * @throws ODKDatastoreException
    */
@@ -271,18 +272,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     // is issued.
     //
     // To work around this, issue a query to return the current min/max
-    // value of the dominant sort attribute and apply a GE/LE 
-    // constraint using that value. This is effectively a no-op, 
+    // value of the dominant sort attribute and apply a GE/LE
+    // constraint using that value. This is effectively a no-op,
     // but keeps GAE happy.
     //
     // this is the dominant sort:
     SortTracker dominantSort = sortList.get(0);
     DataField dominantSortAttr = dominantSort.getAttribute();
-    SortDirection dominantSortDirection = 
-        dominantSort.direction.equals(Direction.ASCENDING) 
+    SortDirection dominantSortDirection =
+        dominantSort.direction.equals(Direction.ASCENDING)
         ? SortDirection.ASCENDING
         : SortDirection.DESCENDING;
-    
+
 
     DatastoreService ds = datastore.getDatastoreService();
     EntityRowMapper m = new EntityRowMapper(relation, user);
@@ -311,18 +312,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     } catch (SQLException e) {
       throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
     }
-    
-    SimpleFilterTracker impliedDominantFilter = constructFilter(dominantSortAttr, 
-        dominantSort.direction.equals(Direction.ASCENDING) 
+
+    SimpleFilterTracker impliedDominantFilter = constructFilter(dominantSortAttr,
+        dominantSort.direction.equals(Direction.ASCENDING)
         ? FilterOperation.GREATER_THAN_OR_EQUAL
         : FilterOperation.LESS_THAN_OR_EQUAL, dominantFilterValue );
-    
+
     return impliedDominantFilter;
   }
-  
+
   /**
    * Construct the query appropriate for this fragment of the result-set production.
-   * 
+   *
    * @param startCursorFilter
    * @param impliedDominantFilter
    * @return
@@ -338,51 +339,59 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       Query hack = new com.google.appengine.api.datastore.Query(relation.getSchemaName() + "."
           + relation.getTableName());
 
+      ArrayList<com.google.appengine.api.datastore.Query.Filter> filters =
+          new ArrayList<com.google.appengine.api.datastore.Query.Filter>();
       // add all the dominant filter conditions...
 
       // apply the startCursor filter on dominant attr.
       if (startCursorFilter != null) {
-        startCursorFilter.setFilter(hack);
+        startCursorFilter.setFilter(filters);
       }
 
       // add any other filter conditions on the dominant sort attribute.
       // e.g., for "between x and y" types of queries.
       for (Tracker t : filterList) {
         if (dominantSortAttr.equals(t.getAttribute())) {
-          t.setFilter(hack);
+          t.setFilter(filters);
         }
       }
 
       if (impliedDominantFilter != null) {
         // and apply the implicit filter...
-        impliedDominantFilter.setFilter(hack);
+        impliedDominantFilter.setFilter(filters);
       }
 
       // and add all other equality filter conditions.
       if ( isWorkingZigZagEqualityFiltering ) {
-        // GAE: this doesn't work in production, 
-        // though the ZigZag queries are supposed 
+        // GAE: this doesn't work in production,
+        // though the ZigZag queries are supposed
         // to support this...
         for (Tracker t : filterList) {
           if (!dominantSortAttr.equals(t.getAttribute())) {
             if (t instanceof SimpleFilterTracker) {
               SimpleFilterTracker st = (SimpleFilterTracker) t;
               if (st.isEqualityTest()) {
-                st.setFilter(hack);
+                st.setFilter(filters);
               }
             }
           }
         }
       }
 
+      if ( filters.size() == 1 ) {
+        hack.setFilter(filters.get(0));
+      } else if ( filters.size() > 1 ) {
+        hack.setFilter(new Query.CompositeFilter( CompositeFilterOperator.AND, filters));
+      }
+
       // add the dominant sort.
-      SortDirection dominantSortDirection = 
-          dominantSort.direction.equals(Direction.ASCENDING) 
+      SortDirection dominantSortDirection =
+          dominantSort.direction.equals(Direction.ASCENDING)
           ? SortDirection.ASCENDING
           : SortDirection.DESCENDING;
-      
+
       hack.addSort(dominantSort.getAttribute().getName(), dominantSortDirection);
-      // subordinate sorts cannot be applied 
+      // subordinate sorts cannot be applied
       // GAE production doesn't like them.
 
       gaeCostLogger.declareQuery(hack);
@@ -396,7 +405,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
     }
   }
-  
+
   /**
    * Inner action function that can fill odkEntities with > fetchLimit+1 entries
    * beyond the set of entries matching the initial dominantSortAttr value.
@@ -404,7 +413,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * of the 'final' value and then grab the value after those as well.  This
    * is because the 'final' value can have nested sorts applied that will reorder
    * the sequence.
-   * 
+   *
    * @param odkEntities
    *          -- list of entities being assembled.
    * @param startCursorFilter
@@ -429,10 +438,10 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     DataField dominantSortAttr = dominantSort.getAttribute();
 
     // Test whether we have filters on the dominant sort attribute.
-    // If we don't have filters on the dominant sort attribute, 
+    // If we don't have filters on the dominant sort attribute,
     // then interrogate the database to establish an implied filter.
     SimpleFilterTracker impliedDominantFilter = null;
-    
+
     if (!hasDominantAttributeFilter(dominantSortAttr, startCursorFilter)) {
       impliedDominantFilter = getImpliedDominantAttributeFilter();
       if ( impliedDominantFilter == null ) {
@@ -442,9 +451,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
 
     EntityRowMapper m = new EntityRowMapper(relation, user);
-    
+
     // Fetch chunks bigger that the default...
-    // Bulk fetches are dead slow if the chunks are small. 
+    // Bulk fetches are dead slow if the chunks are small.
     // This burns quota but makes fetches that filter data faster.
     int chunkSize = 2048;
 
@@ -514,7 +523,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       w.odkAdditionalEntities.clear();
 
       try {
-        { 
+        {
           // scope iterable to this block -- can be GC'd on exit from it.
           Iterable<com.google.appengine.api.datastore.Entity> it;
           try {
@@ -527,17 +536,17 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
             datastore.recordQueryUsage(relation, 0);
             throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
           }
-  
+
           // loop while the query returns at least one result...
           // Calls recordQueryUsage -- including during exceptions.
           hasQueryResults = fetchResults(it, dominantSort, dominantSortAttr, m, mustReadEverything,
               fetchLimit, options.getLimit(), odkEntities.size(), w);
         }
         // and if we succeeded, we update the actual state to that of the
-        // fetched results.  This loop makes extensive use of the 
+        // fetched results.  This loop makes extensive use of the
         // fetchOffset to index into the remainder of the query set
         // even when we re-issue the query.  Note that the above
-        // query-set will return only up to options.getLimit() values, 
+        // query-set will return only up to options.getLimit() values,
         // and there may be many more values beyond that.
         idx = w.idx;
         fetchOffset = w.fetchOffset;
@@ -588,7 +597,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * and applies the filter criteria to them.  It assumes
    * the query production will return a consistently ordered
    * set of results.
-   * 
+   *
    * @param it
    * @param dominantSort
    * @param dominantSortAttr
@@ -614,13 +623,13 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         for (com.google.appengine.api.datastore.Entity gaeEntity : it) {
           hasQueryResults = true;
           readSetCount++;
-  
+
           CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, gaeEntity, w.idx++);
-  
+
           // determine whether this odkEntity shares the same dominantSortAttr
           // value as the one before it.
           boolean matchingDominantAttr;
-  
+
           // reset the fetch offset to zero and update the startCursorFilter
           // if the matchingAttr has changed.
           if (w.odkFirstEntityOfCurrentDominantValue == null) {
@@ -637,17 +646,17 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
               w.fetchOffset = 0;
               w.odkFirstEntityOfCurrentDominantValue = odkEntity;
               w.dominantSortAttrValueHasChanged = true;
-  
+
               w.startCursorFilter = new SimpleFilterTracker(
                   dominantSortAttr,
-                  dominantSort.direction.equals(Direction.ASCENDING) 
+                  dominantSort.direction.equals(Direction.ASCENDING)
                     ? FilterOperation.GREATER_THAN_OR_EQUAL
                     : FilterOperation.LESS_THAN_OR_EQUAL,
                   EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr));
             }
           }
           w.fetchOffset++;
-  
+
           // if we have read enough records to satisfy the fetchLimit, we
           // only need to continue reading records until matchingDominantAttr
           // becomes false. This indicates that we have collected all the
@@ -661,7 +670,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
             // we're done!
             return false;
           }
-  
+
           // determine if this result passes all filters...
           boolean passed = true;
           for (Tracker t : filterList) {
@@ -670,7 +679,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
               break;
             }
           }
-  
+
           if (passed) {
             if (w.possiblyBeforeStartCursor && w.dominantSortAttrValueHasChanged) {
               // We are starting to process the result set.
@@ -724,7 +733,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * If the primary key does not already have a sort order applied,
    * ensure that it is ordered in the same ascending/descending
    * order as the dominant sort parameter.
-   * 
+   *
    * @param dominantSort
    */
   private void enforcePrimaryKeyOrdering(SortTracker dominantSort) {
@@ -748,7 +757,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       addSort(relation.primaryKey, dominantSort.direction);
     }
   }
-  
+
   /**
    * Uses chunkFetch(...) to fetch at least fetchLimit+1 values beyond
    * the start-value (or all values, if fetchLimit is zero).  Then orders
@@ -882,9 +891,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   /**
-   * Incoming queries that lack an sort criteria will have the 
+   * Incoming queries that lack an sort criteria will have the
    * field of the first filter criteria passed down as a sort
-   * criteria.  If zig-zag queries are supported, the sort 
+   * criteria.  If zig-zag queries are supported, the sort
    * field will be the first non-equality test in the initial
    * query (or the PK if there is none).
    */

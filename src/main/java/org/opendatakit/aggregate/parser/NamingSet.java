@@ -14,11 +14,11 @@
 package org.opendatakit.aggregate.parser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -50,13 +50,20 @@ final class NamingSet {
 
   private StringBuilder dbg = null;
   private int idxResolveNames = 0;
-  private final Map<String, Name> tablePlaceholders = new HashMap<String, Name>();
-  private final Map<String, Map<String, Name>> columnPlaceholders = new HashMap<String, Map<String, Name>>();
-  private final Set<String> uniqueTables = new HashSet<String>();
+  private final Map<String, Name> tablePlaceholders = new TreeMap<String, Name>();
+  private final Map<String, Map<String, Name>> columnPlaceholders = new TreeMap<String, Map<String, Name>>();
+  private final Set<String> uniqueTables = new TreeSet<String>();
 
-  private final Map<String, Integer> tableIndexCounters = new HashMap<String, Integer>();
+  private final Map<String, Integer> tableIndexCounters = new TreeMap<String, Integer>();
+
+  private int baseCounter = 0;
 
   public NamingSet() {
+  }
+
+  private final String genPlaceholder() {
+    String holder = String.format("%1$04d%2$s", ++baseCounter, UUID.randomUUID().toString());
+    return holder;
   }
 
   private void dumpIndent(int indent) {
@@ -96,56 +103,64 @@ final class NamingSet {
 
   private synchronized void dumpTables(String header, int indent) {
     if (logger.isDebugEnabled()) {
-      dbg = new StringBuilder();
+      dumpTablesInternal(header, indent, false);
+    }
+  }
 
-      dumpIndent(indent);
-      dbg.append("\"" + header + "\": {\n");
+  private synchronized void dumpTablesInternal(String header, int indent, boolean asError) {
+    dbg = new StringBuilder();
 
-      dumpIndent(indent + 2);
-      dbg.append("\"tablePlaceholders\": {\n");
-      boolean first = true;
-      for (Map.Entry<String, Name> tp : tablePlaceholders.entrySet()) {
-        if (!first) {
+    dumpIndent(indent);
+    dbg.append("\"" + header + "\": {\n");
+
+    dumpIndent(indent + 2);
+    dbg.append("\"tablePlaceholders\": {\n");
+    boolean first = true;
+    for (Map.Entry<String, Name> tp : tablePlaceholders.entrySet()) {
+      if (!first) {
+        dbg.append(",\n");
+      }
+      first = false;
+      dumpIndent(indent + 4);
+      dbg.append("\"" + tp.getKey() + "\" : ");
+      dumpName(tp.getValue(), indent + 6);
+    }
+    dbg.append("\n");
+    dumpIndent(indent + 2);
+    dbg.append("},\n");
+
+    dumpIndent(indent + 2);
+    dbg.append("\"columnPlaceholders\": {\n");
+    first = true;
+    for (Map.Entry<String, Map<String, Name>> cp : columnPlaceholders.entrySet()) {
+      if (!first) {
+        dbg.append(",\n");
+      }
+      first = false;
+      dumpIndent(indent + 4);
+      dbg.append("\"" + cp.getKey() + "\" : {");
+      boolean nestedFirst = true;
+      for (Map.Entry<String, Name> cpp : cp.getValue().entrySet()) {
+        if (!nestedFirst) {
           dbg.append(",\n");
         }
-        first = false;
-        dumpIndent(indent + 4);
-        dbg.append("\"" + tp.getKey() + "\" : ");
-        dumpName(tp.getValue(), indent + 6);
+        nestedFirst = false;
+        dumpIndent(indent + 6);
+        dbg.append("\"" + cpp.getKey() + "\" : ");
+        dumpName(cpp.getValue(), indent + 8);
       }
       dbg.append("\n");
-      dumpIndent(indent + 2);
-      dbg.append("},\n");
-
-      dumpIndent(indent + 2);
-      dbg.append("\"columnPlaceholders\": {\n");
-      first = true;
-      for (Map.Entry<String, Map<String, Name>> cp : columnPlaceholders.entrySet()) {
-        if (!first) {
-          dbg.append(",\n");
-        }
-        first = false;
-        dumpIndent(indent + 4);
-        dbg.append("\"" + cp.getKey() + "\" : {");
-        boolean nestedFirst = true;
-        for (Map.Entry<String, Name> cpp : cp.getValue().entrySet()) {
-          if (!nestedFirst) {
-            dbg.append(",\n");
-          }
-          nestedFirst = false;
-          dumpIndent(indent + 6);
-          dbg.append("\"" + cpp.getKey() + "\" : ");
-          dumpName(cpp.getValue(), indent + 8);
-        }
-        dbg.append("\n");
-        dumpIndent(indent + 4);
-        dbg.append("}");
-      }
-      dbg.append("\n");
-      dumpIndent(indent + 2);
-      dbg.append("}\n");
-      dumpIndent(indent);
-      dbg.append("},\n");
+      dumpIndent(indent + 4);
+      dbg.append("}");
+    }
+    dbg.append("\n");
+    dumpIndent(indent + 2);
+    dbg.append("}\n");
+    dumpIndent(indent);
+    dbg.append("},\n");
+    if (asError) {
+      logger.error(dbg.toString());
+    } else {
       logger.debug(dbg.toString());
     }
   }
@@ -160,7 +175,7 @@ final class NamingSet {
    * @return placeholder string for this table.
    */
   public final String getTableName(String schema, String prefix, String qualifier, String itemName) {
-    String placeholder = UUID.randomUUID().toString();
+    String placeholder = genPlaceholder();
 
     tablePlaceholders.put(placeholder, new Name(schema, prefix, qualifier, itemName));
     return placeholder;
@@ -176,11 +191,11 @@ final class NamingSet {
    * @return placeholder string for this column.
    */
   public final String getColumnName(String tablePlaceholder, String qualifier, String itemName) {
-    String placeholder = UUID.randomUUID().toString();
+    String placeholder = genPlaceholder();
 
     Map<String, Name> m = columnPlaceholders.get(tablePlaceholder);
     if (m == null) {
-      m = new HashMap<String, Name>();
+      m = new TreeMap<String, Name>();
       columnPlaceholders.put(tablePlaceholder, m);
     }
     m.put(placeholder, new Name(null, "", qualifier, itemName));
@@ -232,7 +247,7 @@ final class NamingSet {
     int maxTblPrefix = 0;
     int maxQualLen = 0;
     int maxItemName = 0;
-    Map<String, Integer> qualMaxName = new HashMap<String, Integer>();
+    Map<String, Integer> qualMaxName = new TreeMap<String, Integer>();
     for (Map.Entry<String, Name> tbl : tablePlaceholders.entrySet()) {
       Name nm = tbl.getValue();
       int len = nm.itemName.length();
@@ -410,79 +425,93 @@ final class NamingSet {
    * @param maxLenColumnName
    */
   private void resolveColumnNames(int maxLenColumnName) {
-    // resolve the column names within a table
-    for (Map.Entry<String, Map<String, Name>> colMap : columnPlaceholders.entrySet()) {
-      // We have the column map entry for a given table.
+    try {
+      // resolve the column names within a table
+      for (Map.Entry<String, Map<String, Name>> colMap : columnPlaceholders.entrySet()) {
+        // We have the column map entry for a given table.
 
-      // now, construct a map of qualifier -to- max item name length
-      // for each different qualifier of column names.
-      Map<String, Integer> qualMaxName = new HashMap<String, Integer>();
-      for (Map.Entry<String, Name> col : colMap.getValue().entrySet()) {
-        int len = col.getValue().itemName.length();
-        String qualifier = col.getValue().qualifier;
-        Integer curMax = qualMaxName.get(qualifier);
-        if (curMax == null || curMax.compareTo(len) < 0) {
-          qualMaxName.put(qualifier, len);
-        }
-      }
-
-      // and go through the columns in the table creating consistently
-      // munged column names by shrinking the qualifier a consistent
-      // amount across all the fields it qualifies.
-      for (Map.Entry<String, Name> col : colMap.getValue().entrySet()) {
-        Name nm = col.getValue();
-        String qualifier = nm.qualifier;
-        int maxAll = qualMaxName.get(qualifier);
-        // remainder available to the qualifier... (extra one is for '_')
-        int remainder = maxLenColumnName - maxAll - 1;
-        if (remainder > 0 && qualifier.length() - 5 > remainder) {
-          // truncate qualifier to remainder...
-          nm.mungedQualifier = trimName(nm.qualifier, remainder);
-          nm.mungedItemName = nm.itemName;
-        } else if (qualifier.length() == 0) {
-          // truncate the item name, since it is all we have...
-          nm.mungedQualifier = nm.qualifier;
-          nm.mungedItemName = trimName(nm.itemName, maxLenColumnName);
-        } else {
-          // we have to pare down both the qualifier and the item name.
-          // trim the qualifier to be 1/3 the max length, and the
-          // item name to be 2/3 the max length...
-          remainder = maxLenColumnName / 3;
-          nm.mungedQualifier = trimName(nm.qualifier, remainder - 1);
-          nm.mungedItemName = trimName(nm.itemName, maxLenColumnName - remainder);
-        }
-
-        if (nm.mungedQualifier.length() == 0) {
-          nm.resolvedName = nm.mungedItemName;
-        } else {
-          nm.resolvedName = nm.mungedQualifier + "_" + nm.mungedItemName;
-        }
-
-        if (nm.resolvedName.length() > maxLenColumnName) {
-          logger.error("Munged resolved name still too long: " + nm.resolvedName);
-          nm.resolvedName = trimName(nm.resolvedName, maxLenColumnName);
-        }
-      }
-
-      // we now have the set of candidate resolved names.
-      // build a set of these to ensure no collisions. If we find a collision,
-      // resolve by appending suffix count and re-trimming as needed.
-      Set<String> resolvedNames = new HashSet<String>();
-      for (Map.Entry<String, Name> col : colMap.getValue().entrySet()) {
-        Name nm = col.getValue();
-        if (resolvedNames.contains(nm.resolvedName)) {
-          // collision
-          int dupCounter = 2;
-          String newName = trimName(nm.resolvedName + Integer.toString(dupCounter++),
-              maxLenColumnName);
-          while (resolvedNames.contains(newName)) {
-            newName = trimName(nm.resolvedName + Integer.toString(dupCounter++), maxLenColumnName);
+        // now, construct a map of qualifier -to- max item name length
+        // for each different qualifier of column names.
+        Map<String, Integer> qualMaxName = new TreeMap<String, Integer>();
+        for (Map.Entry<String, Name> col : colMap.getValue().entrySet()) {
+          int len = col.getValue().itemName.length();
+          String qualifier = col.getValue().qualifier;
+          Integer curMax = qualMaxName.get(qualifier);
+          if (curMax == null || curMax.compareTo(len) < 0) {
+            qualMaxName.put(qualifier, len);
           }
-          nm.resolvedName = newName;
         }
-        resolvedNames.add(nm.resolvedName);
+
+        // and go through the columns in the table creating consistently
+        // munged column names by shrinking the qualifier a consistent
+        // amount across all the fields it qualifies.
+        for (Map.Entry<String, Name> col : colMap.getValue().entrySet()) {
+          Name nm = col.getValue();
+          String qualifier = nm.qualifier;
+          int maxAll = qualMaxName.get(qualifier);
+          // remainder available to the qualifier... (extra one is for '_')
+          int remainder = maxLenColumnName - maxAll - 1;
+          if (qualifier.length() == 0) {
+            // truncate the item name, since it is all we have...
+            nm.mungedQualifier = nm.qualifier;
+            nm.mungedItemName = trimName(nm.itemName, maxLenColumnName);
+          } else if ( qualifier.length() <= remainder ) {
+            // (qualifier + max item name) is short enough to avoid truncation
+            nm.mungedQualifier = nm.qualifier;
+            nm.mungedItemName = nm.itemName;
+          } else if ((remainder >= 3) &&
+                     (qualifier.length() <= 11 ||
+                      remainder >= Integer.toString(qualifier.length() - 2).length() + 2)) {
+            // truncate qualifier to remainder...
+            // In the worst case, we have enough room
+            // to encode the qualifier with an I18N style encoding.
+            nm.mungedQualifier = trimName(nm.qualifier, remainder);
+            nm.mungedItemName = nm.itemName;
+          } else {
+            // we have to pare down both the qualifier and the item name.
+            // trim the qualifier to be 1/3 the max length, and the
+            // item name to be 2/3 the max length...
+            remainder = maxLenColumnName / 3;
+            nm.mungedQualifier = trimName(nm.qualifier, remainder - 1);
+            nm.mungedItemName = trimName(nm.itemName, maxLenColumnName - remainder);
+          }
+
+          if (nm.mungedQualifier.length() == 0) {
+            nm.resolvedName = nm.mungedItemName;
+          } else {
+            nm.resolvedName = nm.mungedQualifier + "_" + nm.mungedItemName;
+          }
+
+          if (nm.resolvedName.length() > maxLenColumnName) {
+            logger.error("Munged resolved name still too long: " + nm.resolvedName);
+            nm.resolvedName = trimName(nm.resolvedName, maxLenColumnName);
+          }
+        }
+
+        // we now have the set of candidate resolved names.
+        // build a set of these to ensure no collisions. If we find a collision,
+        // resolve by appending suffix count and re-trimming as needed.
+        Set<String> resolvedNames = new TreeSet<String>();
+        for (Map.Entry<String, Name> col : colMap.getValue().entrySet()) {
+          Name nm = col.getValue();
+          if (resolvedNames.contains(nm.resolvedName)) {
+            // collision
+            int dupCounter = 2;
+            String newName = trimName(nm.resolvedName + Integer.toString(dupCounter++),
+                maxLenColumnName);
+            while (resolvedNames.contains(newName)) {
+              newName = trimName(nm.resolvedName + Integer.toString(dupCounter++), maxLenColumnName);
+            }
+            nm.resolvedName = newName;
+          }
+          resolvedNames.add(nm.resolvedName);
+        }
+        // OK. At this point, we have found good column names for this table!
       }
-      // OK. At this point, we have found good column names for this table!
+    } catch (IndexOutOfBoundsException e) {
+      logger.error("Index out of bounds exception");
+      dumpTablesInternal("idxOutOfBounds", 0, true);
+      throw e;
     }
   }
 
@@ -496,6 +525,7 @@ final class NamingSet {
    */
   public String trimName(String name, int len) {
 
+    String originalName = name;
     int numCharToDrop = name.length() - len;
 
     if (numCharToDrop > name.length()) {
@@ -553,26 +583,31 @@ final class NamingSet {
         }
       }
 
-      if (numCharToDrop > 0 && name.length() > numCharToDrop) {
+      if (name.length() > len) {
+        numCharToDrop = originalName.length() - len;
         // urgh! we are still too long -- go to I18N formatting...
         // if we need to drop 100 characters, we actually need to drop 103
         // so we can have space for the digits -- e.g., A103N
         //
         // Compute the number of characters we actually have to drop...
-        int digits = (numCharToDrop >= 97) ? 3 : (numCharToDrop >= 8) ? 2 : 1;
+        int digits = (numCharToDrop >= 98) ? 3 : (numCharToDrop >= 9) ? 2 : 1;
         numCharToDrop += digits;
-        // possibly increase numCharToDrop to make it even...
-        // this won't affect digits...
-        numCharToDrop = (2 * numCharToDrop + 1) / 2;
 
-        int elideFirst = name.length() / 2 - numCharToDrop / 2;
-        int elideLast = name.length() / 2 + numCharToDrop / 2;
+        if ( numCharToDrop + 2 <= originalName.length() ) {
+          int oddCorrector = 1 - (originalName.length() % 2);
+          int elideFirst = (originalName.length() + oddCorrector - numCharToDrop) / 2;
+          int elideLast = (originalName.length() + oddCorrector + numCharToDrop) / 2;
 
-        name = name.substring(0, elideFirst) + Integer.toString(numCharToDrop)
-            + name.substring(elideLast + 1);
+          name = originalName.substring(0, elideFirst) + Integer.toString(numCharToDrop)
+              + originalName.substring(elideLast);
+        }
       }
-      numCharToDrop = name.length() - len;
-      assert (numCharToDrop <= 0);
+
+      if (name.length() > len) {
+        // OK. We are completely hosed.
+        // There is no room for I18N
+        name = originalName.substring(0, len);
+      }
     }
     return name;
   }

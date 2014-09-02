@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendatakit</groupId>
     <artifactId>aggregate</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>odk-mysql-unit-settings</artifactId>

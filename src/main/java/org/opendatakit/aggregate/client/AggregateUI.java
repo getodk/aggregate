@@ -61,6 +61,8 @@ import com.google.gwt.user.client.ui.Widget;
 public class AggregateUI implements EntryPoint {
 
   private UrlHash hash;
+  private Label notSecureMsgLabel;
+  private FlowPanel notSecurePanel;
   private Label errorMsgLabel;
   private FlowPanel errorPanel;
 
@@ -121,9 +123,19 @@ public class AggregateUI implements EntryPoint {
     singleton = null;
     timer = new RefreshTimer(this);
 
+    // define the not-secure message info...
+    notSecureMsgLabel = new Label();
+    notSecureMsgLabel.setStyleName("not_secure_message");
+
+    notSecurePanel = new FlowPanel();
+    notSecurePanel.add(notSecureMsgLabel);
+    notSecurePanel.setVisible(false);
+    
     // define the error message info...
     errorMsgLabel = new Label();
     errorMsgLabel.setStyleName("error_message");
+
+    // put the not-secure and error messages in an error panel
     errorPanel = new FlowPanel();
     errorPanel.add(errorMsgLabel);
     errorPanel.setVisible(false);
@@ -134,14 +146,20 @@ public class AggregateUI implements EntryPoint {
 
     wrappingLayoutPanel = new FlowPanel(); // vertical
     wrappingLayoutPanel.setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
+
     layoutPanel = new HorizontalPanel();
-    helpPanel = new ScrollPanel();
 
     mainNav = new DecoratedTabPanel();
     mainNav.getElement().setId("mainNav");
     mainNav.addSelectionHandler(new RefreshSelectionHandler<Integer>());
 
-    settingsBar = new NavLinkBar();
+    // add to layout
+    layoutPanel.add(mainNav);
+    layoutPanel.getElement().setId("layout_panel");
+
+    wrappingLayoutPanel.add(layoutPanel);
+
+    helpPanel = new ScrollPanel();
 
     // Create help panel
     Tree helpTree = new Tree();
@@ -153,18 +171,18 @@ public class AggregateUI implements EntryPoint {
 
     helpPanel.add(helpTree);
     helpPanel.getElement().setId("help_panel");
+    helpPanel.setVisible(false);
 
-    wrappingLayoutPanel.add(layoutPanel);
+    wrappingLayoutPanel.add(helpPanel);
 
-    // add to layout
-    layoutPanel.add(mainNav);
-    layoutPanel.getElement().setId("layout_panel");
-
+    settingsBar = new NavLinkBar();
+    
+    RootPanel.get("not_secure_content").add(notSecurePanel);
     RootPanel.get("error_content").add(errorPanel);
-    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
-    RootPanel.get("dynamic_content").add(settingsBar);
     RootPanel.get("dynamic_content").add(
         new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" class=\"gwt-Image\" />"));
+    RootPanel.get("dynamic_content").add(settingsBar);
+    RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
   }
 
   private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
@@ -255,6 +273,7 @@ public class AggregateUI implements EntryPoint {
                   @Override
                   public void onSuccess(RealmSecurityInfo result) {
                     realmInfo = result;
+                    updateNotSecureInfo();
                     if (realmInfo != null && userInfo != null) {
                       commonUserInfoUpdateCompleteAction();
                     }
@@ -265,6 +284,7 @@ public class AggregateUI implements EntryPoint {
           @Override
           public void onSuccess(RealmSecurityInfo result) {
             realmInfo = result;
+            updateNotSecureInfo();
             // it worked the first time! Now do the user info request.
             SecureGWT.getSecurityService().getUserInfo(new AsyncCallback<UserSecurityInfo>() {
 
@@ -307,7 +327,7 @@ public class AggregateUI implements EntryPoint {
         if ( w != null && w instanceof OdkTablesTabUI ) {
           w.setVisible(odkTablesVisible);
           ((Widget) mainNav.getTabBar().getTab(i)).setVisible(odkTablesVisible);
-          ((OdkTablesTabUI) w).updateVisibilityOdkTablesAdminSubTabs();
+          ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
         }
       }
 
@@ -320,6 +340,29 @@ public class AggregateUI implements EntryPoint {
           } else {
             adminTab.hideOdkTablesSubTab();
           }
+        } else {
+          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
+        }
+      }
+    } else {
+      AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
+      if ( odkTables != null ) {
+        odkTables.setVisible(false);
+      }
+      for (int i = 0; i < mainNav.getWidgetCount(); i++) {
+        Widget w = mainNav.getWidget(i);
+        if ( w != null && w instanceof OdkTablesTabUI ) {
+          w.setVisible(false);
+          ((Widget) mainNav.getTabBar().getTab(i)).setVisible(false);
+          ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
+        }
+      }
+
+      if ( authorizedForTab(Tabs.ADMIN) ) {
+        AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
+        if (AminTab != null && AminTab instanceof AdminTabUI) {
+          AdminTabUI adminTab = (AdminTabUI) AminTab;
+          adminTab.hideOdkTablesSubTab();
         } else {
           AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
         }
@@ -568,6 +611,25 @@ public class AggregateUI implements EntryPoint {
     return userInfo;
   }
 
+  public void updateNotSecureInfo() {
+    if ( realmInfo != null ) {
+      if (!realmInfo.isSuperUsernamePasswordSet() ) {
+        notSecureMsgLabel.setText("This server and its data are not secure! Please change the super-user's password!");
+        notSecurePanel.setVisible(true);
+        resize();
+      } else if ( notSecurePanel.isVisible() ) {
+        notSecureMsgLabel.setText("");
+        notSecurePanel.setVisible(false);
+        resize();
+      }
+    }
+  }
+  
+  public void forceUpdateNotSecureInfo() {
+    lastRealmInfoUpdateAttemptTimestamp = 0L;
+    getRealmInfo();
+  }
+  
   public RealmSecurityInfo getRealmInfo() {
     if (realmInfo == null) {
       GWT.log("AggregateUI.getRealmInfo: realmInfo is null");
@@ -588,6 +650,7 @@ public class AggregateUI implements EntryPoint {
             @Override
             public void onSuccess(RealmSecurityInfo result) {
               realmInfo = result;
+              updateNotSecureInfo();
             }
           });
     }
@@ -628,12 +691,12 @@ public class AggregateUI implements EntryPoint {
   }
 
   public void displayHelpPanel() {
-    wrappingLayoutPanel.add(helpPanel);
+    helpPanel.setVisible(true);
     resize();
   }
 
   public void hideHelpPanel() {
-    wrappingLayoutPanel.remove(helpPanel);
+    helpPanel.setVisible(false);
     resize();
   }
 
@@ -666,11 +729,9 @@ public class AggregateUI implements EntryPoint {
     } else {
       textMessage = context + t.getMessage();
     }
-    int lines = 1 + (textMessage.length() / 80);
     errorMsgLabel.setText(textMessage);
-    errorPanel.setVisible(true);
-    errorPanel.setHeight(Integer.toString(lines) + "em");
     displayErrorPanel();
+    resize();
     Window.alert(textMessage);
   }
 

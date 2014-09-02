@@ -15,27 +15,28 @@
  */
 package org.opendatakit.aggregate.odktables.impl.api;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
+import java.net.MalformedURLException;
+import java.net.URI;
+
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.resteasy.annotations.GZIP;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
 import org.opendatakit.aggregate.odktables.api.FileManifestService;
+import org.opendatakit.aggregate.odktables.api.FileService;
+import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -47,26 +48,23 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FileManifestServiceImpl implements FileManifestService {
 
-  private CallingContext cc;
+  private final CallingContext cc;
+  private final String appId;
+  private final UriInfo info;
   private TablesUserPermissions userPermissions;
-  private UriInfo info;
 
-  public FileManifestServiceImpl(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
-      @Context UriInfo info) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
-    ServiceUtils.examineRequest(sc, req, httpHeaders);
-    this.cc = ContextFactory.getCallingContext(sc, req);
-    this.userPermissions = new TablesUserPermissionsImpl(this.cc.getCurrentUser().getUriUser(), cc);
+
+  public FileManifestServiceImpl(UriInfo info, String appId, CallingContext cc)
+      throws ODKEntityNotFoundException, ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+    this.cc = cc;
+    this.appId = appId;
     this.info = info;
+    this.userPermissions = ContextFactory.getTablesUserPermissions(cc);
   }
 
   @Override
-  @GET
-  @GZIP
-  public Response getAppLevelFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion) {
-    // Now make sure we have an app id.
-    if (appId == null || "".equals(appId)) {
-      return Response.status(Status.BAD_REQUEST).entity("Invalid request. App id must be present and valid.").build();
-    }
+  public Response getAppLevelFileManifest(@PathParam("odkClientVersion") String odkClientVersion) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
+
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
     OdkTablesFileManifest manifest = null;
     try {
@@ -80,19 +78,26 @@ public class FileManifestServiceImpl implements FileManifestService {
     if (manifest == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
     } else {
+      UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(OdkTables.class, "getFilesService");
+      // now supply the downloadUrl...
+      for ( OdkTablesFileManifestEntry entry : manifest.getFiles() ) {
+        URI self = ub.clone().path(FileService.class, "getFile").build(appId, odkClientVersion, entry.filename);
+        try {
+          entry.downloadUrl = self.toURL().toExternalForm();
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unable to convert to URL");
+        }
+      }
+
       return Response.ok(manifest).build();
     }
   }
 
-
   @Override
-  @GET
-  @GZIP
-  public Response getTableIdFileManifest(@PathParam("appId") String appId, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) {
-    // Now make sure we have an app id.
-    if (appId == null || "".equals(appId)) {
-      return Response.status(Status.BAD_REQUEST).entity("Invalid request. App id must be present and valid.").build();
-    }
+  public Response getTableIdFileManifest(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
+
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
     OdkTablesFileManifest manifest = null;
     try {
@@ -106,6 +111,19 @@ public class FileManifestServiceImpl implements FileManifestService {
     if (manifest == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
     } else {
+      UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(OdkTables.class, "getFilesService");
+      // now supply the downloadUrl...
+      for ( OdkTablesFileManifestEntry entry : manifest.getFiles() ) {
+        URI self = ub.clone().path(FileService.class, "getFile").build(appId, odkClientVersion, entry.filename);
+        try {
+          entry.downloadUrl = self.toURL().toExternalForm();
+        } catch (MalformedURLException e) {
+          e.printStackTrace();
+          throw new IllegalArgumentException("Unable to convert to URL");
+        }
+      }
+
       return Response.ok(manifest).build();
     }
   }

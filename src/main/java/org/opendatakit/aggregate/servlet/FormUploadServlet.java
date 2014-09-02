@@ -310,7 +310,7 @@ public class FormUploadServlet extends ServletUtilBase {
             b.append(warnings.toString());
             b.append("</table>");
             out.write("<message>");
-            out.write(StringEscapeUtils.escapeXml(b.toString()));
+            out.write(StringEscapeUtils.escapeXml10(b.toString()));
             out.write("</message>");
           } else {
             out.write("<message>Successful upload.</message>");

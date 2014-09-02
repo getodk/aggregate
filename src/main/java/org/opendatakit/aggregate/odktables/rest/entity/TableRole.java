@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 public enum TableRole {
   NONE("No permissions. Can not see that the table exists."),
 
@@ -47,6 +49,7 @@ public enum TableRole {
       "All permissions. Can delete table, read/write properties, read/write/delete all data, and read/write/delete access control lists.",
       TablePermission.values());
 
+  @JsonIgnoreProperties({"description", "permissions"})
   private final String description;
   private final List<TablePermission> permissions;
 

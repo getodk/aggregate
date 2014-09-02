@@ -39,16 +39,16 @@ import org.opendatakit.common.web.constants.BasicConsts;
 /**
  * Emits the list of media filenames and URLs for a given form.
  * Used for the new briefcase download.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class XmlMediaAttachmentFormatter implements ElementFormatter {
   XmlAttachmentFormatter xmlAttachmentFormatter;
   /**
    * Construct a XML Media Attachment Formatter
- * @param xmlAttachmentFormatter 
-   * 
+ * @param xmlAttachmentFormatter
+   *
    */
   public XmlMediaAttachmentFormatter(XmlAttachmentFormatter xmlAttachmentFormatter) {
 	  this.xmlAttachmentFormatter = xmlAttachmentFormatter;
@@ -62,12 +62,12 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
 
-    if( blobSubmission == null || 
+    if( blobSubmission == null ||
     	(blobSubmission.getAttachmentCount(cc) == 0) ||
     	(blobSubmission.getContentHash(1, cc) == null) ) {
     	return;
     }
-	
+
 	String urlLink;
 	{
 		Map<String, String> properties = new HashMap<String, String>();
@@ -79,11 +79,11 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
 	}
 	// parallel to XFormsManifestXmlTable
     String xmlString = "<mediaFile>" +
-    		"<filename>" + StringEscapeUtils.escapeXml(blobSubmission.getUnrootedFilename(1, cc)) + "</filename>" +
-    		"<hash>"	+ StringEscapeUtils.escapeXml(blobSubmission.getContentHash(1, cc)) + "</hash>" +
-    		"<downloadUrl>"	+ StringEscapeUtils.escapeXml(urlLink) + "</downloadUrl>" +
+    		"<filename>" + StringEscapeUtils.escapeXml10(blobSubmission.getUnrootedFilename(1, cc)) + "</filename>" +
+    		"<hash>"	+ StringEscapeUtils.escapeXml10(blobSubmission.getContentHash(1, cc)) + "</hash>" +
+    		"<downloadUrl>"	+ StringEscapeUtils.escapeXml10(urlLink) + "</downloadUrl>" +
     	"</mediaFile>\n";
-    
+
     row.addFormattedValue(xmlString);
   }
 
@@ -96,7 +96,7 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {	  
+  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
   }
 
   @Override

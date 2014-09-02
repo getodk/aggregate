@@ -16,19 +16,26 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Default;
-import org.simpleframework.xml.DefaultType;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Root
-@Default(DefaultType.FIELD)
+
+/**
+ * Error return type.
+ *
+ * Removed all JAXB annotations -- these cause issues on Android 4.2 and earlier.
+ *
+ * @author dylan price?
+ *
+ */
 public class Error {
 
-  @Attribute(required = true)
+  public enum ErrorType {
+    APP_NAME_MISMATCH, SCHEMA_ETAG_MISMATCH, ETAG_MISMATCH, TABLE_EXISTS, PERMISSION_DENIED, RESOURCE_NOT_FOUND, BAD_COLUMN_NAME, INTERNAL_ERROR, BAD_REQUEST, LOCK_TIMEOUT,
+  }
+
   private ErrorType type;
 
-  @Attribute(required = true)
+  @JsonProperty(required = false)
   private String message;
 
   @SuppressWarnings("unused")
@@ -126,9 +133,5 @@ public class Error {
     builder.append(message);
     builder.append("]");
     return builder.toString();
-  }
-
-  public enum ErrorType {
-    ETAG_MISMATCH, TABLE_EXISTS, PERMISSION_DENIED, RESOURCE_NOT_FOUND, BAD_COLUMN_NAME, INTERNAL_ERROR, BAD_REQUEST, LOCK_TIMEOUT,
   }
 }

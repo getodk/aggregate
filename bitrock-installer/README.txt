@@ -1,5 +1,5 @@
 This directory contains the files needed to build the
-installer for Aggregate using the Bitrock InstallBuilder 7.2
+installer for Aggregate using the Bitrock InstallBuilder 8.6
 or higher.
 
 Notably, it contains a subset of the Google AppEngine SDK

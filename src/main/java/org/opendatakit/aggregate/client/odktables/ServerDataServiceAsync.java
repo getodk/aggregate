@@ -35,11 +35,9 @@ public interface ServerDataServiceAsync {
   void createOrUpdateRow(String tableId, String rowId, RowClient row,
       AsyncCallback<RowClient> callback);
 
-  void deleteRow(String tableId, String rowId, AsyncCallback<Void> callback);
+  void deleteRow(String tableId, String rowId, String rowETag, AsyncCallback<Void> callback);
 
   void getColumnNames(String tableId, AsyncCallback<ArrayList<String>> callback);
-
-  void getNonMediaFiles(String tableId, AsyncCallback<ArrayList<FileSummaryClient>> callback);
 
   void getFileRowInfoColumnNames(AsyncCallback<ArrayList<String>> callback);
 
@@ -51,9 +49,11 @@ public interface ServerDataServiceAsync {
 
   void getInstanceFileInfoContents(String tableId, AsyncCallback<TableContentsForFilesClient> callback);
 
-  void deleteTableFile(String tableId, String rowId, AsyncCallback<Void> callback);
+  void deleteTableFile(String odkClientApiVersion, String tableId, String filepath, AsyncCallback<Void> callback);
 
-  void getMedialFilesKey(String tableId, String key,
-      AsyncCallback<ArrayList<FileSummaryClient>> callback);
+  void deleteAppLevelFile(String odkClientApiVersion, String filepath, AsyncCallback<Void> callback);
+
+  void deleteInstanceFile(String tableId, String rowId, String filepath,
+      AsyncCallback<Void> callback);
 
 }
