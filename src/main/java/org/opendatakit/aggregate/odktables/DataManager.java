@@ -37,6 +37,9 @@ import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEnt
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowList;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome.OutcomeType;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -481,6 +484,207 @@ public class DataManager {
       throw new PermissionDeniedException(String.format("Denied table %s row %s access to user %s",
           tableId, rowId, userPermissions.getOdkTablesUserId()));
 
+    } catch (NullPointerException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (IndexOutOfBoundsException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (ODKEntityPersistException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (ODKTaskLockException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (BadColumnNameException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (PermissionDeniedException e) {
+      e.printStackTrace();
+      throw e;
+    } catch (InconsistentStateException e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+  public ArrayList<RowOutcome> insertOrUpdateRows(RowList rows)
+      throws ODKEntityPersistException, ODKEntityNotFoundException, ODKDatastoreException,
+      ODKTaskLockException, ETagMismatchException, BadColumnNameException,
+      PermissionDeniedException, InconsistentStateException {
+    try {
+      Validate.notNull(rows);
+      ArrayList<RowOutcome> rowOutcomes = new ArrayList<RowOutcome>();
+
+      userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
+
+      List<DbColumnDefinitionsEntity> columns = null;
+      Entity entity = null;
+      LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      try {
+        propsLock.acquire();
+        Sequencer sequencer = new Sequencer(cc);
+
+        DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+        String schemaETag = entry.getSchemaETag();
+
+        if ( schemaETag == null ) {
+          throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
+        }
+
+        DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag, cc);
+        columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
+
+        DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+        DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+        revertPendingChanges( entry, columns, table, logTable);
+
+        for ( Row row : rows.getRows() ) {
+          
+          RowOutcome outcome = null;
+          while(true) {
+            String rowId = row.getRowId();
+            boolean newRowId = false;
+            if (rowId == null) {
+              newRowId = true;
+              rowId = PersistenceUtils.newUri();
+              row.setRowId(rowId);
+            }
+            boolean nullIncomingScope = false;
+            Scope scope = row.getFilterScope();
+            if (scope == null) {
+              nullIncomingScope = true;
+              scope = Scope.EMPTY_SCOPE;
+              row.setFilterScope(scope);
+            }
+    
+            try {
+              entity = table.getEntity(rowId, cc);
+    
+              if ( newRowId ) {
+                outcome = new RowOutcome(row);
+                outcome.setOutcome(OutcomeType.IN_CONFLICT);
+                break;
+              }
+    
+              if ( nullIncomingScope ) {
+                // preserve the scope of the existing entity if the incoming Row didn't specify one.
+                scope = converter.getDbTableFilterScope(entity);
+              }
+    
+              // confirm that the user has the ability to read the row
+              boolean hasPermissions = false;
+              if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
+                hasPermissions = true;
+              } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, rowId, scope)) {
+                hasPermissions = true;
+              }
+    
+              if (!hasPermissions ) {
+                outcome = new RowOutcome(row);
+                outcome.setOutcome(OutcomeType.DENIED);
+                break;
+              }
+    
+              // confirm they have the ability to write to it
+              hasPermissions = false;
+              if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
+                hasPermissions = true;
+              } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.WRITE_ROW, rowId, scope)) {
+                hasPermissions = true;
+              }
+    
+              if (!hasPermissions ) {
+                outcome = new RowOutcome(row);
+                outcome.setOutcome(OutcomeType.DENIED);
+                break;
+              }
+    
+              String rowETag = entity.getString(DbTable.ROW_ETAG);
+              String currentETag = row.getRowETag();
+              if (currentETag == null || !currentETag.equals(rowETag)) {
+    
+                // Take the hit to convert the row we have.
+                // If the row matches everywhere except on the rowETag, return it.
+                Row currentRow = converter.toRow(entity, columns);
+                if ( row.hasMatchingSignificantFieldValues(currentRow) ) {
+                  outcome = new RowOutcome(currentRow);
+                  outcome.setOutcome(OutcomeType.DENIED);
+                  break;
+                }
+    
+                // if null, then the client thinks they are creating a new row.
+                // The rows may be identical, but leave that to the client to determine
+                // trigger client-side conflict resolution.
+                // Otherwise, if there is a mis-match, then the client needs to pull and
+                // perform client-side conflict resolution on the changes already up on the server.
+                outcome = new RowOutcome(currentRow);
+                outcome.setOutcome(OutcomeType.IN_CONFLICT);
+                break;
+              }
+    
+            } catch ( ODKEntityNotFoundException e ) {
+    
+              // require unfiltered write permissions to create a new record
+              userPermissions.checkPermission(appId, tableId, TablePermission.UNFILTERED_WRITE);
+    
+              newRowId = true;
+              // initialization for insert...
+              entity = table.newEntity(rowId, cc);
+              entity.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
+            }
+    
+            // OK we are able to update or insert the record -- mark as pending change.
+    
+            // get new dataETag
+            String dataETagAtModification = PersistenceUtils.newUri();
+            entry.setPendingDataETag(dataETagAtModification);
+            entry.put(cc);
+    
+            // this will be null of the entity is newly created...
+            String previousRowETag = row.getRowETag();
+    
+            // update the fields in the DbTable entity...
+            creator.setRowFields(entity, PersistenceUtils.newUri(), dataETagAtModification,
+                userPermissions.getOdkTablesUserId(), false, scope, row.getFormId(), row.getLocale(),
+                row.getSavepointType(), row.getSavepointTimestamp(), row.getSavepointCreator(), row.getValues(), columns);
+    
+            // create log table entry
+            Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);
+    
+            // update db
+            DbLogTable.putEntity(logEntity, cc);
+            DbTable.putEntity(entity, cc);
+    
+            // commit change
+            entry.setDataETag(entry.getPendingDataETag());
+            entry.setPendingDataETag(null);
+            entry.put(cc);
+            
+            Row updatedRow = converter.toRow(entity, columns);
+            outcome = new RowOutcome(updatedRow);
+            outcome.setOutcome(OutcomeType.SUCCESS);
+            break;
+          }
+          rowOutcomes.add(outcome);
+        }
+      } finally {
+        propsLock.release();
+      }
+
+      if ( columns == null ) {
+        throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
+      }
+      return rowOutcomes;
     } catch (NullPointerException e) {
       e.printStackTrace();
       throw e;
