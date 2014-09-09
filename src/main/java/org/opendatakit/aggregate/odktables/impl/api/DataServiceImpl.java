@@ -38,6 +38,9 @@ import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowList;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -70,6 +73,17 @@ public class DataServiceImpl implements DataService {
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(rowResourceList).build();
+  }
+  
+  @Override
+  public Response /*RowOutcomeList*/ alterRows(RowList rows)
+      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
+      PermissionDeniedException, BadColumnNameException, InconsistentStateException {
+
+    ArrayList<RowOutcome> changedRows = dm.insertOrUpdateRows(rows);
+    RowOutcomeList outcomes = getOutcomes(changedRows);
+    return Response.ok(outcomes).build();
+    
   }
 
   @Override
@@ -123,5 +137,36 @@ public class DataServiceImpl implements DataService {
       resources.add(getResource(row));
     }
     return resources;
+  }
+
+  private RowOutcomeList getOutcomes(ArrayList<RowOutcome> rows) {
+    String appId = dm.getAppId();
+    String tableId = dm.getTableId();
+    for (RowOutcome row : rows) {
+      String rowId = row.getRowId();
+
+      UriBuilder ub = info.getBaseUriBuilder();
+      ub.path(OdkTables.class, "getTablesService");
+      URI self = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getData").path(DataService.class, "getRow")
+          .build(appId, tableId, schemaETag, rowId);
+      try {
+        row.setSelfUri(self.toURL().toExternalForm());
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+        throw new IllegalArgumentException("unable to convert URL ");
+      }
+    }
+
+    UriBuilder ub = info.getBaseUriBuilder();
+    ub.path(OdkTables.class, "getTablesService");
+    URI table = ub.clone().build(appId, tableId);
+    RowOutcomeList outcomeList = new RowOutcomeList(rows);
+    try {
+      outcomeList.setTableUri(table.toURL().toExternalForm());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert URL ");
+    }
+    return outcomeList;
   }
 }

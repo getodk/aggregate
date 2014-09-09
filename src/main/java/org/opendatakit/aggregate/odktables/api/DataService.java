@@ -33,6 +33,8 @@ import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowList;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -58,6 +60,24 @@ public interface DataService {
   @GET
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowResourceList*/ getRows(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
+
+  /**
+   *
+   * @param rows
+   * @return {@link RowOutcomeList} of the newly added/modified/deleted rows.
+   * @throws ODKTaskLockException
+   * @throws ODKDatastoreException
+   * @throws ETagMismatchException
+   * @throws PermissionDeniedException
+   * @throws BadColumnNameException
+   * @throws InconsistentStateException
+   */
+  @PUT
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowOutcomeList*/ alterRows(RowList rows)
+      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
+      PermissionDeniedException, BadColumnNameException, InconsistentStateException;
 
   /**
    *
