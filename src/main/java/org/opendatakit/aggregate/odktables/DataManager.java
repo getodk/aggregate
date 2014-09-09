@@ -595,14 +595,26 @@ public class DataManager {
                 break;
               }
     
-              // confirm they have the ability to write to it
-              hasPermissions = false;
-              if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
-                hasPermissions = true;
-              } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.WRITE_ROW, rowId, scope)) {
-                hasPermissions = true;
+              if ( row.isDeleted() ) {
+
+                // check for delete access
+                hasPermissions = false;
+                if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_DELETE)) {
+                  hasPermissions = true;
+                } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.DELETE_ROW, rowId, scope)) {
+                  hasPermissions = true;
+                }
+ 
+              } else {
+                // confirm they have the ability to write to it
+                hasPermissions = false;
+                if ( userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
+                  hasPermissions = true;
+                } else if ( userPermissions.hasFilterScope(appId, tableId, TablePermission.WRITE_ROW, rowId, scope)) {
+                  hasPermissions = true;
+                }
               }
-    
+      
               if (!hasPermissions ) {
                 outcome = new RowOutcome(row);
                 outcome.setOutcome(OutcomeType.DENIED);
@@ -634,35 +646,59 @@ public class DataManager {
     
             } catch ( ODKEntityNotFoundException e ) {
     
+              if ( row.isDeleted() ) {
+                // not found on server -- deny it
+                outcome = new RowOutcome(row);
+                outcome.setOutcome(OutcomeType.DENIED);
+                break;
+              }
+              
               // require unfiltered write permissions to create a new record
               userPermissions.checkPermission(appId, tableId, TablePermission.UNFILTERED_WRITE);
     
               newRowId = true;
+              
               // initialization for insert...
               entity = table.newEntity(rowId, cc);
               entity.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
             }
-    
-            // OK we are able to update or insert the record -- mark as pending change.
+
+            // OK we are able to update or insert or delete the record -- mark as pending change.
     
             // get new dataETag
             String dataETagAtModification = PersistenceUtils.newUri();
             entry.setPendingDataETag(dataETagAtModification);
             entry.put(cc);
-    
-            // this will be null of the entity is newly created...
-            String previousRowETag = row.getRowETag();
-    
-            // update the fields in the DbTable entity...
-            creator.setRowFields(entity, PersistenceUtils.newUri(), dataETagAtModification,
-                userPermissions.getOdkTablesUserId(), false, scope, row.getFormId(), row.getLocale(),
-                row.getSavepointType(), row.getSavepointTimestamp(), row.getSavepointCreator(), row.getValues(), columns);
-    
+
+            String previousRowETag;
+            Entity logEntity;
+            
+            if ( row.isDeleted() ) {
+
+              // remember the previous row ETag so we can chain revisions in the DbLogTable
+              previousRowETag = entity.getString(DbTable.ROW_ETAG);
+
+              // update the row ETag and deletion status
+              entity.set(DbTable.ROW_ETAG, PersistenceUtils.newUri());
+              entity.set(DbTable.DELETED, true);
+
+            } else {
+              // this will be null of the entity is newly created...
+              previousRowETag = row.getRowETag();
+      
+              // update the fields in the DbTable entity...
+              creator.setRowFields(entity, PersistenceUtils.newUri(), dataETagAtModification,
+                  userPermissions.getOdkTablesUserId(), false, scope, row.getFormId(), row.getLocale(),
+                  row.getSavepointType(), row.getSavepointTimestamp(), row.getSavepointCreator(), row.getValues(), columns);
+      
+            }
+
             // create log table entry
-            Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);
-    
-            // update db
+            logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag, entity, columns, sequencer, cc);
+
+            // commit the log change to the database (must be done first!)
             DbLogTable.putEntity(logEntity, cc);
+            // commit the row change
             DbTable.putEntity(entity, cc);
     
             // commit change
