@@ -81,7 +81,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xalan-2.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjweaver-1.7.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-collections-3.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jdo2-api-2.3-eb.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xmlsec-1.5.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-common-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-common/src/main/java"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-server-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-server/src/main/java"/>
@@ -115,7 +114,7 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/gwt-2.6.1"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
