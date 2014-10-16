@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -91,6 +92,15 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
     }
     while ( redirectParamString.startsWith("/") ) {
       redirectParamString = redirectParamString.substring(1);
+    }
+    
+    // check for XSS attacks. The redirect string is emitted within single and double
+    // quotes. It is a URL with :, /, ? and # characters. But it should not contain 
+    // quotes, parentheses or semicolons.
+    String cleanString = redirectParamString.replaceAll("[();'\"]", "");
+    if ( !cleanString.equals(redirectParamString) ) {
+      logger.warn("XSS cleanup -- redirectParamString has forbidden characters: " + redirectParamString);
+      redirectParamString = cleanString;
     }
 
     logger.info("Invalidating login session " + req.getSession().getId());
