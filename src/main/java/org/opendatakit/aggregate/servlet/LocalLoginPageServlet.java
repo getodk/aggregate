@@ -23,6 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
@@ -33,6 +35,8 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * 
  */
 public class LocalLoginPageServlet extends ServletUtilBase {
+
+  private static final Log logger = LogFactory.getLog(LocalLoginPageServlet.class);
 
   /*
    * Standard fields
@@ -47,6 +51,16 @@ public class LocalLoginPageServlet extends ServletUtilBase {
       IOException {
 
     String redirectParamString = getRedirectUrl(req, AggregateHtmlServlet.ADDR);
+    
+    // check for XSS attacks. The redirect string is emitted within single and double
+    // quotes. It is a URL with :, /, ? and # characters. But it should not contain 
+    // quotes, parentheses or semicolons.
+    String cleanString = redirectParamString.replaceAll("[();'\"]", "");
+    if ( !cleanString.equals(redirectParamString) ) {
+      logger.warn("XSS cleanup -- redirectParamString has forbidden characters: " + redirectParamString);
+      redirectParamString = cleanString;
+    }
+
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
     resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
