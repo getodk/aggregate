@@ -49,6 +49,7 @@ public class LocalLoginPageServlet extends ServletUtilBase {
     String redirectParamString = getRedirectUrl(req, AggregateHtmlServlet.ADDR);
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
     out.print("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
         + "<html>"

@@ -105,6 +105,7 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
     resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     resp.setHeader("Expires", "Mon, 26 Jul 1997 05:00:00 GMT");
     resp.setHeader("Pragma", "no-cache");
+    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
     out.print("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
         + "<html>"

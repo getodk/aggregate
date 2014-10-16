@@ -152,6 +152,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
     out.print(PAGE_CONTENTS_FIRST);
     String simpleApiKey;

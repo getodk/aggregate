@@ -31,6 +31,7 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * JSON servlet used by the GWT layer to send change password requests over
@@ -89,6 +90,7 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
     resp.setContentType("text/javascript; charset=UTF-8");
     resp.setHeader("Cache-Control", "no-cache");
     resp.setHeader("Pragma", "no-cache");
+    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
 
     String callback = req.getParameter(CALLBACK);
