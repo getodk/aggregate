@@ -86,7 +86,7 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
   }
 
   @Override
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) {
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) {
   }
   
   @Override

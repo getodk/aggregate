@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.datamodel.SelectChoice;
 import org.opendatakit.aggregate.datamodel.TopLevelInstanceData;
 import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.datamodel.BinaryContentRefBlob;
+import org.opendatakit.common.datamodel.DeleteHelper;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.datamodel.RefBlob;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -548,7 +549,7 @@ public class FormDefinition {
 				    for ( CommonFieldsBase m : fdmList ) {
 						eks.add(m.getEntityKey());
 				    }
-				    ds.deleteEntities(eks, user);
+				    DeleteHelper.deleteEntities(eks, cc);
 
 				    // and delete the SA record
 				    ds.deleteEntity(sa.getEntityKey(), user);
@@ -586,7 +587,7 @@ public class FormDefinition {
 			eks.add(m.getEntityKey());
 	    }
 	    // delete everything out of FDM
-	    ds.deleteEntities(eks, user);
+       DeleteHelper.deleteEntities(eks, cc);
 
 	    // drop the tables...
 	    for ( CommonFieldsBase b : getBackingTableSet()) {

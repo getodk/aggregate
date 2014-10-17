@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
+import org.opendatakit.common.datamodel.DeleteHelper;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -51,7 +52,7 @@ public class DeleteSubmissions {
       try {
 		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
   		Submission sub = Submission.fetchSubmission(parts, cc);
-  		sub.recursivelyAddEntityKeys(deleteKeys, cc);
+  		sub.recursivelyAddEntityKeysForDeletion(deleteKeys, cc);
   		deleteKeys.add(sub.getKey());
       } catch (ODKEntityNotFoundException e) {
         // just move on
@@ -59,6 +60,6 @@ public class DeleteSubmissions {
 		  e.printStackTrace();
       }
     }
-    cc.getDatastore().deleteEntities(deleteKeys, cc.getCurrentUser());
+    DeleteHelper.deleteEntities(deleteKeys, cc);
   }
 }

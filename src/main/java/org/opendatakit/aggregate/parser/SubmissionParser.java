@@ -48,6 +48,7 @@ import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.common.datamodel.DeleteHelper;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -396,10 +397,10 @@ public class SubmissionParser {
       submission.persist(cc);
     } catch (Exception e) {
       List<EntityKey> keys = new ArrayList<EntityKey>();
-      submission.recursivelyAddEntityKeys(keys, cc);
+      submission.recursivelyAddEntityKeysForDeletion(keys, cc);
       keys.add(submission.getKey());
       try {
-        cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
+        DeleteHelper.deleteEntities(keys, cc);
       } catch (Exception ex) {
         // ignore... we are rolling back...
       }

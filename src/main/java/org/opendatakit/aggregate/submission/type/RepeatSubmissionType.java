@@ -192,10 +192,10 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   }
 
   @Override
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
     for (SubmissionSet s : submissionSets) {
-      s.recursivelyAddEntityKeys(keyList, cc);
+      s.recursivelyAddEntityKeysForDeletion(keyList, cc);
     }
   }
 
