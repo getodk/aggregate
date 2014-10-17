@@ -823,10 +823,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 		}
 	}
 
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+	public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
 			throws ODKOverQuotaException, ODKDatastoreException {
 		for (SubmissionValue value : getSubmissionValues()) {
-			value.recursivelyAddEntityKeys(keyList, cc);
+			value.recursivelyAddEntityKeysForDeletion(keyList, cc);
 		}
 		for ( DynamicCommonFieldsBase e : dbEntities.values() ) {
 			keyList.add(e.getEntityKey());
