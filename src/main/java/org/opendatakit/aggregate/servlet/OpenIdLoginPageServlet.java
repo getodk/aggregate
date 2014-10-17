@@ -97,7 +97,7 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
     // check for XSS attacks. The redirect string is emitted within single and double
     // quotes. It is a URL with :, /, ? and # characters. But it should not contain 
     // quotes, parentheses or semicolons.
-    String cleanString = redirectParamString.replaceAll("[();'\"]", "");
+    String cleanString = redirectParamString.replaceAll(BAD_PARAMETER_CHARACTERS, "");
     if ( !cleanString.equals(redirectParamString) ) {
       logger.warn("XSS cleanup -- redirectParamString has forbidden characters: " + redirectParamString);
       redirectParamString = cleanString;
