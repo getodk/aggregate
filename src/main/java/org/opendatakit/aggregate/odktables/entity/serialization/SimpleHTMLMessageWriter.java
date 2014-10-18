@@ -76,8 +76,10 @@ public class SimpleHTMLMessageWriter<T> implements MessageBodyWriter<T> {
       OutputStreamWriter w = new OutputStreamWriter(bas,
           Charset.forName(ApiConstants.UTF8_ENCODE));
       w.write("<html><head></head><body>");
-      mapper.writeValue(w, o);
+      w.write(mapper.writeValueAsString(o));
       w.write("</body></html>");
+      w.flush();
+      w.close();
       // get the array and compute md5 hash
       byte[] bytes = bas.toByteArray();
       String eTag;
