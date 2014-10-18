@@ -4,8 +4,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
@@ -18,6 +20,17 @@ import org.opendatakit.common.web.CallingContext;
 
 @Path("")
 public class OdkTablesImpl implements OdkTables {
+  
+  @Override
+  public Response getAppName(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders) 
+      throws ODKDatastoreException {
+
+    ServiceUtils.examineRequest(sc, req, httpHeaders);
+    CallingContext cc = ContextFactory.getCallingContext(sc, req);
+    String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
+
+    return Response.status(Status.OK).entity(preferencesAppId).build();
+  }
 
   @Override
   public FileManifestServiceImpl getFileManifestService(ServletContext sc, HttpServletRequest req,

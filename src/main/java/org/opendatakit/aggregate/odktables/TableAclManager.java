@@ -98,10 +98,11 @@ public class TableAclManager {
     Validate.notNull(cc);
 
     this.cc = cc;
+    this.appId = appId;
+    this.tableId = tableId;
     this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
-    this.tableId = tableId;
     // check table exists
     DbTableEntryEntity e = DbTableEntry.getTableIdEntry(tableId, cc);
     if (e == null) {

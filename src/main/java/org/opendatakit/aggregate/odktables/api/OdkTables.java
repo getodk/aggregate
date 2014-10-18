@@ -26,6 +26,11 @@ public interface OdkTables {
 
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
+  
+  @GET
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*String*/ getAppName(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders) throws AppNameMismatchException,
+      PermissionDeniedException, ODKDatastoreException;
 
   @Path("{appId}/manifest")
   public FileManifestServiceImpl getFileManifestService(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
