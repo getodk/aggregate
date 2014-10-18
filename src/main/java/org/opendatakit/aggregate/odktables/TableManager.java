@@ -365,20 +365,23 @@ public class TableManager {
 
       String pendingSchemaETag = PersistenceUtils.newUri();
 
-      if ( tableEntry == null ) {
-        // create table. "entities" will store all of the things we will need to
-        // persist into the datastore for the table to truly be created.
-        Sequencer sequencer = new Sequencer(cc);
-        String aprioriDataSequenceValue = sequencer.getNextSequenceValue();
-
-        tableEntry = creator.newTableEntryEntity(tableId, pendingSchemaETag,
-            aprioriDataSequenceValue, cc);
-      } else {
-        // clean up the state of the database
-        deleteVersionedTable(tableEntry, false, cc);
-        // and proceed to creat this record
-        tableEntry.setPendingSchemaETag(pendingSchemaETag);
+      if ( tableEntry != null ) {
+        // we are in some sort of intermediate state
+        // of table creation. Remove everything!
+        // (clean up the state of the database)
+        deleteVersionedTable(tableEntry, true, cc);
+        // NOTE: removes the tableEntry from the database
+        tableEntry = null;
       }
+      
+      // create table. "entities" will store all of the things we will need to
+      // persist into the datastore for the table to truly be created.
+      Sequencer sequencer = new Sequencer(cc);
+      String aprioriDataSequenceValue = sequencer.getNextSequenceValue();
+
+      tableEntry = creator.newTableEntryEntity(tableId, pendingSchemaETag,
+          aprioriDataSequenceValue, cc);
+
       // write it...
 
       /**
@@ -556,6 +559,7 @@ public class TableManager {
       if ( tableEntry.getStaleSchemaETag() != null ) {
         // what had been the current schema, properties and row data now needs to be deleted
         tableEntry.put(cc);
+        // delete them (tail-recursive)
         deleteVersionedTable(tableEntry, deleteCurrent, cc);
       } else {
         // we have completely deleted all schemas, properties and row data
