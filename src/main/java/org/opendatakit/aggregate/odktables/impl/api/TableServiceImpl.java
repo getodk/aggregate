@@ -44,6 +44,7 @@ import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
@@ -63,7 +64,7 @@ import org.opendatakit.common.web.CallingContext;
 public class TableServiceImpl implements TableService {
   private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
 
-  private static final String ERROR_APP_ID_DIFFERS = "AppName differs";
+  private static final String ERROR_TABLE_NOT_FOUND = "Table not found";
   private static final String ERROR_SCHEMA_DIFFERS = "SchemaETag differs";
 
   private final ServletContext sc;
@@ -107,8 +108,11 @@ public class TableServiceImpl implements TableService {
     WebsafeTables websafeResult = tm.getTables(QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : websafeResult.tables) {
-      TableResource resource = getResource(info, appId, entry);
-      resources.add(resource);
+      // database cruft will have a null schemaETag -- ignore those
+      if ( entry.getSchemaETag() != null ) {
+        TableResource resource = getResource(info, appId, entry);
+        resources.add(resource);
+      }
     }
     // TODO: add QueryResumePoint support
     TableResourceList tableResourceList = new TableResourceList(resources,
@@ -120,13 +124,17 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response getTable() throws ODKDatastoreException,
+  public Response getTable() throws ODKDatastoreException, TableNotFoundException,
       PermissionDeniedException, ODKTaskLockException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
-    TableEntry entry = tm.getTableNullSafe(tableId);
+    TableEntry entry = tm.getTable(tableId);
+    if ( entry == null || entry.getSchemaETag() == null ) {
+      // the table doesn't exist yet (or something is there that is database cruft)
+      throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
+    }
     TableResource resource = getResource(info, appId, entry);
     return Response.ok(resource).build();
   }
@@ -153,12 +161,16 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public RealizedTableService getRealizedTable(@PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException {
+  public RealizedTableService getRealizedTable(@PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
     TableEntry entry = tm.getTable(tableId);
+    if ( entry == null || entry.getSchemaETag() == null ) {
+      // the table doesn't exist yet (or something is there that is database cruft)
+      throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
+    }
     if ( !entry.getSchemaETag().equals(schemaETag) ) {
       throw new SchemaETagMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + entry.getSchemaETag());
     }
