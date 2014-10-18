@@ -171,7 +171,7 @@ public class FileServiceImpl implements FileService {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH).build();
     }
     String tableId = getTableIdFromPathSegments(segments);
-    String wholePath = constructPathFromSegments(segments);
+    String filePath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
     try {
       // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
@@ -181,7 +181,7 @@ public class FileServiceImpl implements FileService {
 
       // 0) Delete anything that is already stored
 
-      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion, tableId, wholePath, cc);
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion, tableId, filePath, cc);
       for ( DbTableFileInfoEntity entity : entities ) {
 
         String uri = entity.getId();
@@ -209,7 +209,7 @@ public class FileServiceImpl implements FileService {
       //
       // 1) Create an entry in the user friendly table.
       EntityCreator ec = new EntityCreator();
-      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(odkClientVersion, tableId, wholePath,
+      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(odkClientVersion, tableId, filePath,
           userPermissions, cc);
       String rowUri = tableFileInfoRow.getId();
 
@@ -223,13 +223,12 @@ public class FileServiceImpl implements FileService {
       // TODO: this being set to true is probably where some sort of versioning
       // should happen.
       BlobSubmissionOutcome outcome = instance.addBlob(content, contentType, null, true, cc);
-
       // 3) persist the user-friendly table entry about the blob
       tableFileInfoRow.put(cc);
 
       UriBuilder ub = info.getBaseUriBuilder();
       ub.path(OdkTables.class, "getFilesService");
-      URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion, wholePath);
+      URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion, filePath);
 
       String locationUrl = self.toURL().toExternalForm();
 
