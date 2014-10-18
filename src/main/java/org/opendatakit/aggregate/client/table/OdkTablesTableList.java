@@ -64,11 +64,16 @@ public class OdkTablesTableList extends FlexTable {
    * @param tableList
    *          the list of tables to be displayed.
    */
-  public void updateTableList(ArrayList<TableEntryClient> tables) {
+  public void updateTableList(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
     if (tables == null) {
       return;
     }
 
+    if ( !tableListChanged && (getRowCount() == tables.size()+1) ) {
+      // nothing changed and everything is reflected in the UI...
+      return;
+    }
+    
     removeAllRows();
 
     removeAllRows();

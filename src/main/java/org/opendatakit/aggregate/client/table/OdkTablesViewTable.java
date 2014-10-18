@@ -134,7 +134,7 @@ public class OdkTablesViewTable extends FlexTable {
           // we've deleted the table.
           // TODO ensure the correct exception makes it here
           ((OdkTablesViewTableSubTab) AggregateUI.getUI()
-              .getSubTab(SubTabs.VIEWTABLE)).setTabToDislpayZero();
+              .getSubTab(SubTabs.VIEWTABLE)).setTabToDisplayZero();
         } else if (caught instanceof PermissionDeniedExceptionClient) {
           // do nothing, b/c it's probably legitimate that you don't get an
           // error if there are rows you're not allowed to see.

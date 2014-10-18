@@ -87,6 +87,17 @@ public class AggregateTabBase extends TabPanel {
      }
   }
 
+  public SubTabInterface getActiveSubTabInterface() {
+    for ( int i = 0 ; i < subTabPosition.size() ; ++i ) {
+      boolean isVisible = this.isVisible();
+      boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
+      if ( isVisible && isSelectedTab ) {
+         return subTabMap.get(subTabPosition.get(i));
+      }
+    }
+    return null;
+  }
+  
   public int findSubTabIndex(SubTabs subTab) {
     int index = subTabPosition.indexOf(subTab);
 
