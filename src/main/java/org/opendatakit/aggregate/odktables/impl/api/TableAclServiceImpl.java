@@ -229,7 +229,7 @@ public class TableAclServiceImpl implements TableAclService {
       break;
     }
     URI acls = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
-    URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
+    URI table = ub.clone().build(appId, tableId);
 
     TableAclResource resource = new TableAclResource(acl);
     try {
