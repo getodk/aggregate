@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 
@@ -71,6 +72,9 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
           .entity(new Error(ErrorType.SCHEMA_ETAG_MISMATCH, msg)).type(type).build();
     } else if (e instanceof TableAlreadyExistsException) {
       return Response.status(Status.CONFLICT).entity(new Error(ErrorType.TABLE_EXISTS, msg))
+          .type(type).build();
+    } else if (e instanceof TableNotFoundException) {
+      return Response.status(Status.NOT_FOUND).entity(new Error(ErrorType.TABLE_NOT_FOUND, msg))
           .type(type).build();
     } else {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_REQUEST, msg))

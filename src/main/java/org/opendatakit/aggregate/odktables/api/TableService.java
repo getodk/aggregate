@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
@@ -62,11 +63,12 @@ public interface TableService {
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
+   * @throws TableNotFoundException
    */
   @GET
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*TableResource*/ getTable() throws ODKDatastoreException,
-      PermissionDeniedException, ODKTaskLockException;
+      PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
 
   /**
    * Create a particular tableId (supplied in implementation constructor)
@@ -95,9 +97,10 @@ public interface TableService {
    * @throws SchemaETagMismatchException
    * @throws AppNameMismatchException
    * @throws ODKTaskLockException
+   * @throws TableNotFoundException
    */
   @Path("ref/{schemaETag}")
-  public RealizedTableService getRealizedTable(@PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException;
+  public RealizedTableService getRealizedTable(@PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, TableNotFoundException, ODKTaskLockException;
 
   /**
    * ACL manager for a particular tableId (supplied in implementation constructor)
