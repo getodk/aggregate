@@ -16,23 +16,43 @@
 
 package org.opendatakit.aggregate.client;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
+import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OdkTablesTabUI extends AggregateTabBase {
-
+  
+  interface TablesChangeNotification {
+    public void updateTableSet(boolean tableListChanged);
+  }
+  
+  private ArrayList<TableEntryClient> mTables = new ArrayList<TableEntryClient>();
+  private HashSet<TablesChangeNotification> mChangeNotifications = new HashSet<TablesChangeNotification>();
+  
   public OdkTablesTabUI(AggregateUI baseUI) {
     super();
 
     // add the subtabs
-    addSubTab(new OdkTablesCurrentTablesSubTab(), SubTabs.CURRENTTABLES);
-    addSubTab(new OdkTablesViewTableSubTab(), SubTabs.VIEWTABLE);
-    addSubTab(new OdkTablesManageInstanceFilesSubTab(), SubTabs.MANAGE_INSTANCE_FILES);
-    addSubTab(new OdkTablesManageTableFilesSubTab(), SubTabs.MANAGE_TABLE_ID_FILES);
-    addSubTab(new OdkTablesManageAppLevelFilesSubTab(), SubTabs.MANAGE_APP_LEVEL_FILES);
+    OdkTablesCurrentTablesSubTab ct = new OdkTablesCurrentTablesSubTab(this);
+    OdkTablesViewTableSubTab vt = new OdkTablesViewTableSubTab(this);
+    OdkTablesManageInstanceFilesSubTab tif = new OdkTablesManageInstanceFilesSubTab(this);
+    OdkTablesManageTableFilesSubTab tlf = new OdkTablesManageTableFilesSubTab(this);
+    OdkTablesManageAppLevelFilesSubTab alf = new OdkTablesManageAppLevelFilesSubTab(this);
+    
+    addSubTab(ct, SubTabs.CURRENTTABLES);
+    addSubTab(vt, SubTabs.VIEWTABLE);
+    addSubTab(tif, SubTabs.MANAGE_INSTANCE_FILES);
+    addSubTab(tlf, SubTabs.MANAGE_TABLE_ID_FILES);
+    addSubTab(alf, SubTabs.MANAGE_APP_LEVEL_FILES);
 
     updateVisibilityOdkTablesSubTabs();
 
@@ -40,6 +60,75 @@ public class OdkTablesTabUI extends AggregateTabBase {
     registerClickHandlers(Tabs.ODKTABLES, baseUI);
   }
 
+  /** 
+   * All the children rely on the top-level tab to maintain and update the 
+   * set of accessible tables.
+   */
+  public void update(TablesChangeNotification activeTab) {
+    // listeners are cleared once the response comes back...
+    mChangeNotifications.add(activeTab);
+    
+    if ( mChangeNotifications.size() == 1 ) {
+      GWT.log("ServerTableService.getTables() requested");
+      // we don't have an outstanding request -- issue one
+      if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+          .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+        SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
+  
+          @Override
+          public void onFailure(Throwable caught) {
+            if (caught instanceof AccessDeniedException) {
+              // swallow it...
+              AggregateUI.getUI().clearError();
+              if ( !mTables.isEmpty() ) {
+                // change our values and notify
+                mTables = new ArrayList<TableEntryClient>();
+                notifyListener(true);
+              } else {
+                notifyListener(false);
+              }
+            } else {
+              // ignore error and clear pending listeners
+              mChangeNotifications.clear();
+              AggregateUI.getUI().reportError(caught);
+            }
+          }
+  
+          @Override
+          public void onSuccess(ArrayList<TableEntryClient> tables) {
+            AggregateUI.getUI().clearError();
+            if ( mTables.size() != tables.size() || 
+                 !mTables.containsAll(tables) ) {
+              mTables = tables;
+              notifyListener(true);
+            } else {
+              notifyListener(false);
+            }
+          }
+        });
+      }
+    }
+  }
+  
+  private void notifyListener(boolean tableListChanged) {
+    // make a copy...
+    ArrayList<TablesChangeNotification> oldSet =
+        new ArrayList<TablesChangeNotification>(this.mChangeNotifications);
+    
+    // clear listeners!
+    this.mChangeNotifications.clear();
+
+    // notify the listeners in the copy...
+    GWT.log("ServerTableService.getTables() response received -- call updateTableSet() x " + oldSet.size());
+    for ( TablesChangeNotification subtab : oldSet ) {
+      subtab.updateTableSet(tableListChanged);
+    }
+  }
+
+  public ArrayList<TableEntryClient> getTables() {
+    return mTables;
+  }
+  
   public void updateVisibilityOdkTablesSubTabs() {
 
     /**
