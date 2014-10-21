@@ -194,6 +194,11 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   @Override
   public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
+    // the keyList will be deleted in reverse order.
+    // so by adding the repeats in-order, we ensure
+    // that the last repeat to delete is ordinal 1.
+    // i.e., the submission remains always remains
+    // well-formed w.r.t. its repeat groups.
     for (SubmissionSet s : submissionSets) {
       s.recursivelyAddEntityKeysForDeletion(keyList, cc);
     }
