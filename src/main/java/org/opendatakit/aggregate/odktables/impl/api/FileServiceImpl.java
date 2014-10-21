@@ -91,6 +91,10 @@ public class FileServiceImpl implements FileService {
 
   }
 
+  public static String getPropertiesFilePath(String tableId) {
+    return TABLES_FOLDER + BasicConsts.FORWARDSLASH + tableId + BasicConsts.FORWARDSLASH + "properties.csv";
+  }
+  
   @Override
   public Response getFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
@@ -113,6 +117,13 @@ public class FileServiceImpl implements FileService {
       // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
       if ( !DbTableFileInfo.NO_TABLE_ID.equals(tableId) ) {
         userPermissions.checkPermission(appId, tableId, TablePermission.READ_PROPERTIES);
+        
+        String propertiesPath = getPropertiesFilePath(tableId);
+        if ( propertiesPath.equals(wholePath) ) {
+          // properties are always stored as version 1 files...
+          // the format is not changeable...
+          odkClientVersion = "1";
+        }
       }
       // otherwise, it is an app-level file, and that is accessible to anyone with synchronize tables privileges
 
@@ -177,6 +188,13 @@ public class FileServiceImpl implements FileService {
       // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
       if ( !DbTableFileInfo.NO_TABLE_ID.equals(tableId) ) {
         userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
+        
+        String propertiesPath = getPropertiesFilePath(tableId);
+        if ( propertiesPath.equals(filePath) ) {
+          // properties are always stored as version 1 files...
+          // the format is not changeable...
+          odkClientVersion = "1";
+        }
       }
 
       // 0) Delete anything that is already stored
