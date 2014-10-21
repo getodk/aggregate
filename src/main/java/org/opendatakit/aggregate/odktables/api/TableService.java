@@ -17,6 +17,8 @@
 package org.opendatakit.aggregate.odktables.api;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -34,7 +36,7 @@ import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryList;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryXmlList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
@@ -113,6 +115,8 @@ public interface TableService {
    * This does not preserve the existing properties in the properties.csv,
    * but does a wholesale, atomic, replacement of those properties.
    * 
+   * This is the XML variant of this API. See putJsonTableProperties, below.
+   * 
    * @param propertiesList
    * @return
    * @throws ODKDatastoreException
@@ -122,9 +126,30 @@ public interface TableService {
    */
   @PUT
   @Path("properties")
-  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  @Consumes({ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*void*/ putTableProperties(PropertyEntryList propertiesList) throws ODKDatastoreException,
+  public Response /*void*/ putXmlTableProperties(PropertyEntryXmlList propertiesList) throws ODKDatastoreException,
+      PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
+
+  /**
+   * Replace the properties.csv with the supplied propertiesList.
+   * This does not preserve the existing properties in the properties.csv,
+   * but does a wholesale, atomic, replacement of those properties.
+   * 
+   * This is the JSON variant of this API. See putXmlTableProperties, above.
+   * 
+   * @param propertiesList
+   * @return
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws ODKTaskLockException
+   * @throws TableNotFoundException
+   */
+  @PUT
+  @Path("properties")
+  @Consumes({MediaType.APPLICATION_JSON})
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*void*/ putJsonTableProperties(ArrayList<Map<String,Object>> propertiesList) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
 
   /**
