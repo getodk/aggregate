@@ -34,6 +34,7 @@ import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
@@ -86,6 +87,45 @@ public interface TableService {
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*TableResource*/ createTable(TableDefinition definition )
       throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, IOException;
+
+  /**
+   * Get the properties.csv for this tableId.
+   * 
+   * The properties.csv is not versioned but is atomically 
+   * updated. It is the metadata for the tableId excluding
+   * the data type definitions which are defined in the 
+   * TableDefinition's Column array.
+   * 
+   * @return
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws ODKTaskLockException
+   * @throws TableNotFoundException
+   */
+  @GET
+  @Path("properties")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*PropertyEntryList*/ getTableProperties() throws ODKDatastoreException,
+      PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
+
+  /**
+   * Replace the properties.csv with the supplied propertiesList.
+   * This does not preserve the existing properties in the properties.csv,
+   * but does a wholesale, atomic, replacement of those properties.
+   * 
+   * @param propertiesList
+   * @return
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws ODKTaskLockException
+   * @throws TableNotFoundException
+   */
+  @PUT
+  @Path("properties")
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*void*/ putTableProperties(PropertyEntryList propertiesList) throws ODKDatastoreException,
+      PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
 
   /**
    * Get the realized verison of this table.
