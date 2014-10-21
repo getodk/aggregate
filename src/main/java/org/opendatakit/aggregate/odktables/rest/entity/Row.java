@@ -374,7 +374,7 @@ public class Row {
     boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (rowETag == null ? other.rowETag == null : rowETag.equals(other.rowETag))
         && (dataETagAtModification == null ? other.dataETagAtModification == null
-            : dataETagAtModification.equals(dataETagAtModification))
+            : dataETagAtModification.equals(other.dataETagAtModification))
         && (deleted == other.deleted)
         && (createUser == null ? other.createUser == null : createUser.equals(other.createUser))
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
