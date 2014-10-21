@@ -20,34 +20,42 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
- * This holds a list of {@link Row}.
+ * This holds a list of {@link PropertyEntryXml}.
  * Proper XML documents can contain only one root node.
  * This wrapping class provides that root node.
+ * 
+ * This is used when getting the properties.csv as an 
+ * XML properties array, and when putting an update to that
+ * file as an XML properties array.
+ * 
+ * See {@link PropertyEntryJson} for the JSON variant.
  *
  * @author mitchellsundt@gmail.com
  *
  */
 @JacksonXmlRootElement(localName="propertyList")
-public class PropertyEntryList {
+public class PropertyEntryXmlList {
 
   /**
-   * The entries in the manifest.
+   * The KeyValueStore entries.
    */
-  @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
+  @JsonProperty(required = true)
+  @JsonTypeInfo(use=JsonTypeInfo.Id.NONE, defaultImpl=PropertyEntryXml.class)
+  @JacksonXmlElementWrapper(useWrapping=false,localName="properties")
   @JacksonXmlProperty(localName="property")
-  private ArrayList<PropertyEntry> properties;
+  private ArrayList<PropertyEntryXml> properties;
 
   /**
    * Constructor used by Jackson
    */
-  public PropertyEntryList() {
-    this.properties = new ArrayList<PropertyEntry>();
+  public PropertyEntryXmlList() {
+    this.properties = new ArrayList<PropertyEntryXml>();
   }
 
   /**
@@ -60,9 +68,9 @@ public class PropertyEntryList {
    *
    * @param entries
    */
-  public PropertyEntryList(ArrayList<PropertyEntry> properties) {
+  public PropertyEntryXmlList(ArrayList<PropertyEntryXml> properties) {
     if ( properties == null ) {
-      this.properties = new ArrayList<PropertyEntry>();
+      this.properties = new ArrayList<PropertyEntryXml>();
     } else {
       this.properties = properties;
       // throws an exception if there are any nulls in the list...
@@ -75,7 +83,7 @@ public class PropertyEntryList {
    * 
    * @return
    */
-  public ArrayList<PropertyEntry> getProperties() {
+  public ArrayList<PropertyEntryXml> getProperties() {
     return properties;
   }
 
@@ -87,7 +95,7 @@ public class PropertyEntryList {
    *
    * @param properties
    */
-  public void setProperties(ArrayList<PropertyEntry> properties) {
+  public void setProperties(ArrayList<PropertyEntryXml> properties) {
     this.properties = properties;
     // throws an exception if there are any nulls in the list...
     Collections.sort(this.properties);
@@ -109,10 +117,10 @@ public class PropertyEntryList {
     if (obj == this) {
       return true;
     }
-    if (!(obj instanceof PropertyEntryList)) {
+    if (!(obj instanceof PropertyEntryXmlList)) {
       return false;
     }
-    PropertyEntryList other = (PropertyEntryList) obj;
+    PropertyEntryXmlList other = (PropertyEntryXmlList) obj;
     boolean simpleResult = (properties == null ? other.properties == null : (other.properties != null && properties.size() == other.properties.size()));
     if ( !simpleResult ) {
       return false;
@@ -125,8 +133,8 @@ public class PropertyEntryList {
     // the properties are an ordered list. 
     // Do an O(n) compare of the lists.
     for ( int i = 0 ; i < properties.size() ; ++i ) {
-      PropertyEntry left = this.properties.get(i);
-      PropertyEntry right = other.properties.get(i);
+      PropertyEntryXml left = this.properties.get(i);
+      PropertyEntryXml right = other.properties.get(i);
       if ( ! left.equals(right) ) {
         return false;
       }

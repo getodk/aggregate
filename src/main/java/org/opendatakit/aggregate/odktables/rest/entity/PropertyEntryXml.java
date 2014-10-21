@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author mitchellsundt@gmail.com
  *
  */
-public class PropertyEntry implements Comparable<PropertyEntry> {
+public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
 
   @JsonProperty(required = true)
   private String partition;
@@ -44,9 +44,17 @@ public class PropertyEntry implements Comparable<PropertyEntry> {
   private String value;
 
   /**
-   * Construct a row for insertion. This is used by the remote client (ODK
-   * Tables) to construct a REST request to insert the row, and by the 
-   * server to construct a REST reply.
+   * Used by deserializer
+   */
+  public PropertyEntryXml() {
+  }
+  
+  /**
+   * Construct a KeyValueStore entry for insertion. This can be used
+   * by a remote client to construct an XML request to update the 
+   * properties.csv using a list of properties. It is also used
+   * by the server when constructing the XML response to fetch 
+   * the properties.csv as a list of properties.
    * 
    * @param partition
    * @param aspect
@@ -54,7 +62,7 @@ public class PropertyEntry implements Comparable<PropertyEntry> {
    * @param type
    * @param value
    */
-  public PropertyEntry(String partition, String aspect, String key, String type,
+  public PropertyEntryXml(String partition, String aspect, String key, String type,
       String value) {
     this.partition = partition;
     this.aspect = aspect;
@@ -64,11 +72,11 @@ public class PropertyEntry implements Comparable<PropertyEntry> {
   }
 
   /**
-   * Clone a row.
+   * Clone a KeyValueStore entry.
    * 
    * @param r
    */
-  protected PropertyEntry(PropertyEntry r) {
+  protected PropertyEntryXml(PropertyEntryXml r) {
     this.partition = r.partition;
     this.aspect = r.aspect;
     this.key = r.key;
@@ -136,10 +144,10 @@ public class PropertyEntry implements Comparable<PropertyEntry> {
     if (obj == this) {
       return true;
     }
-    if (!(obj instanceof PropertyEntry)) {
+    if (!(obj instanceof PropertyEntryXml)) {
       return false;
     }
-    PropertyEntry other = (PropertyEntry) obj;
+    PropertyEntryXml other = (PropertyEntryXml) obj;
     boolean match = (partition == null ? other.partition == null : partition.equals(other.partition))
         && (aspect == null ? other.aspect == null : aspect.equals(other.aspect))
         && (key == null ? other.key == null : key.equals(other.key))
@@ -177,7 +185,7 @@ public class PropertyEntry implements Comparable<PropertyEntry> {
    * matching (partition, aspect, key). We do not enforce this.
    */
   @Override
-  public int compareTo(PropertyEntry other) {
+  public int compareTo(PropertyEntryXml other) {
     int outcome;
     
     // compare partition

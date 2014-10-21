@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -60,11 +62,14 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryList;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryXml;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryJson;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryJsonList;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryXmlList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
@@ -83,10 +88,15 @@ import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.common.net.MediaType;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TableServiceImpl implements TableService {
   private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
+
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   private static final String ERROR_TABLE_NOT_FOUND = "Table not found";
   private static final String ERROR_SCHEMA_DIFFERS = "SchemaETag differs";
@@ -293,7 +303,7 @@ public class TableServiceImpl implements TableService {
       ByteArrayInputStream bas = new ByteArrayInputStream(fileBlob);
       Reader rdr = null;
       RFC4180CsvReader csvReader = null;
-      ArrayList<PropertyEntry> properties = new ArrayList<PropertyEntry>();
+      ArrayList<PropertyEntryXml> properties = new ArrayList<PropertyEntryXml>();
       try {
         rdr = new InputStreamReader(bas, CharEncoding.UTF_8);
         csvReader = new RFC4180CsvReader(rdr);
@@ -325,7 +335,7 @@ public class TableServiceImpl implements TableService {
         
         entries = csvReader.readNext();
         while ( entries != null ) {
-          PropertyEntry e = new PropertyEntry(entries[0], entries[1], entries[2], entries[3], entries[4]);
+          PropertyEntryXml e = new PropertyEntryXml(entries[0], entries[1], entries[2], entries[3], entries[4]);
           properties.add(e);
           entries = csvReader.readNext();
         }
@@ -351,12 +361,98 @@ public class TableServiceImpl implements TableService {
         }
       }
       
-      PropertyEntryList pl = new PropertyEntryList(properties);
+      PropertyEntryXmlList pl = new PropertyEntryXmlList(properties);
+
+      List<MediaType> acceptableMedia = headers.getAcceptableMediaTypes();
+      double maxJson = 0.0;
+      double maxOther = 0.0;
+      MediaType xmlType = null;
+      for ( MediaType m : acceptableMedia ) {
+        // get q value, if any (default = 1.0).
+        double weight = 0.0;
+        String quotient = m.getParameters().get("q");
+        if ( quotient != null ) {
+          try {
+            weight = Double.valueOf(quotient);
+          } catch ( NumberFormatException e ) {
+            weight = 1.0;
+          }
+        } else { 
+          weight = 1.0;
+        }
+        
+        if ( m.isCompatible(MediaType.APPLICATION_JSON_TYPE) ) {
+          // this will snarf "*/*", so we will prefer the JSON return format.
+          maxJson = (maxJson > weight) ? maxJson : weight;
+        } else if ( m.isCompatible(MediaType.valueOf(ApiConstants.MEDIA_TEXT_XML_UTF8)) ||
+            m.isCompatible(MediaType.valueOf(ApiConstants.MEDIA_APPLICATION_XML_UTF8))) {
+          if ( weight > maxOther ) {
+            maxOther = weight;
+            xmlType = m;
+          }
+        }
+      }
       
-      ResponseBuilder rBuild = Response.ok(pl);
-      return rBuild.build();
+      if ( maxJson >= maxOther ) {
+        // re-write as full Json object...
+        PropertyEntryJsonList pjson = new PropertyEntryJsonList();
+        for ( PropertyEntryXml e : properties ) {
+          PropertyEntryJson tpe = new PropertyEntryJson(e.getPartition(), e.getAspect(), e.getKey(), e.getType(), null);
+          String value = e.getValue();
+          if ( value == null ) {
+            // shouldn't happen...
+            tpe.setValue(null);
+            continue;
+          }
+          String type = e.getType();
+          if ( type.equals("string") ) {
+            tpe.setValue(value);
+          } else if ( type.equals("number") ) {
+            try {
+              double d = Double.valueOf(value);
+              tpe.setValue(d);
+            } catch ( NumberFormatException ex) {
+              // swallow...
+              tpe.setValue(null);
+            }
+          } else if ( type.equals("integer") ) {
+            try {
+              int i = Integer.valueOf(value);
+              tpe.setValue(i);
+            } catch ( NumberFormatException ex) {
+              // swallow...
+              tpe.setValue(null);
+            }
+          } else if ( type.equals("boolean") ) {
+            boolean b = Boolean.valueOf(value);
+            tpe.setValue(b);
+          } else {
+            // could be anything. most likely 
+            // an array or object -- just convert
+            // and store...
+            Object o = null;
+            try {
+              o = mapper.readValue(value, Object.class);
+            } catch (JsonParseException ex) {
+              ex.printStackTrace();
+            } catch (JsonMappingException ex) {
+              ex.printStackTrace();
+            } catch (IOException ex) {
+              ex.printStackTrace();
+            }
+            tpe.setValue(o);
+          }
+          pjson.add(tpe);
+        }
+        
+        ResponseBuilder rBuild = Response.ok(pjson, MediaType.APPLICATION_JSON_TYPE);
+        return rBuild.build();
+      } else {
+        ResponseBuilder rBuild = Response.ok(pl, xmlType);
+        return rBuild.build();
+      }
     } else {
-      PropertyEntryList pl = new PropertyEntryList(null);
+      PropertyEntryXmlList pl = new PropertyEntryXmlList(null);
       
       ResponseBuilder rBuild = Response.ok(pl);
       return rBuild.build();
@@ -364,7 +460,60 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response putTableProperties(PropertyEntryList propertiesList)
+  public Response putXmlTableProperties(PropertyEntryXmlList propertiesList)
+      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
+      TableNotFoundException {
+    return putInternalTableProperties(propertiesList);
+  }
+
+  @Override
+  public Response putJsonTableProperties(ArrayList<Map<String,Object>> propertiesList)
+      throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
+      TableNotFoundException {
+    ArrayList<PropertyEntryXml> properties = new ArrayList<PropertyEntryXml>();
+    for ( Map<String,Object> tpe : propertiesList ) {
+      // bogus type and value...
+      String partition = (String) tpe.get("partition");
+      String aspect = (String) tpe.get("aspect");
+      String key = (String) tpe.get("key");
+      String type = (String) tpe.get("type");
+      PropertyEntryXml e = new PropertyEntryXml(partition, aspect, key, type, null);
+      
+      // and figure out the correct type and value...
+      Object value = tpe.get("value");
+      if ( value == null ) {
+        e.setValue(null);
+      } else if ( value instanceof Boolean ) {
+        e.setValue(Boolean.toString((Boolean) value));
+      } else if ( value instanceof Integer ) {
+        e.setValue(Integer.toString((Integer) value));
+      } else if ( value instanceof Float ) {
+        e.setValue(Float.toString((Float) value));
+      } else if ( value instanceof Double ) {
+        e.setValue(Double.toString((Double) value));
+      } else if ( value instanceof List ) {
+        try {
+          e.setValue(mapper.writeValueAsString(value));
+        } catch (JsonProcessingException ex) {
+          ex.printStackTrace();
+          e.setValue("[]");
+        }
+      } else {
+        try {
+          e.setValue(mapper.writeValueAsString(value));
+        } catch (JsonProcessingException ex) {
+          ex.printStackTrace();
+          e.setValue("{}");
+        }
+      }
+      
+      properties.add(e);
+    }
+    PropertyEntryXmlList pl = new PropertyEntryXmlList(properties);
+    return putInternalTableProperties(pl);
+  }
+  
+  public Response putInternalTableProperties(PropertyEntryXmlList propertiesList)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
       TableNotFoundException {
 
@@ -377,7 +526,7 @@ public class TableServiceImpl implements TableService {
 
     String filePath = FileServiceImpl.getPropertiesFilePath(tableId);
 
-    String contentType = MediaType.CSV_UTF_8.toString();
+    String contentType = com.google.common.net.MediaType.CSV_UTF_8.toString();
     try {
       // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
@@ -396,7 +545,7 @@ public class TableServiceImpl implements TableService {
         entry[3] = "_type";
         entry[4] = "_value";
         csvWtr.writeNext(entry);
-        for ( PropertyEntry e : propertiesList.getProperties()) {
+        for ( PropertyEntryXml e : propertiesList.getProperties()) {
           entry[0] = e.getPartition();
           entry[1] = e.getAspect();
           entry[2] = e.getKey();
@@ -473,6 +622,7 @@ public class TableServiceImpl implements TableService {
       BlobEntitySet instance = dbTableFiles.newBlobEntitySet(rowUri, cc);
       // TODO: this being set to true is probably where some sort of versioning
       // should happen.
+      @SuppressWarnings("unused")
       BlobSubmissionOutcome outcome = instance.addBlob(content, contentType, null, true, cc);
       // 3) persist the user-friendly table entry about the blob
       tableFileInfoRow.put(cc);
