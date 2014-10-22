@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.FileManager;
+import org.opendatakit.aggregate.odktables.FileManager.FileChangeDetail;
 import org.opendatakit.aggregate.odktables.FileManager.FileContentInfo;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
@@ -45,7 +46,6 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -169,7 +169,7 @@ public class FileServiceImpl implements FileService {
 
     FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), content);
 
-    BlobSubmissionOutcome outcome = fm.putFile(odkClientVersion, tableId, filePath,
+    FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, filePath,
         userPermissions, fi);
 
     UriBuilder ub = info.getBaseUriBuilder();
@@ -180,7 +180,7 @@ public class FileServiceImpl implements FileService {
 
     return Response
         .status(
-            (outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) ? Status.ACCEPTED : Status.CREATED)
+            (outcome == FileChangeDetail.FILE_UPDATED) ? Status.ACCEPTED : Status.CREATED)
         .header("Location", locationUrl).build();
   }
 

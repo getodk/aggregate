@@ -47,6 +47,7 @@ import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.FileManager;
+import org.opendatakit.aggregate.odktables.FileManager.FileChangeDetail;
 import org.opendatakit.aggregate.odktables.FileManager.FileContentInfo;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.TableManager.WebsafeTables;
@@ -75,7 +76,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
-import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -552,7 +552,7 @@ public class TableServiceImpl implements TableService {
     FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), content);
     
     @SuppressWarnings("unused")
-    BlobSubmissionOutcome outcome = fm.putFile("1", tableId, filePath, userPermissions, fi);
+    FileChangeDetail outcome = fm.putFile("1", tableId, filePath, userPermissions, fi);
     return Response.status(Status.ACCEPTED).build();
   }
 
