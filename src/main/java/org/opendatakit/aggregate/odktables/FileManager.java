@@ -16,6 +16,7 @@
 package org.opendatakit.aggregate.odktables;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,10 +52,11 @@ public class FileManager {
   /**
    * The name of the folder that contains the files associated with a table in
    * an app.
-   *
-   * @see #getTableIdFromPathSegments(List)
    */
   private static final String TABLES_FOLDER = "tables";
+  private static final String ASSETS_FOLDER = "assets";
+  private static final String CSV_FOLDER = "csv";
+  private static final String CSV_EXTENSION = "csv";
 
   public static class FileContentInfo {
     public final byte[] fileBlob;
@@ -82,6 +84,42 @@ public class FileManager {
         + "properties.csv";
   }
 
+  /**
+   * Retrieve the table id given the appRelativeFilePath. The first path
+   * segment (position 0) is a directory under /sdcard/opendatakit/{app_id}/,
+   * as all files must be associated with an app id. Not all files must be
+   * associated with a table, however, so it parses to find the table id.
+   * If it is not associated with a table, it returns DbTableFileInfo.NO_TABLE_ID
+   * <p>
+   * The convention is that any table-related file must be under:
+   * /tables/tableid OR a csv file: /assets/csv/tableid....csv
+   *
+   * So the 2nd position (0 indexed) will be the table id if the first position
+   * is "tables", and the 3rd position (0 indexed) will begin with the table id
+   * if it is a csv file under the assets/csv directory.
+   *  
+   * @param appRelativeFilePath
+   * @return tableId or DbTableFileInfo.NO_TABLE_ID
+   */
+  public static String getTableIdForFilePath(String appRelativeFilePath) {
+      String[] pathParts = appRelativeFilePath.split(BasicConsts.FORWARDSLASH);
+      String tableId = DbTableFileInfo.NO_TABLE_ID;
+      String firstFolder = pathParts[0];
+      if ((pathParts.length >= 2) && firstFolder.equals(FileManager.TABLES_FOLDER)) {
+        tableId = pathParts[1];
+      } else if ((pathParts.length == 3) && firstFolder.equals(FileManager.ASSETS_FOLDER)) {
+        String secondFolder = pathParts[1];
+        if (secondFolder.equals(FileManager.CSV_FOLDER)) {
+          String fileName = pathParts[2];
+          String splits[] = fileName.split("\\.");
+          if (splits[splits.length - 1].toLowerCase(Locale.ENGLISH).equals(FileManager.CSV_EXTENSION)) {
+            tableId = splits[0];
+          }
+        }
+      }
+      return tableId;
+  }
+  
   public FileContentInfo getFile(String odkClientVersion, String tableId, String wholePath)
       throws ODKDatastoreException, FileNotFoundException {
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
