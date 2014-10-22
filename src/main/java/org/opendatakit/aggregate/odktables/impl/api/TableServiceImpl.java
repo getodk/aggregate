@@ -255,7 +255,7 @@ public class TableServiceImpl implements TableService {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
-    String wholePath = FileServiceImpl.getPropertiesFilePath(tableId);
+    String wholePath = FileManager.getPropertiesFilePath(tableId);
 
     FileContentInfo fi;
 
@@ -493,7 +493,7 @@ public class TableServiceImpl implements TableService {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
-    String filePath = FileServiceImpl.getPropertiesFilePath(tableId);
+    String filePath = FileManager.getPropertiesFilePath(tableId);
 
     String contentType = com.google.common.net.MediaType.CSV_UTF_8.toString();
     

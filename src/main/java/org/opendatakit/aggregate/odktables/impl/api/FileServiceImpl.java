@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.impl.api;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Locale;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
@@ -59,16 +58,6 @@ public class FileServiceImpl implements FileService {
 
   private static final Log LOGGER = LogFactory.getLog(FileServiceImpl.class);
 
-  /**
-   * The name of the folder that contains the files associated with a table in
-   * an app.
-   *
-   * @see #getTableIdFromPathSegments(List)
-   */
-  private static final String TABLES_FOLDER = "tables";
-  private static final String ASSETS_FOLDER = "assets";
-  private static final String CSV_FOLDER = "csv";
-
   private final ServletContext sc;
   private final HttpServletRequest req;
   private final HttpHeaders headers;
@@ -90,11 +79,6 @@ public class FileServiceImpl implements FileService {
 
   }
 
-  public static String getPropertiesFilePath(String tableId) {
-    return TABLES_FOLDER + BasicConsts.FORWARDSLASH + tableId + BasicConsts.FORWARDSLASH
-        + "properties.csv";
-  }
-
   @Override
   public Response getFile(@PathParam("odkClientVersion") String odkClientVersion,
       @PathParam("filePath") List<PathSegment> segments,
@@ -111,8 +95,8 @@ public class FileServiceImpl implements FileService {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
           .build();
     }
-    String tableId = getTableIdFromPathSegments(segments);
-    String wholePath = constructPathFromSegments(segments);
+    String appRelativePath = constructPathFromSegments(segments);
+    String tableId = FileManager.getTableIdForFilePath(appRelativePath);
 
     FileContentInfo fi = null;
 
@@ -123,7 +107,7 @@ public class FileServiceImpl implements FileService {
     }
 
     FileManager fm = new FileManager(appId, cc);
-    fi = fm.getFile(odkClientVersion, tableId, wholePath);
+    fi = fm.getFile(odkClientVersion, tableId, appRelativePath);
 
     // And now prepare everything to be returned to the caller.
     if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null
@@ -131,13 +115,13 @@ public class FileServiceImpl implements FileService {
       ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType);
       if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
-        rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + wholePath
+        rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + appRelativePath
             + "\"");
       }
       return rBuild.build();
     } else {
       return Response.status(Status.NOT_FOUND)
-          .entity("File content not yet available for: " + wholePath).build();
+          .entity("File content not yet available for: " + appRelativePath).build();
     }
   }
 
@@ -155,8 +139,8 @@ public class FileServiceImpl implements FileService {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
           .build();
     }
-    String tableId = getTableIdFromPathSegments(segments);
-    String filePath = constructPathFromSegments(segments);
+    String appRelativePath = constructPathFromSegments(segments);
+    String tableId = FileManager.getTableIdForFilePath(appRelativePath);
     String contentType = req.getContentType();
 
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
@@ -169,12 +153,12 @@ public class FileServiceImpl implements FileService {
 
     FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), content);
 
-    FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, filePath,
+    FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, appRelativePath,
         userPermissions, fi);
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getFilesService");
-    URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion, filePath);
+    URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion, appRelativePath);
 
     String locationUrl = self.toURL().toExternalForm();
 
@@ -198,8 +182,9 @@ public class FileServiceImpl implements FileService {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
           .build();
     }
-    String tableId = getTableIdFromPathSegments(segments);
-    String wholePath = constructPathFromSegments(segments);
+    String appRelativePath = constructPathFromSegments(segments);
+    String tableId = FileManager.getTableIdForFilePath(appRelativePath);
+
     
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
     if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
@@ -207,7 +192,7 @@ public class FileServiceImpl implements FileService {
     }
 
     FileManager fm = new FileManager(appId, cc);
-    fm.deleteFile(odkClientVersion, tableId, wholePath);
+    fm.deleteFile(odkClientVersion, tableId, appRelativePath);
     
     return Response.ok().build();
   }
@@ -238,42 +223,6 @@ public class FileServiceImpl implements FileService {
     }
     String wholePath = sb.toString();
     return wholePath;
-  }
-
-  /**
-   * Retrieve the table id given the path. The first segment (position 0) is a
-   * directory under /sdcard/opendatakit/{app_id}/, as all files must be
-   * associated with an app id. Not all files must be associated with a table,
-   * however, so it parses to find the table id. Otherwise it returns the
-   * {@link DEFAULT_TABLE_ID}.
-   * <p>
-   * The convention is that any table-related file must be under:
-   * /tables/tableid OR a csv file: /assets/csv/tableid....csv
-   *
-   * So the 2nd position (0 indexed) will be the table id if the first position
-   * is "tables", and the 3rd position (0 indexed) will begin with the table id
-   * if it is a csv file under the assets/csv directory.
-   *
-   * @param segments
-   * @return
-   */
-  private String getTableIdFromPathSegments(List<PathSegment> segments) {
-    String[] pathParts = constructPathFromSegments(segments).split(BasicConsts.FORWARDSLASH);
-    String tableId = DbTableFileInfo.NO_TABLE_ID;
-    String firstFolder = pathParts[0];
-    if ((segments.size() >= 2) && firstFolder.equals(TABLES_FOLDER)) {
-      tableId = pathParts[1];
-    } else if ((segments.size() == 3) && firstFolder.equals(ASSETS_FOLDER)) {
-      String secondFolder = pathParts[1];
-      if (secondFolder.equals(CSV_FOLDER)) {
-        String fileName = pathParts[2];
-        String splits[] = fileName.split("\\.");
-        if (splits[splits.length - 1].toLowerCase(Locale.ENGLISH).equals("csv")) {
-          tableId = splits[0];
-        }
-      }
-    }
-    return tableId;
   }
 
 }
