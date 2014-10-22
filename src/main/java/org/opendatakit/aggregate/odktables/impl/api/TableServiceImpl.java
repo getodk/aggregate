@@ -255,7 +255,7 @@ public class TableServiceImpl implements TableService {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
-    String wholePath = FileManager.getPropertiesFilePath(tableId);
+    String appRelativePath = FileManager.getPropertiesFilePath(tableId);
 
     FileContentInfo fi;
 
@@ -263,7 +263,7 @@ public class TableServiceImpl implements TableService {
     
     FileManager fm = new FileManager(appId, cc);
     
-    fi = fm.getFile("1", tableId, wholePath);
+    fi = fm.getFile("1", tableId, appRelativePath);
       
     // And now prepare everything to be returned to the caller.
     if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null && fi.contentLength != 0L) {
@@ -493,7 +493,7 @@ public class TableServiceImpl implements TableService {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
-    String filePath = FileManager.getPropertiesFilePath(tableId);
+    String appRelativePath = FileManager.getPropertiesFilePath(tableId);
 
     String contentType = com.google.common.net.MediaType.CSV_UTF_8.toString();
     
@@ -552,7 +552,7 @@ public class TableServiceImpl implements TableService {
     FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), content);
     
     @SuppressWarnings("unused")
-    FileChangeDetail outcome = fm.putFile("1", tableId, filePath, userPermissions, fi);
+    FileChangeDetail outcome = fm.putFile("1", tableId, appRelativePath, userPermissions, fi);
     return Response.status(Status.ACCEPTED).build();
   }
 
