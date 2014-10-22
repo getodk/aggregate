@@ -25,6 +25,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
@@ -75,6 +76,9 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
           .type(type).build();
     } else if (e instanceof TableNotFoundException) {
       return Response.status(Status.NOT_FOUND).entity(new Error(ErrorType.TABLE_NOT_FOUND, msg))
+          .type(type).build();
+    } else if (e instanceof FileNotFoundException) {
+      return Response.status(Status.NOT_FOUND).entity(new Error(ErrorType.RESOURCE_NOT_FOUND, msg))
           .type(type).build();
     } else {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_REQUEST, msg))
