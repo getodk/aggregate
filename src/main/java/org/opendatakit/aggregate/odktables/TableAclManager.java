@@ -47,7 +47,6 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class TableAclManager {
   
-
   public static class WebsafeAcls {
     public final List<TableAcl> acls;
 
@@ -68,7 +67,6 @@ public class TableAclManager {
       this.hasPrior = hasPrior;
     }
   }
-
   
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
