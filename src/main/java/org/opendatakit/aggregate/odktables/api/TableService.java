@@ -31,6 +31,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
+import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
@@ -103,12 +104,13 @@ public interface TableService {
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
    * @throws TableNotFoundException
+   * @throws FileNotFoundException 
    */
   @GET
   @Path("properties")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*PropertyEntryList*/ getTableProperties() throws ODKDatastoreException,
-      PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
+      PermissionDeniedException, ODKTaskLockException, TableNotFoundException, FileNotFoundException;
 
   /**
    * Replace the properties.csv with the supplied propertiesList.

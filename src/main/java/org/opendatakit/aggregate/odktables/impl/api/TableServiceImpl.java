@@ -46,7 +46,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.constants.ErrorConsts;
+import org.opendatakit.aggregate.odktables.FileManager;
+import org.opendatakit.aggregate.odktables.FileManager.FileContentInfo;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.TableManager.WebsafeTables;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
@@ -54,21 +55,18 @@ import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
+import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
 import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
-import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
-import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
-import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryXml;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryJson;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryJsonList;
+import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryXml;
 import org.opendatakit.aggregate.odktables.rest.entity.PropertyEntryXmlList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
@@ -78,7 +76,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
-import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -254,53 +251,25 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public Response getTableProperties() throws ODKDatastoreException, PermissionDeniedException,
-      ODKTaskLockException, TableNotFoundException {
+      ODKTaskLockException, TableNotFoundException, FileNotFoundException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     String wholePath = FileServiceImpl.getPropertiesFilePath(tableId);
 
-    byte[] fileBlob;
-    String contentType;
-    Long contentLength;
-    try {
-      userPermissions.checkPermission(appId, tableId, TablePermission.READ_PROPERTIES);
+    FileContentInfo fi;
+
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_PROPERTIES);
+    
+    FileManager fm = new FileManager(appId, cc);
+    
+    fi = fm.getFile("1", tableId, wholePath);
       
-      // properties.csv is odkClientVersion-agnostic -- and always stored as a version "1" file.
-      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity("1", tableId, wholePath, cc);
-      if (entities.size() > 1) {
-        Log log = LogFactory.getLog(DbTableFileInfo.class);
-        log.error("more than one entity for appId: " + appId + ", tableId: " + tableId
-            + ", pathToFile: " + wholePath);
-      } else if (entities.size() < 1) {
-        return Response.status(Status.NOT_FOUND).entity("No manifest entry found for: " + wholePath).build();
-      }
-      DbTableFileInfoEntity dbTableFileInfoRow = entities.get(0);
-      String uri = dbTableFileInfoRow.getId();
-      DbTableFiles dbTableFiles = new DbTableFiles(cc);
-      BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(uri, cc);
-      // We should only ever have one, as wholePath is the primary key.
-      if (blobEntitySet.getAttachmentCount(cc) > 1) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("More than one file specified for: " + wholePath).build();
-      }
-      if (blobEntitySet.getAttachmentCount(cc) < 1) {
-        return Response.status(Status.NOT_FOUND).entity("No file found for path: " + wholePath).build();
-      }
-      fileBlob = blobEntitySet.getBlob(1, cc);
-      contentType = blobEntitySet.getContentType(1, cc);
-      contentLength = blobEntitySet.getContentLength(1, cc);
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve attachment and access attributes for: " + wholePath).build();
-    } catch (PermissionDeniedException e) {
-      logger.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
-    }
     // And now prepare everything to be returned to the caller.
-    if (fileBlob != null && contentType != null && contentLength != null && contentLength != 0L) {
+    if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null && fi.contentLength != 0L) {
       // read the byte[] array using the CSV reader, and build a 
       // list of PropertyEntry objects. 
-      ByteArrayInputStream bas = new ByteArrayInputStream(fileBlob);
+      ByteArrayInputStream bas = new ByteArrayInputStream(fi.fileBlob);
       Reader rdr = null;
       RFC4180CsvReader csvReader = null;
       ArrayList<PropertyEntryXml> properties = new ArrayList<PropertyEntryXml>();
@@ -527,113 +496,64 @@ public class TableServiceImpl implements TableService {
     String filePath = FileServiceImpl.getPropertiesFilePath(tableId);
 
     String contentType = com.google.common.net.MediaType.CSV_UTF_8.toString();
+    
+    // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
+    userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
+
+    ByteArrayOutputStream bas = new ByteArrayOutputStream();
+    Writer wtr = null;
+    RFC4180CsvWriter csvWtr = null;
+    
     try {
-      // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
-      userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
-
-      ByteArrayOutputStream bas = new ByteArrayOutputStream();
-      Writer wtr = null;
-      RFC4180CsvWriter csvWtr = null;
-      
-      try {
-        wtr = new OutputStreamWriter(bas, CharEncoding.UTF_8);
-        csvWtr = new RFC4180CsvWriter(wtr);
-        String[] entry = new String[5];
-        entry[0] = "_partition";
-        entry[1] = "_aspect";
-        entry[2] = "_key";
-        entry[3] = "_type";
-        entry[4] = "_value";
+      wtr = new OutputStreamWriter(bas, CharEncoding.UTF_8);
+      csvWtr = new RFC4180CsvWriter(wtr);
+      String[] entry = new String[5];
+      entry[0] = "_partition";
+      entry[1] = "_aspect";
+      entry[2] = "_key";
+      entry[3] = "_type";
+      entry[4] = "_value";
+      csvWtr.writeNext(entry);
+      for ( PropertyEntryXml e : propertiesList.getProperties()) {
+        entry[0] = e.getPartition();
+        entry[1] = e.getAspect();
+        entry[2] = e.getKey();
+        entry[3] = e.getType();
+        entry[4] = e.getValue();
         csvWtr.writeNext(entry);
-        for ( PropertyEntryXml e : propertiesList.getProperties()) {
-          entry[0] = e.getPartition();
-          entry[1] = e.getAspect();
-          entry[2] = e.getKey();
-          entry[3] = e.getType();
-          entry[4] = e.getValue();
-          csvWtr.writeNext(entry);
+      }
+      csvWtr.flush();
+    } catch (UnsupportedEncodingException ex) {
+      ex.printStackTrace();
+      throw new IllegalStateException("Unrecognized UTF-8 charset!");
+    } catch (IOException ex) {
+      ex.printStackTrace();
+      throw new IllegalStateException("Unable to write into a byte array!");
+    } finally {
+      if ( csvWtr != null ) {
+        try {
+          csvWtr.close();
+        } catch (IOException e) {
+          e.printStackTrace();
         }
-        csvWtr.flush();
-      } catch (UnsupportedEncodingException ex) {
-        ex.printStackTrace();
-        throw new IllegalStateException("Unrecognized UTF-8 charset!");
-      } catch (IOException ex) {
-        ex.printStackTrace();
-        throw new IllegalStateException("Unable to write into a byte array!");
-      } finally {
-        if ( csvWtr != null ) {
-          try {
-            csvWtr.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-        } else if ( wtr != null ) {
-          try {
-            wtr.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
+      } else if ( wtr != null ) {
+        try {
+          wtr.close();
+        } catch (IOException e) {
+          e.printStackTrace();
         }
       }
-      
-      byte[] content = bas.toByteArray();
-      // properties.csv is odkClientVersion-agnostic -- and always stored as a version "1" file.
-
-      // 0) Delete anything that is already stored
-
-      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity("1", tableId, filePath, cc);
-      for ( DbTableFileInfoEntity entity : entities ) {
-
-        String uri = entity.getId();
-        DbTableFiles dbTableFiles = new DbTableFiles(cc);
-        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(uri, cc);
-        blobEntitySet.remove(cc);
-        entity.delete(cc);
-      }
-
-      // We are going to store the file in two tables: 1) a user-friendly table
-      // that relates an app and table id to the name of a file; 2) a table
-      // that holds the actual blob.
-      //
-      // Table 1 is represented by DbTableFileInfo. Each row of this table
-      // contains a uri, appid, tableid, and pathToFile.
-      // Table 2 is a BlobEntitySet. The top level URI of this blob entity set
-      // is the uri from table 1. Each blob set here has a single attachment
-      // count of 1--the blob of the file itself. The pathToFile of this
-      // attachment is null.
-      //
-      // So, now that we have retrieved the file from the request, we have two
-      // things to do: 1) create an entry in the user-friendly table so we can
-      // bet a uri. 2) add the file to the blob entity set, using the top level
-      // uri as the row uri from table 1.
-      //
-      // 1) Create an entry in the user friendly table.
-      EntityCreator ec = new EntityCreator();
-      DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity("1", tableId, filePath,
-          userPermissions, cc);
-      String rowUri = tableFileInfoRow.getId();
-
-      // 2) Put the blob in the datastore.
-      DbTableFiles dbTableFiles = new DbTableFiles(cc);
-      // Although this is called an entity set, it in fact represents a single
-      // file, because we have chosen to use it this way in this case. For more
-      // information see the docs in DbTableFiles. We'll use the uri of the
-      // corresponding row in the DbTableFileInfo table.
-      BlobEntitySet instance = dbTableFiles.newBlobEntitySet(rowUri, cc);
-      // TODO: this being set to true is probably where some sort of versioning
-      // should happen.
-      @SuppressWarnings("unused")
-      BlobSubmissionOutcome outcome = instance.addBlob(content, contentType, null, true, cc);
-      // 3) persist the user-friendly table entry about the blob
-      tableFileInfoRow.put(cc);
-      return Response.status(Status.ACCEPTED).build();
-    } catch (ODKDatastoreException e) {
-      logger.error(("ODKTables file upload persistence error: " + e.getMessage()));
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage()).build();
-    } catch (PermissionDeniedException e) {
-      logger.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
     }
+    
+    byte[] content = bas.toByteArray();
+    
+    FileManager fm = new FileManager(appId, cc);
+    
+    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), content);
+    
+    @SuppressWarnings("unused")
+    BlobSubmissionOutcome outcome = fm.putFile("1", tableId, filePath, userPermissions, fi);
+    return Response.status(Status.ACCEPTED).build();
   }
 
 }
