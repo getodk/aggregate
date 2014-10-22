@@ -32,10 +32,10 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * Implementation of file management APIs. 
+ * Implementation of file management APIs.
  * 
- * Isolated here so that the differences between Mezuri and Aggregate can be isolated to 
- * this one class.
+ * Isolated here so that the differences between Mezuri and Aggregate can be
+ * isolated to this one class.
  * 
  * @author mitchellsundt@gmail.com
  *
@@ -43,6 +43,10 @@ import org.opendatakit.common.web.constants.BasicConsts;
 public class FileManager {
 
   private static final Log LOGGER = LogFactory.getLog(FileManager.class);
+
+  public static enum FileChangeDetail {
+    FILE_NOT_CHANGED, FILE_UPDATED, FILE_NEWLY_CREATED
+  }
 
   /**
    * The name of the folder that contains the files associated with a table in
@@ -81,7 +85,6 @@ public class FileManager {
   public FileContentInfo getFile(String odkClientVersion, String tableId, String wholePath)
       throws ODKDatastoreException, FileNotFoundException {
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
-    // permissions
     if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
 
       String propertiesPath = getPropertiesFilePath(tableId);
@@ -119,11 +122,10 @@ public class FileManager {
     return fo;
   }
 
-  public BlobSubmissionOutcome putFile(String odkClientVersion, String tableId, String filePath,
+  public FileChangeDetail putFile(String odkClientVersion, String tableId, String filePath,
       TablesUserPermissions userPermissions, FileContentInfo fi) throws ODKDatastoreException {
 
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
-    // permissions
     if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
 
       String propertiesPath = getPropertiesFilePath(tableId);
@@ -179,17 +181,38 @@ public class FileManager {
     // TODO: this being set to true is probably where some sort of versioning
     // should happen.
     BlobSubmissionOutcome outcome = null;
-    
+
     if (fi.fileBlob != null && fi.contentType != null) {
       outcome = instance.addBlob(fi.fileBlob, fi.contentType, null, true, cc);
     }
     // 3) persist the user-friendly table entry about the blob
     tableFileInfoRow.put(cc);
-    
-    return outcome;
+
+    switch (outcome) {
+    case FILE_UNCHANGED:
+      return FileChangeDetail.FILE_NOT_CHANGED;
+    case NEW_FILE_VERSION:
+      return FileChangeDetail.FILE_UPDATED;
+    case COMPLETELY_NEW_FILE:
+      return FileChangeDetail.FILE_NEWLY_CREATED;
+    default:
+      throw new IllegalStateException("Unexpected extra status for BlobSubmissionOutcome");
+    }
   }
-  
-  public void deleteFile(String odkClientVersion, String tableId, String wholePath) throws ODKDatastoreException {
+
+  public void deleteFile(String odkClientVersion, String tableId, String wholePath)
+      throws ODKDatastoreException {
+
+    // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
+    if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
+
+      String propertiesPath = getPropertiesFilePath(tableId);
+      if (propertiesPath.equals(wholePath)) {
+        // properties are always stored as version 1 files...
+        // the format is not changeable...
+        odkClientVersion = "1";
+      }
+    }
 
     // if we find nothing, we are happy.
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion,
