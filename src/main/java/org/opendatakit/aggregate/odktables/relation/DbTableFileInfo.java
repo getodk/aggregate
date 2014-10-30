@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
+import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -79,6 +81,15 @@ public class DbTableFileInfo extends Relation {
   public static final DataField TABLE_ID = new DataField("_TABLE_ID", DataType.STRING, true, 80L);
   public static final DataField PATH_TO_FILE = new DataField("_PATH_TO_FILE", DataType.STRING,
       true, 5120L);
+  
+  public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
+
+  // limited to 10 characters
+  public static final DataField FILTER_TYPE = new DataField(TableConstants.FILTER_TYPE.toUpperCase(),
+      DataType.STRING, true, 10L);
+  // limited to 50 characters
+  public static final DataField FILTER_VALUE = new DataField(TableConstants.FILTER_VALUE.toUpperCase(),
+      DataType.STRING, true, 50L).setIndexable(IndexType.HASH);
 
   // NOTE: code elsewhere depends upon all these data fields being String
   // fields.
@@ -90,7 +101,7 @@ public class DbTableFileInfo extends Relation {
   // fields.
   public static final List<DataField> exposedColumnNames;
 
-  public static final String RELATION_NAME = "TABLE_FILE_INFO3";
+  public static final String RELATION_NAME = "TABLE_FILE_INFO4";
 
   // the list of the datafields/columns
   private static final List<DataField> dataFields;
@@ -100,8 +111,9 @@ public class DbTableFileInfo extends Relation {
     dataFields.add(ODK_CLIENT_VERSION);
     dataFields.add(TABLE_ID);
     dataFields.add(PATH_TO_FILE);
-    // and add the things from DbTable
-    dataFields.addAll(DbTable.getStaticFields());
+    dataFields.add(DELETED);
+    dataFields.add(FILTER_TYPE);
+    dataFields.add(FILTER_VALUE);
     // TODO: do the appropriate time stamping and things.
     // populate the list with all the column names
     List<DataField> columns = new ArrayList<DataField>();
@@ -155,6 +167,30 @@ public class DbTableFileInfo extends Relation {
 
     public void setPathToFile(String value) {
       e.set(PATH_TO_FILE, value);
+    }
+
+    public boolean getDeleted() {
+      return e.getBoolean(DELETED);
+    }
+
+    public void setDeleted(boolean value) {
+      e.set(DELETED, value);
+    }
+
+    public String getFilterType() {
+      return e.getString(FILTER_TYPE);
+    }
+
+    public void setFilterType(String value) {
+      e.set(FILTER_TYPE, value);
+    }
+
+    public String getFilterValue() {
+      return e.getString(FILTER_VALUE);
+    }
+
+    public void setFilterValue(String value) {
+      e.set(FILTER_VALUE, value);
     }
 
     public String getStringField(DataField field) {

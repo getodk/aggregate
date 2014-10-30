@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
@@ -224,13 +223,13 @@ public class EntityConverter {
   }
 
   public static Scope getDbTableFileInfoFilterScope(DbTableFileInfoEntity entity) {
-    String filterType = entity.getStringField(DbTable.FILTER_TYPE);
+    String filterType = entity.getStringField(DbTableFileInfo.FILTER_TYPE);
     if (filterType != null) {
       Scope.Type type = Scope.Type.valueOf(filterType);
       if (filterType.equals(Scope.Type.DEFAULT)) {
         return new Scope(Scope.Type.DEFAULT, null);
       } else {
-        String value = entity.getStringField(DbTable.FILTER_VALUE);
+        String value = entity.getStringField(DbTableFileInfo.FILTER_VALUE);
         return new Scope(type, value);
       }
     } else {
@@ -267,54 +266,6 @@ public class EntityConverter {
 
     row.setValues(getRowValues(entity, columns));
     return row;
-  }
-
-  /**
-   * This method creates a row from an entity retrieved from the DbTableFileInfo
-   * table. It makes use of the static List of String column names in that
-   * class.
-   *
-   * @param entity
-   * @return
-   * @author sudar.sam@gmail.com
-   */
-  public static Row toRowFromFileInfo(DbTableFileInfoEntity entity) {
-    Row row = new Row();
-    row.setRowId(entity.getId());
-    row.setRowETag(entity.getStringField(DbTable.ROW_ETAG));
-    row.setDataETagAtModification(entity.getStringField(DbTable.DATA_ETAG_AT_MODIFICATION));
-    row.setDeleted(entity.getBooleanField(DbTable.DELETED));
-    row.setCreateUser(entity.getStringField(DbTable.CREATE_USER));
-    row.setLastUpdateUser(entity.getStringField(DbTable.LAST_UPDATE_USER));
-    row.setFilterScope(getDbTableFileInfoFilterScope(entity));
-    // this will be the actual values of the row
-    ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
-    for (DataField column : DbTableFileInfo.exposedColumnNames) {
-      Validate.isTrue(column.getDataType() == DataType.STRING);
-      String value = entity.getStringField(column);
-      values.add(new DataKeyValue(column.getName(), value));
-    }
-    row.setValues(values);
-    return row;
-  }
-
-  /**
-   * Return a list of rows from a list of entities queried from the
-   * DbTableFileInfo table. Just calls {@link toRowFromFileInfo()} for every
-   * entity in the list. However, it does NOT include deleted rows.
-   *
-   * @param entities
-   * @return
-   */
-  public static List<Row> toRowsFromFileInfo(List<DbTableFileInfoEntity> entities) {
-    List<Row> rows = new ArrayList<Row>();
-    for (DbTableFileInfoEntity e : entities) {
-      Row row = toRowFromFileInfo(e);
-      if (!row.isDeleted()) {
-        rows.add(row);
-      }
-    }
-    return rows;
   }
 
   /**
