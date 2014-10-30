@@ -540,8 +540,18 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             b.append(" NOT NULL ");
           }
         }
-        // for performance reasons, any uri index must use HASH
-        b.append(", PRIMARY KEY(");
+        /*
+         * Setting the primary key as the _URI and making it use
+         * HASH.
+         */
+        
+        // For MySQL, it is important to NOT declare a PRIMARY KEY
+        // when that key is a UUID. It should only be declared as 
+        // a non-unique index...
+        //
+        // http://kccoder.com/mysql/uuid-vs-int-insert-performance/
+        //
+        b.append(", INDEX(");
         b.append(K_BQ);
         b.append(relation.primaryKey.getName());
         b.append(K_BQ);

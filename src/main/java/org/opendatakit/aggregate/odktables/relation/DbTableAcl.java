@@ -55,7 +55,7 @@ public class DbTableAcl extends Relation {
   }
 
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
-      .setIndexable(IndexType.HASH);
+      .setIndexable(IndexType.ORDERED);
   private static final DataField SCOPE_TYPE = new DataField("SCOPE_TYPE", DataType.STRING, false);
   private static final DataField SCOPE_VALUE = new DataField("SCOPE_VALUE", DataType.STRING, true);
   private static final DataField ROLE = new DataField("ROLE", DataType.STRING, false);

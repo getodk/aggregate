@@ -63,7 +63,7 @@ public class DbColumnDefinitions extends Relation {
 
   // these are the column names in the COLUMN table
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
-      .setIndexable(IndexType.HASH);
+      .setIndexable(IndexType.ORDERED);
   private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, false);
   private static final DataField ELEMENT_KEY = new DataField("ELEMENT_KEY", DataType.STRING, false);
   private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataType.STRING,
