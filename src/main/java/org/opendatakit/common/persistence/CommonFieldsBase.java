@@ -57,7 +57,7 @@ public abstract class CommonFieldsBase {
       DataField.DataType.DATETIME, false);
   /** last user to update record */
   private static final DataField LAST_UPDATE_URI_USER = new DataField(
-      LAST_UPDATE_URI_USER_COLUMN_NAME, DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
+      LAST_UPDATE_URI_USER_COLUMN_NAME, DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
   /** last update date */
   private static final DataField LAST_UPDATE_DATE = new DataField(LAST_UPDATE_DATE_COLUMN_NAME,
       DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);

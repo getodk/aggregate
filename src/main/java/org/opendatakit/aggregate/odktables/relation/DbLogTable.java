@@ -83,7 +83,7 @@ public class DbLogTable extends Relation {
   // nanoseconds at the time the form was saved (on client).
   // limited to 40 characters
   public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
-      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, true, 40L);
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, false, 40L).setIndexable(IndexType.ORDERED);
   // the creator of this row, as reported by the device (may be a remote SMS user)
   public static final DataField SAVEPOINT_CREATOR = new DataField(
       TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);
