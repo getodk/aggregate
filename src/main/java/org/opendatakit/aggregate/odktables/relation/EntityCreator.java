@@ -36,7 +36,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
-import org.opendatakit.common.persistence.PersistenceUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -137,21 +136,10 @@ public class EntityCreator {
     entity.setOdkClientVersion(odkClientVersion);
     entity.setTableId(tableId);
     entity.setPathToFile(pathToFile);
-
-    // now set the universal fields
-    // TODO: do the appropriate time stamping and include data for the other
-    // fields.
-    entity.setStringField(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
-    // TODO last update same as create? correct?
-    entity.setStringField(DbTable.LAST_UPDATE_USER, userPermissions.getOdkTablesUserId());
-    // TODO: should DATA_ETAG_AT_MODIFICATION also be from the TableEntry
-    // record? Or tracked?
-    entity.setStringField(DbTable.DATA_ETAG_AT_MODIFICATION, PersistenceUtils.newUri());
-    entity.setBooleanField(DbTable.DELETED, false);
-    entity.setStringField(DbTable.ROW_ETAG, PersistenceUtils.newUri());
-    // TODO is this the right kind of scope to be setting? one wonders...
-    entity.setStringField(DbTable.FILTER_VALUE, (String) null);
-    entity.setStringField(DbTable.FILTER_TYPE, (String) null);
+    
+    entity.setDeleted(false);
+    entity.setFilterType(null);
+    entity.setFilterValue(null);
 
     return entity;
   }
