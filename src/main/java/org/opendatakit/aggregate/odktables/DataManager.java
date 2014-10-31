@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -371,13 +372,22 @@ public class DataManager {
       throws ODKDatastoreException {
     Query query = logTable.query("DataManager.getSequenceValueForDataETag", cc);
     query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
+
+    // we need the filter to activate the sort for the sequence value
+    query.addFilter(DbLogTable.SEQUENCE_VALUE,
+            org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
+    
+    query.addSort(DbLogTable.SEQUENCE_VALUE, Direction.DESCENDING);
+
     List<Entity> values = query.execute();
     if (values == null || values.size() == 0) {
       throw new ODKEntityNotFoundException("ETag " + dataETag + " was not found in log table!");
     } else if (values.size() != 1) {
-      // TODO: at least for now, we only have one update per change event...
-      throw new ODKDatastoreException("Unexpected duplicate records for ETag " + dataETag
-          + " found in log table!");
+      // the descending sort on the sequence value ensures we get the last change for 
+      // this dataETagAtModification. This assumes the client has gotten all records
+      // matching this tag, and is requesting changes *after* the tag.
+      LogFactory.getLog(DataManager.class)
+        .info("Multiple records for dataETagAtModification " + dataETag + " count: " + values.size());
     }
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
