@@ -135,6 +135,8 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
         throw new IllegalStateException("Unexpected problem computing md5 hash", e);
       }
       map.putSingle(HttpHeaders.ETAG, eTag);
+      map.putSingle("Access-Control-Allow-Origin", "*");
+      map.putSingle("Access-Control-Allow-Credentials", "true");
 
       String tmp = (String) context.getAttribute(GZIPRequestHandler.emitGZIPContentEncodingKey);
       boolean emitGZIPContentEncodingKey = (tmp == null) ? false : Boolean.valueOf(tmp);

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
@@ -67,6 +68,8 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 
 public class DataManager {
+
+  private static final Log logger = LogFactory.getLog(DataManager.class);
 
   public static class WebsafeRows {
     public final List<Row> rows;
@@ -140,6 +143,7 @@ public class DataManager {
       return;
     }
 
+    logger.warn("Reverting changes for dataETag " + dataETag);
     // search for log entries matching the TableEntry dataETag
     // log entries are written first, so these should exist, and the
     // row entries may or may not reflect the log contents.
@@ -386,8 +390,7 @@ public class DataManager {
       // the descending sort on the sequence value ensures we get the last change for 
       // this dataETagAtModification. This assumes the client has gotten all records
       // matching this tag, and is requesting changes *after* the tag.
-      LogFactory.getLog(DataManager.class)
-        .info("Multiple records for dataETagAtModification " + dataETag + " count: " + values.size());
+      logger.info("Multiple records for dataETagAtModification " + dataETag + " count: " + values.size());
     }
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
