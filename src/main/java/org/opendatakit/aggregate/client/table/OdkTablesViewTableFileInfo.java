@@ -148,7 +148,10 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
       }
     };
 
-    SecureGWT.getServerDataService().getTableFileInfoContents(table.getTableId(), getDataCallback);
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      SecureGWT.getServerDataService().getTableFileInfoContents(table.getTableId(), getDataCallback);
+    }
   }
 
   private void setColumnHeadings() {

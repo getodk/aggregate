@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 
 public class UrlHash {
   public static final int MAIN_MENU = 0;
@@ -116,7 +117,7 @@ public class UrlHash {
   }
 
   public static void redirect() {
-    String url = GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR;
+    String url = GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR + Window.Location.getQueryString();
     redirectTo(url);
   }
 

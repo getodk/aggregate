@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.client.odktables.FileSummaryClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.constants.common.SubTabs;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -141,7 +142,10 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
       }
     };
 
-    SecureGWT.getServerDataService().getInstanceFileInfoContents(table.getTableId(), getDataCallback);
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      SecureGWT.getServerDataService().getInstanceFileInfoContents(table.getTableId(), getDataCallback);
+    }
   }
 
   private void setColumnHeadings() {
