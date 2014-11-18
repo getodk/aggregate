@@ -70,7 +70,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "	<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">"
       + "  <link rel=\"shortcut icon\" href=\"favicon.ico\"/>"
       + "	<title>ODK Aggregate</title>"
-      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.11.1.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.11.1.min.js\"></script>"
       + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/resize.js\"></script>"
       + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
