@@ -194,6 +194,7 @@ public class SubmissionParser {
 
   private static final String OPEN_ROSA_NAMESPACE_PRELIM = "http://openrosa.org/xforms/metadata";
   private static final String OPEN_ROSA_NAMESPACE = "http://openrosa.org/xforms";
+  private static final String OPEN_ROSA_NAMESPACE_SLASH = "http://openrosa.org/xforms/";
   private static final String OPEN_ROSA_METADATA_TAG = "meta";
   private static final String OPEN_ROSA_INSTANCE_ID = "instanceID";
 
@@ -212,8 +213,10 @@ public class SubmissionParser {
         String cnName = cn.getLocalName();
         if (cn.getNodeType() == Node.ELEMENT_NODE
             && cnName.equals(OPEN_ROSA_INSTANCE_ID)
-            && (cnUri == null || cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) || cnUri
-                .equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
+            && (cnUri == null || 
+                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
+                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
+                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
           NodeList cnl = cn.getChildNodes();
           boolean textFound = false;
           int idxText = -1;
@@ -255,8 +258,10 @@ public class SubmissionParser {
       String name = n.getLocalName();
       if (n.getNodeType() == Node.ELEMENT_NODE
           && name.equals(OPEN_ROSA_METADATA_TAG)
-          && (namespace == null || namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) || namespace
-              .equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
+          && (namespace == null || 
+              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
+              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
+              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
         return n;
       } else {
         n = findMetaTag(n);

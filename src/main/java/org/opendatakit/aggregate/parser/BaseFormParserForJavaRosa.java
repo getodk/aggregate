@@ -134,17 +134,23 @@ public class BaseFormParserForJavaRosa {
 
   // bind attributes that CAN change without affecting database structure
   // Note: must specify these entirely in lowercase
-  private static final String[] ChangeableBindAttributes = {
-      "relevant", "constraint", "readonly", "required", "calculate",
-      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":constraintmsg",
-      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preload",
-      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preloadparams", "appearance" };
+  private static final List<String> ChangeableBindAttributes;
 
   // core instance def. attrs. that CANNOT change w/o affecting db structure
   // Note: must specify these entirely in lowercase
-  private static final String[] NonchangeableInstanceAttributes = {
-    "id" };
+  private static final List<String> NonchangeableInstanceAttributes;
 
+  static {
+    ChangeableBindAttributes = Arrays.asList(new String[]{
+        "relevant", "constraint", "readonly", "required", "calculate",
+        XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":constraintmsg",
+        XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preload",
+        XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preloadparams", 
+        "appearance" });
+    
+    NonchangeableInstanceAttributes = Arrays.asList(new String[]{"id"});
+  }
+  
   // nodeset attribute name, in <bind> elements
   private static final String NODESET_ATTR = "nodeset";
 
@@ -252,6 +258,7 @@ public class BaseFormParserForJavaRosa {
   }
 
   private static class XFormParserWithBindEnhancements extends XFormParser {
+    @SuppressWarnings("unused")
     private Document xmldoc;
     private BaseFormParserForJavaRosa parser;
 
@@ -902,7 +909,7 @@ public class BaseFormParserForJavaRosa {
         // flag differences as small or large based on list in
         // NonchangeableInstanceAttributes[]
         // here, changes are ALLOWED by default, unless to a listed attribute
-        if (!Arrays.asList(NonchangeableInstanceAttributes).contains(
+        if (!NonchangeableInstanceAttributes.contains(
             fullAttributeName.toLowerCase())) {
           smalldiff = true;
         } else {
@@ -925,7 +932,7 @@ public class BaseFormParserForJavaRosa {
         // flag differences as small or large based on list in
         // NonchangeableInstanceAttributes[]
         // here, changes are ALLOWED by default, unless to a listed attribute
-        if (!Arrays.asList(NonchangeableInstanceAttributes).contains(
+        if (!NonchangeableInstanceAttributes.contains(
             fullAttributeName.toLowerCase())) {
           smalldiff = true;
         } else {
@@ -968,7 +975,7 @@ public class BaseFormParserForJavaRosa {
               // ChangeableBindAttributes[]
               // here, changes are NOT ALLOWED by default, unless to a listed
               // attribute
-              if (Arrays.asList(ChangeableBindAttributes).contains(fullAttributeName.toLowerCase())) {
+              if (ChangeableBindAttributes.contains(fullAttributeName.toLowerCase())) {
                 smalldiff = true;
               } else {
                 bigdiff = true;
@@ -997,7 +1004,7 @@ public class BaseFormParserForJavaRosa {
             // ChangeableBindAttributes[]
             // here, changes are NOT ALLOWED by default, unless to a listed
             // attribute
-            if (Arrays.asList(ChangeableBindAttributes).contains(fullAttributeName.toLowerCase())) {
+            if (ChangeableBindAttributes.contains(fullAttributeName.toLowerCase())) {
               smalldiff = true;
             } else {
               bigdiff = true;
@@ -1015,7 +1022,7 @@ public class BaseFormParserForJavaRosa {
     // it appears only as an INDEX_TEMPLATE element.
 
     @SuppressWarnings("unused")
-	int template1DropCount = 0;
+    int template1DropCount = 0;
     // get non-template entries for treeElement1
     List<TreeElement> element1ExcludingRepeatIndex0Children = new ArrayList<TreeElement>();
 
@@ -1033,7 +1040,7 @@ public class BaseFormParserForJavaRosa {
     }
 
     @SuppressWarnings("unused")
-	int template2DropCount = 0;
+    int template2DropCount = 0;
     // get non-template entries for treeElement2
     Map<String, TreeElement> element2ExcludingRepeatIndex0Children = new HashMap<String, TreeElement>();
 
@@ -1075,11 +1082,9 @@ public class BaseFormParserForJavaRosa {
           case XFORMS_DIFFERENT:
             bigdiff = true;
             break;
-          case XFORMS_SHARE_INSTANCE:
-            // the other possibility... 
-            break;
           default:
-              throw new IllegalStateException("Unexpected return values");
+            // no update for the other cases (IDENTICAL, EARLIER, MISSING, SHARE_INSTANCE)
+            break;
           }
         } else {
           // consider children not found as big differences
