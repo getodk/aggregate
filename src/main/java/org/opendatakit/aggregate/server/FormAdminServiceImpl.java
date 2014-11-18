@@ -324,7 +324,11 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     }
   }
 
-  private static final class RemoveIncompleteAttachmentVisitor implements SubmissionVisitor {
+  private interface VisitorOutcome extends SubmissionVisitor {
+    public boolean getSuccess();
+  }
+  
+  private static final class RemoveIncompleteAttachmentVisitor implements VisitorOutcome {
     final CallingContext cc;
     boolean success = true; // assume it completes successfully...
 
@@ -332,7 +336,8 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
       this.cc = cc;
     }
 
-    boolean getSuccess() {
+    @Override
+    public boolean getSuccess() {
       return success;
     }
 
@@ -363,6 +368,59 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
 
   }
 
+  private static final class ModifyIncompleteEncryptedAttachmentVisitor implements VisitorOutcome {
+    
+    private static final String ENC_EXTENSION = ".enc";
+    private static final String MISSING_ENC_EXTENSION = ".missing.enc";
+    private static final String MIME_OCTET = "application/octet-stream";
+    
+    final CallingContext cc;
+    boolean success = true; // assume it completes successfully...
+
+    ModifyIncompleteEncryptedAttachmentVisitor(CallingContext cc) {
+      this.cc = cc;
+    }
+
+    @Override
+    public boolean getSuccess() {
+      return success;
+    }
+
+    @Override
+    public boolean traverse(SubmissionElement element) {
+      if (element instanceof SubmissionSet) {
+        SubmissionSet set = (SubmissionSet) element;
+        List<FormElementModel> elements = set.getFormElements();
+        for (FormElementModel e : elements) {
+          SubmissionValue v = set.getElementValue(e);
+          if (v instanceof BlobSubmissionType) {
+            BlobSubmissionType blob = (BlobSubmissionType) v;
+            try {
+              if (blob.getAttachmentCount(cc) == 1 && blob.getContentHash(1, cc) == null) {
+                
+                // we need to entirely delete the entry and re-create it
+                // so that we can change the filename to the suffix ".missing.enc"
+                String unrootedFilename = blob.getUnrootedFilename(1, cc);
+                if ( unrootedFilename != null ) {
+                  if ( unrootedFilename.endsWith(ENC_EXTENSION)) {
+                    unrootedFilename = unrootedFilename.substring(0,unrootedFilename.lastIndexOf(".")) + MISSING_ENC_EXTENSION;
+                  }
+                }
+                blob.deleteAll(cc);
+                blob.setValueFromByteArray(new byte[]{}, MIME_OCTET, unrootedFilename, true, cc);
+              }
+            } catch ( ODKDatastoreException ex ) {
+              ex.printStackTrace();
+              success = false;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+  }
+
   @Override
   public void markSubmissionAsComplete(String submissionKeyAsString)
       throws AccessDeniedException, FormNotAvailableException, DatastoreFailureException, RequestFailureException {
@@ -374,9 +432,22 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     try {
       List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
       Submission sub = Submission.fetchSubmission(parts, cc);
+
+      IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+      if ( !form.hasValidFormDefinition() ) {
+        // should never happen here -- should happen in the fetchSubmission() call above.
+        throw new IllegalArgumentException("Form definition is ill-formed"); // ill-formed definition
+      }
+      
+      VisitorOutcome visitor = null;
+      if ( !form.isEncryptedForm() ) {
+        visitor = new RemoveIncompleteAttachmentVisitor(cc);
+      } else {
+        visitor = new ModifyIncompleteEncryptedAttachmentVisitor(cc);
+      }
+
       // recursively examine all attachments and remove any that are
       // missing their files...
-      RemoveIncompleteAttachmentVisitor visitor = new RemoveIncompleteAttachmentVisitor(cc);
       sub.depthFirstTraversal(visitor);
       if (visitor.getSuccess()) {
         sub.setIsComplete(visitor.getSuccess());
