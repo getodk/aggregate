@@ -175,9 +175,11 @@ public class OdkTablesViewTable extends FlexTable {
     // TODO: paginate this
     // TODO: paginate this
     // TODO: paginate this
-
-    SecureGWT.getServerDataService().getTableContents(table.getTableId(),
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      SecureGWT.getServerDataService().getTableContents(table.getTableId(),
         getDataCallback);
+    }
   }
 
   /*

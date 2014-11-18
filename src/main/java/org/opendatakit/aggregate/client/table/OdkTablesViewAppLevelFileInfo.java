@@ -99,8 +99,12 @@ public class OdkTablesViewAppLevelFileInfo extends FlexTable {
         setRows();
       }
     };
-
-    SecureGWT.getServerDataService().getAppLevelFileInfoContents(getDataCallback);
+    
+    // Only issue the request if we have access...
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      SecureGWT.getServerDataService().getAppLevelFileInfoContents(getDataCallback);
+    }
   }
 
   private void setColumnHeadings() {
