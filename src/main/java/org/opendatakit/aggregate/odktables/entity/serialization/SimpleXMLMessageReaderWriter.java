@@ -24,10 +24,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -43,8 +40,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
-import org.opendatakit.aggregate.odktables.impl.api.AppEngineHandlersFactory.GZIPRequestHandler;
+import org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory.GZIPRequestHandler;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -119,41 +115,19 @@ public class SimpleXMLMessageReaderWriter<T> implements MessageBodyReader<T>,
       mapper.writeValue(w, o);
       // get the array and compute md5 hash
       byte[] bytes = bas.toByteArray();
-      String eTag;
-      try {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(bytes);
-
-        byte[] messageDigest = md.digest();
-
-        BigInteger number = new BigInteger(1, messageDigest);
-        String md5 = number.toString(16);
-        while (md5.length() < 32)
-          md5 = "0" + md5;
-        eTag = "md5_" + md5;
-      } catch (NoSuchAlgorithmException e) {
-        throw new IllegalStateException("Unexpected problem computing md5 hash", e);
-      }
-      map.putSingle(HttpHeaders.ETAG, eTag);
       map.putSingle("Access-Control-Allow-Origin", "*");
       map.putSingle("Access-Control-Allow-Credentials", "true");
 
       String tmp = (String) context.getAttribute(GZIPRequestHandler.emitGZIPContentEncodingKey);
       boolean emitGZIPContentEncodingKey = (tmp == null) ? false : Boolean.valueOf(tmp);
 
-      String ifNoneMatchTag = headers.getRequestHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
-      if ( ifNoneMatchTag != null && ifNoneMatchTag.equals(eTag) ) {
-        // return UNMODIFIED...
-        throw new NotModifiedException(ifNoneMatchTag);
-      } else {
-        OutputStream rawStr = rawStream;
-        if ( emitGZIPContentEncodingKey ) {
-          map.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-          rawStr = new GZIPOutputStream(rawStream);
-        }
-
-        rawStr.write(bytes);
+      OutputStream rawStr = rawStream;
+      if ( emitGZIPContentEncodingKey ) {
+        map.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
+        rawStr = new GZIPOutputStream(rawStream);
       }
+
+      rawStr.write(bytes);
 
     } catch (Exception e) {
       throw new IOException(e);
