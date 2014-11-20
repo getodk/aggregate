@@ -25,6 +25,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
@@ -63,7 +65,7 @@ public interface FileService {
 
   @GET
   @Path("{odkClientVersion}/{filePath:.*}")
-  public Response getFile(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, ODKEntityNotFoundException, ODKOverQuotaException, FileNotFoundException, PermissionDeniedException, ODKDatastoreException;
+  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, ODKEntityNotFoundException, ODKOverQuotaException, FileNotFoundException, PermissionDeniedException, ODKDatastoreException;
 
   @POST
   @Path("{odkClientVersion}/{filePath:.*}")
