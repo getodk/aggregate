@@ -17,8 +17,10 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -32,6 +34,9 @@ import org.opendatakit.aggregate.odktables.api.FileManifestService;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.relation.DbManifestETags;
+import org.opendatakit.aggregate.odktables.relation.DbManifestETags.DbManifestETagEntity;
+import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -63,13 +68,28 @@ public class FileManifestServiceImpl implements FileManifestService {
   }
 
   @Override
-  public Response getAppLevelFileManifest(@PathParam("odkClientVersion") String odkClientVersion) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
+  public Response getAppLevelFileManifest(HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
     OdkTablesFileManifest manifest = null;
+    
+    // retrieve the incoming if-none-match eTag...
+    List<String> eTags = httpHeaders.getRequestHeader(HttpHeaders.IF_NONE_MATCH);
+    String eTag = (eTags == null || eTags.isEmpty()) ? null : eTags.get(0);
+    DbManifestETagEntity eTagEntity = null;
     try {
+        try {
+          eTagEntity = DbManifestETags.getTableIdEntry(DbManifestETags.APP_LEVEL, cc);
+        } catch ( ODKEntityNotFoundException e ) {
+          // ignore...
+        }
+      if ( eTag != null && eTagEntity != null && 
+           eTag.equals( eTagEntity.getManifestETag() ) ) {
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+      }
       // we want just the app-level files.
       manifest = manifestManager.getManifestForAppLevelFiles();
+    
     } catch (ODKDatastoreException e) {
       Log log = LogFactory.getLog(FileManifestServiceImpl.class);
       log.error("Datastore exception in getting the file manifest");
@@ -78,6 +98,21 @@ public class FileManifestServiceImpl implements FileManifestService {
     if (manifest == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
     } else {
+      String newETag = Integer.toHexString(manifest.hashCode());
+      // create a new eTagEntity if there isn't one already...
+      if ( eTagEntity == null ) {
+        eTagEntity = DbManifestETags.createNewEntity(DbManifestETags.APP_LEVEL, cc);
+        eTagEntity.setManifestETag(newETag);
+        eTagEntity.put(cc);
+      } else if ( !newETag.equals(eTagEntity.getManifestETag()) ) {
+        Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+        log.error("App-level Manifest ETag does not match computed value!");
+        eTagEntity.setManifestETag(newETag);
+        eTagEntity.put(cc);
+      }
+      // and whatever the eTag is in that entity is the eTag we should return...
+      eTag = eTagEntity.getManifestETag();
+      
       UriBuilder ub = info.getBaseUriBuilder();
       ub.path(OdkTables.class, "getFilesService");
       // now supply the downloadUrl...
@@ -91,16 +126,30 @@ public class FileManifestServiceImpl implements FileManifestService {
         }
       }
 
-      return Response.ok(manifest).build();
+      return Response.ok(manifest).header(HttpHeaders.ETAG, eTag).build();
     }
   }
 
   @Override
-  public Response getTableIdFileManifest(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
+  public Response getTableIdFileManifest(HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
     OdkTablesFileManifest manifest = null;
+    
+    // retrieve the incoming if-none-match eTag...
+    List<String> eTags = httpHeaders.getRequestHeader(HttpHeaders.IF_NONE_MATCH);
+    String eTag = (eTags == null || eTags.isEmpty()) ? null : eTags.get(0);
+    DbManifestETagEntity eTagEntity = null;
     try {
+        try {
+          eTagEntity = DbManifestETags.getTableIdEntry(tableId, cc);
+        } catch ( ODKEntityNotFoundException e ) {
+          // ignore...
+        }
+      if ( eTag != null && eTagEntity != null && 
+           eTag.equals( eTagEntity.getManifestETag() ) ) {
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+      }
       // we want just the files for the table.
       manifest = manifestManager.getManifestForTable(tableId);
     } catch (ODKDatastoreException e) {
@@ -111,6 +160,21 @@ public class FileManifestServiceImpl implements FileManifestService {
     if (manifest == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
     } else {
+      String newETag = Integer.toHexString(manifest.hashCode());
+      // create a new eTagEntity if there isn't one already...
+      if ( eTagEntity == null ) {
+        eTagEntity = DbManifestETags.createNewEntity(tableId, cc);
+        eTagEntity.setManifestETag(newETag);
+        eTagEntity.put(cc);
+      } else if ( !newETag.equals(eTagEntity.getManifestETag()) ) {
+        Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+        log.error("App-level Manifest ETag does not match computed value!");
+        eTagEntity.setManifestETag(newETag);
+        eTagEntity.put(cc);
+      }
+      // and whatever the eTag is in that entity is the eTag we should return...
+      eTag = eTagEntity.getManifestETag();
+      
       UriBuilder ub = info.getBaseUriBuilder();
       ub.path(OdkTables.class, "getFilesService");
       // now supply the downloadUrl...
@@ -124,7 +188,7 @@ public class FileManifestServiceImpl implements FileManifestService {
         }
       }
 
-      return Response.ok(manifest).build();
+      return Response.ok(manifest).header(HttpHeaders.ETAG, eTag).build();
     }
   }
 

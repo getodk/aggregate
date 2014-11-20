@@ -21,7 +21,9 @@ import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
+import org.opendatakit.aggregate.odktables.relation.DbManifestETags;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
+import org.opendatakit.aggregate.odktables.relation.DbManifestETags.DbManifestETagEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
@@ -29,6 +31,7 @@ import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -174,6 +177,22 @@ public class FileManager {
       }
     }
 
+    // -1) clear the eTag for the manifest of this tableId
+
+    {
+      try {
+        DbManifestETagEntity etag;
+        if (DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
+          etag = DbManifestETags.getTableIdEntry(DbManifestETags.APP_LEVEL, cc);
+        } else {
+          etag = DbManifestETags.getTableIdEntry(tableId, cc);
+        }
+        etag.delete(cc);
+      } catch ( ODKEntityNotFoundException e ) {
+        // ignore...
+      }
+    }
+
     // 0) Delete anything that is already stored
 
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion,
@@ -255,8 +274,24 @@ public class FileManager {
     // if we find nothing, we are happy.
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion,
         tableId, wholePath, cc);
+    
+    if ( !entities.isEmpty() ) {
+      // -1) clear the eTag for the manifest of this tableId
+      try {
+        DbManifestETagEntity etag;
+        if (DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
+          etag = DbManifestETags.getTableIdEntry(DbManifestETags.APP_LEVEL, cc);
+        } else {
+          etag = DbManifestETags.getTableIdEntry(tableId, cc);
+        }
+        etag.delete(cc);
+      } catch ( ODKEntityNotFoundException e ) {
+        // ignore...
+      }
+    }
+    
+    // 0) delete the matching entities
     for (DbTableFileInfoEntity entity : entities) {
-
       String uri = entity.getId();
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
       BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(uri, cc);

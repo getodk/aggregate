@@ -129,7 +129,12 @@ public class AppEngineHandlersFactory extends HandlersFactory {
         if ( result instanceof Response ) {
           Response response = (Response)result;
           
-          if ( response.getEntity() != null ) {
+          // if the implementation provides an ETAG, do nothing. Otherwise
+          // compute the ETAG from the md5hash of the JSON serialization of
+          // whatever the implementation is providing.
+          
+          if ( response.getEntity() != null &&
+              !response.getMetadata().containsKey(HttpHeaders.ETAG) ) {
             // This is extremely wasteful, but I don't see a way to avoid it
             // given the handler stack structure and its lack of flexibility.
             
