@@ -65,10 +65,12 @@ public class FileManager {
     public final byte[] fileBlob;
     public final String contentType;
     public final Long contentLength;
+    public final String contentHash;
 
-    public FileContentInfo(String contentType, Long contentLength, byte[] blob) {
+    public FileContentInfo(String contentType, Long contentLength, String contentHash, byte[] blob) {
       this.contentType = contentType;
       this.contentLength = contentLength;
+      this.contentHash = contentHash;
       this.fileBlob = blob;
     }
   };
@@ -159,7 +161,8 @@ public class FileManager {
     }
 
     FileContentInfo fo = new FileContentInfo(blobEntitySet.getContentType(1, cc),
-        blobEntitySet.getContentLength(1, cc), blobEntitySet.getBlob(1, cc));
+        blobEntitySet.getContentLength(1, cc), blobEntitySet.getContentHash(1, cc),
+        blobEntitySet.getBlob(1, cc));
     return fo;
   }
 

@@ -27,6 +27,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
@@ -75,11 +76,11 @@ public interface InstanceFileService {
   @GET
   @Path("manifest")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response getManifest(@QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @GET
   @Path("file/{filePath:.*}")
-  public Response getFile(@PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
   @POST
   @Path("file/{filePath:.*}")

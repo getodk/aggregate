@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
@@ -80,7 +81,7 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public Response getFile(@PathParam("odkClientVersion") String odkClientVersion,
+  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion,
       @PathParam("filePath") List<PathSegment> segments,
       @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException,
       ODKTaskLockException, PermissionDeniedException, ODKDatastoreException, FileNotFoundException {
@@ -106,13 +107,23 @@ public class FileServiceImpl implements FileService {
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_PROPERTIES);
     }
 
+    // retrieve the incoming if-none-match eTag...
+    List<String> eTags = httpHeaders.getRequestHeader(HttpHeaders.IF_NONE_MATCH);
+    String eTag = (eTags == null || eTags.isEmpty()) ? null : eTags.get(0);
+
     FileManager fm = new FileManager(appId, cc);
     fi = fm.getFile(odkClientVersion, tableId, appRelativePath);
 
     // And now prepare everything to be returned to the caller.
     if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null
         && fi.contentLength != 0L) {
-      ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType);
+      
+      // test if we should return a NOT_MODIFIED response...
+      if ( eTag != null && eTag.equals(fi.contentHash)) {
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+      }
+
+      ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType).header(HttpHeaders.ETAG,fi.contentHash);
       if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
         rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + appRelativePath
@@ -151,7 +162,7 @@ public class FileServiceImpl implements FileService {
 
     FileManager fm = new FileManager(appId, cc);
 
-    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), content);
+    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), null, content);
 
     FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, appRelativePath,
         userPermissions, fi);

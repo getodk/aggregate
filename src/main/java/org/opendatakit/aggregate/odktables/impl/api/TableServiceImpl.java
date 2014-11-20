@@ -549,7 +549,7 @@ public class TableServiceImpl implements TableService {
     
     FileManager fm = new FileManager(appId, cc);
     
-    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), content);
+    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), null, content);
     
     @SuppressWarnings("unused")
     FileChangeDetail outcome = fm.putFile("1", tableId, appRelativePath, userPermissions, fi);

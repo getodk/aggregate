@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -40,6 +41,8 @@ import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
+import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags;
+import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags.DbTableInstanceManifestETagEntity;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -94,7 +97,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   }
 
   @Override
-  public Response getManifest(@QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
+  public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
@@ -102,7 +105,22 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     URI self = full.build(appId, tableId, schemaETag, rowId);
     String manifestUrl = self.toURL().toExternalForm();
 
+    // retrieve the incoming if-none-match eTag...
+    List<String> eTags = httpHeaders.getRequestHeader(HttpHeaders.IF_NONE_MATCH);
+    String eTag = (eTags == null || eTags.isEmpty()) ? null : eTags.get(0);
+    DbTableInstanceManifestETagEntity eTagEntity = null;
     try {
+      try {
+        eTagEntity = DbTableInstanceManifestETags.getRowIdEntry(tableId, rowId, cc);
+      } catch ( ODKEntityNotFoundException e ) {
+        // ignore...
+      }
+
+      if ( eTag != null && eTagEntity != null && 
+           eTag.equals( eTagEntity.getManifestETag() ) ) {
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+      }
+
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
       ArrayList<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
@@ -125,8 +143,24 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         manifestEntries.add(entry);
       }
       OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
+      
+      String newETag = Integer.toHexString(manifest.hashCode());
+      // create a new eTagEntity if there isn't one already...
+      if ( eTagEntity == null ) {
+        eTagEntity = DbTableInstanceManifestETags.createNewEntity(tableId, rowId, cc);
+        eTagEntity.setManifestETag(newETag);
+        eTagEntity.put(cc);
+      } else if ( !newETag.equals(eTagEntity.getManifestETag()) ) {
+        Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+        log.error("TableInstance (" + tableId + "," + rowId + ") Manifest ETag does not match computed value!");
+        eTagEntity.setManifestETag(newETag);
+        eTagEntity.put(cc);
+      }
+      
+      // and whatever the eTag is in that entity is the eTag we should return...
+      eTag = eTagEntity.getManifestETag();
 
-      ResponseBuilder rBuild = Response.ok(manifest);
+      ResponseBuilder rBuild = Response.ok(manifest).header(HttpHeaders.ETAG, eTag);
       if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
         rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
@@ -145,7 +179,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
 
   @Override
-  public Response getFile(@PathParam("filePath") List<PathSegment> segments,
+  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments,
       @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException {
     // The appId and tableId are from the surrounding TableService.
     // The rowId is already pulled out.
@@ -163,6 +197,10 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     // Now construct the whole path.
     String partialPath = constructPathFromSegments(segments);
 
+    // retrieve the incoming if-none-match eTag...
+    List<String> eTags = httpHeaders.getRequestHeader(HttpHeaders.IF_NONE_MATCH);
+    String eTag = (eTags == null || eTags.isEmpty()) ? null : eTags.get(0);
+
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
 
@@ -173,7 +211,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
     try {
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
-
+      
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
       BlobEntitySet instance = blobStore.getBlobEntitySet(rowId, cc);
 
@@ -183,12 +221,19 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         if (path != null && path.equals(partialPath)) {
           byte[] fileBlob = instance.getBlob(i, cc);
           String contentType = instance.getContentType(i, cc);
+          String contentHash = instance.getContentHash(i, cc);
           Long contentLength = instance.getContentLength(i, cc);
 
           // And now prepare everything to be returned to the caller.
           if (fileBlob != null && contentType != null && contentLength != null
               && contentLength != 0L) {
-            ResponseBuilder rBuild = Response.ok(fileBlob, contentType);
+            
+            // test if we should return a NOT_MODIFIED response...
+            if ( eTag != null && eTag.equals(contentHash) ) {
+              return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+            }
+            
+            ResponseBuilder rBuild = Response.ok(fileBlob, contentType).header(HttpHeaders.ETAG, contentHash);
             if (asAttachment != null && !"".equals(asAttachment)) {
               // Set the filename we're downloading to the disk.
               rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
@@ -242,6 +287,14 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
       String locationUrl = getFile.toURL().toExternalForm();
 
+      // we are adding a file -- delete any cached ETag value for this row's attachments manifest
+      try {
+        DbTableInstanceManifestETagEntity entity = DbTableInstanceManifestETags.getRowIdEntry(tableId, rowId, cc);
+        entity.delete(cc);
+      } catch (ODKEntityNotFoundException e) {
+        // ignore...
+      }
+      
       DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
       BlobEntitySet instance = blobStore.newBlobEntitySet(rowId, cc);
       int count = instance.getAttachmentCount(cc);

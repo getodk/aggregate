@@ -13,8 +13,6 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -28,7 +26,6 @@ import org.apache.wink.server.handlers.ResponseHandler;
 import org.eclipse.jetty.http.HttpStatus;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleJSONMessageReaderWriter;
-import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.web.CallingContext;
 

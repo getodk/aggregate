@@ -36,7 +36,6 @@ import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbManifestETags;
 import org.opendatakit.aggregate.odktables.relation.DbManifestETags.DbManifestETagEntity;
-import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
