@@ -25,6 +25,8 @@ import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
+import org.opendatakit.aggregate.odktables.relation.DbManifestETags;
+import org.opendatakit.aggregate.odktables.relation.DbManifestETags.DbManifestETagEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTable;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
@@ -36,6 +38,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
+import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.relation.RUtil;
@@ -492,10 +495,27 @@ public class TableManager {
         if ( logTableRelation != null ) {
           logTableRelation.dropRelation(cc);
         }
-        // delete the blob store
+        
+        // drop the manifest ETags table for instance attachments
+        DbTableInstanceManifestETags instanceManifestETagsRelation =
+          DbTableInstanceManifestETags.getRelation(tableEntry.getId(), cc);
+        if ( instanceManifestETagsRelation != null ) {
+          instanceManifestETagsRelation.dropRelation(cc);
+        }
+          
+        // delete the blob store (holding the instance attachments)
         DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableEntry.getId(), cc);
         blobStore.dropBlobEntitySet(cc);
 
+        // delete the table-level file manifest ETag entry for this tableId
+        // it is OK if this doesn't exist.
+        try {
+          DbManifestETagEntity entity = DbManifestETags.getTableIdEntry(tableEntry.getId(), cc);
+          entity.delete(cc);
+        } catch ( ODKEntityNotFoundException e) {
+          // ignore...
+        }
+        
         // delete app-level files specific to this table
         List<DbTableFileInfoEntity> entries = DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles(tableEntry.getId(), cc);
         for ( DbTableFileInfoEntity entry : entries ) {
