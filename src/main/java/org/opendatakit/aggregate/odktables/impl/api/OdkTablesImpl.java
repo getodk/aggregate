@@ -14,6 +14,7 @@ import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -29,7 +30,10 @@ public class OdkTablesImpl implements OdkTables {
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
     String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
 
-    return Response.status(Status.OK).entity(preferencesAppId).build();
+    return Response.status(Status.OK).entity(preferencesAppId)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override

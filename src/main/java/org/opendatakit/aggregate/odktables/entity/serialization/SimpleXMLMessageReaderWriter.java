@@ -115,6 +115,7 @@ public class SimpleXMLMessageReaderWriter<T> implements MessageBodyReader<T>,
       mapper.writeValue(w, o);
       // get the array and compute md5 hash
       byte[] bytes = bas.toByteArray();
+      map.putSingle(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
       map.putSingle("Access-Control-Allow-Origin", "*");
       map.putSingle("Access-Control-Allow-Credentials", "true");
 

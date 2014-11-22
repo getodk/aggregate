@@ -82,8 +82,8 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjweaver-1.7.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-collections-3.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xmlsec-1.5.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-common-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-common/src/main/java"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-server-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-server/src/main/java"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-common-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink-gens/wink/wink-common/src/main/java"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-server-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink-gens/wink/wink-server/src/main/java"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/geronimo-jaxrs_1.1_spec-1.0.jar" sourcepath="C:/Users/Administrator/.m2/repository/org/apache/geronimo/specs/geronimo-jaxrs_1.1_spec/1.0/geronimo-jaxrs_1.1_spec-1.0-sources.jar"/>

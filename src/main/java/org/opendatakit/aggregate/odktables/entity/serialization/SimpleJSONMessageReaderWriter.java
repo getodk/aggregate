@@ -139,6 +139,7 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
       /**
        * OK. At this point, bytes[] holds the serialized response entity.
        */
+      map.putSingle(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
       map.putSingle("Access-Control-Allow-Origin", "*");
       map.putSingle("Access-Control-Allow-Credentials", "true");
 
