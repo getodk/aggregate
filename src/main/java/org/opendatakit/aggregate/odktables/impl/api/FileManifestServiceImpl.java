@@ -36,6 +36,7 @@ import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbManifestETags;
 import org.opendatakit.aggregate.odktables.relation.DbManifestETags.DbManifestETagEntity;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -84,7 +85,10 @@ public class FileManifestServiceImpl implements FileManifestService {
         }
       if ( eTag != null && eTagEntity != null && 
            eTag.equals( eTagEntity.getManifestETag() ) ) {
-        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true").build();
       }
       // we want just the app-level files.
       manifest = manifestManager.getManifestForAppLevelFiles();
@@ -95,7 +99,10 @@ public class FileManifestServiceImpl implements FileManifestService {
       e.printStackTrace();
     }
     if (manifest == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.")
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else {
       String newETag = Integer.toHexString(manifest.hashCode());
       // create a new eTagEntity if there isn't one already...
@@ -147,7 +154,10 @@ public class FileManifestServiceImpl implements FileManifestService {
         }
       if ( eTag != null && eTagEntity != null && 
            eTag.equals( eTagEntity.getManifestETag() ) ) {
-        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true").build();
       }
       // we want just the files for the table.
       manifest = manifestManager.getManifestForTable(tableId);
@@ -157,7 +167,10 @@ public class FileManifestServiceImpl implements FileManifestService {
       e.printStackTrace();
     }
     if (manifest == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.").build();
+      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Unable to retrieve manifest.")
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else {
       String newETag = Integer.toHexString(manifest.hashCode());
       // create a new eTagEntity if there isn't one already...
@@ -167,7 +180,7 @@ public class FileManifestServiceImpl implements FileManifestService {
         eTagEntity.put(cc);
       } else if ( !newETag.equals(eTagEntity.getManifestETag()) ) {
         Log log = LogFactory.getLog(FileManifestServiceImpl.class);
-        log.error("App-level Manifest ETag does not match computed value!");
+        log.error("Table-level (" + tableId + ") Manifest ETag does not match computed value!");
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);
       }

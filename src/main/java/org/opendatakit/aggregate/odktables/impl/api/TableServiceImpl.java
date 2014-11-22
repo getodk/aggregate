@@ -553,7 +553,10 @@ public class TableServiceImpl implements TableService {
     
     @SuppressWarnings("unused")
     FileChangeDetail outcome = fm.putFile("1", tableId, appRelativePath, userPermissions, fi);
-    return Response.status(Status.ACCEPTED).build();
+    return Response.status(Status.ACCEPTED)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
 }

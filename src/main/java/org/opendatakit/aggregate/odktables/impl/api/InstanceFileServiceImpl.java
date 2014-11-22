@@ -43,6 +43,7 @@ import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags.DbTableInstanceManifestETagEntity;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -118,7 +119,10 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
       if ( eTag != null && eTagEntity != null && 
            eTag.equals( eTagEntity.getManifestETag() ) ) {
-        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true").build();
       }
 
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
@@ -170,10 +174,16 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity("Unable to retrieve manifest of attachments for: " + manifestUrl).build();
+          .entity("Unable to retrieve manifest of attachments for: " + manifestUrl)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } catch (PermissionDeniedException e) {
       LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied")
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 
@@ -188,11 +198,15 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     // appid/data/attachments/tableid/instances/instanceId/rest/of/path
     if (rowId == null || rowId.length() == 0) {
       return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INVALID_ROW_ID)
-          .build();
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
-          .build();
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
     // Now construct the whole path.
     String partialPath = constructPathFromSegments(segments);
@@ -204,7 +218,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
 
-    URI getFile = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
+    URI getFile = ub.clone().path(TableService.class, "getRealizedTable")
+        .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
           .build(appId, tableId, schemaETag, rowId, partialPath);
 
     String locationUrl = getFile.toURL().toExternalForm();
@@ -230,7 +245,10 @@ public class InstanceFileServiceImpl implements InstanceFileService {
             
             // test if we should return a NOT_MODIFIED response...
             if ( eTag != null && eTag.equals(contentHash) ) {
-              return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+              return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
+                  .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                  .header("Access-Control-Allow-Origin", "*")
+                  .header("Access-Control-Allow-Credentials", "true").build();
             }
             
             ResponseBuilder rBuild = Response.ok(fileBlob, contentType).header(HttpHeaders.ETAG, contentHash);
@@ -242,20 +260,31 @@ public class InstanceFileServiceImpl implements InstanceFileService {
             return rBuild.build();
           } else {
             return Response.status(Status.NOT_FOUND)
-                .entity("File content not yet available for: " + locationUrl).build();
+                .entity("File content not yet available for: " + locationUrl)
+                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true").build();
           }
 
         }
       }
-      return Response.status(Status.NOT_FOUND).entity("No file found for: " + locationUrl).build();
+      return Response.status(Status.NOT_FOUND).entity("No file found for: " + locationUrl)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       return Response.status(Status.INTERNAL_SERVER_ERROR)
           .entity("Unable to retrieve attachment and access attributes for: " + locationUrl)
-          .build();
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } catch (PermissionDeniedException e) {
       LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied")
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 
@@ -266,7 +295,9 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
-          .build();
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
     // The appId and tableId are from the surrounding TableService.
     // The rowId is already pulled out.
@@ -282,7 +313,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
       UriBuilder ub = info.getBaseUriBuilder();
       ub.path(OdkTables.class, "getTablesService");
 
-      URI getFile = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
+      URI getFile = ub.clone().path(TableService.class, "getRealizedTable")
+          .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
             .build(appId, tableId, schemaETag, rowId, partialPath);
 
       String locationUrl = getFile.toURL().toExternalForm();
@@ -304,10 +336,16 @@ public class InstanceFileServiceImpl implements InstanceFileService {
           // we already have this in our store -- check that it is identical.
           // if not, we have a problem!!!
           if (md5Hash.equals(instance.getContentHash(i, cc))) {
-            return Response.status(Status.CREATED).header("Location", locationUrl).build();
+            return Response.status(Status.CREATED).header("Location", locationUrl)
+                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true").build();
           } else {
             return Response.status(Status.BAD_REQUEST)
-                .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath).build();
+                .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath)
+                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true").build();
           }
         }
       }
@@ -315,16 +353,28 @@ public class InstanceFileServiceImpl implements InstanceFileService {
           .addBlob(content, contentType, partialPath, false, cc);
       if (outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) {
         return Response.status(Status.BAD_REQUEST)
-            .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath).build();
+            .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath)
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true").build();
       }
-      return Response.status(Status.CREATED).header("Location", locationUrl).build();
+      return Response.status(Status.CREATED).header("Location", locationUrl)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } catch (ODKDatastoreException e) {
       LOGGER.error(("ODKTables file upload persistence error: " + e.getMessage()));
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage()).build();
+          .entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage())
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } catch (PermissionDeniedException e) {
       LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied").build();
+      return Response.status(Status.UNAUTHORIZED).entity("Permission denied")
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 

@@ -78,6 +78,7 @@ public class SimpleHTMLMessageWriter<T> implements MessageBodyWriter<T> {
       w.close();
       // get the array
       byte[] bytes = bas.toByteArray();
+      map.putSingle(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
       map.putSingle("Access-Control-Allow-Origin", "*");
       map.putSingle("Access-Control-Allow-Credentials", "true");
 

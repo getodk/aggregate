@@ -44,6 +44,7 @@ import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -94,7 +95,9 @@ public class FileServiceImpl implements FileService {
     // and these are then app-level files.
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
-          .build();
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
     String appRelativePath = constructPathFromSegments(segments);
     String tableId = FileManager.getTableIdForFilePath(appRelativePath);
@@ -120,10 +123,18 @@ public class FileServiceImpl implements FileService {
       
       // test if we should return a NOT_MODIFIED response...
       if ( eTag != null && eTag.equals(fi.contentHash)) {
-        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag).build();
+        return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true").build();
       }
 
-      ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType).header(HttpHeaders.ETAG,fi.contentHash);
+      ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType)
+          .header(HttpHeaders.ETAG,fi.contentHash)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true");
+
       if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
         rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + appRelativePath
@@ -132,7 +143,10 @@ public class FileServiceImpl implements FileService {
       return rBuild.build();
     } else {
       return Response.status(Status.NOT_FOUND)
-          .entity("File content not yet available for: " + appRelativePath).build();
+          .entity("File content not yet available for: " + appRelativePath)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 
@@ -148,7 +162,9 @@ public class FileServiceImpl implements FileService {
 
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
-          .build();
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
     String appRelativePath = constructPathFromSegments(segments);
     String tableId = FileManager.getTableIdForFilePath(appRelativePath);
@@ -176,7 +192,10 @@ public class FileServiceImpl implements FileService {
     return Response
         .status(
             (outcome == FileChangeDetail.FILE_UPDATED) ? Status.ACCEPTED : Status.CREATED)
-        .header("Location", locationUrl).build();
+        .header("Location", locationUrl)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -191,7 +210,9 @@ public class FileServiceImpl implements FileService {
 
     if (segments.size() < 1) {
       return Response.status(Status.BAD_REQUEST).entity(FileService.ERROR_MSG_INSUFFICIENT_PATH)
-          .build();
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
     String appRelativePath = constructPathFromSegments(segments);
     String tableId = FileManager.getTableIdForFilePath(appRelativePath);
