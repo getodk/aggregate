@@ -83,7 +83,6 @@ public class DataServiceImpl implements DataService {
     ArrayList<RowOutcome> changedRows = dm.insertOrUpdateRows(rows);
     RowOutcomeList outcomes = getOutcomes(changedRows);
     return Response.ok(outcomes).build();
-    
   }
 
   @Override
@@ -98,9 +97,18 @@ public class DataServiceImpl implements DataService {
       ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
       BadColumnNameException, InconsistentStateException {
     row.setRowId(rowId);
-    Row newRow = dm.insertOrUpdateRow(row);
-    RowResource resource = getResource(newRow);
-    return Response.ok(resource).build();
+
+    // changed to behave like the bulk update action.
+    // Returns a RowOutcome (was RowResource).
+    
+    RowList rowList = new RowList();
+    ArrayList<Row> rows = new ArrayList<Row>();
+    rows.add(row);
+    rowList.setRows(rows);
+    ArrayList<RowOutcome> changedRows = dm.insertOrUpdateRows(rowList);
+    RowOutcomeList outcomes = getOutcomes(changedRows);
+    RowOutcome outcome = outcomes.getRows().get(0);
+    return Response.ok(outcome).build();
   }
 
   @Override
@@ -142,20 +150,7 @@ public class DataServiceImpl implements DataService {
   private RowOutcomeList getOutcomes(ArrayList<RowOutcome> rows) {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
-    for (RowOutcome row : rows) {
-      String rowId = row.getRowId();
-
-      UriBuilder ub = info.getBaseUriBuilder();
-      ub.path(OdkTables.class, "getTablesService");
-      URI self = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getData").path(DataService.class, "getRow")
-          .build(appId, tableId, schemaETag, rowId);
-      try {
-        row.setSelfUri(self.toURL().toExternalForm());
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-        throw new IllegalArgumentException("unable to convert URL ");
-      }
-    }
+    // for bandwidth efficiency, do not provide selfUri in response array
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");

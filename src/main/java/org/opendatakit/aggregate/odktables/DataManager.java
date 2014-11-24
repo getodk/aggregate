@@ -606,8 +606,12 @@ public class DataManager {
               entity = table.getEntity(rowId, cc);
 
               if (newRowId) {
+                // this is an impossible special case --
+                // the UUID we generated conflicts; 
+                // set row outcome to FAILED
                 outcome = new RowOutcome(row);
-                outcome.setOutcome(OutcomeType.IN_CONFLICT);
+                row.setRowId(null);
+                outcome.setOutcome(OutcomeType.FAILED);
                 break;
               }
 
@@ -671,7 +675,7 @@ public class DataManager {
                 Row currentRow = converter.toRow(entity, columns);
                 if (row.hasMatchingSignificantFieldValues(currentRow)) {
                   outcome = new RowOutcome(currentRow);
-                  outcome.setOutcome(OutcomeType.DENIED);
+                  outcome.setOutcome(OutcomeType.SUCCESS);
                   break;
                 }
 
@@ -691,13 +695,18 @@ public class DataManager {
             } catch (ODKEntityNotFoundException e) {
 
               if (row.isDeleted()) {
-                // not found on server -- deny it
+                // not found on server -- it is unclear whether
+                // the server should create the row and a deletion
+                // marker for the row, or whether it should just
+                // silently do nothing and return success.
+                //
+                // set row outcome to FAILED (client must decide).
                 outcome = new RowOutcome(row);
-                outcome.setOutcome(OutcomeType.DENIED);
+                outcome.setOutcome(OutcomeType.FAILED);
                 break;
               }
-
-              // require unfiltered write permissions to create a new record
+ 
+                // require unfiltered write permissions to create a new record
               userPermissions.checkPermission(appId, tableId, TablePermission.UNFILTERED_WRITE);
 
               newRowId = true;
