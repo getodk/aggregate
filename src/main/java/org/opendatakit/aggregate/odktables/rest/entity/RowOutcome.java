@@ -19,12 +19,22 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-
-@JacksonXmlRootElement(localName="rowResource")
+@JacksonXmlRootElement(localName = "rowResource")
 public class RowOutcome extends Row {
-  
+
+  /**
+   * Possible values:
+   * <ul>
+   * <li>UNKNOWN -- initial default value</li>
+   * <li>SUCCESS -- rowETag, dataETagAtModification, filterScope updated</li>
+   * <li>DENIED -- permission denied -- just the rowId is returned</li>
+   * <li>IN_CONFLICT -- server record is returned (in full)</li>
+   * <li>FAILED -- anonymous insert conflict (impossible?) or
+   *               delete of non-existent row -- just rowId is returned</li>
+   * </ul>
+   */
   public enum OutcomeType {
-    UNKNOWN, SUCCESS, DENIED, IN_CONFLICT
+    UNKNOWN, SUCCESS, DENIED, IN_CONFLICT, FAILED
   }
 
   /**
@@ -58,6 +68,34 @@ public class RowOutcome extends Row {
 
   public void setOutcome(final OutcomeType outcome) {
     this.outcome = outcome;
+    if (outcome == OutcomeType.SUCCESS 
+        || outcome == OutcomeType.DENIED
+        || outcome == OutcomeType.FAILED) {
+      // for these outcomes, we only need to preserve
+      // the rowID, rowETag, deleted, dataETagAtModification,
+      // and filterScope fields.
+      //
+      // Clear the others to reduce bandwidth needs for
+      // the response packets.
+      this.setLastUpdateUser(null);
+      this.setCreateUser(null);
+      this.setFormId(null);
+      this.setLocale(null);
+      this.setSavepointType(null);
+      this.setSavepointTimestamp(null);
+      this.setSavepointCreator(null);
+      this.setValues(null);
+
+      // additionally...
+      if (outcome == OutcomeType.DENIED || outcome == OutcomeType.FAILED) {
+        // for these outcomes, preserve only the 
+        // rowId and deleted fields.
+
+        this.setRowETag(null);
+        this.setDataETagAtModification(null);
+        this.setFilterScope(null);
+      }
+    }
   }
 
   @Override
@@ -74,8 +112,8 @@ public class RowOutcome extends Row {
     if (this.getSelfUri() == null ? other.getSelfUri() != null : !this.getSelfUri().equals(
         (java.lang.Object) other.getSelfUri()))
       return false;
-    if (this.getOutcome() == null ? other.getOutcome() != null : 
-        !this.getOutcome().equals(other.getOutcome()))
+    if (this.getOutcome() == null ? other.getOutcome() != null : !this.getOutcome().equals(
+        other.getOutcome()))
       return false;
     return true;
   }

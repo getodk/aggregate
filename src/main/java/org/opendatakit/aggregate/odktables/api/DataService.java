@@ -96,10 +96,11 @@ public interface DataService {
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
   /**
-   *
+   * Executes the exact same code path as alterRows() above, but with just a single Row.
+   * 
    * @param rowId
    * @param row
-   * @return {@link RowResource} of the newly added/inserted row.
+   * @return {@link RowOutcome} of the newly added/inserted row. Outcome should be tested.
    * @throws ODKTaskLockException
    * @throws ODKDatastoreException
    * @throws ETagMismatchException
@@ -111,7 +112,7 @@ public interface DataService {
   @Path("{rowId}")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*RowResource*/ createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
+  public Response /*RowOutcome*/ createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
       PermissionDeniedException, BadColumnNameException, InconsistentStateException;
 
