@@ -16,12 +16,12 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.http.HttpStatus;
 import org.apache.wink.server.handlers.HandlersChain;
 import org.apache.wink.server.handlers.HandlersFactory;
 import org.apache.wink.server.handlers.MessageContext;
 import org.apache.wink.server.handlers.RequestHandler;
 import org.apache.wink.server.handlers.ResponseHandler;
-import org.eclipse.jetty.http.HttpStatus;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.PersistenceUtils;
@@ -171,7 +171,7 @@ public class AppEngineHandlersFactory extends HandlersFactory {
 
             response.getMetadata().add(HttpHeaders.ETAG, eTag);
           }
-        } else if ( response.getStatus() == HttpStatus.NOT_MODIFIED_304 ) {
+        } else if ( response.getStatus() == HttpStatus.SC_NOT_MODIFIED ) {
           if ( response.getMetadata().containsKey(HttpHeaders.ETAG) ) {
             eTag = (String) response.getMetadata().getFirst(HttpHeaders.ETAG);
             overrideWithNotModifiedStatus = true;
@@ -180,7 +180,7 @@ public class AppEngineHandlersFactory extends HandlersFactory {
         
         if ( overrideWithNotModifiedStatus ) {
           context.setResponseEntity(null);
-          context.setResponseStatusCode(HttpStatus.NOT_MODIFIED_304);
+          context.setResponseStatusCode(HttpStatus.SC_NOT_MODIFIED);
           
           // force the response...
           final HttpServletResponse httpResponse = context
@@ -190,7 +190,7 @@ public class AppEngineHandlersFactory extends HandlersFactory {
           httpResponse.addHeader(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
           httpResponse.addHeader("Access-Control-Allow-Origin", "*");
           httpResponse.addHeader("Access-Control-Allow-Credentials", "true");
-          httpResponse.setStatus(HttpStatus.NOT_MODIFIED_304);
+          httpResponse.setStatus(HttpStatus.SC_NOT_MODIFIED);
           httpResponse.flushBuffer();
         }
       }
