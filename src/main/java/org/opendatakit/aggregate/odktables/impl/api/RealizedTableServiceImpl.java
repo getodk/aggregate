@@ -40,6 +40,7 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -95,7 +96,10 @@ public class RealizedTableServiceImpl implements RealizedTableService {
     logger.info("tableId: " + tableId);
     DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
     ds.getDam().logUsage();
-    return Response.ok().build();
+    return Response.ok()
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -140,7 +144,10 @@ public class RealizedTableServiceImpl implements RealizedTableService {
       e.printStackTrace();
       throw new IllegalArgumentException("Unable to convert to URL");
     }
-    return Response.ok(definitionResource).build();
+    return Response.ok(definitionResource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
 }

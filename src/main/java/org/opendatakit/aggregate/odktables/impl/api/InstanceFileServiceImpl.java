@@ -164,7 +164,10 @@ public class InstanceFileServiceImpl implements InstanceFileService {
       // and whatever the eTag is in that entity is the eTag we should return...
       eTag = eTagEntity.getManifestETag();
 
-      ResponseBuilder rBuild = Response.ok(manifest).header(HttpHeaders.ETAG, eTag);
+      ResponseBuilder rBuild = Response.ok(manifest).header(HttpHeaders.ETAG, eTag)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true");
       if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
         rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
@@ -251,7 +254,10 @@ public class InstanceFileServiceImpl implements InstanceFileService {
                   .header("Access-Control-Allow-Credentials", "true").build();
             }
             
-            ResponseBuilder rBuild = Response.ok(fileBlob, contentType).header(HttpHeaders.ETAG, contentHash);
+            ResponseBuilder rBuild = Response.ok(fileBlob, contentType).header(HttpHeaders.ETAG, contentHash)
+                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Credentials", "true");
             if (asAttachment != null && !"".equals(asAttachment)) {
               // Set the filename we're downloading to the disk.
               rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""

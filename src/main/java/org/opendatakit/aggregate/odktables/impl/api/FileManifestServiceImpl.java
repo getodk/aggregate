@@ -132,7 +132,10 @@ public class FileManifestServiceImpl implements FileManifestService {
         }
       }
 
-      return Response.ok(manifest).header(HttpHeaders.ETAG, eTag).build();
+      return Response.ok(manifest).header(HttpHeaders.ETAG, eTag)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 
@@ -200,7 +203,10 @@ public class FileManifestServiceImpl implements FileManifestService {
         }
       }
 
-      return Response.ok(manifest).header(HttpHeaders.ETAG, eTag).build();
+      return Response.ok(manifest).header(HttpHeaders.ETAG, eTag)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 
