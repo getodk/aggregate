@@ -37,6 +37,7 @@ import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
@@ -72,7 +73,10 @@ public class DataServiceImpl implements DataService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-    return Response.ok(rowResourceList).build();
+    return Response.ok(rowResourceList)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
   
   @Override
@@ -82,14 +86,20 @@ public class DataServiceImpl implements DataService {
 
     ArrayList<RowOutcome> changedRows = dm.insertOrUpdateRows(rows);
     RowOutcomeList outcomes = getOutcomes(changedRows);
-    return Response.ok(outcomes).build();
+    return Response.ok(outcomes)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
   public Response getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
     Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -108,14 +118,20 @@ public class DataServiceImpl implements DataService {
     ArrayList<RowOutcome> changedRows = dm.insertOrUpdateRows(rowList);
     RowOutcomeList outcomes = getOutcomes(changedRows);
     RowOutcome outcome = outcomes.getRows().get(0);
-    return Response.ok(outcome).build();
+    return Response.ok(outcome)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
   public Response deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException, ODKTaskLockException,
       PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
     String dataETagOnTableOfModification = dm.deleteRow(rowId, rowETag);
-    return Response.ok(dataETagOnTableOfModification).build();
+    return Response.ok(dataETagOnTableOfModification)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   private RowResource getResource(Row row) {

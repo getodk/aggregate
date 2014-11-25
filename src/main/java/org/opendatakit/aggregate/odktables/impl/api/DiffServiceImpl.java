@@ -36,6 +36,7 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
@@ -69,7 +70,10 @@ public class DiffServiceImpl implements DiffService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-    return Response.ok(rowResourceList).build();
+    return Response.ok(rowResourceList)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   private RowResource getResource(Row row) {

@@ -33,6 +33,7 @@ import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.api.TableAclService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAclResource;
@@ -68,7 +69,10 @@ public class TableAclServiceImpl implements TableAclService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-     return Response.ok(list).build();
+     return Response.ok(list)
+         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+         .header("Access-Control-Allow-Origin", "*")
+         .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -81,7 +85,10 @@ public class TableAclServiceImpl implements TableAclService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-    return Response.ok(list).build();
+    return Response.ok(list)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -94,7 +101,10 @@ public class TableAclServiceImpl implements TableAclService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-    return Response.ok(list).build();
+    return Response.ok(list)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -105,7 +115,10 @@ public class TableAclServiceImpl implements TableAclService {
     }
     TableAcl acl = am.getAcl(new Scope(Scope.Type.USER, odkTablesUserId));
     TableAclResource resource = getResource(acl);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -113,14 +126,20 @@ public class TableAclServiceImpl implements TableAclService {
       PermissionDeniedException {
     TableAcl acl = am.getAcl(new Scope(Scope.Type.GROUP, groupId));
     TableAclResource resource = getResource(acl);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
   public Response getDefaultAcl() throws ODKDatastoreException, PermissionDeniedException {
     TableAcl acl = am.getAcl(new Scope(Scope.Type.DEFAULT, null));
     TableAclResource resource = getResource(acl);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -136,7 +155,10 @@ public class TableAclServiceImpl implements TableAclService {
       odkTablesUserId = null;
     acl = am.setAcl(new Scope(Scope.Type.USER, odkTablesUserId), acl.getRole());
     TableAclResource resource = getResource(acl);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -150,7 +172,10 @@ public class TableAclServiceImpl implements TableAclService {
 
     acl = am.setAcl(new Scope(Scope.Type.GROUP, groupId), acl.getRole());
     TableAclResource resource = getResource(acl);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -164,7 +189,10 @@ public class TableAclServiceImpl implements TableAclService {
 
     acl = am.setAcl(new Scope(Scope.Type.DEFAULT, null), acl.getRole());
     TableAclResource resource = getResource(acl);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -176,7 +204,10 @@ public class TableAclServiceImpl implements TableAclService {
     }
 
     am.deleteAcl(new Scope(Scope.Type.DEFAULT, null));
-    return Response.ok().build();
+    return Response.ok()
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -188,7 +219,10 @@ public class TableAclServiceImpl implements TableAclService {
     }
 
     am.deleteAcl(new Scope(Scope.Type.USER, odkTablesUserId));
-    return Response.ok().build();
+    return Response.ok()
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -201,7 +235,10 @@ public class TableAclServiceImpl implements TableAclService {
     }
 
     am.deleteAcl(new Scope(Scope.Type.GROUP, groupId));
-    return Response.ok().build();
+    return Response.ok()
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   private TableAclResource getResource(TableAcl acl) {

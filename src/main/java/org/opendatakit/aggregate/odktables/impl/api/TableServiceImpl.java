@@ -150,7 +150,10 @@ public class TableServiceImpl implements TableService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-    return Response.ok(tableResourceList).build();
+    return Response.ok(tableResourceList)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -166,7 +169,10 @@ public class TableServiceImpl implements TableService {
       throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     TableResource resource = getResource(info, appId, entry);
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -188,7 +194,10 @@ public class TableServiceImpl implements TableService {
     TableEntry entry = tm.createTable(tableId, columns);
     TableResource resource = getResource(info, appId, entry);
     logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
-    return Response.ok(resource).build();
+    return Response.ok(resource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -414,16 +423,25 @@ public class TableServiceImpl implements TableService {
           pjson.add(tpe);
         }
         
-        ResponseBuilder rBuild = Response.ok(pjson, MediaType.APPLICATION_JSON_TYPE);
+        ResponseBuilder rBuild = Response.ok(pjson, MediaType.APPLICATION_JSON_TYPE)
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true");
         return rBuild.build();
       } else {
-        ResponseBuilder rBuild = Response.ok(pl, xmlType);
+        ResponseBuilder rBuild = Response.ok(pl, xmlType)
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true");
         return rBuild.build();
       }
     } else {
       PropertyEntryXmlList pl = new PropertyEntryXmlList(null);
       
-      ResponseBuilder rBuild = Response.ok(pl);
+      ResponseBuilder rBuild = Response.ok(pl)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true");
       return rBuild.build();
     }
   }
