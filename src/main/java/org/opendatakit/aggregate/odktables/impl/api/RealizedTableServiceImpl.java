@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.InstanceFileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
+import org.opendatakit.aggregate.odktables.api.QueryService;
 import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
@@ -113,6 +114,13 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   public DiffService getDiff() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException {
 
     DiffService service = new DiffServiceImpl(appId, tableId, schemaETag, info, userPermissions, cc);
+    return service;
+  }
+
+  @Override
+  public QueryService getQuery() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException {
+
+    QueryService service = new QueryServiceImpl(appId, tableId, schemaETag, info, userPermissions, cc);
     return service;
   }
 

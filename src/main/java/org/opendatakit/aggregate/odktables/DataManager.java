@@ -16,7 +16,10 @@
 
 package org.opendatakit.aggregate.odktables;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -362,6 +365,136 @@ public class DataManager {
     return new WebsafeRows(computeDiff(rows), result.websafeRefetchCursor,
         result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
+  
+  /**
+   * Retrieves a set of rows representing the changes since the given timestamp.
+ * @param dateToUse TODO
+ * @param startTime - the timestamp to start at in the format of yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
+ * @param endTime - the timestamp to end at in the format of yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
+ * @param startCursor - the cursor to start with
+ * @param fetchLimit - the number of rows to return in the response
+   * 
+   * @return the rows which have changed or been added since the given timestamp
+   * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
+   * @throws InconsistentStateException
+   * @throws PermissionDeniedException
+   * @throws BadColumnNameException
+   * @throws ParseException 
+   */
+  public WebsafeRows getRowsInTimeRange(String dateToUse, String startTime, String endTime, QueryResumePoint startCursor, int fetchLimit)
+      throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException,
+      PermissionDeniedException, BadColumnNameException, ParseException {
+     
+    String query_col = DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME;
+     
+   if (dateToUse.equals(DbLogTable.SAVEPOINT_TIMESTAMP.getName())) {
+      query_col = DbLogTable.SAVEPOINT_TIMESTAMP.getName();
+   }
+
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
+
+    List<DbColumnDefinitionsEntity> columns = null;
+    WebsafeQueryResult result = null;
+    LockTemplate propsLock = new LockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();
+
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
+
+      if (schemaETag == null) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
+      }
+
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions
+          .getDefinition(tableId, schemaETag, cc);
+      columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
+
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges(entry, columns, table, logTable);
+
+     SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+     Date startDateToCompare = null;
+      String startSequenceValue = null;
+      if (startTime != null) {
+        try {
+        startDateToCompare = sf.parse(startTime);
+          startSequenceValue = getSequenceValueForStartTime(logTable, query_col, startTime, startDateToCompare, Direction.ASCENDING);
+              //(startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
+        } catch (ODKEntityNotFoundException e) {
+          // No values to display should return empty list
+          ArrayList<Row> rows = new ArrayList<Row>();
+          return new WebsafeRows(rows, null, null, null, false, false);
+        }
+      } else {
+        throw new IllegalArgumentException("startTime must be specified.");
+      }
+      
+      // endTime is an optional parameter
+      // and does not have to have a valid value
+     Date endDateToCompare = null;
+      String endSequenceValue = null;
+      if (endTime != null) {
+        try {
+         endDateToCompare = sf.parse(endTime);
+         // For the end time stamp we want the last one
+         endSequenceValue = getSequenceValueForEndTime(logTable, query_col, endTime, endDateToCompare, Direction.DESCENDING);
+             // (startCursor == null || startCursor.isForwardCursor()) ? Direction.DESCENDING : Direction.ASCENDING);
+        } catch (ODKEntityNotFoundException e) {
+          // If a sequence values is not found,
+          // the query should still work
+        }
+      } 
+
+      // CAL: From getRowsSince
+      Query query;
+      if (startSequenceValue == null) {
+        throw new IllegalArgumentException("No sequence value exists for the specified startTime.");
+      } else {
+        query = buildRowsIncludingQuery(logTable, startSequenceValue, endSequenceValue, (startCursor == null ? true
+            : startCursor.isForwardCursor()));
+      }
+
+      result = query.execute(startCursor, fetchLimit);
+    } finally {
+      propsLock.release();
+    }
+
+    if (result.entities == null || columns == null) {
+      throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
+    }
+
+    // TODO: properly handle reporting of rows that the user no longer has
+    // access to because of a access / permissions change for that user and / or
+    // row.
+    ArrayList<Row> rows = new ArrayList<Row>();
+    for (Entity entity : result.entities) {
+      Row row = converter.toRowFromLogTable(entity, columns);
+      if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
+        rows.add(row);
+      } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
+          row.getRowId(), row.getFilterScope())) {
+        rows.add(row);
+      }
+    }
+    
+    List<Row> diffRows = computeDiff(rows);
+    
+    // Display rows in the order that they were meant to be 
+    // displayed
+    List<Row> orderedRows = new ArrayList<Row>();
+    for (int i = 0; i < rows.size(); i++) {
+      if (diffRows.contains(rows.get(i))) {
+         orderedRows.add(rows.get(i));
+      }
+    }
+    return new WebsafeRows(orderedRows, result.websafeRefetchCursor,
+        result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
+  }
 
   /**
    * Perform direct query on DATA_ETAG_AT_MODIFICATION to retrieve the
@@ -395,6 +528,88 @@ public class DataManager {
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
   }
+  
+  /**
+   * Perform direct query on dateColToUseForCompare to retrieve the
+   * SEQUENCE_VALUE of that row. This is then used to construct the
+   * query for getting data with that using this start time.
+   * 
+   * @param logTable - the log table to use
+   * @param dateColToUseForCompare - the date field to use for the comparison
+   * @param givenTimestamp - the original string value the user passed in
+   * @param dateToCompare - the date to compare against the LAST_UPDATE_DATE_COLUMN_NAME
+   * @param dir - the sort direction to use when retrieving the data
+   * @return SEQUENCE_VALUE of that row
+   * @throws ODKDatastoreException
+   */
+  private String getSequenceValueForStartTime(DbLogTable logTable, String dateColToUseForCompare, String givenTimestamp, Date dateToCompare, Direction dir)
+      throws ODKDatastoreException {
+    Query query = logTable.query("DataManager.getSequenceValueForTimestamp", cc);
+    
+    // we need the filter to activate the sort for the sequence value
+    query.addFilter(DbLogTable.SEQUENCE_VALUE,
+            org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
+    
+    query.addSort(DbLogTable.SEQUENCE_VALUE, dir);
+    
+    // _LAST_UPDATE_DATE is a datetime field
+    // _SAVEPOINT_TIMESTAMP is a String field
+    if (dateColToUseForCompare.equals(DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME)) {
+      query.addFilter(dateColToUseForCompare, 
+           org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN_OR_EQUAL, dateToCompare);
+    } else if (dateColToUseForCompare.equals(DbLogTable.SAVEPOINT_TIMESTAMP.getName())) {
+      query.addFilter(dateColToUseForCompare,
+           org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN_OR_EQUAL, givenTimestamp);
+    }
+    
+    List<Entity> values = query.execute();
+    if (values == null || values.size() == 0) {
+      throw new ODKEntityNotFoundException("Timestamp " + dateToCompare.toString() + " was not found in log table!");
+    } 
+    Entity e = values.get(0);
+    return e.getString(DbLogTable.SEQUENCE_VALUE);
+  }
+  
+  /**
+   * Perform direct query on dateColToUseForCompare to retrieve the
+   * SEQUENCE_VALUE of that row. This is then used to construct the
+   * query for getting data with that using this end time.
+   * 
+   * @param logTable - the log table to use
+   * @param dateColToUseForCompare - the date field to use for the comparison
+   * @param givenTimestamp - the original string value the user passed in
+   * @param dateToCompare - the date to compare against the LAST_UPDATE_DATE_COLUMN_NAME
+   * @param dir - the sort direction to use when retrieving the data
+   * @return SEQUENCE_VALUE of that row
+   * @throws ODKDatastoreException
+   */
+  private String getSequenceValueForEndTime(DbLogTable logTable, String dateColToUseForCompare, String givenTimestamp, Date dateToCompare, Direction dir)
+      throws ODKDatastoreException {
+    Query query = logTable.query("DataManager.getSequenceValueForTimestamp", cc);
+    
+    // we need the filter to activate the sort for the sequence value
+    query.addFilter(DbLogTable.SEQUENCE_VALUE,
+            org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
+    
+    query.addSort(DbLogTable.SEQUENCE_VALUE, dir);
+    
+    // _LAST_UPDATE_DATE is a datetime field
+    // _SAVEPOINT_TIMESTAMP is a String field
+    if (dateColToUseForCompare.equals(DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME)) {
+      query.addFilter(dateColToUseForCompare, 
+           org.opendatakit.common.persistence.Query.FilterOperation.LESS_THAN_OR_EQUAL, dateToCompare);
+    } else if (dateColToUseForCompare.equals(DbLogTable.SAVEPOINT_TIMESTAMP.getName())) {
+      query.addFilter(dateColToUseForCompare,
+           org.opendatakit.common.persistence.Query.FilterOperation.LESS_THAN_OR_EQUAL, givenTimestamp);
+    }
+    
+    List<Entity> values = query.execute();
+    if (values == null || values.size() == 0) {
+      throw new ODKEntityNotFoundException("Timestamp " + dateToCompare.toString() + " was not found in log table!");
+    } 
+    Entity e = values.get(0);
+    return e.getString(DbLogTable.SEQUENCE_VALUE);
+  }
 
   /**
    * @return the query for rows which have been changed or added from the
@@ -423,6 +638,29 @@ public class DataManager {
       boolean isForwardCursor) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
     query.greaterThan(DbLogTable.SEQUENCE_VALUE, sequenceValue);
+    if (isForwardCursor) {
+      query.sortAscending(DbLogTable.SEQUENCE_VALUE);
+    } else {
+      query.sortDescending(DbLogTable.SEQUENCE_VALUE);
+    }
+    return query;
+  }
+  
+  /**
+   * @param startSequenceValue
+   * @param endSequenceValue 
+   * @return the query for rows which have been changed or added since the given
+   *         sequenceValue
+   * @throws ODKDatastoreException
+   */
+  private Query buildRowsIncludingQuery(DbLogTable logTable, String startSequenceValue,
+      String endSequenceValue, boolean isForwardCursor) throws ODKDatastoreException {
+    Query query = logTable.query("DataManager.buildRowsIncludingQuery", cc);
+    query.greaterThanOrEqual(DbLogTable.SEQUENCE_VALUE, startSequenceValue);
+    if (endSequenceValue != null) {
+      query.lessThanOrEqual(DbLogTable.SEQUENCE_VALUE, endSequenceValue);
+    }
+
     if (isForwardCursor) {
       query.sortAscending(DbLogTable.SEQUENCE_VALUE);
     } else {

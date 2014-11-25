@@ -2,14 +2,10 @@ package org.opendatakit.aggregate.odktables.impl.api.wink;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -18,10 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.RuntimeDelegate;
-import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
 import org.apache.wink.server.handlers.HandlersChain;
 import org.apache.wink.server.handlers.HandlersFactory;
@@ -30,7 +23,6 @@ import org.apache.wink.server.handlers.RequestHandler;
 import org.apache.wink.server.handlers.ResponseHandler;
 import org.eclipse.jetty.http.HttpStatus;
 import org.opendatakit.aggregate.ContextFactory;
-import org.opendatakit.aggregate.odktables.entity.serialization.SimpleJSONMessageReaderWriter;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.PersistenceUtils;
 import org.opendatakit.common.web.CallingContext;

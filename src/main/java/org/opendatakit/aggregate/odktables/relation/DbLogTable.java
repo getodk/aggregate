@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumn
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.Relation;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -37,6 +38,8 @@ public class DbLogTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
+  public static final String LAST_UPDATE_DATE_COLUMN_NAME = CommonFieldsBase.LAST_UPDATE_DATE_COLUMN_NAME;
+  
   /**
    * NOTE: the PK of this table is the ROW_ETAG of the DbTable Row
    * who's state matches this log entry.
