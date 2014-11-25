@@ -150,7 +150,7 @@ public class EntityConverter {
    * We create fields on the server with boolean, integer, numeric and string
    * data types. Everything else is preserved as a string data type. This
    * includes dates and times, as thier representation varies across databases.
-   * Dates are stored as yyyy-mm-ddThh:mm:ss.ssszzz and should sort in a
+   * Dates are stored as yyyy-mm-ddThh:mm:ss.sssssssss and should sort in a
    * predictable way even though they remain strings. Similarly, times are
    * stored as hh:mm:ss.ssszzz and should also sort predictably.
    * <p>
