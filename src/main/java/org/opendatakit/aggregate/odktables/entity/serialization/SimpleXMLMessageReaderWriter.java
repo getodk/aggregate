@@ -129,6 +129,8 @@ public class SimpleXMLMessageReaderWriter<T> implements MessageBodyReader<T>,
       }
 
       rawStr.write(bytes);
+      rawStr.flush();
+      rawStr.close();
 
     } catch (Exception e) {
       throw new IOException(e);

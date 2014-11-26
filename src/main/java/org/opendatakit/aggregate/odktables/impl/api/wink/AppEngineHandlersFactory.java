@@ -25,6 +25,8 @@ import org.apache.wink.server.handlers.ResponseHandler;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.PersistenceUtils;
+import org.opendatakit.common.security.Realm;
+import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,7 +71,21 @@ public class AppEngineHandlersFactory extends HandlersFactory {
        * before delivering it to the app.
        */
       boolean isGaeDevelopmentEnvironment = server.contains("Development");
-      boolean isGaeEnvironment = cc.getUserService().getCurrentRealm().getIsGaeEnvironment();
+      boolean isGaeEnvironment = false;
+      try {
+        UserService us = cc.getUserService();
+        if ( us != null ) {
+          Realm realm = us.getCurrentRealm();
+          if ( realm != null ) {
+            Boolean outcome = realm.getIsGaeEnvironment();
+            if ( outcome != null ) {
+              isGaeEnvironment = outcome;
+            }
+          }
+        }
+      } catch ( Exception e ) {
+        // ignore...
+      }
       MultivaluedMap<String, String> headers = context.getHttpHeaders().getRequestHeaders();
 
       boolean effectiveSuppressContentEncoding = suppressContentEncoding
@@ -77,24 +93,43 @@ public class AppEngineHandlersFactory extends HandlersFactory {
 
       List<String> encodes = headers.get(ApiConstants.CONTENT_ENCODING_HEADER);
 
-      if (effectiveSuppressContentEncoding || encodes == null
-          || !encodes.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-        sc.setAttribute(noUnGZIPContentEncodingKey, Boolean.toString(true));
-      } else {
-        sc.setAttribute(noUnGZIPContentEncodingKey, Boolean.toString(false));
+      boolean encodesContainsGzip = false;
+      if (!effectiveSuppressContentEncoding && encodes != null ) {
+        // don't know what to do if there are multiple content-encoding headers.
+        // assume that if any of them specify gzip, that the content is simply
+        // gzip'd.
+        for ( String enc : encodes ) {
+          if ( enc.trim().equals(ApiConstants.GZIP_CONTENT_ENCODING) ) {
+            encodesContainsGzip = true;
+            break;
+          }
+        }
       }
 
+      sc.setAttribute(noUnGZIPContentEncodingKey, Boolean.toString(!encodesContainsGzip));
+
+      
       boolean effectiveSuppressAcceptContentEncoding = suppressAcceptContentEncoding
           || (isGaeEnvironment && !isGaeDevelopmentEnvironment);
 
       List<String> accepts = headers.get(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
 
-      if (effectiveSuppressAcceptContentEncoding || accepts == null
-          || !accepts.contains(ApiConstants.GZIP_CONTENT_ENCODING)) {
-        sc.setAttribute(emitGZIPContentEncodingKey, Boolean.toString(false));
-      } else {
-        sc.setAttribute(emitGZIPContentEncodingKey, Boolean.toString(true));
+      boolean requestGzipOutputEncoding = false;
+      if (!effectiveSuppressContentEncoding && accepts != null ) {
+        // there might be multiple headers.
+        // Each header is a comma-separated list of encodings.
+        for ( String acc : accepts ) {
+          String[] accEncodings = acc.split(",");
+          for ( String enc : accEncodings ) {
+            if ( enc.trim().equals(ApiConstants.GZIP_CONTENT_ENCODING) ) {
+              requestGzipOutputEncoding = true;
+              break;
+            }
+          }
+        }
       }
+      
+      sc.setAttribute(emitGZIPContentEncodingKey, Boolean.toString(requestGzipOutputEncoding));
 
       chain.doChain(context);
     }
