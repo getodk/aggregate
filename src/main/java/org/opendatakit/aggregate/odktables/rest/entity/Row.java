@@ -318,6 +318,11 @@ public class Row {
 
   @JsonIgnore
   public void setValues(final ArrayList<DataKeyValue> values) {
+    if ( values == null ) {
+      this.orderedColumns = null;
+      return;
+    }
+    
     Collections.sort(values, new Comparator<DataKeyValue>(){
 
       @Override
