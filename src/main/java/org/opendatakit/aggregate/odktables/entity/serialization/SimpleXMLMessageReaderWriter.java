@@ -25,22 +25,16 @@ import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory.GZIPRequestHandler;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -53,11 +47,6 @@ public class SimpleXMLMessageReaderWriter<T> implements MessageBodyReader<T>,
 
   private static final XmlMapper mapper = new XmlMapper();
   private static final String DEFAULT_ENCODING = "utf-8";
-  
-  @Context
-  ServletContext context;
-  @Context
-  HttpHeaders headers;
 
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation annotations[],
@@ -82,16 +71,7 @@ public class SimpleXMLMessageReaderWriter<T> implements MessageBodyReader<T>,
       if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
         throw new IllegalArgumentException("charset for the request is not utf-8");
       }
-      InputStream instr = stream;
-
-      String tmp = (String) context.getAttribute(GZIPRequestHandler.noUnGZIPContentEncodingKey);
-      boolean noUnGZIPContentEncodingKey = tmp == null ? false : Boolean.valueOf(tmp);
-
-      if ( !noUnGZIPContentEncodingKey ) {
-        instr = new GZIPInputStream(stream);
-      }
-
-      InputStreamReader r = new InputStreamReader(instr,
+      InputStreamReader r = new InputStreamReader(stream,
           Charset.forName(ApiConstants.UTF8_ENCODE));
       return mapper.readValue(r, aClass);
     } catch (Exception e) {
@@ -119,18 +99,9 @@ public class SimpleXMLMessageReaderWriter<T> implements MessageBodyReader<T>,
       map.putSingle("Access-Control-Allow-Origin", "*");
       map.putSingle("Access-Control-Allow-Credentials", "true");
 
-      String tmp = (String) context.getAttribute(GZIPRequestHandler.emitGZIPContentEncodingKey);
-      boolean emitGZIPContentEncodingKey = (tmp == null) ? false : Boolean.valueOf(tmp);
-
-      OutputStream rawStr = rawStream;
-      if ( emitGZIPContentEncodingKey ) {
-        map.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-        rawStr = new GZIPOutputStream(rawStream);
-      }
-
-      rawStr.write(bytes);
-      rawStr.flush();
-      rawStr.close();
+      rawStream.write(bytes);
+      rawStream.flush();
+      rawStream.close();
 
     } catch (Exception e) {
       throw new IOException(e);
