@@ -9,12 +9,9 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.http.HttpStatus;
 import org.apache.wink.server.handlers.HandlersChain;
@@ -22,119 +19,12 @@ import org.apache.wink.server.handlers.HandlersFactory;
 import org.apache.wink.server.handlers.MessageContext;
 import org.apache.wink.server.handlers.RequestHandler;
 import org.apache.wink.server.handlers.ResponseHandler;
-import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.PersistenceUtils;
-import org.opendatakit.common.security.Realm;
-import org.opendatakit.common.security.UserService;
-import org.opendatakit.common.web.CallingContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AppEngineHandlersFactory extends HandlersFactory {
-
-  public static class GZIPRequestHandler implements RequestHandler {
-    public static final String noUnGZIPContentEncodingKey = GZIPRequestHandler.class
-        .getCanonicalName() + ":disregardGZIPContentEncodingKey";
-    public static final String emitGZIPContentEncodingKey = GZIPRequestHandler.class
-        .getCanonicalName() + ":emitGZIPContentEncodingKey";
-
-    public static final String FALSE = "false";
-
-    boolean suppressContentEncoding = false;
-    boolean suppressAcceptContentEncoding = false;
-
-    @Override
-    public void init(Properties props) {
-      suppressContentEncoding = !FALSE.equalsIgnoreCase(props.getProperty(
-          "suppressContentEncoding", FALSE));
-      suppressAcceptContentEncoding = !FALSE.equalsIgnoreCase(props.getProperty(
-          "suppressAcceptContentEncoding", FALSE));
-      // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void handleRequest(MessageContext context, HandlersChain chain) throws Throwable {
-      UriInfo info = context.getUriInfo();
-      System.out.println("The path relative to the base URI is : " + context.getHttpMethod() + " "
-          + info.getPath());
-
-      ServletContext sc = (ServletContext) context.getAttributes().get(
-          ServletContext.class.getCanonicalName());
-      HttpServletRequest req = (HttpServletRequest) context.getAttributes().get(
-          HttpServletRequest.class.getCanonicalName());
-      CallingContext cc = ContextFactory.getCallingContext(sc, req);
-      String server = sc.getServerInfo();
-
-      /*
-       * AppEngine leaves the GZIP header even though it unzips the content
-       * before delivering it to the app.
-       */
-      boolean isGaeDevelopmentEnvironment = server.contains("Development");
-      boolean isGaeEnvironment = false;
-      try {
-        UserService us = cc.getUserService();
-        if ( us != null ) {
-          Realm realm = us.getCurrentRealm();
-          if ( realm != null ) {
-            Boolean outcome = realm.getIsGaeEnvironment();
-            if ( outcome != null ) {
-              isGaeEnvironment = outcome;
-            }
-          }
-        }
-      } catch ( Exception e ) {
-        // ignore...
-      }
-      MultivaluedMap<String, String> headers = context.getHttpHeaders().getRequestHeaders();
-
-      boolean effectiveSuppressContentEncoding = suppressContentEncoding
-          || (isGaeEnvironment && !isGaeDevelopmentEnvironment);
-
-      List<String> encodes = headers.get(ApiConstants.CONTENT_ENCODING_HEADER);
-
-      boolean encodesContainsGzip = false;
-      if (!effectiveSuppressContentEncoding && encodes != null ) {
-        // don't know what to do if there are multiple content-encoding headers.
-        // assume that if any of them specify gzip, that the content is simply
-        // gzip'd.
-        for ( String enc : encodes ) {
-          if ( enc.trim().equals(ApiConstants.GZIP_CONTENT_ENCODING) ) {
-            encodesContainsGzip = true;
-            break;
-          }
-        }
-      }
-
-      sc.setAttribute(noUnGZIPContentEncodingKey, Boolean.toString(!encodesContainsGzip));
-
-      
-      boolean effectiveSuppressAcceptContentEncoding = suppressAcceptContentEncoding
-          || (isGaeEnvironment && !isGaeDevelopmentEnvironment);
-
-      List<String> accepts = headers.get(ApiConstants.ACCEPT_CONTENT_ENCODING_HEADER);
-
-      boolean requestGzipOutputEncoding = false;
-      if (!effectiveSuppressContentEncoding && accepts != null ) {
-        // there might be multiple headers.
-        // Each header is a comma-separated list of encodings.
-        for ( String acc : accepts ) {
-          String[] accEncodings = acc.split(",");
-          for ( String enc : accEncodings ) {
-            if ( enc.trim().equals(ApiConstants.GZIP_CONTENT_ENCODING) ) {
-              requestGzipOutputEncoding = true;
-              break;
-            }
-          }
-        }
-      }
-      
-      sc.setAttribute(emitGZIPContentEncodingKey, Boolean.toString(requestGzipOutputEncoding));
-
-      chain.doChain(context);
-    }
-
-  }
 
   public AppEngineHandlersFactory() {
     // super();
@@ -237,6 +127,7 @@ public class AppEngineHandlersFactory extends HandlersFactory {
   public List<? extends ResponseHandler> getResponseHandlers() {
     ArrayList<ResponseHandler> myHandlers = new ArrayList<ResponseHandler>();
     myHandlers.add(new NotModifiedHandler());
+    myHandlers.add(new GZIPResponseHandler());
     myHandlers.addAll(super.getResponseHandlers());
     return myHandlers;
   }
