@@ -45,13 +45,6 @@ public class AppEngineHandlersFactory extends HandlersFactory {
     // super();
   }
 
-  @Override
-  public List<? extends RequestHandler> getRequestHandlers() {
-    ArrayList<RequestHandler> myHandlers = new ArrayList<RequestHandler>();
-    myHandlers.add(new GZIPRequestHandler());
-    return myHandlers;
-  }
-
   public static class NotModifiedHandler implements ResponseHandler {
 
     public static final String jsonBufferKey = NotModifiedHandler.class.getCanonicalName()
