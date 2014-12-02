@@ -312,7 +312,7 @@ public class GZIPRequestHandler implements RequestHandler {
       context.setAttribute(HttpServletRequest.class, sreq);
     }
     // and don't bother with this processing if called twice
-    suppressContentEncoding = true;
+    //suppressContentEncoding = true;
 
     chain.doChain(context);
   }
