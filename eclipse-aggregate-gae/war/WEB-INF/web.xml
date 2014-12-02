@@ -49,6 +49,16 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 	</filter-mapping>
 	
 	<filter>
+	    <filter-name>GaeAwareContentEncodingRequestFilter</filter-name>
+	    <filter-class>org.opendatakit.aggregate.odktables.impl.api.wink.GaeAwareContentEncodingRequestFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+	    <filter-name>GaeAwareContentEncodingRequestFilter</filter-name>
+	    <url-pattern>/odktables/*</url-pattern>
+	</filter-mapping>
+		
+	<filter>
 	    <filter-name>GaeAwareContentEncodingResponseFilter</filter-name>
 	    <filter-class>org.opendatakit.aggregate.odktables.impl.api.wink.GaeAwareContentEncodingResponseFilter</filter-class>
 	</filter>
