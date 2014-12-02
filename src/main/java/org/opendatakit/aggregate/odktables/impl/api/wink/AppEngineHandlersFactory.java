@@ -1,10 +1,25 @@
+/*
+ * Copyright (C) 2014 University of Washington
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.opendatakit.aggregate.odktables.impl.api.wink;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,7 +47,9 @@ public class AppEngineHandlersFactory extends HandlersFactory {
 
   @Override
   public List<? extends RequestHandler> getRequestHandlers() {
-    return Arrays.asList(new GZIPRequestHandler());
+    ArrayList<RequestHandler> myHandlers = new ArrayList<RequestHandler>();
+    myHandlers.add(new GZIPRequestHandler());
+    return myHandlers;
   }
 
   public static class NotModifiedHandler implements ResponseHandler {
@@ -127,7 +144,6 @@ public class AppEngineHandlersFactory extends HandlersFactory {
   public List<? extends ResponseHandler> getResponseHandlers() {
     ArrayList<ResponseHandler> myHandlers = new ArrayList<ResponseHandler>();
     myHandlers.add(new NotModifiedHandler());
-    myHandlers.add(new GZIPResponseHandler());
     myHandlers.addAll(super.getResponseHandlers());
     return myHandlers;
   }
