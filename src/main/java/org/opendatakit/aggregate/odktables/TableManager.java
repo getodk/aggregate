@@ -505,7 +505,7 @@ public class TableManager {
           
         // delete the blob store (holding the instance attachments)
         DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableEntry.getId(), cc);
-        blobStore.dropBlobEntitySet(cc);
+        blobStore.dropBlobRelationSet(cc);
 
         // delete the table-level file manifest ETag entry for this tableId
         // it is OK if this doesn't exist.

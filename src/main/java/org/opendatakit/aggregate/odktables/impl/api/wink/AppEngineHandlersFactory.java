@@ -32,7 +32,6 @@ import org.apache.http.HttpStatus;
 import org.apache.wink.server.handlers.HandlersChain;
 import org.apache.wink.server.handlers.HandlersFactory;
 import org.apache.wink.server.handlers.MessageContext;
-import org.apache.wink.server.handlers.RequestHandler;
 import org.apache.wink.server.handlers.ResponseHandler;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.PersistenceUtils;

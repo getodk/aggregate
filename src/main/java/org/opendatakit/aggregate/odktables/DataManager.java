@@ -820,6 +820,8 @@ public class DataManager {
         DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
         revertPendingChanges(entry, columns, table, logTable);
+        
+        DataKeyValueDeepComparator dc = new DataKeyValueDeepComparator(columns);
 
         for (Row row : rows.getRows()) {
 
@@ -911,7 +913,7 @@ public class DataManager {
                 // If the row matches everywhere except on the rowETag, return
                 // it.
                 Row currentRow = converter.toRow(entity, columns);
-                if (row.hasMatchingSignificantFieldValues(currentRow)) {
+                if (row.hasMatchingSignificantFieldValues(currentRow, dc)) {
                   outcome = new RowOutcome(currentRow);
                   outcome.setOutcome(OutcomeType.SUCCESS);
                   break;
@@ -1112,6 +1114,8 @@ public class DataManager {
         DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
         revertPendingChanges(entry, columns, table, logTable);
+        
+        DataKeyValueDeepComparator dc = new DataKeyValueDeepComparator(columns);
 
         String rowId = row.getRowId();
         boolean newRowId = false;
@@ -1179,7 +1183,7 @@ public class DataManager {
             // Take the hit to convert the row we have.
             // If the row matches everywhere except on the rowETag, return it.
             Row currentRow = converter.toRow(entity, columns);
-            if (row.hasMatchingSignificantFieldValues(currentRow)) {
+            if (row.hasMatchingSignificantFieldValues(currentRow, dc)) {
               return currentRow;
             }
 
