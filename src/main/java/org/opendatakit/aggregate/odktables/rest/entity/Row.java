@@ -426,7 +426,7 @@ public class Row {
    * @param other
    * @return
    */
-  public boolean hasMatchingSignificantFieldValues(Row other) {
+  public boolean hasMatchingSignificantFieldValues(Row other, Comparator<DataKeyValue> deepComparator) {
     if (other == null)
       return false;
     boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
@@ -451,7 +451,7 @@ public class Row {
     
     // columns are ordered... compare one-to-one
     for ( int i = 0 ; i < orderedColumns.size() ; ++i ) {
-      if ( !orderedColumns.get(i).equals(other.orderedColumns.get(i)) ) {
+      if ( deepComparator.compare(orderedColumns.get(i), other.orderedColumns.get(i)) != 0 ) {
         return false;
       }
     }

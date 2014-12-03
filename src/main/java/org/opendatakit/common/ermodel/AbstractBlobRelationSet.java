@@ -282,7 +282,7 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
    * Numerous possibilities for failures here...
    */
   @Override
-  public void dropBlobEntitySet(CallingContext cc) throws ODKDatastoreException {
+  public void dropBlobRelationSet(CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     Query q = ds.createQuery(ctntRelation, "AbstractBlobRelationSet.dropBlobEntitySet", user);

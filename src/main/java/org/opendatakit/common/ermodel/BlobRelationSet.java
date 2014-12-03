@@ -129,5 +129,5 @@ public interface BlobRelationSet {
    * @param cc
    * @throws ODKDatastoreException
    */
-  public void dropBlobEntitySet(CallingContext cc) throws ODKDatastoreException;
+  public void dropBlobRelationSet(CallingContext cc) throws ODKDatastoreException;
 }
