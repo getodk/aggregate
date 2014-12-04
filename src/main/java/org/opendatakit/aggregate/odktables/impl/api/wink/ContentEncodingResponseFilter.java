@@ -58,6 +58,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.RuntimeDelegate;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.wink.common.internal.http.AcceptEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +91,8 @@ import org.slf4j.LoggerFactory;
  * </code>
  */
 public class ContentEncodingResponseFilter implements Filter {
+
+  private static final Log log = LogFactory.getLog(ContentEncodingResponseFilter.class);
 
     private final static Logger                         logger                       =
                                                                                          LoggerFactory
@@ -393,16 +397,16 @@ public class ContentEncodingResponseFilter implements Filter {
                 if (hasGZip || (acceptEncoding.isAnyEncodingAllowed() && !acceptEncoding.getBannedEncodings()
                     .contains("gzip"))) { //$NON-NLS-1$
                   if ( hasGZip ) {
-                    logger.trace("going to use gzip encoding"); //$NON-NLS-1$
+                    log.info("going to use gzip encoding"); //$NON-NLS-1$
                   } else {
-                    logger.trace("going to use gzip encoding because any encoding is allowed"); //$NON-NLS-1$
+                    log.info("going to use gzip encoding because any encoding is allowed"); //$NON-NLS-1$
                   }
                     this.encodedOutputStream = new GzipEncoderOutputStream(outputStream, this);
                     this.outputStream = encodedOutputStream;
                     logger.trace("getOutputStream() exit - returning gzipped encode stream"); //$NON-NLS-1$
                     return outputStream;
                 } else if ( hasDeflate ) {
-                  logger.trace("going to use deflate encoding"); //$NON-NLS-1$
+                  log.info("going to use deflate encoding"); //$NON-NLS-1$
                   this.encodedOutputStream =
                       new DeflaterContentEncodedOutputStream(outputStream, this);
                   this.outputStream = encodedOutputStream;
@@ -410,6 +414,7 @@ public class ContentEncodingResponseFilter implements Filter {
                   return outputStream;
                 }
             }
+            log.info("no content encoding");
             logger.trace("getOutputStream() exit - returning output stream"); //$NON-NLS-1$
             return outputStream;
         }
