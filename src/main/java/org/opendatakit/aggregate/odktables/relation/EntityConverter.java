@@ -24,6 +24,8 @@ import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
+import org.opendatakit.aggregate.odktables.rest.ElementDataType;
+import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
@@ -167,15 +169,21 @@ public class EntityConverter {
           "Attempt to get DataField for a non-persisted elementKey (" + entity.getElementKey()
               + ")");
     }
-    String type = entity.getElementType();
-    if (type.equals("boolean")) {
+    ElementType type = ElementType.parseElementType(entity.getElementType(), 
+                                                    !entity.getArrayListChildElementKeys().isEmpty());
+    ElementDataType dataType = type.getDataType();
+    if ( dataType == ElementDataType.bool ) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.BOOLEAN, true);
-    } else if (type.equals("integer")) {
+    } else if ( dataType == ElementDataType.integer ) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.INTEGER, true);
-    } else if (type.equals("number")) {
+    } else if ( dataType == ElementDataType.number ) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.DECIMAL, true);
-    } else {
+    } else if ( type.getAuxInfo() == null || type.getAuxInfo().trim().length() == 0 ) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true);
+    } else {
+      // string length explicitly specified for this field...
+      long len = Long.valueOf(type.getAuxInfo().trim());
+      return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true, len);
     }
   }
 
