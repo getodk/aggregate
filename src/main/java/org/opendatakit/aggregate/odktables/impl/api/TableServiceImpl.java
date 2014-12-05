@@ -142,6 +142,14 @@ public class TableServiceImpl implements TableService {
       // database cruft will have a null schemaETag -- ignore those
       if ( entry.getSchemaETag() != null ) {
         TableResource resource = getResource(info, appId, entry);
+        
+        // set the table-level manifest ETag if known...
+        try {
+          resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(entry.getTableId(), cc));
+        } catch (ODKDatastoreException e) {
+          // ignore
+        }
+
         resources.add(resource);
       }
     }
@@ -150,6 +158,14 @@ public class TableServiceImpl implements TableService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
+    
+    // set the app-level manifest ETag if known...
+    try {
+      tableResourceList.setAppLevelManifestETag(FileManifestServiceImpl.getAppLevelManifestETag(cc));
+    } catch (ODKDatastoreException e) {
+      // ignore
+    }
+    
     return Response.ok(tableResourceList)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
@@ -169,6 +185,14 @@ public class TableServiceImpl implements TableService {
       throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     TableResource resource = getResource(info, appId, entry);
+    
+    // set the table-level manifest ETag if known...
+    try {
+      resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(entry.getTableId(), cc));
+    } catch (ODKDatastoreException e) {
+      // ignore
+    }
+
     return Response.ok(resource)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
@@ -193,7 +217,16 @@ public class TableServiceImpl implements TableService {
 
     TableEntry entry = tm.createTable(tableId, columns);
     TableResource resource = getResource(info, appId, entry);
-    logger.info(String.format("tableId: %s, definition: %s", tableId, definition));
+    
+    // set the table-level manifest ETag if known...
+    try {
+      resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(entry.getTableId(), cc));
+    } catch (ODKDatastoreException e) {
+      // ignore
+    }
+
+    logger.info(String.format("createTable: tableId: %s, definition: %s", tableId, definition));
+
     return Response.ok(resource)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")

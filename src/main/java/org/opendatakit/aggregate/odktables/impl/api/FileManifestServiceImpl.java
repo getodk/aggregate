@@ -66,6 +66,16 @@ public class FileManifestServiceImpl implements FileManifestService {
     this.info = info;
     this.userPermissions = ContextFactory.getTablesUserPermissions(cc);
   }
+  
+  public static String getAppLevelManifestETag(CallingContext cc) throws ODKDatastoreException {
+    DbManifestETagEntity eTagEntity = DbManifestETags.getTableIdEntry(DbManifestETags.APP_LEVEL, cc);
+    return eTagEntity.getManifestETag();
+  }
+
+  public static String getTableLevelManifestETag(String tableId, CallingContext cc) throws ODKDatastoreException {
+    DbManifestETagEntity eTagEntity = DbManifestETags.getTableIdEntry(tableId, cc);
+    return eTagEntity.getManifestETag();
+  }
 
   @Override
   public Response getAppLevelFileManifest(HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {

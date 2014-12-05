@@ -23,14 +23,14 @@ import org.opendatakit.common.web.CallingContext;
 public class OdkTablesImpl implements OdkTables {
   
   @Override
-  public Response getAppName(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders) 
+  public Response getAppNames(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders) 
       throws ODKDatastoreException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
     String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
 
-    return Response.status(Status.OK).entity(preferencesAppId)
+    return Response.status(Status.OK).entity("[\"" + preferencesAppId + "\"]")
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Credentials", "true").build();
