@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -29,6 +30,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
+import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -224,6 +226,12 @@ public interface IForm {
 
   public FormElementModel getFormElementModel(List<SubmissionKeyPart> submissionKeyParts);
 
+  /**
+   * Used when recovering from data corruption
+   * 
+   * @return
+   */
+  public Set<DynamicCommonFieldsBase> getAllBackingObjects();
 
   public List<FormElementModel> getRepeatGroupsInModel();
   

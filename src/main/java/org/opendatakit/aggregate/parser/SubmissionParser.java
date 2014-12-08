@@ -31,6 +31,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -379,7 +381,15 @@ public class SubmissionParser {
       User user = cc.getCurrentUser();
       TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement()
           .getFormDataModel().getBackingObjectPrototype(), instanceId, user);
-      submission = new Submission(fi, form, cc);
+      try {
+        submission = new Submission(fi, form, cc);
+      } catch (ODKDatastoreException e) {
+        Log logger = LogFactory.getLog(Submission.class);
+        e.printStackTrace();
+        logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
+            + fi.getTableName() + " uri " + fi.getUri());
+        throw e;
+      }
       preExisting = true;
       preExistingComplete = submission.isComplete();
     } catch (ODKEntityNotFoundException e) {
