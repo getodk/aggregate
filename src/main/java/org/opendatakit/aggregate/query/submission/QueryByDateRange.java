@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
@@ -106,8 +108,16 @@ public class QueryByDateRange extends QueryBase {
 
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
-    CommonFieldsBase subEntity = submissionEntities.get(count);
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm(), cc));
+      CommonFieldsBase subEntity = submissionEntities.get(count);
+      try {
+        retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm(), cc));
+      } catch ( ODKDatastoreException e ) {
+        Log logger = LogFactory.getLog(QueryByUIFilterGroup.class);
+        e.printStackTrace();
+        logger.error("Unable to reconstruct submission for " + 
+            subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
+        throw e;
+      }
     }
     return retrievedSubmissions;
   }
