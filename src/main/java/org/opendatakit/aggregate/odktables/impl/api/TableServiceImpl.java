@@ -106,8 +106,9 @@ public class TableServiceImpl implements TableService {
   private final String tableId;
   private final CallingContext cc;
 
-  public TableServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers, UriInfo info, String appId, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException {
+  public TableServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers,
+      UriInfo info, String appId, CallingContext cc) throws ODKEntityNotFoundException,
+      ODKDatastoreException {
     this.sc = sc;
     this.req = req;
     this.headers = headers;
@@ -117,7 +118,8 @@ public class TableServiceImpl implements TableService {
     this.cc = cc;
   }
 
-  public TableServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers, UriInfo info, String appId, String tableId, CallingContext cc)
+  public TableServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers,
+      UriInfo info, String appId, String tableId, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     this.sc = sc;
     this.req = req;
@@ -129,23 +131,28 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response getTables(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
+  public Response getTables(@QueryParam(CURSOR_PARAMETER) String cursor,
+      @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
+      PermissionDeniedException, ODKTaskLockException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
 
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
-    WebsafeTables websafeResult = tm.getTables(QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer
+        .parseInt(fetchLimit);
+    WebsafeTables websafeResult = tm.getTables(
+        QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
     for (TableEntry entry : websafeResult.tables) {
       // database cruft will have a null schemaETag -- ignore those
-      if ( entry.getSchemaETag() != null ) {
+      if (entry.getSchemaETag() != null) {
         TableResource resource = getResource(info, appId, entry);
-        
+
         // set the table-level manifest ETag if known...
         try {
-          resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(entry.getTableId(), cc));
+          resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(
+              entry.getTableId(), cc));
         } catch (ODKDatastoreException e) {
           // ignore
         }
@@ -156,16 +163,17 @@ public class TableServiceImpl implements TableService {
     TableResourceList tableResourceList = new TableResourceList(resources,
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
-        WebUtils.safeEncode(websafeResult.websafeResumeCursor),
-        websafeResult.hasMore, websafeResult.hasPrior);
-    
+        WebUtils.safeEncode(websafeResult.websafeResumeCursor), websafeResult.hasMore,
+        websafeResult.hasPrior);
+
     // set the app-level manifest ETag if known...
     try {
-      tableResourceList.setAppLevelManifestETag(FileManifestServiceImpl.getAppLevelManifestETag(cc));
+      tableResourceList
+          .setAppLevelManifestETag(FileManifestServiceImpl.getAppLevelManifestETag(cc));
     } catch (ODKDatastoreException e) {
       // ignore
     }
-    
+
     return Response.ok(tableResourceList)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
@@ -180,15 +188,17 @@ public class TableServiceImpl implements TableService {
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
     TableEntry entry = tm.getTable(tableId);
-    if ( entry == null || entry.getSchemaETag() == null ) {
-      // the table doesn't exist yet (or something is there that is database cruft)
+    if (entry == null || entry.getSchemaETag() == null) {
+      // the table doesn't exist yet (or something is there that is database
+      // cruft)
       throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     TableResource resource = getResource(info, appId, entry);
-    
+
     // set the table-level manifest ETag if known...
     try {
-      resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(entry.getTableId(), cc));
+      resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(
+          entry.getTableId(), cc));
     } catch (ODKDatastoreException e) {
       // ignore
     }
@@ -200,11 +210,11 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response createTable(TableDefinition definition)
-      throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, IOException {
+  public Response createTable(TableDefinition definition) throws ODKDatastoreException,
+      TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, IOException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -212,15 +222,16 @@ public class TableServiceImpl implements TableService {
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
     // NOTE: the only access control restriction for
-    // creating the table is the Administer Tables role. 
+    // creating the table is the Administer Tables role.
     List<Column> columns = definition.getColumns();
 
     TableEntry entry = tm.createTable(tableId, columns);
     TableResource resource = getResource(info, appId, entry);
-    
+
     // set the table-level manifest ETag if known...
     try {
-      resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(entry.getTableId(), cc));
+      resource.setTableLevelManifestETag(FileManifestServiceImpl.getTableLevelManifestETag(
+          entry.getTableId(), cc));
     } catch (ODKDatastoreException e) {
       // ignore
     }
@@ -234,26 +245,31 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public RealizedTableService getRealizedTable(@PathParam("schemaETag") String schemaETag) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException {
+  public RealizedTableService getRealizedTable(@PathParam("schemaETag") String schemaETag)
+      throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException,
+      AppNameMismatchException, ODKTaskLockException, TableNotFoundException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
     TableEntry entry = tm.getTable(tableId);
-    if ( entry == null || entry.getSchemaETag() == null ) {
-      // the table doesn't exist yet (or something is there that is database cruft)
+    if (entry == null || entry.getSchemaETag() == null) {
+      // the table doesn't exist yet (or something is there that is database
+      // cruft)
       throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
-    if ( !entry.getSchemaETag().equals(schemaETag) ) {
+    if (!entry.getSchemaETag().equals(schemaETag)) {
       throw new SchemaETagMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + entry.getSchemaETag());
     }
-    RealizedTableService service = new RealizedTableServiceImpl(sc, req, headers, info, appId, tableId, schemaETag, userPermissions, tm, cc);
+    RealizedTableService service = new RealizedTableServiceImpl(sc, req, headers, info, appId,
+        tableId, schemaETag, userPermissions, tm, cc);
     return service;
 
   }
 
   @Override
-  public TableAclService getAcl() throws ODKDatastoreException, AppNameMismatchException, PermissionDeniedException, ODKTaskLockException {
+  public TableAclService getAcl() throws ODKDatastoreException, AppNameMismatchException,
+      PermissionDeniedException, ODKTaskLockException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
 
@@ -271,9 +287,12 @@ public class TableServiceImpl implements TableService {
     ub.path(OdkTables.class, "getTablesService");
     URI self = ub.clone().build(appId, tableId);
     UriBuilder realized = ub.clone().path(TableService.class, "getRealizedTable");
-    URI data = realized.clone().path(RealizedTableService.class, "getData").build(appId, tableId, schemaETag);
-    URI instanceFiles = realized.clone().path(RealizedTableService.class, "getInstanceFileService").build(appId, tableId, schemaETag);
-    URI diff = realized.clone().path(RealizedTableService.class, "getDiff").build(appId, tableId, schemaETag);
+    URI data = realized.clone().path(RealizedTableService.class, "getData")
+        .build(appId, tableId, schemaETag);
+    URI instanceFiles = realized.clone().path(RealizedTableService.class, "getInstanceFileService")
+        .build(appId, tableId, schemaETag);
+    URI diff = realized.clone().path(RealizedTableService.class, "getDiff")
+        .build(appId, tableId, schemaETag);
     URI acl = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
     URI definition = realized.clone().build(appId, tableId, schemaETag);
 
@@ -302,15 +321,16 @@ public class TableServiceImpl implements TableService {
     FileContentInfo fi;
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_PROPERTIES);
-    
+
     FileManager fm = new FileManager(appId, cc);
-    
+
     fi = fm.getFile("1", tableId, appRelativePath);
-      
+
     // And now prepare everything to be returned to the caller.
-    if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null && fi.contentLength != 0L) {
-      // read the byte[] array using the CSV reader, and build a 
-      // list of PropertyEntry objects. 
+    if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null
+        && fi.contentLength != 0L) {
+      // read the byte[] array using the CSV reader, and build a
+      // list of PropertyEntry objects.
       ByteArrayInputStream bas = new ByteArrayInputStream(fi.fileBlob);
       Reader rdr = null;
       RFC4180CsvReader csvReader = null;
@@ -318,35 +338,41 @@ public class TableServiceImpl implements TableService {
       try {
         rdr = new InputStreamReader(bas, CharEncoding.UTF_8);
         csvReader = new RFC4180CsvReader(rdr);
-        
+
         String[] entries = csvReader.readNext();
-        if ( entries.length != 5 ) {
+        if (entries.length != 5) {
           throw new IllegalStateException("Uploaded properties.csv does not have 5 columns!");
         }
-        
-        if ( !"_partition".equals(entries[0])) {
-          throw new IllegalStateException("Uploaded properties.csv does not have 'partition' as first column heading!");
+
+        if (!"_partition".equals(entries[0])) {
+          throw new IllegalStateException(
+              "Uploaded properties.csv does not have 'partition' as first column heading!");
         }
-        
-        if ( !"_aspect".equals(entries[1])) {
-          throw new IllegalStateException("Uploaded properties.csv does not have 'aspect' as second column heading!");
+
+        if (!"_aspect".equals(entries[1])) {
+          throw new IllegalStateException(
+              "Uploaded properties.csv does not have 'aspect' as second column heading!");
         }
-        
-        if ( !"_key".equals(entries[2])) {
-          throw new IllegalStateException("Uploaded properties.csv does not have 'key' as third column heading!");
+
+        if (!"_key".equals(entries[2])) {
+          throw new IllegalStateException(
+              "Uploaded properties.csv does not have 'key' as third column heading!");
         }
-        
-        if ( !"_type".equals(entries[3])) {
-          throw new IllegalStateException("Uploaded properties.csv does not have 'type' as fourth column heading!");
+
+        if (!"_type".equals(entries[3])) {
+          throw new IllegalStateException(
+              "Uploaded properties.csv does not have 'type' as fourth column heading!");
         }
-        
-        if ( !"_value".equals(entries[4])) {
-          throw new IllegalStateException("Uploaded properties.csv does not have 'value' as fifth column heading!");
+
+        if (!"_value".equals(entries[4])) {
+          throw new IllegalStateException(
+              "Uploaded properties.csv does not have 'value' as fifth column heading!");
         }
-        
+
         entries = csvReader.readNext();
-        while ( entries != null ) {
-          PropertyEntryXml e = new PropertyEntryXml(entries[0], entries[1], entries[2], entries[3], entries[4]);
+        while (entries != null) {
+          PropertyEntryXml e = new PropertyEntryXml(entries[0], entries[1], entries[2], entries[3],
+              entries[4]);
           properties.add(e);
           entries = csvReader.readNext();
         }
@@ -357,13 +383,13 @@ public class TableServiceImpl implements TableService {
         ex.printStackTrace();
         throw new IllegalStateException("unable to parse properties.csv!");
       } finally {
-        if ( csvReader != null ) {
+        if (csvReader != null) {
           try {
             csvReader.close();
           } catch (IOException e) {
             e.printStackTrace();
           }
-        } else if ( rdr != null ) {
+        } else if (rdr != null) {
           try {
             rdr.close();
           } catch (IOException e) {
@@ -371,74 +397,75 @@ public class TableServiceImpl implements TableService {
           }
         }
       }
-      
+
       PropertyEntryXmlList pl = new PropertyEntryXmlList(properties);
 
       List<MediaType> acceptableMedia = headers.getAcceptableMediaTypes();
       double maxJson = 0.0;
       double maxOther = 0.0;
       MediaType xmlType = null;
-      for ( MediaType m : acceptableMedia ) {
+      for (MediaType m : acceptableMedia) {
         // get q value, if any (default = 1.0).
         double weight = 0.0;
         String quotient = m.getParameters().get("q");
-        if ( quotient != null ) {
+        if (quotient != null) {
           try {
             weight = Double.valueOf(quotient);
-          } catch ( NumberFormatException e ) {
+          } catch (NumberFormatException e) {
             weight = 1.0;
           }
-        } else { 
+        } else {
           weight = 1.0;
         }
-        
-        if ( m.isCompatible(MediaType.APPLICATION_JSON_TYPE) ) {
+
+        if (m.isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
           // this will snarf "*/*", so we will prefer the JSON return format.
           maxJson = (maxJson > weight) ? maxJson : weight;
-        } else if ( m.isCompatible(MediaType.valueOf(ApiConstants.MEDIA_TEXT_XML_UTF8)) ||
-            m.isCompatible(MediaType.valueOf(ApiConstants.MEDIA_APPLICATION_XML_UTF8))) {
-          if ( weight > maxOther ) {
+        } else if (m.isCompatible(MediaType.valueOf(ApiConstants.MEDIA_TEXT_XML_UTF8))
+            || m.isCompatible(MediaType.valueOf(ApiConstants.MEDIA_APPLICATION_XML_UTF8))) {
+          if (weight > maxOther) {
             maxOther = weight;
             xmlType = m;
           }
         }
       }
-      
-      if ( maxJson >= maxOther ) {
+
+      if (maxJson >= maxOther) {
         // re-write as full Json object...
         PropertyEntryJsonList pjson = new PropertyEntryJsonList();
-        for ( PropertyEntryXml e : properties ) {
-          PropertyEntryJson tpe = new PropertyEntryJson(e.getPartition(), e.getAspect(), e.getKey(), e.getType(), null);
+        for (PropertyEntryXml e : properties) {
+          PropertyEntryJson tpe = new PropertyEntryJson(e.getPartition(), e.getAspect(),
+              e.getKey(), e.getType(), null);
           String value = e.getValue();
-          if ( value == null ) {
+          if (value == null) {
             // shouldn't happen...
             tpe.setValue(null);
             continue;
           }
           String type = e.getType();
-          if ( type.equals("string") ) {
+          if (type.equals("string")) {
             tpe.setValue(value);
-          } else if ( type.equals("number") ) {
+          } else if (type.equals("number")) {
             try {
               double d = Double.valueOf(value);
               tpe.setValue(d);
-            } catch ( NumberFormatException ex) {
+            } catch (NumberFormatException ex) {
               // swallow...
               tpe.setValue(null);
             }
-          } else if ( type.equals("integer") ) {
+          } else if (type.equals("integer")) {
             try {
               int i = Integer.valueOf(value);
               tpe.setValue(i);
-            } catch ( NumberFormatException ex) {
+            } catch (NumberFormatException ex) {
               // swallow...
               tpe.setValue(null);
             }
-          } else if ( type.equals("boolean") ) {
+          } else if (type.equals("boolean")) {
             boolean b = Boolean.valueOf(value);
             tpe.setValue(b);
           } else {
-            // could be anything. most likely 
+            // could be anything. most likely
             // an array or object -- just convert
             // and store...
             Object o = null;
@@ -455,7 +482,7 @@ public class TableServiceImpl implements TableService {
           }
           pjson.add(tpe);
         }
-        
+
         ResponseBuilder rBuild = Response.ok(pjson, MediaType.APPLICATION_JSON_TYPE)
             .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
             .header("Access-Control-Allow-Origin", "*")
@@ -470,7 +497,7 @@ public class TableServiceImpl implements TableService {
       }
     } else {
       PropertyEntryXmlList pl = new PropertyEntryXmlList(null);
-      
+
       ResponseBuilder rBuild = Response.ok(pl)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
@@ -487,31 +514,31 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response putJsonTableProperties(ArrayList<Map<String,Object>> propertiesList)
+  public Response putJsonTableProperties(ArrayList<Map<String, Object>> propertiesList)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
       TableNotFoundException {
     ArrayList<PropertyEntryXml> properties = new ArrayList<PropertyEntryXml>();
-    for ( Map<String,Object> tpe : propertiesList ) {
+    for (Map<String, Object> tpe : propertiesList) {
       // bogus type and value...
       String partition = (String) tpe.get("partition");
       String aspect = (String) tpe.get("aspect");
       String key = (String) tpe.get("key");
       String type = (String) tpe.get("type");
       PropertyEntryXml e = new PropertyEntryXml(partition, aspect, key, type, null);
-      
+
       // and figure out the correct type and value...
       Object value = tpe.get("value");
-      if ( value == null ) {
+      if (value == null) {
         e.setValue(null);
-      } else if ( value instanceof Boolean ) {
+      } else if (value instanceof Boolean) {
         e.setValue(Boolean.toString((Boolean) value));
-      } else if ( value instanceof Integer ) {
+      } else if (value instanceof Integer) {
         e.setValue(Integer.toString((Integer) value));
-      } else if ( value instanceof Float ) {
+      } else if (value instanceof Float) {
         e.setValue(Float.toString((Float) value));
-      } else if ( value instanceof Double ) {
+      } else if (value instanceof Double) {
         e.setValue(Double.toString((Double) value));
-      } else if ( value instanceof List ) {
+      } else if (value instanceof List) {
         try {
           e.setValue(mapper.writeValueAsString(value));
         } catch (JsonProcessingException ex) {
@@ -526,19 +553,19 @@ public class TableServiceImpl implements TableService {
           e.setValue("{}");
         }
       }
-      
+
       properties.add(e);
     }
     PropertyEntryXmlList pl = new PropertyEntryXmlList(properties);
     return putInternalTableProperties(pl);
   }
-  
+
   public Response putInternalTableProperties(PropertyEntryXmlList propertiesList)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
       TableNotFoundException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -547,14 +574,15 @@ public class TableServiceImpl implements TableService {
     String appRelativePath = FileManager.getPropertiesFilePath(tableId);
 
     String contentType = com.google.common.net.MediaType.CSV_UTF_8.toString();
-    
-    // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
+
+    // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
+    // permissions
     userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
 
     ByteArrayOutputStream bas = new ByteArrayOutputStream();
     Writer wtr = null;
     RFC4180CsvWriter csvWtr = null;
-    
+
     try {
       wtr = new OutputStreamWriter(bas, CharEncoding.UTF_8);
       csvWtr = new RFC4180CsvWriter(wtr);
@@ -565,7 +593,7 @@ public class TableServiceImpl implements TableService {
       entry[3] = "_type";
       entry[4] = "_value";
       csvWtr.writeNext(entry);
-      for ( PropertyEntryXml e : propertiesList.getProperties()) {
+      for (PropertyEntryXml e : propertiesList.getProperties()) {
         entry[0] = e.getPartition();
         entry[1] = e.getAspect();
         entry[2] = e.getKey();
@@ -581,13 +609,13 @@ public class TableServiceImpl implements TableService {
       ex.printStackTrace();
       throw new IllegalStateException("Unable to write into a byte array!");
     } finally {
-      if ( csvWtr != null ) {
+      if (csvWtr != null) {
         try {
           csvWtr.close();
         } catch (IOException e) {
           e.printStackTrace();
         }
-      } else if ( wtr != null ) {
+      } else if (wtr != null) {
         try {
           wtr.close();
         } catch (IOException e) {
@@ -595,13 +623,14 @@ public class TableServiceImpl implements TableService {
         }
       }
     }
-    
+
     byte[] content = bas.toByteArray();
-    
+
     FileManager fm = new FileManager(appId, cc);
-    
-    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), null, content);
-    
+
+    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), null,
+        content);
+
     @SuppressWarnings("unused")
     FileChangeDetail outcome = fm.putFile("1", tableId, appRelativePath, userPermissions, fi);
     return Response.status(Status.ACCEPTED)

@@ -786,20 +786,102 @@ public class DataManager {
     }
   }
 
+  private void prepareRowForInsertUpdateOrDelete(BulkRowObjWrapper rowWrapper,
+      List<DbColumnDefinitionsEntity> columns, DbTable table,
+      DataKeyValueDeepComparator dc) throws ODKDatastoreException,
+      PermissionDeniedException {
+
+    Row row = rowWrapper.getRow();
+    Entity entity = rowWrapper.getEntity();
+    String rowId = rowWrapper.getRowId();
+    Scope scope = rowWrapper.getFilterScope();
+
+    if (rowWrapper.hasNullIncomingScope() && entity.isFromDatabase()) {
+      // preserve the scope of the existing entity if the incoming Row didn't
+      // specify one.
+      scope = converter.getDbTableFilterScope(entity);
+    }
+
+    // confirm that the user has the ability to read the row
+    boolean hasPermissions = false;
+    if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
+      hasPermissions = true;
+    } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, rowId,
+        scope)) {
+      hasPermissions = true;
+    }
+
+    if (!hasPermissions) {
+      rowWrapper.setOutcome(OutcomeType.DENIED);
+      return;
+    }
+
+    if (row.isDeleted()) {
+
+      // check for delete access
+      hasPermissions = false;
+      if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_DELETE)) {
+        hasPermissions = true;
+      } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.DELETE_ROW, rowId,
+          scope)) {
+        hasPermissions = true;
+      }
+
+    } else {
+      // confirm they have the ability to write to it
+      hasPermissions = false;
+      if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
+        hasPermissions = true;
+      } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.WRITE_ROW, rowId,
+          scope)) {
+        hasPermissions = true;
+      }
+    }
+
+    if (!hasPermissions) {
+      rowWrapper.setOutcome(OutcomeType.DENIED);
+      return;
+    }
+
+    if (entity.isFromDatabase()) {
+      String rowETag = entity.getString(DbTable.ROW_ETAG);
+      String currentETag = row.getRowETag();
+      // there was an existing record for the row in the database...
+      if (currentETag == null || !currentETag.equals(rowETag)) {
+        // Take the hit to convert the row we have.
+        Row currentRow = converter.toRow(entity, columns);
+        if (row.hasMatchingSignificantFieldValues(currentRow, dc)) {
+          // If the row matches everywhere except on the rowETag,
+          // return the row on the server.
+          rowWrapper.setOutcome(currentRow, OutcomeType.SUCCESS);
+          return;
+        }
+
+        // Otherwise, if there is a mis-match, then the client needs to
+        // perform client-side conflict resolution on the changes already
+        // up on the server. Return the row on the server.
+        rowWrapper.setOutcome(currentRow, OutcomeType.IN_CONFLICT);
+        return;
+      }
+    }
+  }
+
   public ArrayList<RowOutcome> insertOrUpdateRows(RowList rows) throws ODKEntityPersistException,
       ODKEntityNotFoundException, ODKDatastoreException, ODKTaskLockException,
       ETagMismatchException, BadColumnNameException, PermissionDeniedException,
       InconsistentStateException {
+
+    long startTime = System.currentTimeMillis();
+
     try {
       Validate.notNull(rows);
       ArrayList<RowOutcome> rowOutcomes = new ArrayList<RowOutcome>();
 
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
-
-      List<DbColumnDefinitionsEntity> columns = null;
-      Entity entity = null;
       LockTemplate propsLock = new LockTemplate(tableId,
           ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+
+      List<DbColumnDefinitionsEntity> columns = null;
       try {
         propsLock.acquire();
         Sequencer sequencer = new Sequencer(cc);
@@ -820,152 +902,66 @@ public class DataManager {
         DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
         revertPendingChanges(entry, columns, table, logTable);
-        
+
+        logger.error("Before loop Time elpased: " + (System.currentTimeMillis() - startTime));
+
         DataKeyValueDeepComparator dc = new DataKeyValueDeepComparator(columns);
+
+        // mark as pending change.
+        // get new dataETag
+        String dataETagAtModification = PersistenceUtils.newUri();
+        entry.setPendingDataETag(dataETagAtModification);
+        entry.put(cc);
+
+        List<Entity> entityInsertList = new ArrayList<Entity>();
+        List<Entity> entityUpdateList = new ArrayList<Entity>();
+        List<Entity> logEntityList = new ArrayList<Entity>();
+
+        ArrayList<BulkRowObjWrapper> rowWrapperList = new ArrayList<BulkRowObjWrapper>();
 
         for (Row row : rows.getRows()) {
 
-          RowOutcome outcome = null;
-          while (true) {
-            String rowId = row.getRowId();
-            boolean newRowId = false;
-            if (rowId == null) {
-              newRowId = true;
-              rowId = PersistenceUtils.newUri();
-              row.setRowId(rowId);
-            }
-            boolean nullIncomingScope = false;
-            Scope scope = row.getFilterScope();
-            if (scope == null) {
-              nullIncomingScope = true;
-              scope = Scope.EMPTY_SCOPE;
-              row.setFilterScope(scope);
-            }
+          BulkRowObjWrapper rowWrapper = new BulkRowObjWrapper(row);
 
-            try {
-              entity = table.getEntity(rowId, cc);
+          // and add row wrapper for bulk processing
+          rowWrapperList.add(rowWrapper);
 
-              if (newRowId) {
-                // this is an impossible special case --
-                // the UUID we generated conflicts; 
-                // set row outcome to FAILED
-                outcome = new RowOutcome(row);
-                row.setRowId(null);
-                outcome.setOutcome(OutcomeType.FAILED);
-                break;
-              }
+          Entity entity = null;
+          try {
+            entity = table.getEntity(rowWrapper.getRowId(), cc);
 
-              if (nullIncomingScope) {
-                // preserve the scope of the existing entity if the incoming Row
-                // didn't specify one.
-                scope = converter.getDbTableFilterScope(entity);
-              }
-
-              // confirm that the user has the ability to read the row
-              boolean hasPermissions = false;
-              if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
-                hasPermissions = true;
-              } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-                  rowId, scope)) {
-                hasPermissions = true;
-              }
-
-              if (!hasPermissions) {
-                outcome = new RowOutcome(row);
-                outcome.setOutcome(OutcomeType.DENIED);
-                break;
-              }
-
-              if (row.isDeleted()) {
-
-                // check for delete access
-                hasPermissions = false;
-                if (userPermissions
-                    .hasPermission(appId, tableId, TablePermission.UNFILTERED_DELETE)) {
-                  hasPermissions = true;
-                } else if (userPermissions.hasFilterScope(appId, tableId,
-                    TablePermission.DELETE_ROW, rowId, scope)) {
-                  hasPermissions = true;
-                }
-
-              } else {
-                // confirm they have the ability to write to it
-                hasPermissions = false;
-                if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
-                  hasPermissions = true;
-                } else if (userPermissions.hasFilterScope(appId, tableId,
-                    TablePermission.WRITE_ROW, rowId, scope)) {
-                  hasPermissions = true;
-                }
-              }
-
-              if (!hasPermissions) {
-                outcome = new RowOutcome(row);
-                outcome.setOutcome(OutcomeType.DENIED);
-                break;
-              }
-
-              String rowETag = entity.getString(DbTable.ROW_ETAG);
-              String currentETag = row.getRowETag();
-              if (currentETag == null || !currentETag.equals(rowETag)) {
-
-                // Take the hit to convert the row we have.
-                // If the row matches everywhere except on the rowETag, return
-                // it.
-                Row currentRow = converter.toRow(entity, columns);
-                if (row.hasMatchingSignificantFieldValues(currentRow, dc)) {
-                  outcome = new RowOutcome(currentRow);
-                  outcome.setOutcome(OutcomeType.SUCCESS);
-                  break;
-                }
-
-                // if null, then the client thinks they are creating a new row.
-                // The rows may be identical, but leave that to the client to
-                // determine
-                // trigger client-side conflict resolution.
-                // Otherwise, if there is a mis-match, then the client needs to
-                // pull and
-                // perform client-side conflict resolution on the changes
-                // already up on the server.
-                outcome = new RowOutcome(currentRow);
-                outcome.setOutcome(OutcomeType.IN_CONFLICT);
-                break;
-              }
-
-            } catch (ODKEntityNotFoundException e) {
-
-              if (row.isDeleted()) {
-                // not found on server -- it is unclear whether
-                // the server should create the row and a deletion
-                // marker for the row, or whether it should just
-                // silently do nothing and return success.
-                //
-                // set row outcome to FAILED (client must decide).
-                outcome = new RowOutcome(row);
-                outcome.setOutcome(OutcomeType.FAILED);
-                break;
-              }
- 
-                // require unfiltered write permissions to create a new record
-              userPermissions.checkPermission(appId, tableId, TablePermission.UNFILTERED_WRITE);
-
-              newRowId = true;
-
-              // initialization for insert...
-              entity = table.newEntity(rowId, cc);
-              entity.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
+            if (rowWrapper.hasNewRowId()) {
+              // yikes! -- generated UUID conflicts with an existing one.
+              rowWrapper.setOutcome(OutcomeType.IN_CONFLICT);
+              rowWrapperList.add(rowWrapper);
+              continue;
             }
 
-            // OK we are able to update or insert or delete the record -- mark
-            // as pending change.
+          } catch (ODKEntityNotFoundException e) {
 
-            // get new dataETag
-            String dataETagAtModification = PersistenceUtils.newUri();
-            entry.setPendingDataETag(dataETagAtModification);
-            entry.put(cc);
+            if (row.isDeleted()) {
+              rowWrapper.setOutcome(OutcomeType.DENIED);
+              rowWrapperList.add(rowWrapper);
+              continue;
+            }
+
+            // presumptive initialization for insert...
+            entity = table.newEntity(rowWrapper.getRowId(), cc);
+            entity.set(DbTable.CREATE_USER, userPermissions.getOdkTablesUserId());
+          }
+
+          // add entity to row wrapper
+          rowWrapper.setEntity(entity);
+
+          // determine whether the update or insert should go through or not.
+          // if entity.isFromDatabase() is true, it is an update or delete
+          prepareRowForInsertUpdateOrDelete(rowWrapper, columns, table, dc);
+
+          // OK we are able to update or insert or delete the record
+          if (!rowWrapper.outcomeAlreadySet()) {
+            Scope scope = rowWrapper.getFilterScope();
 
             String previousRowETag;
-            Entity logEntity;
 
             if (row.isDeleted()) {
 
@@ -990,26 +986,50 @@ public class DataManager {
             }
 
             // create log table entry
-            logEntity = creator.newLogEntity(logTable, dataETagAtModification, previousRowETag,
-                entity, columns, sequencer, cc);
+            Entity logEntity = creator.newLogEntity(logTable, dataETagAtModification,
+                previousRowETag, entity, columns, sequencer, cc);
 
-            // commit the log change to the database (must be done first!)
-            DbLogTable.putEntity(logEntity, cc);
-            // commit the row change
-            DbTable.putEntity(entity, cc);
+            logEntityList.add(logEntity);
 
-            // commit change
-            entry.setDataETag(entry.getPendingDataETag());
-            entry.setPendingDataETag(null);
-            entry.put(cc);
-
-            Row updatedRow = converter.toRow(entity, columns);
-            outcome = new RowOutcome(updatedRow);
-            outcome.setOutcome(OutcomeType.SUCCESS);
-            break;
+            if (entity.isFromDatabase()) {
+              entityUpdateList.add(entity);
+            } else {
+              entityInsertList.add(entity);
+            }
           }
-          rowOutcomes.add(outcome);
+
         }
+
+        // commit the log change to the database (must be done first!)
+        if (!logEntityList.isEmpty()) {
+          logTable.bulkAlterEntities(logEntityList, cc);
+        }
+
+        // commit the row updates
+        if (!entityUpdateList.isEmpty()) {
+          table.bulkAlterEntities(entityUpdateList, cc);
+        }
+        // commit the row inserts
+        if (!entityInsertList.isEmpty()) {
+          table.bulkAlterEntities(entityInsertList, cc);
+        }
+
+        // commit change
+        entry.setDataETag(entry.getPendingDataETag());
+        entry.setPendingDataETag(null);
+        entry.put(cc);
+
+        for (BulkRowObjWrapper rowWrapper : rowWrapperList) {
+          if (!rowWrapper.outcomeAlreadySet()) {
+            // we need to return the fields from the entity we upserted.
+            Row newServer = converter.toRow(rowWrapper.getEntity(), columns);
+            rowWrapper.setOutcome(newServer, OutcomeType.SUCCESS);
+          }
+          // update the outcomes set...
+          rowOutcomes.add(rowWrapper.getOutcome());
+        }
+
+        logger.error("End loop Time elpased: " + (System.currentTimeMillis() - startTime));
       } finally {
         propsLock.release();
       }
@@ -1017,6 +1037,13 @@ public class DataManager {
       if (columns == null) {
         throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
       }
+
+      if (rows != null) {
+        long time = (System.currentTimeMillis() - startTime);
+        int numRows = rows.getRows().size();
+        logger.error("Time: " + time + " size: " + numRows + " per iteration " + (time / numRows));
+      }
+
       return rowOutcomes;
     } catch (NullPointerException e) {
       e.printStackTrace();

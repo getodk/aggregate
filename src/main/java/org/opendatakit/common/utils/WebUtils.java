@@ -68,8 +68,7 @@ public class WebUtils {
 
   /**
    * Date format pattern used to parse HTTP date headers in ANSI C
-   * <code>asctime()</code> format.
-   * copied from apache.commons.lang.DateUtils
+   * <code>asctime()</code> format. copied from apache.commons.lang.DateUtils
    */
   private static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
   private static final String PATTERN_DATE_TOSTRING = "EEE MMM dd HH:mm:ss zzz yyyy";
@@ -94,10 +93,10 @@ public class WebUtils {
    * @return encoded string
    */
   public static String safeEncode(String rawString) {
-    if ( rawString == null || rawString.length() == 0 ) {
+    if (rawString == null || rawString.length() == 0) {
       return null;
     }
-    
+
     try {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       GZIPOutputStream gzip = new GZIPOutputStream(out);
@@ -122,16 +121,17 @@ public class WebUtils {
    * @return rawString
    */
   public static String safeDecode(String encodedWebsafeString) {
-    if ( encodedWebsafeString == null || encodedWebsafeString.length() == 0 ) {
+    if (encodedWebsafeString == null || encodedWebsafeString.length() == 0) {
       return encodedWebsafeString;
     }
-    
+
     try {
-      ByteArrayInputStream in = new ByteArrayInputStream(Base64.decodeBase64(encodedWebsafeString.getBytes(CharEncoding.UTF_8)));
+      ByteArrayInputStream in = new ByteArrayInputStream(Base64.decodeBase64(encodedWebsafeString
+          .getBytes(CharEncoding.UTF_8)));
       GZIPInputStream gzip = new GZIPInputStream(in);
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       int ch = gzip.read();
-      while ( ch >= 0 ) {
+      while (ch >= 0) {
         out.write(ch);
         ch = gzip.read();
       }
@@ -181,14 +181,15 @@ public class WebUtils {
     return b;
   }
 
-  private static final Date parseDateSubset( String value, String[] parsePatterns, Locale l, TimeZone tz) {
+  private static final Date parseDateSubset(String value, String[] parsePatterns, Locale l,
+      TimeZone tz) {
     // borrowed from apache.commons.lang.DateUtils...
     Date d = null;
     SimpleDateFormat parser = null;
     ParsePosition pos = new ParsePosition(0);
     for (int i = 0; i < parsePatterns.length; i++) {
       if (i == 0) {
-        if ( l == null ) {
+        if (l == null) {
           parser = new SimpleDateFormat(parsePatterns[0]);
         } else {
           parser = new SimpleDateFormat(parsePatterns[0], l);
@@ -205,6 +206,7 @@ public class WebUtils {
     }
     return d;
   }
+
   /**
    * Parse a string into a datetime value. Tries the common Http formats, the
    * iso8601 format (used by Javarosa), the default formatting from
@@ -214,58 +216,64 @@ public class WebUtils {
    * @return
    */
   public static final Date parseDate(String value) {
-    if ( value == null || value.length() == 0 ) return null;
+    if (value == null || value.length() == 0)
+      return null;
 
-    String[] iso8601Pattern = new String[] {
-        PATTERN_ISO8601 };
+    String[] iso8601Pattern = new String[] { PATTERN_ISO8601 };
 
     String[] localizedParsePatterns = new String[] {
         // try the common HTTP date formats that have time zones
-        PATTERN_RFC1123,
-        PATTERN_RFC1036,
-        PATTERN_DATE_TOSTRING };
+        PATTERN_RFC1123, PATTERN_RFC1036, PATTERN_DATE_TOSTRING };
 
     String[] localizedNoTzParsePatterns = new String[] {
-        // ones without timezones... (will assume UTC)
-        PATTERN_ASCTIME };
+    // ones without timezones... (will assume UTC)
+    PATTERN_ASCTIME };
 
-    String[] tzParsePatterns = new String[] {
-        PATTERN_ISO8601,
-        PATTERN_ISO8601_DATE,
+    String[] tzParsePatterns = new String[] { PATTERN_ISO8601, PATTERN_ISO8601_DATE,
         PATTERN_ISO8601_TIME };
 
     String[] noTzParsePatterns = new String[] {
         // ones without timezones... (will assume UTC)
-        PATTERN_ISO8601_WITHOUT_ZONE,
-        PATTERN_NO_DATE_TIME_ONLY,
-        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH,
-        PATTERN_GOOGLE_DOCS };
+        PATTERN_ISO8601_WITHOUT_ZONE, PATTERN_NO_DATE_TIME_ONLY,
+        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH, PATTERN_GOOGLE_DOCS };
 
     Date d = null;
     // iso8601 parsing is sometimes off-by-one when JR does it...
     d = parseDateSubset(value, iso8601Pattern, null, TimeZone.getTimeZone("GMT"));
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
     // try to parse with the JavaRosa parsers
     d = DateUtils.parseDateTime(value);
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
     d = DateUtils.parseDate(value);
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
     d = DateUtils.parseTime(value);
-    if ( d != null ) return d;
-    // try localized and english text parsers (for Web headers and interactive filter spec.)
+    if (d != null)
+      return d;
+    // try localized and english text parsers (for Web headers and interactive
+    // filter spec.)
     d = parseDateSubset(value, localizedParsePatterns, Locale.ENGLISH, TimeZone.getTimeZone("GMT"));
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
     d = parseDateSubset(value, localizedParsePatterns, null, TimeZone.getTimeZone("GMT"));
-    if ( d != null ) return d;
-    d = parseDateSubset(value, localizedNoTzParsePatterns, Locale.ENGLISH, TimeZone.getTimeZone("GMT"));
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
+    d = parseDateSubset(value, localizedNoTzParsePatterns, Locale.ENGLISH,
+        TimeZone.getTimeZone("GMT"));
+    if (d != null)
+      return d;
     d = parseDateSubset(value, localizedNoTzParsePatterns, null, TimeZone.getTimeZone("GMT"));
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
     // try other common patterns that might not quite match JavaRosa parsers
     d = parseDateSubset(value, tzParsePatterns, null, TimeZone.getTimeZone("GMT"));
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
     d = parseDateSubset(value, noTzParsePatterns, null, TimeZone.getTimeZone("GMT"));
-    if ( d != null ) return d;
+    if (d != null)
+      return d;
     // try the locale- and timezone- specific parsers
     {
       DateFormat formatter = DateFormat.getDateTimeInstance();
@@ -386,13 +394,16 @@ public class WebUtils {
     if (d == null)
       return null;
     // SDF is not thread-safe
-    SimpleDateFormat asGMTiso8601 = new SimpleDateFormat(PATTERN_ISO8601); // with time zone
+    SimpleDateFormat asGMTiso8601 = new SimpleDateFormat(PATTERN_ISO8601); // with
+                                                                           // time
+                                                                           // zone
     asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTiso8601.format(d);
   }
 
   /**
    * Return the RFC1123 string representation of a date.
+   * 
    * @param d
    * @return
    */
@@ -400,7 +411,9 @@ public class WebUtils {
     if (d == null)
       return null;
     // SDF is not thread-safe
-    SimpleDateFormat asGMTrfc1123 = new SimpleDateFormat(PATTERN_RFC1123); // with time zone
+    SimpleDateFormat asGMTrfc1123 = new SimpleDateFormat(PATTERN_RFC1123); // with
+                                                                           // time
+                                                                           // zone
     asGMTrfc1123.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTrfc1123.format(d);
   }
@@ -414,7 +427,7 @@ public class WebUtils {
   }
 
   public static final Date parsePurgeDateString(String str) throws ParseException {
-    if ( str == null ) {
+    if (str == null) {
       return null;
     }
     // SDF is not thread-safe
@@ -446,19 +459,20 @@ public class WebUtils {
     return b.toString();
   }
 
-  public static String readResponse( HttpResponse resp ) throws IOException {
+  public static String readResponse(HttpResponse resp) throws IOException {
 
     HttpEntity e = resp.getEntity();
-    if ( e != null ) {
-        return WebUtils.readResponseHelper(e.getContent());
+    if (e != null) {
+      return WebUtils.readResponseHelper(e.getContent());
     }
 
     return BasicConsts.EMPTY_STRING;
   }
 
-  public static String readGoogleResponse(com.google.api.client.http.HttpResponse resp ) throws IOException {
-    if (resp != null ) {
-        return WebUtils.readResponseHelper(resp.getContent());
+  public static String readGoogleResponse(com.google.api.client.http.HttpResponse resp)
+      throws IOException {
+    if (resp != null) {
+      return WebUtils.readResponseHelper(resp.getContent());
     }
 
     return BasicConsts.EMPTY_STRING;
@@ -468,10 +482,12 @@ public class WebUtils {
     StringBuffer response = new StringBuffer();
 
     if (content != null) {
-      // TODO: this section of code is possibly causing 'WARNING: Going to buffer
+      // TODO: this section of code is possibly causing 'WARNING: Going to
+      // buffer
       // response body of large or unknown size. Using getResponseBodyAsStream
       // instead is recommended.'
-      // The WARNING is most likely only happening when running appengine locally,
+      // The WARNING is most likely only happening when running appengine
+      // locally,
       // but we should investigate to make sure
       BufferedReader reader = null;
       InputStreamReader isr = null;
@@ -489,23 +505,22 @@ public class WebUtils {
         ex.printStackTrace();
       } finally {
         try {
-          if ( reader != null ) {
+          if (reader != null) {
             reader.close();
           }
-        } catch ( IOException ex ) {
+        } catch (IOException ex) {
           // no-op
         }
         try {
-          if ( isr != null ) {
+          if (isr != null) {
             isr.close();
           }
-        } catch ( IOException ex ) {
+        } catch (IOException ex) {
           // no-op
         }
       }
     }
     return response.toString();
   }
-
 
 }
