@@ -49,6 +49,8 @@ public class Preferences {
   private static String appName;
 
   private static Boolean fasterBackgroundActionsDisabled;
+  
+  private static Boolean skipMalformedSubmissions;
 
   private static int nesting = 0;
   private static ArrayList<PreferencesCompletionCallback> userCallbacks = new ArrayList<PreferencesCompletionCallback>();
@@ -84,6 +86,7 @@ public class Preferences {
       odkTablesEnabled = summary.getOdkTablesEnabled();
       appName = summary.getAppName();
       fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
+      skipMalformedSubmissions = summary.getSkipMalformedSubmissions();
 
       --nesting;
       if ( nesting <= 0 ) {
@@ -161,6 +164,13 @@ public class Preferences {
   public static Boolean getFasterBackgroundActionsDisabled() {
     if (fasterBackgroundActionsDisabled != null) {
       return fasterBackgroundActionsDisabled;
+    }
+    return Boolean.FALSE;
+  }
+
+  public static Boolean getSkipMalformedSubmissions() {
+    if (skipMalformedSubmissions != null) {
+      return skipMalformedSubmissions;
     }
     return Boolean.FALSE;
   }

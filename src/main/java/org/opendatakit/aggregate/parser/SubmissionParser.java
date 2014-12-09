@@ -388,6 +388,11 @@ public class SubmissionParser {
         e.printStackTrace();
         logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
             + fi.getTableName() + " uri " + fi.getUri());
+        if ( e instanceof ODKEntityNotFoundException ) {
+          // this is a malformed submission...
+          // try to clean this up...
+          DeleteHelper.deleteDamagedSubmission(fi, form.getAllBackingObjects(), cc);
+        }
         throw e;
       }
       preExisting = true;

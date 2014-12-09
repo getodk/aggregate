@@ -37,6 +37,7 @@ import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -47,6 +48,7 @@ import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -226,7 +228,18 @@ public class QueryByUIFilterGroup extends QueryBase {
         e.printStackTrace();
         logger.error("Unable to reconstruct submission for " + 
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
-        throw e;
+        
+        if ( e instanceof ODKEntityNotFoundException ) {
+          // see if we should throw an error or skip processing...
+          Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
+          if ( skip ) {
+            continue;
+          } else {
+            throw e;
+          }
+        } else {
+          throw e;
+        }
       }
     }
 
@@ -356,7 +369,18 @@ public class QueryByUIFilterGroup extends QueryBase {
         e.printStackTrace();
         logger.error("Unable to reconstruct submission for " + 
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
-        throw e;
+
+        if ( e instanceof ODKEntityNotFoundException ) {
+          // see if we should throw an error or skip processing...
+          Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
+          if ( skip ) {
+            continue;
+          } else {
+            throw e;
+          }
+        } else {
+          throw e;
+        }
       }
     }
     if ( !isForwardCursor ) {

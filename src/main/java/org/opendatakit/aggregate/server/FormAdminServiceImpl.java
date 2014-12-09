@@ -432,7 +432,10 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     try {
       List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
       Submission sub = Submission.fetchSubmission(parts, cc);
-
+      if ( sub == null ) {
+        throw new RequestFailureException("Unable to revise submission (see logs)");
+      }
+      
       IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       if ( !form.hasValidFormDefinition() ) {
         // should never happen here -- should happen in the fetchSubmission() call above.
