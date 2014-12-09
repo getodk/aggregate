@@ -205,7 +205,7 @@ public class BinaryDataServlet extends ServletUtilBase {
       }
     }
 
-    if (imageBlob != null) {
+    if (imageBlob != null && imageBlob.length > 0) {
       if (contentType == null) {
         contentType = HtmlConsts.RESP_TYPE_IMAGE_JPEG;
       }
