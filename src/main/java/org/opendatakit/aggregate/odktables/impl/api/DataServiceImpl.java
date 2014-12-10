@@ -85,8 +85,8 @@ public class DataServiceImpl implements DataService {
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
       PermissionDeniedException, BadColumnNameException, InconsistentStateException {
 
-    ArrayList<RowOutcome> changedRows = dm.insertOrUpdateRows(rows);
-    RowOutcomeList outcomes = getOutcomes(changedRows);
+    RowOutcomeList outcomes = dm.insertOrUpdateRows(rows);
+    updateTableUri(outcomes);
     return Response.ok(outcomes)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
@@ -116,8 +116,8 @@ public class DataServiceImpl implements DataService {
     ArrayList<Row> rows = new ArrayList<Row>();
     rows.add(row);
     rowList.setRows(rows);
-    ArrayList<RowOutcome> changedRows = dm.insertOrUpdateRows(rowList);
-    RowOutcomeList outcomes = getOutcomes(changedRows);
+    RowOutcomeList outcomes = dm.insertOrUpdateRows(rowList);
+    updateTableUri(outcomes);
     RowOutcome outcome = outcomes.getRows().get(0);
     return Response.ok(outcome)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
@@ -164,7 +164,7 @@ public class DataServiceImpl implements DataService {
     return resources;
   }
 
-  private RowOutcomeList getOutcomes(ArrayList<RowOutcome> rows) {
+  private void updateTableUri(RowOutcomeList outcomeList) {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
     // for bandwidth efficiency, do not provide selfUri in response array
@@ -172,13 +172,11 @@ public class DataServiceImpl implements DataService {
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
     URI table = ub.clone().build(appId, tableId);
-    RowOutcomeList outcomeList = new RowOutcomeList(rows);
     try {
       outcomeList.setTableUri(table.toURL().toExternalForm());
     } catch (MalformedURLException e) {
       e.printStackTrace();
       throw new IllegalArgumentException("unable to convert URL ");
     }
-    return outcomeList;
   }
 }
