@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.common.datamodel.DeleteHelper;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -84,8 +85,14 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
     List<? extends CommonFieldsBase> choiceHits = q.executeQuery();
     choices.clear();
     values.clear();
+    long expectedOrdinal = 1L;
     for (CommonFieldsBase cb : choiceHits) {
       SelectChoice choice = (SelectChoice) cb;
+      Long ordinal = choice.getOrdinalNumber();
+      if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
+        throw new ODKEnumeratedElementException(element.getElementName() + " valueSet is missing an entry");
+      }
+      ++expectedOrdinal;
       choices.add(choice);
       values.add(choice.getValue());
     }

@@ -41,6 +41,7 @@ import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -229,7 +230,8 @@ public class QueryByUIFilterGroup extends QueryBase {
         logger.error("Unable to reconstruct submission for " + 
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
         
-        if ( e instanceof ODKEntityNotFoundException ) {
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
           // see if we should throw an error or skip processing...
           Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
           if ( skip ) {
@@ -370,7 +372,8 @@ public class QueryByUIFilterGroup extends QueryBase {
         logger.error("Unable to reconstruct submission for " + 
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
 
-        if ( e instanceof ODKEntityNotFoundException ) {
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
           // see if we should throw an error or skip processing...
           Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
           if ( skip ) {

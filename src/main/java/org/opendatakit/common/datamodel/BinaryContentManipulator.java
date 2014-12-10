@@ -99,7 +99,7 @@ public class BinaryContentManipulator {
       // loop to create the VBCRB and RB entries for each part of the
       // larger blob
       long blobLimit = ref.value.getMaxCharLen();
-      long i = 1;
+      long part = 1L;
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
       for (long index = 0; index < blob.length; index = index + blobLimit) {
@@ -115,7 +115,7 @@ public class BinaryContentManipulator {
         bcb.setTopLevelAuri(topLevelKey);
         bcb.setDomAuri(uriVersionedContent);
         bcb.setSubAuri(eBlob.getUri());
-        bcb.setPart(i++);
+        bcb.setPart(part++);
         dbBcbEntityList.add(bcb);
         ds.putEntity(eBlob, user);
         ds.putEntity(bcb, user);
@@ -133,8 +133,15 @@ public class BinaryContentManipulator {
       q.addSort(bcbRef.domAuri, Direction.ASCENDING); // gae optimization
       q.addSort(bcbRef.part, Direction.ASCENDING);
       List<? extends CommonFieldsBase> bcbList = q.executeQuery();
+      long expectedPart = 1L;
       for (CommonFieldsBase cb : bcbList) {
-        dbBcbEntityList.add((BinaryContentRefBlob) cb);
+        BinaryContentRefBlob bcref = (BinaryContentRefBlob) cb;
+        Long part = bcref.getPart();
+        if ( part == null || part.longValue() != expectedPart ) {
+          throw new ODKEnumeratedElementException(bcbRef.getTableName() + " is missing a reference part");
+        }
+        ++expectedPart;
+        dbBcbEntityList.add(bcref);
       }
 
       // and gather the blob parts themselves...
@@ -572,8 +579,14 @@ public class BinaryContentManipulator {
 
       List<? extends CommonFieldsBase> contentHits = q.executeQuery();
       attachments.clear();
+      long expectedOrdinal = 1L;
       for (CommonFieldsBase cb : contentHits) {
         BinaryContent bc = (BinaryContent) cb;
+        Long ordinal = bc.getOrdinalNumber();
+        if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
+          throw new ODKEnumeratedElementException(ctntRelation.getTableName() + " is missing an attachment instance");
+        }
+        ++expectedOrdinal;
         attachments.put(bc.getOrdinalNumber(), bc);
       }
       refreshBeforeUse = false;

@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -263,7 +264,8 @@ public class Submission extends SubmissionSet {
       logger.error("Unable to reconstruct submission for " + tle.getSchemaName() + "."
           + tle.getTableName() + " uri " + tle.getUri());
       
-      if ( e instanceof ODKEntityNotFoundException ) {
+      if ( (e instanceof ODKEntityNotFoundException) ||
+           (e instanceof ODKEnumeratedElementException) ) {
         // see if we should throw an error or skip processing...
         Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
         if ( skip ) {

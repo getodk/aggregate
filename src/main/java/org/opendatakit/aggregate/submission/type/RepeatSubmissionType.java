@@ -33,6 +33,7 @@ import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.SubmissionVisitor;
 import org.opendatakit.common.datamodel.DynamicBase;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
@@ -143,9 +144,15 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     // reconstruct all the repeating groups from a single submission.
     // This should be a small number. We don't have the logic to
     // handle fractional returns of rows.
+    long expectedOrdinal = 1L;
     List<? extends CommonFieldsBase> repeatGroupList = q.executeQuery();
     for (CommonFieldsBase cb : repeatGroupList) {
       DynamicBase d = (DynamicBase) cb;
+      Long ordinal = d.getOrdinalNumber();
+      if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
+        throw new ODKEnumeratedElementException(repeatGroup.getElementName() + " is missing a (repeat) group instance");
+      }
+      ++expectedOrdinal;
       SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
       submissionSets.add(set);
     }

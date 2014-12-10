@@ -26,6 +26,7 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
@@ -119,7 +120,8 @@ public class QueryByDateRange extends QueryBase {
         logger.error("Unable to reconstruct submission for " + 
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
         
-        if ( e instanceof ODKEntityNotFoundException ) {
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
           // see if we should throw an error or skip processing...
           Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
           if ( skip ) {
