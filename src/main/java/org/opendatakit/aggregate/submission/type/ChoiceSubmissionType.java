@@ -90,7 +90,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
       SelectChoice choice = (SelectChoice) cb;
       Long ordinal = choice.getOrdinalNumber();
       if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
-        throw new ODKEnumeratedElementException(element.getElementName() + "@parentAuri(" + choice.getParentAuri() + ") valueSet is missing an entry");
+        throw new ODKEnumeratedElementException(element.getElementName() + "@parentAuri(" + choice.getParentAuri() + ") valueSet is missing an entry OR has an extra copy of one");
       }
       ++expectedOrdinal;
       choices.add(choice);
