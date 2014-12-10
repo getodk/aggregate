@@ -78,15 +78,18 @@ public class DataManager {
   public static class WebsafeRows {
     public final List<Row> rows;
 
+    public final String dataETag;
     public final String websafeRefetchCursor;
     public final String websafeBackwardCursor;
     public final String websafeResumeCursor;
     public final boolean hasMore;
     public final boolean hasPrior;
 
-    public WebsafeRows(List<Row> rows, String websafeRefetchCursor, String websafeBackwardCursor,
+    public WebsafeRows(List<Row> rows, String dataETag, 
+        String websafeRefetchCursor, String websafeBackwardCursor,
         String websafeResumeCursor, boolean hasMore, boolean hasPrior) {
       this.rows = rows;
+      this.dataETag = dataETag;
       this.websafeRefetchCursor = websafeRefetchCursor;
       this.websafeBackwardCursor = websafeBackwardCursor;
       this.websafeResumeCursor = websafeResumeCursor;
@@ -218,6 +221,8 @@ public class DataManager {
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
+    String currentDataETag = null;
+    
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     LockTemplate propsLock = new LockTemplate(tableId,
@@ -232,6 +237,8 @@ public class DataManager {
         throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
       }
 
+      currentDataETag = entry.getDataETag();
+      
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -268,7 +275,7 @@ public class DataManager {
         rows.add(row);
       }
     }
-    return new WebsafeRows(rows, result.websafeRefetchCursor, result.websafeBackwardCursor,
+    return new WebsafeRows(rows, currentDataETag, result.websafeRefetchCursor, result.websafeBackwardCursor,
         result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
@@ -299,6 +306,8 @@ public class DataManager {
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
+    String currentDataETag = null;
+    
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     LockTemplate propsLock = new LockTemplate(tableId,
@@ -313,6 +322,8 @@ public class DataManager {
         throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
       }
 
+      currentDataETag = entry.getDataETag();
+      
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -363,7 +374,7 @@ public class DataManager {
         rows.add(row);
       }
     }
-    return new WebsafeRows(computeDiff(rows), result.websafeRefetchCursor,
+    return new WebsafeRows(computeDiff(rows), currentDataETag, result.websafeRefetchCursor,
         result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
   
@@ -394,7 +405,9 @@ public class DataManager {
    }
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
-
+    
+    String currentDataETag = null;
+    
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     LockTemplate propsLock = new LockTemplate(tableId,
@@ -408,6 +421,8 @@ public class DataManager {
       if (schemaETag == null) {
         throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
       }
+
+      currentDataETag = entry.getDataETag();
 
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
@@ -429,7 +444,7 @@ public class DataManager {
         } catch (ODKEntityNotFoundException e) {
           // No values to display should return empty list
           ArrayList<Row> rows = new ArrayList<Row>();
-          return new WebsafeRows(rows, null, null, null, false, false);
+          return new WebsafeRows(rows, currentDataETag, null, null, null, false, false);
         }
       } else {
         throw new IllegalArgumentException("startTime must be specified.");
@@ -493,7 +508,7 @@ public class DataManager {
          orderedRows.add(rows.get(i));
       }
     }
-    return new WebsafeRows(orderedRows, result.websafeRefetchCursor,
+    return new WebsafeRows(orderedRows, currentDataETag, result.websafeRefetchCursor,
         result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
@@ -1600,6 +1615,8 @@ public class DataManager {
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
+    String currentDataETag = null;
+    
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     LockTemplate propsLock = new LockTemplate(tableId,
@@ -1614,6 +1631,8 @@ public class DataManager {
         throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
       }
 
+      currentDataETag = entry.getDataETag();
+      
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -1692,7 +1711,7 @@ public class DataManager {
       }
       
     }
-    return new WebsafeRows(computeDiff(rows), result.websafeRefetchCursor,
+    return new WebsafeRows(computeDiff(rows), currentDataETag, result.websafeRefetchCursor,
         result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 }

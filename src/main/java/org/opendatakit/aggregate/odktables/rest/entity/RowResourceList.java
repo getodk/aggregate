@@ -43,6 +43,13 @@ public class RowResourceList {
   private ArrayList<RowResource> rows;
 
   /**
+   * The dataETag of the table at the time this response 
+   * was sent. 
+   */
+  @JsonProperty(required = false)
+  private String dataETag;
+
+  /**
    * together with the initial query, pass this in to
    * return this same result set.
    */
@@ -83,13 +90,14 @@ public class RowResourceList {
    *
    * @param entries
    */
-  public RowResourceList(ArrayList<RowResource> rows,
+  public RowResourceList(ArrayList<RowResource> rows, String dataETag,
       String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
     if ( rows == null ) {
       this.rows = new ArrayList<RowResource>();
     } else {
       this.rows = rows;
     }
+    this.dataETag = dataETag;
     this.webSafeRefetchCursor = refetchCursor;
     this.webSafeBackwardCursor = backCursor;
     this.webSafeResumeCursor = resumeCursor;
@@ -103,6 +111,14 @@ public class RowResourceList {
 
   public void setRows(ArrayList<RowResource> rows) {
     this.rows = rows;
+  }
+
+  public String getDataETag() {
+    return dataETag;
+  }
+
+  public void setDataETag(String dataETag) {
+    this.dataETag = dataETag;
   }
 
   public String getWebSafeRefetchCursor() {
@@ -150,6 +166,7 @@ public class RowResourceList {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((rows == null) ? 0 : rows.hashCode());
+    result = prime * result + ((dataETag == null) ? 0 : dataETag.hashCode());
     result = prime * result + ((webSafeRefetchCursor == null) ? 0 : webSafeRefetchCursor.hashCode());
     result = prime * result + ((webSafeBackwardCursor == null) ? 0 : webSafeBackwardCursor.hashCode());
     result = prime * result + ((webSafeResumeCursor == null) ? 0 : webSafeResumeCursor.hashCode());
@@ -171,6 +188,7 @@ public class RowResourceList {
     }
     RowResourceList other = (RowResourceList) obj;
     boolean simpleResult = (rows == null ? other.rows == null : (other.rows != null && rows.size() == other.rows.size())) &&
+        (dataETag == null ? other.dataETag == null : (dataETag.equals(other.dataETag))) &&
         (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
         (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
         (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
