@@ -51,6 +51,7 @@ import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.datamodel.DeleteHelper;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -388,7 +389,8 @@ public class SubmissionParser {
         e.printStackTrace();
         logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
             + fi.getTableName() + " uri " + fi.getUri());
-        if ( e instanceof ODKEntityNotFoundException ) {
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
           // this is a malformed submission...
           // try to clean this up...
           DeleteHelper.deleteDamagedSubmission(fi, form.getAllBackingObjects(), cc);

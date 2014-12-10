@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -38,17 +36,9 @@ import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
-import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.PartialResults;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.common.datamodel.DeleteHelper;
-import org.opendatakit.common.datamodel.DynamicAssociationBase;
-import org.opendatakit.common.datamodel.DynamicBase;
-import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
-import org.opendatakit.common.datamodel.DynamicDocumentBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -155,10 +145,6 @@ public class PurgeOlderSubmissionsWorkerImpl {
   private List<TopLevelDynamicBase> querySubmissionsDateRange(Date startDate, Date endDate)
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
     
-    Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
-
-    List<Submission> submissions = null;
-    boolean success = false;
     // fetch completed submissions, ascending.  Stop before the endDate.
     FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
     filterGroup.setQueryFetchLimit(MAX_QUERY_LIMIT);
