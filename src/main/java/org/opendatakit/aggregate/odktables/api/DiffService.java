@@ -17,6 +17,8 @@
 package org.opendatakit.aggregate.odktables.api;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -32,7 +34,9 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 public interface DiffService {
 
+  public static final String QUERY_ACTIVE_ONLY = "active_only";
   public static final String QUERY_DATA_ETAG = "data_etag";
+  public static final String QUERY_SEQUENCE_VALUE = "sequence_value";
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
 
@@ -51,5 +55,52 @@ public interface DiffService {
   @GET
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowResourceList*/ getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
+      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
+  
+  /**
+   * Get the changeSets that have been applied since the dataETag changeSet
+   * (must be a valid dataETag) or since the given sequenceValue.
+   * 
+   * These are returned in no meaningful order. For consistency, the values
+   * are sorted alphabetically. The returned object includes a sequenceValue
+   * that can be used on a subsequent call to get all changes to this table
+   * since this point in time.
+   * 
+   * @param dataETag
+   * @param sequenceValue
+   * @return
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
+  @GET
+  @Path("changeSets")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*ChangeSetList*/ getChangeSetsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(QUERY_SEQUENCE_VALUE) String sequenceValue)
+      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
+
+  /**
+   * Retrieve the rows for the given dataETag changeSet.
+   * If isActive is specified, then return only the currently-active
+   * row changes. I.e., if a later changeSet has revised an
+   * affected row, do not return that row.
+
+   * @param dataETag
+   * @param isActive
+   * @param cursor
+   * @param fetchLimit
+   * @return
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
+  @GET
+  @Path("changeSets/{dataETag}")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowResourceList*/ getChangeSetRows(@PathParam("dataETag") String dataETag, @QueryParam(QUERY_ACTIVE_ONLY) String isActive, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
       throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 }
