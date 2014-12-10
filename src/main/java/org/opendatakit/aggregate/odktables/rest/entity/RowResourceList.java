@@ -43,8 +43,7 @@ public class RowResourceList {
   private ArrayList<RowResource> rows;
 
   /**
-   * The dataETag of the table at the time this response 
-   * was sent. 
+   * The dataETag of the table at the START of this request. 
    */
   @JsonProperty(required = false)
   private String dataETag;

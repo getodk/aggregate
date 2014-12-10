@@ -46,6 +46,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome.OutcomeType;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -882,7 +883,21 @@ public class DataManager {
     }
   }
 
-  public ArrayList<RowOutcome> insertOrUpdateRows(RowList rows) throws ODKEntityPersistException,
+  /**
+   * The tableUri of the returned rowOutcomeList is null.
+   *  
+   * @param rows
+   * @return
+   * @throws ODKEntityPersistException
+   * @throws ODKEntityNotFoundException
+   * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
+   * @throws ETagMismatchException
+   * @throws BadColumnNameException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   */
+  public RowOutcomeList insertOrUpdateRows(RowList rows) throws ODKEntityPersistException,
       ODKEntityNotFoundException, ODKDatastoreException, ODKTaskLockException,
       ETagMismatchException, BadColumnNameException, PermissionDeniedException,
       InconsistentStateException {
@@ -894,6 +909,9 @@ public class DataManager {
       ArrayList<RowOutcome> rowOutcomes = new ArrayList<RowOutcome>();
 
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
+      
+      String currentDataETag = null;
+      
       LockTemplate propsLock = new LockTemplate(tableId,
           ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
 
@@ -910,6 +928,8 @@ public class DataManager {
               + " is not yet defined.");
         }
 
+        currentDataETag = entry.getDataETag();
+        
         DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag,
             cc);
         columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -1060,7 +1080,7 @@ public class DataManager {
         logger.error("Time: " + time + " size: " + numRows + " per iteration " + (time / numRows));
       }
 
-      return rowOutcomes;
+      return new RowOutcomeList(rowOutcomes, currentDataETag);
     } catch (NullPointerException e) {
       e.printStackTrace();
       throw e;
@@ -1511,7 +1531,9 @@ public class DataManager {
    * 
    * There is no meaningful ordering of this returned set. For consistency,
    * the list is ordered by the dataETag values themselves. The returned object
-   * includes a sequenceValue that would return any changes after this request.
+   * includes the dataETag at the beginning of the processing of this request 
+   * and a sequenceValue. Either of these can be used to return any changes 
+   * made after this request.
    * 
    * @param dataETag
    * @param sequenceValue
@@ -1526,6 +1548,7 @@ public class DataManager {
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
+    String currentDataETag = null;
     String retrievalSequenceValue = null;
     
     List<DbColumnDefinitionsEntity> columns = null;
@@ -1544,6 +1567,8 @@ public class DataManager {
         throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
       }
 
+      currentDataETag = entry.getDataETag();
+      
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -1581,7 +1606,7 @@ public class DataManager {
     }
 
     if (result == null || result.isEmpty() ) {
-      return new ChangeSetList(null, retrievalSequenceValue);
+      return new ChangeSetList(null, currentDataETag, retrievalSequenceValue);
     }
 
     ArrayList<String> dataETags = new ArrayList<String>();
@@ -1590,7 +1615,7 @@ public class DataManager {
       dataETags.add(value);
     }
     
-    return new ChangeSetList(dataETags, retrievalSequenceValue);
+    return new ChangeSetList(dataETags, currentDataETag, retrievalSequenceValue);
   }
 
   /**

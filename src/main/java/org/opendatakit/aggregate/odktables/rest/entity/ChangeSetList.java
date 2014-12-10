@@ -47,6 +47,16 @@ public class ChangeSetList {
   @JacksonXmlProperty(localName="changeSet")
   private ArrayList<String> changeSets;
 
+  /**
+   * The dataETag value of the table at the START of this request.
+   */
+  @JsonProperty(required = false)
+  private String dataETag;
+
+  /**
+   * The sequenceValue of the server at the START of this request.
+   * A monotonically increasing string.
+   */
   @JsonProperty(required = false)
   private String sequenceValue;
 
@@ -55,6 +65,7 @@ public class ChangeSetList {
    */
   public ChangeSetList() {
     this.changeSets = new ArrayList<String>();
+    this.dataETag = null;
     this.sequenceValue = null;
   }
 
@@ -63,13 +74,14 @@ public class ChangeSetList {
    *
    * @param entries
    */
-  public ChangeSetList(ArrayList<String> changeSets, String sequenceValue) {
+  public ChangeSetList(ArrayList<String> changeSets, String dataETag, String sequenceValue) {
     if ( changeSets == null ) {
       this.changeSets = new ArrayList<String>();
     } else {
       this.changeSets = changeSets;
       Collections.sort(this.changeSets);
     }
+    this.dataETag = dataETag;
     this.sequenceValue = sequenceValue;
   }
 
@@ -79,6 +91,14 @@ public class ChangeSetList {
 
   public void setChangeSets(ArrayList<String> changeSets) {
     this.changeSets = changeSets;
+  }
+
+  public String getDataETag() {
+    return dataETag;
+  }
+
+  public void setDataETag(String dataETag) {
+    this.dataETag = dataETag;
   }
 
   public String getSequenceValue() {
@@ -94,6 +114,7 @@ public class ChangeSetList {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((changeSets == null) ? 0 : changeSets.hashCode());
+    result = prime * result + ((dataETag == null) ? 0 : dataETag.hashCode());
     result = prime * result + ((sequenceValue == null) ? 0 : sequenceValue.hashCode());
     return result;
   }
@@ -111,6 +132,7 @@ public class ChangeSetList {
     }
     ChangeSetList other = (ChangeSetList) obj;
     boolean simpleResult =
+        (dataETag == null ? other.dataETag == null : dataETag.equals(other.dataETag)) &&
         (sequenceValue == null ? other.sequenceValue == null : sequenceValue.equals(other.sequenceValue)) &&
         (changeSets == null ? other.changeSets == null : (other.changeSets != null && changeSets.size() == other.changeSets.size())); 
     
