@@ -41,6 +41,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableEntry;
 import org.opendatakit.aggregate.odktables.relation.DbTableEntry.DbTableEntryEntity;
 import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
+import org.opendatakit.aggregate.odktables.rest.entity.ChangeSetList;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
@@ -1487,5 +1488,211 @@ public class DataManager {
       e.printStackTrace();
       throw e;
     }
+  }
+
+  /**
+   * Returns the dataETag values that were applied after the given dataETag
+   * and/or sequenceValue.
+   * 
+   * There is no meaningful ordering of this returned set. For consistency,
+   * the list is ordered by the dataETag values themselves. The returned object
+   * includes a sequenceValue that would return any changes after this request.
+   * 
+   * @param dataETag
+   * @param sequenceValue
+   * @return
+   * @throws PermissionDeniedException
+   * @throws ODKDatastoreException
+   * @throws ODKTaskLockException
+   * @throws InconsistentStateException
+   * @throws BadColumnNameException
+   */
+  public ChangeSetList getChangeSetsSince(String dataETag, String sequenceValue) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException, InconsistentStateException, BadColumnNameException {
+
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
+
+    String retrievalSequenceValue = null;
+    
+    List<DbColumnDefinitionsEntity> columns = null;
+    List<?> result = null;
+    LockTemplate propsLock = new LockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();
+      Sequencer sequencer = new Sequencer(cc);
+      retrievalSequenceValue = sequencer.getNextSequenceValue();
+
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
+
+      if (schemaETag == null) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
+      }
+
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions
+          .getDefinition(tableId, schemaETag, cc);
+      columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
+
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges(entry, columns, table, logTable);
+
+      String unifiedSequenceValue = null;
+      if (dataETag != null) {
+        try {
+          unifiedSequenceValue = getSequenceValueForDataETag(logTable, dataETag);
+        } catch (ODKEntityNotFoundException e) {
+          // TODO: log this as a warning -- may be returning a very large set
+          unifiedSequenceValue = null;
+        }
+      }
+
+      if ( sequenceValue != null && 
+          (unifiedSequenceValue == null || (unifiedSequenceValue.compareTo(sequenceValue) < 0)) ) {
+        unifiedSequenceValue = sequenceValue;
+      }
+      
+      Query query;
+      if (unifiedSequenceValue == null) {
+        query = buildRowsFromBeginningQuery(logTable, entry, true);
+      } else {
+        query = buildRowsSinceQuery(logTable, unifiedSequenceValue, true);
+      }
+      
+      result = query.getDistinct(DbLogTable.DATA_ETAG_AT_MODIFICATION);
+    } finally {
+      propsLock.release();
+    }
+
+    if (result == null || result.isEmpty() ) {
+      return new ChangeSetList(null, retrievalSequenceValue);
+    }
+
+    ArrayList<String> dataETags = new ArrayList<String>();
+    for (Object o : result) {
+      String value = (String) o;
+      dataETags.add(value);
+    }
+    
+    return new ChangeSetList(dataETags, retrievalSequenceValue);
+  }
+
+  /**
+   * Returns the set of rows for a given dataETag (changeSet).
+   * If the isActive flag is true, then return only the subset
+   * of these that are the most current (in the DbTable).
+   * Otherwise, return the full set of changes from the DbLogTable.
+   * 
+   * @param dataETag
+   * @param isActive
+   * @param startCursor
+   * @param fetchLimit
+   * @return
+   * @throws PermissionDeniedException
+   * @throws ODKDatastoreException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
+  public WebsafeRows getChangeSetRows(String dataETag, boolean isActive,
+      QueryResumePoint startCursor, int fetchLimit) throws PermissionDeniedException, ODKDatastoreException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+
+    userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
+
+    List<DbColumnDefinitionsEntity> columns = null;
+    WebsafeQueryResult result = null;
+    LockTemplate propsLock = new LockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();
+
+      DbTableEntryEntity entry = DbTableEntry.getTableIdEntry(tableId, cc);
+      String schemaETag = entry.getSchemaETag();
+
+      if (schemaETag == null) {
+        throw new InconsistentStateException("Schema for table " + tableId + " is not yet defined.");
+      }
+
+      DbTableDefinitionsEntity tableDefn = DbTableDefinitions
+          .getDefinition(tableId, schemaETag, cc);
+      columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
+
+      DbTable table = DbTable.getRelation(tableDefn, columns, cc);
+      DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
+
+      revertPendingChanges(entry, columns, table, logTable);
+
+      boolean isForwardCursor = (startCursor == null ? true
+          : startCursor.isForwardCursor());
+      
+      if ( isActive ) {
+        // query is against DbTable
+        Query query = table.query("DataManager.getChangeSetRows", cc);
+        query.equal(DbTable.DATA_ETAG_AT_MODIFICATION, dataETag);
+        if (isForwardCursor) {
+          query.greaterThan(DbTable.ROW_ETAG,"");
+          query.sortAscending(DbTable.ROW_ETAG);
+        } else {
+          query.greaterThan(DbTable.ROW_ETAG,"");
+          query.sortDescending(DbTable.ROW_ETAG);
+        }
+
+        result = query.execute(startCursor, fetchLimit);
+        
+      } else {
+        // query is against DbLogTable
+        Query query = logTable.query("DataManager.getChangeSetRows", cc);
+        query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
+        if (isForwardCursor) {
+          query.greaterThan(DbLogTable.ROW_ID,"");
+          query.sortAscending(DbLogTable.ROW_ID);
+        } else {
+          query.greaterThan(DbLogTable.ROW_ID,"");
+          query.sortDescending(DbLogTable.ROW_ID);
+        }
+        
+        result = query.execute(startCursor, fetchLimit);
+      }
+
+    } finally {
+      propsLock.release();
+    }
+
+    if (result.entities == null || columns == null) {
+      throw new InconsistentStateException("Unable to retrieve rows for table " + tableId + ".");
+    }
+
+    // TODO: properly handle reporting of rows that the user no longer has
+    // access to because of a access / permissions change for that user and / or
+    // row.
+    ArrayList<Row> rows = new ArrayList<Row>();
+    if ( isActive ) {
+      // query is against DbTable
+      for (Entity entity : result.entities) {
+        Row row = converter.toRow(entity, columns);
+        if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
+          rows.add(row);
+        } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
+            row.getRowId(), row.getFilterScope())) {
+          rows.add(row);
+        }
+      }
+
+    } else {
+      // query is against DbLogTable
+      for (Entity entity : result.entities) {
+        Row row = converter.toRowFromLogTable(entity, columns);
+        if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
+          rows.add(row);
+        } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
+            row.getRowId(), row.getFilterScope())) {
+          rows.add(row);
+        }
+      }
+      
+    }
+    return new WebsafeRows(computeDiff(rows), result.websafeRefetchCursor,
+        result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 }
