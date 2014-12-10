@@ -138,7 +138,7 @@ public class BinaryContentManipulator {
         BinaryContentRefBlob bcref = (BinaryContentRefBlob) cb;
         Long part = bcref.getPart();
         if ( part == null || part.longValue() != expectedPart ) {
-          throw new ODKEnumeratedElementException(bcbRef.getTableName() + " is missing a reference part");
+          throw new ODKEnumeratedElementException(bcbRef.getTableName() + "@domAuri(" + bcbRef.getDomAuri() + ") is missing a reference part");
         }
         ++expectedPart;
         dbBcbEntityList.add(bcref);
@@ -584,7 +584,7 @@ public class BinaryContentManipulator {
         BinaryContent bc = (BinaryContent) cb;
         Long ordinal = bc.getOrdinalNumber();
         if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
-          throw new ODKEnumeratedElementException(ctntRelation.getTableName() + " is missing an attachment instance");
+          throw new ODKEnumeratedElementException(ctntRelation.getTableName() + "@parentAuri(" + bc.getParentAuri() + ") is missing an attachment instance");
         }
         ++expectedOrdinal;
         attachments.put(bc.getOrdinalNumber(), bc);
