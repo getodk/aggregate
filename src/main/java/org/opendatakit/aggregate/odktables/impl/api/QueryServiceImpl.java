@@ -68,6 +68,7 @@ public class QueryServiceImpl implements QueryService {
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsInTimeRange(DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME, startTime, endTime, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
+        websafeResult.dataETag,
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
@@ -81,6 +82,7 @@ public class QueryServiceImpl implements QueryService {
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsInTimeRange(DbLogTable.SAVEPOINT_TIMESTAMP.getName(), startTime, endTime, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
+        websafeResult.dataETag,
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
