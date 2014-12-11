@@ -24,12 +24,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 
 public class GaeAwareContentEncodingResponseFilter extends ContentEncodingResponseFilter {
+
+  private static final Log logger = LogFactory.getLog(GaeAwareContentEncodingResponseFilter.class);
 
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
@@ -65,9 +69,11 @@ public class GaeAwareContentEncodingResponseFilter extends ContentEncodingRespon
 
       if (isGaeEnvironment && !isGaeDevelopmentEnvironment) {
         // don't try to process anything -- GAE does but does not remove headers
+        logger.info("Gae environment -- ignoring Accept-Encoding header");
         chain.doFilter(servletRequest, servletResponse);
       } else {
         // perhaps wrap response with GZIP
+        logger.info("not Gae environment -- processing Accept-Encoding header");
         super.doFilter(servletRequest, servletResponse, chain);
       }
     }
