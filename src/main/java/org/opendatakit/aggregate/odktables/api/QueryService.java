@@ -36,7 +36,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 public interface QueryService {
 
   public static final String QUERY_DATA_ETAG = "data_etag";
-  public static final String QUERY_TIMESTAMP = "timestamp";
   public static final String QUERY_START_TIME = "startTime";
   public static final String QUERY_END_TIME = "endTime";
   public static final String CURSOR_PARAMETER = "cursor";
