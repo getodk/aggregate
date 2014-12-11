@@ -70,11 +70,11 @@ public class GaeAwareContentEncodingRequestFilter extends ContentEncodingRequest
 
       if (isGaeEnvironment && !isGaeDevelopmentEnvironment) {
         // don't try to process anything -- GAE does but does not remove headers
-        logger.info("Gae environment -- ignoring Accept-Encoding header");
+        logger.info("Gae environment -- ignoring Content-Encoding header");
         chain.doFilter(servletRequest, servletResponse);
       } else {
         // perhaps wrap response with GZIP
-        logger.info("not Gae environment -- processing Accept-Encoding header");
+        logger.info("not Gae environment -- processing Content-Encoding header");
         super.doFilter(servletRequest, servletResponse, chain);
       }
     }
