@@ -44,8 +44,10 @@ import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags.DbTableInstanceManifestETagEntity;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
@@ -182,8 +184,12 @@ public class InstanceFileServiceImpl implements InstanceFileService {
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     } catch (PermissionDeniedException e) {
-      LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied")
+      String msg = e.getMessage();
+      if (msg == null) {
+        msg = e.toString();
+      }
+      LOGGER.error(("ODKTables file upload permissions error: " + msg));
+      return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
@@ -255,6 +261,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
             }
             
             ResponseBuilder rBuild = Response.ok(fileBlob, contentType).header(HttpHeaders.ETAG, contentHash)
+                .header(HttpHeaders.CONTENT_LENGTH, contentLength)
                 .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true");
@@ -286,8 +293,12 @@ public class InstanceFileServiceImpl implements InstanceFileService {
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     } catch (PermissionDeniedException e) {
-      LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied")
+      String msg = e.getMessage();
+      if (msg == null) {
+        msg = e.toString();
+      }
+      LOGGER.error(("ODKTables file upload permissions error: " + msg));
+      return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
@@ -376,8 +387,12 @@ public class InstanceFileServiceImpl implements InstanceFileService {
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     } catch (PermissionDeniedException e) {
-      LOGGER.error(("ODKTables file upload permissions error: " + e.getMessage()));
-      return Response.status(Status.UNAUTHORIZED).entity("Permission denied")
+      String msg = e.getMessage();
+      if (msg == null) {
+        msg = e.toString();
+      }
+      LOGGER.error(("ODKTables file upload permissions error: " + msg));
+      return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
