@@ -130,6 +130,7 @@ public class FileServiceImpl implements FileService {
       }
 
       ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType)
+          .header(HttpHeaders.CONTENT_LENGTH, fi.contentLength)
           .header(HttpHeaders.ETAG,fi.contentHash)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")

@@ -70,6 +70,9 @@ import org.slf4j.LoggerFactory;
  * However, that implementation did not properly recompute the Content-Length.
  * This implementation does.
  * 
+ * For increased efficiency, the client and server should be converted to use 
+ * the chunked Transfer-Encoding.
+ * 
  * @author mitchellsundt@gmail.com
  */
 
