@@ -49,7 +49,7 @@ public class RowOutcomeList {
   private ArrayList<RowOutcome> rows;
 
   /**
-   * The dataETag at the START of this request.
+   * The dataETag for the changes made by this request.
    */
   @JsonProperty(required = false)
   private String dataETag;

@@ -910,7 +910,7 @@ public class DataManager {
 
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
       
-      String currentDataETag = null;
+      String dataETagAtModification = null;
       
       LockTemplate propsLock = new LockTemplate(tableId,
           ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
@@ -928,8 +928,6 @@ public class DataManager {
               + " is not yet defined.");
         }
 
-        currentDataETag = entry.getDataETag();
-        
         DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag,
             cc);
         columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -945,7 +943,7 @@ public class DataManager {
 
         // mark as pending change.
         // get new dataETag
-        String dataETagAtModification = PersistenceUtils.newUri();
+        dataETagAtModification = PersistenceUtils.newUri();
         entry.setPendingDataETag(dataETagAtModification);
         entry.put(cc);
 
@@ -1080,7 +1078,7 @@ public class DataManager {
         logger.error("Time: " + time + " size: " + numRows + " per iteration " + (time / numRows));
       }
 
-      return new RowOutcomeList(rowOutcomes, currentDataETag);
+      return new RowOutcomeList(rowOutcomes, dataETagAtModification);
     } catch (NullPointerException e) {
       e.printStackTrace();
       throw e;
