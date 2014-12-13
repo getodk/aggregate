@@ -32,9 +32,8 @@ public class RowResourceClient extends RowClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -6295463336596904L;
+  private static final long serialVersionUID = -629546333656904L;
   private String selfUri;
-  private String tableUri;
 
   @SuppressWarnings("unused")
   private RowResourceClient() {
@@ -48,16 +47,8 @@ public class RowResourceClient extends RowClient implements Serializable {
     return this.selfUri;
   }
 
-  public String getTableUri() {
-    return this.tableUri;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
-  }
-
-  public void setTableUri(final String tableUri) {
-    this.tableUri = tableUri;
   }
 
   @Override
@@ -74,9 +65,6 @@ public class RowResourceClient extends RowClient implements Serializable {
     if (this.getSelfUri() == null ? other.getSelfUri() != null : !this.getSelfUri().equals(
         (java.lang.Object) other.getSelfUri()))
       return false;
-    if (this.getTableUri() == null ? other.getTableUri() != null : !this.getTableUri().equals(
-        (java.lang.Object) other.getTableUri()))
-      return false;
     return true;
   }
 
@@ -90,13 +78,11 @@ public class RowResourceClient extends RowClient implements Serializable {
     int result = 1;
     result = result * PRIME + super.hashCode();
     result = result * PRIME + (this.getSelfUri() == null ? 0 : this.getSelfUri().hashCode());
-    result = result * PRIME + (this.getTableUri() == null ? 0 : this.getTableUri().hashCode());
     return result;
   }
 
   public String toString() {
-    return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
-        + ", tableUri=" + this.getTableUri() + ")";
+    return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri() + ")";
   }
 
 }
