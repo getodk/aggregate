@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.exception.TableDataETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
@@ -66,6 +67,12 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
           .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof ETagMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
+          .entity(new Error(ErrorType.ETAG_MISMATCH, msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    } else if (e instanceof TableDataETagMismatchException) {
+      return Response.status(Status.CONFLICT)
           .entity(new Error(ErrorType.ETAG_MISMATCH, msg)).type(type)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")

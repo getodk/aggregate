@@ -37,10 +37,10 @@ import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.exception.TableDataETagMismatchException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowList;
-import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
@@ -83,7 +83,7 @@ public class DataServiceImpl implements DataService {
   @Override
   public Response /*RowOutcomeList*/ alterRows(RowList rows)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
-      PermissionDeniedException, BadColumnNameException, InconsistentStateException {
+      PermissionDeniedException, BadColumnNameException, InconsistentStateException, TableDataETagMismatchException {
 
     RowOutcomeList outcomes = dm.insertOrUpdateRows(rows);
     updateTableUri(outcomes);
@@ -98,38 +98,6 @@ public class DataServiceImpl implements DataService {
     Row row = dm.getRow(rowId);
     RowResource resource = getResource(row);
     return Response.ok(resource)
-        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Credentials", "true").build();
-  }
-
-  @Override
-  public Response createOrUpdateRow(@PathParam("rowId") String rowId, Row row) throws ODKTaskLockException,
-      ODKDatastoreException, ETagMismatchException, PermissionDeniedException,
-      BadColumnNameException, InconsistentStateException {
-    row.setRowId(rowId);
-
-    // changed to behave like the bulk update action.
-    // Returns a RowOutcome (was RowResource).
-    
-    RowList rowList = new RowList();
-    ArrayList<Row> rows = new ArrayList<Row>();
-    rows.add(row);
-    rowList.setRows(rows);
-    RowOutcomeList outcomes = dm.insertOrUpdateRows(rowList);
-    updateTableUri(outcomes);
-    RowOutcome outcome = outcomes.getRows().get(0);
-    return Response.ok(outcome)
-        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Credentials", "true").build();
-  }
-
-  @Override
-  public Response deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException, ODKTaskLockException,
-      PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException {
-    String dataETagOnTableOfModification = dm.deleteRow(rowId, rowETag);
-    return Response.ok(dataETagOnTableOfModification)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Credentials", "true").build();

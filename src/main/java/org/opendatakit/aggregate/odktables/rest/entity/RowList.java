@@ -43,6 +43,12 @@ public class RowList {
   private ArrayList<Row> rows;
 
   /**
+   * The dataETag of the table at the START of this request. 
+   */
+  @JsonProperty(required = false)
+  private String dataETag;
+
+  /**
    * Constructor used by Jackson
    */
   public RowList() {
@@ -54,12 +60,13 @@ public class RowList {
    *
    * @param entries
    */
-  public RowList(ArrayList<Row> rows) {
+  public RowList(ArrayList<Row> rows, String dataETag) {
     if ( rows == null ) {
       this.rows = new ArrayList<Row>();
     } else {
       this.rows = rows;
     }
+    this.dataETag = dataETag;
   }
 
   public ArrayList<Row> getRows() {
@@ -70,11 +77,20 @@ public class RowList {
     this.rows = rows;
   }
 
+  public String getDataETag() {
+    return dataETag;
+  }
+
+  public void setDataETag(String dataETag) {
+    this.dataETag = dataETag;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((rows == null) ? 0 : rows.hashCode());
+    result = prime * result + ((dataETag == null) ? 0 : dataETag.hashCode());
     return result;
   }
 
@@ -90,7 +106,9 @@ public class RowList {
       return false;
     }
     RowList other = (RowList) obj;
-    boolean simpleResult = (rows == null ? other.rows == null : (other.rows != null && rows.size() == other.rows.size()));
+    boolean simpleResult = 
+        (rows == null ? other.rows == null : (other.rows != null && rows.size() == other.rows.size())) &&
+        (dataETag == null ? other.dataETag == null : (dataETag.equals(other.dataETag)));
     if ( !simpleResult ) {
       return false;
     }
