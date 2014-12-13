@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.odktables.api;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -31,8 +30,8 @@ import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.exception.TableDataETagMismatchException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
@@ -47,7 +46,8 @@ public interface DataService {
   public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
-   *
+   * Get all data rows.
+   * 
    * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
    * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
    * @return {@link RowResourceList} containing the rows being returned.
@@ -62,7 +62,11 @@ public interface DataService {
   public Response /*RowResourceList*/ getRows(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
 
   /**
-   *
+   * API for creating, updating or deleting rows.
+   * 
+   * This API will return 409 (Conflict) if the RowList dataETag does not 
+   * match the current dataETag for this table.
+   * 
    * @param rows
    * @return {@link RowOutcomeList} of the newly added/modified/deleted rows.
    * @throws ODKTaskLockException
@@ -71,16 +75,18 @@ public interface DataService {
    * @throws PermissionDeniedException
    * @throws BadColumnNameException
    * @throws InconsistentStateException
+   * @throws TableDataETagMismatchException 
    */
   @PUT
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowOutcomeList*/ alterRows(RowList rows)
       throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
-      PermissionDeniedException, BadColumnNameException, InconsistentStateException;
+      PermissionDeniedException, BadColumnNameException, InconsistentStateException, TableDataETagMismatchException;
 
   /**
-   *
+   * Get the current values for a single rowId
+   * 
    * @param rowId
    * @return {@link RowResource} of the row
    * @throws ODKDatastoreException
@@ -94,44 +100,4 @@ public interface DataService {
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowResource*/ getRow(@PathParam("rowId") String rowId) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
-
-  /**
-   * Executes the exact same code path as alterRows() above, but with just a single Row.
-   * 
-   * @param rowId
-   * @param row
-   * @return {@link RowOutcome} of the newly added/inserted row. Outcome should be tested.
-   * @throws ODKTaskLockException
-   * @throws ODKDatastoreException
-   * @throws ETagMismatchException
-   * @throws PermissionDeniedException
-   * @throws BadColumnNameException
-   * @throws InconsistentStateException
-   */
-  @PUT
-  @Path("{rowId}")
-  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*RowOutcome*/ createOrUpdateRow(@PathParam("rowId") String rowId, Row row)
-      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
-      PermissionDeniedException, BadColumnNameException, InconsistentStateException;
-
-  /**
-   *
-   * @param rowId
-   * @param rowETag -- the row's ETag as known to the client (must match on server)
-   * @return String dataETag on the table that marks this row as deleted.
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   * @throws PermissionDeniedException
-   * @throws InconsistentStateException
-   * @throws BadColumnNameException
-   * @throws ETagMismatchException
-   */
-  @DELETE
-  @Path("{rowId}")
-  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*String*/ deleteRow(@PathParam("rowId") String rowId, @QueryParam(QUERY_ROW_ETAG) String rowETag) throws ODKDatastoreException,
-      ODKTaskLockException, PermissionDeniedException, InconsistentStateException, BadColumnNameException, ETagMismatchException;
-
 }

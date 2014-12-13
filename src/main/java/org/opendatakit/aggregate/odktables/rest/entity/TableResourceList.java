@@ -72,6 +72,10 @@ public class TableResourceList {
   @JacksonXmlProperty(localName="tableResource")
   private ArrayList<TableResource> tables;
 
+  /**
+   * If known, the ETag of the app-level files 
+   * manifest is also returned.
+   */
   @JsonProperty(required = false)
   private String appLevelManifestETag;
 

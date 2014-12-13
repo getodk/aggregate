@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.exception.TableDataETagMismatchException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbLogTable;
@@ -896,11 +897,12 @@ public class DataManager {
    * @throws BadColumnNameException
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
+   * @throws TableDataETagMismatchException 
    */
   public RowOutcomeList insertOrUpdateRows(RowList rows) throws ODKEntityPersistException,
       ODKEntityNotFoundException, ODKDatastoreException, ODKTaskLockException,
       ETagMismatchException, BadColumnNameException, PermissionDeniedException,
-      InconsistentStateException {
+      InconsistentStateException, TableDataETagMismatchException {
 
     long startTime = System.currentTimeMillis();
 
@@ -926,6 +928,11 @@ public class DataManager {
         if (schemaETag == null) {
           throw new InconsistentStateException("Schema for table " + tableId
               + " is not yet defined.");
+        }
+        
+        String dataETag = entry.getDataETag();
+        if (!((dataETag == null) ? (rows.getDataETag() == null) : dataETag.equals(rows.getDataETag())) ) {
+          throw new TableDataETagMismatchException("The dataETag for table " + tableId + " does not match that supplied in the RowList");          
         }
 
         DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag,
