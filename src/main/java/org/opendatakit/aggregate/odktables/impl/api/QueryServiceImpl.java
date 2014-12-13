@@ -68,7 +68,7 @@ public class QueryServiceImpl implements QueryService {
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsInTimeRange(DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME, startTime, endTime, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
-        websafeResult.dataETag,
+        websafeResult.dataETag, getTableUri(),
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
@@ -82,13 +82,30 @@ public class QueryServiceImpl implements QueryService {
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsInTimeRange(DbLogTable.SAVEPOINT_TIMESTAMP.getName(), startTime, endTime, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
-        websafeResult.dataETag,
+        websafeResult.dataETag, getTableUri(),
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(rowResourceList).build();
   }
+  
+
+  private String getTableUri() {
+    String appId = dm.getAppId();
+    String tableId = dm.getTableId();
+
+    UriBuilder ub = info.getBaseUriBuilder();
+    ub.path(OdkTables.class, "getTablesService");
+    URI table = ub.clone().build(appId, tableId);
+    try {
+      return table.toURL().toExternalForm();
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert URL ");
+    }
+  }
+  
   private RowResource getResource(Row row) {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
@@ -98,11 +115,9 @@ public class QueryServiceImpl implements QueryService {
     ub.path(OdkTables.class, "getTablesService");
     URI self = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getData").path(DataService.class, "getRow")
         .build(appId, tableId, schemaETag, rowId);
-    URI table = ub.clone().build(appId, tableId);
     RowResource resource = new RowResource(row);
     try {
       resource.setSelfUri(self.toURL().toExternalForm());
-      resource.setTableUri(table.toURL().toExternalForm());
     } catch (MalformedURLException e) {
       e.printStackTrace();
       throw new IllegalArgumentException("unable to convert URL ");
