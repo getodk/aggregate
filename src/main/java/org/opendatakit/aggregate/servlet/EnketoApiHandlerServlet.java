@@ -106,8 +106,11 @@ public class EnketoApiHandlerServlet extends ServletUtilBase {
           }
           if (inputLine.contains("https")) {
             responseURL = inputLine;
-
+          } else if (inputLine.contains("http")) {
+            logger.error("Enketo api token is compromised! Enketo URL should specify https");
+            responseURL = inputLine;
           }
+          
           response.append(inputLine);
         }
         in.close();
@@ -122,7 +125,7 @@ public class EnketoApiHandlerServlet extends ServletUtilBase {
       } else if (responseURL != null) {
         String arryResponseURL[] = responseURL.toString().split(" ");
         for (String token : arryResponseURL) {
-          if (!token.contains("https")) {
+          if (!token.contains("http")) {
             continue;
           }
           token = token.replace("\\", "");
