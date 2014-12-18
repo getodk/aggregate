@@ -15,14 +15,20 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.wink.client.ClientWebException;
+import org.opendatakit.aggregate.odktables.api.ColumnDefinition;
+import org.opendatakit.aggregate.odktables.api.SyncRow;
 import org.opendatakit.aggregate.odktables.api.T;
+import org.opendatakit.aggregate.odktables.api.exceptions.InvalidAuthTokenException;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -54,10 +60,11 @@ public class MultipleUsersTest implements PerfTest {
       Random rand = new Random();
       int maxBackoff = 2;
       try {
-        for (int i = 0; i < numRows; i++) {
-          boolean tryAgain = true;
-          do {
-            try {
+        boolean tryAgain = true;
+        do {
+          try {
+            ArrayList<SyncRow> rowsToChange = new ArrayList<SyncRow>();
+            for (int i = 0; i < numRows; i++) {
               // insert a row
               ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
               for (int j = 0; j < numCols; j++) {
@@ -66,15 +73,22 @@ public class MultipleUsersTest implements PerfTest {
 
               Row row = Row.forInsert(UUID.randomUUID().toString(), T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
                   T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values);
-              synchronizer.putRow(tableId, row);
-              tryAgain = false;
-            } catch (HttpStatusCodeException e) {
-              checkLockTimeout(e);
-              Thread.sleep((int) (rand.nextDouble() * maxBackoff));
-              maxBackoff *= 2;
+              SyncRow sr = new SyncRow(row.getRowId(), row.getRowETag(), row.isDeleted(),
+                  row.getFormId(), row.getLocale(), row.getSavepointType(),
+                  row.getSavepointTimestamp(), row.getSavepointCreator(), row.getFilterScope(),
+                  row.getValues(), new ArrayList<ColumnDefinition>());
+              rowsToChange.add(sr);
             }
-          } while (tryAgain);
-        }
+            
+            RowOutcomeList ro = synchronizer.alterRows(rsc, rowsToChange);
+            rsc.setDataETag(ro.getDataETag());
+            tryAgain = false;
+          } catch (HttpStatusCodeException e) {
+            checkLockTimeout(e);
+            Thread.sleep((int) (rand.nextDouble() * maxBackoff));
+            maxBackoff *= 2;
+          }
+        } while (tryAgain);
 
       } catch (Exception e) {
         throw new RuntimeException(e.getMessage(), e);
@@ -100,6 +114,8 @@ public class MultipleUsersTest implements PerfTest {
     return "column_" + colNum;
   }
 
+  private TableResource rsc = null;
+  
   @Override
   public boolean setUp() throws IOException {
     // create table
@@ -107,7 +123,15 @@ public class MultipleUsersTest implements PerfTest {
     for (int i = 0; i < numCols; i++) {
       columns.add(new Column(colName(i), colName(i), "STRING", null));
     }
-    synchronizer.createTable(tableId, null, columns);
+    try {
+      rsc = synchronizer.createTable(tableId, null, columns);
+    } catch (ClientWebException e) {
+      e.printStackTrace();
+      return false;
+    } catch (InvalidAuthTokenException e) {
+      e.printStackTrace();
+      return false;
+    }
     return true;
   }
 
@@ -144,7 +168,7 @@ public class MultipleUsersTest implements PerfTest {
   public void tearDown() {
     while (true) {
       try {
-        synchronizer.deleteTable(tableId);
+        synchronizer.deleteTable(rsc);
         break;
       } catch (HttpStatusCodeException e) {
         logger.warn("message: " + e.getMessage() + ", body: " + e.getResponseBodyAsString(), e);
