@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -270,8 +269,8 @@ public class BaseFormParserForJavaRosa {
 
     protected void parseBind(Element e) {
       // remember raw bindings in case we want to compare parsed XForms later
-      parser.bindElements.addElement(copyBindingElement(e));
-      Vector<String> usedAtts = new Vector<String>();
+      parser.bindElements.add(copyBindingElement(e));
+      List<String> usedAtts = new ArrayList<String>();
 
       DataBinding binding = processStandardBindAttributes(usedAtts, e);
 
@@ -334,13 +333,8 @@ public class BaseFormParserForJavaRosa {
 
   // extracted from XForm during parsing
   private final Map<String, Integer> stringLengths = new HashMap<String, Integer>();
-  private final Vector<Element> bindElements = new Vector<Element>(); // original
-                                                                      // bindings
-                                                                      // from
-                                                                      // parse-time,
-                                                                      // for
-                                                                      // later
-                                                                      // comparison
+  // original bindings from parse-time for later comparison
+  private final List<Element> bindElements = new ArrayList<Element>();
 
   private void setNodesetStringLength(String nodeset, Integer length) {
     stringLengths.put(nodeset, length);
@@ -460,14 +454,14 @@ public class BaseFormParserForJavaRosa {
   private String extractBase64FieldEncryptionKey(TreeElement submissionElement) {
     TreeElement meta = findDepthFirst(submissionElement, "meta");
     if (meta != null) {
-      Vector<TreeElement> v;
+      List<TreeElement> l;
 
       // Save the base64 RSA-Encrypted symmetric encryption key
       // we are using for field encryption.
       // Do not encrypt the form if we can't save this encrypted key...
-      v = meta.getChildrenWithName(BASE64_ENCRYPTED_FIELD_KEY);
-      if (v.size() == 1) {
-        TreeElement ek = v.get(0);
+      l = meta.getChildrenWithName(BASE64_ENCRYPTED_FIELD_KEY);
+      if (l.size() == 1) {
+        TreeElement ek = l.get(0);
         String base64EncryptedFieldRsaPublicKey = getBindAttribute(ek, BASE64_RSA_PUBLIC_KEY);
         if (base64EncryptedFieldRsaPublicKey != null
             && base64EncryptedFieldRsaPublicKey.trim().length() == 0) {
@@ -686,18 +680,18 @@ public class BaseFormParserForJavaRosa {
    * @param treeElement
    * @return
    */
-  private Vector<Element> getBindingsForTreeElement(TreeElement treeElement) {
-    Vector<Element> v = new Vector<Element>();
+  private List<Element> getBindingsForTreeElement(TreeElement treeElement) {
+    List<Element> l = new ArrayList<Element>();
     String nodeset = "/" + getTreeElementPath(treeElement);
 
     for (int i = 0; i < this.bindElements.size(); i++) {
-      Element element = (Element) this.bindElements.elementAt(i);
+      Element element = this.bindElements.get(i);
       if (element.getAttributeValue("", NODESET_ATTR).equalsIgnoreCase(nodeset)) {
-        v.addElement(element);
+        l.add(element);
       }
     }
 
-    return (v);
+    return (l);
   }
 
   public String getFormId() {
@@ -943,10 +937,10 @@ public class BaseFormParserForJavaRosa {
 
     // note attributes don't actually include bindings; thus, check raw bindings
     // also one-by-one (starting with bindings1)
-    Vector<Element> bindings1 = parser1.getBindingsForTreeElement(treeElement1);
-    Vector<Element> bindings2 = parser2.getBindingsForTreeElement(treeElement2);
+    List<Element> bindings1 = parser1.getBindingsForTreeElement(treeElement1);
+    List<Element> bindings2 = parser2.getBindingsForTreeElement(treeElement2);
     for (int i = 0; i < bindings1.size(); i++) {
-      Element binding = bindings1.elementAt(i);
+      Element binding = bindings1.get(i);
       for (int j = 0; j < binding.getAttributeCount(); j++) {
         String attributeNamespace = binding.getAttributeNamespace(j);
         if (attributeNamespace != null && attributeNamespace.length() == 0) {
@@ -987,7 +981,7 @@ public class BaseFormParserForJavaRosa {
     }
     // check binding attributes only in bindings2
     for (int i = 0; i < bindings2.size(); i++) {
-      Element binding = bindings2.elementAt(i);
+      Element binding = bindings2.get(i);
       for (int j = 0; j < binding.getAttributeCount(); j++) {
         String attributeNamespace = binding.getAttributeNamespace(j);
         if (attributeNamespace != null && attributeNamespace.length() == 0) {
@@ -1027,7 +1021,7 @@ public class BaseFormParserForJavaRosa {
     List<TreeElement> element1ExcludingRepeatIndex0Children = new ArrayList<TreeElement>();
 
     for (int i = 0; i < treeElement1.getNumChildren(); i++) {
-      TreeElement child = (TreeElement) treeElement1.getChildAt(i);
+      TreeElement child = treeElement1.getChildAt(i);
       if (child.isRepeatable()) {
         if (child.getMult() != TreeReference.INDEX_TEMPLATE) {
           template1DropCount++;
@@ -1045,7 +1039,7 @@ public class BaseFormParserForJavaRosa {
     Map<String, TreeElement> element2ExcludingRepeatIndex0Children = new HashMap<String, TreeElement>();
 
     for (int i = 0; i < treeElement2.getNumChildren(); i++) {
-      TreeElement child = (TreeElement) treeElement2.getChildAt(i);
+      TreeElement child = treeElement2.getChildAt(i);
       if (child.isRepeatable()) {
         if (child.getMult() != TreeReference.INDEX_TEMPLATE) {
           template2DropCount++;
@@ -1105,12 +1099,12 @@ public class BaseFormParserForJavaRosa {
 
   // search list of recorded bindings for a particular attribute; return its
   // value
-  private static String getBindingAttributeValue(Vector<Element> bindings,
+  private static String getBindingAttributeValue(List<Element> bindings,
       String attributeNamespace, String attributeName) {
     String retval = null;
 
     for (int i = 0; i < bindings.size(); i++) {
-      Element element = (Element) bindings.elementAt(i);
+      Element element = bindings.get(i);
       if ((retval = element.getAttributeValue(attributeNamespace, attributeName)) != null) {
         return (retval);
       }
