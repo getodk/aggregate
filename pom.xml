@@ -607,7 +607,7 @@
 		<dependency>
 		  <groupId>org.javarosa</groupId>
 		  <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>2014-04-29</version>
+		  <version>2015-01-10</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>

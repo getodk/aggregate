@@ -25,7 +25,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpmime-4.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2014-04-29.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/joda-time-2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jsr305-1.3.9.jar"/>
@@ -109,6 +108,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-json-provider-2.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-xml-provider-2.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-module-jaxb-annotations-2.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2015-01-10.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre7">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
