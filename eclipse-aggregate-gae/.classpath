@@ -25,7 +25,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/httpmime-4.2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/icu4j-3.4.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2014-04-29.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/joda-time-2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jsr305-1.3.9.jar"/>
@@ -81,10 +80,9 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xalan-2.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aspectjweaver-1.7.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-collections-3.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jdo2-api-2.3-eb.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/xmlsec-1.5.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-common-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-common/src/main/java"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-server-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink/wink-server/src/main/java"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-common-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink-gens/wink/wink-common/src/main/java"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/wink-server-1.4.jar" sourcepath="C:/Users/Administrator/Documents/workspace/wink-gens/wink/wink-server/src/main/java"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/geronimo-jaxrs_1.1_spec-1.0.jar" sourcepath="C:/Users/Administrator/.m2/repository/org/apache/geronimo/specs/geronimo-jaxrs_1.1_spec/1.0/geronimo-jaxrs_1.1_spec-1.0-sources.jar"/>
@@ -110,12 +108,13 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-json-provider-2.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-xml-provider-2.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-module-jaxb-annotations-2.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2015-01-10.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre7">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/gwt-2.6.1"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -134,17 +133,23 @@ public class BaseFormParserForJavaRosa {
 
   // bind attributes that CAN change without affecting database structure
   // Note: must specify these entirely in lowercase
-  private static final String[] ChangeableBindAttributes = {
-      "relevant", "constraint", "readonly", "required", "calculate",
-      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":constraintmsg",
-      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preload",
-      XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preloadparams", "appearance" };
+  private static final List<String> ChangeableBindAttributes;
 
   // core instance def. attrs. that CANNOT change w/o affecting db structure
   // Note: must specify these entirely in lowercase
-  private static final String[] NonchangeableInstanceAttributes = {
-    "id" };
+  private static final List<String> NonchangeableInstanceAttributes;
 
+  static {
+    ChangeableBindAttributes = Arrays.asList(new String[]{
+        "relevant", "constraint", "readonly", "required", "calculate",
+        XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":constraintmsg",
+        XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preload",
+        XFormParser.NAMESPACE_JAVAROSA.toLowerCase() + ":preloadparams", 
+        "appearance" });
+    
+    NonchangeableInstanceAttributes = Arrays.asList(new String[]{"id"});
+  }
+  
   // nodeset attribute name, in <bind> elements
   private static final String NODESET_ATTR = "nodeset";
 
@@ -252,6 +257,7 @@ public class BaseFormParserForJavaRosa {
   }
 
   private static class XFormParserWithBindEnhancements extends XFormParser {
+    @SuppressWarnings("unused")
     private Document xmldoc;
     private BaseFormParserForJavaRosa parser;
 
@@ -263,8 +269,8 @@ public class BaseFormParserForJavaRosa {
 
     protected void parseBind(Element e) {
       // remember raw bindings in case we want to compare parsed XForms later
-      parser.bindElements.addElement(copyBindingElement(e));
-      Vector<String> usedAtts = new Vector<String>();
+      parser.bindElements.add(copyBindingElement(e));
+      List<String> usedAtts = new ArrayList<String>();
 
       DataBinding binding = processStandardBindAttributes(usedAtts, e);
 
@@ -327,13 +333,8 @@ public class BaseFormParserForJavaRosa {
 
   // extracted from XForm during parsing
   private final Map<String, Integer> stringLengths = new HashMap<String, Integer>();
-  private final Vector<Element> bindElements = new Vector<Element>(); // original
-                                                                      // bindings
-                                                                      // from
-                                                                      // parse-time,
-                                                                      // for
-                                                                      // later
-                                                                      // comparison
+  // original bindings from parse-time for later comparison
+  private final List<Element> bindElements = new ArrayList<Element>();
 
   private void setNodesetStringLength(String nodeset, Integer length) {
     stringLengths.put(nodeset, length);
@@ -453,14 +454,14 @@ public class BaseFormParserForJavaRosa {
   private String extractBase64FieldEncryptionKey(TreeElement submissionElement) {
     TreeElement meta = findDepthFirst(submissionElement, "meta");
     if (meta != null) {
-      Vector<TreeElement> v;
+      List<TreeElement> l;
 
       // Save the base64 RSA-Encrypted symmetric encryption key
       // we are using for field encryption.
       // Do not encrypt the form if we can't save this encrypted key...
-      v = meta.getChildrenWithName(BASE64_ENCRYPTED_FIELD_KEY);
-      if (v.size() == 1) {
-        TreeElement ek = v.get(0);
+      l = meta.getChildrenWithName(BASE64_ENCRYPTED_FIELD_KEY);
+      if (l.size() == 1) {
+        TreeElement ek = l.get(0);
         String base64EncryptedFieldRsaPublicKey = getBindAttribute(ek, BASE64_RSA_PUBLIC_KEY);
         if (base64EncryptedFieldRsaPublicKey != null
             && base64EncryptedFieldRsaPublicKey.trim().length() == 0) {
@@ -679,18 +680,18 @@ public class BaseFormParserForJavaRosa {
    * @param treeElement
    * @return
    */
-  private Vector<Element> getBindingsForTreeElement(TreeElement treeElement) {
-    Vector<Element> v = new Vector<Element>();
+  private List<Element> getBindingsForTreeElement(TreeElement treeElement) {
+    List<Element> l = new ArrayList<Element>();
     String nodeset = "/" + getTreeElementPath(treeElement);
 
     for (int i = 0; i < this.bindElements.size(); i++) {
-      Element element = (Element) this.bindElements.elementAt(i);
+      Element element = this.bindElements.get(i);
       if (element.getAttributeValue("", NODESET_ATTR).equalsIgnoreCase(nodeset)) {
-        v.addElement(element);
+        l.add(element);
       }
     }
 
-    return (v);
+    return (l);
   }
 
   public String getFormId() {
@@ -902,7 +903,7 @@ public class BaseFormParserForJavaRosa {
         // flag differences as small or large based on list in
         // NonchangeableInstanceAttributes[]
         // here, changes are ALLOWED by default, unless to a listed attribute
-        if (!Arrays.asList(NonchangeableInstanceAttributes).contains(
+        if (!NonchangeableInstanceAttributes.contains(
             fullAttributeName.toLowerCase())) {
           smalldiff = true;
         } else {
@@ -925,7 +926,7 @@ public class BaseFormParserForJavaRosa {
         // flag differences as small or large based on list in
         // NonchangeableInstanceAttributes[]
         // here, changes are ALLOWED by default, unless to a listed attribute
-        if (!Arrays.asList(NonchangeableInstanceAttributes).contains(
+        if (!NonchangeableInstanceAttributes.contains(
             fullAttributeName.toLowerCase())) {
           smalldiff = true;
         } else {
@@ -936,10 +937,10 @@ public class BaseFormParserForJavaRosa {
 
     // note attributes don't actually include bindings; thus, check raw bindings
     // also one-by-one (starting with bindings1)
-    Vector<Element> bindings1 = parser1.getBindingsForTreeElement(treeElement1);
-    Vector<Element> bindings2 = parser2.getBindingsForTreeElement(treeElement2);
+    List<Element> bindings1 = parser1.getBindingsForTreeElement(treeElement1);
+    List<Element> bindings2 = parser2.getBindingsForTreeElement(treeElement2);
     for (int i = 0; i < bindings1.size(); i++) {
-      Element binding = bindings1.elementAt(i);
+      Element binding = bindings1.get(i);
       for (int j = 0; j < binding.getAttributeCount(); j++) {
         String attributeNamespace = binding.getAttributeNamespace(j);
         if (attributeNamespace != null && attributeNamespace.length() == 0) {
@@ -968,7 +969,7 @@ public class BaseFormParserForJavaRosa {
               // ChangeableBindAttributes[]
               // here, changes are NOT ALLOWED by default, unless to a listed
               // attribute
-              if (Arrays.asList(ChangeableBindAttributes).contains(fullAttributeName.toLowerCase())) {
+              if (ChangeableBindAttributes.contains(fullAttributeName.toLowerCase())) {
                 smalldiff = true;
               } else {
                 bigdiff = true;
@@ -980,7 +981,7 @@ public class BaseFormParserForJavaRosa {
     }
     // check binding attributes only in bindings2
     for (int i = 0; i < bindings2.size(); i++) {
-      Element binding = bindings2.elementAt(i);
+      Element binding = bindings2.get(i);
       for (int j = 0; j < binding.getAttributeCount(); j++) {
         String attributeNamespace = binding.getAttributeNamespace(j);
         if (attributeNamespace != null && attributeNamespace.length() == 0) {
@@ -997,7 +998,7 @@ public class BaseFormParserForJavaRosa {
             // ChangeableBindAttributes[]
             // here, changes are NOT ALLOWED by default, unless to a listed
             // attribute
-            if (Arrays.asList(ChangeableBindAttributes).contains(fullAttributeName.toLowerCase())) {
+            if (ChangeableBindAttributes.contains(fullAttributeName.toLowerCase())) {
               smalldiff = true;
             } else {
               bigdiff = true;
@@ -1015,12 +1016,12 @@ public class BaseFormParserForJavaRosa {
     // it appears only as an INDEX_TEMPLATE element.
 
     @SuppressWarnings("unused")
-	int template1DropCount = 0;
+    int template1DropCount = 0;
     // get non-template entries for treeElement1
     List<TreeElement> element1ExcludingRepeatIndex0Children = new ArrayList<TreeElement>();
 
     for (int i = 0; i < treeElement1.getNumChildren(); i++) {
-      TreeElement child = (TreeElement) treeElement1.getChildAt(i);
+      TreeElement child = treeElement1.getChildAt(i);
       if (child.isRepeatable()) {
         if (child.getMult() != TreeReference.INDEX_TEMPLATE) {
           template1DropCount++;
@@ -1033,12 +1034,12 @@ public class BaseFormParserForJavaRosa {
     }
 
     @SuppressWarnings("unused")
-	int template2DropCount = 0;
+    int template2DropCount = 0;
     // get non-template entries for treeElement2
     Map<String, TreeElement> element2ExcludingRepeatIndex0Children = new HashMap<String, TreeElement>();
 
     for (int i = 0; i < treeElement2.getNumChildren(); i++) {
-      TreeElement child = (TreeElement) treeElement2.getChildAt(i);
+      TreeElement child = treeElement2.getChildAt(i);
       if (child.isRepeatable()) {
         if (child.getMult() != TreeReference.INDEX_TEMPLATE) {
           template2DropCount++;
@@ -1075,11 +1076,9 @@ public class BaseFormParserForJavaRosa {
           case XFORMS_DIFFERENT:
             bigdiff = true;
             break;
-          case XFORMS_SHARE_INSTANCE:
-            // the other possibility... 
-            break;
           default:
-              throw new IllegalStateException("Unexpected return values");
+            // no update for the other cases (IDENTICAL, EARLIER, MISSING, SHARE_INSTANCE)
+            break;
           }
         } else {
           // consider children not found as big differences
@@ -1100,12 +1099,12 @@ public class BaseFormParserForJavaRosa {
 
   // search list of recorded bindings for a particular attribute; return its
   // value
-  private static String getBindingAttributeValue(Vector<Element> bindings,
+  private static String getBindingAttributeValue(List<Element> bindings,
       String attributeNamespace, String attributeName) {
     String retval = null;
 
     for (int i = 0; i < bindings.size(); i++) {
-      Element element = (Element) bindings.elementAt(i);
+      Element element = bindings.get(i);
       if ((retval = element.getAttributeValue(attributeNamespace, attributeName)) != null) {
         return (retval);
       }

@@ -18,17 +18,16 @@ package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTableFileInfo;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -46,7 +45,10 @@ import com.google.gwt.user.client.ui.ListBox;
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase implements OdkTablesData {
+public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase implements OdkTablesData,
+    TablesChangeNotification {
+
+  private OdkTablesTabUI parent;
 
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
@@ -86,10 +88,12 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   /**
    * Sets up the View Table subtab.
    */
-  public OdkTablesManageTableFilesSubTab() {
+  public OdkTablesManageTableFilesSubTab(OdkTablesTabUI parent) {
+    this.parent = parent;
 
     addFileButton = new OdkTablesTableIdServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
-        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT, this, this);
+        UIConsts.TABLE_FILE_UPLOAD_SERVLET_ADDR, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT, this,
+        this);
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -124,7 +128,8 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
     selectTablePanel.getElement().setId("select_table_panel");
     selectTablePanel.setHTML(0, 0, "<h2 id=\"table_name\"> Select a Table </h2>");
     selectTablePanel.setWidget(0, 1, tableBox);
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       selectTablePanel.setWidget(1, 0, addFileButton);
     }
 
@@ -150,35 +155,16 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
     updateContentsForSelectedTable();
   }
 
-  private void updateTableList() {
-    SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
-
-      @Override
-      public void onFailure(Throwable caught) {
-        if ( caught instanceof AccessDeniedException ) {
-          // swallow it...
-          AggregateUI.getUI().clearError();
-          ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
-          addTablesToListBox(tables);
-          tableBox.clear();
-          setTabToDislpayZero();
-        } else {
-          AggregateUI.getUI().reportError(caught);
-        }
-      }
-
-      @Override
-      public void onSuccess(ArrayList<TableEntryClient> tables) {
-        AggregateUI.getUI().clearError();
-
-        addTablesToListBox(tables);
-        tableBox.setItemSelected(selectedValue, true);
-
-        // This makes the server go crazy with requests.
-        // AggregateUI.getUI().getTimer().refreshNow();
-
-      }
-    });
+  private boolean updateTableList(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
+    boolean realChange = addTablesToListBox(tables, tableListChanged);
+    
+    if (tables.isEmpty()) {
+      tableBox.clear();
+      setTabToDislpayZero();
+    } else {
+      tableBox.setItemSelected(selectedValue, true);
+    }
+    return realChange;
   }
 
   @Override
@@ -190,7 +176,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   /*
    * temporarily existed to display deleted rows public Boolean
    * getDisplayDeleted() { return displayDeleted; }
-   *
+   * 
    * public void setDisplayDeleted(Boolean display) { this.displayDeleted =
    * display; }
    */
@@ -201,15 +187,16 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   // does so by calling other methods.
   @Override
   public void update() {
-
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
-      updateTableList();
-      // this causing trouble
-      updateTableData();
-    }
+    parent.update(this);
   }
 
-  public void addTablesToListBox(ArrayList<TableEntryClient> tables) {
+  public boolean addTablesToListBox(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
+    if (currentTables.size() == tables.size() && !tableListChanged
+        && currentTables.containsAll(tables)) {
+      // no change...
+      return false;
+    }
+
     // clear the old tables
     currentTables.clear();
     // and add the new
@@ -221,6 +208,8 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
     for (int i = 0; i < currentTables.size(); i++) {
       tableBox.addItem(currentTables.get(i).getTableId());
     }
+
+    return true;
   }
 
   public void updateContentsForSelectedTable() {
@@ -232,7 +221,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
       // we also want to have no curren table.
       currentTable = null;
       // clear the "displaying" thing
-      if ( selectTablePanel.getRowCount() > 2 ) {
+      if (selectTablePanel.getRowCount() > 2) {
         selectTablePanel.removeRow(2);
       }
     } else {
@@ -248,7 +237,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
 
   @Override
   public String getTableId() {
-    if ( currentTable == null ) {
+    if (currentTable == null) {
       return null;
     } else {
       return currentTable.getTableId();
@@ -281,6 +270,14 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
     if (!foundTable) {
       selectedValue = 0;
       tableFileData.removeAllRows();
+    }
+  }
+
+  @Override
+  public void updateTableSet(boolean tableListChanged) {
+    boolean realChange = updateTableList(parent.getTables(), tableListChanged);
+    if (realChange) {
+      updateTableData();
     }
   }
 

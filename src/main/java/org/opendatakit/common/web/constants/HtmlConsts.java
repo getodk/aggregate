@@ -155,5 +155,9 @@ public final class HtmlConsts {
 	public static final String PARAM_DELIMITER = "&";
 	public static final String ATTACHMENT_FILENAME_TXT = "attachment; filename=\"";
 	public static final String CONTENT_DISPOSITION = "Content-Disposition";
+	
+	/** for click-jacking prevention */
+	public static final String X_FRAME_OPTIONS = "X-Frame-Options";
+	public static final String X_FRAME_SAMEORIGIN = "SAMEORIGIN";
 
 }

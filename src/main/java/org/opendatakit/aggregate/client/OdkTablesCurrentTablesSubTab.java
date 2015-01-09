@@ -16,15 +16,9 @@
 
 package org.opendatakit.aggregate.client;
 
-import java.util.ArrayList;
-
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
+import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * This is the subtab that will house the display of the current ODK Tables
@@ -34,13 +28,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
+public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase implements TablesChangeNotification {
 
   private static final String IMPORT_TABLE_TXT = "Import table from CSV";
   private static final String IMPORT_TABLE_TOOLTIP_TEXT = "Create a new  table by importing a CSV";
   private static final String IMPORT_TABLE_BALLOON_TXT = "Create a new table by importing from a CSV";
   private static final String IMPORT_TABLE_BUTTON_TXT = "<img src =\"images/yellow_plus.png\" />Import Table From CSV";
 
+  private OdkTablesTabUI parent;
+  
   private OdkTablesTableList tableList;
 
   // private OdkTablesAddTableButton addButton;
@@ -50,7 +46,8 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
   // this is a button for adding a file to be associated with a table.
   // private ServletPopupButton addFileButton;
 
-  public OdkTablesCurrentTablesSubTab() {
+  public OdkTablesCurrentTablesSubTab(OdkTablesTabUI parent) {
+    this.parent = parent;
     // vertical
     // setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -77,39 +74,14 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase {
    */
   @Override
   public void update() {
-    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
-        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
-      SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
+    parent.update(this);
+  }
+  
 
-        @Override
-        public void onFailure(Throwable caught) {
-          if (caught instanceof AccessDeniedException) {
-            // swallow it...
-            AggregateUI.getUI().clearError();
-            ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
-            tableList.updateTableList(tables);
-            tableList.setVisible(true);
-
-            // for some reason this line was making a crazy number of
-            // refreshes when you were just sitting on the page.
-            // AggregateUI.getUI().getTimer().refreshNow();
-          } else {
-            AggregateUI.getUI().reportError(caught);
-          }
-        }
-
-        @Override
-        public void onSuccess(ArrayList<TableEntryClient> tables) {
-          AggregateUI.getUI().clearError();
-          tableList.updateTableList(tables);
-          tableList.setVisible(true);
-
-          // for some reason this line was making a crazy number of
-          // refreshes when you were just sitting on the page.
-          // AggregateUI.getUI().getTimer().refreshNow();
-        }
-      });
-    }
+  @Override
+  public void updateTableSet(boolean tableListChanged) {
+      tableList.updateTableList(parent.getTables(), tableListChanged);
+      tableList.setVisible(true);
   }
 
 }

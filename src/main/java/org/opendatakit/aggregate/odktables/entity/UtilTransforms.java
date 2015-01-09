@@ -239,7 +239,6 @@ public class UtilTransforms {
     // manipulator URIs
     RowResourceClient resource = new RowResourceClient(rowClient);
     resource.setSelfUri(serverResource.getSelfUri());
-    resource.setTableUri(serverResource.getTableUri());
 
     return resource;
 

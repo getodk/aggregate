@@ -68,9 +68,9 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "<html>"
       + "  <head>"
       + "	<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">"
-      + "  <link rel=\"icon\" href=\"favicon.ico\"/>"
+      + "  <link rel=\"shortcut icon\" href=\"favicon.ico\"/>"
       + "	<title>ODK Aggregate</title>"
-      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.9.0.min.js\"></script>"
+      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.11.1.min.js\"></script>"
       + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/resize.js\"></script>"
       + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
@@ -152,6 +152,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
     out.print(PAGE_CONTENTS_FIRST);
     String simpleApiKey;

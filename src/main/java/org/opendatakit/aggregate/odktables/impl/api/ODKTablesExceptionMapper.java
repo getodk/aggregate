@@ -25,12 +25,16 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableAlreadyExistsException;
+import org.opendatakit.aggregate.odktables.exception.TableDataETagMismatchException;
+import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 
@@ -51,30 +55,75 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     }
     if (e instanceof AppNameMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
-        .entity(new Error(ErrorType.APP_NAME_MISMATCH, msg)).type(type).build();
+        .entity(new Error(ErrorType.APP_NAME_MISMATCH, msg)).type(type)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof BadColumnNameException) {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_COLUMN_NAME, msg))
-          .type(type).build();
+          .type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof ETagMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
-          .entity(new Error(ErrorType.ETAG_MISMATCH, msg)).type(type).build();
+          .entity(new Error(ErrorType.ETAG_MISMATCH, msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    } else if (e instanceof TableDataETagMismatchException) {
+      return Response.status(Status.CONFLICT)
+          .entity(new Error(ErrorType.ETAG_MISMATCH, msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof InconsistentStateException) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof NotModifiedException) {
-      return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, ((NotModifiedException) e).getETag()).build();
+      return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, ((NotModifiedException) e).getETag())
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof PermissionDeniedException) {
       return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
-          .type(type).build();
+          .type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof SchemaETagMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
-          .entity(new Error(ErrorType.SCHEMA_ETAG_MISMATCH, msg)).type(type).build();
+          .entity(new Error(ErrorType.SCHEMA_ETAG_MISMATCH, msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof TableAlreadyExistsException) {
       return Response.status(Status.CONFLICT).entity(new Error(ErrorType.TABLE_EXISTS, msg))
-          .type(type).build();
+          .type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    } else if (e instanceof TableNotFoundException) {
+      return Response.status(Status.NOT_FOUND).entity(new Error(ErrorType.TABLE_NOT_FOUND, msg))
+          .type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    } else if (e instanceof FileNotFoundException) {
+      return Response.status(Status.NOT_FOUND).entity(new Error(ErrorType.RESOURCE_NOT_FOUND, msg))
+          .type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_REQUEST, msg))
-          .type(type).build();
+          .type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 

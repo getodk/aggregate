@@ -99,7 +99,7 @@ public class BinaryContentManipulator {
       // loop to create the VBCRB and RB entries for each part of the
       // larger blob
       long blobLimit = ref.value.getMaxCharLen();
-      long i = 1;
+      long part = 1L;
       Datastore ds = cc.getDatastore();
       User user = cc.getCurrentUser();
       for (long index = 0; index < blob.length; index = index + blobLimit) {
@@ -115,7 +115,7 @@ public class BinaryContentManipulator {
         bcb.setTopLevelAuri(topLevelKey);
         bcb.setDomAuri(uriVersionedContent);
         bcb.setSubAuri(eBlob.getUri());
-        bcb.setPart(i++);
+        bcb.setPart(part++);
         dbBcbEntityList.add(bcb);
         ds.putEntity(eBlob, user);
         ds.putEntity(bcb, user);
@@ -133,8 +133,15 @@ public class BinaryContentManipulator {
       q.addSort(bcbRef.domAuri, Direction.ASCENDING); // gae optimization
       q.addSort(bcbRef.part, Direction.ASCENDING);
       List<? extends CommonFieldsBase> bcbList = q.executeQuery();
+      long expectedPart = 1L;
       for (CommonFieldsBase cb : bcbList) {
-        dbBcbEntityList.add((BinaryContentRefBlob) cb);
+        BinaryContentRefBlob bcref = (BinaryContentRefBlob) cb;
+        Long part = bcref.getPart();
+        if ( part == null || part.longValue() != expectedPart ) {
+          throw new ODKEnumeratedElementException(bcbRef.getTableName() + "@domAuri(" + bcbRef.getDomAuri() + ") is missing a reference part OR has an extra copy of one");
+        }
+        ++expectedPart;
+        dbBcbEntityList.add(bcref);
       }
 
       // and gather the blob parts themselves...
@@ -172,11 +179,32 @@ public class BinaryContentManipulator {
       return reconstructedBlob.toByteArray();
     }
 
-    public void recursivelyAddKeys(List<EntityKey> keyList) {
-      for (BinaryContentRefBlob e : dbBcbEntityList) {
+    /**
+     * Recursively add the keys for this entry to keyList.
+     * Pay attention to the order of insertion so that if
+     * we reverse the resulting keyList, we can delete the
+     * entities in order and not get into a bad database
+     * state. 
+     *  
+     * @param keyList
+     */
+    public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList) {
+      HashMap<String, RefBlob> blobs = new HashMap<String, RefBlob>();
+      for ( RefBlob r : dbRefBlobList ) {
+        blobs.put(r.getUri(), r);
+      }
+      
+      for ( int i = 0 ; i < dbBcbEntityList.size() ; ++i ) {
+        BinaryContentRefBlob e = dbBcbEntityList.get(i);
+        String sub = e.getSubAuri();
+        RefBlob r = blobs.get(sub);
+        if ( r != null ) {
+          keyList.add(r.getEntityKey());
+          blobs.remove(sub);
+        }
         keyList.add(e.getEntityKey());
       }
-      for (RefBlob r : dbRefBlobList) {
+      for (RefBlob r : blobs.values()) {
         keyList.add(r.getEntityKey());
       }
     }
@@ -481,8 +509,8 @@ public class BinaryContentManipulator {
         // -- should not have any data. If it does, prior request failed before step 4 completed.
         BlobManipulator b = new BlobManipulator(matchedBc.getUri(), vrefRelation, blbRelation, cc);
         List<EntityKey> keyList = new ArrayList<EntityKey>();
-        b.recursivelyAddKeys(keyList);
-        ds.deleteEntities(keyList, user);
+        b.recursivelyAddEntityKeysForDeletion(keyList);
+        DeleteHelper.deleteEntities(keyList, cc);
 
         // Step (3)
         // persist the binary data
@@ -517,8 +545,8 @@ public class BinaryContentManipulator {
         // Step (2)
         BlobManipulator b = new BlobManipulator(matchedBc.getUri(), vrefRelation, blbRelation, cc);
         List<EntityKey> keyList = new ArrayList<EntityKey>();
-        b.recursivelyAddKeys(keyList);
-        ds.deleteEntities(keyList, user);
+        b.recursivelyAddEntityKeysForDeletion(keyList);
+        DeleteHelper.deleteEntities(keyList, cc);
 
         // Step (3)
         // persist the binary data
@@ -551,8 +579,14 @@ public class BinaryContentManipulator {
 
       List<? extends CommonFieldsBase> contentHits = q.executeQuery();
       attachments.clear();
+      long expectedOrdinal = 1L;
       for (CommonFieldsBase cb : contentHits) {
         BinaryContent bc = (BinaryContent) cb;
+        Long ordinal = bc.getOrdinalNumber();
+        if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
+          throw new ODKEnumeratedElementException(ctntRelation.getTableName() + "@parentAuri(" + bc.getParentAuri() + ") is missing an attachment instance OR has an extra copy of one");
+        }
+        ++expectedOrdinal;
         attachments.put(bc.getOrdinalNumber(), bc);
       }
       refreshBeforeUse = false;
@@ -580,8 +614,8 @@ public class BinaryContentManipulator {
     boolean success = false;
     List<EntityKey> keys = new ArrayList<EntityKey>();
     try {
-      recursivelyAddEntityKeys(keys, cc);
-      cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
+      recursivelyAddEntityKeysForDeletion(keys, cc);
+      DeleteHelper.deleteEntities(keys, cc);
       success = true;
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
@@ -612,14 +646,23 @@ public class BinaryContentManipulator {
     return parentKey.equals(bt.parentKey) && topLevelKey.equals(bt.topLevelKey);
   }
 
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+  /**
+   * Build up the list of entity keys for the attachments and their
+   * references and blobs. This is done so that if we delete these in
+   * reverse order, we don't get into a bad state.
+   * 
+   * @param keyList
+   * @param cc
+   * @throws ODKDatastoreException
+   */
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
 
     updateAttachments(cc);
     for (BinaryContent bc : attachments.values()) {
       if (bc.getContentHash() != null) {
         BlobManipulator b = new BlobManipulator(bc.getUri(), vrefRelation, blbRelation, cc);
-        b.recursivelyAddKeys(keyList);
+        b.recursivelyAddEntityKeysForDeletion(keyList);
       }
       keyList.add(bc.getEntityKey());
     }

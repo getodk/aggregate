@@ -40,6 +40,7 @@ import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsForFilesClient;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.DataManager;
+import org.opendatakit.aggregate.odktables.FileManager;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.api.FileService;
@@ -58,6 +59,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceFiles;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
+import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.datamodel.BinaryContent;
@@ -583,18 +585,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
-      TableManager tm = new TableManager(appId, userPermissions, cc);
-      // TODO: add permissions check
-      List<DbTableFileInfo.DbTableFileInfoEntity> entities =
-          DbTableFileInfo.queryForEntity(odkClientApiVersion, DbTableFileInfo.NO_TABLE_ID, filepath, cc);
-      DbTableFiles dbTableFiles = new DbTableFiles(cc);
-
-      for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
-
-        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
-        blobEntitySet.remove(cc);
-        entry.delete(cc);
-      }
+      
+      FileManager fm = new FileManager(appId, cc);
+      fm.deleteFile(odkClientApiVersion, DbTableFileInfo.NO_TABLE_ID, filepath);
       return;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -620,18 +613,11 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     try {
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
-      TableManager tm = new TableManager(appId, userPermissions, cc);
-      // TODO: add permissions check
-      List<DbTableFileInfo.DbTableFileInfoEntity> entities =
-          DbTableFileInfo.queryForEntity(odkClientApiVersion, tableId, filepath, cc);
-      DbTableFiles dbTableFiles = new DbTableFiles(cc);
 
-      for (DbTableFileInfo.DbTableFileInfoEntity entry : entities) {
+      userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
 
-        BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(entry.getId(), cc);
-        blobEntitySet.remove(cc);
-        entry.delete(cc);
-      }
+      FileManager fm = new FileManager(appId, cc);
+      fm.deleteFile(odkClientApiVersion, tableId, filepath);
       return;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();

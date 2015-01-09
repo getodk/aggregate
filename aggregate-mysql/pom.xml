@@ -24,6 +24,12 @@
       <artifactId>odk-mysql-it-settings</artifactId>
       <version>latest</version>
     </dependency>
+    <dependency>
+        <groupId>org.apache.wink</groupId>
+        <artifactId>wink-client</artifactId>
+        <version>1.4</version>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <testSourceDirectory>${toplevel.directory}/src/it/java</testSourceDirectory>

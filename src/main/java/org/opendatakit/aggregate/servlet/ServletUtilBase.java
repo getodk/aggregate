@@ -42,6 +42,8 @@ import org.opendatakit.common.web.servlet.CommonServletBase;
 @SuppressWarnings("serial")
 public class ServletUtilBase extends CommonServletBase {
 
+  public static final String BAD_PARAMETER_CHARACTERS = "[();\\'\"]";
+  
   protected ServletUtilBase() {
     super(ServletConsts.APPLICATION_NAME);
   }

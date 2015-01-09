@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client;
 
+import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.table.OdkTablesViewAppLevelFileInfo;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -34,8 +35,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
  * @author sudar.sam@gmail.com
  *
  */
-public class OdkTablesManageAppLevelFilesSubTab extends AggregateSubTabBase {
+public class OdkTablesManageAppLevelFilesSubTab extends AggregateSubTabBase implements TablesChangeNotification {
 
+  private OdkTablesTabUI parent;
+  
   // this is the panel with the add button
   private FlexTable selectTablePanel;
 
@@ -57,7 +60,8 @@ public class OdkTablesManageAppLevelFilesSubTab extends AggregateSubTabBase {
   /**
    * Sets up the View Table subtab.
    */
-  public OdkTablesManageAppLevelFilesSubTab() {
+  public OdkTablesManageAppLevelFilesSubTab(OdkTablesTabUI parent) {
+    this.parent = parent;
 
     addFileButton = new ServletPopupButton(ADD_FILE_BUTTON_TXT, ADD_FILE_TXT,
         UIConsts.APP_LEVEL_FILE_UPLOAD_SERVLET_ADDR, this, ADD_FILE_TOOLTIP_TXT, ADD_FILE_BALLOON_TXT);
@@ -88,10 +92,13 @@ public class OdkTablesManageAppLevelFilesSubTab extends AggregateSubTabBase {
 
   @Override
   public void update() {
+    // no need to get table list
+    // parent.update();
+    tableFileData.updateData();
+  }
 
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
-      tableFileData.updateData();
-    }
+  @Override
+  public void updateTableSet(boolean tableListChanged) {
   }
 
 }

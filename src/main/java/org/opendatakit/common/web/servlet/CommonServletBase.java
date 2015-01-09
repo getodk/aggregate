@@ -165,6 +165,8 @@ public abstract class CommonServletBase extends HttpServlet {
 
   protected PrintWriter beginBasicHtmlResponsePreamble(String headContent, HttpServletResponse resp, CallingContext cc) throws IOException {
 	    resp.addHeader(HOST_HEADER, cc.getServerURL());
+	    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
+
 	    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
 	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
 	    PrintWriter out = resp.getWriter();

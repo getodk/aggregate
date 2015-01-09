@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer.InvalidAuthTokenException;
+import org.opendatakit.aggregate.odktables.api.exceptions.InvalidAuthTokenException;
 import org.opendatakit.aggregate.odktables.api.perf.PerfTest.TestInfo;
 
 import com.google.common.collect.Lists;
@@ -114,7 +114,8 @@ public class TestRunner {
     Scanner scanner = new Scanner(System.in);
     // String token = scanner.nextLine();
     scanner.close();
-    AggregateSynchronizer synchronizer = new AggregateSynchronizer(aggregateUrl, "");
+    AggregateSynchronizer synchronizer = new AggregateSynchronizer("context", "appName", "1",
+        aggregateUrl, null);
 
     // List<Integer> numRowsValues = Lists.newArrayList(100, 1000);//, 10000);
     // for (int numRows : numRowsValues) {

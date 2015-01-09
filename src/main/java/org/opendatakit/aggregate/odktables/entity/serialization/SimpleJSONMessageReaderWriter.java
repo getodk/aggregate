@@ -24,27 +24,20 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
-import org.opendatakit.aggregate.odktables.impl.api.AppEngineHandlersFactory.GZIPRequestHandler;
+import org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,10 +51,15 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
   private static final ObjectMapper mapper = new ObjectMapper();
   private static final String DEFAULT_ENCODING = "utf-8";
 
+  public static class JSONWrapper {
+    byte[] buffer;
+    public JSONWrapper(byte[] buffer) {
+      this.buffer = buffer;
+    }
+  };
+  
   @Context
   ServletContext context;
-  @Context
-  HttpHeaders headers;
 
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation annotations[],
@@ -86,16 +84,7 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
       if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
         throw new IllegalArgumentException("charset for the request is not utf-8");
       }
-      InputStream instr = stream;
-
-      String tmp = (String) context.getAttribute(GZIPRequestHandler.noUnGZIPContentEncodingKey);
-      boolean noUnGZIPContentEncodingKey = tmp == null ? false : Boolean.valueOf(tmp);
-
-      if ( !noUnGZIPContentEncodingKey ) {
-        instr = new GZIPInputStream(stream);
-      }
-
-      InputStreamReader r = new InputStreamReader(instr,
+      InputStreamReader r = new InputStreamReader(stream,
           Charset.forName(ApiConstants.UTF8_ENCODE));
       return mapper.readValue(r, aClass);
     } catch (Exception e) {
@@ -112,46 +101,39 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
       if (!encoding.equalsIgnoreCase(DEFAULT_ENCODING)) {
         throw new IllegalArgumentException("charset for the response is not utf-8");
       }
-      // write it to a byte array
-      ByteArrayOutputStream bas = new ByteArrayOutputStream(8192);
-      OutputStreamWriter w = new OutputStreamWriter(bas,
-          Charset.forName(ApiConstants.UTF8_ENCODE));
-      mapper.writeValue(w, o);
-      // get the array and compute md5 hash
-      byte[] bytes = bas.toByteArray();
-      String eTag;
-      try {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(bytes);
 
-        byte[] messageDigest = md.digest();
-
-        BigInteger number = new BigInteger(1, messageDigest);
-        String md5 = number.toString(16);
-        while (md5.length() < 32)
-          md5 = "0" + md5;
-        eTag = "md5_" + md5;
-      } catch (NoSuchAlgorithmException e) {
-        throw new IllegalStateException("Unexpected problem computing md5 hash", e);
-      }
-      map.putSingle(HttpHeaders.ETAG, eTag);
-
-      String tmp = (String) context.getAttribute(GZIPRequestHandler.emitGZIPContentEncodingKey);
-      boolean emitGZIPContentEncodingKey = (tmp == null) ? false : Boolean.valueOf(tmp);
-
-      String ifNoneMatchTag = headers.getRequestHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
-      if ( ifNoneMatchTag != null && ifNoneMatchTag.equals(eTag) ) {
-        // return UNMODIFIED...
-        throw new NotModifiedException(ifNoneMatchTag);
-      } else {
-        OutputStream rawStr = rawStream;
-        if ( emitGZIPContentEncodingKey ) {
-          map.add(ApiConstants.CONTENT_ENCODING_HEADER, ApiConstants.GZIP_CONTENT_ENCODING);
-          rawStr = new GZIPOutputStream(rawStream);
+      /**
+       * This is an optimization because of the weird way Wink handles request/response
+       * processing. I'd like to do post-processing on the constructed response, but 
+       * am forced to do pre-processing. We only do this for JSON response path.
+       */
+      byte[] bytes = null;
+      {
+        Object obj = context.getAttribute(AppEngineHandlersFactory.NotModifiedHandler.jsonBufferKey);
+        if ( obj != null && obj instanceof JSONWrapper ) {
+          JSONWrapper wrapper = (JSONWrapper) obj;
+          bytes = wrapper.buffer;
         }
-
-        rawStr.write(bytes);
       }
+      if ( bytes == null ) {
+        // write object to a byte array
+        ByteArrayOutputStream bas = new ByteArrayOutputStream(8192);
+        OutputStreamWriter w = new OutputStreamWriter(bas,
+            Charset.forName(ApiConstants.UTF8_ENCODE));
+        mapper.writeValue(w, o);
+        // get the array
+        bytes = bas.toByteArray();
+      }
+      /**
+       * OK. At this point, bytes[] holds the serialized response entity.
+       */
+      map.putSingle(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
+      map.putSingle("Access-Control-Allow-Origin", "*");
+      map.putSingle("Access-Control-Allow-Credentials", "true");
+
+      rawStream.write(bytes);
+      rawStream.flush();
+      rawStream.close();
 
     } catch (Exception e) {
       throw new IOException(e);

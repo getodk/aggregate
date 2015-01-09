@@ -86,6 +86,8 @@ public interface Entity {
   public abstract Long getLong(String fieldName);
 
   public abstract String getString(String fieldName);
+  
+  public abstract boolean isFromDatabase();
 
   public abstract void set(DataField field, Boolean value);
 

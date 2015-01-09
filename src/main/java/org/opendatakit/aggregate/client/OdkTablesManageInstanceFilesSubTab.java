@@ -18,16 +18,14 @@ package org.opendatakit.aggregate.client;
 
 import java.util.ArrayList;
 
+import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewInstanceFileInfo;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -41,8 +39,10 @@ import com.google.gwt.user.client.ui.ListBox;
  *
  */
 public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
-        implements OdkTablesData {
+        implements OdkTablesData, TablesChangeNotification {
 
+  private OdkTablesTabUI parent;
+  
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
   private FlexTable selectTablePanel;
@@ -72,7 +72,8 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
   /**
    * Sets up the View Table subtab.
    */
-  public OdkTablesManageInstanceFilesSubTab() {
+  public OdkTablesManageInstanceFilesSubTab(OdkTablesTabUI parent) {
+    this.parent = parent;
 
     setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
 
@@ -120,41 +121,21 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
    * Call this to remove any currently displayed data, set the selected table in
    * the list box to zero, and generally reset this page.
    */
-  public void setTabToDislpayZero() {
+  public void setTabToDisplayZero() {
     selectedValue = 0;
     tableBox.setSelectedIndex(0);
     updateContentsForSelectedTable();
   }
 
-  private void updateTableList() {
-    SecureGWT.getServerTableService().getTables(new AsyncCallback<ArrayList<TableEntryClient>>() {
-
-      @Override
-      public void onFailure(Throwable caught) {
-        if ( caught instanceof AccessDeniedException ) {
-          // swallow it...
-          AggregateUI.getUI().clearError();
-          ArrayList<TableEntryClient> tables = new ArrayList<TableEntryClient>();
-          addTablesToListBox(tables);
-          tableBox.clear();
-          setTabToDislpayZero();
-        } else {
-          AggregateUI.getUI().reportError(caught);
-        }
-      }
-
-      @Override
-      public void onSuccess(ArrayList<TableEntryClient> tables) {
-        AggregateUI.getUI().clearError();
-
-        addTablesToListBox(tables);
-        tableBox.setItemSelected(selectedValue, true);
-
-        // This makes the server go crazy with requests.
-        // AggregateUI.getUI().getTimer().refreshNow();
-
-      }
-    });
+  private boolean updateTableList(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
+    boolean realChange = addTablesToListBox(tables, tableListChanged);
+    if (tables.isEmpty()) {
+      tableBox.clear();
+      setTabToDisplayZero();
+    } else {
+      tableBox.setItemSelected(selectedValue, true);
+    }
+    return realChange;
   }
 
   @Override
@@ -177,15 +158,16 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
   // does so by calling other methods.
   @Override
   public void update() {
-
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
-      updateTableList();
-      // this causing trouble
-      updateTableData();
-    }
+    parent.update(this);
   }
 
-  public void addTablesToListBox(ArrayList<TableEntryClient> tables) {
+  public boolean addTablesToListBox(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
+    if ( currentTables.size() == tables.size() && !tableListChanged && 
+         currentTables.containsAll(tables) ) {
+      // no change...
+      return false;
+    }
+    
     // clear the old tables
     currentTables.clear();
     // and add the new
@@ -197,6 +179,8 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
     for (int i = 0; i < currentTables.size(); i++) {
       tableBox.addItem(currentTables.get(i).getTableId());
     }
+    
+    return true;
   }
 
   public void updateContentsForSelectedTable() {
@@ -257,6 +241,14 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
     if (!foundTable) {
       selectedValue = 0;
       tableFileData.removeAllRows();
+    }
+  }
+
+  @Override
+  public void updateTableSet(boolean tableListChanged) {
+    boolean realChange = updateTableList(parent.getTables(), tableListChanged);
+    if ( realChange ) {
+      updateTableData();
     }
   }
 

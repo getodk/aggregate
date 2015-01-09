@@ -19,6 +19,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -41,6 +43,7 @@ public interface FileManifestService {
 
   /**
    *
+   * @param httpHeaders
    * @param odkClientVersion
    * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
    * @throws ODKOverQuotaException
@@ -52,10 +55,11 @@ public interface FileManifestService {
   @GET
   @Path("{odkClientVersion}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*OdkTablesFileManifest*/ getAppLevelFileManifest(@PathParam("odkClientVersion") String odkClientVersion) throws ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
+  public Response /*OdkTablesFileManifest*/ getAppLevelFileManifest(@Context HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion) throws ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
 
   /**
    *
+   * @param httpHeaders
    * @param odkClientVersion
    * @param tableId
    * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
@@ -68,5 +72,5 @@ public interface FileManifestService {
   @GET
   @Path("{odkClientVersion}/{tableId}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*OdkTablesFileManifest*/ getTableIdFileManifest(@PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) throws ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
+  public Response /*OdkTablesFileManifest*/ getTableIdFileManifest(@Context HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId) throws ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
 }

@@ -180,7 +180,8 @@ public class WebCursorUtils {
         }
       } else if (name.equalsIgnoreCase(WebUtils.IS_FORWARD_CURSOR_VALUE_TAG)) {
         String flag = XFormParser.getXMLText(child, true);
-        if (flag != null && flag.length() == 0) {
+        // CAL: Change to make backward web safe cursor work
+        if (flag != null && flag.length() != 0) {
           isForwardCursor = WebUtils.parseBoolean(flag);
         }
       }

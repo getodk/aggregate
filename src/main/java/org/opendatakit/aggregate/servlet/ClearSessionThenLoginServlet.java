@@ -56,6 +56,14 @@ public class ClearSessionThenLoginServlet extends ServletUtilBase {
     HttpSession s = req.getSession();
     if (s != null) {
       s.invalidate();
+      // insert delay to let this propagate out?
+      // attempt to fix non-responsiveness of the Log In
+      // button upon initial page load...
+      try {
+        Thread.sleep(1000L);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
     String newUrl;
     if (isAnon) {

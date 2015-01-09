@@ -36,6 +36,8 @@ import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.ChangeSetList;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
@@ -65,13 +67,32 @@ public class DiffServiceImpl implements DiffService {
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsSince(dataETag, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
+        websafeResult.dataETag, getTableUri(),
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-    return Response.ok(rowResourceList).build();
+    return Response.ok(rowResourceList)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
+  private String getTableUri() {
+    String appId = dm.getAppId();
+    String tableId = dm.getTableId();
+
+    UriBuilder ub = info.getBaseUriBuilder();
+    ub.path(OdkTables.class, "getTablesService");
+    URI table = ub.clone().build(appId, tableId);
+    try {
+      return table.toURL().toExternalForm();
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException("unable to convert URL ");
+    }
+  }
+  
   private RowResource getResource(Row row) {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();
@@ -81,11 +102,9 @@ public class DiffServiceImpl implements DiffService {
     ub.path(OdkTables.class, "getTablesService");
     URI self = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getData").path(DataService.class, "getRow")
         .build(appId, tableId, schemaETag, rowId);
-    URI table = ub.clone().build(appId, tableId);
     RowResource resource = new RowResource(row);
     try {
       resource.setSelfUri(self.toURL().toExternalForm());
-      resource.setTableUri(table.toURL().toExternalForm());
     } catch (MalformedURLException e) {
       e.printStackTrace();
       throw new IllegalArgumentException("unable to convert URL ");
@@ -99,5 +118,38 @@ public class DiffServiceImpl implements DiffService {
       resources.add(getResource(row));
     }
     return resources;
+  }
+
+  @Override
+  public Response getChangeSetsSince(String dataETag, String sequenceValue)
+      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException,
+      ODKTaskLockException, BadColumnNameException {
+
+    ChangeSetList changeSetList = dm.getChangeSetsSince(dataETag, sequenceValue);
+    return Response.ok(changeSetList)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
+  }
+
+  @Override
+  public Response getChangeSetRows(String dataETag, String isActive, String cursor,
+      String fetchLimit) throws ODKDatastoreException, PermissionDeniedException,
+      InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+
+    boolean bIsActive = (isActive == null || isActive.length() == 0 || !isActive.equalsIgnoreCase("true")) 
+        ? false : true;
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    WebsafeRows websafeResult = dm.getChangeSetRows(dataETag, bIsActive, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
+    RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
+        websafeResult.dataETag, getTableUri(),
+        WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
+        WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
+        WebUtils.safeEncode(websafeResult.websafeResumeCursor),
+        websafeResult.hasMore, websafeResult.hasPrior);
+    return Response.ok(rowResourceList)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 }

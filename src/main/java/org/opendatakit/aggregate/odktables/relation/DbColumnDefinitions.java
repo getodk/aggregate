@@ -63,7 +63,7 @@ public class DbColumnDefinitions extends Relation {
 
   // these are the column names in the COLUMN table
   private static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
-      .setIndexable(IndexType.HASH);
+      .setIndexable(IndexType.ORDERED);
   private static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, false);
   private static final DataField ELEMENT_KEY = new DataField("ELEMENT_KEY", DataType.STRING, false);
   private static final DataField ELEMENT_NAME = new DataField("ELEMENT_NAME", DataType.STRING,
@@ -88,7 +88,7 @@ public class DbColumnDefinitions extends Relation {
   public static class DbColumnDefinitionsEntity {
 
     Entity e;
-    private boolean isUnitOfRetention = true;
+    private Boolean isUnitOfRetention = true;
 
     DbColumnDefinitionsEntity(Entity e) {
       this.e = e;
@@ -179,7 +179,7 @@ public class DbColumnDefinitions extends Relation {
       e.set(LIST_CHILD_ELEMENT_KEYS, value);
     }
 
-    public boolean isUnitOfRetention() {
+    public Boolean isUnitOfRetention() {
       return isUnitOfRetention;
     }
     
@@ -317,7 +317,6 @@ public class DbColumnDefinitions extends Relation {
     }
   }
 
-
   /**
    * Return the actual database column names for the given table.
    * Sort them so that complex type elements are together
@@ -331,7 +330,6 @@ public class DbColumnDefinitions extends Relation {
    */
   public static ArrayList<String> queryForDbColumnNames(String tableId, String schemaETag,
       CallingContext cc) throws ODKDatastoreException {
-
     List<DbColumnDefinitionsEntity> columns = query(tableId, schemaETag, cc);
 
     ArrayList<String> list = new ArrayList<String>();
