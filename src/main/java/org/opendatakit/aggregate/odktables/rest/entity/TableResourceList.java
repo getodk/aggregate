@@ -73,6 +73,13 @@ public class TableResourceList {
   private ArrayList<TableResource> tables;
 
   /**
+   * If known, the ETag of the app-level files 
+   * manifest is also returned.
+   */
+  @JsonProperty(required = false)
+  private String appLevelManifestETag;
+
+  /**
    * Constructor used by Jackson
    */
   public TableResourceList() {
@@ -107,6 +114,14 @@ public class TableResourceList {
   public void setTables(ArrayList<TableResource> tables) {
     this.tables = tables;
     Collections.sort(this.tables);
+  }
+
+  public String getAppLevelManifestETag() {
+    return appLevelManifestETag;
+  }
+
+  public void setAppLevelManifestETag(String appLevelManifestETag) {
+    this.appLevelManifestETag = appLevelManifestETag;
   }
 
   public String getWebSafeRefetchCursor() {
@@ -154,6 +169,7 @@ public class TableResourceList {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((tables == null) ? 0 : tables.hashCode());
+    result = prime * result + ((appLevelManifestETag == null) ? 0 : appLevelManifestETag.hashCode());
     result = prime * result + ((webSafeRefetchCursor == null) ? 0 : webSafeRefetchCursor.hashCode());
     result = prime * result + ((webSafeBackwardCursor == null) ? 0 : webSafeBackwardCursor.hashCode());
     result = prime * result + ((webSafeResumeCursor == null) ? 0 : webSafeResumeCursor.hashCode());
@@ -175,6 +191,7 @@ public class TableResourceList {
     }
     TableResourceList other = (TableResourceList) obj;
     boolean simpleResult = (tables == null ? other.tables == null : (other.tables != null && tables.size() == other.tables.size())) &&
+            (appLevelManifestETag == null ? other.appLevelManifestETag == null : (appLevelManifestETag.equals(other.appLevelManifestETag))) &&
             (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
             (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
             (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&

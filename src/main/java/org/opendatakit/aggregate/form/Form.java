@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -35,6 +37,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
+import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -494,6 +497,21 @@ class Form implements IForm {
     }
   }
 
+  public Set<DynamicCommonFieldsBase> getAllBackingObjects() {
+    Set<DynamicCommonFieldsBase> set = new TreeSet<DynamicCommonFieldsBase>(
+        DynamicCommonFieldsBase.sameTableName);
+    
+    getAllBackingObjectsHelper(getTopLevelGroupElement(), set);
+    return set;
+  }
+
+  private void getAllBackingObjectsHelper(FormElementModel current, Set<DynamicCommonFieldsBase> set) {
+    for (FormElementModel m : current.getChildren()) {
+      set.add((DynamicCommonFieldsBase) m.getFormDataModel().getBackingObjectPrototype());
+      getAllBackingObjectsHelper(m, set);
+    }
+  }
+  
   public List<FormElementModel> getRepeatGroupsInModel() {
     List<FormElementModel> list = new ArrayList<FormElementModel>();
 

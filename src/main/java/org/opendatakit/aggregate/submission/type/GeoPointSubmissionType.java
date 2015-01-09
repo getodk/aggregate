@@ -175,7 +175,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 	}
 
 	@Override
-	public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) {
+	public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) {
 		// geopoint storage is handled by SubmissionSet
 	}
 

@@ -28,4 +28,6 @@ public interface PreferenceServiceAsync {
 
   void setOdkAppName(String appName, AsyncCallback<Void> callback);
 
+  void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions, AsyncCallback<Void> callback);
+
 }

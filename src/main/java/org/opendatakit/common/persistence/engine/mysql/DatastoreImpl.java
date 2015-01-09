@@ -15,6 +15,7 @@ package org.opendatakit.common.persistence.engine.mysql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -93,6 +94,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   public static final String K_CS = ", ";
   public static final String K_BQ = "`";
   public static final String K_COMMA = ", ";
+  public static final String K_COLON = ";";
   public static final String K_FROM = " FROM ";
   public static final String K_WHERE = " WHERE ";
   public static final String K_AND = " AND ";
@@ -540,8 +542,18 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             b.append(" NOT NULL ");
           }
         }
-        // for performance reasons, any uri index must use HASH
-        b.append(", PRIMARY KEY(");
+        /*
+         * Setting the primary key as the _URI and making it use
+         * HASH.
+         */
+        
+        // For MySQL, it is important to NOT declare a PRIMARY KEY
+        // when that key is a UUID. It should only be declared as 
+        // a non-unique index...
+        //
+        // http://kccoder.com/mysql/uuid-vs-int-insert-performance/
+        //
+        b.append(", INDEX(");
         b.append(K_BQ);
         b.append(relation.primaryKey.getName());
         b.append(K_BQ);
@@ -784,6 +796,147 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       throws ODKEntityPersistException {
     for (CommonFieldsBase d : entityList) {
       putEntity(d, user);
+    }
+  }
+  
+  @Override
+  public void batchAlterData(List<? extends CommonFieldsBase> changes, User user)
+      throws ODKEntityPersistException {
+    if ( changes.isEmpty() ) {
+      return;
+    }
+
+    boolean generateSQL = true;
+    String sql = null;
+    int[] argTypes = new int[changes.get(0).getFieldList().size()];
+    List<Object[]> batchArgs = new ArrayList<Object[]>();
+    StringBuilder b = new StringBuilder();
+
+    for ( CommonFieldsBase entity : changes ) {
+      dam.recordPutUsage(entity);
+
+      boolean first;
+      b.setLength(0);
+
+      Object[] ol = new Object[entity.getFieldList().size()];
+
+      if (entity.isFromDatabase()) {
+        // we need to do an update
+        entity.setDateField(entity.lastUpdateDate, new Date());
+        entity.setStringField(entity.lastUpdateUriUser, user.getUriUser());
+
+        if ( generateSQL ) {
+          b.append(K_UPDATE);
+          b.append(K_BQ);
+          b.append(entity.getSchemaName());
+          b.append(K_BQ);
+          b.append(".");
+          b.append(K_BQ);
+          b.append(entity.getTableName());
+          b.append(K_BQ);
+          b.append(K_SET);
+        }
+
+        int idx = 0;
+        first = true;
+        // fields...
+        for (DataField f : entity.getFieldList()) {
+          // primary key goes in the where clause...
+          if (f == entity.primaryKey)
+            continue;
+
+          if ( generateSQL ) {
+            if (!first) {
+              b.append(K_CS);
+            }
+            first = false;
+            b.append(K_BQ);
+            b.append(f.getName());
+            b.append(K_BQ);
+            b.append(K_EQ);
+            b.append(K_BIND_VALUE);
+          }
+
+          buildArgumentList(ol, argTypes, idx, entity, f);
+          ++idx;
+        }
+        if ( generateSQL ) {
+          b.append(K_WHERE);
+          b.append(K_BQ);
+          b.append(entity.primaryKey.getName());
+          b.append(K_BQ);
+          b.append(K_EQ);
+          b.append(K_BIND_VALUE);
+        }
+        buildArgumentList(ol, argTypes, idx, entity, entity.primaryKey);
+
+      } else {
+        if ( generateSQL ) {
+          // not yet in database -- insert
+          b.append(K_INSERT_INTO);
+          b.append(K_BQ);
+          b.append(entity.getSchemaName());
+          b.append(K_BQ);
+          b.append(".");
+          b.append(K_BQ);
+          b.append(entity.getTableName());
+          b.append(K_BQ);
+          first = true;
+          b.append(K_OPEN_PAREN);
+          // fields...
+          for (DataField f : entity.getFieldList()) {
+            if (!first) {
+              b.append(K_CS);
+            }
+            first = false;
+            b.append(K_BQ);
+            b.append(f.getName());
+            b.append(K_BQ);
+          }
+          b.append(K_CLOSE_PAREN);
+          b.append(K_VALUES);
+          b.append(K_OPEN_PAREN);
+        }
+
+        int idx = 0;
+        first = true;
+        // fields...
+        for (DataField f : entity.getFieldList()) {
+          if ( generateSQL ) {
+            if (!first) {
+              b.append(K_CS);
+            }
+            first = false;
+            b.append(K_BIND_VALUE);
+          }
+          buildArgumentList(ol, argTypes, idx, entity, f);
+          ++idx;
+        }
+        
+        if ( generateSQL ) {
+          b.append(K_CLOSE_PAREN);
+        }
+      }
+
+      if ( generateSQL ) {
+        b.append(K_COLON);
+        sql = b.toString();
+      }
+      generateSQL = false;
+      batchArgs.add(ol);
+    }
+    
+    try {
+      // update...
+      getJdbcConnection().batchUpdate(sql, batchArgs, argTypes);
+      // if this was an insert, set the fromDatabase flag in the entities
+      if ( !changes.get(0).isFromDatabase() ) {
+        for ( CommonFieldsBase entity : changes ) {
+          entity.setFromDatabase(true);
+        }
+      }
+    } catch (Exception e) {
+      throw new ODKEntityPersistException(e);
     }
   }
 

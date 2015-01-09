@@ -67,7 +67,7 @@ public interface RealizedTableService {
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*TableDefinitionResource*/ getDefinition()
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, AppNameMismatchException;
-
+  
   /**
    * Data row subresource for a realized tableId (supplied in implementation constructor)
    *
@@ -117,4 +117,17 @@ public interface RealizedTableService {
    */
   @Path("diff")
   public DiffService getDiff() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException;
+  
+  /**
+   * Differences subresource for a realized tableId (supplied in implementation constructor)
+   *
+   * @return {@link QueryService} for the row-changes on this table.
+   * @throws ODKDatastoreException
+   * @throws SchemaETagMismatchException
+   * @throws PermissionDeniedException
+   * @throws AppNameMismatchException
+   * @throws ODKTaskLockException
+   */
+  @Path("query")
+  public QueryService getQuery() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException;
 }

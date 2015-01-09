@@ -15,6 +15,8 @@
  */
 package org.opendatakit.common.datamodel;
 
+import java.util.Comparator;
+
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.security.User;
@@ -30,6 +32,23 @@ import org.opendatakit.common.security.User;
  */
 public abstract class DynamicCommonFieldsBase extends CommonFieldsBase {
 
+  public static final Comparator<DynamicCommonFieldsBase> sameTableName = 
+      new Comparator<DynamicCommonFieldsBase>(){
+
+    @Override
+    public int compare(DynamicCommonFieldsBase arg0, DynamicCommonFieldsBase arg1) {
+      int cmp = 0;
+      if ( arg0.sameTable(arg1) ) {
+        return 0;
+      }
+      cmp = arg0.getSchemaName().compareTo(arg1.getSchemaName());
+      if ( cmp != 0 ) {
+        return cmp;
+      }
+      cmp = arg0.getTableName().compareTo(arg1.getTableName());
+      return cmp;
+    }};
+    
 	/**
 	 * Construct a relation prototype.
 	 * 

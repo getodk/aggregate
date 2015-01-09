@@ -202,7 +202,9 @@ public class AggregateUI implements EntryPoint {
 
     // assign the singleton here...
     singleton = this;
-
+    
+    beforeContentLoaded();
+    
     // start the refresh timer...
     timer.setInitialized();
 
@@ -434,6 +436,7 @@ public class AggregateUI implements EntryPoint {
     t.schedule(1000);
 
     contentLoaded();
+    resize();
   }
 
   // Let's JavaScript know that the GWT content has been loaded
@@ -443,8 +446,12 @@ public class AggregateUI implements EntryPoint {
 		$wnd.gwtContentLoaded();
   }-*/;
 
+  public native void beforeContentLoaded() /*-{
+      $wnd.gwtBeforeContentLoaded();
+  }-*/;
+
   public native static void resize() /*-{
-		$wnd.onWindowResize();
+      $wnd.onAggregateResize();
   }-*/;
 
   /***********************************
@@ -553,12 +560,6 @@ public class AggregateUI implements EntryPoint {
       }
     });
   }
-
-  native void redirect(String url)
-  /*-{
-		$wnd.location.replace(url);
-
-  }-*/;
 
   /***********************************
    ****** SECURITY ******
@@ -719,12 +720,12 @@ public class AggregateUI implements EntryPoint {
       textMessage = "You do not have permission for this action.\n" + context + t.getMessage();
     } else if (t instanceof InvocationException) {
       // could occur if the cached JavaScript is out-of-sync with server
-      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
+      UrlHash.redirect();
       return;
     } else if ( t.getMessage().contains("uuid:081e8b57-1698-4bbf-ba5b-ae31338b121d") ) {
       // magic number for the service-error.html page.
       // Generally means an out-of-quota error.
-      redirect(GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR);
+      UrlHash.redirect();
       return;
     } else {
       textMessage = context + t.getMessage();

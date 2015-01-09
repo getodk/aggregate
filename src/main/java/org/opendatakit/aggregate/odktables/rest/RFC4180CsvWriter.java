@@ -39,7 +39,7 @@ public class RFC4180CsvWriter {
 
   private final char quotechar = '"';
 
-  RFC4180CsvWriter(Writer writer) {
+  public RFC4180CsvWriter(Writer writer) {
     this.bw = new BufferedWriter(writer);
   }
 

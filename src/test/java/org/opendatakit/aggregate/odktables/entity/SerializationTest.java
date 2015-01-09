@@ -111,7 +111,6 @@ public class SerializationTest {
     RowResource expected = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values));
     expected.setSelfUri("http://localhost:8080/odktables/tables/1/rows/1");
-    expected.setTableUri("http://localhost:8080/odktables/tables/1");
 
     serializer.writeValue(writer, expected);
     String xml = writer.toString();
@@ -168,14 +167,12 @@ public class SerializationTest {
     RowResource one = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues()));
     one.setSelfUri("http://localhost/tables/1/rows/1");
-    one.setTableUri("http://localhost/tables/1");
     RowResource two = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
         T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.JOHN.getValues()));
     two.setSelfUri("http://localhost/tables/1/rows/2");
-    two.setTableUri("http://localhost/tables/1");
     expected.add(one);
     expected.add(two);
-    RowResourceList rrl = new RowResourceList(expected, null, null, null, false, false);
+    RowResourceList rrl = new RowResourceList(expected, null, "http://localhost/tables/1", null, null, null, false, false);
     serializer.writeValue(writer, rrl);
     String xml = writer.toString();
     System.out.println(xml);

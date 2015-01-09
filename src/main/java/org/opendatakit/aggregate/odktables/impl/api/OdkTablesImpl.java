@@ -4,20 +4,37 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 @Path("")
 public class OdkTablesImpl implements OdkTables {
+  
+  @Override
+  public Response getAppNames(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders) 
+      throws ODKDatastoreException {
+
+    ServiceUtils.examineRequest(sc, req, httpHeaders);
+    CallingContext cc = ContextFactory.getCallingContext(sc, req);
+    String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
+
+    return Response.status(Status.OK).entity("[\"" + preferencesAppId + "\"]")
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
+  }
 
   @Override
   public FileManifestServiceImpl getFileManifestService(ServletContext sc, HttpServletRequest req,
