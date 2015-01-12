@@ -240,6 +240,9 @@ public class FragmentedCsvServlet extends ServletUtilBase {
           return; // ill-formed definition
         }
         Submission sub = Submission.fetchSubmission(submissionKeyParts, cc);
+        if ( sub == null ) {
+          throw new ODKDatastoreException("Unable to retrieve submission (see logs)");
+        }
         FormElementModel m = form.getFormElementModel(submissionKeyParts);
         SubmissionElement elem = sub.resolveSubmissionKey(submissionKeyParts);
         List<SubmissionSet> submissions = new ArrayList<SubmissionSet>();

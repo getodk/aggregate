@@ -30,57 +30,133 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 public class Row {
 
+  /**
+   * PK identifying this row of data.
+   */
   @JacksonXmlProperty(localName = "id")
   @JsonProperty(value = "id", required = false)
   private String rowId;
 
+  /**
+   * identifies this revision of this row of data.
+   * (needed to support updates to data rows)
+   * (creation is a revision from 'undefined').
+   */
   @JsonProperty(required = false)
   private String rowETag;
 
+  /**
+   * identifies the service-level 
+   * interaction during which this 
+   * revision was made. Useful for 
+   * finding coincident changes 
+   * and prior/next changes.
+   */
   @JsonProperty(required = false)
   private String dataETagAtModification;
 
+  /**
+   * deletion is itself a revision.
+   */
   @JsonProperty(required = false)
   private boolean deleted;
 
+  /**
+   * audit field returned for 
+   * archive/recovery tools.
+   */
   @JsonProperty(required = false)
   private String createUser;
 
+  /**
+   * audit field returned for 
+   * archive/recovery tools
+   */
   @JsonProperty(required = false)
   private String lastUpdateUser;
 
   /**
    * OdkTables metadata column.
+   *
+   * The ODK Survey form that 
+   * was used when revising this
+   * row.
+   *
+   * This can be useful for 
+   * implementing workflows.
+   * I.e., if savepointTyp is
+   * COMPLETE with this formId,
+   * then enable editing with
+   * this other formId.
    */
   @JsonProperty(required = false)
   private String formId;
 
   /**
    * OdkTables metadata column.
+   *
+   * The locale of the device 
+   * that last revised this row.
    */
   @JsonProperty(required = false)
   private String locale;
 
   /**
    * OdkTables metadata column.
+   *
+   * One of either COMPLETE
+   * or INCOMPLETE. COMPLETE
+   * indicates that the formId
+   * used to fill out the row
+   * has validated the entered 
+   * values.
    */
   @JsonProperty(required = false)
   private String savepointType;
 
   /**
    * OdkTables metadata column.
+   *
+   * For Mezuri, the timestamp
+   * of this data value.
+   *
+   * For ODK Survey, the last
+   * save time of the survey.
+   *
+   * For sensor data,
+   * the timestamp for the 
+   * reading in this row.
    */
   @JsonProperty(required = false)
   private String savepointTimestamp;
 
   /**
    * OdkTables metadata column.
+   *
+   * For ODK Survey, the user
+   * that filled out the survey.
+   *
+   * Unclear what this would be 
+   * for sensors.
+   *
+   * For Mezuri, this would be
+   * the task execution ID that 
+   * created the row.
    */
-  @JsonProperty(required = false)
+ @JsonProperty(required = false)
   private String savepointCreator;
 
   /**
    * FilterScope is passed down to device.
+   *
+   * This is a placeholder for 
+   * security filtering.
+   * 
+   * It is passed down to the 
+   * device so that the 
+   * device could do best-effort
+   * enforcement of access control
+   * (trusted executor)
    */
   @JsonProperty(required = false)
   private Scope filterScope;
@@ -318,6 +394,11 @@ public class Row {
 
   @JsonIgnore
   public void setValues(final ArrayList<DataKeyValue> values) {
+    if ( values == null ) {
+      this.orderedColumns = null;
+      return;
+    }
+    
     Collections.sort(values, new Comparator<DataKeyValue>(){
 
       @Override
@@ -374,7 +455,7 @@ public class Row {
     boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (rowETag == null ? other.rowETag == null : rowETag.equals(other.rowETag))
         && (dataETagAtModification == null ? other.dataETagAtModification == null
-            : dataETagAtModification.equals(dataETagAtModification))
+            : dataETagAtModification.equals(other.dataETagAtModification))
         && (deleted == other.deleted)
         && (createUser == null ? other.createUser == null : createUser.equals(other.createUser))
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
@@ -421,7 +502,7 @@ public class Row {
    * @param other
    * @return
    */
-  public boolean hasMatchingSignificantFieldValues(Row other) {
+  public boolean hasMatchingSignificantFieldValues(Row other, Comparator<DataKeyValue> deepComparator) {
     if (other == null)
       return false;
     boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
@@ -446,7 +527,7 @@ public class Row {
     
     // columns are ordered... compare one-to-one
     for ( int i = 0 ; i < orderedColumns.size() ; ++i ) {
-      if ( !orderedColumns.get(i).equals(other.orderedColumns.get(i)) ) {
+      if ( deepComparator.compare(orderedColumns.get(i), other.orderedColumns.get(i)) != 0 ) {
         return false;
       }
     }

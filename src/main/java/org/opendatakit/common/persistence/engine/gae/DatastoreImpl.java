@@ -413,6 +413,12 @@ public class DatastoreImpl implements Datastore {
       throw new ODKEntityPersistException(ex);
     }
   }
+  
+  @Override
+  public void batchAlterData(List<? extends CommonFieldsBase> changes, User user)
+      throws ODKEntityPersistException, ODKOverQuotaException {
+    putEntities(changes, user);
+  }
 
   @Override
   public void deleteEntity(EntityKey key, User user) throws ODKDatastoreException {

@@ -10,10 +10,8 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.opendatakit.aggregate.odktables.api.T;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
-import org.opendatakit.aggregate.odktables.rest.serialization.OdkXmlHttpMessageConverter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -43,7 +42,7 @@ public abstract class AbstractServiceTest {
     this.rt.setErrorHandler(new ErrorHandler());
     List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 
-    converters.add(new OdkXmlHttpMessageConverter());
+    converters.add(new XmlAwareFormHttpMessageConverter());
     this.rt.setMessageConverters(converters);
 
     // HttpHeaders

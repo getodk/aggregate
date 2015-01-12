@@ -56,6 +56,7 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.header.HeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.task.UploadSubmissions;
+import org.opendatakit.common.datamodel.DeleteHelper;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -256,7 +257,7 @@ public abstract class AbstractExternalService implements ExternalService{
       for (CommonFieldsBase repeat : repeats) {
         keys.add(repeat.getEntityKey());
       }
-      ds.deleteEntities(keys, user);
+      DeleteHelper.deleteEntities(keys, cc);
       repeats.clear();
     }
 

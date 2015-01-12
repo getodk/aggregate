@@ -92,6 +92,15 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
     while ( redirectParamString.startsWith("/") ) {
       redirectParamString = redirectParamString.substring(1);
     }
+    
+    // check for XSS attacks. The redirect string is emitted within single and double
+    // quotes. It is a URL with :, /, ? and # characters. But it should not contain 
+    // quotes, parentheses or semicolons.
+    String cleanString = redirectParamString.replaceAll(BAD_PARAMETER_CHARACTERS, "");
+    if ( !cleanString.equals(redirectParamString) ) {
+      logger.warn("XSS cleanup -- redirectParamString has forbidden characters: " + redirectParamString);
+      redirectParamString = cleanString;
+    }
 
     logger.info("Invalidating login session " + req.getSession().getId());
     // Invalidate session.
@@ -105,6 +114,7 @@ public class OpenIdLoginPageServlet extends ServletUtilBase {
     resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
     resp.setHeader("Expires", "Mon, 26 Jul 1997 05:00:00 GMT");
     resp.setHeader("Pragma", "no-cache");
+    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
     out.print("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
         + "<html>"

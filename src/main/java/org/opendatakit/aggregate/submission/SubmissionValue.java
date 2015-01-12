@@ -55,11 +55,14 @@ public interface SubmissionValue extends SubmissionElement {
    * Gather the entity keys for this and all subordinate elements.
    * Used when assembling the deletion list when deleting a submission.
    * 
+   * When using this value, you should reverse the keyList and delete
+   * the entries in the reverse order in which they were added. 
+   * 
    * @param keyList
  * @throws ODKDatastoreException 
  * @throws ODKOverQuotaException
    */
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException;
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException;
   
   /**
    * Recursively persist this submission to the datastore.

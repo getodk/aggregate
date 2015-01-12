@@ -27,11 +27,6 @@ public class RowResource extends Row {
    */
   private String selfUri;
 
-  /**
-   * The URL that returns the TableResource for this row's table.
-   */
-  private String tableUri;
-
   @SuppressWarnings("unused")
   private RowResource() {
   }
@@ -44,16 +39,8 @@ public class RowResource extends Row {
     return this.selfUri;
   }
 
-  public String getTableUri() {
-    return this.tableUri;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
-  }
-
-  public void setTableUri(final String tableUri) {
-    this.tableUri = tableUri;
   }
 
   @Override
@@ -67,11 +54,7 @@ public class RowResource extends Row {
       return false;
     if (!super.equals(o))
       return false;
-    if (this.getSelfUri() == null ? other.getSelfUri() != null : !this.getSelfUri().equals(
-        (java.lang.Object) other.getSelfUri()))
-      return false;
-    if (this.getTableUri() == null ? other.getTableUri() != null : !this.getTableUri().equals(
-        (java.lang.Object) other.getTableUri()))
+    if (selfUri == null ? (other.selfUri != null) : !selfUri.equals(other.selfUri))
       return false;
     return true;
   }
@@ -86,13 +69,11 @@ public class RowResource extends Row {
     int result = 1;
     result = result * PRIME + super.hashCode();
     result = result * PRIME + (this.getSelfUri() == null ? 0 : this.getSelfUri().hashCode());
-    result = result * PRIME + (this.getTableUri() == null ? 0 : this.getTableUri().hashCode());
     return result;
   }
 
   public String toString() {
-    return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
-        + ", tableUri=" + this.getTableUri() + ")";
+    return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri() + ")";
   }
 
 }

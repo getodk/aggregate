@@ -9,14 +9,18 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.wink.client.ClientWebException;
+import org.opendatakit.aggregate.odktables.api.ColumnDefinition;
+import org.opendatakit.aggregate.odktables.api.SyncRow;
 import org.opendatakit.aggregate.odktables.api.T;
-import org.opendatakit.aggregate.odktables.api.perf.AggregateSynchronizer.InvalidAuthTokenException;
+import org.opendatakit.aggregate.odktables.api.exceptions.InvalidAuthTokenException;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
-import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
+import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import com.google.common.collect.Lists;
@@ -31,7 +35,7 @@ public class CreateTableTest implements PerfTest {
   private String displayName;
 
   public CreateTableTest(AggregateSynchronizer synchronizer, int numCols, int numRows)
-      throws InvalidAuthTokenException {
+      throws org.opendatakit.aggregate.odktables.api.exceptions.InvalidAuthTokenException {
     this.synchronizer = synchronizer;
     this.numCols = numCols;
     this.numRows = numRows;
@@ -47,6 +51,8 @@ public class CreateTableTest implements PerfTest {
     return true;
   }
 
+  private TableResource rsc = null;
+  
   public void run() {
     try {
       // create table
@@ -54,9 +60,10 @@ public class CreateTableTest implements PerfTest {
       for (int i = 0; i < numCols; i++) {
         columns.add(new Column(colName(i), colName(i), "STRING", null));
       }
-      synchronizer.createTable(tableId, null, columns);
+      rsc = synchronizer.createTable(tableId, null, columns);
 
       // insert rows
+      ArrayList<SyncRow> syncRows = new ArrayList<SyncRow>();
       List<Row> rows = Lists.newArrayList();
       for (int i = 0; i < numRows; i++) {
         ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
@@ -66,21 +73,37 @@ public class CreateTableTest implements PerfTest {
 
         Row row = Row.forInsert(UUID.randomUUID().toString(), T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
             T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values);
-        RowResource inserted = synchronizer.putRow(tableId, row);
-        rows.add(inserted);
+        rows.add(row);
+        SyncRow sr = new SyncRow(row.getRowId(), row.getRowETag(), row.isDeleted(),
+            row.getFormId(), row.getLocale(), row.getSavepointType(),
+            row.getSavepointTimestamp(), row.getSavepointCreator(), row.getFilterScope(),
+            row.getValues(), new ArrayList<ColumnDefinition>());
+        syncRows.add(sr);
       }
+      
+      RowOutcomeList inserted = synchronizer.alterRows(rsc, syncRows);
+      rsc.setDataETag(inserted.getDataETag());
       // update rows
+      syncRows.clear();
       for (Row row : rows) {
         ArrayList<DataKeyValue> values = row.getValues();
         for (int i = 0; i < numCols; i++) {
           values.add(new DataKeyValue(colName(i), "new_value_" + i));
         }
         row.setValues(values);
-        synchronizer.putRow(tableId, row);
+        SyncRow sr = new SyncRow(row.getRowId(), row.getRowETag(), row.isDeleted(),
+            row.getFormId(), row.getLocale(), row.getSavepointType(),
+            row.getSavepointTimestamp(), row.getSavepointCreator(), row.getFilterScope(),
+            row.getValues(), new ArrayList<ColumnDefinition>());
+        syncRows.add(sr);
       }
-    } catch (HttpStatusCodeException e) {
-      throw new RuntimeException(e.getMessage() + " " + e.getResponseBodyAsString(), e);
-    } catch (IOException e) {
+      RowOutcomeList updated = synchronizer.alterRows(rsc, syncRows);
+      rsc.setDataETag(updated.getDataETag());
+    } catch (ClientWebException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e.getMessage() + " " + e.getResponse().getStatusCode(), e);
+    } catch (InvalidAuthTokenException e) {
+      e.printStackTrace();
       throw new RuntimeException(e.getMessage(), e);
     }
   }
@@ -88,7 +111,7 @@ public class CreateTableTest implements PerfTest {
   public void tearDown() {
     // delete table
     try {
-      synchronizer.deleteTable(tableId);
+      synchronizer.deleteTable(rsc);
     } catch (HttpStatusCodeException e) {
       logger.warn("message: " + e.getMessage() + ", body: " + e.getResponseBodyAsString(), e);
     } catch (Exception e) {

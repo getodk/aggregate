@@ -57,10 +57,6 @@ public class TableDefinition {
   @JacksonXmlProperty(localName="column")
   private ArrayList<Column> orderedColumns;
 
-  // ss: trying to subsume this information into the kvs.
-  // @Element(required = false)
-  // private String metadata;
-
   protected TableDefinition() {
   }
 

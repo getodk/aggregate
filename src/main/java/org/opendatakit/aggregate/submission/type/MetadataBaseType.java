@@ -56,7 +56,7 @@ public abstract class MetadataBaseType<T> implements SubmissionField<T> {
   }
 
   @Override
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
     // no-op
   }

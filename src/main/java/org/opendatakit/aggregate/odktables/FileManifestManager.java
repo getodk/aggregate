@@ -28,10 +28,8 @@ import org.opendatakit.aggregate.odktables.impl.api.FileServiceImpl;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileInfoEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableFiles;
-import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -104,22 +102,22 @@ public class FileManifestManager {
   private ArrayList<OdkTablesFileManifestEntry> getEntriesFromQuery(
       List<DbTableFileInfoEntity> entities, DbTableFiles dbTableFiles) throws ODKDatastoreException {
     // TODO: need to handle access control.
-    List<Row> infoRows = EntityConverter.toRowsFromFileInfo(entities);
     ArrayList<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
-    // A map of static url get parameters. In this case we only want to downoad
+    // A map of static url get parameters. In this case we only want to download
     // as an attachment.
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.AS_ATTACHMENT, "true");
-    for (Row row : infoRows) {
-      if (row.isDeleted()) {
-        // We only want the non-deleted rows.
+    for (DbTableFileInfoEntity entity : entities) {
+      // ignore deleted entities
+      if ( entity.getDeleted() ) {
         continue;
       }
+      // TODO: apply filter
       OdkTablesFileManifestEntry entry = new OdkTablesFileManifestEntry();
       // To retrieve the actual file we need to get the uri of the file info
       // row, which is the top-level uri of the blob tables holding the files.
-      String rowUri = row.getRowId();
-      String pathToFile = Row.convertToMap(row.getValues()).get(DbTableFileInfo.PATH_TO_FILE.getName());
+      String rowUri = entity.getId();
+      String pathToFile = entity.getPathToFile();
       BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(rowUri, cc);
       // We should only ever have one.
       if (blobEntitySet.getAttachmentCount(cc) > 1) {

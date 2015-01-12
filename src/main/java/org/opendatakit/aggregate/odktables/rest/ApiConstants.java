@@ -38,4 +38,6 @@ public final class ApiConstants {
   public static final String CONTENT_ENCODING_HEADER = "Content-Encoding";
 
   public static final String GZIP_CONTENT_ENCODING = "gzip";
+
+  public static final String DEFLATE_CONTENT_ENCODING = "deflate";
 }

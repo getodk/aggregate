@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
@@ -35,9 +37,11 @@ import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
@@ -45,6 +49,7 @@ import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -200,8 +205,13 @@ public class QueryByUIFilterGroup extends QueryBase {
 
   }
 
+  /**
+   * Silently skip the submissions that are not retrievable due to malformations
+   * of some kind.
+   * 
+   */
   public List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException {
-
+    
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
     // retrieve submissions
@@ -211,13 +221,64 @@ public class QueryByUIFilterGroup extends QueryBase {
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
       CommonFieldsBase subEntity = submissionEntities.get(count);
-      Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
-      retrievedSubmissions.add(sub);
+      try {
+        Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
+        retrievedSubmissions.add(sub);
+      } catch (ODKDatastoreException e ) {
+        Log logger = LogFactory.getLog(QueryByUIFilterGroup.class);
+        e.printStackTrace();
+        logger.error("Unable to reconstruct submission for " + 
+            subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
+        
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
+          // see if we should throw an error or skip processing...
+          Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
+          if ( skip ) {
+            continue;
+          } else {
+            throw e;
+          }
+        } else {
+          throw e;
+        }
+      }
     }
 
     // advance cursor...
     cursor = results.getResumeCursor();
     return retrievedSubmissions;
+  }
+
+  public static final class PartialResults {
+    public List<Submission> retrievedSubmissions;
+    public List<TopLevelDynamicBase> badTopLevelEntities;
+  }
+  
+  /**
+   * Try to construct whatever portion of a submission we can from a fractional record.
+   * 
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public List<TopLevelDynamicBase> getTopLevelSubmissionObjects(CallingContext cc) throws ODKDatastoreException {
+    
+    List<TopLevelDynamicBase> topLevelEntities = new ArrayList<TopLevelDynamicBase>();
+    
+    // retrieve submissions
+    QueryResult results = getQueryResult(cursor, fetchLimit);
+    List<? extends CommonFieldsBase> submissionEntities = results.getResultList();
+
+    // create a row for each submission
+    for (int count = 0; count < submissionEntities.size(); count++) {
+      CommonFieldsBase subEntity = submissionEntities.get(count);
+      topLevelEntities.add((TopLevelDynamicBase) subEntity);
+    }
+
+    // advance cursor...
+    cursor = results.getResumeCursor();
+    return topLevelEntities;
   }
 
   public void populateSubmissions(SubmissionUISummary summary,
@@ -298,12 +359,32 @@ public class QueryByUIFilterGroup extends QueryBase {
 
     // create a row for each submission
     for (CommonFieldsBase subEntity : results.getResultList()) {
-      Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
-      Row row = sub.getFormattedValuesAsRow(elementTypes, filteredElements, elemFormatter, false,
-          cc);
+      try {
+        Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
+        Row row = sub.getFormattedValuesAsRow(elementTypes, filteredElements, elemFormatter, false,
+            cc);
+  
+        SubmissionKey subKey = sub.constructSubmissionKey(fem);
+        submissionList.add(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
+      } catch ( ODKDatastoreException e ) {
+        Log logger = LogFactory.getLog(QueryByUIFilterGroup.class);
+        e.printStackTrace();
+        logger.error("Unable to reconstruct submission for " + 
+            subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
 
-      SubmissionKey subKey = sub.constructSubmissionKey(fem);
-      submissionList.add(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
+          // see if we should throw an error or skip processing...
+          Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
+          if ( skip ) {
+            continue;
+          } else {
+            throw e;
+          }
+        } else {
+          throw e;
+        }
+      }
     }
     if ( !isForwardCursor ) {
       // query has the results in the reverse order.
