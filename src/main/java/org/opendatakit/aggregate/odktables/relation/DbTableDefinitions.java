@@ -57,7 +57,7 @@ public class DbTableDefinitions extends Relation {
   // Column names. Based on the ODK Tables Schema google doc for the
   // non client-local columns.
   public static final DataField TABLE_ID = new DataField("TABLE_ID", DataType.STRING, false)
-      .setIndexable(IndexType.HASH);
+      .setIndexable(IndexType.ORDERED);
   public static final DataField SCHEMA_ETAG = new DataField("SCHEMA_ETAG", DataType.STRING, false);
   public static final DataField DB_TABLE_NAME = new DataField("DB_TABLE_NAME", DataType.STRING,
       false);

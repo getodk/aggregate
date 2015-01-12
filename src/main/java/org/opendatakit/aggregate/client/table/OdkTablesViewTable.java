@@ -134,7 +134,7 @@ public class OdkTablesViewTable extends FlexTable {
           // we've deleted the table.
           // TODO ensure the correct exception makes it here
           ((OdkTablesViewTableSubTab) AggregateUI.getUI()
-              .getSubTab(SubTabs.VIEWTABLE)).setTabToDislpayZero();
+              .getSubTab(SubTabs.VIEWTABLE)).setTabToDisplayZero();
         } else if (caught instanceof PermissionDeniedExceptionClient) {
           // do nothing, b/c it's probably legitimate that you don't get an
           // error if there are rows you're not allowed to see.
@@ -175,9 +175,11 @@ public class OdkTablesViewTable extends FlexTable {
     // TODO: paginate this
     // TODO: paginate this
     // TODO: paginate this
-
-    SecureGWT.getServerDataService().getTableContents(table.getTableId(),
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
+      SecureGWT.getServerDataService().getTableContents(table.getTableId(),
         getDataCallback);
+    }
   }
 
   /*

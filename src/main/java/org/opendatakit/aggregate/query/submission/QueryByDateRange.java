@@ -19,10 +19,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
@@ -30,6 +34,7 @@ import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -106,8 +111,28 @@ public class QueryByDateRange extends QueryBase {
 
     // create a row for each submission
     for (int count = 0; count < submissionEntities.size(); count++) {
-    CommonFieldsBase subEntity = submissionEntities.get(count);
-      retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm(), cc));
+      CommonFieldsBase subEntity = submissionEntities.get(count);
+      try {
+        retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm(), cc));
+      } catch ( ODKDatastoreException e ) {
+        Log logger = LogFactory.getLog(QueryByUIFilterGroup.class);
+        e.printStackTrace();
+        logger.error("Unable to reconstruct submission for " + 
+            subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
+        
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
+          // see if we should throw an error or skip processing...
+          Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
+          if ( skip ) {
+            continue;
+          } else {
+            throw e;
+          }
+        } else {
+          throw e;
+        }
+      }
     }
     return retrievedSubmissions;
   }

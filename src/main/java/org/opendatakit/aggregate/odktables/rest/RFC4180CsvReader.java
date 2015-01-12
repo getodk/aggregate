@@ -23,12 +23,16 @@ import java.util.List;
 
 /**
  * Unfortunately, while the CSVWriter of opencsv works, the reader is broken
- * w.r.t. quoted strings and RFC4180.  Here is a working reader...
+ * w.r.t. quoted strings and RFC4180.  To further complicate things, on a 
+ * Mac, Excel fails to emit line feeds, but only emits carriage returns, which 
+ * is non-conformant behavior. Here is a working reader...
  * The key difference is that when a quotechar appears within a quoted
  * string, it is replaced with two quotechars.  So if we see two quotechars
  * in a row, then they are replaced with a single quotechar inside the
  * current string. quotechar, cr, lf are not permitted unless they are within
- * a quoted field.
+ * a quoted field if either cr, cr lf, or lf appear in a quoted field, a
+ * cr lf combination is produced in the field string (i.e., we ensure that a 
+ * cr is always followed by a lf in any field values).
  *
  * @author mitchellsundt@gmail.com
  *
@@ -69,6 +73,9 @@ public class RFC4180CsvReader {
 
   public RFC4180CsvReader(Reader reader) {
     this.br = new BufferedReader(reader);
+    if ( !br.markSupported() ) {
+      throw new IllegalStateException("Unable to support mark!");
+    }
   }
 
   /**
@@ -116,9 +123,11 @@ public class RFC4180CsvReader {
         }
         if ( ch == cr ) {
           // special case -- if we have an immediate CR LF, return an empty array
+          br.mark(1);
           ch = br.read();
-          if ( ch != lf ) {
-            throw new IllegalStateException("Unexpected CR without LF!");
+          if ( ch != lf && ch != -1 ) {
+            // Excel for Mac silliness
+            br.reset();
           }
           return results.toArray(new String[results.size()]);
         } else if ( ch == lf ) {
@@ -129,7 +138,9 @@ public class RFC4180CsvReader {
       }
 
       if ( ch == -1 ) {
-        throw new IllegalStateException("Unexpected end of file - last line is missing the CR LF!");
+        // allow the last line to not have a terminator
+        // this is legal w.r.t. RFC4180, and is what Excel does on a Mac.
+        return results.toArray(new String[results.size()]);
       }
 
       // NOTE: we must be in a ParseState other than atStartOfLine
@@ -138,9 +149,11 @@ public class RFC4180CsvReader {
         // encounter a CR LF, then we emit a null value
         // and return the results array.
         if ( ch == cr ) {
+          br.mark(1);
           ch = br.read();
-          if ( ch != lf ) {
-            throw new IllegalStateException("Unexpected CR without LF!");
+          if ( ch != lf && ch != -1 ) {
+            // Excel for Mac silliness
+            br.reset();
           }
           results.add(null);
           return results.toArray(new String[results.size()]);
@@ -167,9 +180,11 @@ public class RFC4180CsvReader {
         if ( ch == cr ) {
           // We are expecting a comma but hit a CR LF
           // return the current results array.
+          br.mark(1);
           ch = br.read();
-          if ( ch != lf ) {
-            throw new IllegalStateException("Unexpected CR without LF!");
+          if ( ch != lf && ch != -1 ) {
+            // Excel for Mac silliness
+            br.reset();
           }
           return results.toArray(new String[results.size()]);
         } else if ( ch == lf ) {
@@ -184,9 +199,11 @@ public class RFC4180CsvReader {
       } else if ( state == ParseState.naked ) {
         if ( ch == cr ) {
           // marks the end of this naked field (and the end of the line)
+          br.mark(1);
           ch = br.read();
-          if ( ch != lf ) {
-            throw new IllegalStateException("Unexpected CR without LF!");
+          if ( ch != lf && ch != -1 ) {
+            // Excel for Mac silliness
+            br.reset();
           }
           results.add(b.toString());
           b.setLength(0);
@@ -236,7 +253,25 @@ public class RFC4180CsvReader {
           }
         } else {
           // anything else is just added to the field
-          b.append((char) ch);
+          //
+          // If we have a cr, cr/lf, lf or nl, always emit
+          // a cr/lf combination.
+          if ( ch == cr ) {
+            // marks the end of this naked field (and the end of the line)
+            br.mark(1);
+            ch = br.read();
+            if ( ch != lf && ch != -1 ) {
+              // Excel for Mac silliness
+              br.reset();
+            }
+            b.append((char) cr);
+            b.append((char) lf);
+          } else if ( ch == lf ) {
+            b.append((char) cr);
+            b.append((char) lf);
+          } else {
+            b.append((char) ch);
+          }
         }
       }
     }

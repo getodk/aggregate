@@ -47,7 +47,6 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class TableAclManager {
   
-
   public static class WebsafeAcls {
     public final List<TableAcl> acls;
 
@@ -68,7 +67,6 @@ public class TableAclManager {
       this.hasPrior = hasPrior;
     }
   }
-
   
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
@@ -98,10 +96,11 @@ public class TableAclManager {
     Validate.notNull(cc);
 
     this.cc = cc;
+    this.appId = appId;
+    this.tableId = tableId;
     this.userPermissions = userPermissions;
     this.converter = new EntityConverter();
     this.creator = new EntityCreator();
-    this.tableId = tableId;
     // check table exists
     DbTableEntryEntity e = DbTableEntry.getTableIdEntry(tableId, cc);
     if (e == null) {

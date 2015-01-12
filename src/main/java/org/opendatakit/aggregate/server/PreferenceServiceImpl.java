@@ -41,7 +41,7 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
   /**
    * Serialization Identifier
    */
-  private static final long serialVersionUID = -4892832848446000170L;
+  private static final long serialVersionUID = -489283284844600170L;
 
   @Override
   public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException,
@@ -116,6 +116,27 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
       //
       // No-op if not changed.
       wd.setFasterWatchdogCycleEnabled(!disabled);
+
+    } catch (ODKEntityNotFoundException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
+    }
+
+  }
+
+  @Override
+  public void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions)
+      throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    try {
+      ServerPreferencesProperties.setSkipMalformedSubmissions(cc, skipMalformedSubmissions);
+
+      log.info("setSkipMalformedSubmissions as: " + Boolean.toString(skipMalformedSubmissions));
 
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();

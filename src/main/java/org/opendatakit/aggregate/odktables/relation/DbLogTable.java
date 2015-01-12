@@ -24,6 +24,7 @@ import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumn
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.common.ermodel.Relation;
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -37,6 +38,8 @@ public class DbLogTable extends Relation {
     super(namespace, tableName, fields, cc);
   }
 
+  public static final String LAST_UPDATE_DATE_COLUMN_NAME = CommonFieldsBase.LAST_UPDATE_DATE_COLUMN_NAME;
+  
   /**
    * NOTE: the PK of this table is the ROW_ETAG of the DbTable Row
    * who's state matches this log entry.
@@ -83,7 +86,7 @@ public class DbLogTable extends Relation {
   // nanoseconds at the time the form was saved (on client).
   // limited to 40 characters
   public static final DataField SAVEPOINT_TIMESTAMP = new DataField(
-      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, true, 40L);
+      TableConstants.SAVEPOINT_TIMESTAMP.toUpperCase(), DataType.STRING, false, 40L).setIndexable(IndexType.ORDERED);
   // the creator of this row, as reported by the device (may be a remote SMS user)
   public static final DataField SAVEPOINT_CREATOR = new DataField(
       TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);

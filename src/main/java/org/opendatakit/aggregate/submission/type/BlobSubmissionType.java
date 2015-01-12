@@ -198,9 +198,9 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   }
 
   @Override
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
-    bcm.recursivelyAddEntityKeys(keyList, cc);
+    bcm.recursivelyAddEntityKeysForDeletion(keyList, cc);
   }
 
   @Override

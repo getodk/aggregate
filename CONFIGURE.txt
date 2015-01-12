@@ -279,7 +279,8 @@ To delete the local datastore:
 Full Maven Development Environment Configuration
 ------------------------------------------
 
-(1) Install Maven 3.  This will generally set up a maven repository under
+(1) Install Maven 3.  This document assumes Maven 3.0.4 or higher.
+    This will generally set up a maven repository under
     the user's home directory:  ${HOME}/.m2/repository
 
 (2) Install Eclipse 3.7.2 or higher.  This workspace WILL NOT work with 

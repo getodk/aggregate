@@ -657,6 +657,11 @@ public class Relation {
         throw new IllegalArgumentException("Invalid type for field " + f.getName());
       }
     }
+    
+    @Override
+    public boolean isFromDatabase() {
+      return backingObject.isFromDatabase();
+    }
 
     /**
      * Save this entity into the datastore.
@@ -715,6 +720,12 @@ public class Relation {
         f = Relation.this.getDataField(WebUtils.unCamelCase(fieldName));
       }
       return f;
+    }
+    
+
+    boolean isCompatible(EntityImpl entityImpl) {
+      return this.backingObject.getTableName().equals(entityImpl.backingObject.getTableName()) &&
+          this.isFromDatabase() == entityImpl.isFromDatabase();
     }
   }
 
@@ -807,6 +818,40 @@ public class Relation {
       backingObjects.add(ei.backingObject);
     }
     ds.putEntities(backingObjects, user);
+  }
+  /**
+   * Execute a set of commands sharing the same SQL but with different bind parameters.
+   * This may either insert or update data (one or the other, across all alterations).
+   * 
+   * @param bulkAlterEntities
+   * @param cc
+   * @throws ODKDatastoreException
+   * @throws ODKEntityPersistException
+   * @throws ODKOverQuotaException
+   */
+  public void bulkAlterEntities(List<Entity> bulkAlterEntities, CallingContext cc)
+      throws ODKDatastoreException, ODKEntityPersistException, ODKOverQuotaException {
+ 
+    if (bulkAlterEntities == null) {
+      throw new ODKDatastoreException("No bulk update list provided");
+    }
+
+    if (bulkAlterEntities.size() < 1) {
+      throw new ODKDatastoreException("Bulk update list MUST contain at least one item");
+    }
+
+    ArrayList<CommonFieldsBase> changes = new ArrayList<CommonFieldsBase>();
+    
+    EntityImpl lastUpdate = (EntityImpl) bulkAlterEntities.get(0);
+    for ( Entity entity : bulkAlterEntities ) {
+      EntityImpl update = (EntityImpl) entity;
+      if ( !lastUpdate.isCompatible(update) ) {
+        throw new ODKDatastoreException(
+            "INCOMPATIBLE BULK UPDATES were found inside an attempted bulk update");
+      }
+      changes.add(update.backingObject);
+    }
+    cc.getDatastore().batchAlterData(changes, cc.getCurrentUser());
   }
 
   /**

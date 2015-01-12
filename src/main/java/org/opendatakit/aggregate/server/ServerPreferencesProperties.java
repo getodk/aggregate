@@ -69,6 +69,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   private static final String ODK_TABLES_ENABLED = "ODK_TABLES_ENABLED";
   private static final String FASTER_WATCHDOG_CYCLE_ENABLED = "FASTER_WATCHDOG_CYCLE_ENABLED";
   private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
+  private static final String SKIP_MALFORMED_SUBMISSIONS = "SKIP_MALFORMED_SUBMISSIONS";
 
   private static final String ODK_TABLES_SEQUENCER_BASE = "ODK_TABLES_SEQUENCER_BASE";
   // there can be only one APP_ID per ODK Aggregate. Store the app name here.
@@ -92,7 +93,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
         getEnketoApiUrl(cc), getEnketoApiToken(cc), getOdkTablesEnabled(cc),
-        getOdkTablesAppId(cc), getFasterBackgroundActionsDisabled(cc));
+        getOdkTablesAppId(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
   }
 
   /**
@@ -258,6 +259,21 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static void setFasterBackgroundActionsDisabled(CallingContext cc, Boolean disabled)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED, disabled.toString());
+  }
+
+  public static Boolean getSkipMalformedSubmissions(CallingContext cc)
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
+    String value = getServerPreferencesProperty(cc, SKIP_MALFORMED_SUBMISSIONS);
+    if (value != null) {
+      return Boolean.valueOf(value);
+    }
+    // null value should be treated as false
+    return false;
+  }
+
+  public static void setSkipMalformedSubmissions(CallingContext cc, Boolean skipMalformedSubmissions)
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
+    setServerPreferencesProperty(cc, SKIP_MALFORMED_SUBMISSIONS, skipMalformedSubmissions.toString());
   }
 
   public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {

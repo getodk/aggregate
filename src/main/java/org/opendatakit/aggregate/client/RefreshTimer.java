@@ -46,7 +46,7 @@ public class RefreshTimer extends Timer {
 
   // MISC_REFRESH_MULTIPLIER is the multiplier to apply to
   // the REFRESH_INTERVAL to slow down the rate at which
-  // an update occurs from the server.  See code for what
+  // an update occurs from the server. See code for what
   // pages have this multiplier.
   private static final int MISC_REFRESH_MULTIPLIER = 3;
 
@@ -72,7 +72,8 @@ public class RefreshTimer extends Timer {
   // intervalsElapsed counts the intervals since a UI interaction
   private int intervalsElapsed = 0;
 
-  // intervalsCount counts the total number of intervals since page load or refreshNow()
+  // intervalsCount counts the total number of intervals since page load or
+  // refreshNow()
   private int intervalsCount = 0;
 
   // isActive tracks the active/cancelled state of the timer
@@ -217,17 +218,7 @@ public class RefreshTimer extends Timer {
         }
         break;
       case CURRENTTABLES:
-    	  if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
-    		  GWT.log("currentTables Refresh");
-    		  tabPanel.update();
-    	  }
-    	  break;
       case VIEWTABLE:
-    	  if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
-    		  GWT.log("view table refresh");
-    		  tabPanel.update();
-    	  }
-    	  break;
       case MANAGE_INSTANCE_FILES:
       case MANAGE_TABLE_ID_FILES:
       case MANAGE_APP_LEVEL_FILES:

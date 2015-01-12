@@ -31,6 +31,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -48,6 +50,8 @@ import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.common.datamodel.DeleteHelper;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
@@ -193,6 +197,7 @@ public class SubmissionParser {
 
   private static final String OPEN_ROSA_NAMESPACE_PRELIM = "http://openrosa.org/xforms/metadata";
   private static final String OPEN_ROSA_NAMESPACE = "http://openrosa.org/xforms";
+  private static final String OPEN_ROSA_NAMESPACE_SLASH = "http://openrosa.org/xforms/";
   private static final String OPEN_ROSA_METADATA_TAG = "meta";
   private static final String OPEN_ROSA_INSTANCE_ID = "instanceID";
 
@@ -211,8 +216,10 @@ public class SubmissionParser {
         String cnName = cn.getLocalName();
         if (cn.getNodeType() == Node.ELEMENT_NODE
             && cnName.equals(OPEN_ROSA_INSTANCE_ID)
-            && (cnUri == null || cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) || cnUri
-                .equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
+            && (cnUri == null || 
+                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
+                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
+                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
           NodeList cnl = cn.getChildNodes();
           boolean textFound = false;
           int idxText = -1;
@@ -254,8 +261,10 @@ public class SubmissionParser {
       String name = n.getLocalName();
       if (n.getNodeType() == Node.ELEMENT_NODE
           && name.equals(OPEN_ROSA_METADATA_TAG)
-          && (namespace == null || namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) || namespace
-              .equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
+          && (namespace == null || 
+              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
+              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
+              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
         return n;
       } else {
         n = findMetaTag(n);
@@ -373,7 +382,21 @@ public class SubmissionParser {
       User user = cc.getCurrentUser();
       TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement()
           .getFormDataModel().getBackingObjectPrototype(), instanceId, user);
-      submission = new Submission(fi, form, cc);
+      try {
+        submission = new Submission(fi, form, cc);
+      } catch (ODKDatastoreException e) {
+        Log logger = LogFactory.getLog(Submission.class);
+        e.printStackTrace();
+        logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
+            + fi.getTableName() + " uri " + fi.getUri());
+        if ( (e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException) ) {
+          // this is a malformed submission...
+          // try to clean this up...
+          DeleteHelper.deleteDamagedSubmission(fi, form.getAllBackingObjects(), cc);
+        }
+        throw e;
+      }
       preExisting = true;
       preExistingComplete = submission.isComplete();
     } catch (ODKEntityNotFoundException e) {
@@ -396,10 +419,10 @@ public class SubmissionParser {
       submission.persist(cc);
     } catch (Exception e) {
       List<EntityKey> keys = new ArrayList<EntityKey>();
-      submission.recursivelyAddEntityKeys(keys, cc);
+      submission.recursivelyAddEntityKeysForDeletion(keys, cc);
       keys.add(submission.getKey());
       try {
-        cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
+        DeleteHelper.deleteEntities(keys, cc);
       } catch (Exception ex) {
         // ignore... we are rolling back...
       }

@@ -43,11 +43,10 @@ public class Column implements Serializable {
    * The tableId containing this elementKey
    */
   /**
-   * The fully qualified key for this element. If this is a retained field,
-   * then this is the element's database column name. For composite types 
-   * whose elements are individually retained
-   * (e.g., geopoint), this would be the elementName of the geopoint (e.g.,
-   * 'myLocation' concatenated with '_' and this elementName (e.g.,
+   * The fully qualified key for this element. This is the element's database 
+   * column name. For composite types whose elements are individually retained
+   * (e.g., geopoint), this would be the elementName of the geopoint (e.g., 
+   * 'myLocation' concatenated with '_' and this elementName (e.g., 
    * 'myLocation_latitude').
    *
    * Never longer than 58 characters.

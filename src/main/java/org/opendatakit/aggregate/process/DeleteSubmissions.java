@@ -18,11 +18,17 @@ package org.opendatakit.aggregate.process;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
+import org.opendatakit.aggregate.form.FormFactory;
+import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
+import org.opendatakit.common.datamodel.DeleteHelper;
+import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -48,17 +54,35 @@ public class DeleteSubmissions {
     List<EntityKey> deleteKeys = new ArrayList<EntityKey>();
 
     for (SubmissionKey submissionKey : submissionKeys) {
+      List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
+      
+      // fetch the top-level entity for this submission.
+      // If this doesn't exist, then we assume the submission
+      // is entirely absent.
+      TopLevelDynamicBase tle = null;
       try {
-		List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
-  		Submission sub = Submission.fetchSubmission(parts, cc);
-  		sub.recursivelyAddEntityKeys(deleteKeys, cc);
-  		deleteKeys.add(sub.getKey());
+        tle = Submission.fetchTopLevelSubmissionObject(parts, cc); 
       } catch (ODKEntityNotFoundException e) {
-        // just move on
+        // ignore
       } catch (ODKFormNotFoundException e) {
-		  e.printStackTrace();
+        // also ignore, but log it...
+        e.printStackTrace();
+      }
+      if ( tle != null ) {
+        // we have the top-level entity. Construct the submission.
+        IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+        try {
+          Submission sub = new Submission(tle, form, cc);
+          sub.recursivelyAddEntityKeysForDeletion(deleteKeys, cc);
+          deleteKeys.add(sub.getKey());
+        } catch (ODKEntityNotFoundException e) {
+          // OK. We have a malformed or incompletely persisted Submission
+          // Attempt to delete whatever portion is present.
+          Set<DynamicCommonFieldsBase> backingObjects = form.getAllBackingObjects();
+          DeleteHelper.deleteDamagedSubmission(tle, backingObjects, cc);
+        }
       }
     }
-    cc.getDatastore().deleteEntities(deleteKeys, cc.getCurrentUser());
+    DeleteHelper.deleteEntities(deleteKeys, cc);
   }
 }

@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 
@@ -43,13 +44,22 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
 
     if (e instanceof IllegalArgumentException) {
       return Response.status(Status.BAD_REQUEST)
-          .entity(new Error(ErrorType.BAD_REQUEST, "Bad arguments: " + msg)).type(type).build();
+          .entity(new Error(ErrorType.BAD_REQUEST, "Bad arguments: " + msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof IllegalStateException) {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, "Illegal state: " + msg)).type(type).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, "Illegal state: " + msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else {
       return Response.status(Status.INTERNAL_SERVER_ERROR)
-          .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type).build();
+          .entity(new Error(ErrorType.INTERNAL_ERROR, msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
 

@@ -35,11 +35,13 @@ import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
 import org.opendatakit.aggregate.odktables.api.InstanceFileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
+import org.opendatakit.aggregate.odktables.api.QueryService;
 import org.opendatakit.aggregate.odktables.api.RealizedTableService;
 import org.opendatakit.aggregate.odktables.api.TableService;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
+import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -95,7 +97,10 @@ public class RealizedTableServiceImpl implements RealizedTableService {
     logger.info("tableId: " + tableId);
     DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
     ds.getDam().logUsage();
-    return Response.ok().build();
+    return Response.ok()
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -109,6 +114,13 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   public DiffService getDiff() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException {
 
     DiffService service = new DiffServiceImpl(appId, tableId, schemaETag, info, userPermissions, cc);
+    return service;
+  }
+
+  @Override
+  public QueryService getQuery() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException {
+
+    QueryService service = new QueryServiceImpl(appId, tableId, schemaETag, info, userPermissions, cc);
     return service;
   }
 
@@ -140,7 +152,10 @@ public class RealizedTableServiceImpl implements RealizedTableService {
       e.printStackTrace();
       throw new IllegalArgumentException("Unable to convert to URL");
     }
-    return Response.ok(definitionResource).build();
+    return Response.ok(definitionResource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
 }

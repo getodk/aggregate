@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -35,7 +36,6 @@ import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
-import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
@@ -142,9 +142,9 @@ public class PurgeOlderSubmissionsWorkerImpl {
     }
   }
 
-  private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate)
+  private List<TopLevelDynamicBase> querySubmissionsDateRange(Date startDate, Date endDate)
       throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
-
+    
     // fetch completed submissions, ascending.  Stop before the endDate.
     FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
     filterGroup.setQueryFetchLimit(MAX_QUERY_LIMIT);
@@ -152,13 +152,17 @@ public class PurgeOlderSubmissionsWorkerImpl {
         CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
     query.addFilterByPrimaryDate(FilterOperation.LESS_THAN, endDate);
     
-    // fetch the submissions
-    List<Submission> submissions = query.getResultSubmissions(cc);
-    return submissions;
+    // fetch the top-level entities for the submissions
+    return query.getTopLevelSubmissionObjects(cc);
   }
 
   private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException,
       ODKOverQuotaException {
+
+    Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+    logger.info("Submissions Purge: " + miscTasksKey.toString() + " form "
+        + form.getFormId() + " doMarkAsComplete");
+
     // and mark us as completed... (don't delete for audit..).
     t.setCompletionDate(new Date());
     t.setStatus(FormActionStatus.SUCCESSFUL);
@@ -179,8 +183,14 @@ public class PurgeOlderSubmissionsWorkerImpl {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
+    Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+
     Map<String, String> rp = t.getRequestParameters();
-    Date purgeBeforeDate = WebUtils.parsePurgeDateString(rp.get(PurgeOlderSubmissions.PURGE_DATE));
+    String purgeBeforeDateString = rp.get(PurgeOlderSubmissions.PURGE_DATE);
+    Date purgeBeforeDate = WebUtils.parsePurgeDateString(purgeBeforeDateString);
+
+    logger.info("Submissions Purge: " + miscTasksKey.toString() + " form "
+        + form.getFormId() + " doPurgeOlderSubmissions date: " + purgeBeforeDateString);
 
     // it is possible to have a FormInfo entry without any information
     // on the backing object (no records in FormDataModel). In that
@@ -193,23 +203,27 @@ public class PurgeOlderSubmissionsWorkerImpl {
     }
 
     if (relation != null) {
+      
       for (;;) {
         // retrieve submissions
+        // for large data sets, this might fail?
         Date startDate = BasicConsts.EPOCH;
-        List<Submission> submissions = querySubmissionsDateRange(startDate, purgeBeforeDate);
-
-        if (submissions.size() == 0)
+        List<TopLevelDynamicBase> topLevelEntities = querySubmissionsDateRange(startDate, purgeBeforeDate);
+        
+        logger.info("retrieved " + topLevelEntities.size() + " submissions.");
+        if (topLevelEntities.size() == 0)
           break;
 
         List<SubmissionKey> keys = new ArrayList<SubmissionKey>();
-        for (Submission s : submissions) {
-          keys.add(new SubmissionKey(s.getFormId(), s.getFormElementModel().getElementName(), s.getKey().getKey()));
+        for ( TopLevelDynamicBase tld : topLevelEntities ) {
+          keys.add(new SubmissionKey(form.getFormId(), form.getTopLevelGroupElement().getElementName(), tld.getEntityKey().getKey()));
         }
 
         DeleteSubmissions delete;
         delete = new DeleteSubmissions(keys);
         delete.deleteSubmissions(cc);
-
+        
+        logger.info("successfully deleted " + topLevelEntities.size() + " submissions");
         t.setLastActivityDate(new Date());
         t.persist(cc);
         // renew lock

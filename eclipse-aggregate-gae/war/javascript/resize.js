@@ -1,22 +1,39 @@
 var MAX_SIDE_PANEL_WIDTH = 350;
+var resizeInProgress = false;
 
 // Handle resizing various parts of the page based on
 // the screen size.
 function onWindowResize() {
+	onAggregateResize();
+}
+
+function onAggregateResize() {
 	if (contentLoaded == false)
 		return;
 
-	// First set all heights to ensure there is not a vertical scrollbar when we calculate width.
-	setHeights();
-	setWidths();
-	setHeights();
+	if ( !resizeInProgress ) {
+		resizeInProgress = true;
+		setTimeout(function() {
+		  // First set all heights to ensure there is not a vertical scrollbar when we calculate width.
+		  try {
+			  setHeights();
+			  setWidths();
+			  setHeights();
+		  } catch(e) {
+			console.log(e);
+		  }
+		  setTimeout(function() {
+			resizeInProgress = false;
+		  }, 100);
+		}, 0);
+	}
 }
 
 function setHeights() {
 	var height = $(window).height();
 
 	var helpPanelHeight = 0;
-	if ( $("#help_panel").is(':visible') ) {
+	if ( $("#help_panel").filter(':visible').get(0) !== undefined ) {
 		helpPanelHeight = $("#help_tree").height();
 	}
 
@@ -40,21 +57,33 @@ function setHeights() {
     // push down to leave room for error messages
     var allAlertMessagesHeight = 0;
     var errorMessageOffset = 0;
-    if ( $("#not_secure_content").is(':visible') || $("#error_content").is(':visible') ) {
+    if ( ($("#not_secure_content").filter(':visible').get(0) !== undefined) ||
+         ($("#error_content").filter(':visible').get(0) !== undefined) ) {
     	errorMessageOffset = $("#not_secure_content").height();
     	allAlertMessagesHeight = $("#not_secure_content").height() + $("#error_content").height();
     }
     layoutPanelTop = layoutPanelTop + allAlertMessagesHeight;
     console.log("layoutPanelTop " + layoutPanelTop);
-    $("#layout_panel").offset({top: layoutPanelTop });
-    $("#odk_aggregate_logo").offset({top: allAlertMessagesHeight + imageOffset });
-    $("#nav_bar_help_login").offset({top: allAlertMessagesHeight + navBarOffset });
-    if ( $("#error_content").is(':visible') ) {
-      $("#error_content").offset({top: errorMessageOffset});
+	
+	if ( $("#layout_panel").get(0) !== undefined && $("#layout_panel").offset().top !== layoutPanelTop ) {
+		$("#layout_panel").offset({top: layoutPanelTop });
+	}
+	if ( $("#odk_aggregate_logo").offset().top !== allAlertMessagesHeight + imageOffset ) {
+		$("#odk_aggregate_logo").offset({top: allAlertMessagesHeight + imageOffset });
+	}
+	if ( $("#nav_bar_help_login").offset().top !== allAlertMessagesHeight + navBarOffset ) {
+		$("#nav_bar_help_login").offset({top: allAlertMessagesHeight + navBarOffset });
+	}
+    if ( $("#error_content").filter(':visible').get(0) !== undefined ) {
+		if ( $("#error_content").offset().top !== errorMessageOffset ) {
+			$("#error_content").offset({top: errorMessageOffset});
+		}
     }
 
-    if ( $("#help_panel").is(':visible') ) {
-        $("#help_panel").height(helpPanelHeight);
+    if ( $("#help_panel").filter(':visible').get(0) !== undefined ) {
+		if ( $("#help_panel").height() !== helpPanelHeight ) {
+			$("#help_panel").height(helpPanelHeight);
+		}
     }
 
     var tab2Height = $(".tab_measure_2").first().height();
@@ -67,21 +96,41 @@ function setHeights() {
 	var filterPaginationHeight = $("#filter_submission_pagination").height();
 
 	// All tabs
-	$("html").height(height);
-	$("body").height(height);
-	$("#dynamic_content").height(height-allAlertMessagesHeight);
-	$("#mainNav").height(layoutHeight);
-	$("#layout_panel").height(layoutHeight);
-	$(".second_level_menu").height(layoutHeight - tab1Height);
-	$(".tab_content").height(contentHeight);
+	if ( $("html").height() !== height ) {
+		$("html").height(height);
+	}
+	if ( $("body").height() !== height ) {
+		$("body").height(height);
+	}
+	if ( $("#dynamic_content").height() !== height-allAlertMessagesHeight ) {
+		$("#dynamic_content").height(height-allAlertMessagesHeight);
+	}
+	if ( $("#mainNav").height() !== layoutHeight ) {
+		$("#mainNav").height(layoutHeight);
+	}
+	if ( $("#layout_panel") !== undefined && $("#layout_panel").height() !== layoutHeight ) {
+		$("#layout_panel").height(layoutHeight);
+	}
+	if ( $(".second_level_menu").height() !== layoutHeight - tab1Height ) {
+		$(".second_level_menu").height(layoutHeight - tab1Height);
+	}
+	if ( $(".tab_content").height() !== contentHeight ) {
+		$(".tab_content").height(contentHeight);
+	}
 
-    if ( $("#help_panel").is(':visible') ) {
-        $("#help_panel").offset({top: ($("#layout_panel").offset().bottom +  /* border width */ 1) });
+    if ( $("#help_panel").filter(':visible').get(0) !== undefined ) {
+		if ( $("#help_panel").offset().top !== $("#layout_panel").offset().bottom +  /* border width */ 1 ) {
+			$("#help_panel").offset({top: ($("#layout_panel").offset().bottom +  /* border width */ 1) });
+		}
     }
     
 	// Submissions tab
-	$("#filters_container").height(filterContentHeight - /* border width */ 1);
-	$("#submission_container").height(filterContentHeight - filterPaginationHeight - /* border width */ 1);
+	if ( $("#filters_container").height() !== filterContentHeight - /* border width */ 1 ) {
+		$("#filters_container").height(filterContentHeight - /* border width */ 1);
+	}
+	if ( $("#submission_container").height() !== filterContentHeight - filterPaginationHeight - /* border width */ 1 ) {
+		$("#submission_container").height(filterContentHeight - filterPaginationHeight - /* border width */ 1);
+	}
 }
 
 function setWidths() {

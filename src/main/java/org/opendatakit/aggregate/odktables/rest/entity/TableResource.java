@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
@@ -55,6 +56,12 @@ public class TableResource extends TableEntry {
    * Path prefix for permissions / access-control service.
    */
   private String aclUri;
+  
+  /**
+   * table-level file manifest ETag (optional)
+   */
+  @JsonProperty(required = false)
+  private String tableLevelManifestETag;
 
   public TableResource(TableEntry entry) {
     super(entry.getTableId(), entry.getDataETag(), entry.getSchemaETag());
@@ -88,6 +95,10 @@ public class TableResource extends TableEntry {
     return this.aclUri;
   }
 
+  public String getTableLevelManifestETag() {
+    return tableLevelManifestETag;
+  }
+
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
   }
@@ -110,6 +121,10 @@ public class TableResource extends TableEntry {
 
   public void setAclUri(final String aclUri) {
     this.aclUri = aclUri;
+  }
+
+  public void setTableLevelManifestETag(String tableLevelManifestETag) {
+    this.tableLevelManifestETag = tableLevelManifestETag;
   }
 
   /*
@@ -152,12 +167,15 @@ public class TableResource extends TableEntry {
     } else if (!selfUri.equals(other.selfUri))
       return false;
     if (definitionUri == null) {
-      if (other.definitionUri != null) {
+      if (other.definitionUri != null)
         return false;
-      } else if (!definitionUri.equals(other.definitionUri)) {
+    } else if (!definitionUri.equals(other.definitionUri))
+      return false;
+    if (tableLevelManifestETag == null) {
+      if (other.tableLevelManifestETag != null)
         return false;
-      }
-    }
+    } else if (!tableLevelManifestETag.equals(other.tableLevelManifestETag))
+      return false;
     return true;
   }
 
@@ -180,6 +198,7 @@ public class TableResource extends TableEntry {
     result = prime * result + ((diffUri == null) ? 0 : diffUri.hashCode());
     result = prime * result + ((selfUri == null) ? 0 : selfUri.hashCode());
     result = prime * result + ((definitionUri == null) ? 0 : definitionUri.hashCode());
+    result = prime * result + ((tableLevelManifestETag == null) ? 0 : tableLevelManifestETag.hashCode());
     return result;
   }
 
@@ -203,6 +222,8 @@ public class TableResource extends TableEntry {
     builder.append(diffUri);
     builder.append(", aclUri=");
     builder.append(aclUri);
+    builder.append(", tableLevelManifestETag=");
+    builder.append(tableLevelManifestETag);
     builder.append("]");
     return builder.toString();
   }

@@ -38,7 +38,7 @@ public class BlobRelationSetTest {
 
 		// ensure that blobset tables are not present...
 		MyBlobRelationSet set = new MyBlobRelationSet(cc);
-		set.dropBlobEntitySet(cc);
+		set.dropBlobRelationSet(cc);
 	}
 	
 	static class MyBlobRelationSet extends AbstractBlobRelationSet {
@@ -77,6 +77,6 @@ public class BlobRelationSetTest {
 		}
 		assertEquals(otherType, alt.getContentType(2, cc));
 		
-		rel.dropBlobEntitySet(cc);
+		rel.dropBlobRelationSet(cc);
 	}
 }

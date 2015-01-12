@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.client.widgets.ChangeAppNameButton;
 import org.opendatakit.aggregate.client.widgets.DisableFasterBackgroundActionsCheckbox;
 import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
+import org.opendatakit.aggregate.client.widgets.SkipMalformedSubmissionsCheckbox;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.PreferencesConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -87,12 +88,14 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private Label appName;
   private ChangeAppNameButton changeAppNameButton;
   private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
+  private SkipMalformedSubmissionsCheckbox skipMalformedSubmissions;
 
   private PreferencesCompletionCallback settingsChange = new PreferencesCompletionCallback() {
     @Override
     public void refreshFromUpdatedPreferences() {
       setCredentialValues();
       disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
+      skipMalformedSubmissions.updateValue(Preferences.getSkipMalformedSubmissions());
       odkTablesEnable.updateValue(Preferences.getOdkTablesEnabled());
       appName.setText(Preferences.getAppName());
     }
@@ -226,6 +229,12 @@ public class PreferencesSubTab extends AggregateSubTabBase {
         Preferences.getFasterBackgroundActionsDisabled(), settingsChange);
     add(disableFasterBackgroundActions);
 
+    HTML linebreak = new HTML("<br>");
+    add(linebreak);
+    
+    skipMalformedSubmissions = new SkipMalformedSubmissionsCheckbox(
+        Preferences.getSkipMalformedSubmissions(), settingsChange);
+    add(skipMalformedSubmissions);
   }
 
   @Override

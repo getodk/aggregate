@@ -33,6 +33,7 @@ import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.SubmissionVisitor;
 import org.opendatakit.common.datamodel.DynamicBase;
+import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
@@ -143,9 +144,15 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     // reconstruct all the repeating groups from a single submission.
     // This should be a small number. We don't have the logic to
     // handle fractional returns of rows.
+    long expectedOrdinal = 1L;
     List<? extends CommonFieldsBase> repeatGroupList = q.executeQuery();
     for (CommonFieldsBase cb : repeatGroupList) {
       DynamicBase d = (DynamicBase) cb;
+      Long ordinal = d.getOrdinalNumber();
+      if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
+        throw new ODKEnumeratedElementException(repeatGroup.getElementName() + "@parentAuri(" + d.getParentAuri() + ") is missing a (repeat) group instance OR has an extra copy of one");
+      }
+      ++expectedOrdinal;
       SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
       submissionSets.add(set);
     }
@@ -192,10 +199,15 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   }
 
   @Override
-  public void recursivelyAddEntityKeys(List<EntityKey> keyList, CallingContext cc)
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
+    // the keyList will be deleted in reverse order.
+    // so by adding the repeats in-order, we ensure
+    // that the last repeat to delete is ordinal 1.
+    // i.e., the submission remains always remains
+    // well-formed w.r.t. its repeat groups.
     for (SubmissionSet s : submissionSets) {
-      s.recursivelyAddEntityKeys(keyList, cc);
+      s.recursivelyAddEntityKeysForDeletion(keyList, cc);
     }
   }
 
