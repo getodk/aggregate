@@ -331,18 +331,24 @@ public class FormUploadServlet extends ServletUtilBase {
         case ID_MALFORMED:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
               + "\n" + e.toString());
+          return;
         case ID_MISSING:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
+          return;
         case MISSING_XML:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
+          return;
         case BAD_JR_PARSE:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
               + "\n" + e.toString());
+          return;
         case MISMATCHED_SUBMISSION_ELEMENT:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
               ErrorConsts.FORM_INVALID_SUBMISSION_ELEMENT);
+          return;
         default:
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INVALID_PARAMS);
+          return;
         }
       } catch (ODKEntityPersistException e) {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
