@@ -22,10 +22,9 @@ Skip to the next section if you want a fully configured development environment.
 
 The steps required are:
 
-(0) Install the latest Java 6 SDK
+(0) Install the latest Java 7 SDK
 
-(1a) Install Eclipse 3.7.2 or higher.  This workspace WILL NOT work with 
-    Eclipse 3.5.2 and earlier.
+(1a) Install Eclipse IDE for Java EE -- Kepler (4.3.2). Luna has not been tested.
 
 (1b) Increase the start-up memory sizes for the Eclipse workspace as detailed 
 below. The GAE database consumes huge amounts of space in the JVM and the GAE
@@ -40,9 +39,9 @@ in the same directory as the eclipse.exe.
 This is my eclipse.ini:
 ------------------------------start-------------------
 -startup
-plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
+plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar
 --launcher.library
-plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.100.v20110502
+plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.200.v20140116-2212
 -product
 org.eclipse.epp.package.jee.product
 --launcher.defaultAction
@@ -55,11 +54,12 @@ org.eclipse.platform
 1536m
 --launcher.defaultAction
 openFile
+--launcher.appendVmargs
 -vmargs
--Dosgi.requiredJavaVersion=1.6
+-Dosgi.requiredJavaVersion=1.7
 -Xms100m
--Xmx2048m
--startup
+-Xmx3048m
+-XX:MaxPermSize=1536m
 ------------------------------end----------------------
 
 (2) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
@@ -70,17 +70,17 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.9.0 or higher SDK defined.
-	If the default App Engine version is not 1.9.0, you may need to 
+    Be sure there is an App Engine 1.9.7 or higher SDK defined.
+	If the default App Engine version is not 1.9.7, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.5.1 or higher.
+    Be sure there is a WebToolkit SDK defined 2.6.1 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.5.1).  The GWT library is installed as 
+	pom.xml (currently 2.6.1).  The GWT library is installed as 
 	part of the plugin and can be found in:
-	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.5.1...\gwt-2.5.1
+	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.6.1...\gwt-2.6.1
 
 File / Import:
 
@@ -111,7 +111,7 @@ jar and copy it into the eclipse project.
 
 This should now build without errors.  
 
-On Eclipse 3.7, these additional steps may also be required:
+On Eclipse, these additional steps may also be required:
 
 Select eclipse-aggregate-gae
 right-click Properties
@@ -283,16 +283,17 @@ Full Maven Development Environment Configuration
     This will generally set up a maven repository under
     the user's home directory:  ${HOME}/.m2/repository
 
-(2) Install Eclipse 3.7.2 or higher.  This workspace WILL NOT work with 
-    Eclipse 3.5.2 and earlier.
+(2) Install Java 7 JDK.
 
-(3) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
+(3) Install Eclipse Kepler (4.3.2) or higher. Luna has not been tested.
 
-(4) Optionally Install Tomcat 6.0.  
+(4) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
+
+(5) Optionally Install Tomcat 6.0.  
     This is required unless you do not import or always keep closed
     the MySQL and Postgres projects and don't use maven.
 
-(5) Optionally: Install Postgres
+(6) Optionally: Install Postgres
 
 For Postgres, run these commands:
 
@@ -377,8 +378,7 @@ A minimal file is:
   	  <properties>
 		<localRepository>${user.home}/.m2/repository</localRepository>
 		<temp.home>C:\\Users\\Administrator\\AppData\\Local\\Temp</temp.home>
-	    <gae.home>\C:\\Users\\Administrator\\appengine-java-sdk-1.9.0</gae.home>
-		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 8.6.0</bitrock.home>
+		<bitrock.home>C:\Program Files (x86)\BitRock InstallBuilder Professional 9.5.3</bitrock.home>
 	    <keystore.propertyfile>\C:\\Users\\Administrator\\keystore\\jarSignerDetails.txt</keystore.propertyfile>
 		<headless.operation>no</headless.operation>
 		<mysql.client.executable>C:\\Program Files\\MySQL\\MySQL Server 5.5\\bin\\mysql.exe</mysql.client.executable>
@@ -389,11 +389,11 @@ A minimal file is:
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
 		<test.server.gae.monitor.port>7075</test.server.gae.monitor.port>
+		<unix.display>:20.0</unix.display>
 		<firefox.executable></firefox.executable>
 	  </properties>
   	</profile>
   </profiles>
-  <activeProfiles><activeProfile>gae</activeProfile></activeProfiles>
 </settings>
 
 Be sure to update the paths and passwords to match those of your environment.
