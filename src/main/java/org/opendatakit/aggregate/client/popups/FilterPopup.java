@@ -205,8 +205,8 @@ public final class FilterPopup extends AbstractPopupBase {
 				return;
 			}
 
-			Visibility kr = visibility.getSelectedValue();
-			RowOrCol rowcol = rowCol.getSelectedValue();
+			Visibility kr = visibility.getSelectedEnumValue();
+			RowOrCol rowcol = rowCol.getSelectedEnumValue();
 			long numFilters = (long) group.getFilters().size();
 
 			Filter newFilter;
@@ -216,7 +216,7 @@ public final class FilterPopup extends AbstractPopupBase {
 				if (columns.size() > 0) {
 					column = columns.get(0);
 				}          
-				newFilter = new RowFilter(kr, column, filterOp.getSelectedValue(), filterValue.getValue(), numFilters);
+				newFilter = new RowFilter(kr, column, filterOp.getSelectedEnumValue(), filterValue.getValue(), numFilters);
 			} else {
 				ArrayList<Column> columnfilterheaders = columnsForColumnFilter.getSelectedColumns();
 				newFilter = new ColumnFilter(kr, columnfilterheaders, numFilters);

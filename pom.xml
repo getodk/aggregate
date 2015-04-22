@@ -27,7 +27,7 @@
 		<google.gdata.version>1.47.1</google.gdata.version>
 		<google.api-client.version>1.18.0-rc</google.api-client.version>
 		<google.api-services-drive.version>v2-rev131-1.18.0-rc</google.api-services-drive.version>
-		<google.gwt.version>2.6.1</google.gwt.version>
+		<google.gwt.version>2.7.0</google.gwt.version>
 		<org.apache.wink.version>1.4</org.apache.wink.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
 		<maven.surefire.report.plugin.version>2.16</maven.surefire.report.plugin.version>
@@ -607,7 +607,7 @@
 		<dependency>
 		  <groupId>org.javarosa</groupId>
 		  <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>2015-01-10</version>
+		  <version>2015-04-17</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>

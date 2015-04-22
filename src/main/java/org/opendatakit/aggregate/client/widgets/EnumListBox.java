@@ -27,7 +27,16 @@ public final class EnumListBox<T extends Enum<T>> extends AggregateListBox {
 
   }
 
-  public T getSelectedValue() {
+  public String getSelectedValue() {
+    T val = getSelectedEnumValue();
+    if ( val == null ) {
+      return null;
+    } else {
+      return val.name();
+    }
+  }
+  
+  public T getSelectedEnumValue() {
     int selectedIndex = getSelectedIndex();
     if (selectedIndex > -1) {
       return (T) Enum.valueOf(classType, getValue(selectedIndex));

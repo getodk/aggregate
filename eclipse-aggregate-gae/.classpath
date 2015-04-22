@@ -17,8 +17,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-1.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-meta-1.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-core-1.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-docs-3.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-docs-meta-3.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-2.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-meta-2.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-media-1.0-1.47.1.jar"/>
@@ -55,7 +53,7 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-xml-provider-2.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-module-jaxb-annotations-2.4.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2015-01-10.jar"/>
+	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javarosa-libraries-2015-04-17.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxb-api-2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jaxb-impl-2.2.1.1.jar"/>
