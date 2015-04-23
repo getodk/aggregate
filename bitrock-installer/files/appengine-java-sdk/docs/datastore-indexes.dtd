@@ -1,11 +1,25 @@
+<!-- CAUTION: the following files implement the parsing and validation of -->
+<!-- the index definition schema, and so they all must be kep in sync: -->
+
+<!--     apphosting/datastore/datastore_index.py -->
+<!--     apphosting/datastore/datastore_index_xml.py -->
+<!--     java/com/google/apphosting/utils/config/IndexesXmlReader.java -->
+<!--     java/com/google/apphosting/utils/config/IndexYamlReader.java -->
+<!--     java/com/google/appengine/tools/development/datastore-indexes.xsd -->
+<!--     java/com/google/appengine/tools/development/datastore-indexes.xsd -->
+
+<!-- TODO(flyboy): add to this list when we discover even more places -->
+<!-- that are sensitive to schema changes -->
+
 <!ELEMENT datastore-indexes (datastore-index)*>
 <!ATTLIST datastore-indexes
           autoGenerate (true|false) #REQUIRED>
 <!ELEMENT datastore-index (property)*>
 <!ATTLIST datastore-index
-          ancestor CDATA #REQUIRED
+          ancestor CDATA #IMPLIED
           kind CDATA #REQUIRED>
 <!ELEMENT property (#PCDATA)>
 <!ATTLIST property
-          direction (asc|desc) #REQUIRED
+          direction (asc|desc) #IMPLIED
+          mode (geospatial) #IMPLIED
           name CDATA #REQUIRED>

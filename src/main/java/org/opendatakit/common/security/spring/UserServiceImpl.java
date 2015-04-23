@@ -80,7 +80,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
         (!superUserEmail.startsWith(SecurityUtils.MAILTO_COLON)
           || !superUserEmail.contains(SecurityUtils.AT_SIGN))) {
       throw new IllegalStateException("superUserEmail is malformed. "
-          + "Must be of the form 'mailto:user@gmail.com' or other supported OpenID provider.");
+          + "Must be of the form 'mailto:user@gmail.com' or other supported OAuth2 provider.");
     }
     Log log = LogFactory.getLog(UserServiceImpl.class);
     log.info("superUserEmail: " + superUserEmail);
@@ -317,9 +317,9 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
     return name;
   }
 
-  private static final String getEmail(String uriUser, String openIdEmail) {
-    if (openIdEmail != null) {
-      return openIdEmail;
+  private static final String getEmail(String uriUser, String oauth2Email) {
+    if (oauth2Email != null) {
+      return oauth2Email;
     }
     if (uriUser.startsWith(SecurityUtils.MAILTO_COLON)) {
       String n = uriUser;

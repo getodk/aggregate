@@ -23,18 +23,6 @@ exposes bind and prompt attributes, and numerous contributed fixes from SurveyCT
 This can be installed by pulling the Aggregate (Components) sources
 and running 'mvn install' in the GaeHttpClient project.  
 
-# openid4java-nodeps-0.9.6.662.1.odk-SNAPSHOT:
-
-This can be built by pulling the Aggregate (Components) sources
-and compiling the OpenId4Java project.
-
-You need to install both the parent and jar projects.
-
-# spring-security-openid-3.2.4.odk-SNAPSHOT:
-
-This is a merge of deltas that can be built by pulling the Aggregate (Components) sources
-and applying the spring-security-patch to the corresponding 3.2.4 SpringSecurity sources.
-
 # odk-tomcatutil:
 
 This can be installed by pulling the Aggregate (Components) sources

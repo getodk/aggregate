@@ -107,8 +107,8 @@ public class Oauth2AuthenticationProvider implements AuthenticationProvider, Ini
          UserDetails rawUserDetails, Oauth2AuthenticationToken auth) {
       String eMail = auth.getEmail();
       if ( eMail == null ) {
-         logger.warn("OpenId attributes did not include an e-mail address! ");
-         throw new UsernameNotFoundException("email address not supplied in OpenID attributes");
+         logger.warn("User account attributes did not include an e-mail address! ");
+         throw new UsernameNotFoundException("email address not supplied in User account attributes");
       }
       eMail = Oauth2AuthenticationProvider.normalizeMailtoAddress(eMail);
       String mailtoDomain = Oauth2AuthenticationProvider.getMailtoDomain(eMail);
@@ -118,7 +118,7 @@ public class Oauth2AuthenticationProvider implements AuthenticationProvider, Ini
       Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
       
       authorities.addAll(userDetails.getAuthorities());
-      // add the AUTH_OPENID granted authority,
+      // add the AUTH_GOOGLE_OAUTH2 granted authority,
       authorities.add(new SimpleGrantedAuthority(GrantedAuthorityName.AUTH_GOOGLE_OAUTH2.toString()));
 
       // attempt to look user up in registered users table...
@@ -133,7 +133,7 @@ public class Oauth2AuthenticationProvider implements AuthenticationProvider, Ini
          noRights = partialDetails.getAuthorities().isEmpty();
          username = partialDetails.getUsername();
       } catch (Exception e) {
-        logger.warn("OpenId attribute e-mail: " + eMail + " did not match any known e-mail addresses! " + e.getMessage());
+        logger.warn("Oauth2 attribute e-mail: " + eMail + " did not match any known e-mail addresses! " + e.getMessage());
         throw new UsernameNotFoundException("account not recognized");
       }
 
@@ -148,7 +148,7 @@ public class Oauth2AuthenticationProvider implements AuthenticationProvider, Ini
                                        authorities);
       if ( noRights || !( trueUser.isEnabled() && trueUser.isAccountNonExpired() &&
             trueUser.isAccountNonLocked() ) ) {
-         logger.warn("OpenId attribute e-mail: " + eMail + " account is blocked! ");
+         logger.warn("Oauth2 attribute e-mail: " + eMail + " account is blocked! ");
          throw new UsernameNotFoundException("account is blocked");
       }
       
@@ -170,7 +170,7 @@ public class Oauth2AuthenticationProvider implements AuthenticationProvider, Ini
          if ( emailAddress.contains(SecurityUtils.AT_SIGN) ) {
             mailtoUsername = SecurityUtils.MAILTO_COLON + emailAddress;
          } else {
-            logger.warn("OpenId attribute e-mail: " + emailAddress + " does not specify a domain! ");
+            logger.warn("Oauth2 attribute e-mail: " + emailAddress + " does not specify a domain! ");
             throw new IllegalStateException("e-mail address is incomplete - it does not specify a domain!");
          }
       }

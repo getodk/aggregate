@@ -46,7 +46,7 @@ public class Util {
     assertTrue(expectedCopy.isEmpty());
   }
 
-  public static <V> List<V> list(V... values) {
+  private static <V> List<V> list(V... values) {
     ArrayList<V> list = new ArrayList<V>();
     for (V value : values) {
       list.add(value);
