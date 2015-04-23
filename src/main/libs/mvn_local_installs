@@ -1,12 +1,5 @@
 mvn install:install-file -Dfile=javarosa-libraries-2015-04-17.jar -DgroupId=org.javarosa -DartifactId=javarosa-libraries -Dversion=2015-04-17 -Dpackaging=jar -DupdateReleaseInfo=true
 mvn install:install-file -Dfile=odk-httpclient-gae-1.1.1.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=1.1.1 -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=openid4java-parent-pom.xml -DgroupId=org.openid4java -DartifactId=openid4java-parent -Dversion=0.9.6.662.1.odk-SNAPSHOT -Dpackaging=pom -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=openid4java-nodeps-0.9.6.662.1.odk-SNAPSHOT.jar -DgroupId=org.openid4java -DartifactId=openid4java-nodeps -Dversion=0.9.6.662.1.odk-SNAPSHOT -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=spring-security-crypto-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-crypto -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=spring-security-config-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-config -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=spring-security-core-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-core -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=spring-security-web-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-web -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=spring-security-openid-3.2.4.odk-SNAPSHOT.jar -DgroupId=org.springframework.security -DartifactId=spring-security-openid -Dversion=3.2.4.odk-SNAPSHOT -Dpackaging=jar -DupdateReleaseInfo=true
 mvn install:install-file -Dfile=odk-tomcatutil.jar -DgroupId=org.opendatakit -DartifactId=odk-tomcatutil -Dversion=1.0 -Dpackaging=jar -DupdateReleaseInfo=true
 mvn install:install-file -Dfile=gwt-google-maps-v3-snapshot.jar -DgroupId=com.googlecode.gwt-google-maps-v3 -DartifactId=gwt-google-maps-v3 -Dversion=snapshot -Dpackaging=jar -DupdateReleaseInfo=true
 mvn install:install-file -Dfile=gwt-visualization-1.1.1.jar -DgroupId=com.google.gwt.google-apis -DartifactId=gwt-visualization -Dversion=1.1.1 -Dpackaging=jar -DupdateReleaseInfo=true

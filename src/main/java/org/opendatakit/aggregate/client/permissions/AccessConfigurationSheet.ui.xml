@@ -6,8 +6,7 @@
 <h1>Configure Site Access</h1>
 <h4>Users access the site either</h4>
 <ul><li>anonymously (i.e., as the <em>anonymousUser</em>), or</li>
-<li>via a Google account, using OpenID (requires an Email account (e.g., user@gmail.com)), or</li>
-<li>via an Oauth 1.0 or Oauth 2.0 token (issued by Google with access to userInfo.email), or</li>
+<li>via an Oauth 2.0 token (requires an Email account (e.g., user@gmail.com) and an Oauth 2.0 token issued by Google with access to userInfo.email), or</li>
 <li>via an ODK account, with a username and password that a site administrator has configured for them.</li></ul>
 <h4>Capabilities are as follows:</h4>
 <ul><li>Data Collector - able to download forms to ODK Collect and submit data from ODK Collect to ODK Aggregate.
@@ -32,8 +31,8 @@ retrieval of images, audio and video data (needed for GoogleEarth balloon displa
 <g:Button  styleName="gwt-Button" ui:field="button" text="Save Changes" />
 <hr/>
 <h3>Add Users</h3>
-<p>Enter the usernames (for ODK accounts) or e-mail addresses (for Google OpenID accounts) to add to the
-list of users in the above table</p>
+<p>Enter the usernames (for ODK accounts) or e-mail addresses (for Google Gmail accounts) to add to the
+list of users in the above table. Iteractive logins with Google accounts are no longer supported.</p>
 <g:TextArea visibleLines="3" characterWidth="80" ui:field="addedUsers" />
 <br/>
 <g:Button styleName="gwt-Button" ui:field="addNow" text="Add"/>

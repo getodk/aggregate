@@ -13,20 +13,23 @@
 	<properties>
 	    <toplevel.directory>${project.basedir}/../</toplevel.directory>
 		<!-- must match the gae version below and the build/build.xml ant script defn -->
-		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.7/appengine-java-sdk-1.9.7</gae.home>
+		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18</gae.home>
 		<!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
-		<selenium.home>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2</selenium.home>
-		<selenium.libs>${project.basedir}/../build/selenium-java-2.42.2/selenium-2.42.2/libs</selenium.libs>
+		<selenium.home>${project.basedir}/../build/selenium-java-2.45.0/selenium-2.45.0</selenium.home>
+		<selenium.libs>${project.basedir}/../build/selenium-java-2.45.0/selenium-2.45.0/libs</selenium.libs>
 	    <war.directory>${project.basedir}/../eclipse-aggregate-gae/war</war.directory>
 		<scriptSourceDirectory>${project.basedir}/../src/it/scripts</scriptSourceDirectory>
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.9.7</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
+		<gooogle.appengine.sdk.version>1.9.18</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
 		<gae.version>${gooogle.appengine.sdk.version}</gae.version>
+		<project.httpclient.version>4.2.2</project.httpclient.version>
+		<project.jsr305.version>1.3.9</project.jsr305.version>
 		<google.gdata.version>1.47.1</google.gdata.version>
-		<google.api-client.version>1.18.0-rc</google.api-client.version>
-		<google.api-services-drive.version>v2-rev131-1.18.0-rc</google.api-services-drive.version>
+		<project.http.version>1.20.0</project.http.version> <!-- match google.api-client.version -->
+		<google.api-client.version>1.20.0</google.api-client.version>
+		<google.api-services-drive.version>v2-rev167-1.20.0</google.api-services-drive.version>
 		<google.gwt.version>2.7.0</google.gwt.version>
 		<org.apache.wink.version>1.4</org.apache.wink.version>
 		<emma.maven.plugin.version>1.2</emma.maven.plugin.version>
@@ -36,7 +39,7 @@
 		<maven.failsafe.plugin.version>2.16</maven.failsafe.plugin.version>
 		<cargo.maven2.plugin.version>1.4.7</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.8</build.helper.maven.plugin.version>
-		<gwt.maven.plugin.version>2.6.1</gwt.maven.plugin.version>
+		<gwt.maven.plugin.version>2.7.0</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
 		<maven.jar.plugin.version>2.4</maven.jar.plugin.version>
 		<maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
@@ -48,13 +51,11 @@
 		<com.fasterxml.jackson.core.version>2.4.1.1</com.fasterxml.jackson.core.version>
 		<com.fasterxml.jackson.version>2.4.1.3</com.fasterxml.jackson.version>
 		<org.codehaus.woodstox.version>4.1.4</org.codehaus.woodstox.version> <!-- used by jackson2 XML serializer -->
-		<org.springframework.version>4.0.5.RELEASE</org.springframework.version>
+		<org.springframework.version>4.1.6.RELEASE</org.springframework.version>
 		<org.slf4j.version>1.7.7</org.slf4j.version>
 		<!-- log4j is not used -->
-		<org.springframework.security.version>3.2.4.odk-SNAPSHOT</org.springframework.security.version>
-		<openid4java.version>0.9.6.662.1.odk-SNAPSHOT</openid4java.version>
-		<org.springframework.security.openid.version>3.2.4.odk-SNAPSHOT</org.springframework.security.openid.version>
-		<org.seleniumhq.version>2.42.2</org.seleniumhq.version>
+		<org.springframework.security.version>3.2.7.RELEASE</org.springframework.security.version>
+		<org.seleniumhq.version>2.45.0</org.seleniumhq.version>
 		<!--
 			keystore.propertyfile - define this in your settings.xml - the
 			location of the properties file for the keystore
@@ -72,20 +73,20 @@
 		<module>odk-postgres-it-settings</module>
 		<module>odk-postgres-unit-settings</module>
 		
-		<!-- aggregate-gae-specific -->
-		<module>gae-unit-tests</module>
+		<!-- odk tables client libraries -->
+		<module>odk-tables-api</module>
 		<!-- aggregate-postgresql-specific -->
 		<module>aggregate-postgres</module>
-		<!-- aggregate-mysql-specific -->
-		<module>aggregate-mysql</module>
 		<!-- aggregate-postgresql-specific -->
 		<module>postgres-unit-tests</module>
 		<!-- aggregate-mysql-specific -->
+		<module>aggregate-mysql</module>
+		<!-- aggregate-mysql-specific -->
 		<module>mysql-unit-tests</module>
-		<!-- odk tables client libraries -->
-		<module>odk-tables-api</module>
 		<!-- aggregate-gae-specific -->
 		<module>aggregate-gae</module>
+		<!-- aggregate-gae-specific -->
+		<module>gae-unit-tests</module>
 	</modules>
 	<repositories>
 		<!-- main repository -->
@@ -99,7 +100,7 @@
 		  </snapshots>
 		</repository>
 		<!-- old main repository (maven-gae-plugin 0.9.6) -->
-		<repository>
+		<!-- <repository>
 		  <id>old central</id>
 		  <name>Maven Repository Switchboard</name>
 		  <layout>default</layout>
@@ -107,7 +108,7 @@
 		  <snapshots>
 			<enabled>false</enabled>
 		  </snapshots>
-		</repository>
+		</repository> -->
 		<!-- java.net maven repo
 		<repository>
 		<id>maven2-repository.java.net</id>
@@ -116,7 +117,7 @@
 			<layout>default</layout>
 		</repository> -->
 		<!-- spring framework repository -->
-        <repository>
+        <!-- <repository>
           <snapshots>
             <enabled>false</enabled>
           </snapshots>
@@ -129,13 +130,13 @@
           <id>snapshots</id>
           <name>libs-snapshot</name>
           <url>https://repo.springsource.org/libs-snapshot</url>
-        </repository>
+        </repository> -->
 		<!-- contains the gdata apis -->
 		<repository>
 			<id>mandubian-mvn</id>
 			<url>http://mandubian-mvn.googlecode.com/svn/trunk/mandubian-mvn/repository</url>
 		</repository>
-		<repository>
+		<!-- <repository>
 		  <id>codehaus-snapshots</id>
 		  <url>https://nexus.codehaus.org/snapshots/</url>
 		  <snapshots>
@@ -145,10 +146,9 @@
 		  <releases>
 			<enabled>false</enabled>
 		  </releases>
-		</repository>
+		</repository> -->
 		<!-- contains the jai imageio standalone code -->
         <repository>
-            <releases />
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -167,12 +167,9 @@
 		  <snapshots>
 			<enabled>false</enabled>
 		  </snapshots>
-		  <releases>
-			<updatePolicy>never</updatePolicy>
-		  </releases>
 		</pluginRepository>
 		<!-- old main repository (maven-gae-plugin) -->
-		<pluginRepository>
+<!--		<pluginRepository>
 		  <id>old central</id>
 		  <name>Maven Repository Switchboard</name>
 		  <layout>default</layout>
@@ -183,8 +180,8 @@
 		  <releases>
 			<updatePolicy>never</updatePolicy>
 		  </releases>
-		</pluginRepository>
-		<pluginRepository>
+		</pluginRepository> -->
+		<!-- <pluginRepository>
 		  <id>codehaus-snapshots</id>
 		  <url>https://nexus.codehaus.org/snapshots/</url>
 		  <snapshots>
@@ -194,9 +191,17 @@
 		  <releases>
 			<enabled>false</enabled>
 		  </releases>
-		</pluginRepository>
+		</pluginRepository> -->
+ 	    <pluginRepository>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+		  <id>sonatype.snapshots</id>
+		  <name>sonatype-plugins-release</name>
+		  <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+	    </pluginRepository>
 		<!-- spring framework plugnins -->
-        <pluginRepository>
+        <!-- <pluginRepository>
           <snapshots>
             <enabled>false</enabled>
           </snapshots>
@@ -209,16 +214,9 @@
           <id>spring-snapshots</id>
           <name>plugins-snapshot</name>
           <url>https://repo.springsource.org/plugins-snapshot</url>
-        </pluginRepository>
+        </pluginRepository> -->
 	</pluginRepositories>
 	<dependencies>
-<!--		<dependency>
-		  <groupId>aopalliance</groupId>
-		  <artifactId>aopalliance</artifactId>
-		  <version>1.0</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency> -->
 		<dependency>
 		  <groupId>com.google.appengine</groupId>
 		  <artifactId>appengine-api-1.0-sdk</artifactId>
@@ -240,36 +238,13 @@
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
-<!--		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjrt</artifactId>
-			<version>1.6.12</version>
-		</dependency>
 		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<version>1.6.12</version>
-		</dependency> -->
-		<dependency>
-			<groupId>com.jolbox</groupId>
-			<artifactId>bonecp</artifactId>
-			<version>0.8.0.RELEASE</version>
-		  <exclusions>
-		    <exclusion>
-			  <groupId>com.google.guava</groupId>
-			  <artifactId>guava</artifactId>
-			</exclusion>
-			<exclusion>
-			  <groupId>org.slf4j</groupId>
-			  <artifactId>slf4j-api</artifactId>
-			</exclusion>
-			<exclusion>
-			  <groupId>log4j</groupId>
-			  <artifactId>log4j</artifactId>
-			</exclusion>
-		  </exclusions>
+			<groupId>com.mchange</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.5</version>
+		  <scope>compile</scope>
 		</dependency>
-		<dependency> <!-- required by spring-security odk-SNAPSHOT -->
+		<dependency> <!-- required by spring-security -->
 		  <groupId>commons-codec</groupId>
 		  <artifactId>commons-codec</artifactId>
 		  <version>1.9</version> <!-- note: java 1.6 -->
@@ -293,7 +268,7 @@
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
 		  <artifactId>commons-lang3</artifactId>
-		  <version>3.3.2</version>
+		  <version>3.4</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -310,7 +285,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-        <dependency> <!-- required by spring-security odk-SNAPSHOT -->
+        <dependency> <!-- required by spring-security -->
 		  <groupId>net.sf.ehcache</groupId>
 		  <artifactId>ehcache</artifactId>
 		  <version>2.8.3</version>
@@ -342,20 +317,6 @@
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
 		  <artifactId>gdata-core-1.0</artifactId>
-		  <version>${google.gdata.version}</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-		  <groupId>com.google.gdata</groupId>
-		  <artifactId>gdata-docs-3.0</artifactId>
-		  <version>${google.gdata.version}</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-		  <groupId>com.google.gdata</groupId>
-		  <artifactId>gdata-docs-meta-3.0</artifactId>
 		  <version>${google.gdata.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
@@ -418,6 +379,12 @@
 		  <version>${google.api-client.version}</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
+		  <exclusions>
+			<exclusion>
+			  <groupId>com.google.guava</groupId>
+			  <artifactId>guava-jdk5</artifactId>
+			</exclusion>
+		  </exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>com.google.apis</groupId>
@@ -513,7 +480,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.2.2</version>
+			<version>${project.httpclient.version}</version>
 		    <exclusions>
 		      <exclusion>
 			    <groupId>commons-codec</groupId>
@@ -531,11 +498,6 @@
 			<artifactId>httpmime</artifactId>
 			<version>4.2.2</version>
 		</dependency>
-<!--		<dependency> < !- - needed by spring-security odk-SNAPSHOT - ->
-			<groupId>com.ibm.icu</groupId>
-			<artifactId>icu4j</artifactId>
-			<version>3.4.4</version>
-		</dependency> -->
 		<dependency>
 		  <groupId>com.fasterxml.jackson.core</groupId>
 		  <artifactId>jackson-annotations</artifactId>
@@ -621,7 +583,7 @@
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
-			<version>1.3.9</version>
+			<version>${project.jsr305.version}</version>
 		</dependency>
 		<dependency>
 		  <groupId>net.sf.kxml</groupId>
@@ -665,25 +627,6 @@
 			<version>1.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.openid4java</groupId>
-			<artifactId>openid4java-nodeps</artifactId>
-			<version>${openid4java.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>jcl-over-slf4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-				  <groupId>log4j</groupId>
-				  <artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 		  <groupId>postgresql</groupId>
@@ -853,25 +796,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-openid</artifactId>
-			<version>${org.springframework.security.openid.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>jcl-over-slf4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-				  <groupId>log4j</groupId>
-				  <artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 			<version>${org.springframework.security.version}</version>
 		</dependency>
@@ -885,7 +809,7 @@
 		  <artifactId>woodstox-core-asl</artifactId>
 		  <version>${org.codehaus.woodstox.version}</version>
 		</dependency>
-		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
+		<dependency> <!-- needed by spring-security -->
 			<groupId>xalan</groupId>
 			<artifactId>xalan</artifactId>
 			<version>2.7.1</version>	
@@ -906,7 +830,7 @@
 		  <artifactId>xml-apis</artifactId>
 		  <version>1.4.01</version>
 		</dependency>
-		<dependency> <!-- needed by spring-security odk-SNAPSHOT -->
+		<dependency> <!-- needed by spring-security -->
 			<groupId>org.apache.santuario</groupId>
 			<artifactId>xmlsec</artifactId>
 			<version>1.5.1</version>
@@ -926,17 +850,6 @@
 			<artifactId>xpp3</artifactId>
 			<version>1.1.4c</version>
 		</dependency>
-        <!-- for odktables api -->
-		<!-- <dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-			<version>${org.apache.cxf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-core</artifactId>
-			<version>${org.apache.cxf.version}</version>
-		</dependency> -->
 		<dependency>
 			<groupId>org.apache.wink</groupId>
 			<artifactId>wink-common</artifactId>
@@ -1011,6 +924,12 @@
 		<dependency>
 		  <groupId>org.seleniumhq.selenium</groupId>
 		  <artifactId>selenium-java</artifactId>
+		  <version>${org.seleniumhq.version}</version>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+	      <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-leg-rc</artifactId>
 		  <version>${org.seleniumhq.version}</version>
 		  <scope>test</scope>
 		  <exclusions>
@@ -1095,13 +1014,13 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven.compiler.plugin.version}</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
 					<executions>
 						<execution>
 							<id>compile-java-source</id>
-							<configuration>
-								<source>1.6</source>
-								<target>1.6</target>
-							</configuration>
 							<phase>compile</phase>
 							<goals>
 								<goal>compile</goal>
@@ -1176,7 +1095,7 @@
 							<id>gwt-javascript</id>
 							<!-- used in aggregate-gae, aggregate-postgres, aggregate-mysql -->
 							<configuration>
-							  <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+							  <extraJvmArgs>-Xmx512M -Xss30M</extraJvmArgs>
 							</configuration>
 							<goals>
 							  <goal>compile</goal>
@@ -1363,7 +1282,7 @@
 						<configuration>
 						  <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
 						  <additionalClasspathElements>
-							<additionalClasspathElement>${selenium.home}/selenium-java-2.42.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.home}/selenium-java-2.45.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/bsh-1.3.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
@@ -1372,29 +1291,29 @@
 							<additionalClasspathElement>${selenium.libs}/commons-exec-1.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-io-2.4.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-jxpath-1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/commons-lang3-3.2.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/commons-lang3-3.3.2.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/commons-logging-1.1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.11.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/guava-15.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/cssparser-0.9.14.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/gson-2.3.1.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/guava-18.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-core-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/hamcrest-library-1.3.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-2.14.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.14.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpclient-4.3.2.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpcore-4.3.1.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/httpmime-4.3.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-2.15.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.15.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpclient-4.3.6.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpcore-4.3.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/httpmime-4.3.6.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/ini4j-0.5.2.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jcommander-1.29.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jetty-websocket-8.1.8.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jna-3.4.0.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/jna-platform-3.4.0.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/json-20080701.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/junit-dep-4.11.jar</additionalClasspathElement>
 							<additionalClasspathElement>${localRepository}/junit/junit/${junit.version}/junit-${junit.version}.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.20.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/nekohtml-1.9.21.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/netty-3.5.7.Final.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/operadriver-1.5.jar</additionalClasspathElement>
-							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.1.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.2.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
 							<additionalClasspathElement>${selenium.libs}/serializer-2.7.1.jar</additionalClasspathElement>
@@ -1441,6 +1360,7 @@
 					  <wait>false</wait>
 					  <container>
 						<containerId>tomcat7x</containerId>
+						<output>${project.build.directory}/cargo-tree/tomcat7x/tomcat.log</output>
 						<log>${project.build.directory}/cargo-tree/tomcat7x/cargo.log</log>
 						<artifactInstaller>
 						  <groupId>org.apache.tomcat</groupId>
@@ -1570,8 +1490,8 @@
 		</pluginManagement>
 	</build>
 	<ciManagement>
-		<system>hudson</system>
-		<url>opendatakit.cs.washington.edu/jenkins</url>
+		<system>jenkins</system>
+		<url>http://cwe.cs.washington.edu:8081/</url>
 		<notifiers>
 		  <notifier>
 			<type>mail</type>
