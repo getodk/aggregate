@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="it"/>
 	<classpathentry excluding="org/opendatakit/common/testing/gae/*" kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/activation-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/aopalliance-1.0.jar"/>
@@ -17,8 +16,6 @@
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-1.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-client-meta-1.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-core-1.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-2.0-1.47.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-maps-meta-2.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-media-1.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-3.0-1.47.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/gdata-spreadsheet-meta-3.0-1.47.1.jar"/>

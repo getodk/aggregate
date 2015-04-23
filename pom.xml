@@ -323,20 +323,6 @@
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gdata</groupId>
-		  <artifactId>gdata-maps-2.0</artifactId>
-		  <version>${google.gdata.version}</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-		  <groupId>com.google.gdata</groupId>
-		  <artifactId>gdata-maps-meta-2.0</artifactId>
-		  <version>${google.gdata.version}</version>
-		  <type>jar</type>
-		  <scope>compile</scope>
-		</dependency>
-		<dependency>
-		  <groupId>com.google.gdata</groupId>
 		  <artifactId>gdata-media-1.0</artifactId>
 		  <version>${google.gdata.version}</version>
 		  <type>jar</type>
