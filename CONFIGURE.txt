@@ -346,9 +346,9 @@ To run, just cd to this directory and type 'ant'
 
 See the src/main/libs/readme.txt for information about these jars.
 
-(8a) Download and install Firefox ESR 24. This is a slowly-upgrading version
-of Firefox, since the upgrade cycle of Firefox is too rapid for Selenium
-(our UI testing framework) to keep up.
+(8a) Download and install Firefox. This build works for Firefox 37.
+Firefox often changes and selenium plays catch-up. You might need 
+to update selenium or back-rev Firefox for UI testing to work.
 
 (8) Download tomcat 6 and selenium java client for full-stack integration / web UI tests.
 
