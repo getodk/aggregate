@@ -28,10 +28,13 @@
 	</target>
 	
 	<target name="dist_gdata">
-		<get src="http://gdata-java-client.googlecode.com/files/gdata-src.java-1.47.1.zip" 
+		<!-- github does not have the same content in the pre-built java/lib 
+		     directory as does googlecode. For now, use a copy of the googlecode
+			 src zip to extract and install the jars that we need -->
+		<!-- <get src="https://github.com/google/gdata-java-client/archive/master.zip" 
 			dest="gdata-src.java-1.47.1.zip"
-			skipexisting="true"/>
-		<unzip src="gdata-src.java-1.47.1.zip" dest="gdata-src.java-1.47.1" overwrite="true"/>
+			skipexisting="true"/> -->
+		<unzip src="googlecode-gdata-src.java-1.47.1.zip" dest="gdata-src.java-1.47.1" overwrite="true"/>
 		<!-- do not know how to operate within a subdirectory, so force the gdata jars into this one -->
 		<copy todir="." overwrite="true" force="true">
 			<fileset dir="gdata-src.java-1.47.1/gdata/java/lib"/>

@@ -74,7 +74,7 @@ public class Oauth2AuthenticationToken extends AbstractAuthenticationToken {
   //~ Methods ========================================================================================================
 
   /**
-   * Returns 'null' always, as no credentials are processed by the OpenID provider.
+   * Returns 'null' always, as no credentials are processed by the OAuth2 provider.
    * @see org.springframework.security.core.Authentication#getCredentials()
    */
   public Object getCredentials() {

@@ -27,6 +27,11 @@
       <xs:element type="ns:settingType" name="setting" maxOccurs="unbounded" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="beta-settingsType">
+    <xs:sequence>
+      <xs:element type="ns:settingType" name="setting" maxOccurs="unbounded" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="settingType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
@@ -57,7 +62,11 @@
       <xs:element type="ns:resource-filesType" name="resource-files" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="ns:system-propertiesType" name="system-properties" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="ns:vm-settingsType" name="vm-settings" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
+      <xs:element type="ns:beta-settingsType" name="beta-settings" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="ns:vm-health-checkType" name="vm-health-check" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
+      <xs:element type="ns:vm-health-checkType" name="health-check" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
+      <xs:element type="ns:resources-type" name="resources" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
+      <xs:element type="ns:network-type" name="network" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="ns:env-variablesType" name="env-variables" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="xs:boolean" name="ssl-enabled" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
       <xs:element type="xs:boolean" name="sessions-enabled" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
@@ -116,6 +125,23 @@
       <xs:element type="xs:string" name="min-idle-instances" minOccurs="0"/>
       <xs:element type="xs:string" name="max-idle-instances" minOccurs="0"/>
       <xs:element type="xs:string" name="max-concurrent-requests" minOccurs="0"/>
+      <xs:element type="xs:positiveInteger" name="min-num-instances" minOccurs="0"/>
+      <xs:element type="xs:positiveInteger" name="max-num-instances" minOccurs="0"/>
+      <xs:element type="xs:positiveInteger" name="cool-down-period-sec" minOccurs="0"/>
+      <xs:element type="ns:cpu-utilization-type" name="cpu-utilization" minOccurs="0" xmlns:ns="http://appengine.google.com/ns/1.0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="cpu-utilization-type">
+    <xs:all>
+      <xs:element name="target-utilization" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:decimal">
+            <xs:minExclusive value="0"/>
+            <xs:maxInclusive value="1"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element type="xs:positiveInteger" name="aggregation-window-length-sec" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="vm-health-checkType">
@@ -127,6 +153,19 @@
       <xs:element type="xs:unsignedInt" name="healthy-threshold" minOccurs="0"/>
       <xs:element type="xs:unsignedInt" name="restart-threshold" minOccurs="0"/>
       <xs:element type="xs:string" name="host" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="resources-type">
+    <xs:all>
+      <xs:element type="xs:double" name="cpu" minOccurs="0"/>
+      <xs:element type="xs:double" name="memory-gb" minOccurs="0"/>
+      <xs:element type="xs:unsignedInt" name="disk-size-gb" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="network-type">
+    <xs:all>
+      <xs:element type="xs:string" name="forwarded-port" minOccurs="0"/>
+      <xs:element type="xs:string" name="instance-tag" minOccurs="0"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="manual-scaling-type">

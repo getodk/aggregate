@@ -54,17 +54,17 @@ import org.springframework.security.authentication.encoding.MessageDigestPasswor
  * <ul>
  * <li>LOCAL_USERNAME + DIGEST_AUTH_PASSWORD</li>
  * <li>LOCAL_USERNAME + BASIC_AUTH_PASSWORD + BASIC_AUTH_SALT</li>
- * <li>OPENID_EMAIL</li>
+ * <li>OAUTH2_EMAIL</li>
  * </ul>
  * <p>
  * The format of LOCAL_USERNAME is any string less than 80 characters. The
- * format of OPENID_EMAIL must be of the form mailto:uid@domain.name and less
+ * format of OAUTH2_EMAIL must be of the form mailto:uid@domain.name and less
  * than 80 characters.
  * <p>
  * The LOCAL_USERNAME credential is used by ODK Collect communications. (you can
  * configure the server to use either digest or basic auth). Note that
- * basic-auth credentials can be used for forms-based auth. The OPENID_EMAIL is
- * used for openid authentications.
+ * basic-auth credentials can be used for forms-based auth. The OAUTH2_EMAIL is
+ * used for OAuth2 authentications.
  * <p>
  * Records in this table are never deleted. Instead, they are marked with
  * IS_REMOVED = true. This allows audit tracking back to the username. Once
@@ -89,7 +89,10 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
       DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED); 
 
   // Unique key (disregarding removed) or null
-  private static final DataField OPENID_EMAIL = new DataField("OPENID_EMAIL",
+  // NOTE: the column name in the database is not changed. This was 
+  // used for OpenID authentication originally, but now is used for 
+  // OAuth2 authentication.
+  private static final DataField OAUTH2_EMAIL = new DataField("OPENID_EMAIL",
       DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED);
 
   private static final DataField FULL_NAME = new DataField("FULL_NAME", DataField.DataType.STRING,
@@ -116,7 +119,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
   protected RegisteredUsersTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(LOCAL_USERNAME);
-    fieldList.add(OPENID_EMAIL);
+    fieldList.add(OAUTH2_EMAIL);
     fieldList.add(FULL_NAME);
     fieldList.add(BASIC_AUTH_PASSWORD);
     fieldList.add(BASIC_AUTH_SALT);
@@ -167,11 +170,11 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
   }
 
   public String getEmail() {
-    return getStringField(OPENID_EMAIL);
+    return getStringField(OAUTH2_EMAIL);
   }
 
   public void setEmail(String value) {
-    if (!setStringField(OPENID_EMAIL, value)) {
+    if (!setStringField(OAUTH2_EMAIL, value)) {
       throw new IllegalStateException("overflow email");
     }
   }
@@ -381,8 +384,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     Query q = RegisteredUsersTable.createQuery(datastore,
         "RegisteredUsersTable.getUniqueUserByEmail", user);
     // already applied: q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
-    q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
-    q.addSort(OPENID_EMAIL, Direction.ASCENDING); // GAE work-around
+    q.addFilter(OAUTH2_EMAIL, FilterOperation.EQUAL, email);
+    q.addSort(OAUTH2_EMAIL, Direction.ASCENDING); // GAE work-around
     q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
     @SuppressWarnings("unchecked")
     List<RegisteredUsersTable> l = (List<RegisteredUsersTable>) q.executeQuery();
@@ -398,8 +401,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     User user = userService.getDaemonAccountUser();
     RegisteredUsersTable prototype = assertRelation(datastore, user);
     Query q = datastore.createQuery(prototype, "RegisteredUsersTable.getUserByEmail", user);
-    q.addFilter(OPENID_EMAIL, FilterOperation.EQUAL, email);
-    q.addSort(OPENID_EMAIL, Direction.ASCENDING); // GAE work-around
+    q.addFilter(OAUTH2_EMAIL, FilterOperation.EQUAL, email);
+    q.addSort(OAUTH2_EMAIL, Direction.ASCENDING); // GAE work-around
     q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
     q.addSort(prototype.lastUpdateDate, Direction.DESCENDING);
     @SuppressWarnings("unchecked")
@@ -416,7 +419,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
         // flag the duplicate as removed...
         tt.setIsRemoved(true);
         datastore.putEntity(tt, user);
-        logger.warn("duplicate OpenId email records for " + email + " - marking as removed: "
+        logger.warn("duplicate OAuth2 email records for " + email + " - marking as removed: "
             + tt.getUri());
       }
       l.clear();
@@ -432,16 +435,16 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 
   /**
    * If the given username is not present, this will create a record for the
-   * user, marking them as active (able to log in via OpenID or Aggregate
+   * user, marking them as active (able to log in via OAuth2 or Aggregate
    * password). Otherwise, this will just update the nickname and e-mail address
    * of the existing record and return it.</p>
    * <p>
    * NOTE: Once a user is defined, changing the active status of the user (their
-   * ability to log in using OpenID or their Aggregate password) must be done as
+   * ability to log in using OAuth2 or their Aggregate password) must be done as
    * a separate step.
    * </p>
    * <p>
-   * NOTE: users won't be able to log in with OpenID if no e-mail address is
+   * NOTE: users won't be able to log in with OAuth2 if no e-mail address is
    * supplied; and they won't be able to log in with an Aggregate password until
    * one is defined.
    * </p>

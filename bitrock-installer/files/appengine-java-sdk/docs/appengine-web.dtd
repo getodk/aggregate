@@ -18,11 +18,19 @@
 <!ELEMENT module (#PCDATA)>
 <!ELEMENT instance-class (#PCDATA)>
 <!ELEMENT automatic-scaling (min-pending-latency?, max-pending-latency?,
-                              min-idle-instances?, max-idle-instances?)>
+                              min-idle-instances?, max-idle-instances?,
+                              min-num-instances?, max-num-instances?,
+                              cool-down-period-sec?, cpu-utilization?)>
 <!ELEMENT min-pending-latency (#PCDATA)>
 <!ELEMENT max-pending-latency (#PCDATA)>
 <!ELEMENT min-idle-instances (#PCDATA)>
 <!ELEMENT max-idle-instances (#PCDATA)>
+<!ELEMENT min-num-instances (#PCDATA)>
+<!ELEMENT max-num-instances (#PCDATA)>
+<!ELEMENT cool-down-period-sec (#PCDATA)>
+<!ELEMENT cpu-utilization (target-utilization?, aggregation-window-length-sec?)>
+<!ELEMENT target-utilization (#PCDATA)>
+<!ELEMENT aggregation-window-length-sec (#PCDATA)>
 <!ELEMENT vm-health-check (enable-health-check?, check-interval-sec?,
                            timeout-sec?, unhealthy-threshold?,
                            healthy-threshold?, restart-threshold?, host?)>

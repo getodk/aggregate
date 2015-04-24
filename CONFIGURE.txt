@@ -70,17 +70,17 @@ Windows / Preferences:
 
   Google / App Engine:
   
-    Be sure there is an App Engine 1.9.7 or higher SDK defined.
-	If the default App Engine version is not 1.9.7, you may need to 
+    Be sure there is an App Engine 1.9.18 or higher SDK defined.
+	If the default App Engine version is not 1.9.18, you may need to 
 	tweak with the project settings to get the newer jars to be added.
 
   Google / Web Toolkit:
   
-    Be sure there is a WebToolkit SDK defined 2.6.1 or higher.
+    Be sure there is a WebToolkit SDK defined 2.7.0 or higher.
 	The default GWT version should match that in the maven 
-	pom.xml (currently 2.6.1).  The GWT library is installed as 
+	pom.xml (currently 2.7.0).  The GWT library is installed as 
 	part of the plugin and can be found in:
-	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.6.1...\gwt-2.6.1
+	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.7.0...\gwt-2.7.0
 
 File / Import:
 
@@ -152,61 +152,63 @@ Running or Debugging under Eclipse
 
 Select eclipse-aggregate-gae project.
 
-The first time you run or debug, you need to increase the JVM sizes
+Launch ODK Aggregate under the debugger with 'Debug As' choosing
+'Web Application (GWT Super Dev Mode)'
+
+This will fail with an Out-of-Memory error.
+
+Stop the server (click on the small red square on the 'Development Mode' tab).
+
+Repeat for 'Run As'
+
+Now, to increase the JVM size:
+
+For each of these configuration screens:
 
 Run As 'Run Configurations...'
 Debug As 'Debug Configurations...'
+
+Open the above dialog (repeat this for each of these)
 
 Choose 'Web Application'
 
 Open this up, and select 'index.html'
 
-On the '(X)= Arguments' tab, replace the '-Xmx512m' at the front of the 'VM Arguments' section with:
+On the '(X)= Arguments' tab,
+
+under the 'Program Arguments' section, add an argument with whatever
+hostname or IP address you have configured in your 
+security.properties file. i.e., if that IP is 192.168.10.2, you would
+add:
+ 
+ -bindAddress 192.168.10.2 
+ 
+replace the '-Xmx512m' at the front of the 'VM Arguments' section with:
 
 -Xmx2048m -XX:MaxPermSize=1536m 
 
-Click 'Run' or 'Debug'
+Click 'Apply'
 
-This should start up the server.
+Now close and repeat for the other configuration.
 
-GWT UI debugging needs to be done on a Chrome browser.
+To Debug or Run the application, you will then:
+
+choose 'Debug As' or 'Run As', 
+choose 'Web Application (GWT Super Dev Mode)'
+choose 'index.html' 
+
+And it will use this revised configuration.
+
+See the documentation for GWT SuperDevMode to understand how to use 
+that execution mode. GWT UI debugging generally needs to be done on
+a Chrome browser.
 
 ==================================
 Debugging GWT UI in Chrome Browser
 ==================================
 
-Open a Chrome browser
-
-Go to Tools / Extensions
-
-Choose to 'Get more extensions'
-
-Search for 'GWT Developer Plugin' and install it.
-
-Ensure that it is enabled.
-
-Now paste in the URL from Eclipse's 'Development Mode' tab into 
-your browser. This will typically be:
-
-http://127.0.0.1:8888/index.html?gwt-server=127.0.0.1:9997
-
-This will redirect to the login screen. After logging in
-you will then be redirected to the Aggregate.html page and the
-main UI.
-
-At this point, the query string, ?gwt-server=127.0.0.1:9997
-may drop off. This will disconnect the UI rendering from the 
-client Java code, causing the rendering to fall back to the
-last manually compiled GWT code. Be on the alert for this.
-If it happens, just add the query string back into the URL 
-before the hash (#) mark.
-
-The URL should show have a red GWT toolbox to its right. If this
-ever changes to gray, you need to click on the toolbox and allow
-the new hostname and port to access GWT. If you specify an IP address
-or hostname in the security.properties file, you generally need to 
-do this (you would need to do that in order for a device to reach
-your server).
+See the documentation for running GWT SuperDevMode
+e.g., http://www.gwtproject.org/articles/superdevmode.html
 
 =====================
 MySQL Eclipse Setup
