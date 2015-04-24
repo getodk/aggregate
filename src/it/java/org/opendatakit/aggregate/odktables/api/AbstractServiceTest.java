@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -42,7 +42,7 @@ public abstract class AbstractServiceTest {
     this.rt.setErrorHandler(new ErrorHandler());
     List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 
-    converters.add(new XmlAwareFormHttpMessageConverter());
+    converters.add(new AllEncompassingFormHttpMessageConverter());
     this.rt.setMessageConverters(converters);
 
     // HttpHeaders

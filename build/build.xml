@@ -14,15 +14,15 @@
 	</target>
 	
 	<target name="dist">
-		<get src="http://selenium-release.storage.googleapis.com/2.42/selenium-java-2.42.2.zip" 
-			dest="selenium-java-2.42.2.zip"
+		<get src="http://selenium-release.storage.googleapis.com/2.45/selenium-java-2.45.0.zip" 
+			dest="selenium-java-2.45.0.zip"
 			skipexisting="true"/>
-		<unzip src="selenium-java-2.42.2.zip" dest="selenium-java-2.42.2" overwrite="false"/>
+		<unzip src="selenium-java-2.45.0.zip" dest="selenium-java-2.45.0" overwrite="false"/>
 		
-		<get src="https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.7.zip" 
-			dest="appengine-java-sdk-1.9.7.zip"
+		<get src="https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.18.zip" 
+			dest="appengine-java-sdk-1.9.18.zip"
 			skipexisting="true"/>
-		<unzip src="appengine-java-sdk-1.9.7.zip" dest="appengine-java-sdk-1.9.7" overwrite="false"/>
+		<unzip src="appengine-java-sdk-1.9.18.zip" dest="appengine-java-sdk-1.9.18" overwrite="false"/>
 	</target>
   	
 </project>

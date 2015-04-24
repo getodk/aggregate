@@ -504,12 +504,12 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>openIdLoginPage</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.servlet.OpenIdLoginPageServlet</servlet-class>
+        <servlet-name>multimodeLoginPage</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.MultimodeLoginPageServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>openIdLoginPage</servlet-name>
-        <url-pattern>/openid_login.html</url-pattern>
+        <servlet-name>multimodeLoginPage</servlet-name>
+        <url-pattern>/multimode_login.html</url-pattern>
     </servlet-mapping>
 
     <!-- servlet for odktables api -->

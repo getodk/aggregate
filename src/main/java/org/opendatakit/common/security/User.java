@@ -42,7 +42,7 @@ public interface User {
 	
 	/**
 	 * 
-	 * @return user@domain.com if an OpenID authenticated user.  Otherwise null.
+	 * @return user@domain.com if an OAuth2 authenticated user.  Otherwise null.
 	 */
 	public String getEmail();
 	
