@@ -37,7 +37,7 @@
 		<maven.surefire.plugin.version>2.16</maven.surefire.plugin.version>
 		<surefire.argLine>-Xms300m -Xmx3048m -XX:+UseParallelGC -XX:+UseParallelOldGC</surefire.argLine> <!-- need a huge JVM size for GAE datastore -->
 		<maven.failsafe.plugin.version>2.16</maven.failsafe.plugin.version>
-		<cargo.maven2.plugin.version>1.4.7</cargo.maven2.plugin.version>
+		<cargo.maven2.plugin.version>1.4.13</cargo.maven2.plugin.version>
 		<build.helper.maven.plugin.version>1.8</build.helper.maven.plugin.version>
 		<gwt.maven.plugin.version>2.7.0</gwt.maven.plugin.version>
 		<maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
@@ -75,16 +75,18 @@
 		
 		<!-- odk tables client libraries -->
 		<module>odk-tables-api</module>
+
 		<!-- aggregate-postgresql-specific -->
 		<module>aggregate-postgres</module>
+		<!-- aggregate-mysql-specific -->
+		<module>aggregate-mysql</module>
+		<!-- aggregate-gae-specific -->
+		<module>aggregate-gae</module>
+
 		<!-- aggregate-postgresql-specific -->
 		<module>postgres-unit-tests</module>
 		<!-- aggregate-mysql-specific -->
-		<module>aggregate-mysql</module>
-		<!-- aggregate-mysql-specific -->
 		<module>mysql-unit-tests</module>
-		<!-- aggregate-gae-specific -->
-		<module>aggregate-gae</module>
 		<!-- aggregate-gae-specific -->
 		<module>gae-unit-tests</module>
 	</modules>
@@ -99,63 +101,6 @@
 			<enabled>false</enabled>
 		  </snapshots>
 		</repository>
-		<!-- old main repository (maven-gae-plugin 0.9.6) -->
-		<!-- <repository>
-		  <id>old central</id>
-		  <name>Maven Repository Switchboard</name>
-		  <layout>default</layout>
-		  <url>http://repo1.maven.org/maven2</url>
-		  <snapshots>
-			<enabled>false</enabled>
-		  </snapshots>
-		</repository> -->
-		<!-- java.net maven repo
-		<repository>
-		<id>maven2-repository.java.net</id>
-			<name>Java.net Repository for Maven</name>
-			<url>http://download.java.net/maven/2/</url>
-			<layout>default</layout>
-		</repository> -->
-		<!-- spring framework repository -->
-        <!-- <repository>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <id>spring-central</id>
-          <name>libs-release-remote</name>
-          <url>https://repo.springsource.org/libs-release-remote</url>
-        </repository>
-        <repository>
-          <snapshots />
-          <id>snapshots</id>
-          <name>libs-snapshot</name>
-          <url>https://repo.springsource.org/libs-snapshot</url>
-        </repository> -->
-		<!-- contains the gdata apis -->
-		<repository>
-			<id>mandubian-mvn</id>
-			<url>http://mandubian-mvn.googlecode.com/svn/trunk/mandubian-mvn/repository</url>
-		</repository>
-		<!-- <repository>
-		  <id>codehaus-snapshots</id>
-		  <url>https://nexus.codehaus.org/snapshots/</url>
-		  <snapshots>
-			<enabled>true</enabled>
-		    <updatePolicy>daily</updatePolicy>
-		  </snapshots>
-		  <releases>
-			<enabled>false</enabled>
-		  </releases>
-		</repository> -->
-		<!-- contains the jai imageio standalone code -->
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>mygrid-repository</id>
-            <name>myGrid Repository</name>
-            <url>http://www.mygrid.org.uk/maven/repository</url>
-        </repository>
 	</repositories>
 	<pluginRepositories>
 		<!-- main repository -->
@@ -168,30 +113,6 @@
 			<enabled>false</enabled>
 		  </snapshots>
 		</pluginRepository>
-		<!-- old main repository (maven-gae-plugin) -->
-<!--		<pluginRepository>
-		  <id>old central</id>
-		  <name>Maven Repository Switchboard</name>
-		  <layout>default</layout>
-		  <url>http://repo1.maven.org/maven2</url>
-		  <snapshots>
-			<enabled>false</enabled>
-		  </snapshots>
-		  <releases>
-			<updatePolicy>never</updatePolicy>
-		  </releases>
-		</pluginRepository> -->
-		<!-- <pluginRepository>
-		  <id>codehaus-snapshots</id>
-		  <url>https://nexus.codehaus.org/snapshots/</url>
-		  <snapshots>
-			<enabled>true</enabled>
-		    <updatePolicy>daily</updatePolicy>
-		  </snapshots>
-		  <releases>
-			<enabled>false</enabled>
-		  </releases>
-		</pluginRepository> -->
  	    <pluginRepository>
           <snapshots>
             <enabled>false</enabled>
@@ -200,21 +121,6 @@
 		  <name>sonatype-plugins-release</name>
 		  <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 	    </pluginRepository>
-		<!-- spring framework plugnins -->
-        <!-- <pluginRepository>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <id>spring-central</id>
-          <name>plugins-release</name>
-          <url>https://repo.springsource.org/plugins-release</url>
-        </pluginRepository>
-        <pluginRepository>
-          <snapshots />
-          <id>spring-snapshots</id>
-          <name>plugins-snapshot</name>
-          <url>https://repo.springsource.org/plugins-snapshot</url>
-        </pluginRepository> -->
 	</pluginRepositories>
 	<dependencies>
 		<dependency>
@@ -445,14 +351,14 @@
 		<dependency>
 		  <groupId>com.googlecode.gwt-google-maps-v3</groupId>
 		  <artifactId>gwt-google-maps-v3</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>snapshot</version>
+		  <version>1.0.1</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 		  <groupId>com.google.gwt.google-apis</groupId>
 		  <artifactId>gwt-visualization</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>1.1.1</version>
+		  <version>1.1.2</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
@@ -553,6 +459,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>com.github.jai-imageio</groupId>
+			<artifactId>jai-imageio-core</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+		<dependency>
 		  <groupId>org.javarosa</groupId>
 		  <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
 		  <version>2015-04-17</version>
@@ -603,14 +514,14 @@
 		<dependency>
 		  <groupId>org.opendatakit</groupId>
 		  <artifactId>odk-httpclient-gae</artifactId> <!-- see src/main/libs/readme.txt -->
-		  <version>1.1.1</version>
+		  <version>1.1.2</version>
 		  <type>jar</type>
 		  <scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.opendatakit</groupId>
 			<artifactId>odk-tomcatutil</artifactId> <!-- see src/main/libs/readme.txt -->
-			<version>1.0</version>
+			<version>1.0.1</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -1122,8 +1033,6 @@
 										<exclude name="WEB-INF/lib/**" />
 									</fileset>
 								</copy>
-								<copy todir="${project.basedir}/src/main/webapp/WEB-INF/lib" 
-									file="${toplevel.directory}/src/main/libs/jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar" />
 							  </target>
 							</configuration>
 							<goals>
@@ -1345,6 +1254,7 @@
 					<configuration>
 					  <wait>false</wait>
 					  <container>
+					    <timeout>180000</timeout>
 						<containerId>tomcat7x</containerId>
 						<output>${project.build.directory}/cargo-tree/tomcat7x/tomcat.log</output>
 						<log>${project.build.directory}/cargo-tree/tomcat7x/cargo.log</log>
