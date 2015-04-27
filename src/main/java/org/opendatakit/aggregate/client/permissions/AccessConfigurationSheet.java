@@ -68,8 +68,8 @@ import com.google.gwt.view.client.ListDataProvider;
 public class AccessConfigurationSheet extends Composite {
 
   private static final String NOT_VALID_EMAIL = "Username is not a valid Email address.\n\n"
-      + "Usernames for Google accounts must be\n" + "Email addresses that Google OpenID can\n"
-      + "authenticate.";
+      + "Usernames for Google accounts must be\n" + "Email addresses that Google can\n"
+      + "authenticate (Google login is not supported at this time).";
 
   private static final ArrayList<String> userType;
   private static final String ACCOUNT_TYPE_ODK = "ODK";

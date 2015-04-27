@@ -28,7 +28,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 /**
  * This is a trivial stub service that returns a User object with the 
  * supplied login.  When wrapped by the DelegatingUserDetailsService,
- * it is used by the OpenIDAuthenticationProvider for OpenID identities.
+ * it is used by the various token-based providers for their identities.
+ * e.g., OAuth2AuthenticationProvider and OutOfBandAuthenticationProvider.
  * 
  * @author mitchellsundt@gmail.com
  *

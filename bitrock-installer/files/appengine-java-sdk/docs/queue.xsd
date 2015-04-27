@@ -78,7 +78,7 @@
 
   <xs:simpleType name="target-Type">
     <xs:restriction base="xs:string">
-      <xs:pattern value="[a-z\d\-]{1,100}"/>
+      <xs:pattern value="[a-z\d\-\.]{1,100}"/>
     </xs:restriction>
   </xs:simpleType>
 

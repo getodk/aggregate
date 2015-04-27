@@ -28,7 +28,7 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Simple servlet used to clear the session cookie of a client and present the
- * openid_login.html page to them. This allows for an anonymous user to choose
+ * multimode_login.html page to them. This allows for an anonymous user to choose
  * to provide credentials.
  * 
  * @author mitchellsundt@gmail.com
@@ -68,9 +68,9 @@ public class ClearSessionThenLoginServlet extends ServletUtilBase {
     String newUrl;
     if (isAnon) {
       // anonymous user -- go to the login page...
-      newUrl = cc.getWebApplicationURL("openid_login.html");
+      newUrl = cc.getWebApplicationURL("multimode_login.html");
     } else {
-      // we are logged in via openid or basic or digest auth.
+      // we are logged in via token-based or basic or digest auth.
       // redirect to Spring's logout url...
       newUrl = cc.getWebApplicationURL(cc.getUserService().createLogoutURL());
     }

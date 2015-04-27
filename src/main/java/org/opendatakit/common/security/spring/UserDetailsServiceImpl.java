@@ -185,8 +185,8 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 							"User " + name + " does not have a password configured. You must close and re-open your browser to clear this error.");
 				}
 			} else {
-				// openid or token (oauth or oauth2)...
-				// there is no password for an openid credential
+				// OAuth2 token...
+				// there is no password for an OAuth2 credential
 				if ( passwordType != PasswordType.Random ) {
 					throw new AuthenticationCredentialsNotFoundException(
 							"Password type " + passwordType.toString() + " cannot be interpretted");

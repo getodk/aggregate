@@ -245,7 +245,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
   }
 
   private void updateUIoptions() {
-    ChartType selected = chartType.getSelectedValue();
+    ChartType selected = chartType.getSelectedEnumValue();
     executeButton.setHTML(selected.getButtonText());
     if (selected.equals(ChartType.MAP)) {
       typeControlBar.setHTML(0, COLUMN_TEXT, GPS_TXT);
@@ -552,7 +552,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
       }
 
       Widget chart;
-      switch (chartType.getSelectedValue()) {
+      switch (chartType.getSelectedEnumValue()) {
       case MAP:
         chart = createMap();
         break;
