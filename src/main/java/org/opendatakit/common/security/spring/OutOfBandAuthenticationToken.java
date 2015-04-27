@@ -24,6 +24,7 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
 
 /**
  * Authentication token returned when an out-of-band user identity is processed.
+ * Structure liberally copied from Spring OpenId and Oauth2 authentication token classes.
  * These are considered token-based authentications.
  * 
  * @author mitchellsundt@gmail.com
@@ -48,10 +49,10 @@ public class OutOfBandAuthenticationToken extends AbstractAuthenticationToken {
   }
 
   /**
-   * Created by the <tt>OpenIDAuthenticationProvider</tt> on successful authentication.
+   * Created by the <tt>OutOfBandAuthenticationProvider</tt> on successful authentication.
    *
    * @param principal usually the <tt>UserDetails</tt> returned by the the configured <tt>UserDetailsService</tt>
-   * used by the <tt>OpenIDAuthenticationProvider</tt>.
+   * used by the <tt>OutOfBandAuthenticationProvider</tt>.
    *
    */
   public OutOfBandAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities,
@@ -66,7 +67,7 @@ public class OutOfBandAuthenticationToken extends AbstractAuthenticationToken {
   //~ Methods ========================================================================================================
 
   /**
-   * Returns 'null' always, as no credentials are processed by the OpenID provider.
+   * Returns 'null' always, as no credentials are processed by the OutOfBand provider.
    * @see org.springframework.security.core.Authentication#getCredentials()
    */
   public Object getCredentials() {

@@ -3,6 +3,95 @@ All rights reserved.
 
 App Engine Java SDK - Release Notes
 
+Version 1.9.18
+=============
+- Fixed a bug in the Task Queue Java API where TaskOptions.removeParam(String)
+  was using the wrong operator to compare strings.
+- Fixed a bug wherein calling Recording.get() on a non-warmup request fails
+  to find RECORDING_KEY in current environment.
+- Fixed a bug to ensure App Engine Remote API supports go remote_api responses
+- An useful error message is displayed when Endpoints deployment fails for a
+  known reason
+- Fixed a bug wherein xsd schema did not agree with the SDKs interpretation of
+  appengine-web.xml
+- Fixed a bug wherein local dev server was ignoring <vm>true</vm> for ear-based
+  multi-module projects
+- Added a --noisy option to Java appcfg, to turn on all available logging.
+- Fixed the issue with the Dev App server failing to reproduce the production
+  environment behaviour when serving Google Storage files.
+    https://code.google.com/p/googleappengine/issues/detail?id=9000
+- Fixed the issue of Memcache API returning an unhelpful generic error message
+  when put() value is >1MB
+
+Version 1.9.17
+=============
+- Fixed an issue with Endpoints JSON-RPC calls failing in the Java
+  development server.
+    https://code.google.com/p/googleappengine/issues/detail?id=11414
+
+Version 1.9.15
+=============
+- Fixed an issue with Datastore stats not displaying entity counts.
+    https://code.google.com/p/googleappengine/issues/detail?id=9328
+
+Version 1.9.14
+=============
+- The URL Fetch service will always issue a GET request when it receives
+  and responds to a 302 response; previously it would preserve the original
+  HTTP method. This new behavior is in line with modern conventions (see
+  http://tools.ietf.org/html/rfc7231#section-6.4).  You can
+  use the final_url field of the Response object (or a similar object in other
+  APIs, see https://cloud.google.com/appengine/docs/java/urlfetch/) to
+  determine if your fetches are being redirected. If this change affects your
+  application, please contact our support team - even if you do not have a
+  support contract at
+  https://support.google.com/cloud/answer/3420056?hl=en&ref_topic=3473162.
+
+Version 1.9.13
+=============
+- No changes for 1.9.13
+
+Version 1.9.12
+=============
+- No changes for 1.9.12
+
+Version 1.9.11
+=============
+- Fixed an issue with the Search API in the SDK where listing indexes throws
+  NoSuchElementException when there are no indexes past the start key.
+    https://code.google.com/p/googleappengine/issues/detail?id=11185
+
+Version 1.9.10
+=============
+- The deprecated methods in the LogQuery class will no longer work for
+  deployed apps. For a full list of methods that have been deleted,
+  please see the LogQuery deprecation announcement in the 1.8.7 version of the
+  SDK.
+
+Version 1.9.9
+=============
+- The deprecated methods in the LogQuery class have been deleted in the SDK.
+  For a full list of methods that have been deleted, please see the LogQuery
+  deprecation announcement in the 1.8.7 version of the SDK. Please note that
+  these methods will no longer work for deployed apps starting on the next
+  release.
+- Fixed an issue with the SDK where having Lucene Core on the classpath
+  causes unit tests in the Search API to fail when assertions are enabled.
+    https://code.google.com/p/googleappengine/issues/detail?id=8451
+- Fixed an issue with the SDK where adding appengine-local-runtime.jar to
+  the classpath of the junit ant task causes an output warning each time it is
+  run.
+    https://code.google.com/p/googleappengine/issues/detail?id=9885
+- Fixed an issue with the Datastore Admin failing to load due to a
+  DeadlineExceededError when retrieving kinds.
+    https://code.google.com/p/googleappengine/issues/detail?id=11145
+
+Version 1.9.8
+=============
+- Fixed an issue with Datastore Admin not properly restoring backups if writes
+  are disabled.
+    https://code.google.com/p/googleappengine/issues/detail?id=11090
+
 Version 1.9.7
 =============
 - Added memcache historical hit ratio to Admin Console dashboard.

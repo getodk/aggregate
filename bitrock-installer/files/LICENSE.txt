@@ -1,5 +1,5 @@
 Copyright (C) 2009 Google Inc.
-Copyright (C) 2010-2013 University of Washington
+Copyright (C) 2010-2015 University of Washington
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
 not use this software except in compliance with the License. You may
@@ -19,20 +19,19 @@ http://www.oracle.com/technetwork/java/jaf11-139815.html           /standard ext
 http://aopalliance.sourceforge.net        /Public domain/
     aopalliance-1.0.jar
 http://code.google.com/appengine/         /Apache 2.0/
-    appengine-api-1.0-sdk-1.9.7.jar
-    appengine-api-labs-1.9.7.jar
-    appengine-jsr107cache-1.9.7.jar
+    appengine-api-1.0-sdk-1.9.18.jar
+    appengine-api-labs-1.9.18.jar
+    appengine-jsr107cache-1.9.18.jar
 http://www.eclipse.org/aspectj            /Eclipse Public License - v 1.0/
-    aspectjweaver-1.7.4.jar
-http://jolbox.com/                        /Apache 2.0/
-    bonecp-0.8.0.RELEASE.jar
+    aspectjweaver-1.8.5.jar
+http://www.mchange.com/projects/c3p0/     /Eclipse Public License - v 1.0/
+    c3p0-0.9.5.jar
 http://apache.org/                        /Apache 2.0/
     commons-codec-1.9.jar
-    commons-collections-3.2.1.jar
     commons-fileupload-1.3.1.jar
     commons-io-2.4.jar
     commons-lang-2.3.jar
-    commons-lang3-3.2.jar
+    commons-lang3-3.4.jar
     commons-logging-1.1.3.jar
 http://ehcache.org/                       /Apache 2.0/
     ehcache-2.8.3.jar
@@ -40,30 +39,27 @@ http://code.google.com/apis/gdata/docs/directory.html     /Apache 2.0/
     gdata-client-1.0-1.47.1.jar
     gdata-client-meta-1.0-1.47.1.jar
     gdata-core-1.0-1.47.1.jar
-    gdata-docs-3.0-1.47.1.jar
-    gdata-docs-meta-3.0-1.47.1.jar
-    gdata-maps-2.0-1.47.1.jar
-    gdata-maps-meta-2.0-1.47.1.jar
     gdata-media-1.0-1.47.1.jar
     gdata-spreadsheet-3.0-1.47.1.jar
     gdata-spreadsheet-meta-3.0-1.47.1.jar
-http://geronimo.apache.org/               /Apache 2.0/	
-	geronimo-annotation_1.1_spec-1.0.jar
-	geronimo-jaxrs_1.1_spec-1.0.jar
+http://geronimo.apache.org/               /Apache 2.0/    
+    geronimo-annotation_1.1_spec-1.0.jar
+    geronimo-jaxrs_1.1_spec-1.0.jar
 http://code.google.com/p/google-gin/      /Apache 2.0/
     gin-1.5.0.jar
 http://code.google.com/p/google-api-java-client/          /Apache 2.0/
-    google-api-client-1.18.0-rc.jar
+    google-api-client-1.20.0.jar
 https://developers.google.com/api-client-library/java/apis/drive/v2   /Apache 2.0/
-	google-api-services-drive-v2-rev131-1.18.0-rc.jar
+    google-api-services-drive-v2-rev167-1.20.0.jar
 https://code.google.com/p/google-http-java-client/        /Apache 2.0/
-    google-http-client-1.18.0-rc.jar
-    google-http-client-jackson2-1.18.0-rc.jar
-	google-http-client-jdo-1.18.0-rc.jar
+    google-http-client-1.20.0.jar
+    google-http-client-appengine-1.20.0.jar
+    google-http-client-jackson2-1.20.0.jar
+    google-http-client-jdo-1.20.0.jar
 http://code.google.com/p/google-oauth-java-client/        /Apache 2.0/
-    google-oauth-client-1.18.0-rc.jar
-	google-oauth-client-appengine-1.18.0-rc.jar
-	google-oauth-client-servlet-1.18.0-rc.jar
+    google-oauth-client-1.20.0.jar
+    google-oauth-client-appengine-1.20.0.jar
+    google-oauth-client-servlet-1.20.0.jar
 http://code.google.com/p/google-gson/     /Apache 2.0/
     gson-2.1.jar
 http://code.google.com/p/guava-libraries/                 /Apache 2.0/
@@ -72,100 +68,100 @@ http://code.google.com/p/google-guice/    /Apache 2.0/
     guice-3.0.jar
     guice-assistedinject-3.0-rc2.jar
 http://code.google.com/p/gwt-google-maps-v3/              /Apache 2.0/
-    gwt-google-maps-v3-snapshot.jar
+now at: https://code.google.com/p/opendatakit/source/browse?repo=components    
+    gwt-google-maps-v3-1.0.1.jar
     See the ODK Aggregate (Components) README.txt 
-    for how this is built; the jars available on
-    this google code site do not work.
+    for how this is built.
 http://code.google.com/webtoolkit/        /Apache 2.0/
-    gwt-servlet-2.6.1.jar
+    gwt-servlet-2.7.0.jar
 http://code.google.com/p/gwt-google-apis/                 /Apache 2.0/
-    gwt-visualization-1.1.1.jar
+now at: https://code.google.com/p/opendatakit/source/browse?repo=components    
+    gwt-visualization-1.1.2.jar
+    See the ODK Aggregate (Components) README.txt 
+    for how this is built.
 http://apache.org/                        /Apache 2.0/
     httpclient-4.2.2.jar
     httpcore-4.2.2.jar
     httpmime-4.2.2.jar
-http://site.icu-project.org/  /ICU License - ICU 1.8.1 and later/
-    icu4j-3.4.4.jar
 https://github.com/FasterXML/jackson     /Apache 2.0/
     jackson-annotations-2.4.1.jar
-	jackson-core-2.4.1.1.jar
-	jackson-databind-2.4.1.3.jar
-	jackson-databind-xml-2.4.1.jar
-	jackson-jaxrs-base-2.4.1.jar
-	jackson-jaxrs-json-provider-2.4.1.jar
-	jackson-jaxrs-xml-provider-2.4.1.jar
-	jackson-module-jaxb-annotations-2.4.1.jar
-https://github.com/stain/jai-imageio-core   /Modified BSD/ /Apache 2.0/
-    jai-imageio-core-standalone-1.2-pre-dr-b04-2010-04-30.jar
-    Copyright (c) 2005 Sun Microsystems, Inc. All Rights Reserved.
-    Modifications (c) Stian Soiland-Reyes <stian@soiland-reyes.com> 2010-04-30
+    jackson-core-2.4.1.1.jar
+    jackson-databind-2.4.1.3.jar
+    jackson-databind-xml-2.4.1.jar
+    jackson-jaxrs-base-2.4.1.jar
+    jackson-jaxrs-json-provider-2.4.1.jar
+    jackson-jaxrs-xml-provider-2.4.1.jar
+    jackson-module-jaxb-annotations-2.4.1.jar
+https://github.com/jai-imageio/jai-imageio-core   /3-clause BSD with nuclear disclaimer/
+    jai-imageio-core-1.30.jar
+    Copyright (c) 2005 Sun Microsystems, Inc.
+    Copyright © 2010-2014 University of Manchester
+    Copyright © 2010-2015 Stian Soiland-Reyes
+    Copyright © 2015 Peter Hull
+    All Rights Reserved.
 https://bitbucket.org/javarosa/javarosa/wiki/Home        /Apache 2.0/
-    javarosa-libraries-2014-04-29.jar
-    Modified from the core distribution.
-    see https://bitbucket.org/m.sundt/javarosa/src/
+now at: https://bitbucket.org/m.sundt/javarosa/src/
+    javarosa-libraries-2015-04-17.jar
 http://code.google.com/p/atinject/        /Apache 2.0/
     javax.inject-1.jar
 https://jaxb.java.net/                    /CDDL 1.1/
     jaxb-api-2.2.jar
-	jaxb-impl-2.2.1.1.jar
+    jaxb-impl-2.2.1.1.jar
 http://db.apache.org/jdo/index.html       /Apache 2.0/
-	jdo2-api-2.3-eb.jar
+    jdo2-api-2.3-eb.jar
 http://joda-time.sourceforge.net/         /Apache 2.0/
     joda-time-2.2.jar
 http://code.google.com/p/jsr-305/         /New BSD license/
     jsr305-1.3.9.jar
 http://kxml.sourceforge.net/kxml2/        /BSD license/
     kxml2-2.3.0.jar
+http://www.mchange.com/projects/c3p0/     /Eclipse Public License - v 1.0/
+    mchange-commons-java-0.2.9.jar
 http://nekohtml.sourceforge.net/          /Apache 2.0/
     nekohtml-1.9.15.jar
 http://opendatakit.org/                   /Apache 2.0/
-    odk-httpclient-gae-1.1.1.jar
-    odk-tomcatutil-1.0.jar
-http://code.google.com/p/openid4java/     /Apache 2.0/
-    Special build -- see ODK Aggregate Components
-    openid4java-nodeps-0.9.6.662.1.odk-SNAPSHOT.jar
-http://maven.apache.org/                  /Apache 2.0/
-    openxri-client-1.2.1.jar
-    openxri-syntax-1.2.1.jar
+at: https://code.google.com/p/opendatakit/source/browse?repo=components    
+    odk-httpclient-gae-1.1.2.jar
+    odk-tomcatutil-1.0.1.jar
+    See the ODK Aggregate (Components) README.txt 
+    for how these are built.
 http://www.postgresql.org/                /Modified BSD / MIT Open Source License/
     postgresql-9.0-801.jdbc4.jar
-http://code.google.com/p/protobuf/        /New BSD license/	
-	protobuf-java-2.5.0.jar
-http://xml.apache.org/xalan-j/            /Apache 2.0/	
-	serializer-2.7.1.jar
+http://code.google.com/p/protobuf/        /New BSD license/    
+    protobuf-java-2.5.0.jar
+http://xml.apache.org/xalan-j/            /Apache 2.0/    
+    serializer-2.7.1.jar
 http://www.slf4j.org/                     /MIT License/
     slf4j-api-1.7.7.jar
     slf4j-jcl-1.7.7.jar
 http://www.springsource.org/              /Apache 2.0/
-    spring-aop-4.0.5.RELEASE.jar
-    spring-aspects-4.0.5.RELEASE.jar
-    spring-beans-4.0.5.RELEASE.jar
-    spring-context-4.0.5.RELEASE.jar
-    spring-context-support-4.0.5.RELEASE.jar
-    spring-core-4.0.5.RELEASE.jar
-    spring-expression-4.0.5.RELEASE.jar
-    spring-instrument-4.0.5.RELEASE.jar
-    spring-instrument-tomcat-4.0.5.RELEASE.jar
-    spring-jdbc-4.0.5.RELEASE.jar
-    spring-tx-4.0.5.RELEASE.jar
-    spring-web-4.0.5.RELEASE.jar
+    spring-aop-4.1.6.RELEASE.jar
+    spring-aspects-4.1.6.RELEASE.jar
+    spring-beans-4.1.6.RELEASE.jar
+    spring-context-4.1.6.RELEASE.jar
+    spring-context-support-4.1.6.RELEASE.jar
+    spring-core-4.1.6.RELEASE.jar
+    spring-expression-4.1.6.RELEASE.jar
+    spring-instrument-4.1.6.RELEASE.jar
+    spring-instrument-tomcat-4.1.6.RELEASE.jar
+    spring-jdbc-4.1.6.RELEASE.jar
+    spring-tx-4.1.6.RELEASE.jar
+    spring-web-4.1.6.RELEASE.jar
 http://static.springsource.org/spring-security/site/        /Apache 2.0/
-    Special build -- see ODK Aggregate Components
-    spring-security-config-3.2.4.odk-SNAPSHOT.jar
-    spring-security-core-3.2.4.odk-SNAPSHOT.jar
-    spring-security-crypto-3.2.4.odk-SNAPSHOT.jar
-    spring-security-openid-3.2.4.odk-SNAPSHOT.jar
-    spring-security-web-3.2.4.odk-SNAPSHOT.jar
+    spring-security-config-3.2.7.jar
+    spring-security-core-3.2.7.jar
+    spring-security-crypto-3.2.7.jar
+    spring-security-web-3.2.7.jar
 http://stax.codehaus.org/                 /Apache 2.0/
     stax2-api-3.1.4.jar
-    stax-api-1.0.1.jar
-http://jcp.org/en/jsr/detail?id=907       /CDDL 1.1/	
-	transaction-api-1.1.jar
-http://wink.apache.org/                   /Apache 2.0/	
-	wink-common-1.4.jar
-	wink-server-1.4.jar
-http://woodstox.codehaus.org/             /Apache 2.0/	
-	woodstox-core-asl-4.1.4.jar
+    stax-api-1.0-2.jar
+http://jcp.org/en/jsr/detail?id=907       /CDDL 1.1/    
+    transaction-api-1.1.jar
+http://wink.apache.org/                   /Apache 2.0/    
+    wink-common-1.4.jar
+    wink-server-1.4.jar
+http://woodstox.codehaus.org/             /Apache 2.0/    
+    woodstox-core-asl-4.1.4.jar
 http://xml.apache.org/xalan-j/            /Apache 2.0/
     xalan-2.7.1.jar
 http://apache.org/                        /Apache 2.0/

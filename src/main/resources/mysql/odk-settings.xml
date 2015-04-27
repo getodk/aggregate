@@ -3,9 +3,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+           http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
            http://www.springframework.org/schema/task
-           http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+           http://www.springframework.org/schema/task/spring-task-4.1.xsd">
 
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -19,17 +19,22 @@
 	</bean>
 
 	<!--Datasource configuration-->
-	<bean id="dataSource" destroy-method="close"
-		class="com.jolbox.bonecp.BoneCPDataSource">
+	<!--Datasource configuration-->
+	<!-- parameterized by jdbc.server jdbc.schema -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close" >
 		<property name="driverClass" value="${jdbc.driverClassName}" />
 		<property name="jdbcUrl" value="${jdbc.url}" />
-		<property name="username" value="${jdbc.username}" />
+		<property name="user" value="${jdbc.username}" />
 		<property name="password" value="${jdbc.password}" />
-		<property name="partitionCount" value="3" />
-		<property name="minConnectionsPerPartition" value="10" />
-		<property name="maxConnectionsPerPartition" value="40" />
-		<property name="acquireIncrement" value="5" />
-		<property name="releaseHelperThreads" value="3" />
+		<property name="acquireIncrement" value="5"/>
+		<property name="maxIdleTimeExcessConnections" value="5"/>
+		<property name="minPoolSize" value="5"/>
+		<property name="maxPoolSize" value="100"/>
+		<property name="maxIdleTime" value="590"/>
+		<property name="checkoutTimeout" value="30000"/>
+		<property name="automaticTestTable" value="c3po_alive"/>
+		<property name="idleConnectionTestPeriod" value="148"/>
+		<property name="testConnectionOnCheckin" value="true"/>
 	</bean>
 
 	<bean id="datastore"

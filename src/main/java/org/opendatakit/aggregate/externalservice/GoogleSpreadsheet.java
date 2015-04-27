@@ -20,10 +20,14 @@ package org.opendatakit.aggregate.externalservice;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,11 +65,17 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.EmailParser;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
-import com.google.gdata.client.docs.DocsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
 import com.google.gdata.client.spreadsheet.CellQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.Link;
@@ -73,7 +83,6 @@ import com.google.gdata.data.PlainTextConstruct;
 import com.google.gdata.data.batch.BatchOperationType;
 import com.google.gdata.data.batch.BatchStatus;
 import com.google.gdata.data.batch.BatchUtils;
-import com.google.gdata.data.docs.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.CellEntry;
 import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
@@ -91,7 +100,11 @@ import com.google.gdata.util.ServiceException;
 public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(GoogleSpreadsheet.class.getName());
 
+  private static final String GOOGLE_DRIVE_FILES_API = "https://www.googleapis.com/drive/v2/files";
+
   private static final String GOOGLE_SPREADSHEET_OAUTH2_SCOPE = "https://www.googleapis.com/auth/drive https://docs.google.com/feeds/ https://docs.googleusercontent.com/ https://spreadsheets.google.com/feeds/";
+
+  private static ObjectMapper mapper = new ObjectMapper();
 
   /**
    * Datastore entity specific to this type of external service
@@ -159,46 +172,67 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     objectEntity.setSpreadsheetName(name);
     persist(cc);
   }
+  
+  protected String executeDriveStmt(String spreadsheetTitle, String spreadsheetDescription,
+      CallingContext cc) throws ServiceException,
+      IOException, ODKExternalServiceException, GeneralSecurityException {
+
+    HashMap<String,String> requestBody = new HashMap<String,String>();
+    requestBody.put("title", spreadsheetTitle);
+    requestBody.put("description", spreadsheetDescription);
+    requestBody.put("mimeType", "application/vnd.google-apps.spreadsheet");
+    
+    GenericUrl url = new GenericUrl(GOOGLE_DRIVE_FILES_API);
+
+    String statement = mapper.writeValueAsString(requestBody);
+    HttpContent entity = null;
+    entity = new ByteArrayContent("application/json",
+        statement.getBytes(HtmlConsts.UTF8_ENCODE));
+
+    HttpRequest request = requestFactory.buildRequest("POST", url, entity);
+    HttpResponse resp = request.execute();
+    String response = WebUtils.readGoogleResponse(resp);
+
+    int statusCode = resp.getStatusCode();
+    if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
+      throw new ODKExternalServiceCredentialsException(response.toString() + statement);
+    } else if (statusCode != HttpServletResponse.SC_OK) {
+      throw new ODKExternalServiceException(response.toString() + statement);
+    }
+
+    return response;
+  }
 
   public void initiate(CallingContext cc) throws ODKExternalServiceException, ODKDatastoreException {
-    // authenticate2AndCreate(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, cc);
-    // setup service
-    DocsService service = new DocsService(ServletConsts.APPLICATION_NAME);
-    service.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
-    service.setOAuth2Credentials(credential);
 
     boolean newlyCreated = false;
     if (objectEntity.getSpreadsheetKey() == null) {
       newlyCreated = true;
 
       // create spreadsheet
-      com.google.gdata.data.docs.SpreadsheetEntry createdEntry = new SpreadsheetEntry();
-      createdEntry.setTitle(new PlainTextConstruct(getSpreadsheetName()));
-
-      com.google.gdata.data.docs.SpreadsheetEntry updatedEntry;
+      String spreadsheetName = getSpreadsheetName();
+      String spreadsheetDescription = spreadsheetName + " ODK Aggregate " + WebUtils.iso8601Date(new Date());
+      // will hold doc id
+      String spreadKey = null;
       try {
-        updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
-      } catch (IOException e) {
-        // try one more time
-        try {
-          updatedEntry = service.insert(new URL(SpreadsheetConsts.DOC_FEED), createdEntry);
-        } catch (AuthenticationException e1) {
-          e1.printStackTrace();
-          throw new ODKExternalServiceCredentialsException(e1);
-        } catch (Exception e1) {
-          e1.printStackTrace();
-          throw new ODKExternalServiceException(e1);
-        }
-      } catch (AuthenticationException e) {
-        e.printStackTrace();
-        throw new ODKExternalServiceCredentialsException(e);
-      } catch (Exception e) {
+        String response = executeDriveStmt(spreadsheetName, spreadsheetDescription, cc);
+        
+        // convert response from json to Java
+        HashMap<Object,Object> map = mapper.readValue(response, HashMap.class);
+
+        // get document ID (spreadsheet 'key')
+        spreadKey = (String) map.get("id");
+        
+      } catch (ServiceException e) {
         e.printStackTrace();
         throw new ODKExternalServiceException(e);
-      }
-
-      // get key
-      String spreadKey = updatedEntry.getDocId();
+      } catch (IOException e) {
+        e.printStackTrace();
+        throw new ODKExternalServiceException(e);
+      } catch (GeneralSecurityException e) {
+        e.printStackTrace();
+        throw new ODKExternalServiceCredentialsException(e);
+      }   
 
       objectEntity.setSpreadsheetKey(spreadKey);
       objectEntity.setReady(false);
