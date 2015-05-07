@@ -45,6 +45,7 @@ import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
+import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -95,8 +96,10 @@ public class RealizedTableServiceImpl implements RealizedTableService {
 
     tm.deleteTable(tableId);
     logger.info("tableId: " + tableId);
-    DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
-    ds.getDam().logUsage();
+    Datastore ds = cc.getDatastore();
+    if ( ds instanceof DatastoreImpl ) {
+      ((DatastoreImpl) ds).getDam().logUsage();
+    }
     return Response.ok()
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
