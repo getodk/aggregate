@@ -138,7 +138,10 @@ public class BinaryContentManipulator {
         BinaryContentRefBlob bcref = (BinaryContentRefBlob) cb;
         Long part = bcref.getPart();
         if ( part == null || part.longValue() != expectedPart ) {
-          throw new ODKEnumeratedElementException(bcbRef.getTableName() + "@domAuri(" + bcbRef.getDomAuri() + ") is missing a reference part OR has an extra copy of one");
+          String errString = "SELECT * FROM " + bcref.getTableName()
+              + " WHERE _TOP_LEVEL_AURI = " + bcref.getTopLevelAuri()
+              + " AND _DOM_AURI = " + bcref.getDomAuri() + " is missing a reference part OR has extra copies.";
+          throw new ODKEnumeratedElementException(errString);
         }
         ++expectedPart;
         dbBcbEntityList.add(bcref);
@@ -584,7 +587,10 @@ public class BinaryContentManipulator {
         BinaryContent bc = (BinaryContent) cb;
         Long ordinal = bc.getOrdinalNumber();
         if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
-          throw new ODKEnumeratedElementException(ctntRelation.getTableName() + "@parentAuri(" + bc.getParentAuri() + ") is missing an attachment instance OR has an extra copy of one");
+          String errString = "SELECT * FROM " + bc.getTableName()
+              + " WHERE _TOP_LEVEL_AURI = " + bc.getTopLevelAuri()
+              + " AND _PARENT_AURI = " + bc.getParentAuri() + " is missing an attachment instance OR has extra copies.";
+          throw new ODKEnumeratedElementException(errString);
         }
         ++expectedOrdinal;
         attachments.put(bc.getOrdinalNumber(), bc);
