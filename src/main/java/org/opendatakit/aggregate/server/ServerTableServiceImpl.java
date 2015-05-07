@@ -40,6 +40,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.CommonFieldsBase;
+import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -172,8 +173,10 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       TableManager tm = new TableManager(appId, userPermissions, cc);
       tm.deleteTable(tableId);
       logger.info("tableId: " + tableId);
-      DatastoreImpl ds = (DatastoreImpl) cc.getDatastore();
-      ds.getDam().logUsage();
+      Datastore ds = cc.getDatastore();
+      if ( ds instanceof DatastoreImpl ) {
+        ((DatastoreImpl) ds).getDam().logUsage();
+      }
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);

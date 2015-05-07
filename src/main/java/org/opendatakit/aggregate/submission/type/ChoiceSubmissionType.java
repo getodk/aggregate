@@ -90,7 +90,10 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
       SelectChoice choice = (SelectChoice) cb;
       Long ordinal = choice.getOrdinalNumber();
       if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
-        throw new ODKEnumeratedElementException(element.getElementName() + "@parentAuri(" + choice.getParentAuri() + ") valueSet is missing an entry OR has an extra copy of one");
+        String errString = "SELECT * FROM " + choice.getTableName()
+            + " WHERE _TOP_LEVEL_AURI = " + choice.getTopLevelAuri()
+            + " AND _PARENT_AURI = " + choice.getParentAuri() + " multiple-choice valueSet is missing an entry OR has an extra copy of one";
+        throw new ODKEnumeratedElementException(errString);
       }
       ++expectedOrdinal;
       choices.add(choice);
