@@ -150,7 +150,10 @@ public class RepeatSubmissionType implements SubmissionRepeat {
       DynamicBase d = (DynamicBase) cb;
       Long ordinal = d.getOrdinalNumber();
       if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
-        throw new ODKEnumeratedElementException(repeatGroup.getElementName() + "@parentAuri(" + d.getParentAuri() + ") is missing a (repeat) group instance OR has an extra copy of one");
+        String errString = "SELECT * FROM " + d.getTableName()
+            + " WHERE _TOP_LEVEL_AURI = " + d.getTopLevelAuri()
+            + " AND _PARENT_AURI = " + d.getParentAuri() + " is missing a (repeat) group instance OR has an extra copies.";
+        throw new ODKEnumeratedElementException(errString);
       }
       ++expectedOrdinal;
       SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
