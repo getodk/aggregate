@@ -27,12 +27,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
-import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
+import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
 import org.opendatakit.aggregate.client.exception.ImportFromCSVExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -164,7 +165,7 @@ public class OdkTablesUploadTableFromCSVServlet extends ServletUtilBase {
       CsvUtil csvUtil = new CsvUtil();
       byte[] bytes = csvFile.getStream().toByteArray();
       ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-      BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+      BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, CharEncoding.UTF_8));
       boolean success = csvUtil.importNewTable(br, tableName, cc);
       PrintWriter out = resp.getWriter();
       if (success) {
