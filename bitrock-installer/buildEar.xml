@@ -11,7 +11,7 @@
             <file>components/params.xml</file>
         </include>
         <include>
-            <file>components/configure_war.xml</file>
+            <file>components/configure_ear.xml</file>
         </include>
     </componentList>
     <createUninstaller>0</createUninstaller>

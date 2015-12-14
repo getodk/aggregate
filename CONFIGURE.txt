@@ -431,7 +431,7 @@ build the bitrock installer.  First,
  cd bitrock-installer
  mvn clean
  mvn install
-Open bitrock and open the buildWar.xml project file in this directory.
+Open bitrock and open the buildEar.xml project file in this directory.
 On the packaging page, build for windows, linux, linux-64 and OSX.
 
 On Windows, the generated installers are placed under:

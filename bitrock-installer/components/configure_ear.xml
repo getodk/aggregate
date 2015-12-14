@@ -11,21 +11,21 @@
             <name>temp</name>
             <platforms>all</platforms>
             <distributionFileList>
-	<!-- as follows:
+	        <!-- as follows:
 			files/conf - configuration extracted from maven build tree.
 			files/mf - fake Manifest.mf directory structure
 			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
-			files/ODKAggregate.war - war file minus site-specific settings.
+			files/ODKAggregate.ear - ear file minus site-specific settings.
 			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
 			-->
-	<distributionDirectory>
+	        <distributionDirectory>
                     <origin>files/conf</origin>
                 </distributionDirectory>
                 <distributionDirectory>
                     <origin>files/mf</origin>
                 </distributionDirectory>
                 <distributionFile>
-                    <origin>files/ODKAggregate.war</origin>
+                    <origin>files/ODKAggregate.ear</origin>
                 </distributionFile>
                 <distributionFile>
                     <origin>files/appengine-web.xml</origin>
@@ -346,15 +346,15 @@
             </actionList>
         </actionGroup>
         <deleteFile>
-            <path>${temp_dir}/cfg-war</path>
+            <path>${temp_dir}/cfg-ear</path>
         </deleteFile>
         <createDirectory>
-            <path>${temp_dir}/cfg-war</path>
+            <path>${temp_dir}/cfg-ear</path>
         </createDirectory>
         <unzip>
-            <destinationDirectory>${temp_dir}/cfg-war</destinationDirectory>
-            <progressText>Exploding ODKAggregate.war</progressText>
-            <zipFile>${temp_dir}/ODKAggregate.war</zipFile>
+            <destinationDirectory>${temp_dir}/cfg-ear</destinationDirectory>
+            <progressText>Exploding ODKAggregate.ear</progressText>
+            <zipFile>${temp_dir}/ODKAggregate.ear</zipFile>
         </unzip>
         <deleteFile>
             <path>${temp_dir}/jarBody</path>
@@ -375,33 +375,33 @@
             <origin>${temp_dir}/mf/*</origin>
         </copyFile>
         <zip>
-	<!-- create the settings jar -->
-	<baseDirectory>${temp_dir}/jarBody</baseDirectory>
+            <!-- create the settings jar -->
+            <baseDirectory>${temp_dir}/jarBody</baseDirectory>
             <files>${temp_dir}/jarBody/*</files>
             <progressText>Building configuration jar</progressText>
-            <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
+            <zipFile>${temp_dir}/cfg-ear/WEB-INF/lib/${settings_jar}</zipFile>
         </zip>
         <copyFile>
-            <destination>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</destination>
+            <destination>${temp_dir}/cfg-ear/WEB-INF/appengine-web.xml</destination>
             <origin>${temp_dir}/appengine-web.xml</origin>
         </copyFile>
         <xmlFileSet>
             <attribute></attribute>
             <element>//*[local-name()="application"]</element>
-            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
+            <file>${temp_dir}/cfg-ear/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
         </xmlFileSet>
         <xmlFileSet>
             <attribute></attribute>
             <element>//*[local-name()="version"]</element>
-            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
+            <file>${temp_dir}/cfg-ear/WEB-INF/appengine-web.xml</file>
             <value>1</value>
         </xmlFileSet>
         <zip>
-            <baseDirectory>${temp_dir}/cfg-war</baseDirectory>
-            <files>${temp_dir}/cfg-war/*</files>
-            <progressText>Reassembling ODKAggregate.war</progressText>
-            <zipFile>${installdir}/ODKAggregate.war</zipFile>
+            <baseDirectory>${temp_dir}/cfg-ear</baseDirectory>
+            <files>${temp_dir}/cfg-ear/*</files>
+            <progressText>Reassembling ODKAggregate.ear</progressText>
+            <zipFile>${installdir}/ODKAggregate.ear</zipFile>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
@@ -415,7 +415,7 @@
         </deleteFile>
         <createDirectory>
             <path>${installdir}/ODKAggregate</path>
-            <progressText>Creating war directory</progressText>
+            <progressText>Creating ear directory</progressText>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -426,8 +426,8 @@
         </createDirectory>
         <copyFile>
             <destination>${installdir}/ODKAggregate</destination>
-            <origin>${temp_dir}/cfg-war/*</origin>
-            <progressText>Copy war files to war directory</progressText>
+            <origin>${temp_dir}/cfg-ear/*</origin>
+            <progressText>Copy ear files to ear directory</progressText>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>

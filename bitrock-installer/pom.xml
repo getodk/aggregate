@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-    <parent>
+	<parent>
 		<groupId>org.opendatakit</groupId>
 		<artifactId>aggregate</artifactId>
 		<version>1.0.1</version>
 		<relativePath>../pom.xml</relativePath>
-    </parent>
+	</parent>
 	<groupId>org.opendatakit</groupId>
 	<artifactId>ODKAggregateInstaller</artifactId>
 	<version>1.0.1</version>
@@ -70,8 +70,8 @@
 								<delete includeemptydirs="true">
 									<fileset dir="${conf.directory}" includes="**/*" />
 								</delete>
-								<touch file="${project.basedir}/files/ODKAggregate.war" />
-								<delete file="${project.basedir}/files/ODKAggregate.war" />
+								<touch file="${project.basedir}/files/ODKAggregate.ear" />
+								<delete file="${project.basedir}/files/ODKAggregate.ear" />
 								<touch file="${project.basedir}/files/appengine-web.xml" />
 								<delete file="${project.basedir}/files/appengine-web.xml" />
 								<!-- delete the exploded war directory -->
@@ -123,19 +123,19 @@
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
 										includes="appengine-web.xml" />
 								</delete>
-								<mkdir dir="${project.build.directory}/repackaged-war" />
+								<mkdir dir="${project.build.directory}/repackaged-ear" />
 								<delete includeemptydirs="true">
-									<fileset dir="${project.build.directory}/repackaged-war" includes="**/*" />
+									<fileset dir="${project.build.directory}/repackaged-ear" includes="**/*" />
 								</delete>
-								<mkdir dir="${project.build.directory}/repackaged-war" />
-								<war destfile="${project.build.directory}/repackaged-war/ODKAggregate.war"
+								<mkdir dir="${project.build.directory}/repackaged-ear" />
+								<war destfile="${project.build.directory}/repackaged-ear/ODKAggregate.ear"
 									webxml="${project.build.directory}/exploded-war/WEB-INF/web.xml">
 									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
 								</war>
-								<touch file="${project.basedir}/files/ODKAggregate.war" />
-								<delete file="${project.basedir}/files/ODKAggregate.war" />
-								<copy file="${project.build.directory}/repackaged-war/ODKAggregate.war"
-									tofile="${project.basedir}/files/ODKAggregate.war" />
+								<touch file="${project.basedir}/files/ODKAggregate.ear" />
+								<delete file="${project.basedir}/files/ODKAggregate.ear" />
+								<copy file="${project.build.directory}/repackaged-ear/ODKAggregate.ear"
+									tofile="${project.basedir}/files/ODKAggregate.ear" />
 							</target>
 						</configuration>
 						<goals>
@@ -156,7 +156,7 @@
 							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
 							<arguments>
 								<argument>build</argument>
-								<argument>${project.basedir}/buildWar.xml</argument>
+								<argument>${project.basedir}/buildEar.xml</argument>
 								<argument>windows</argument>
 							</arguments>
 						</configuration>
@@ -168,7 +168,7 @@
 							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
 							<arguments>
 								<argument>build</argument>
-								<argument>${project.basedir}/buildWar.xml</argument>
+								<argument>${project.basedir}/buildEar.xml</argument>
 								<argument>linux</argument>
 							</arguments>
 						</configuration>
@@ -180,7 +180,7 @@
 							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
 							<arguments>
 								<argument>build</argument>
-								<argument>${project.basedir}/buildWar.xml</argument>
+								<argument>${project.basedir}/buildEar.xml</argument>
 								<argument>osx</argument>
 							</arguments>
 						</configuration>
