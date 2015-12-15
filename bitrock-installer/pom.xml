@@ -115,8 +115,6 @@
 								<unjar dest="${project.build.directory}/exploded-war">
 									<fileset dir="${project.basedir}" includes="*.war"/>
 								</unjar>
-								<copy file="${project.build.directory}/exploded-war/WEB-INF/appengine-web.xml"
-									tofile="${project.basedir}/files/appengine-web.xml"/>
 								<delete quiet="true">
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
 										includes="odk*setting*.jar" />
@@ -128,10 +126,6 @@
 									<fileset dir="${project.build.directory}/repackaged-ear" includes="**/*" />
 								</delete>
 								<mkdir dir="${project.build.directory}/repackaged-ear" />
-								<war destfile="${project.build.directory}/repackaged-ear/ODKAggregate.war"
-									webxml="${project.build.directory}/exploded-war/WEB-INF/web.xml">
-									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
-								</war>
 								<ear destfile="${project.build.directory}/repackaged-ear/ODKAggregate.ear"
 									appxml="${project.basedir}/files/ear/META-INF/application.xml">
 									<zipfileset dir="${project.build.directory}/exploded-war" includes="**/*" prefix="default">
