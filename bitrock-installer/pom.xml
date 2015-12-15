@@ -72,8 +72,6 @@
 								</delete>
 								<touch file="${project.basedir}/files/ODKAggregate.ear" />
 								<delete file="${project.basedir}/files/ODKAggregate.ear" />
-								<touch file="${project.basedir}/files/appengine-web.xml" />
-								<delete file="${project.basedir}/files/appengine-web.xml" />
 								<!-- delete the exploded war directory -->
 								<mkdir dir="${project.build.directory}" />
 								<delete includeemptydirs="true">
@@ -118,7 +116,7 @@
 								<delete quiet="true">
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
 										includes="odk*setting*.jar" />
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
 										includes="appengine-web.xml" />
 								</delete>
 								<mkdir dir="${project.build.directory}/repackaged-ear" />
@@ -129,11 +127,9 @@
 								<ear destfile="${project.build.directory}/repackaged-ear/ODKAggregate.ear"
 									appxml="${project.basedir}/files/ear/META-INF/application.xml">
 									<zipfileset dir="${project.build.directory}/exploded-war" includes="**/*" prefix="default">
-										<exclude name="**/appengine-web.xml"/>
 										<exclude name="**/backends.xml"/>
 									</zipfileset>
 									<zipfileset dir="${project.build.directory}/exploded-war" includes="**/*" prefix="background">
-										<exclude name="**/appengine-web.xml"/>
 										<exclude name="**/backends.xml"/>
 										<exclude name="**/cron.xml"/>
 										<exclude name="**/datastore-indexes.xml"/>

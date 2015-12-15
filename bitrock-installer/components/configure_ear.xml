@@ -16,7 +16,6 @@
 			files/mf - fake Manifest.mf directory structure
 			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
 			files/ODKAggregate.ear - ear file minus site-specific settings.
-			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
 			-->
 	        <distributionDirectory>
                     <origin>files/conf</origin>
@@ -26,9 +25,6 @@
                 </distributionDirectory>
                 <distributionFile>
                     <origin>files/ODKAggregate.ear</origin>
-                </distributionFile>
-                <distributionFile>
-                    <origin>files/appengine-web.xml</origin>
                 </distributionFile>
             </distributionFileList>
         </folder>
