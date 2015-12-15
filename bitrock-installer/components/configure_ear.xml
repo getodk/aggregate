@@ -375,27 +375,36 @@
             <origin>${temp_dir}/mf/*</origin>
         </copyFile>
         <zip>
-            <!-- create the settings jar -->
+            <!-- create the default settings jar -->
             <baseDirectory>${temp_dir}/jarBody</baseDirectory>
             <files>${temp_dir}/jarBody/*</files>
-            <progressText>Building configuration jar</progressText>
-            <zipFile>${temp_dir}/cfg-ear/WEB-INF/lib/${settings_jar}</zipFile>
+            <progressText>Building default configuration jar</progressText>
+            <zipFile>${temp_dir}/cfg-ear/default/WEB-INF/lib/${settings_jar}</zipFile>
         </zip>
-        <copyFile>
-            <destination>${temp_dir}/cfg-ear/WEB-INF/appengine-web.xml</destination>
-            <origin>${temp_dir}/appengine-web.xml</origin>
-        </copyFile>
+        <zip>
+            <!-- create the background settings jar -->
+            <baseDirectory>${temp_dir}/jarBody</baseDirectory>
+            <files>${temp_dir}/jarBody/*</files>
+            <progressText>Building background configuration jar</progressText>
+            <zipFile>${temp_dir}/cfg-ear/background/WEB-INF/lib/${settings_jar}</zipFile>
+        </zip>
         <xmlFileSet>
             <attribute></attribute>
             <element>//*[local-name()="application"]</element>
-            <file>${temp_dir}/cfg-ear/WEB-INF/appengine-web.xml</file>
+            <file>${temp_dir}/cfg-ear/META-INF/appengine-application.xml</file>
             <value>${app_id}</value>
         </xmlFileSet>
         <xmlFileSet>
             <attribute></attribute>
-            <element>//*[local-name()="version"]</element>
-            <file>${temp_dir}/cfg-ear/WEB-INF/appengine-web.xml</file>
-            <value>1</value>
+            <element>//*[local-name()="application"]</element>
+            <file>${temp_dir}/cfg-ear/default/WEB-INF/appengine-web.xml</file>
+            <value>${app_id}</value>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="application"]</element>
+            <file>${temp_dir}/cfg-ear/background/WEB-INF/appengine-web.xml</file>
+            <value>${app_id}</value>
         </xmlFileSet>
         <zip>
             <baseDirectory>${temp_dir}/cfg-ear</baseDirectory>
