@@ -402,6 +402,12 @@
             <file>${temp_dir}/cfg-ear/background/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
         </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="display-name"]</element>
+            <file>${temp_dir}/cfg-ear/META-INF/application.xml</file>
+            <value>${instance_display_name}</value>
+        </xmlFileSet>
         <zip>
             <baseDirectory>${temp_dir}/cfg-ear</baseDirectory>
             <files>${temp_dir}/cfg-ear/*</files>

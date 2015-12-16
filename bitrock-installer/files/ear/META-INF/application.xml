@@ -7,8 +7,8 @@ encoding="UTF-8"?>
   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
                       http://java.sun.com/xml/ns/javaee/application_5.xsd"
   version="5">
-	<description>ODK Aggregate</description>
-	<display-name>ODK Aggregate</display-name>
+	<description>ODK Aggregate Instance</description>
+	<display-name/>
 
 	<!-- Modules -->
 	<!-- The default module should be listed first -->
