@@ -270,7 +270,10 @@ public final class PublishPopup extends AbstractPopupBase {
   public void updateUIOptions() {
     System.out.println("UPDATE UI OPTIONS CALLED");
     System.out.println("Type:" + serviceType.getSelectedValue());
-    ExternalServiceType type = serviceType.getSelectedEnumValue();
+    
+    String externalServiceTypeString = serviceType.getSelectedValue();
+    ExternalServiceType type = (externalServiceTypeString == null) ? null :
+      ExternalServiceType.valueOf(externalServiceTypeString);
 
     if (type == null) {
       gmeBar.setVisible(false);
@@ -355,8 +358,14 @@ public final class PublishPopup extends AbstractPopupBase {
     @Override
     public void onClick(ClickEvent event) {
 
-      ExternalServiceType type = serviceType.getSelectedEnumValue();
-      ExternalServicePublicationOption serviceOp = esOptions.getSelectedEnumValue();
+      String externalServiceTypeString = serviceType.getSelectedValue();
+      ExternalServiceType type = (externalServiceTypeString == null) ? null :
+        ExternalServiceType.valueOf(externalServiceTypeString);
+
+      String serviceOpString = esOptions.getSelectedValue();
+      ExternalServicePublicationOption serviceOp = (serviceOpString == null) ? null :
+        ExternalServicePublicationOption.valueOf(serviceOpString);
+
       UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
       String ownerEmail = info.getEmail();
       if (ownerEmail == null || ownerEmail.length() == 0) {
@@ -377,8 +386,12 @@ public final class PublishPopup extends AbstractPopupBase {
             rcUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
         break;
       case JSON_SERVER:
+      {
+        String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
+        BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
         SecureGWT.getServicesAdminService().createSimpleJsonServer(formId, jsAuthKey.getText(),
-            jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOptions.getSelectedEnumValue(), new ReportFailureCallback());
+            jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOp, new ReportFailureCallback());
+      }
         break;
       case OHMAGE_JSON_SERVER:
         SecureGWT.getServicesAdminService().createOhmageJsonServer(formId,
@@ -391,9 +404,12 @@ public final class PublishPopup extends AbstractPopupBase {
             new ReportFailureCallback());
         break;
       case GOOGLE_MAPS_ENGINE:
-        GmePhotoHostType photoType = gmePhotoHostType.getSelectedEnumValue();
+      {
+        String gmePhotoTypeString = gmePhotoHostType.getSelectedValue();
+        GmePhotoHostType photoType = (gmePhotoTypeString == null) ? null : GmePhotoHostType.valueOf(gmePhotoTypeString);
         SecureGWT.getServicesAdminService().createMapEngine(formId, serviceOp, gmeAssetId.getText(), gmeGeoPoint.getElementKey(), photoType, ownerEmail,
             new ReportFailureCallback());
+      }
         break;
       default: // unknown type
         break;
