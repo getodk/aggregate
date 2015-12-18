@@ -10,6 +10,17 @@ sub-projects.
 If you're a Maven expert and have suggestions about the Maven 
 project tree, please contact mitchellsundt@gmail.com
 
+===========================================
+Critically Important Configuration Note!!!!
+-------------------------------------------
+
+You MUST use Java 7. 
+
+If you use Java 8, Springframework uses a blacklisted reflection API
+and you will NOT be able to run the server locally under AppEngine or
+deploy it remotely.
+
+
 =====================
 Minimal Eclipse Setup
 ---------------------
