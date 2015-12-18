@@ -63,7 +63,7 @@ public class FilterNavigationTable extends FlexTable {
     formNFilterTable.getElement().setId("form_and_goal_selection");
     formNFilterTable.setHTML(0, 0, "<h2 id=\"form_name\"> Form </h2>");
     formNFilterTable.setWidget(0, 1, formsBox);
-    formNFilterTable.setHTML(0, 2, "<h2 id=\"form_name\"> Filter </h2>");
+    formNFilterTable.setHTML(0, 2, "<h2 id=\"filter_name\"> Filter </h2>");
     formNFilterTable.setWidget(0, 3, filtersBox);
 
     setWidget(0, 0, formNFilterTable);

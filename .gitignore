@@ -1,0 +1,6 @@
+.metadata/
+.recommenders/
+eclipse-aggregate-gae/gwt-unitCache/
+eclipse-aggregate-gae/war/WEB-INF/appengine-generated/
+eclipse-aggregate-gae/war/aggregateui/
+eclipse-aggregate-gae/war/WEB-INF/classes/

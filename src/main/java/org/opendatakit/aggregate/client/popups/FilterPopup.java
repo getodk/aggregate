@@ -98,11 +98,6 @@ public final class FilterPopup extends AbstractPopupBase {
 
 		// rows or columns
 		rowCol = new EnumListBox<RowOrCol>(RowOrCol.values(), ROW_COL_TOOLTIP, ROW_COL_BALLOON);
-		rowCol.addChangeHandler(new ChangeHandler() {
-			public void onChange(ChangeEvent event) {
-				updateUIoptions();
-			}
-		});
 
 		// column selection - for row filter
 		columnForRowFilter = new ColumnListBox(headers, false, true, COLUMN_TOOLTIP_RF, COLUMN_BALLOON_RF);
@@ -169,6 +164,13 @@ public final class FilterPopup extends AbstractPopupBase {
 		
 		table.setWidget(0, 0, topBar);
 		table.setWidget(1, 0, optionsBar);
+
+		// enable actions
+		rowCol.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				updateUIoptions();
+			}
+		});
 
 		updateUIoptions();
 
