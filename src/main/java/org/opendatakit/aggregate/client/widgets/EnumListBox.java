@@ -24,22 +24,13 @@ public final class EnumListBox<T extends Enum<T>> extends AggregateListBox {
     for (T val : values) {
       addItem(val.toString(), val.name());
     }
-
   }
 
   public String getSelectedValue() {
-    T val = getSelectedEnumValue();
-    if ( val == null ) {
-      return null;
-    } else {
-      return val.name();
-    }
-  }
-  
-  public T getSelectedEnumValue() {
     int selectedIndex = getSelectedIndex();
     if (selectedIndex > -1) {
-      return (T) Enum.valueOf(classType, getValue(selectedIndex));
+      String value = getValue(selectedIndex);
+      return value;
     } else {
       return null;
     }
