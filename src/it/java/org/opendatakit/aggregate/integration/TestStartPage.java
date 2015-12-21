@@ -13,8 +13,7 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.google.common.base.Function;
@@ -29,7 +28,7 @@ public class TestStartPage {
   private static String username = "aggregate";
   private static String password = "aggregate";
   private static int port;
-  private static FirefoxDriver driver;
+  private static ChromeDriver driver;
   private static String fullRootUrl;
 
   @BeforeClass
@@ -40,12 +39,12 @@ public class TestStartPage {
     port = Integer.parseInt(System.getProperty("test.server.port"));
     fullRootUrl = "http://" + username + ":" + password + "@" + hostname + ":" + port + baseUrl;
     // We should also test different browsers?
-    FirefoxProfile profile = new FirefoxProfile();
-    profile.setEnableNativeEvents(false);
-    profile.setPreference("network.negotiate-auth.trusteduris", hostname);
-    Random r = new Random();
-    profile.setPreference(FirefoxProfile.PORT_PREFERENCE, r.nextInt(50) + 7000);
-    driver = new FirefoxDriver(profile);
+//    FirefoxProfile profile = new FirefoxProfile();
+//    profile.setEnableNativeEvents(false);
+//    profile.setPreference("network.negotiate-auth.trusteduris", hostname);
+//    Random r = new Random();
+//    profile.setPreference(FirefoxProfile.PORT_PREFERENCE, r.nextInt(50) + 7000);
+    driver = new ChromeDriver();
     //    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     driver.get(fullRootUrl);
 
