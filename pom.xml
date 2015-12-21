@@ -843,6 +843,12 @@
 		  <scope>test</scope>
 		</dependency>
 		<dependency>
+		  <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-chrome-driver</artifactId>
+		  <version>${org.seleniumhq.version}</version>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
 		  <groupId>org.sonatype.maven.plugin</groupId>
 		  <artifactId>emma-maven-plugin</artifactId>
 		  <version>${emma.maven.plugin.version}</version>
