@@ -35,3 +35,4 @@ gae-unit-tests/target/
 postgres-unit-tests/target/
 aggregate-gae/target/
 aggregate-gae/src/
+eclipse-aggregate-mysql/.tomcatplugin
