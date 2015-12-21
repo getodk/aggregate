@@ -13,7 +13,7 @@
 	<properties>
 	    <toplevel.directory>${project.basedir}/../</toplevel.directory>
 		<!-- must match the gae version below and the build/build.xml ant script defn -->
-		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.18/appengine-java-sdk-1.9.18</gae.home>
+		<gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.30/appengine-java-sdk-1.9.30</gae.home>
 		<!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
 		<selenium.home>${project.basedir}/../build/selenium-java-2.45.0/selenium-2.45.0</selenium.home>
 		<selenium.libs>${project.basedir}/../build/selenium-java-2.45.0/selenium-2.45.0/libs</selenium.libs>
@@ -22,7 +22,7 @@
     	<itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
     	<itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gooogle.appengine.sdk.version>1.9.18</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
+		<gooogle.appengine.sdk.version>1.9.30</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
 		<gae.version>${gooogle.appengine.sdk.version}</gae.version>
 		<project.httpclient.version>4.2.2</project.httpclient.version>
 		<project.jsr305.version>1.3.9</project.jsr305.version>
@@ -1234,6 +1234,7 @@
 							<test.server.port>${test.server.port}</test.server.port>
 							<test.server.hostname>${test.server.hostname}</test.server.hostname>
 							<test.server.baseUrl>${test.server.baseUrl}</test.server.baseUrl>
+							<webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
 						  </systemPropertyVariables>
 						</configuration>
 					  </execution>
