@@ -28,3 +28,10 @@ build/chromedriver_mac32-2.20.zip
 build/chromedriver_win32-2.20.zip
 build/chromedriver_win32-2.20/
 build/chromedriver_mac32-2.20/
+eclipse-aggregate-mysql/war/
+eclipse-aggregate-mysql/gwt-unitCache/
+mysql-unit-tests/target/
+gae-unit-tests/target/
+postgres-unit-tests/target/
+aggregate-gae/target/
+aggregate-gae/src/
