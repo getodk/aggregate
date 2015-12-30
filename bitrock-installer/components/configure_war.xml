@@ -15,7 +15,7 @@
 			files/conf - configuration extracted from maven build tree.
 			files/mf - fake Manifest.mf directory structure
 			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
-			files/ODKAggregate.ear - ear file minus site-specific settings.
+			files/ODKAggregate.war - war file minus site-specific settings.
 			-->
 	        <distributionDirectory>
                     <origin>files/conf</origin>
@@ -24,7 +24,7 @@
                     <origin>files/mf</origin>
                 </distributionDirectory>
                 <distributionFile>
-                    <origin>files/ODKAggregate.ear</origin>
+                    <origin>files/ODKAggregate.war</origin>
                 </distributionFile>
             </distributionFileList>
         </folder>
@@ -342,15 +342,15 @@
             </actionList>
         </actionGroup>
         <deleteFile>
-            <path>${temp_dir}/cfg-ear</path>
+            <path>${temp_dir}/cfg-war</path>
         </deleteFile>
         <createDirectory>
-            <path>${temp_dir}/cfg-ear</path>
+            <path>${temp_dir}/cfg-war</path>
         </createDirectory>
         <unzip>
-            <destinationDirectory>${temp_dir}/cfg-ear</destinationDirectory>
-            <progressText>Exploding ODKAggregate.ear</progressText>
-            <zipFile>${temp_dir}/ODKAggregate.ear</zipFile>
+            <destinationDirectory>${temp_dir}/cfg-war</destinationDirectory>
+            <progressText>Exploding ODKAggregate.war</progressText>
+            <zipFile>${temp_dir}/ODKAggregate.war</zipFile>
         </unzip>
         <deleteFile>
             <path>${temp_dir}/jarBody</path>
@@ -371,48 +371,23 @@
             <origin>${temp_dir}/mf/*</origin>
         </copyFile>
         <zip>
-            <!-- create the default settings jar -->
+            <!-- create the settings jar -->
             <baseDirectory>${temp_dir}/jarBody</baseDirectory>
             <files>${temp_dir}/jarBody/*</files>
-            <progressText>Building default configuration jar</progressText>
-            <zipFile>${temp_dir}/cfg-ear/default/WEB-INF/lib/${settings_jar}</zipFile>
-        </zip>
-        <zip>
-            <!-- create the background settings jar -->
-            <baseDirectory>${temp_dir}/jarBody</baseDirectory>
-            <files>${temp_dir}/jarBody/*</files>
-            <progressText>Building background configuration jar</progressText>
-            <zipFile>${temp_dir}/cfg-ear/background/WEB-INF/lib/${settings_jar}</zipFile>
+            <progressText>Building configuration jar</progressText>
+            <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
         </zip>
         <xmlFileSet>
             <attribute></attribute>
             <element>//*[local-name()="application"]</element>
-            <file>${temp_dir}/cfg-ear/META-INF/appengine-application.xml</file>
+            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
-        </xmlFileSet>
-        <xmlFileSet>
-            <attribute></attribute>
-            <element>//*[local-name()="application"]</element>
-            <file>${temp_dir}/cfg-ear/default/WEB-INF/appengine-web.xml</file>
-            <value>${app_id}</value>
-        </xmlFileSet>
-        <xmlFileSet>
-            <attribute></attribute>
-            <element>//*[local-name()="application"]</element>
-            <file>${temp_dir}/cfg-ear/background/WEB-INF/appengine-web.xml</file>
-            <value>${app_id}</value>
-        </xmlFileSet>
-        <xmlFileSet>
-            <attribute></attribute>
-            <element>//*[local-name()="display-name"]</element>
-            <file>${temp_dir}/cfg-ear/META-INF/application.xml</file>
-            <value>${instance_display_name}</value>
         </xmlFileSet>
         <zip>
-            <baseDirectory>${temp_dir}/cfg-ear</baseDirectory>
-            <files>${temp_dir}/cfg-ear/*</files>
-            <progressText>Reassembling ODKAggregate.ear</progressText>
-            <zipFile>${installdir}/ODKAggregate.ear</zipFile>
+            <baseDirectory>${temp_dir}/cfg-war</baseDirectory>
+            <files>${temp_dir}/cfg-war/*</files>
+            <progressText>Reassembling ODKAggregate.war</progressText>
+            <zipFile>${installdir}/ODKAggregate.war</zipFile>
             <ruleList>
                 <compareText>
                     <logic>does_not_equal</logic>
@@ -426,7 +401,7 @@
         </deleteFile>
         <createDirectory>
             <path>${installdir}/ODKAggregate</path>
-            <progressText>Creating ear directory</progressText>
+            <progressText>Creating war directory</progressText>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -437,8 +412,8 @@
         </createDirectory>
         <copyFile>
             <destination>${installdir}/ODKAggregate</destination>
-            <origin>${temp_dir}/cfg-ear/*</origin>
-            <progressText>Copy ear files to ear directory</progressText>
+            <origin>${temp_dir}/cfg-war/*</origin>
+            <progressText>Copy war files to war directory</progressText>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>

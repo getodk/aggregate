@@ -70,8 +70,8 @@
 								<delete includeemptydirs="true">
 									<fileset dir="${conf.directory}" includes="**/*" />
 								</delete>
-								<touch file="${project.basedir}/files/ODKAggregate.ear" />
-								<delete file="${project.basedir}/files/ODKAggregate.ear" />
+								<touch file="${project.basedir}/files/ODKAggregate.war" />
+								<delete file="${project.basedir}/files/ODKAggregate.war" />
 								<!-- delete the exploded war directory -->
 								<mkdir dir="${project.build.directory}" />
 								<delete includeemptydirs="true">
@@ -119,30 +119,19 @@
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
 										includes="appengine-web.xml" />
 								</delete>
-								<mkdir dir="${project.build.directory}/repackaged-ear" />
+								<mkdir dir="${project.build.directory}/repackaged-war" />
 								<delete includeemptydirs="true">
-									<fileset dir="${project.build.directory}/repackaged-ear" includes="**/*" />
+									<fileset dir="${project.build.directory}/repackaged-war" includes="**/*" />
 								</delete>
-								<mkdir dir="${project.build.directory}/repackaged-ear" />
-								<ear destfile="${project.build.directory}/repackaged-ear/ODKAggregate.ear"
-									appxml="${project.basedir}/files/ear/META-INF/application.xml">
-									<zipfileset dir="${project.build.directory}/exploded-war" includes="**/*" prefix="default">
-										<exclude name="**/backends.xml"/>
-									</zipfileset>
-									<zipfileset dir="${project.build.directory}/exploded-war" includes="**/*" prefix="background">
-										<exclude name="**/backends.xml"/>
-										<exclude name="**/cron.xml"/>
-										<exclude name="**/datastore-indexes.xml"/>
-										<exclude name="**/queue.xml"/>
-									</zipfileset>
-									<fileset dir="${project.basedir}/files/ear" includes="**/*">
-										<exclude name="**/application.xml"/>
-									</fileset>
-								</ear>
-								<touch file="${project.basedir}/files/ODKAggregate.ear" />
-								<delete file="${project.basedir}/files/ODKAggregate.ear" />
-								<copy file="${project.build.directory}/repackaged-ear/ODKAggregate.ear"
-									tofile="${project.basedir}/files/ODKAggregate.ear" />
+								<mkdir dir="${project.build.directory}/repackaged-war" />
+								<war destfile="${project.build.directory}/repackaged-war/ODKAggregate.war"
+									webxml="${project.build.directory}/exploded-war/WEB-INF/web.xml">
+									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
+								</war>
+								<touch file="${project.basedir}/files/ODKAggregate.war" />
+								<delete file="${project.basedir}/files/ODKAggregate.war" />
+								<copy file="${project.build.directory}/repackaged-war/ODKAggregate.war"
+									tofile="${project.basedir}/files/ODKAggregate.war" />
 							</target>
 						</configuration>
 						<goals>
@@ -163,7 +152,7 @@
 							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
 							<arguments>
 								<argument>build</argument>
-								<argument>${project.basedir}/buildEar.xml</argument>
+								<argument>${project.basedir}/buildWar.xml</argument>
 								<argument>windows</argument>
 							</arguments>
 						</configuration>
@@ -175,7 +164,7 @@
 							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
 							<arguments>
 								<argument>build</argument>
-								<argument>${project.basedir}/buildEar.xml</argument>
+								<argument>${project.basedir}/buildWar.xml</argument>
 								<argument>linux</argument>
 							</arguments>
 						</configuration>
@@ -187,7 +176,7 @@
 							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
 							<arguments>
 								<argument>build</argument>
-								<argument>${project.basedir}/buildEar.xml</argument>
+								<argument>${project.basedir}/buildWar.xml</argument>
 								<argument>osx</argument>
 							</arguments>
 						</configuration>
