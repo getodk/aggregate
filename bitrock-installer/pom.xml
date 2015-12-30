@@ -54,6 +54,14 @@
 				  <include>**/*</include>
 				</includes>
 			</resource>
+			<resource>
+				<targetPath>${conf.directory}/ear</targetPath>
+				<filtering>false</filtering>
+				<directory>${project.basedir}/files/ear/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
