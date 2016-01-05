@@ -377,19 +377,6 @@
             <progressText>Building configuration jar</progressText>
             <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
         </zip>
-        <xmlFileSet>
-            <attribute></attribute>
-            <element>//*[local-name()="application"]</element>
-            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
-            <value>${app_id}</value>
-            <ruleList>
-                <compareText>
-                    <logic>does_not_equal</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
-            </ruleList>
-        </xmlFileSet>
         <deleteFile>
             <path>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</path>
             <ruleList>
