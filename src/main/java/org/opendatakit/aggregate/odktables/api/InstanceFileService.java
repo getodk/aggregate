@@ -32,7 +32,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
+import org.apache.wink.common.model.multipart.InMultiPart;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
@@ -68,6 +70,11 @@ public interface InstanceFileService {
 
   public static final String PARAM_AS_ATTACHMENT = "as_attachment";
   public static final String ERROR_MSG_INVALID_ROW_ID = "Invalid RowId.";
+  public static final String ERROR_MSG_MULTIPART_MESSAGE_EXPECTED = "Multipart Form expected.";
+  public static final String ERROR_MSG_MULTIPART_FILES_ONLY_EXPECTED = "Multipart Form of only file contents expected.";
+  public static final String ERROR_MSG_MULTIPART_CONTENT_FILENAME_EXPECTED = "Multipart Form file content must specify instance-relative filename.";
+  public static final String ERROR_MSG_MULTIPART_CONTENT_PARSING_FAILED = "Multipart Form parsing failed.";
+  public static final String ERROR_MSG_MANIFEST_IS_EMPTY_OR_MISSING = "Supplied manifest is missing or specifies no files (empty).";
   public static final String ERROR_MSG_INSUFFICIENT_PATH = "Not Enough Path Segments: must be at least 1.";
   public static final String ERROR_MSG_UNRECOGNIZED_APP_ID = "Unrecognized app id: ";
   public static final String ERROR_MSG_PATH_NOT_UNDER_APP_ID = "File path is not under app id: ";
@@ -78,6 +85,40 @@ public interface InstanceFileService {
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
 
+  /**
+   * The JSON is a OdkTablesFileManifest containing the list of files to be returned.
+   * The files are returned in a multipart form data response.
+   * 
+   * @param httpHeaders
+   * @param manifest
+   * @return
+   * @throws IOException
+   * @throws ODKTaskLockException
+   */
+  @POST
+  @Path("download")
+  @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  @Produces({MediaType.MULTIPART_FORM_DATA})
+  public Response getFiles(@Context HttpHeaders httpHeaders, OdkTablesFileManifest manifest) throws IOException, ODKTaskLockException;
+
+  /**
+   * Takes a multipart form containing the files to be uploaded.
+   * The Content-Disposition for each file should specify the 
+   * instance-relative filepath (using forward slashes).
+   * If not specified, an error is reported.
+   * 
+   * @param req
+   * @param inMP
+   * @return string describing error on failure, otherwise empty and Status.CREATED.
+   * @throws IOException
+   * @throws ODKTaskLockException
+   */
+  @POST
+  @Path("upload")
+  @Consumes({MediaType.MULTIPART_FORM_DATA})
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP) throws IOException, ODKTaskLockException;
+  
   @GET
   @Path("file/{filePath:.*}")
   public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
