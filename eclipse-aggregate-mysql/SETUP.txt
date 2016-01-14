@@ -16,12 +16,99 @@ Specify all the parameters, and get the server running on port 8080, with a data
 (5) Copy the ODKAggregate-settings.jar from the WEB-INF/lib directory of the 
 generated ODK Aggregate war into this project's war/WEB-INF/lib directory.
 
-(6) Configure a new Tomcat 6.0 server with an Installed JRE (not the workspace default).
-This should replace the "Apache Tomcat v6.0 (2)" server target.
+(6) Open Eclipse (Mars)
+
+(7) Go to Help / Install New Software
+choose all available sites
+
+once the selections populate, open "Web, XML, Java EE and OSGi Enterprise Development"
+
+Select
+
+"JST Server Adapters"
+"JST Server Adapters Extensions"
+
+And install those.
+
+(8) After Restart,
+
+Drag the "Install" button on https://marketplace.eclipse.org/content/eclipse-tomcat-plugin
+to your Eclipse workspace (the Package Explorer) to install the Tomcat plugin. 
+
+Proceed to install Tomcat plugin
+
+(9) Go to Window / Preferences  
+
+go to Java / Installed JREs
+
+be sure Java 7 JDK is selected. Apply.
+
+go to Java / Compiler
+
+verify that 1.7 compatibility is selected.
+
+go to Tomcat
+
+Enter the tomcat install directory into the Tomcat home path.
+
+go to Tomcat / Advanced, select the webapps folder of the isntall directory.
+
+go to Tomcat / JVM Settings, change the JRE to Java 7.
+
+go to Tomcat / Tomcat Manager App, specify the username and password for your admin user.
+
+go to Server / Runtime Environment
+
+add an environment
+
+select "Apache Tomcat v6.0"
+
+specify the directory where you installed your local tomcat server.
+specify Java 7 runtime.
+
+Save
+
+(these should be no-op steps if you already have the gae project building)
+
+go to Google / GWT and specify your GWT 2.7 SDK
+
+go to Google / AppEngine and specify the AppEngine SDK
+
+(9) Import the eclipse-aggregate-mysql project into Eclipse (or refresh it)
+
+Go to Properties / Java Build Path
+
+If the server runtime library is failing, delete it.
+Then Add Library ... Server Runtime .. and choose Tomcat 6.0
+
+(10) Configure a new Tomcat 6.0 server with an Installed JRE (not the workspace default).
+
+This should replace the "Apache Tomcat v6.0" server target.
 
 You should now be able to run on port 8080 of that new server. 
 
 It is apparently normal for the minimized jquery Javascript to fail validation. You can ignore that.
+
+(7) Do not forget to update the settings for the Super Dev Mode with the new ports of that server.
+
+See the: 
+==================================
+Running or Debugging under Eclipse
+==================================
+section in CONFIGURE.txt
+
+
+Drag the "Install" button on https://marketplace.eclipse.org/content/eclipse-tomcat-plugin
+to your Eclipse workspace (the Package Explorer) to install the Tomcat plugin. 
+
+(7) Go to Window / Preferences  and select Tomcat
+
+Enter the tomcat install directory into the Tomcat home path.
+Choose "Server.xml" as the Context declaration mode (or change this if you know what you are doing).
+
+Now, under Tomcat, select "JVM Settings" change this to Java 7.
+
+Now, under Tomcat Manager App, specify the username and password for your admin user.
 
 =============================
 Issues
