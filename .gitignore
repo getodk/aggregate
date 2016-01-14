@@ -36,3 +36,16 @@ postgres-unit-tests/target/
 aggregate-gae/target/
 aggregate-gae/src/
 eclipse-aggregate-mysql/.tomcatplugin
+eclipse-aggregate-gae/war/WEB-INF/lib/gwt-servlet.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/jsr107cache-1.1.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/geronimo-jta_1.1_spec-1.1.1.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/geronimo-jpa_3.0_spec-1.1.1.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/datanucleus-jpa-1.1.5.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/appengine-api-1.0-sdk-1.9.30.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/appengine-api-labs.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/appengine-endpoints-deps.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/appengine-endpoints.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/appengine-jsr107cache-1.9.30.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/datanucleus-appengine-1.0.10.final.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/datanucleus-core-1.1.5.jar
+eclipse-aggregate-gae/war/WEB-INF/lib/odk-gae-settings-latest.jar
