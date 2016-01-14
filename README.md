@@ -14,3 +14,8 @@ The developer [wiki](https://github.com/opendatakit/opendatakit/wiki) (including
 the [**opendatakit**](https://github.com/opendatakit/opendatakit) project.
 
 The Google group for software engineering questions is: [opendatakit-developers@](https://groups.google.com/forum/#!forum/opendatakit-developers)
+
+-------
+License
+
+This software is licensed under the [**Apache 2.0 license**](http://www.apache.org/licenses/LICENSE-2.0)
