@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-    <parent>
+	<parent>
 		<groupId>org.opendatakit</groupId>
 		<artifactId>aggregate</artifactId>
 		<version>1.0.1</version>
 		<relativePath>../pom.xml</relativePath>
-    </parent>
+	</parent>
 	<groupId>org.opendatakit</groupId>
 	<artifactId>ODKAggregateInstaller</artifactId>
 	<version>1.0.1</version>
@@ -54,6 +54,14 @@
 				  <include>**/*</include>
 				</includes>
 			</resource>
+			<resource>
+				<targetPath>${conf.directory}/ear</targetPath>
+				<filtering>false</filtering>
+				<directory>${project.basedir}/files/ear/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -72,8 +80,6 @@
 								</delete>
 								<touch file="${project.basedir}/files/ODKAggregate.war" />
 								<delete file="${project.basedir}/files/ODKAggregate.war" />
-								<touch file="${project.basedir}/files/appengine-web.xml" />
-								<delete file="${project.basedir}/files/appengine-web.xml" />
 								<!-- delete the exploded war directory -->
 								<mkdir dir="${project.build.directory}" />
 								<delete includeemptydirs="true">
@@ -115,12 +121,10 @@
 								<unjar dest="${project.build.directory}/exploded-war">
 									<fileset dir="${project.basedir}" includes="*.war"/>
 								</unjar>
-								<copy file="${project.build.directory}/exploded-war/WEB-INF/appengine-web.xml"
-									tofile="${project.basedir}/files/appengine-web.xml"/>
 								<delete quiet="true">
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
 										includes="odk*setting*.jar" />
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
 										includes="appengine-web.xml" />
 								</delete>
 								<mkdir dir="${project.build.directory}/repackaged-war" />
