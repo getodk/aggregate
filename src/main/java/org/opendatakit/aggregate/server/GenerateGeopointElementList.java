@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 University of Washington
+ * Copyright (C) 2016 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,32 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.opendatakit.aggregate.server;
 
 import java.util.List;
 
-import org.opendatakit.aggregate.client.form.KmlSettings;
+import org.opendatakit.aggregate.client.form.GeopointElementList;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
 
-public class GenerateKmlSettings {
+public class GenerateGeopointElementList {
 
-  private KmlSettings settings;
+  private GeopointElementList geopoints;
   private IForm form;
   boolean ignoreRepeats;
 
-  public GenerateKmlSettings(IForm form, boolean ignoreRepeats) {
+  public GenerateGeopointElementList(IForm form, boolean ignoreRepeats) {
     this.form = form;
-    this.settings = new KmlSettings();
+    this.geopoints = new GeopointElementList();
     this.ignoreRepeats = ignoreRepeats;
   }
 
-  public KmlSettings generate() {
+  public GeopointElementList generate() {
     FormElementModel root = form.getTopLevelGroupElement();
     processElementForColumnHead(form, root, root);
-    return settings;
+    return geopoints;
   }
 
   /**
@@ -54,19 +53,14 @@ public class GenerateKmlSettings {
     String nodeName = key.userFriendlyString(form);
     switch (node.getElementType()) {
     case GEOPOINT:
-      settings.addGeopointNode(nodeName, key.toString());
+      geopoints.addGeopointElement(nodeName, key.toString());
       break;
-    case BINARY:
-      settings.addBinaryNode(nodeName, key.toString());
-      break;
-    case REPEAT:
+   case REPEAT:
       if (ignoreRepeats) {
         return;
       }
-    case GROUP:
-      break; // should not be in any list
     default:
-      settings.addTitleNode(nodeName, key.toString());
+      break;
     }
 
     List<FormElementModel> childDataElements = node.getChildren();

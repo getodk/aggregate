@@ -22,7 +22,7 @@ import java.util.HashMap;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.KmlSettings;
+import org.opendatakit.aggregate.client.form.GeopointElementList;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.table.BinaryPopupClickHandler;
@@ -170,13 +170,13 @@ public final class VisualizationPopup extends AbstractPopupBase {
       }
     }, PieChart.PACKAGE, Table.PACKAGE);
 
-    SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
+    SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<GeopointElementList>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
       }
 
-      public void onSuccess(KmlSettings result) {
-        geoPoints.updateValues(result.getGeopointNodes());
+      public void onSuccess(GeopointElementList result) {
+        geoPoints.updateValues(result.getGeopointElements(), false);
       }
     });
 
