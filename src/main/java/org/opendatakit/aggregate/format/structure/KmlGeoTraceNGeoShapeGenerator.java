@@ -18,13 +18,17 @@ package org.opendatakit.aggregate.format.structure;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.format.KmlConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionField;
+import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
@@ -44,8 +48,9 @@ public class KmlGeoTraceNGeoShapeGenerator extends AbstractKmlElementBase {
 
   private FormElementModel nameElement;
 
-  public KmlGeoTraceNGeoShapeGenerator(FormElementModel geoField, FormElementModel nameField) {
-    super(geoField);
+  public KmlGeoTraceNGeoShapeGenerator(FormElementModel geoField, FormElementModel nameField,
+      FormElementModel rootElement) {
+    super(geoField, rootElement);
 
     // Verify that nesting constraints hold.
     if (verifyElementSameLevel(nameField)) {
@@ -67,11 +72,77 @@ public class KmlGeoTraceNGeoShapeGenerator extends AbstractKmlElementBase {
   String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
       CallingContext cc) throws ODKDatastoreException {
 
+    StringBuilder placemarks = new StringBuilder();
+
+    // check if gps coordinate is in top element, else it's in a repeat
+    if (geoParentRootSubmissionElement()) {
+      placemarks.append(generatePlacemark(sub));
+    } else {
+      Queue<SubmissionSet> submissionSetLevelsToExamine = new LinkedList<SubmissionSet>();
+      submissionSetLevelsToExamine.add(sub);
+      while (!submissionSetLevelsToExamine.isEmpty()) {
+        SubmissionSet submissionSet = submissionSetLevelsToExamine.remove();
+        recursiveElementSearchToFindRepeats(submissionSet, submissionSetLevelsToExamine, placemarks);
+      }
+    }
+
+    return placemarks.toString();
+  }
+
+  private void recursiveElementSearchToFindRepeats(SubmissionSet submissionSet,
+      Queue<SubmissionSet> submissionSetLevelsToExamine, StringBuilder placemarks) {
+    List<SubmissionValue> values = submissionSet.getSubmissionValues();
+    if (values == null || values.isEmpty()) {
+      return;
+    }
+
+    for (SubmissionValue value : values) {
+      if (value instanceof SubmissionRepeat) {
+        SubmissionRepeat repeat = (SubmissionRepeat) value;
+        List<SubmissionSet> repeatSets = repeat.getSubmissionSets();
+        if (getGeoElementParent().equals(repeat.getElement())) {
+          // found the correct repeat, generate placemarks
+          for (SubmissionSet set : repeatSets) {
+            placemarks.append(generatePlacemark(set));
+          }
+        } else {
+          submissionSetLevelsToExamine.addAll(repeatSets);
+        }
+      }
+    }
+
+  }
+
+  private String generatePlacemark(SubmissionSet sub) {
     try {
-      // parse into geopoints
-      List<GeoPoint> points = getGeoLineCoordinates(sub.getElementValue(getGeoElement()));
-      if (!points.isEmpty()) {  
-        return generateFormattedGeoTrace(points, getName(sub));
+      // parse value into geopoints
+      SubmissionValue value = sub.getElementValue(getGeoElement());
+      List<GeoPoint> points = getGeoLineCoordinates(value);
+
+      // generate KML placemark
+      if (!points.isEmpty()) {
+        StringBuilder coordinateString = new StringBuilder(BasicConsts.EMPTY_STRING);
+        for (GeoPoint gp : points) {
+          if (gp != null) {
+            if (gp.getLatitude() != null && gp.getLongitude() != null) {
+              coordinateString.append(gp.getLongitude());
+              coordinateString.append(BasicConsts.COMMA);
+              coordinateString.append(gp.getLatitude());
+              if (gp.getAltitude() != null) {
+                coordinateString.append(BasicConsts.COMMA);
+                coordinateString.append(gp.getAltitude());
+              }
+            }
+            coordinateString.append(BasicConsts.NEW_LINE);
+          }
+        }
+        String id = sub.getKey().getKey();
+        String idStr = (id == null) ? BasicConsts.EMPTY_STRING : id;
+        String name = getName(sub);
+        String nameStr = (name == null) ? BasicConsts.EMPTY_STRING : name;
+        return String.format(KmlConsts.KML_LINE_STRING_PLACEMARK_TEMPLATE,
+            StringEscapeUtils.escapeXml10(idStr), StringEscapeUtils.escapeXml10(nameStr),
+            coordinateString.toString().trim());
       }
     } catch (ODKParseException e) {
       // TODO: CHANGE SO THE ERROR GOES TO THE UI
@@ -89,28 +160,6 @@ public class KmlGeoTraceNGeoShapeGenerator extends AbstractKmlElementBase {
       }
     }
     return null;
-  }
-  
-  private String generateFormattedGeoTrace(List<GeoPoint> points, String name) {
-    StringBuilder coordinateString = new StringBuilder(BasicConsts.EMPTY_STRING);
-    for (GeoPoint gp : points) {
-      if (gp != null) {
-        if (gp.getLatitude() != null && gp.getLongitude() != null) {
-          coordinateString.append(gp.getLongitude());
-          coordinateString.append(BasicConsts.COMMA);
-          coordinateString.append(gp.getLatitude());
-          if (gp.getAltitude() != null) {
-            coordinateString.append(BasicConsts.COMMA);
-            coordinateString.append(gp.getAltitude());
-          }
-        }
-        coordinateString.append(BasicConsts.NEW_LINE);
-      }
-    }
-    
-    String nameStr = (name == null) ? BasicConsts.EMPTY_STRING : name;
-    return String.format(KmlConsts.KML_LINE_STRING_PLACEMARK_TEMPLATE, nameStr, coordinateString
-        .toString().trim());
   }
 
   private List<GeoPoint> getGeoLineCoordinates(SubmissionValue subValue) throws ODKParseException {
@@ -137,7 +186,8 @@ public class KmlGeoTraceNGeoShapeGenerator extends AbstractKmlElementBase {
             if (BasicConsts.EMPTY_STRING.equals(values[0])) {
               continue;
             } else {
-              throw new ODKParseException(PARSE_PROBLEM_GEOTRACE_OR_GEOSHAPES_STRING + gpsCoordinate);
+              throw new ODKParseException(PARSE_PROBLEM_GEOTRACE_OR_GEOSHAPES_STRING
+                  + gpsCoordinate);
             }
           } else if (values.length == 2) {
             coordinates = new GeoPoint(new BigDecimal(values[0]), new BigDecimal(values[1]));

@@ -114,7 +114,7 @@ public final class KmlConsts {
     + "  <value>%s</value>\n" 
     + "</Data>\n";
 
-  public static final String KML_LINE_STRING_PLACEMARK_TEMPLATE = "<Placemark>\n" +
+  public static final String KML_LINE_STRING_PLACEMARK_TEMPLATE = "<Placemark id='%s'>\n" +
       "  <name>%s</name>\n" +
       "  <styleUrl>#" + GEOSHAPE_STYLE + "</styleUrl>\n" +
       "  <LineString>\n" +

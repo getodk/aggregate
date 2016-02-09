@@ -35,10 +35,13 @@ abstract class AbstractKmlElementBase {
 
   private FormElementModel geoElement;
   private FormElementModel geoElementParent;
+  private FormElementModel rootElement;
 
-  AbstractKmlElementBase(FormElementModel element) {
+  AbstractKmlElementBase(FormElementModel element, FormElementModel root) {
     geoElement = element;
     geoElementParent = geoElement.getParent();
+    rootElement = root;
+    
     // ignore semantically meaningless nesting groups
     while (geoElementParent.getParent() != null
         && geoElementParent.getElementType().equals(ElementType.GROUP)) {
@@ -95,6 +98,10 @@ abstract class AbstractKmlElementBase {
   String generateDataElement(String name, String value) {
     return String.format(KmlConsts.KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml10(name),
         StringEscapeUtils.escapeXml10(value));
+  }
+  
+  boolean geoParentRootSubmissionElement() {
+      return (geoElementParent.equals(rootElement));
   }
 
 }

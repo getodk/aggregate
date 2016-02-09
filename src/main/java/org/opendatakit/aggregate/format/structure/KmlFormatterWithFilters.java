@@ -104,11 +104,11 @@ public class KmlFormatterWithFilters implements SubmissionFormatter {
       }  else if (kmlElement.getGeoType() == KmlOptionType.GEO_TRACE_N_SHAPE) {
         hasGeotraceOrGeoshape = true;
         
-        FormElementModel geopointField = null;
-        String geopointKey = kmlElement.getGeoElementKey();
-        if (geopointKey != null) {
-          FormElementKey geopointFEMKey = new FormElementKey(geopointKey);
-          geopointField = FormElementModel.retrieveFormElementModel(form, geopointFEMKey);
+        FormElementModel geoField = null;
+        String geoKey = kmlElement.getGeoElementKey();
+        if (geoKey != null) {
+          FormElementKey geoFEMKey = new FormElementKey(geoKey);
+          geoField = FormElementModel.retrieveFormElementModel(form, geoFEMKey);
         }
 
         FormElementModel nameField = null;
@@ -118,7 +118,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter {
           nameField = FormElementModel.retrieveFormElementModel(form, nameFEMKey);
         }
 
-        geoformaters.add(new KmlGeoTraceNGeoShapeGenerator(geopointField, nameField));
+        geoformaters.add(new KmlGeoTraceNGeoShapeGenerator(geoField, nameField, topElement));
       }
     }
   }
