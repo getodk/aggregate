@@ -45,75 +45,72 @@ import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
-*
-* @author wbrunette@gmail.com
-* @author adam.lerer@gmail.com
-* @author mitchellsundt@gmail.com
-*
-*/
+ *
+ * @author wbrunette@gmail.com
+ * @author adam.lerer@gmail.com
+ * @author mitchellsundt@gmail.com
+ *
+ */
 public class KmlGeoPointGenerator extends AbstractKmlElementBase implements RepeatCallbackFormatter {
-  
+
   private static final String LIMITATION_MSG = "limitation: image and title must be in the submission (top-level) or must be in the same repeat group as the gps";
 
   private static final int APPROX_ITEM_LENGTHS = 100;
   private static final int APPROX_TABLE_FORMATTING_LENGTH = 1000;
-  
+
   private FormElementModel imgElement;
   private FormElementModel titleElement;
-    
+
   private ElementFormatter elemFormatter;
   private String baseWebServerUrl;
-  private FormElementModel topElement;
   private List<GpsRepeatRowData> rowsForGpsInRepeats;
-  private boolean imgInGpsRepeat;
-  private boolean titleInGpsRepeat;
-  
-  public KmlGeoPointGenerator(FormElementModel gpsField,
-      FormElementModel titleField, FormElementModel imgField, String webServerUrl, FormElementModel rootElement) {
-    super(gpsField);
+
+  public KmlGeoPointGenerator(FormElementModel gpsField, FormElementModel titleField,
+      FormElementModel imgField, String webServerUrl, FormElementModel rootElement) {
+    super(gpsField, rootElement);
     baseWebServerUrl = webServerUrl;
     elemFormatter = new KmlElementFormatter(webServerUrl, true, this);
-    topElement = rootElement;
-    
+
     // Verify that nesting constraints hold.
-    if(verifyElementSameLevel(titleField)) {
+    if (verifyElementSameLevel(titleField)) {
       titleElement = titleField;
     } else {
       throw new IllegalStateException(LIMITATION_MSG);
     }
-    if(verifyElementSameLevel(titleField)) {
+    if (verifyElementSameLevel(titleField)) {
       imgElement = imgField;
     } else {
       throw new IllegalStateException(LIMITATION_MSG);
     }
- 
+
   }
-  
+
   boolean childVerifyFieldsArePresent(List<FormElementModel> elements) {
     if (titleElement != null && !elements.contains(titleElement)) {
       return false;
-    }    
+    }
     if (imgElement != null && !elements.contains(imgElement)) {
       return false;
     }
     return true;
   }
-  
+
   @Override
   String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
-      CallingContext cc) throws ODKDatastoreException  {
+      CallingContext cc) throws ODKDatastoreException {
 
-    String id = sub.getKey().getKey();
     StringBuilder placemarks = new StringBuilder();
-    
+
     // check if gps coordinate is in top element, else it's in a repeat
-    if (getGeoElementParent() == topElement) {
-      // since both gpsParent equals top element, title & imageURL must be in submission
+    if (geoParentRootSubmissionElement()) {
+      // since both gpsParent equals top element, title & imageURL must be in
+      // submission
       String title = getTitle(sub);
       String imageURL = getImageUrl(sub, cc);
 
       GeoPoint geopoint = getGeoPoint(sub);
       Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
+      String id = sub.getKey().getKey();
       placemarks.append(generateFormattedPlacemark(row, StringEscapeUtils.escapeXml10(id),
           StringEscapeUtils.escapeXml10(title), imageURL, geopoint));
 
@@ -124,16 +121,16 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
       // the call back will populate rowsForGpsInRepeats
       sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
       for (GpsRepeatRowData repeatData : rowsForGpsInRepeats) {
-        String title = titleInGpsRepeat ? repeatData.getTitle() : getTitle(sub);
-        String imageURL = imgInGpsRepeat ? repeatData.getImgUrl() : getImageUrl(sub, cc);
+        String title = repeatData.getTitle();
+        String imageURL = repeatData.getImgUrl();
         placemarks.append(generateFormattedPlacemark(repeatData.getRow(),
-            StringEscapeUtils.escapeXml10(id), StringEscapeUtils.escapeXml10(title), imageURL,
-            repeatData.getGeoPoint()));
+            StringEscapeUtils.escapeXml10(repeatData.getId()),
+            StringEscapeUtils.escapeXml10(title), imageURL, repeatData.getGeoPoint()));
       }
     }
     return placemarks.toString();
   }
-  
+
   @Override
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
       FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
@@ -144,16 +141,17 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
         Row clonedRow = Row.cloneRowValues(row);
         clonedRow.addDataFromRow(rowFromRepeat);
         GeoPoint geopoint = getGeoPoint(repeatSet);
-        String title = titleInGpsRepeat ? getTitle(repeatSet) : null;
-        String imageURL = imgInGpsRepeat ? getImageUrl(repeatSet, cc) : null;
-        GpsRepeatRowData repeatData = new GpsRepeatRowData(geopoint, title, imageURL, clonedRow);
+        String title = getTitle(repeatSet);
+        String imageURL = getImageUrl(repeatSet, cc);
+        String id = repeatSet.getKey().getKey();
+        GpsRepeatRowData repeatData = new GpsRepeatRowData(geopoint, id, title, imageURL, clonedRow);
         rowsForGpsInRepeats.add(repeatData);
       } else {
         row.addDataFromRow(rowFromRepeat);
       }
     }
   }
-  
+
   private GeoPoint getGeoPoint(SubmissionSet set) {
     SubmissionValue geopointField = set.getElementValue(getGeoElement());
     if (geopointField != null) {
@@ -195,7 +193,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
     }
     return null;
   }
-  
+
   private String generateFormattedPlacemark(Row row, String identifier, String title,
       String imageURL, GeoPoint gp) {
 
@@ -243,15 +241,17 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
           KmlConsts.WITH_IMAGE_PLACEMARK_STYLE, titleStr, imgStr, dataStr, geopoint);
     }
   }
-  
-  private class GpsRepeatRowData {
-    private GeoPoint gps;
-    private Row row;
-    private String title;
-    private String imgUrl;
 
-    private GpsRepeatRowData(GeoPoint gps, String title, String imgUrl, Row row) {
+  private final class GpsRepeatRowData {
+    private final GeoPoint gps;
+    private final String id;
+    private final Row row;
+    private final String title;
+    private final String imgUrl;
+
+    private GpsRepeatRowData(GeoPoint gps, String id, String title, String imgUrl, Row row) {
       this.gps = gps;
+      this.id = id;
       this.row = row;
       this.title = title;
       this.imgUrl = imgUrl;
@@ -273,6 +273,9 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
       return imgUrl;
     }
 
+    String getId() {
+        return id;
+    }
   }
 
 }
