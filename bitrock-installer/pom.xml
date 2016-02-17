@@ -126,6 +126,14 @@
 										includes="odk*setting*.jar" />
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
 										includes="appengine-web.xml" />
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+										includes="backends.xml" />
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+										includes="cron.xml" />
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+										includes="datastore-indexes.xml" />
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+										includes="queue.xml" />
 								</delete>
 								<mkdir dir="${project.build.directory}/repackaged-war" />
 								<delete includeemptydirs="true">
