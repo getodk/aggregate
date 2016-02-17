@@ -95,7 +95,7 @@ public abstract class Filter implements Serializable {
     
     Filter other = (Filter) obj;
     return (visibility == null ? (other.visibility == null) : (visibility.equals(other.visibility)))
-        && (rc == null ? (other.rc == null) : (rc.equals(other.rc)))
+        && (rc == null ? (other.rc == null) : (rc == other.rc))
         && (ordinal == null ? (other.ordinal == null) : (ordinal.equals(other.ordinal)));
   }
 

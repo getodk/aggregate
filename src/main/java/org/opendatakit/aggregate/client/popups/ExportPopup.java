@@ -149,7 +149,8 @@ public final class ExportPopup extends AbstractPopupBase {
   }
 
   public void updateUIOptions() {
-    ExportType type = fileType.getSelectedEnumValue();
+    String exportTypeString = fileType.getSelectedValue();
+    ExportType type = (exportTypeString == null) ? null : ExportType.valueOf(exportTypeString);
 
     if (type == null) {
       exportButton.setEnabled(false);
