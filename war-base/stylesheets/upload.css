@@ -1,0 +1,32 @@
+@CHARSET "ISO-8859-1";
+
+* {
+	margin: 0px;
+	padding: 0px;
+}
+
+h1 {
+	color: #07115A;
+	font-size: 20px;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+h1, p {
+	font-family: 'Arial Unicode MS', Arial, sans-serif;
+}
+
+#uploadTable {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+#uploadTable1 {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+#uploadTable2 {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}

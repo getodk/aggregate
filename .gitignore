@@ -49,3 +49,4 @@ eclipse-aggregate-gae/war/WEB-INF/lib/appengine-jsr107cache-1.9.30.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/datanucleus-appengine-1.0.10.final.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/datanucleus-core-1.1.5.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/odk-gae-settings-latest.jar
+bitrock-installer/target/
