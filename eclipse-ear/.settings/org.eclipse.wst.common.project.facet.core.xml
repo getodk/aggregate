@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <faceted-project>
-  <runtime name="Google App Engine"/>
+  <runtime name="Google App Engine (1.9.34)"/>
   <fixed facet="jst.ear"/>
   <installed facet="jst.ear" version="5.0"/>
   <installed facet="com.google.appengine.facet.ear" version="1"/>
