@@ -135,6 +135,7 @@ And extract the SDK.
 ===============================
 Minimal AppEngine Eclipse Setup
 -------------------------------
+This assumes you have completed "Minimal Eclipse Installation Setup"
 
 (1) Finally, start Eclipse (Mars) and select this ODK Aggregate workspace. 
 
@@ -400,8 +401,11 @@ Now open a browser at http://localhost:8888
 
 It should redirect to your Aggregate instance at the IP address you specified.
 
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
+
 ========================================
-Edit-Debug Cycle Considerations
+AppEngine Edit-Debug Cycle Considerations
 ========================================
 
 Now, you should be able to Debug the server-side code using the
@@ -411,6 +415,9 @@ change code, you will probably need to start and stop the server.
 If you change the UI layer, you will want to re-run the GWT compiler,
 and Refresh the project (in the eclipse-default project, where the UI
 code is).
+
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
 
 If you are working with GWT code, you can work in SuperDevMode
 where you set breakpoints within the Chrome development environment.
@@ -429,8 +436,10 @@ the settings you configured in step 17, above.
 Minimal Tomcat6 MySQL/PostgreSQL Eclipse Setup
 --------------------------------------
 
-(0) Download the AppEngine SDK and GWT SDK. These are needed to resolve symbols when
-compiling the source code.
+This assumes you have completed "Minimal Eclipse Installation Setup"
+
+(including the download of the AppEngine SDK and GWT SDK. These are needed to resolve symbols when
+compiling the source code, even when running under Tomcat6.)
 
 (1) Install Tomcat6 on your computer.
 
@@ -439,7 +448,10 @@ Stop and restart the Tomcat6 server so it picks up that library. This must be pr
 for MySQL connections to work. It does not harm anything if this is present when using 
 PostgreSQL.
 
-(3) Start Eclipse (Mars) and select this ODK Aggregate workspace. 
+(3) install the database server of your choice (MySQL or PostgreSQL).
+NOTE:  Be sure that it is configured using a UTF-8 character set as the default.
+
+(4) Start Eclipse (Mars) and select this ODK Aggregate workspace. 
 
 Go to Help / Install New Software.
 
@@ -456,7 +468,7 @@ Google Plugin for Eclipse / Google Plugin for Eclipse 4.4/4.5
 
 Proceed with installing this and restarting Eclipse.
 
-(4) Re-open Eclipse, go to Window / Preferences
+(5) Re-open Eclipse, go to Window / Preferences
 
 Open Google / App Engine and add the AppEngine SDK path that you downloaded and exploded in (5) in earlier section
 
@@ -464,27 +476,19 @@ Open Google / Web Toolkit and add the GWT SDK path of what you downloaded and ex
 
 Choose OK to accept changes and close the preferences dialog.
 
-(5) Once again, go to Window / Preferences
-
-Open Server /Runtime Environment
-
-Select Google AppEngine (it will complain about not having an AppEngine SDK); delete this.
-
-Select Add, choose Google / AppEngine, and accept the defaults to re-create it.
-
-Choose OK to accept changes and close the preferences dialog.
-
-(At this point, Eclipse has the basic AppEngine / GWT configuration.)
-
 (6) Once again, go to Window / Preferences
 
 Open Server /Runtime Environment
 
-Select Apache / Tomcat v6.0 and set it up to point to your 
-installation of Tomcat v6.0 on your system.
+Select Google AppEngine. If it complains about not having an AppEngine SDK the delete this
+and select Add, choose Google / AppEngine, and accept the defaults to re-create it.
 
-Specify the IP address of your box (if you use localhost or 127.0.0.1, 
-follow-on communications with ODK Collect and ODK Briefcase will fail).
+Select Apache Tomcat v6.0. If it complains about not having a configured runtime, then delete this.
+Select Add..., Select Apache / Apache Tomcat v6.0 and set it up to point to your 
+installation of Tomcat v6.0 on your system. Do not choose to create a new server; you are re-using 
+the existing server.
+
+Click OK to save changes.
 
 (7) If you haven't already, go to the Workbench view. Then, 
 Import / Import... / General / Existing Projects into Workspace
@@ -605,42 +609,141 @@ Apply and Compile.
 
 (12) Select eclipse-tomcat6, right-click, properties, 
 
-Go to Servers, select the Tomcat6 server you created earlier as the default server to use.
+(13) Select the Servers tab in the Output area
+
+Delete any existing Tomcat v6.0 server.
+
+Click to create a server.
+
+Choose Tomcat v6.0 Server
+
+Enter the IP address of your computer. If you leave this as localhost, then ODK Collect
+and ODK Briefcase will not be able to fully communicate with your development server.
+
+Click Next
+
+Configure to deploy eclipse-tomcat6 on this server.
+
+Click Finish
+
+(14) Select eclipse-tomcat6 project, right-click Properties
+ 
+Go to Project Facets, select Dynamic Web App, click Runtimes tab, 
+verify that Tomcat v6.0 is chosen.
 
 Apply
 
-Go to Project Facets, select Dynamic Web App, click Runtimes tab, verify that Tomcat v6.0 is chosen.
+Go to Server, select the Tomcat v6.0 server that you just created
 
 Apply
 
-Close
+Click OK
 
-(13) You should now be able to run the server by right-click, Debug As / Debug on Server
+(13) You should now be able to run ODK Aggregate on this Tomcat6 server by 
+right-click, Debug As / Debug on Server
 
-The project will have a validation error reported on it (web.xml not found in WebContent).
+The project may report a validation error (web.xml not found in WebContent).
 You can ignore this. The web.xml is provided in war-base.
+
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
+
+========================================
+Tomcat6 Edit-Debug Cycle Considerations
+========================================
+
+Now, you should be able to Debug the server-side code using the
+Tomcat6 development server. When you are developing, as you 
+change code, you will probably need to start and stop the server.
+
+If you change the UI layer, you will want to re-run the GWT compiler,
+and Refresh the eclipse-tomcat6 project, where the UI
+code is.
+
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
+
+If you are working with GWT code, you can work in SuperDevMode
+where you set breakpoints within the Chrome development environment.
+
+See farther down (below) for configuring GWT.
+
+If something is not picked up, you can try cleaning the project
+and also Clean the server (via right-click on the server on the Servers
+tab). This should refresh everything.  Unlike with AppEngine, this 
+will not clear the content of your database. You would need to do 
+that through your database admin tool (MySQL Workbench or pgAdmin III).
 
 ===============================
 GWT debugging with SuperDevMode
 -------------------------------
 
-You can follow this video:  https://www.youtube.com/watch?v=w9270Yqt-5I
+These instructions are taken from this video:  https://www.youtube.com/watch?v=w9270Yqt-5I
 
-To configure a Java Application execution that you can start separately
-from the webserver to serve GWT code.
+(1) In either the eclipse-ear or eclipse-tomcat6 project, 
+right-click, Debug As / Debug Configurations
 
-Once configured, you can use the Chrome Debugger to set breakpoints and 
-step through the code. 
+Double-click "Java Application" to configure a Java Application execution.
+
+Change the name to, e.g., "AppEngine GWT Codeserver" or "Tomcat6 GWT Codeserver"
+
+Choose Search... and type in Code
+
+Select "CodeServer"
+
+Choose Apply
+
+Click on the (X)= Arguments tab
+
+In Program Arguments, insert the 4 arguments (on one line):
+
+--bindAddress [your IP address]
+-src [path-to-workspace]\src\main\java 
+-launcherDir [path-to-workspace]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\eclipse-tomcat6  
+org.opendatakit.aggregate.AggregateUI
+
+The -launcherDir "tmp0" may be a different directory name (e.g., tmp1, tmp2...). 
+Whichever one contains the eclipse-tomcat6 or eclipse-default is the one you would use.
+If confused, you can stop all servers, blow away all the tmpX directories, and re-publish 
+and re-run the server you have configured to determine what directory has the active content.
+
+Choose Apply
+
+Close
+
+(2) Now, run the server (EAR or Tomcat6)
+
+(3) And run the codeserver you just configured via Debug As / Debug Configurations, and select the configuration.
+
+This will take a long long time, and then emit a URL that the code server is using.
+
+(4) Open a Chrome browser to this URL.
+
+Copy the Dev Mode On / Dev Mode Off buttons up to the bookmarks bar.  
+You may need to delete an earlier copy of these by right-click / Delete.
+And if you have been using Dev Mode, you may need to clear your browser cache.
+
+(5) Now, open the URL to your server (tomcat6 or eclipse-ear).
+
+It will pause compiling aggregateui
+
+And then render the page. 
+
+Choose "Dev Mode On"
+
+(6) Then, to debug, go to Developer Tools 
+
+There will be the standard Javascript Sources tab, and a new tab, Content Scripts.
+
+The content Scripts tab will contain the Java code, and you can set breakpoints in that
+to take effect on the browser, and step through everything there.
+
+I believe you can make code changes in the Java source in Eclipse, and, when you 
+save those changes, they will be picked up and applied after a short delay.
 
 More info here:
 
 http://www.gwtproject.org/articles/superdevmode.html
-
-Note: YOU MUST SPECIFIY:
-
-   --bindAddress
-
-to match the IP address of your server configuration.
 
 ==========================================
 Troubleshooting Debugging/Running 
@@ -665,7 +768,7 @@ Otherwise, when you restart the server, it may use a stale
 copy of the compiled code.
 
 You may also need to stop and start the codeserver during this
-process to get it to be aware of those changes.
+process.
 
 Third, periodically clear your browser cache to force a complete
 re-loading of the clientside javascript.
@@ -687,18 +790,11 @@ and delete the datastore to clear this problem.
 Clearing your Datastore
 -----------------------
 
-To delete the local datastore, you need to find it under
-the .metadata directory. 
-
-It currently seems to live under:
-
-.metadata\.plugins\org.eclipse.wst.server.core\tmp0\eclipse-ear\eclipse-default.war\WEB-INF\appengine-generated
-
-With your server stopped, delete
-
-delete "local_db.bin"
-
-in that directory.
+To delete the local datastore, the easiest way to do this is to 
+Clean your server, which will delete everything and republish it.
+If you do this, you will first need to stop your server, stop
+your codeserver (if debugging the UI), and then Clean, start the
+server, and then start the codeserver (if debugging the UI). 
 
 ==========================================
 Full Maven Development Environment Configuration
