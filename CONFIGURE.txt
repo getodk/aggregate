@@ -165,8 +165,9 @@ Choose OK to accept changes and close the preferences dialog.
 
 Open Server /Runtime Environment
 
-Select Google AppEngine (it will complain about not having an AppEngine SDK); delete this.
+Select Google AppEngine 
 
+If it complains about not having an AppEngine SDK then delete this and 
 Select Add, choose Google / AppEngine, and accept the defaults to re-create it.
 
 Choose OK to accept changes and close the preferences dialog.
@@ -192,6 +193,11 @@ attempting to debug the communications between ODK Aggregate and a device
 
 You can find out your IP address by opening a cmd window and running 
 ipconfig (or, on Mac/Linux, running ifconfig -a).
+
+By default, when running the AppEngine Development Server, it uses port 8888. 
+Be sure that this file has
+
+security.server.port=8888
 
 Save changes.
 
@@ -222,6 +228,7 @@ Click Finish.
 Select "Deployment Assembly"
 
 Select any "Google App Engine Web Libraries" or "Google App Engine" entries and remove them.
+Select and remove the "App Engine SDK" entry.
 
 Click Apply
 
@@ -229,18 +236,19 @@ Go to Java Build Path / Libraries
 
 Select "Server Library" and remove it.
 Select any "Google App Engine Web Libraries" or "Google App Engine" entries and remove them.
+Select and remove the "App Engine SDK" entry.
 
 Click "Add Library"
 
 Choose Server Runtime / Google AppEngine (1.9.34)
 
-And accept it.
+And accept it (this will create a Google App Engine entry).
 
 Click "Add Library"
 
 Choose Google App Engine
 
-And accept it.
+And accept it (this will create an App Engine SDK entry).
 
 Go to Java Build Path / Order and Export
 
@@ -261,6 +269,7 @@ Select:
   AppEngine SDK
 
 Click Apply
+(you may need to repeat this twice to get it to remain)
 
 Select "Project Facets"  
 
@@ -268,7 +277,8 @@ Choose "Google AppEngine (for single module)"
 
 Click on the Runtimes tab.
 
-Uncheck "Google App Engine" and check "Google App Engine (1.9.34)"
+Check the "Google App Engine" entry that has the stylized airplane icon.
+(the one that looks like a server box is missing from your workspace; uncheck that).
 
 Click Apply
 
@@ -290,7 +300,8 @@ Choose "Google AppEngine (for multiple modules)"
 
 Click on the Runtimes tab.
 
-Uncheck "Google App Engine" and check "Google App Engine (1.9.34)"
+Check the "Google App Engine" entry that has the stylized airplane icon.
+(the one that looks like a server box is missing from your workspace; uncheck that).
 
 Click Apply
 
@@ -336,37 +347,8 @@ It will fail with an out-of-memory error.
 
 Stop the server by clicking the red square box on the Console output window.
 
+----------------------------------------
 (17) Select eclipse-ear, right-click, Debug As / Debug Configurations
-
-Select the Google App Engine configuration you created in step (15).
-
-Select the (X)= Arguments tab.
-
-In the VM Arguments section, replace "-Xmx512m" with
-
- "-XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m "
- 
-Click Apply
-
-Choose Close
--------
-If you've done this correctly, the Program Arguments would be something like:
-
---port=8888 --disable_update_check [path...to...]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\eclipse-ear
-
-And the VM Arguments section should become something like:
-
--javaagent:[path...to...]\appengine-java-sdk-1.9.34\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
-
-If you tried to skip a step, the server might not be configured correctly.
-
-(18) Select the Servers tab in the output area.
-
-Right-click on the server you created. Choose Clean.
-
-This will rebuild the server based upon the updated configuration.
-
-(19) Once again, select eclipse-ear, right-click, Debug As / Debug Configurations
 
 Select the Google App Engine configuration you created in step (15).
 
@@ -384,36 +366,64 @@ In the VM Arguments section, replace "-Xmx512m" with
  
 Click Apply
 
-Click Debug
+Choose Close
+-------
+If you've done this correctly, the Program Arguments would be something like:
 
-The server should now start.
+--address=0.0.0.0 --port=8888 --disable_update_check [path...to...]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\eclipse-ear
 
-Open a Chrome browser, and open to the URL
+And the VM Arguments section should become something like:
+
+-javaagent:[path...to...]\appengine-java-sdk-1.9.34\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
+
+If you tried to skip a step, the server might not be configured correctly.
+
+(after Applying these changes, choose Close if you haven't already)
+
+----------------------------------------
+(18) Select the Servers tab in the output area.
+
+Right-click on the server you created. Choose Clean....
+
+This will delete the datastore and rebuild the server based upon the updated configuration.
+
+(19) To run or debug, **YOU CANNOT right-click the server and choose Run or Debug**
+If you do this, all of the settings you changed in step (17) will be lost.
+
+Instead, **YOU MUST** select eclipse-ear, right-click, Debug As / Debug Configurations (Run As / Run Configurations)
+
+This will open up the configuration you made in step (17).
+
+Choose Debug (Run)
+
+Now open a browser at http://localhost:8888
+
+It should redirect to your Aggregate instance at the IP address you specified.
 
 ========================================
 Edit-Debug Cycle Considerations
 ========================================
 
-Now, you should be able to Debug using the AppEngine development
-server. When you are developing, as you change code, you will
-probably need to stop the server, re-run the GWT compiler if the 
-code was in the UI layer, and then re-start the server.
+Now, you should be able to Debug the server-side code using the
+AppEngine development server. When you are developing, as you 
+change code, you will probably need to start and stop the server.
+
+If you change the UI layer, you will want to re-run the GWT compiler,
+and Refresh the project (in the eclipse-default project, where the UI
+code is).
 
 If you are working with GWT code, you can work in SuperDevMode
 where you set breakpoints within the Chrome development environment.
 
-See below for configuring GWT.
+See farther down (below) for configuring GWT.
 
 If something is not picked up, you can try cleaning all the projects
 and also Clean the server (via right-click on the server on the Servers
-tab). This should refresh everything.
+tab). This should refresh everything.  Note, however, that this will
+delete the datastore, too.
 
-The configuration settings for the debug configuration seem to be 
-fragile. If something stops working, verify that these have not 
-been reset.
-
-The most likely reset is the loss of the VM arguments to increase
-the VM size. (step 19, above).
+The most likely problem during development is the inadvertent clearing of 
+the settings you configured in step 17, above. 
 
 ======================================
 Minimal Tomcat6 MySQL/PostgreSQL Eclipse Setup
