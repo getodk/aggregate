@@ -50,3 +50,15 @@ eclipse-aggregate-gae/war/WEB-INF/lib/datanucleus-appengine-1.0.10.final.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/datanucleus-core-1.1.5.jar
 eclipse-aggregate-gae/war/WEB-INF/lib/odk-gae-settings-latest.jar
 bitrock-installer/target/
+build/appengine-java-sdk-1.9.34.zip
+build/appengine-java-sdk-1.9.34/
+war-base/WEB-INF/lib/odk-gae-settings-latest.jar
+eclipse-default/WebContent/WEB-INF/deploy/
+eclipse-default/WebContent/aggregateui/
+eclipse-default/gwt-unitCache/
+eclipse-default/WebContent/WEB-INF/lib/odk-gae-settings-latest.jar
+eclipse-n-background/WebContent/WEB-INF/lib/odk-gae-settings-latest.jar
+eclipse-tomcat6/WebContent/WEB-INF/deploy/
+eclipse-tomcat6/WebContent/aggregateui/
+eclipse-tomcat6/gwt-unitCache/
+eclipse-tomcat6/WebContent/WEB-INF/lib/odk-settings-latest.jar
