@@ -1266,7 +1266,7 @@
                             <configuration>
                               <target>
                                 <mkdir dir="${project.build.directory}/jacoco-it-ear/"/>
-                                <ear destfile="${project.build.directory}/jacoco-it-ear/${project.build.finalName}.ear" basedir="${project.build.directory}/jacoco-it/${project.build.finalName}"/>
+                                <ear destfile="${project.build.directory}/jacoco-it-ear/${project.build.finalName}.ear" appxml="${project.build.directory}/jacoco-it/${project.build.finalName}/META-INF/application.xml" basedir="${project.build.directory}/jacoco-it/${project.build.finalName}"/>
 
                               </target>
                             </configuration>
