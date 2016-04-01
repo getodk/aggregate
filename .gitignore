@@ -66,3 +66,6 @@ aggregate-gae-n-background/target/
 aggregate-gae-default/target/
 aggregate-gae-n-background/src/main/
 aggregate-gae-default/src/main/
+bitrock-installer/files/conf/
+bitrock-installer/files/ODKAggregate.war
+bitrock-installer/*.war
