@@ -8,7 +8,7 @@
     <relativePath>../gae-pom.xml</relativePath>
   </parent>
   <artifactId>aggregate-gae</artifactId>
-  <packaging>war</packaging>
+  <packaging>ear</packaging>
   <name>ODK Aggregate for Google Appengine</name>
   <properties>
     <gae.version>${gooogle.appengine.sdk.version}</gae.version>
@@ -17,18 +17,20 @@
   <dependencies>
     <dependency>
       <groupId>org.opendatakit</groupId>
-      <artifactId>aggregate-src</artifactId>
+      <artifactId>aggregate-gae-default</artifactId>
       <version>latest</version>
+	  <type>war</type>
     </dependency>
     <dependency>
       <groupId>org.opendatakit</groupId>
-      <artifactId>odk-gae-it-settings</artifactId>
+      <artifactId>aggregate-gae-n-background</artifactId>
       <version>latest</version>
+	  <type>war</type>
     </dependency>
     <dependency>
         <groupId>org.apache.wink</groupId>
         <artifactId>wink-client</artifactId>
-        <version>1.4</version>
+        <version>${org.apache.wink.version}</version>
         <scope>test</scope>
     </dependency>
   </dependencies>
@@ -53,50 +55,57 @@
 				</execution>
 			</executions>
 		</plugin>
-		<plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>gwt-maven-plugin</artifactId>
-			<executions>
-			  <execution>
-				<id>gwt-javascript</id>
-			  </execution>
-			</executions>
-		</plugin>
         <plugin>
 			<artifactId>maven-antrun-plugin</artifactId>
 			<executions>
 			  <execution>
-				<id>war-clean</id>
+				<id>ear-clean</id>
 				<phase>pre-clean</phase>
 			  </execution>
 			  <execution>
-				<id>war-prep</id>
+				<id>ear-gae-prep</id>
 				<phase>generate-resources</phase>
 			  </execution>
-			  <execution>
-				<id>war-remove-classes-except-stub</id>
-				<phase>prepare-package</phase>
-			  </execution>
 				<execution>
-					<id>prepare-instrumented-war-folder</id>
+					<id>prepare-instrumented-ear-folder</id>
 					<phase>pre-integration-test</phase>
 				</execution>
 				<execution>
-					<id>add-jacoco-to-war-folder</id>
+					<id>add-jacoco-to-ear-folder</id>
 					<phase>pre-integration-test</phase>
 				</execution>
 				<execution>
-					<id>prepare-instrumented-war</id>
+					<id>prepare-instrumented-ear</id>
 					<phase>pre-integration-test</phase>
 				</execution>
 			</executions>
         </plugin>
         <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-war-plugin</artifactId>
+			<artifactId>maven-ear-plugin</artifactId>
+			<version>${maven.ear.plugin.version}</version>
+			<configuration>
+			  <skinnyWars>false</skinnyWars>
+			  <modules>
+			    <webModule>
+				  <groupId>org.opendatakit</groupId>
+				  <artifactId>aggregate-gae-default</artifactId>
+				  <uri>default</uri>
+				  <unpack>true</unpack>
+				  <contextRoot>default</contextRoot>
+				</webModule>
+			    <webModule>
+				  <groupId>org.opendatakit</groupId>
+				  <artifactId>aggregate-gae-n-background</artifactId>
+				  <uri>background</uri>
+				  <unpack>true</unpack>
+				  <contextRoot>background</contextRoot>
+				</webModule>
+			  </modules>
+			</configuration>
 			<executions>
 			  <execution>
-				<id>war-build</id>
+				<id>ear-build</id>
 				<phase>package</phase>
 			  </execution>
 			</executions>
