@@ -62,3 +62,7 @@ eclipse-tomcat6/WebContent/WEB-INF/deploy/
 eclipse-tomcat6/WebContent/aggregateui/
 eclipse-tomcat6/gwt-unitCache/
 eclipse-tomcat6/WebContent/WEB-INF/lib/odk-settings-latest.jar
+aggregate-gae-n-background/target/
+aggregate-gae-default/target/
+aggregate-gae-n-background/src/main/
+aggregate-gae-default/src/main/
