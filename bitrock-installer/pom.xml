@@ -54,14 +54,6 @@
 				  <include>**/*</include>
 				</includes>
 			</resource>
-			<resource>
-				<targetPath>${conf.directory}/ear</targetPath>
-				<filtering>false</filtering>
-				<directory>${project.basedir}/files/ear/</directory>
-				<includes>
-				  <include>**/*</include>
-				</includes>
-			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -78,6 +70,7 @@
 								<delete includeemptydirs="true">
 									<fileset dir="${conf.directory}" includes="**/*" />
 								</delete>
+								<!-- delete the reconstructed WAR file -->
 								<touch file="${project.basedir}/files/ODKAggregate.war" />
 								<delete file="${project.basedir}/files/ODKAggregate.war" />
 								<!-- delete the exploded war directory -->
@@ -113,6 +106,50 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
+							    <!-- copy Google AppEngine config -->
+								<mkdir dir="${conf.directory}/ear" />
+								<mkdir dir="${conf.directory}/ear/META-INF" />
+								<mkdir dir="${conf.directory}/ear/background" />
+								<mkdir dir="${conf.directory}/ear/background/WEB-INF" />
+								<mkdir dir="${conf.directory}/ear/default" />
+								<mkdir dir="${conf.directory}/ear/default/WEB-INF" />
+								<!-- touch the files, then delete them, then copy them -->
+								<!-- background server -->
+								<touch file="${conf.directory}/ear/background/WEB-INF/appengine-web.xml" />
+								<delete file="${conf.directory}/ear/background/WEB-INF/appengine-web.xml" />
+								<copy file="${toplevel.directory}/eclipse-n-background/WebContent/WEB-INF/appengine-web.xml"
+									tofile="${conf.directory}/ear/background/WEB-INF/appengine-web.xml" />
+								<!-- default server -->
+								<touch file="${conf.directory}/ear/default/WEB-INF/appengine-web.xml" />
+								<delete file="${conf.directory}/ear/default/WEB-INF/appengine-web.xml" />
+								<copy file="${toplevel.directory}/eclipse-default/WebContent/WEB-INF/appengine-web.xml"
+									tofile="${conf.directory}/ear/default/WEB-INF/appengine-web.xml" />
+
+								<touch file="${conf.directory}/ear/default/WEB-INF/cron.xml" />
+								<delete file="${conf.directory}/ear/default/WEB-INF/cron.xml" />
+								<copy file="${toplevel.directory}/eclipse-default/WebContent/WEB-INF/cron.xml"
+									tofile="${conf.directory}/ear/default/WEB-INF/cron.xml" />
+
+								<touch file="${conf.directory}/ear/default/WEB-INF/queue.xml" />
+								<delete file="${conf.directory}/ear/default/WEB-INF/queue.xml" />
+								<copy file="${toplevel.directory}/eclipse-default/WebContent/WEB-INF/queue.xml"
+									tofile="${conf.directory}/ear/default/WEB-INF/queue.xml" />
+
+								<!-- ear/META-INF/ - only appengine-application.xml moves over -->
+									
+								<touch file="${conf.directory}/ear/META-INF/appengine-application.xml" />
+								<delete file="${conf.directory}/ear/META-INF/appengine-application.xml" />
+								<copy file="${toplevel.directory}/eclipse-ear/EarContent/META-INF/appengine-application.xml"
+									tofile="${conf.directory}/ear/META-INF/appengine-application.xml" />
+								
+								<!-- the ear/META-INF/application.xml has directory paths in it -->
+								<!-- use the one that is within this bitrock installer project -->
+								<touch file="${conf.directory}/ear/META-INF/application.xml" />
+								<delete file="${conf.directory}/ear/META-INF/application.xml" />
+								<copy file="${project.basedir}/files/ear/META-INF/application.xml"
+									tofile="${conf.directory}/ear/META-INF/application.xml" />
+
+								<!-- explode the MySQL WAR file and remove various files -->
 								<mkdir dir="${project.build.directory}/exploded-war" />
 								<delete includeemptydirs="true">
 									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />

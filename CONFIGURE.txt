@@ -962,3 +962,9 @@ On Windows, the generated installers are placed under:
 
 C:\Users\Administrator\Documents\InstallBuilder\output
 
+NOTE: the bitrock installer construction process copies configuration files
+from the eclipse-ear (EarContent/appengine-application.xml),
+eclipse-default (WebContent/appengine-web.xml, WebContent/cron.xml, WebContent/queue.xml)
+and eclipse-n-background (WebContent/appengine-web.xml) projects.
+
+Changing those configuration files will alter the installer image.
