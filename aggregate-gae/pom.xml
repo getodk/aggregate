@@ -28,6 +28,12 @@
 	  <type>war</type>
     </dependency>
     <dependency>
+      <groupId>org.opendatakit</groupId>
+      <artifactId>aggregate-src</artifactId>
+      <version>latest</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
         <groupId>org.apache.wink</groupId>
         <artifactId>wink-client</artifactId>
         <version>${org.apache.wink.version}</version>
@@ -52,6 +58,16 @@
 			<executions>
 				<execution>
 					<id>add-java-source</id>
+				</execution>
+			</executions>
+		</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>${maven.compiler.plugin.version}</version>
+			<executions>
+				<execution>
+					<id>compile-test-source</id>
 				</execution>
 			</executions>
 		</plugin>
@@ -116,6 +132,7 @@
 			<artifactId>jacoco-maven-plugin</artifactId>
 		</plugin>
       <!-- This plug-in integrates project with appengine -->
+	  <!-- TODO: update this to https://cloud.google.com/appengine/docs/java/tools/maven -->
         <plugin>
 			<groupId>net.kindleit</groupId>
 			<artifactId>maven-gae-plugin</artifactId>
@@ -128,6 +145,10 @@
 			  <splitJars>true</splitJars>
 			  <jvmFlags>
 				<jvmFlag>-Ddatastore.default_high_rep_job_policy_unapplied_job_pct=20</jvmFlag>
+				<jvmFlag>-XX:PermSize=1536m</jvmFlag>
+				<jvmFlag>-XX:MaxPermSize=1536m</jvmFlag>
+				<jvmFlag>-Xms256m</jvmFlag>
+				<jvmFlag>-Xmx3048m</jvmFlag>
 			  </jvmFlags>
 			  <port>${test.server.port}</port>
 			  <monitorPort>${test.server.gae.monitor.port}</monitorPort>
