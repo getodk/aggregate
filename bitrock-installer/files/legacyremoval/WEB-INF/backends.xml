@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  To set up validation in Eclipse, add appengine-java-sdk/docs/backends.xsd to 
+      XML Catalog with a schema location of http://localhost/backends.xsd -->
+<backends xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://localhost/backends.xsd">
+  <backend name="background">
+  	<instances>1</instances>
+  	<class>B2</class>
+  	<max-concurrent-requests>5</max-concurrent-requests>
+  	<options>
+  	<dynamic>true</dynamic>
+  	</options>
+  </backend>
+</backends>

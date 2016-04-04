@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  To set up validation in Eclipse, add appengine-java-sdk/docs/cron.xsd to
+      XML Catalog with a schema location of http://localhost/cron.xsd -->
+<cronentries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://localhost/cron.xsd">
+  <cron>
+    <url>/gae/watchdog</url>
+    <description>Start a watchdog periodically to nudge things along in cases where quota is exceeded.</description>
+    <schedule>every 45 minutes</schedule>
+  </cron>
+</cronentries>
