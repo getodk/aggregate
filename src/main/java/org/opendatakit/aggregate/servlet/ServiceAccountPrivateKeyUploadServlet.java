@@ -94,12 +94,12 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
        + "            name=\"private_key_file\" /></td>"
        + "      </tr>\n"
        + "      <tr>"
-       + "         <td><label for=\"client_id\">Client ID:</label></td>"
+       + "         <td><label for=\"client_id\">ID (Key ID) or perhaps Client ID:</label></td>"
        + "         <td><input id=\"client_id\" type=\"text\" size=\"80\" name=\"client_id\" value=\"";
   private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_EMAIL = "\" /></td>"
        + "      </tr>"
        + "      <tr>"
-       + "         <td><label for=\"service_account_email\">Email address:</label></td>"
+       + "         <td><label for=\"service_account_email\">Service Account ID (looks like an Email address):</label></td>"
        + "         <td><input id=\"service_account_email\" type=\"text\" size=\"80\" name=\"service_account_email\" value=\"";
   private static final String UPLOAD_PAGE_BODY_END = "\" /></td>"
       + "      </tr>"
