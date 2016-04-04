@@ -196,7 +196,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
       ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, ODK_TABLES_APP_ID);
     if ( value == null || value.length() == 0 ) {
-      value = "tables";
+      value = "default";
     }
     return value;
   }
