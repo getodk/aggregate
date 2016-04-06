@@ -19,14 +19,14 @@ package org.opendatakit.aggregate.client.widgets;
 import org.opendatakit.aggregate.client.popups.EnketoRedirectErrorPopup;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
-
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
 
 public class EnketoWebformButton extends AggregateButton implements ClickHandler {
