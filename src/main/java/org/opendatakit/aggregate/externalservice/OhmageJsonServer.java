@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -166,27 +167,28 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
     builder.setMode(HttpMultipartMode.STRICT)
            .setCharset(UTF_CHARSET);
     
+    ContentType utf8Text = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), UTF_CHARSET);
     // emit the configured publisher parameters if the values are non-empty...
     String value;
     value = getOhmageCampaignUrn();
     if ( value != null && value.length() != 0 ) {
-      builder.addTextBody("campaign_urn", getOhmageCampaignUrn());
+      builder.addTextBody("campaign_urn", getOhmageCampaignUrn(), utf8Text);
     }
     value = getOhmageCampaignCreationTimestamp();
     if ( value != null && value.length() != 0 ) {
-      builder.addTextBody("campaign_creation_timestamp", getOhmageCampaignCreationTimestamp());
+      builder.addTextBody("campaign_creation_timestamp", getOhmageCampaignCreationTimestamp(), utf8Text);
     }
     value = getOhmageUsername();
     if ( value != null && value.length() != 0 ) {
-      builder.addTextBody("user", getOhmageUsername());
+      builder.addTextBody("user", getOhmageUsername(), utf8Text);
     }
     value = getOhmageHashedPassword();
     if ( value != null && value.length() != 0 ) {
-      builder.addTextBody("passowrd", getOhmageHashedPassword());
+      builder.addTextBody("passowrd", getOhmageHashedPassword(), utf8Text);
     }
     // emit the client identity and the json representation of the survey...
-    builder.addTextBody("client", cc.getServerURL());
-    builder.addTextBody("survey", gson.toJson(surveys));
+    builder.addTextBody("client", cc.getServerURL(), utf8Text);
+    builder.addTextBody("survey", gson.toJson(surveys), utf8Text);
 
     // emit the file streams for all the media attachments
     for (Entry<UUID, ByteArrayBody> entry : photos.entrySet()) {
