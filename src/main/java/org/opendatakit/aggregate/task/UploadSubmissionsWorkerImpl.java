@@ -119,6 +119,10 @@ public class UploadSubmissionsWorkerImpl {
 
     try {
       pExtService = pFsc.getExternalService(cc);
+      if (pExtService == null) {
+          logger.error("Upload not performed -- obsolete external service publisher.");
+          return;
+      }
       form = FormFactory.retrieveFormByFormId(pFsc.getFormId(), cc);
       if (!form.hasValidFormDefinition()) {
         logger.error("Upload not performed -- ill-formed form definition.");

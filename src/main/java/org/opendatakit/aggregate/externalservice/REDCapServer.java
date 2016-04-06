@@ -41,11 +41,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.entity.mime.FormBodyPart;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
@@ -226,24 +224,17 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
      * form-data submission it will accept from the client. The following should
      * work, but either resets the socket or returns a 403 error.
      */
-    MultipartEntity postentity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, null,
-        UTF_CHARSET);
-    FormBodyPart fb;
-    fb = new FormBodyPart("token", new StringBody(getApiKey(), UTF_CHARSET));
-    postentity.addPart(fb);
-    fb = new FormBodyPart("content", new StringBody("file", UTF_CHARSET));
-    postentity.addPart(fb);
-    fb = new FormBodyPart("action", new StringBody("import", UTF_CHARSET));
-    postentity.addPart(fb);
-    fb = new FormBodyPart("record", new StringBody(recordID, UTF_CHARSET));
-    postentity.addPart(fb);
-    fb = new FormBodyPart("field", new StringBody(fileField, UTF_CHARSET));
-    postentity.addPart(fb);
-    fb = new FormBodyPart("file", new ByteArrayBody(blob_value.getBlob(1, cc), contentType,
-        filename));
-    postentity.addPart(fb);
+    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+    builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+           .setCharset(UTF_CHARSET);
+    builder.addTextBody("token", getApiKey())
+           .addTextBody("content", "file")
+           .addTextBody("action", "import")
+           .addTextBody("record", recordID)
+           .addTextBody("field", fileField)
+           .addBinaryBody("file", blob_value.getBlob(1,  cc), ContentType.create(contentType), filename);
 
-    submitPost("File import", postentity, null, cc);
+    submitPost("File import", builder.build(), null, cc);
   }
 
   @Override
