@@ -203,7 +203,8 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       // NOTE: Dropped the check because name was not a good value to compare
 
       Drive.Permissions.Create createPerm = drive.permissions().create(fileId, newPermission);
-      createPerm.setSendNotificationEmail(false);
+      // ownership transfer now requires notification e-mail
+      // createPerm.setSendNotificationEmail(false);
       createPerm.setTransferOwnership(true);
       Permission response = createPerm.execute();
 
