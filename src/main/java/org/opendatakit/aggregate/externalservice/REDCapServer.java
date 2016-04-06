@@ -224,14 +224,15 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
      * form-data submission it will accept from the client. The following should
      * work, but either resets the socket or returns a 403 error.
      */
+    ContentType utf8Text = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), UTF_CHARSET);
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();
     builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
            .setCharset(UTF_CHARSET);
-    builder.addTextBody("token", getApiKey())
-           .addTextBody("content", "file")
-           .addTextBody("action", "import")
-           .addTextBody("record", recordID)
-           .addTextBody("field", fileField)
+    builder.addTextBody("token", getApiKey(), utf8Text)
+           .addTextBody("content", "file", utf8Text)
+           .addTextBody("action", "import", utf8Text)
+           .addTextBody("record", recordID, utf8Text)
+           .addTextBody("field", fileField, utf8Text)
            .addBinaryBody("file", blob_value.getBlob(1,  cc), ContentType.create(contentType), filename);
 
     submitPost("File import", builder.build(), null, cc);
