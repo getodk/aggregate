@@ -63,3 +63,5 @@ aggregate-mysql/src/
 aggregate-postgres/src/
 .recommenders/
 
+build/chromedriver_mac32-2.20.zip
+build/selenium-java-2.45.0.zip
