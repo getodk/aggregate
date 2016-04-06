@@ -265,6 +265,8 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           case METADATA: 
             // This keeps lint warnings down...
             break;
+          case GEOSHAPE:
+          case GEOTRACE:
           case STRING: {
             StringSubmissionType str = (StringSubmissionType) value;
             String strValue = str.getValue();

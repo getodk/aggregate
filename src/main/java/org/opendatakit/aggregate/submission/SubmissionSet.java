@@ -389,6 +389,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
       } else {
         DynamicCommonFieldsBase rowGroup = getGroupBackingObject(m);
         switch (m.getFormDataModel().getElementType()) {
+        case GEOTRACE:
+        case GEOSHAPE:
         case STRING:
           if (rowGroup == null) {
             throw new IllegalStateException("Unexpectedly null backingObject");
@@ -904,6 +906,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
       case SELECT1:
       case SELECTN:
       case BINARY:
+      case GEOTRACE: // since based on string
+      case GEOSHAPE: // since based on string
       case STRING:
       case REPEAT:
         entry.getValue().persist(cc);
