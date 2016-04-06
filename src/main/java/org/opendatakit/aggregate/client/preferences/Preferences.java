@@ -158,7 +158,7 @@ public class Preferences {
     if (appName != null && appName.length() != 0) {
       return appName;
     }
-    return "tables";
+    return "default";
   }
 
   public static Boolean getFasterBackgroundActionsDisabled() {

@@ -48,9 +48,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
     b.param(ServletConsts.FORM_ID, form.getFormId());
     b.param(ServletConsts.PERSISTENT_RESULTS_KEY, persistentResults.getSubmissionKey().toString());
     b.param(ServletConsts.ATTEMPT_COUNT, Long.toString(attemptCount));
-    b.param(KmlGenerator.GEOPOINT_FIELD, params.get(KmlGenerator.GEOPOINT_FIELD));
-    b.param(KmlGenerator.TITLE_FIELD, params.get(KmlGenerator.TITLE_FIELD));
-    b.param(KmlGenerator.IMAGE_FIELD, params.get(KmlGenerator.IMAGE_FIELD));
+    b.param(KmlGenerator.KML_SELECTIONS_KEY, params.get(KmlGenerator.KML_SELECTIONS_KEY));
     b.enqueue();
   }
 }

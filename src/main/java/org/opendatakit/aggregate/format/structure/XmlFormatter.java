@@ -95,6 +95,8 @@ public class XmlFormatter implements SubmissionFormatter {
           case JRTIME:
           case INTEGER:
           case DECIMAL:
+          case GEOTRACE:
+          case GEOSHAPE:
           case GEOPOINT:
           case BINARY:  // identifies BinaryContent table
           case BOOLEAN:

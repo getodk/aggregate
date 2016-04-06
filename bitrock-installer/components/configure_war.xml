@@ -11,24 +11,23 @@
             <name>temp</name>
             <platforms>all</platforms>
             <distributionFileList>
-	<!-- as follows:
+	        <!-- as follows:
 			files/conf - configuration extracted from maven build tree.
 			files/mf - fake Manifest.mf directory structure
 			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
 			files/ODKAggregate.war - war file minus site-specific settings.
-			files/appengine-web.xml - copy of the appengine-web.xml (so we can update it)
 			-->
-	<distributionDirectory>
+	            <distributionDirectory>
                     <origin>files/conf</origin>
                 </distributionDirectory>
                 <distributionDirectory>
                     <origin>files/mf</origin>
                 </distributionDirectory>
+                <distributionDirectory>
+                    <origin>files/legacyremoval</origin>
+                </distributionDirectory>
                 <distributionFile>
                     <origin>files/ODKAggregate.war</origin>
-                </distributionFile>
-                <distributionFile>
-                    <origin>files/appengine-web.xml</origin>
                 </distributionFile>
             </distributionFileList>
         </folder>
@@ -375,28 +374,22 @@
             <origin>${temp_dir}/mf/*</origin>
         </copyFile>
         <zip>
-	<!-- create the settings jar -->
-	<baseDirectory>${temp_dir}/jarBody</baseDirectory>
+            <!-- create the settings jar -->
+            <baseDirectory>${temp_dir}/jarBody</baseDirectory>
             <files>${temp_dir}/jarBody/*</files>
             <progressText>Building configuration jar</progressText>
             <zipFile>${temp_dir}/cfg-war/WEB-INF/lib/${settings_jar}</zipFile>
         </zip>
-        <copyFile>
-            <destination>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</destination>
-            <origin>${temp_dir}/appengine-web.xml</origin>
-        </copyFile>
-        <xmlFileSet>
-            <attribute></attribute>
-            <element>//*[local-name()="application"]</element>
-            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
-            <value>${app_id}</value>
-        </xmlFileSet>
-        <xmlFileSet>
-            <attribute></attribute>
-            <element>//*[local-name()="version"]</element>
-            <file>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</file>
-            <value>1</value>
-        </xmlFileSet>
+        <deleteFile>
+            <path>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</path>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </deleteFile>
         <zip>
             <baseDirectory>${temp_dir}/cfg-war</baseDirectory>
             <files>${temp_dir}/cfg-war/*</files>
@@ -414,8 +407,8 @@
             <path>${installdir}/ODKAggregate</path>
         </deleteFile>
         <createDirectory>
-            <path>${installdir}/ODKAggregate</path>
-            <progressText>Creating war directory</progressText>
+            <path>${installdir}/LegacyRemoval</path>
+            <progressText>Creating legacy backend removal directory</progressText>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -425,9 +418,9 @@
             </ruleList>
         </createDirectory>
         <copyFile>
-            <destination>${installdir}/ODKAggregate</destination>
-            <origin>${temp_dir}/cfg-war/*</origin>
-            <progressText>Copy war files to war directory</progressText>
+            <destination>${installdir}/LegacyRemoval</destination>
+            <origin>${temp_dir}/legacyremoval/*</origin>
+            <progressText>Copy legacy deployment files to LegacyRemoval directory</progressText>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -436,6 +429,118 @@
                 </compareText>
             </ruleList>
         </copyFile>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="application"]</element>
+            <file>${installdir}/LegacyRemoval/WEB-INF/appengine-web.xml</file>
+            <value>${app_id}</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </xmlFileSet>
+        <createDirectory>
+            <path>${installdir}/ODKAggregate</path>
+            <progressText>Creating ear directory</progressText>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </createDirectory>
+        <copyFile>
+            <destination>${installdir}/ODKAggregate/default</destination>
+            <origin>${temp_dir}/cfg-war/*</origin>
+            <progressText>Copy war files to ear/default directory</progressText>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </copyFile>
+        <copyFile>
+            <destination>${installdir}/ODKAggregate/background</destination>
+            <origin>${temp_dir}/cfg-war/*</origin>
+            <progressText>Copy war files to ear/background directory</progressText>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </copyFile>
+        <copyFile>
+            <destination>${installdir}/ODKAggregate</destination>
+            <origin>${temp_dir}/conf/ear/*</origin>
+            <progressText>Copy ear files to ear directory</progressText>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </copyFile>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="application"]</element>
+            <file>${installdir}/ODKAggregate/default/WEB-INF/appengine-web.xml</file>
+            <value>${app_id}</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="application"]</element>
+            <file>${installdir}/ODKAggregate/background/WEB-INF/appengine-web.xml</file>
+            <value>${app_id}</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="application"]</element>
+            <file>${installdir}/ODKAggregate/META-INF/appengine-application.xml</file>
+            <value>${app_id}</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="display-name"]</element>
+            <file>${installdir}/ODKAggregate/META-INF/application.xml</file>
+            <value>${instance_display_name}</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+            </ruleList>
+        </xmlFileSet>
         <setInstallerVariable>
             <name>host_port</name>
             <value>${hostname}:${http_port}</value>

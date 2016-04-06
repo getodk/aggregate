@@ -112,8 +112,11 @@ function writeScriptingFiles(action) {
  	file.WriteLine('echo found java in PATH... %found% >> "' + window.logfileName + '"');
  	file.WriteLine('goto doaction');
  	file.WriteLine(':doaction');
-	file.WriteLine('( "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ---- WEBSITE COMPLETE - BEGIN BACKEND ---- >> "' + window.logfileName +
-    '" && "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin backends ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" )');
+	file.WriteLine('( "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin backends "' + cd + '\\LegacyRemoval" list < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ---- LISTING OF BACKENDS COMPLETE ---- >> "' + window.logfileName +  '" )');
+	file.WriteLine('echo backendlist%ERRORLEVEL% >> "' + window.logfileName + '"');
+	file.WriteLine('( "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin backends "' + cd + '\\LegacyRemoval"  delete background < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ---- REMOVAL OF BACKENDS COMPLETE ---- >> "' + window.logfileName +  '" )');
+	file.WriteLine('echo backenddelete%ERRORLEVEL% >> "' + window.logfileName + '"');
+	file.WriteLine('( "' + cd + '\\appengine-java-sdk\\bin\\appcfg.cmd" "--email=' + txtName.value + '" --passin ' + action + ' "' + cd + '\\ODKAggregate" < "' + cd + '\\userpass.txt" 2>&1 | find /V "assword fo" >> "' + window.logfileName + '" && echo ---- WEBSITE COMPLETE ---- >> "' + window.logfileName + '" )');
 	file.WriteLine('goto outcome%ERRORLEVEL%');
 	file.WriteLine(':outcome1');
 	file.WriteLine('echo ---END-SCRIPT-FAILURE--- >> "' + window.logfileName + '"');

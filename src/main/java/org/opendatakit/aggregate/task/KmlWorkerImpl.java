@@ -24,10 +24,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
@@ -54,27 +54,21 @@ public class KmlWorkerImpl {
   private final IForm form;
   private final SubmissionKey persistentResultsKey;
   private final Long attemptCount;
-  private final FormElementModel titleField;
-  private final FormElementModel geopointField;
-  private final FormElementModel imageField;
+  private final List<KmlSelection> kmlElementsToInclude;
   private final CallingContext cc;
 
   public KmlWorkerImpl(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-      FormElementModel titleField, FormElementModel geopointField, FormElementModel imageField,
-      CallingContext cc) {
+      List<KmlSelection> kmlElementsToInclude, CallingContext cc) {
     this.form = form;
     this.persistentResultsKey = persistentResultsKey;
     this.attemptCount = attemptCount;
-    this.titleField = titleField;
-    this.geopointField = geopointField;
-    this.imageField = imageField;
+    this.kmlElementsToInclude = kmlElementsToInclude;
     this.cc = cc;
   }
 
   public void generateKml() {
-    logger.info("Beginning KML generation: " + persistentResultsKey.toString() +
-                " form " + form.getFormId());
-
+    logger.info("Beginning KML generation: " + persistentResultsKey.toString() + " form "
+        + form.getFormId());
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -100,9 +94,10 @@ public class KmlWorkerImpl {
       }
       filterGroup.setQueryFetchLimit(ServletConsts.EXPORT_CURSOR_CHUNK_SIZE);
 
-      query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
-      formatter = new KmlFormatterWithFilters(form, cc.getServerURL(), geopointField,
-          titleField, imageField, pw, filterGroup, cc);
+      query = new QueryByUIFilterGroup(form, filterGroup, CompletionFlag.ONLY_COMPLETE_SUBMISSIONS,
+          cc);
+      formatter = new KmlFormatterWithFilters(form, cc.getServerURL(), kmlElementsToInclude, pw,
+          filterGroup, cc);
 
       logger.info("after setup of KML file generation for " + form.getFormId());
       formatter.beforeProcessSubmissions(cc);
@@ -110,10 +105,13 @@ public class KmlWorkerImpl {
       int count = 0;
       for (;;) {
         count++;
-        logger.info("iteration " + Integer.toString(count) + " before issuing query for " + form.getFormId());
+        logger.info("iteration " + Integer.toString(count) + " before issuing query for "
+            + form.getFormId());
         submissions = query.getResultSubmissions(cc);
-        if ( submissions.isEmpty()) break;
-        logger.info("iteration " + Integer.toString(count) + " before emitting kml for " + form.getFormId());
+        if (submissions.isEmpty())
+          break;
+        logger.info("iteration " + Integer.toString(count) + " before emitting kml for "
+            + form.getFormId());
         formatter.processSubmissionSegment(submissions, cc);
       }
       logger.info("wrapping up kml generation for " + form.getFormId());
@@ -128,15 +126,17 @@ public class KmlWorkerImpl {
       if (attemptCount.equals(r.getAttemptCount())) {
         logger.info("saving kml into PersistentResults table for " + form.getFormId());
         r.setResultFile(outputFile, HtmlConsts.RESP_TYPE_KML,
-            form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND, false, cc);
+            form.getViewableFormNameSuitableAsFileName() + ServletConsts.KML_FILENAME_APPEND,
+            false, cc);
         r.setStatus(ExportStatus.AVAILABLE);
         r.setCompletionDate(new Date());
-        if(subFilterGroup != null) {
+        if (subFilterGroup != null) {
           subFilterGroup.delete(cc);
         }
         r.persist(cc);
       } else {
-        logger.warn("stale KML activity - do not save file in PersistentResults table for " + form.getFormId());
+        logger.warn("stale KML activity - do not save file in PersistentResults table for "
+            + form.getFormId());
       }
     } catch (Exception e) {
       failureRecovery(e);
@@ -151,17 +151,21 @@ public class KmlWorkerImpl {
     try {
       PersistentResults r = new PersistentResults(persistentResultsKey, cc);
       if (attemptCount.equals(r.getAttemptCount())) {
-        logger.info("Exception recovery during KML generation - mark as failed for " + form.getFormId());
+        logger.info("Exception recovery during KML generation - mark as failed for "
+            + form.getFormId());
         r.deleteResultFile(cc);
         r.setStatus(ExportStatus.FAILED);
         r.persist(cc);
       } else {
-        logger.warn("Exception recovery during KML generation - skipped - not the active attempt! for " + form.getFormId());
+        logger
+            .warn("Exception recovery during KML generation - skipped - not the active attempt! for "
+                + form.getFormId());
       }
     } catch (Exception ex) {
       // something is hosed -- don't attempt to continue.
       // TODO: watchdog: find this once lastRetryDate is way late?
-      logger.error("Exception during exception recovery: " + ex.toString() + " for " + form.getFormId());
+      logger.error("Exception during exception recovery: " + ex.toString() + " for "
+          + form.getFormId());
     }
   }
 
