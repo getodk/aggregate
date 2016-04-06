@@ -46,12 +46,11 @@ public interface FormService extends RemoteService {
   
   Boolean createJsonFileFromFilter(FilterGroup group) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  KmlSettings getPossibleKmlSettings(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  KmlOptionsSummary getPossibleKmlSettings(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
-  Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey,
-      String binaryKey) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  Boolean createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
-  KmlSettings getGpsCoordnates(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  GeopointElementList getGpsCoordnates(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
   void deleteExport(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 }

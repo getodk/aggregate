@@ -15,11 +15,12 @@
  */
 package org.opendatakit.aggregate.task.tomcat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.datamodel.FormElementKey;
-import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
@@ -30,9 +31,9 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * This is a singleton bean.  It cannot have any per-request state.
- * It uses a static inner class to encapsulate the per-request state
- * of a running background task.
+ * This is a singleton bean. It cannot have any per-request state. It uses a
+ * static inner class to encapsulate the per-request state of a running
+ * background task.
  * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
@@ -40,57 +41,46 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class KmlGeneratorImpl implements KmlGenerator {
 
-	static class KmlRunner implements Runnable {
-		final KmlWorkerImpl impl;
+  static class KmlRunner implements Runnable {
+    final KmlWorkerImpl impl;
 
-		public KmlRunner(IForm form, SubmissionKey persistentResultsKey,
-				long attemptCount, FormElementModel titleField,
-				FormElementModel geopointField, FormElementModel imageField,
-				CallingContext cc) {
-			
-			impl = new KmlWorkerImpl(form, persistentResultsKey, attemptCount,
-					titleField, geopointField, imageField, cc);
-		}
+    public KmlRunner(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
+        List<KmlSelection> kmlElementsToInclude, CallingContext cc) {
 
-		@Override
-		public void run() {
-			impl.generateKml();
-		}
-	}
+      impl = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, kmlElementsToInclude, cc);
+    }
 
-	@Override
-	public void createKmlTask(IForm form, PersistentResults persistentResults, long attemptCount,
-			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
-	    Map<String,String> params = persistentResults.getRequestParameters();
-	    FormElementModel titleField = null;
-	    FormElementModel imageField = null;
-	    FormElementModel geopointField = null;
-	    if ( params != null ) {
-	    	String field;
-	    	field = params.get(KmlGenerator.TITLE_FIELD);
-	        if (field != null) {
-	          FormElementKey titleKey = new FormElementKey(field);
-	          titleField = FormElementModel.retrieveFormElementModel(form, titleKey);
-	        }
-	        field = params.get(KmlGenerator.GEOPOINT_FIELD);
-	        if (field != null) {
-	          FormElementKey geopointKey = new FormElementKey(field);
-	          geopointField = FormElementModel.retrieveFormElementModel(form, geopointKey);
-	        }
-	        field = params.get(KmlGenerator.IMAGE_FIELD);
-	        if (field != null) {
-	          if (!field.equals(KmlGenerator.NONE)) {
-	            FormElementKey imageKey = new FormElementKey(field);
-	            imageField = FormElementModel.retrieveFormElementModel(form, imageKey);
-	          }
-	        }
-	    }
-		WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
-		// use watchdog's calling context in runner...
-		KmlRunner runner = new KmlRunner(form, persistentResults.getSubmissionKey(), attemptCount,
-				titleField, geopointField, imageField, wd.getCallingContext());
-		AggregrateThreadExecutor exec = AggregrateThreadExecutor
-				.getAggregateThreadExecutor();
-		exec.execute(runner);
-	}
+    @Override
+    public void run() {
+      impl.generateKml();
+    }
+  }
+
+  @Override
+  public void createKmlTask(IForm form, PersistentResults persistentResults, long attemptCount,
+      CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+
+    List<KmlSelection> kmlElementsToInclude = new ArrayList<KmlSelection>();
+
+    Map<String, String> params = persistentResults.getRequestParameters();
+    String encodedString = params.get(KmlGenerator.KML_SELECTIONS_KEY);
+    if (encodedString != null) {
+      String[] kmlSelectionsEncodedStrings = encodedString
+          .split(KmlGenerator.KML_SELECTIONS_DELIMITER);
+      for (String kmlSelectionEncodedString : kmlSelectionsEncodedStrings) {
+        KmlSelection kmlElement = KmlSelection
+            .createKmlSelectionFromEncodedString(kmlSelectionEncodedString);
+        if (kmlElement != null) {
+          kmlElementsToInclude.add(kmlElement);
+        }
+      }
+    }
+
+    WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
+    // use watchdog's calling context in runner...
+    KmlRunner runner = new KmlRunner(form, persistentResults.getSubmissionKey(), attemptCount,
+        kmlElementsToInclude, wd.getCallingContext());
+    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+    exec.execute(runner);
+  }
 }

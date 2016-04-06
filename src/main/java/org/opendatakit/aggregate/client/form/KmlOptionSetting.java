@@ -18,20 +18,20 @@ package org.opendatakit.aggregate.client.form;
 
 import java.io.Serializable;
 
-public final class KmlSettingOption implements Serializable {
+public final class KmlOptionSetting implements Serializable {
 
   /**
    * Serialization Version Identifier
    */
-  private static final long serialVersionUID = -6824246262410791227L;
+  private static final long serialVersionUID = -6824246262410791228L;
 
   private String displayName;
   private String elementKey;
 
-  public KmlSettingOption() {
+  public KmlOptionSetting() {
   }
 
-  public KmlSettingOption(String displayName, String elementKey) {
+  public KmlOptionSetting(String displayName, String elementKey) {
     this.setDisplayName(displayName);
     this.setElementKey(elementKey);
   }
