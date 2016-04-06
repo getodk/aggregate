@@ -30,10 +30,8 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface KmlGenerator {
 
-	public static final String NONE = "None";
-	public static final String TITLE_FIELD = "titleField";
-	public static final String IMAGE_FIELD = "imageField";
-	public static final String GEOPOINT_FIELD = "geopointField";
+	public static final String KML_SELECTIONS_KEY = "KMLSELECTIONS";
+	public static final String KML_SELECTIONS_DELIMITER = "###";
 
 	public void createKmlTask(IForm form, PersistentResults persistentResult,
 			long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
