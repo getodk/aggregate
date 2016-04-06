@@ -35,38 +35,39 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gooogle.appengine.sdk.version>1.9.34</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
         <gae.version>${gooogle.appengine.sdk.version}</gae.version>
-        <project.httpclient.version>4.2.2</project.httpclient.version>
-        <project.jsr305.version>1.3.9</project.jsr305.version>
+        <apache.httpclient.version>4.5.2</apache.httpclient.version>
+        <apache.httpcore.version>4.4.4</apache.httpcore.version>
+        <apache.httpmime.version>4.5.2</apache.httpmime.version>
+        <findbugs.jsr305.version>3.0.1</findbugs.jsr305.version>
         <google.gdata.version>1.47.1</google.gdata.version>
-        <project.http.version>1.20.0</project.http.version> <!-- match google.api-client.version -->
-        <google.api-client.version>1.20.0</google.api-client.version>
-        <google.api-services-drive.version>v2-rev167-1.20.0</google.api-services-drive.version>
+        <google.api-client.version>1.21.0</google.api-client.version>
+        <google.api-services-drive.version>v3-rev17-1.21.0</google.api-services-drive.version>
         <google.gwt.version>2.7.0</google.gwt.version>
         <org.apache.wink.version>1.4</org.apache.wink.version>
-        <jacoco.maven.plugin.version>0.7.5.201505241946</jacoco.maven.plugin.version>
-        <maven.surefire.report.plugin.version>2.16</maven.surefire.report.plugin.version>
-        <maven.surefire.plugin.version>2.16</maven.surefire.plugin.version>
+        <jacoco.maven.plugin.version>0.7.6.201602180812</jacoco.maven.plugin.version>
+        <maven.surefire.report.plugin.version>2.19.1</maven.surefire.report.plugin.version>
+        <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
         <surefire.argLine>-Xms300m -Xmx3048m -XX:+UseParallelGC -XX:+UseParallelOldGC</surefire.argLine> <!-- need a huge JVM size for GAE datastore -->
-        <maven.failsafe.plugin.version>2.16</maven.failsafe.plugin.version>
-        <cargo.maven2.plugin.version>1.4.17</cargo.maven2.plugin.version>
-        <build.helper.maven.plugin.version>1.8</build.helper.maven.plugin.version>
+        <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
+        <cargo.maven2.plugin.version>1.4.19</cargo.maven2.plugin.version>
+        <build.helper.maven.plugin.version>1.10</build.helper.maven.plugin.version>
         <gwt.maven.plugin.version>2.7.0</gwt.maven.plugin.version>
         <maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
-        <maven.jar.plugin.version>2.4</maven.jar.plugin.version>
-        <maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
-        <maven.war.plugin.version>2.4</maven.war.plugin.version>
+        <maven.jar.plugin.version>2.6</maven.jar.plugin.version>
+        <maven.javadoc.plugin.version>2.10.3</maven.javadoc.plugin.version>
+        <maven.war.plugin.version>2.6</maven.war.plugin.version>
         <maven.ear.plugin.version>2.10.1</maven.ear.plugin.version>
         <maven.antrun.plugin.version>1.8</maven.antrun.plugin.version>
-        <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
-        <junit.version>4.11</junit.version>
-        <com.fasterxml.jackson.base.version>2.4.1</com.fasterxml.jackson.base.version>
-        <com.fasterxml.jackson.core.version>2.4.1.1</com.fasterxml.jackson.core.version>
-        <com.fasterxml.jackson.version>2.4.1.3</com.fasterxml.jackson.version>
-        <org.codehaus.woodstox.version>4.1.4</org.codehaus.woodstox.version> <!-- used by jackson2 XML serializer -->
-        <org.springframework.version>4.1.6.RELEASE</org.springframework.version>
-        <org.slf4j.version>1.7.7</org.slf4j.version>
+        <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
+        <junit.version>4.12</junit.version>
+        <com.fasterxml.jackson.base.version>2.7.3</com.fasterxml.jackson.base.version>
+        <com.fasterxml.jackson.core.version>2.7.3</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.version>2.7.3</com.fasterxml.jackson.version>
+        <org.codehaus.woodstox.version>4.4.1</org.codehaus.woodstox.version> <!-- used by jackson2 XML serializer -->
+        <org.springframework.version>4.2.5.RELEASE</org.springframework.version>
+        <org.slf4j.version>1.7.20</org.slf4j.version>
         <!-- log4j is not used -->
-        <org.springframework.security.version>3.2.7.RELEASE</org.springframework.security.version>
+        <org.springframework.security.version>3.2.9.RELEASE</org.springframework.security.version>
         <org.seleniumhq.version>2.45.0</org.seleniumhq.version>
         <!--
             keystore.propertyfile - define this in your settings.xml - the
@@ -85,6 +86,11 @@
         <module>odk-postgres-it-settings</module>
         <module>odk-postgres-unit-settings</module>
         
+        <!-- aggregate-mysql-specific -->
+        <module>aggregate-mysql</module>
+        <!-- aggregate-postgresql-specific -->
+        <module>aggregate-postgres</module>
+
         <!-- aggregate-gae-specific -->
         <module>aggregate-gae-default</module>
         <module>aggregate-gae-n-background</module>
@@ -92,11 +98,6 @@
 
         <!-- odk tables client libraries -->
         <module>odk-tables-api</module>
-
-        <!-- aggregate-postgresql-specific -->
-        <module>aggregate-postgres</module>
-        <!-- aggregate-mysql-specific -->
-        <module>aggregate-mysql</module>
 
         <!-- aggregate-postgresql-specific -->
         <module>postgres-unit-tests</module>
@@ -162,13 +163,13 @@
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
-            <version>0.9.5</version>
+            <version>0.9.5.2</version>
           <scope>compile</scope>
         </dependency>
         <dependency> <!-- required by spring-security -->
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
-          <version>1.9</version> <!-- note: java 1.6 -->
+          <version>1.10</version> <!-- note: java 1.6 -->
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
@@ -196,7 +197,7 @@
         <dependency>
           <groupId>commons-logging</groupId>
           <artifactId>commons-logging</artifactId>
-          <version>1.1.3</version>
+          <version>1.2</version>
           <type>jar</type>
           <scope>compile</scope>
             <exclusions>
@@ -303,14 +304,14 @@
         <dependency>
           <groupId>com.google.code.gson</groupId>
           <artifactId>gson</artifactId>
-          <version>2.1</version>
+          <version>2.6.2</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
         <dependency>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
-          <version>17.0</version>
+          <version>19.0</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
@@ -387,7 +388,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>${project.httpclient.version}</version>
+            <version>${apache.httpclient.version}</version>
             <exclusions>
               <exclusion>
                 <groupId>commons-codec</groupId>
@@ -398,12 +399,12 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.2.2</version>
+            <version>${apache.httpcore.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.2.2</version>
+            <version>${apache.httpmime.version}</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
@@ -481,21 +482,21 @@
         <dependency>
           <groupId>org.javarosa</groupId>
           <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
-          <version>2015-04-17</version>
+          <version>2016-04-04</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.2</version>
+            <version>2.9.3</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>${project.jsr305.version}</version>
+            <version>${findbugs.jsr305.version}</version>
         </dependency>
         <dependency>
           <groupId>net.sf.kxml</groupId>
@@ -507,13 +508,13 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.31</version>
+            <version>5.1.38</version>
             <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>net.sourceforge.nekohtml</groupId>
           <artifactId>nekohtml</artifactId>
-          <version>1.9.15</version>
+          <version>1.9.22</version>
           <scope>compile</scope>
           <exclusions>
             <exclusion>
@@ -529,7 +530,7 @@
         <dependency>
           <groupId>org.opendatakit</groupId>
           <artifactId>odk-httpclient-gae</artifactId> <!-- see src/main/libs/readme.txt -->
-          <version>1.1.2</version>
+          <version>4.5.2</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
@@ -550,7 +551,7 @@
         <dependency>
           <groupId>com.google.protobuf</groupId>
           <artifactId>protobuf-java</artifactId>
-          <version>2.5.0</version>
+          <version>2.6.1</version>
         </dependency>
         <dependency>
           <groupId>javax.servlet</groupId>
@@ -724,7 +725,7 @@
         <dependency> <!-- needed by spring-security -->
             <groupId>xalan</groupId>
             <artifactId>xalan</artifactId>
-            <version>2.7.1</version>    
+            <version>2.7.2</version>    
             <exclusions>
                 <exclusion>
                     <groupId>xerces</groupId>
@@ -745,7 +746,7 @@
         <dependency> <!-- needed by spring-security -->
             <groupId>org.apache.santuario</groupId>
             <artifactId>xmlsec</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.8</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -875,7 +876,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.9</version>
+                <version>2.10</version>
                 <configuration>
                     <buildOutputDirectory>${project.basedir}/build/webapp</buildOutputDirectory>
                 </configuration>
@@ -883,7 +884,7 @@
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
+                <version>2.10</version>
                 <executions>
                     <execution>
                         <id>analyze</id>

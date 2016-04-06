@@ -18,9 +18,11 @@ package org.opendatakit.common.utils.tomcat;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpParams;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.opendatakit.common.utils.HttpClientFactory;
 
 import com.google.api.client.googleapis.apache.GoogleApacheHttpTransport;
@@ -38,8 +40,19 @@ public class TomcatHttpClientFactoryImpl implements HttpClientFactory {
   }
 
   @Override
-  public HttpClient createHttpClient(HttpParams params) {
-    return new DefaultHttpClient(params);
+  public CloseableHttpClient createHttpClient(SocketConfig socketConfig,
+      ConnectionConfig connectionConfig, RequestConfig requestConfig) {
+    HttpClientBuilder builder = HttpClientBuilder.create();
+    if (socketConfig != null) {
+      builder.setDefaultSocketConfig(socketConfig);
+    }
+    if (connectionConfig != null) {
+      builder.setDefaultConnectionConfig(connectionConfig);
+    }
+    if (requestConfig != null) {
+      builder.setDefaultRequestConfig(requestConfig);
+    }
+    return builder.build();
   }
 
   @Override
