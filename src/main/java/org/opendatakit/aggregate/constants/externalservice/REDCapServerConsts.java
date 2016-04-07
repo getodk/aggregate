@@ -39,7 +39,9 @@ public class REDCapServerConsts {
     typeMap.put(ElementType.INTEGER, REDCapServerType.NUMBER);
     typeMap.put(ElementType.DECIMAL, REDCapServerType.NUMBER);
     typeMap.put(ElementType.GEOPOINT, REDCapServerType.GPS);
-
+    typeMap.put(ElementType.GEOSHAPE, REDCapServerType.STRING);
+    typeMap.put(ElementType.GEOTRACE, REDCapServerType.STRING);
+    
     typeMap.put(ElementType.BOOLEAN, REDCapServerType.STRING);
     typeMap.put(ElementType.BINARY, REDCapServerType.CONTENT_TYPE);
     typeMap.put(ElementType.SELECT1, REDCapServerType.STRING);
