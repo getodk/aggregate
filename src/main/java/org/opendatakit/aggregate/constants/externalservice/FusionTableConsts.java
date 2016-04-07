@@ -53,7 +53,8 @@ public final class FusionTableConsts {
     typeMap.put(ElementType.INTEGER, FusionTableType.NUMBER);
     typeMap.put(ElementType.DECIMAL, FusionTableType.NUMBER);
     typeMap.put(ElementType.GEOPOINT, FusionTableType.GPS);
-
+    typeMap.put(ElementType.GEOSHAPE, FusionTableType.STRING);
+    typeMap.put(ElementType.GEOTRACE, FusionTableType.STRING);
     typeMap.put(ElementType.BOOLEAN, FusionTableType.STRING);
     typeMap.put(ElementType.BINARY, FusionTableType.STRING);
     typeMap.put(ElementType.SELECT1, FusionTableType.STRING);
