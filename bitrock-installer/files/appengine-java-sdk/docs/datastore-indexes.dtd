@@ -1,15 +1,8 @@
-<!-- CAUTION: the following files implement the parsing and validation of -->
-<!-- the index definition schema, and so they all must be kep in sync: -->
-
-<!--     apphosting/datastore/datastore_index.py -->
-<!--     apphosting/datastore/datastore_index_xml.py -->
-<!--     java/com/google/apphosting/utils/config/IndexesXmlReader.java -->
-<!--     java/com/google/apphosting/utils/config/IndexYamlReader.java -->
-<!--     java/com/google/appengine/tools/development/datastore-indexes.xsd -->
-<!--     java/com/google/appengine/tools/development/datastore-indexes.xsd -->
-
-<!-- TODO(flyboy): add to this list when we discover even more places -->
-<!-- that are sensitive to schema changes -->
+<!-- CAUTION: this is one of several files that implement parsing and -->
+<!-- validation of the index definition schema; they all must be kept in -->
+<!-- sync.  Please refer to -->
+<!-- java/com/google/appengine/tools/development/datastore-indexes.xsd -->
+<!-- for the list of these files. -->
 
 <!ELEMENT datastore-indexes (datastore-index)*>
 <!ATTLIST datastore-indexes

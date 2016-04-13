@@ -13,6 +13,8 @@
 	<name>ODK Aggregate GAE Specific</name>
 	<modules>
 		<module>aggregate-gae</module>
+		<module>aggregate-gae-default</module>
+		<module>aggregate-gae-n-background</module>
 		<module>gae-unit-tests</module>
 	</modules>
 	<build>

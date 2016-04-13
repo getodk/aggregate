@@ -32,16 +32,15 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.form.FormSummary;
-import org.opendatakit.aggregate.client.form.KmlSettings;
+import org.opendatakit.aggregate.client.form.GeopointElementList;
+import org.opendatakit.aggregate.client.form.KmlOptionsSummary;
+import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
-import org.opendatakit.aggregate.datamodel.FormElementKey;
-import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.filter.SubmissionFilterGroup;
 import org.opendatakit.aggregate.form.FormFactory;
@@ -178,7 +177,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public KmlSettings getPossibleKmlSettings(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
+  public KmlOptionsSummary getPossibleKmlSettings(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -187,8 +186,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
-      GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, false);
-      return kmlSettings.generate();
+      GenerateKmlOptions kmlOptions = new GenerateKmlOptions(form);
+      return kmlOptions.generate();
 
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
@@ -203,7 +202,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public KmlSettings getGpsCoordnates(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
+  public GeopointElementList getGpsCoordnates(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -213,8 +212,8 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
 
-      GenerateKmlSettings kmlSettings = new GenerateKmlSettings(form, true);
-      return kmlSettings.generate();
+      GenerateGeopointElementList geopointList = new GenerateGeopointElementList(form, true);
+      return geopointList.generate();
 
     } catch (ODKFormNotFoundException e) {
       e.printStackTrace();
@@ -327,11 +326,11 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public Boolean createKmlFromFilter(FilterGroup group, String geopointKey, String titleKey, String binaryKey) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public Boolean createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    if (group == null || group.getFormId() == null || geopointKey == null) {
+    if (group == null || group.getFormId() == null || kmlElementsToInclude == null) {
       return false;
     }
 
@@ -356,60 +355,70 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed definition
       }
 
-      FormElementModel titleField = null;
-      if (titleKey != null) {
-        FormElementKey titleFEMKey = new FormElementKey(titleKey);
-        titleField = FormElementModel.retrieveFormElementModel(form, titleFEMKey);
-      }
+//      FormElementModel titleField = null;
+//      if (titleKey != null) {
+//        FormElementKey titleFEMKey = new FormElementKey(titleKey);
+//        titleField = FormElementModel.retrieveFormElementModel(form, titleFEMKey);
+//      }
+//
+//      FormElementModel geopointField = null;
+//      if (geopointKey != null) {
+//        FormElementKey geopointFEMKey = new FormElementKey(geopointKey);
+//        geopointField = FormElementModel.retrieveFormElementModel(form, geopointFEMKey);
+//      }
+//
+//      FormElementModel imageField = null;
+//      if (binaryKey != null) {
+//        FormElementKey imageFEMKey = new FormElementKey(binaryKey);
+//        imageField = FormElementModel.retrieveFormElementModel(form, imageFEMKey);
+//      }
+//
+//      // Apply rendering constraints
+//      FormElementModel topElement = form.getTopLevelGroupElement();
+//
+//      FormElementModel titleParent = titleField.getParent();
+//      // ignore semantically meaningless nesting groups
+//      while ( titleParent.getParent() != null && titleParent.getElementType().equals(ElementType.GROUP) ) {
+//        titleParent = titleParent.getParent();
+//      }
+//      FormElementModel gpsParent = geopointField.getParent();
+//      // ignore semantically meaningless nesting groups
+//      while ( gpsParent.getParent() != null && gpsParent.getElementType().equals(ElementType.GROUP) ) {
+//        gpsParent = gpsParent.getParent();
+//      }
+//
+//      if (!titleParent.equals(topElement) && !titleParent.equals(gpsParent)) {
+//        throw new RequestFailureException(LIMITATION_MSG);
+//      }
+//      if (imageField == null) {
+//      } else {
+//        FormElementModel imgParent = imageField.getParent();
+//        // ignore semantically meaningless nesting groups
+//        while ( imgParent.getParent() != null && imgParent.getElementType().equals(ElementType.GROUP) ) {
+//          imgParent = imgParent.getParent();
+//        }
+//        if (!imgParent.equals(topElement) && !imgParent.equals(gpsParent)) {
+//          throw new RequestFailureException(LIMITATION_MSG);
+//        }
+//      }
 
-      FormElementModel geopointField = null;
-      if (geopointKey != null) {
-        FormElementKey geopointFEMKey = new FormElementKey(geopointKey);
-        geopointField = FormElementModel.retrieveFormElementModel(form, geopointFEMKey);
-      }
-
-      FormElementModel imageField = null;
-      if (binaryKey != null) {
-        FormElementKey imageFEMKey = new FormElementKey(binaryKey);
-        imageField = FormElementModel.retrieveFormElementModel(form, imageFEMKey);
-      }
-
-      // Apply rendering constraints
-      FormElementModel topElement = form.getTopLevelGroupElement();
-
-      FormElementModel titleParent = titleField.getParent();
-      // ignore semantically meaningless nesting groups
-      while ( titleParent.getParent() != null && titleParent.getElementType().equals(ElementType.GROUP) ) {
-        titleParent = titleParent.getParent();
-      }
-      FormElementModel gpsParent = geopointField.getParent();
-      // ignore semantically meaningless nesting groups
-      while ( gpsParent.getParent() != null && gpsParent.getElementType().equals(ElementType.GROUP) ) {
-        gpsParent = gpsParent.getParent();
-      }
-
-      if (!titleParent.equals(topElement) && !titleParent.equals(gpsParent)) {
-        throw new RequestFailureException(LIMITATION_MSG);
-      }
-      if (imageField == null) {
-      } else {
-        FormElementModel imgParent = imageField.getParent();
-        // ignore semantically meaningless nesting groups
-        while ( imgParent.getParent() != null && imgParent.getElementType().equals(ElementType.GROUP) ) {
-          imgParent = imgParent.getParent();
+      
+      // encode all the settings form the selections
+      StringBuilder encodedKmlSettings = new StringBuilder();
+      boolean firstItem = true;
+      for(KmlSelection kmlSetting : kmlElementsToInclude) {
+        if(firstItem) {
+          firstItem = false;
+        } else {
+          encodedKmlSettings.append(KmlGenerator.KML_SELECTIONS_DELIMITER);
         }
-        if (!imgParent.equals(topElement) && !imgParent.equals(gpsParent)) {
-          throw new RequestFailureException(LIMITATION_MSG);
-        }
+        // TODO: think about a bad setting (checking comment out above will prevent this);
+        String tmpString = kmlSetting.generateEncodedString();
+        encodedKmlSettings.append(tmpString );
       }
-
+      
       Map<String, String> params = new HashMap<String, String>();
-      params.put(KmlGenerator.TITLE_FIELD, (titleField == null) ? null : titleField
-          .constructFormElementKey(form).toString());
-      params.put(KmlGenerator.IMAGE_FIELD, (imageField == null) ? KmlGenerator.NONE : imageField
-          .constructFormElementKey(form).toString());
-      params.put(KmlGenerator.GEOPOINT_FIELD, (geopointField == null) ? null : geopointField
-          .constructFormElementKey(form).toString());
+      params.put(KmlGenerator.KML_SELECTIONS_KEY, encodedKmlSettings.toString());
 
       PersistentResults r = new PersistentResults(ExportType.KML, form, filterGrp, params, cc);
       r.persist(cc);

@@ -19,3 +19,4 @@ The Google group for software engineering questions is: [opendatakit-developers@
 License
 
 This software is licensed under the [**Apache 2.0 license**](http://www.apache.org/licenses/LICENSE-2.0)
+

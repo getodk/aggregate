@@ -27,19 +27,15 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  */
 public final class KmlConsts {
 
-  public static final String TABLE_DATA_CUSTOM = "<td align='center'>";
-
   public static final String OPEN_TABLE_W_HEADER_TABLE_FORMAT = "<table border='1' style='border-collapse: collapse;' >";
-
-  public static final String OPEN_TABLE_W_PARENT_TABLE_FORMAT = "<table width='300' cellpadding='0' cellspacing='0'>";
-
-  public static final String VARIABLE_BEGIN = "$[";
 
   public static final String DATA_VARIABLE = "__data";
   public static final String TITLE_VARIABLE = "__title";
   public static final String IMAGE_VARIABLE = "__imgUrl";
 
-  public static final String PLACEMARK_STYLE = "odk_style";
+  public static final String NO_IMAGE_PLACEMARK_STYLE = "odk_no_image_placemark_style";
+  public static final String WITH_IMAGE_PLACEMARK_STYLE = "odk_with_image_placemark_style";
+  public static final String GEOSHAPE_STYLE = "odk_geoshape_style";
   
   public static final String KML_PREAMBLE_TEMPLATE = 
   "<?xml version='1.0' encoding='UTF-8'?>\n" +
@@ -54,21 +50,47 @@ public final class KmlConsts {
   "  </Document>\n" + 
   "</kml>";
   
-  public static final String KML_STYLE_TEMPLATE =
+  private static final String VARIABLE_BEGIN = "$[";
+
+  private static final String TITLE_VAR_DEFN = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, 
+      HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, 
+      HtmlUtil.wrapWithHtmlTags(HtmlConsts.H2, VARIABLE_BEGIN + TITLE_VARIABLE + BasicConsts.RIGHT_BRACKET)));
+ 
+  private static final String IMAGE_FORMAT = "<td align='center'><img style='padding:5px' height='144px' src='" + KmlConsts.VARIABLE_BEGIN + KmlConsts.IMAGE_VARIABLE + BasicConsts.RIGHT_BRACKET + "'/></td>";
+
+  private static final String IMG_VAR_DEFN = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, KmlConsts.IMAGE_FORMAT);
+  
+  private static final String DATA_VAR_DEFN = HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_ROW, 
+      HtmlUtil.wrapWithHtmlTags(HtmlConsts.TABLE_DATA, VARIABLE_BEGIN + DATA_VARIABLE + BasicConsts.RIGHT_BRACKET));
+  
+  private static final String KML_BALLON_STYLE_TEMPLATE =
   "<Style id='%s'>\n" +
   "  <BalloonStyle>\n" +
   "    <text>\n" +
-  "      <![CDATA[\n" +
-  "        %s\n" +
-  "      ]]>\n" +
+  "      <![CDATA[" +  "<table width='300' cellpadding='0' cellspacing='0'>" + TITLE_VAR_DEFN + "%s" + DATA_VAR_DEFN + HtmlConsts.TABLE_CLOSE +"]]>\n" +
   "    </text>\n" +
   "  </BalloonStyle>\n" +
+  "</Style>\n";
+  
+  public static final String KML_BALLON_NO_IMAGE_STYLE_DEFN = String.format(KML_BALLON_STYLE_TEMPLATE, NO_IMAGE_PLACEMARK_STYLE, BasicConsts.EMPTY_STRING);
+  
+  public static final String KML_BALLON_WITH_IMAGE_STYLE_DEFN = String.format(KML_BALLON_STYLE_TEMPLATE, WITH_IMAGE_PLACEMARK_STYLE, IMG_VAR_DEFN);
+  
+  public static final String KML_GEOSHAPE_STYLE_TEMPLATE =
+  "<Style id='" + GEOSHAPE_STYLE + "'>\n" +
+  "  <LineStyle>\n" +
+  "    <color>7f00ffff</color>\n" +
+  "    <width>4</width>\n" +
+  "  </LineStyle>\n" +
+  "  <PolyStyle>\n" +
+  "    <color>7f00ff00</color>\n" +
+  "  </PolyStyle>\n" +
   "</Style>\n";
   
   public static final String KML_PLACEMARK_TEMPLATE = 
   "<Placemark id='%s'>\n" +
   "  <name>%s</name>\n" +
-  "  <styleUrl>#" + PLACEMARK_STYLE+ "</styleUrl>\n" +
+  "  <styleUrl>#%s</styleUrl>\n" +
   "  <Snippet maxLines='0'></Snippet>\n" +
   "  <ExtendedData>\n" + 
   "  %s" +
@@ -92,9 +114,16 @@ public final class KmlConsts {
     + "  <value>%s</value>\n" 
     + "</Data>\n";
 
-  public static final String IMAGE_FORMAT = KmlConsts.TABLE_DATA_CUSTOM
-  + "<img style='padding:5px' height='144px' src='" + KmlConsts.VARIABLE_BEGIN + KmlConsts.IMAGE_VARIABLE + BasicConsts.RIGHT_BRACKET + "'/></td>";
-
-
+  public static final String KML_LINE_STRING_PLACEMARK_TEMPLATE = "<Placemark id='%s'>\n" +
+      "  <name>%s</name>\n" +
+      "  <styleUrl>#" + GEOSHAPE_STYLE + "</styleUrl>\n" +
+      "  <LineString>\n" +
+      "    <extrude>1</extrude>\n" +
+      "    <altitudeMode>clampToGround</altitudeMode>\n" +
+      "    <coordinates>\n" +
+      "     %s\n" +
+      "    </coordinates>\n" +
+      "  </LineString>\n " +
+      "</Placemark>\n"; 
 
 }

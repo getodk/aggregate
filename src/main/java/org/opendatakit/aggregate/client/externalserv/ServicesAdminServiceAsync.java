@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.externalserv;
 
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
-import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -28,10 +27,6 @@ public interface ServicesAdminServiceAsync {
 
   void createFusionTable(String formId, ExternalServicePublicationOption esOption,
       String ownerEmail, AsyncCallback<String> callback);
-
-  void createMapEngine(String formId, ExternalServicePublicationOption esOption, String assetId,
-      String geopoint, GmePhotoHostType gmePhotoHostType, String ownerEmail,
-      AsyncCallback<String> callback);
 
   void createGoogleSpreadsheet(String formId, String name,
       ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
@@ -52,7 +47,5 @@ public interface ServicesAdminServiceAsync {
   void restartPublisher(String uri, AsyncCallback<Void> callback);
 
   void updateApiKeyAndRestartPublisher(String uri, String apiKey, AsyncCallback<Void> callback);
-
-  void getGoogleMapEngineSettings(String formId, AsyncCallback<GmeSettings> callback);
 
 }

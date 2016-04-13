@@ -18,7 +18,7 @@ This is a special build of javarosa using the tree at https://bitbucket.org/m.su
 It incorporates multithread-safe KoBo collect changes (from Clayton), abandons J2ME support, 
 exposes bind and prompt attributes, and numerous contributed fixes from SurveyCTO and others.
 
-# odk-httpclient-gae-1.1.2:
+# odk-httpclient-gae-4.5.2:
 
 This can be installed by pulling the Aggregate (Components) sources
 and running 'mvn install' in the GaeHttpClient project.  
