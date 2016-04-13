@@ -68,6 +68,7 @@ public class RFC4180CsvWriter {
         if ( term.length() == 0 ||
              term.indexOf(cr) != -1 ||
              term.indexOf(lf) != -1 ||
+			 term.indexOf(separator) != -1 ||
              term.indexOf(quotechar) != -1 ) {
           // this string needs to be quoted
           bw.write(quotechar);

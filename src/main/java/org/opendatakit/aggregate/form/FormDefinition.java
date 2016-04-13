@@ -471,6 +471,8 @@ public class FormDefinition {
 			for ( FormDataModel m : c) {
 				DataField.DataType dataType = DataField.DataType.STRING;
 				switch ( m.getElementType() ) {
+				case GEOTRACE:
+				case GEOSHAPE:
 				case STRING:
 					dataType = DataField.DataType.STRING;
 					break;

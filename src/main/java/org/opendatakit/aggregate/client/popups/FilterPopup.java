@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ColumnListBox;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
+import org.opendatakit.aggregate.client.widgets.FilterableColumnListBox;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -80,7 +81,7 @@ public final class FilterPopup extends AbstractPopupBase {
 
 	private final EnumListBox<Visibility> visibility;
 	private final EnumListBox<RowOrCol> rowCol;
-	private final ColumnListBox columnForRowFilter;
+	private final FilterableColumnListBox columnForRowFilter;
 	private final ColumnListBox columnsForColumnFilter;
 	private final EnumListBox<FilterOperation> filterOp;
 	private final TextBox filterValue;
@@ -98,14 +99,9 @@ public final class FilterPopup extends AbstractPopupBase {
 
 		// rows or columns
 		rowCol = new EnumListBox<RowOrCol>(RowOrCol.values(), ROW_COL_TOOLTIP, ROW_COL_BALLOON);
-		rowCol.addChangeHandler(new ChangeHandler() {
-			public void onChange(ChangeEvent event) {
-				updateUIoptions();
-			}
-		});
 
 		// column selection - for row filter
-		columnForRowFilter = new ColumnListBox(headers, false, true, COLUMN_TOOLTIP_RF, COLUMN_BALLOON_RF);
+		columnForRowFilter = new FilterableColumnListBox(headers, COLUMN_TOOLTIP_RF, COLUMN_BALLOON_RF);
 
 		// columns selection - for column filter
 		columnsForColumnFilter = new ColumnListBox(headers, true, false, COLUMN_TOOLTIP_CF, COLUMN_BALLOON_CF);
@@ -170,13 +166,23 @@ public final class FilterPopup extends AbstractPopupBase {
 		table.setWidget(0, 0, topBar);
 		table.setWidget(1, 0, optionsBar);
 
+		// enable actions
+		rowCol.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				updateUIoptions();
+			}
+		});
+
 		updateUIoptions();
 
 		setWidget(table);
 	}
 
 	public void updateUIoptions() {
-		if (rowCol.getSelectedValue().equals(RowOrCol.ROW)) {
+     String rowColChoiceString = rowCol.getSelectedValue();
+     RowOrCol rowColChoice = (rowColChoiceString == null) ? null : RowOrCol.valueOf(rowColChoiceString);
+     
+		if (rowColChoice == RowOrCol.ROW) {
 			// they want to filter based on rows, so enable/disable appropriately
 			optionsBar.getRowFormatter().setStyleName(1, "enabledTableRow");
 			optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
@@ -205,24 +211,36 @@ public final class FilterPopup extends AbstractPopupBase {
 				return;
 			}
 
-			Visibility kr = visibility.getSelectedEnumValue();
-			RowOrCol rowcol = rowCol.getSelectedEnumValue();
-			long numFilters = (long) group.getFilters().size();
+         String krString = visibility.getSelectedValue();
+         Visibility kr = (krString == null) ? null : Visibility.valueOf(krString);
 
-			Filter newFilter;
-			if (rowcol.equals(RowOrCol.ROW)) {
-				Column column = null;
-				ArrayList<Column> columns = columnForRowFilter.getSelectedColumns();
-				if (columns.size() > 0) {
-					column = columns.get(0);
-				}          
-				newFilter = new RowFilter(kr, column, filterOp.getSelectedEnumValue(), filterValue.getValue(), numFilters);
-			} else {
-				ArrayList<Column> columnfilterheaders = columnsForColumnFilter.getSelectedColumns();
-				newFilter = new ColumnFilter(kr, columnfilterheaders, numFilters);
+			String rowColChoiceString = rowCol.getSelectedValue();
+		   RowOrCol rowColChoice = (rowColChoiceString == null) ? null : RowOrCol.valueOf(rowColChoiceString);
+
+		   long numFilters = (long) group.getFilters().size();
+
+			if (rowColChoice != null) {
+	         Filter newFilter = null;
+    			if (rowColChoice == RowOrCol.ROW) {
+    				Column column = columnForRowFilter.getSelectedColumn();
+    
+    	         String filterOpString = filterOp.getSelectedValue();
+    	         FilterOperation filterOp = (filterOpString == null) ? null : FilterOperation.valueOf(filterOpString);
+    
+    	         if ( filterOp != null && column != null) {
+    	           newFilter = new RowFilter(kr, column, filterOp, filterValue.getValue(), numFilters);
+    	         }
+    			} else {
+    				ArrayList<Column> columnfilterheaders = columnsForColumnFilter.getSelectedColumns();
+    				if ( columnfilterheaders != null && !columnfilterheaders.isEmpty() ) {
+    				  newFilter = new ColumnFilter(kr, columnfilterheaders, numFilters);
+    				}
+    			}
+    
+    			if ( newFilter != null ) {
+    			  group.addFilter(newFilter);
+    			}
 			}
-
-			group.addFilter(newFilter);
 
 			hide();
 		}

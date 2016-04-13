@@ -15,16 +15,21 @@
  */
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -34,6 +39,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HeaderElement;
+import org.apache.http.message.BasicHeaderValueParser;
+import org.apache.http.message.HeaderValueParser;
+import org.apache.wink.common.model.multipart.BufferedOutMultiPart;
+import org.apache.wink.common.model.multipart.InMultiPart;
+import org.apache.wink.common.model.multipart.InPart;
+import org.apache.wink.common.model.multipart.OutPart;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.odktables.api.InstanceFileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
@@ -45,9 +57,9 @@ import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags
 import org.opendatakit.aggregate.odktables.relation.DbTableInstanceManifestETags.DbTableInstanceManifestETagEntity;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
+import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
-import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
@@ -305,6 +317,246 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     }
   }
 
+
+  @Override
+  public Response getFiles(@Context HttpHeaders httpHeaders, OdkTablesFileManifest manifest) throws IOException {
+    // The appId and tableId are from the surrounding TableService.
+    // The rowId is already pulled out.
+    // The segments are in the manifest as filenames.
+    // On the device, these filenames are just rest/of/path in the full app-centric
+    // path of:
+    // appid/data/attachments/tableid/instances/instanceId/rest/of/path
+    if (rowId == null || rowId.length() == 0) {
+      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INVALID_ROW_ID)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    }
+    if ( manifest.getFiles() == null || manifest.getFiles().isEmpty() ) {
+      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_MANIFEST_IS_EMPTY_OR_MISSING)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    }
+    
+    UriBuilder ub = info.getBaseUriBuilder();
+    ub.path(OdkTables.class, "getTablesService");
+
+    URI getFile = ub.clone().path(TableService.class, "getRealizedTable")
+        .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFiles")
+          .build(appId, tableId, schemaETag, rowId);
+
+    String locationUrl = getFile.toURL().toExternalForm();
+
+    String boundary = "boundary-" + UUID.randomUUID().toString();
+    
+    try {
+      userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
+      
+      DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
+      BlobEntitySet instance = blobStore.getBlobEntitySet(rowId, cc);
+
+      BufferedOutMultiPart mpEntity = new BufferedOutMultiPart();
+      mpEntity.setBoundary(boundary);
+      
+      int entryCount = 0;
+      for ( OdkTablesFileManifestEntry entry : manifest.getFiles() ) {
+        ++entryCount;
+        // Now construct the whole path.
+        String partialPath = entry.filename;
+    
+        try {
+          int count = instance.getAttachmentCount(cc);
+          for (int i = 1; i <= count; ++i) {
+            String path = instance.getUnrootedFilename(i, cc);
+            if (path != null && path.equals(partialPath)) {
+              byte[] fileBlob = instance.getBlob(i, cc);
+              String contentType = instance.getContentType(i, cc);
+              String contentHash = instance.getContentHash(i, cc);
+              Long contentLength = instance.getContentLength(i, cc);
+    
+              // And now prepare everything to be returned to the caller.
+              if (fileBlob != null && contentType != null && contentLength != null
+                  && contentLength != 0L) {
+                
+                OutPart op = new OutPart();
+                op.addHeader("Name", "file-"+Integer.toString(entryCount));
+                String disposition = "file; filename=\"" + partialPath.replace("\"", "\"\"") + "\"";
+                op.addHeader("Content-Disposition", disposition);
+                op.addHeader("Content-Type", contentType);
+                op.setBody(fileBlob);
+                mpEntity.addPart(op);
+                // test if we should return a NOT_MODIFIED response...
+              }
+            }
+          }
+        } catch (ODKDatastoreException e) {
+          e.printStackTrace();
+          LOGGER.error("Unable to retrieve attachment and access attributes for: " 
+                + locationUrl + " partialPath: " + partialPath);
+        }
+      }
+
+      ResponseBuilder rBuild = Response.status(Status.OK).entity(mpEntity)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true");
+      return rBuild.build();
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      return Response.status(Status.INTERNAL_SERVER_ERROR)
+          .entity("Unable to retrieve attachment and access attributes for: " + locationUrl)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    } catch (PermissionDeniedException e) {
+      String msg = e.getMessage();
+      if (msg == null) {
+        msg = e.toString();
+      }
+      LOGGER.error(("ODKTables file upload permissions error: " + msg));
+      return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    }
+  }
+
+  @Override
+  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP) throws IOException, ODKTaskLockException {
+     try {
+       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
+         
+       // Parse the request
+       while (inMP.hasNext()) {
+         InPart part = inMP.next();
+         MultivaluedMap<String, String> headers = part.getHeaders();
+         String disposition = (headers != null) ? headers.getFirst("Content-Disposition") : null;
+         if (disposition == null) {
+           return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_MULTIPART_FILES_ONLY_EXPECTED)
+               .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+               .header("Access-Control-Allow-Origin", "*")
+               .header("Access-Control-Allow-Credentials", "true").build();
+         }
+         String partialPath = null;
+         {
+           HeaderValueParser parser = new BasicHeaderValueParser();
+           HeaderElement[] values = BasicHeaderValueParser.parseElements(disposition, parser);
+           for ( HeaderElement v : values ) {
+             if ( v.getName().equalsIgnoreCase("file") ) {
+               partialPath = v.getParameterByName("filename").getValue();
+               break;
+             }
+           }
+         }
+         if (partialPath == null) {
+           return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_MULTIPART_CONTENT_FILENAME_EXPECTED)
+               .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+               .header("Access-Control-Allow-Origin", "*")
+               .header("Access-Control-Allow-Credentials", "true").build();
+         }
+  
+         String contentType = (headers != null) ? headers.getFirst("Content-Type") : null;
+         
+         ByteArrayOutputStream bo = new ByteArrayOutputStream();
+         InputStream bi = null;
+         try {
+           bi = new BufferedInputStream(part.getInputStream());
+           int length = 1024;
+           // Transfer bytes from in to out
+           byte[] data = new byte[length];
+           int len;
+           while ((len = bi.read(data, 0, length)) >= 0) {
+             if ( len != 0 ) {
+               bo.write(data, 0, len);
+             }
+           }
+         } finally {
+           bi.close();
+         }
+         byte[] content = bo.toByteArray();
+         String md5Hash = PersistenceUtils.newMD5HashUri(content);
+         try {
+           // we are adding a file -- delete any cached ETag value for this row's attachments manifest
+           try {
+             DbTableInstanceManifestETagEntity entity = DbTableInstanceManifestETags.getRowIdEntry(tableId, rowId, cc);
+             entity.delete(cc);
+           } catch (ODKEntityNotFoundException e) {
+             // ignore...
+           }
+  	          
+           DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
+           BlobEntitySet instance = blobStore.newBlobEntitySet(rowId, cc);
+           int count = instance.getAttachmentCount(cc);
+           boolean found = false;
+           for (int i = 1; i <= count; ++i) {
+             String path = instance.getUnrootedFilename(i, cc);
+             if (path != null && path.equals(partialPath)) {
+               // we already have this in our store -- check that it is identical.
+               // if not, we have a problem!!!
+               if (md5Hash.equals(instance.getContentHash(i, cc))) {
+                 // no-op
+                 found = true;
+               } else {
+                 return Response.status(Status.BAD_REQUEST)
+                     .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath)
+                     .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                     .header("Access-Control-Allow-Origin", "*")
+                     .header("Access-Control-Allow-Credentials", "true").build();
+               }
+             }
+           }
+           if ( !found ) {
+             BlobSubmissionOutcome outcome = instance.addBlob(content, contentType, partialPath, false, cc);
+             if (outcome == BlobSubmissionOutcome.NEW_FILE_VERSION) {
+               return Response.status(Status.BAD_REQUEST)
+                   .entity(ERROR_FILE_VERSION_DIFFERS + "\n" + partialPath)
+                   .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                   .header("Access-Control-Allow-Origin", "*")
+                   .header("Access-Control-Allow-Credentials", "true").build();
+             }
+           }
+         } catch (ODKDatastoreException e) {
+           LOGGER.error(("ODKTables multipart form instance file upload persistence error: " + e.getMessage()));
+           return Response.status(Status.INTERNAL_SERVER_ERROR)
+               .entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage())
+               .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+               .header("Access-Control-Allow-Origin", "*")
+               .header("Access-Control-Allow-Credentials", "true").build();
+         }  
+       }
+       UriBuilder ub = info.getBaseUriBuilder();
+	    ub.path(OdkTables.class, "getTablesService");
+
+	    URI getManifest = ub.clone().path(TableService.class, "getRealizedTable")
+	        .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest")
+           .build(appId, tableId, schemaETag, rowId);
+
+	    String locationUrl = getManifest.toURL().toExternalForm();
+       return Response.status(Status.CREATED).header("Location", locationUrl)
+           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+           .header("Access-Control-Allow-Origin", "*")
+           .header("Access-Control-Allow-Credentials", "true").build();
+     } catch (PermissionDeniedException e) {
+       String msg = e.getMessage();
+       if (msg == null) {
+         msg = e.toString();
+       }
+       LOGGER.error(("ODKTables multipart form instance file upload permissions error: " + msg));
+       return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
+           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+           .header("Access-Control-Allow-Origin", "*")
+           .header("Access-Control-Allow-Credentials", "true").build();
+     } catch (ODKDatastoreException e) {
+       LOGGER.error(("ODKTables multipart form instance file upload persistence error: " + e.getMessage()));
+       return Response.status(Status.INTERNAL_SERVER_ERROR)
+           .entity(ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage())
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+     }
+  }
+  
   @Override
   public Response putFile(@Context HttpServletRequest req,
       @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException,

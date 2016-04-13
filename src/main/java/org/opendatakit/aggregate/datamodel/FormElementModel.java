@@ -35,9 +35,8 @@ public final class FormElementModel {
   /* xform element types */
   public static enum ElementType {
     // xform tag types
-    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, BINARY, // identifies
-                                                                            // BinaryContent
-                                                                            // table
+    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
+    BINARY, // identifies BinaryContent table
     BOOLEAN, SELECT1, // identifies SelectChoice table
     SELECTN, // identifies SelectChoice table
     REPEAT, GROUP, METADATA
@@ -90,6 +89,8 @@ public final class FormElementModel {
     case INTEGER:
     case DECIMAL:
     case GEOPOINT:
+    case GEOTRACE:
+    case GEOSHAPE:
     case BINARY: // identifies BinaryContent table
     case BOOLEAN:
     case SELECT1: // identifies SelectChoice table
@@ -118,6 +119,8 @@ public final class FormElementModel {
     case INTEGER:
     case DECIMAL:
     case GEOPOINT:
+    case GEOTRACE:
+    case GEOSHAPE:
     case BINARY: // identifies BinaryContent table
     case BOOLEAN:
     case SELECT1: // identifies SelectChoice table
@@ -257,6 +260,10 @@ public final class FormElementModel {
       return ElementType.DECIMAL;
     case GEOPOINT:
       return ElementType.GEOPOINT;
+    case GEOTRACE:
+      return ElementType.GEOTRACE;
+    case GEOSHAPE:
+      return ElementType.GEOSHAPE;
     case BINARY: // identifies BinaryContent table
       return ElementType.BINARY;
     case BOOLEAN:

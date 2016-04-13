@@ -19,15 +19,12 @@ package org.opendatakit.aggregate.client.popups;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UIUtils;
-import org.opendatakit.aggregate.client.externalserv.GmeSettings;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
-import org.opendatakit.aggregate.client.widgets.GeoPointListBox;
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
-import org.opendatakit.aggregate.constants.common.GmePhotoHostType;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -49,11 +46,6 @@ public final class PublishPopup extends AbstractPopupBase {
   private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables, "
       + " Google Spreadsheets, a REDCap server, or a server accepting JSON content.";
 
-  private static final String GME_GEO_TOOLTIP = "GeoPoint to map";
-  private static final String GME_GEO_BALLOON = "GeoPoint to use as a 'Point' on Google Map Engine";
-  private static final String GME_PHOTO_TYPE_TOOLTIP = "Location photos should be hosted form";
-  private static final String GME_PHOTO_TYPE_BALLOON = "Select the location where you want your photos to be hosted from.";
-
   private static final String ES_SERVICEOPTIONS_TOOLTIP = "Method data should be published";
   private static final String ES_SERVICEOPTIONS_BALLOON = "Choose whether you would like only old data, only new data, or all data to be published.";
   private static final String ES_TYPE_TOOLTIP = "Type of External Service Connection";
@@ -70,13 +62,6 @@ public final class PublishPopup extends AbstractPopupBase {
   private final FlexTable optionsBar;
 
   private final AggregateButton publishButton;
-
-  // to hold the google map engine only options
-  private final FlexTable gmeBar;
-  private final TextBox gmeAssetId;
-  private final GeoPointListBox gmeGeoPoint;
-  private boolean gotGmeSettings = false;
-  private final EnumListBox<GmePhotoHostType> gmePhotoHostType;
 
   // to hold the google spreadsheet only options
   private final FlexTable gsBar;
@@ -113,11 +98,8 @@ public final class PublishPopup extends AbstractPopupBase {
     this.publishButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     publishButton.addClickHandler(new CreateExernalServiceHandler());
 
-    SecureGWT.getServicesAdminService().getGoogleMapEngineSettings(formId,
-        new GmeSettingsCallback());
-
     ExternalServiceType[] valuesToShow = { ExternalServiceType.GOOGLE_FUSIONTABLES,
-        ExternalServiceType.GOOGLE_SPREADSHEET, ExternalServiceType.GOOGLE_MAPS_ENGINE,
+        ExternalServiceType.GOOGLE_SPREADSHEET,
         ExternalServiceType.REDCAP_SERVER, ExternalServiceType.JSON_SERVER,
         ExternalServiceType.OHMAGE_JSON_SERVER };
     serviceType = new EnumListBox<ExternalServiceType>(valuesToShow, ES_TYPE_TOOLTIP,
@@ -154,22 +136,6 @@ public final class PublishPopup extends AbstractPopupBase {
     gsName.setText(EMPTY_STRING);
     gsName.setVisibleLength(35);
     gsBar.setWidget(1, 1, gsName);
-
-    // this is only for google map engine
-    gmeBar = new FlexTable();
-    gmeBar.addStyleName("stretch_header");
-    gmeBar.setWidget(1, 0, new HTML("<h3>Google Map Engine Asset ID:</h3>"));
-    gmeAssetId = new TextBox();
-    gmeAssetId.setText(EMPTY_STRING);
-    gmeAssetId.setVisibleLength(35);
-    gmeBar.setWidget(1, 1, gmeAssetId);
-    gmeBar.setWidget(2, 0, new HTML("<h3>GeoPoint to use:</h3>"));
-    gmeGeoPoint = new GeoPointListBox(GME_GEO_TOOLTIP, GME_GEO_BALLOON);
-    gmeBar.setWidget(2, 1, gmeGeoPoint);
-    gmeBar.setWidget(3, 0, new HTML("<h3>Host photos on:</h3>"));
-    gmePhotoHostType = new EnumListBox<GmePhotoHostType>(GmePhotoHostType.values(),
-        GME_PHOTO_TYPE_TOOLTIP, GME_PHOTO_TYPE_BALLOON);
-    gmeBar.setWidget(3, 1, gmePhotoHostType);
 
     // this is only for simple json server
     jsBar = new FlexTable();
@@ -244,7 +210,6 @@ public final class PublishPopup extends AbstractPopupBase {
     rcBar.setWidget(2, 1, rcApiKey);
 
     FlowPanel grouping = new FlowPanel();
-    grouping.add(gmeBar);
     grouping.add(gsBar);
     grouping.add(jsBar);
     grouping.add(rcBar);
@@ -253,7 +218,6 @@ public final class PublishPopup extends AbstractPopupBase {
     jsBar.setVisible(false);
     rcBar.setVisible(false);
     ohmageBar.setVisible(false);
-    gmeBar.setVisible(false);
     optionsBar.setWidget(2, 0, grouping);
     optionsBar.getFlexCellFormatter().setColSpan(2, 0, 2);
 
@@ -270,10 +234,12 @@ public final class PublishPopup extends AbstractPopupBase {
   public void updateUIOptions() {
     System.out.println("UPDATE UI OPTIONS CALLED");
     System.out.println("Type:" + serviceType.getSelectedValue());
-    ExternalServiceType type = serviceType.getSelectedEnumValue();
+    
+    String externalServiceTypeString = serviceType.getSelectedValue();
+    ExternalServiceType type = (externalServiceTypeString == null) ? null :
+      ExternalServiceType.valueOf(externalServiceTypeString);
 
     if (type == null) {
-      gmeBar.setVisible(false);
       gsBar.setVisible(false);
       jsBar.setVisible(false);
       rcBar.setVisible(false);
@@ -286,7 +252,6 @@ public final class PublishPopup extends AbstractPopupBase {
 
     switch (type) {
     case GOOGLE_SPREADSHEET:
-      gmeBar.setVisible(false);
       gsBar.setVisible(true);
       jsBar.setVisible(false);
       rcBar.setVisible(false);
@@ -294,7 +259,6 @@ public final class PublishPopup extends AbstractPopupBase {
       optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
       break;
     case JSON_SERVER:
-      gmeBar.setVisible(false);
       gsBar.setVisible(false);
       jsBar.setVisible(true);
       rcBar.setVisible(false);
@@ -302,7 +266,6 @@ public final class PublishPopup extends AbstractPopupBase {
       optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
       break;
     case OHMAGE_JSON_SERVER:
-      gmeBar.setVisible(false);
       gsBar.setVisible(false);
       jsBar.setVisible(false);
       rcBar.setVisible(false);
@@ -310,28 +273,13 @@ public final class PublishPopup extends AbstractPopupBase {
       optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
       break;
     case REDCAP_SERVER:
-      gmeBar.setVisible(false);
       gsBar.setVisible(false);
       jsBar.setVisible(false);
       rcBar.setVisible(true);
       ohmageBar.setVisible(false);
       optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
       break;
-    case GOOGLE_MAPS_ENGINE:
-      gmeBar.setVisible(true);
-      gsBar.setVisible(false);
-      jsBar.setVisible(false);
-      rcBar.setVisible(false);
-      ohmageBar.setVisible(false);
-      optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
-      if (gotGmeSettings) {
-        publishButton.setEnabled(true);
-      } else {
-        publishButton.setEnabled(false);
-      }
-      break;
     case GOOGLE_FUSIONTABLES:
-      gmeBar.setVisible(false);
       gsBar.setVisible(false);
       jsBar.setVisible(false);
       rcBar.setVisible(false);
@@ -339,7 +287,6 @@ public final class PublishPopup extends AbstractPopupBase {
       optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
       break;
     default: // unknown type
-      gmeBar.setVisible(false);
       gsBar.setVisible(false);
       jsBar.setVisible(false);
       rcBar.setVisible(false);
@@ -355,8 +302,14 @@ public final class PublishPopup extends AbstractPopupBase {
     @Override
     public void onClick(ClickEvent event) {
 
-      ExternalServiceType type = serviceType.getSelectedEnumValue();
-      ExternalServicePublicationOption serviceOp = esOptions.getSelectedEnumValue();
+      String externalServiceTypeString = serviceType.getSelectedValue();
+      ExternalServiceType type = (externalServiceTypeString == null) ? null :
+        ExternalServiceType.valueOf(externalServiceTypeString);
+
+      String serviceOpString = esOptions.getSelectedValue();
+      ExternalServicePublicationOption serviceOp = (serviceOpString == null) ? null :
+        ExternalServicePublicationOption.valueOf(serviceOpString);
+
       UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
       String ownerEmail = info.getEmail();
       if (ownerEmail == null || ownerEmail.length() == 0) {
@@ -377,8 +330,12 @@ public final class PublishPopup extends AbstractPopupBase {
             rcUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
         break;
       case JSON_SERVER:
+      {
+        String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
+        BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
         SecureGWT.getServicesAdminService().createSimpleJsonServer(formId, jsAuthKey.getText(),
-            jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOptions.getSelectedEnumValue(), new ReportFailureCallback());
+            jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOp, new ReportFailureCallback());
+      }
         break;
       case OHMAGE_JSON_SERVER:
         SecureGWT.getServicesAdminService().createOhmageJsonServer(formId,
@@ -390,35 +347,11 @@ public final class PublishPopup extends AbstractPopupBase {
         SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, ownerEmail,
             new ReportFailureCallback());
         break;
-      case GOOGLE_MAPS_ENGINE:
-        GmePhotoHostType photoType = gmePhotoHostType.getSelectedEnumValue();
-        SecureGWT.getServicesAdminService().createMapEngine(formId, serviceOp, gmeAssetId.getText(), gmeGeoPoint.getElementKey(), photoType, ownerEmail,
-            new ReportFailureCallback());
-        break;
       default: // unknown type
         break;
       }
 
       hide();
-    }
-  }
-
-  private class GmeSettingsCallback implements AsyncCallback<GmeSettings> {
-    @Override
-    public void onFailure(Throwable caught) {
-      AggregateUI.getUI().reportError(caught);
-    }
-
-    @Override
-    public void onSuccess(GmeSettings result) {
-      gotGmeSettings = true;
-      String gmeAssetIdString = result.getGmeAssetId();
-      if (gmeAssetId == null) {
-        gmeAssetId.setText(EMPTY_STRING);
-      } else {
-        gmeAssetId.setText(gmeAssetIdString);
-      }
-      gmeGeoPoint.updateValues(result.getPossibleGeoPoints());
     }
   }
 

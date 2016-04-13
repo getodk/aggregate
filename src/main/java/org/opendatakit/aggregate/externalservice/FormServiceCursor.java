@@ -365,7 +365,9 @@ public final class FormServiceCursor extends CommonFieldsBase {
       FormServiceCursor c = (FormServiceCursor) cb;
 
       ExternalService obj = constructExternalService(c, form, cc);
-      esList.add(obj);
+      if ( obj != null ) {
+    	  esList.add(obj);
+      }
 
     }
     return esList;
@@ -423,8 +425,6 @@ public final class FormServiceCursor extends CommonFieldsBase {
        switch (fsc.getExternalServiceType()) {
        case GOOGLE_FUSIONTABLES:
          return new FusionTable(fsc, form, cc);
-       case GOOGLE_MAPS_ENGINE:
-         return new GoogleMapsEngine(fsc, form, cc);
        case GOOGLE_SPREADSHEET:
          return new GoogleSpreadsheet(fsc, form, cc);
        case JSON_SERVER:
@@ -433,6 +433,15 @@ public final class FormServiceCursor extends CommonFieldsBase {
          return new OhmageJsonServer(fsc, form, cc);
        case REDCAP_SERVER:
          return new REDCapServer(fsc, form, cc);
+       case GOOGLE_MAPS_ENGINE:
+       {
+    	   // obsolete -- remove the fsc. The parameter table is left as cruft.
+    	    Datastore ds = cc.getDatastore();
+    	    User user = cc.getCurrentUser();
+
+    	    ds.deleteEntity(fsc.getEntityKey(), user);
+       }
+    	 return null;
        default:
          return null;
        }

@@ -1272,6 +1272,18 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       opaque.removeColumnName(persistAsTable, persistAsColumn);
       persistAsColumn = null; // structured field
       break;
+    case org.javarosa.core.model.Constants.DATATYPE_GEOTRACE:
+      /**
+       * Question with location trace.
+       */
+      et = FormDataModel.ElementType.GEOTRACE;
+      break;
+    case org.javarosa.core.model.Constants.DATATYPE_GEOSHAPE:
+      /**
+       * Question with location trace.
+       */
+      et = FormDataModel.ElementType.GEOSHAPE;
+      break;
     case org.javarosa.core.model.Constants.DATATYPE_BARCODE:
       /**
        * Question with barcode string answer.
@@ -1355,6 +1367,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     switch (et) {
     case BINARY_CONTENT_REF_BLOB:
     case BOOLEAN:
+    case GEOTRACE:
+    case GEOSHAPE:
     case DECIMAL:
     case INTEGER:
     case JRDATE:

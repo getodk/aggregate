@@ -544,6 +544,8 @@ public class SubmissionParser {
       case INTEGER:
       case DECIMAL:
       case BOOLEAN:
+      case GEOTRACE:
+      case GEOSHAPE:
       case SELECT1: // identifies SelectChoice table
       case SELECTN: // identifies SelectChoice table
         if (!preExisting) {

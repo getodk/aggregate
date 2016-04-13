@@ -21,6 +21,10 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
+import org.apache.wink.common.internal.providers.entity.ByteArrayProvider;
+import org.apache.wink.common.internal.providers.entity.FileProvider;
+import org.apache.wink.common.internal.providers.multipart.BufferedInMultiPartProvider;
+import org.apache.wink.common.internal.providers.multipart.OutMultiPartProvider;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleHTMLMessageWriter;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleJSONMessageReaderWriter;
 import org.opendatakit.aggregate.odktables.entity.serialization.SimpleXMLMessageReaderWriter;
@@ -38,6 +42,10 @@ public class ODKTablesAPIApplication extends Application {
     classes.add(SimpleJSONMessageReaderWriter.class);
     classes.add(SimpleXMLMessageReaderWriter.class);
     classes.add(SimpleHTMLMessageWriter.class);
+    classes.add(BufferedInMultiPartProvider.class);
+    classes.add(OutMultiPartProvider.class);
+    classes.add(FileProvider.class);
+    classes.add(ByteArrayProvider.class);
     
     // exception response generators - 3 flavors of each because MessageContext is not available
     classes.add(ODKDatastoreExceptionJsonMapper.class);
