@@ -67,8 +67,8 @@
             </ruleList>
         </runProgram>
         <runProgram>
-            <program>xterm</program>
-            <programArguments>-e bash -c '"${installdir}/uploadAggregateToAppEngine.sh"'</programArguments>
+            <program>bash</program>
+            <programArguments>-c '"${installdir}/uploadAggregateToAppEngine.sh"'</programArguments>
             <progressText>Launch installation script (3-10 minutes).</progressText>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
