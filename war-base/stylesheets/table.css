@@ -1,0 +1,50 @@
+.evenTableRow td {
+	background-color: #dfdfdf;
+}
+.dataTable .dataLeft {
+	text-align: left;
+}
+.dataTable .dataRight {
+	text-align: right;
+}
+.dataTable td {
+	padding: 0px 1px 0px 1px;
+	text-align: center;
+}
+.titleBar td {
+	padding-left: 6px;
+	padding-right: 6px;
+	text-align: center;
+	background: #07115A;
+	color: #a1abff;
+	font-weight: bold;
+}
+.dataTable {
+	border-collapse: collapse;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #07115A;
+}
+
+.exportTable td {
+	padding: 3px 10px 3px 10px;
+	text-align: center;
+}
+
+.disabledTableRow td {
+	color: #B0B0B0;
+	background-color: #F8F8F8;
+}
+
+.enabledTableRow td {
+	color: #000000;
+	background-color: #ffffff;
+}
+
+.tableList {
+	border-collapse: collapse;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #07115A;
+	width:100%;
+}

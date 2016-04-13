@@ -1,242 +1,749 @@
+NOTE: this is preliminary documentation!
+NOTE: this is preliminary documentation!
+NOTE: this is preliminary documentation!
+NOTE: this is preliminary documentation!
+NOTE: this is preliminary documentation!
+
+==================================
 Configuring your Build Environment
 ----------------------------------
 
 The build tree relies on Maven 3 for executing unit tests and 
 integration tests across the 3 platforms (GAE, MySQL, PostgreSQL).
-The source tree is in the top level project within Maven.  The 
-directories underneath are Eclipse projects and/or Maven 
-sub-projects.  
+
+Sources are located under
+
+ src/        -- main source code, configuration files, and libraries
+ war-base/   -- static web content and libraries for Eclipse environment
+ 
+Because GWT and AppEngine have not historically respected and worked
+with Maven projects inside Eclipse, the non-Maven directories of our 
+Eclipse projects begin with "eclipse-" prefix.
+
+There are two sets of these:
+
+For AppEngine:
+
+   eclipse-ear
+   eclipse-default
+   eclipse-n-background
+   
+For MySQL or PostgreSQL:
+
+   eclipse-tomcat6
+
+Additionally, when using Eclipse, you must also import one of these projects
+into your environment:
+
+  odk-gae-settings
+  odk-mysql-settings
+  odk-postgresql-settings
+  
 
 If you're a Maven expert and have suggestions about the Maven 
 project tree, please contact mitchellsundt@gmail.com
 
 ===========================================
-Critically Important Configuration Note!!!!
+Critically Important Configuration Notes!!!!
 -------------------------------------------
 
-You MUST use Java 7. 
+(1) You MUST use Java 7. 
 
-If you use Java 8, Springframework uses a blacklisted reflection API
+Java 8 (and anything other than Servlet 2.5) are not supported by AppEngine.
+If you use Java 8, Springframework will use a blacklisted reflection API
 and you will NOT be able to run the server locally under AppEngine or
 deploy it remotely.
 
+(2) When running Google's AppEngine Eclipse plug-in and development server, the 
+plug-in will scan files and delete any that contain Servlet-3.0 functionality.
 
-=====================
-Minimal Eclipse Setup
----------------------
+Unfortunately, this includes the spring-web jar. To work around this, you must
+explode the jar, remove the overview.html and WEB-INF/web-fragment.xml files, 
+and then re-construct the jar.  To work around this problem, there is a 
+suitably modified jar here: war-base/WEB-INF/lib/spring-web-SEE-CONFIGURE-TXT-....jar
 
-For executing only in Eclipse with the bare minimum, you need the 
-odk-gae-settings project and the eclipse-aggregate-gae 
-project.  These should not require any Maven setup.
 
-Skip to the next section if you want a fully configured development environment.
+==================================
+Minimal Eclipse Installation Setup
+----------------------------------
+See the next section if you want a fully configured Maven build environment.
 
-The steps required are:
+You will probably want a computer with at least 8GB of main memory for development purposes.
 
-(0) Install the latest Java 7 SDK
+On Windows, you can confirm the signature of the downloads using certutil. See https://opendatakit.org/help/verifying-downloaded-files/
+(This is a good habit for you to adopt). 
 
-(1a) Install Eclipse IDE for Java EE -- Mars
+(1) Download and install the Java 7 JDK ( http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html )
 
-(1b) Increase the start-up memory sizes for the Eclipse workspace as detailed 
+(2) Download the "Mars.2 (4.5.2)" "Eclipse IDE for Java EE Developers" (be sure it is the Java EE version) ( https://eclipse.org/downloads/ )
+we use the 64-bit IDE. 
+
+(3) Extract Eclipse into a directory (e.g., c:\Users\your-user\eclipse
+
+(4) Use Notepad++ or similar editor to edit the eclipse.ini within this folder
+(this file is in the same directory as the eclipse.exe.). We need to
+increase the start-up memory sizes for the Eclipse workspace as detailed 
 below. The GAE database consumes huge amounts of space in the JVM and the GAE
 environment runs two independent copies of the server code to mimic the existence
 of a foreground and background process. This all requires very large perm space
 and max memory for the underlying Java environments.
 
-To do this, edit the eclipse.ini file, located in the
-eclipse directory (e.g., C:\Users\User\eclipse\eclipse.ini).  This is 
-in the same directory as the eclipse.exe.
+To do this, change -Xms... and the following lines in that file to:
+-Xms256m
+-Xmx3048m
+-XX:PermSize=1536m
+-XX:MaxPermSize=1536m
 
 This is my eclipse.ini:
 ------------------------------start-------------------
 -startup
-plugins/org.eclipse.equinox.launcher_1.3.0.v20130327-1440.jar
+plugins/org.eclipse.equinox.launcher_1.3.100.v20150511-1540.jar
 --launcher.library
-plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.200.v20140116-2212
+plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.300.v20150602-1417
 -product
 org.eclipse.epp.package.jee.product
 --launcher.defaultAction
 openFile
 --launcher.XXMaxPermSize
-1536M
+256M
 -showsplash
 org.eclipse.platform
 --launcher.XXMaxPermSize
-1536m
+256m
 --launcher.defaultAction
 openFile
 --launcher.appendVmargs
 -vmargs
 -Dosgi.requiredJavaVersion=1.7
--Xms100m
+-Xms256m
 -Xmx3048m
+-XX:PermSize=1536m
 -XX:MaxPermSize=1536m
 ------------------------------end----------------------
 
-(2) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
-
-(3) Start Eclipse.  Choose the parent directory of the clone'd repository as your workspace.
-
-Windows / Preferences:
-
-  Google / App Engine:
-  
-    Be sure there is an App Engine 1.9.18 or higher SDK defined.
-	If the default App Engine version is not 1.9.18, you may need to 
-	tweak with the project settings to get the newer jars to be added.
-
-  Google / Web Toolkit:
-  
-    Be sure there is a WebToolkit SDK defined 2.7.0 or higher.
-	The default GWT version should match that in the maven 
-	pom.xml (currently 2.7.0).  The GWT library is installed as 
-	part of the plugin and can be found in:
-	...\eclipse\plugins\com.google.gwt.eclipse.sdkbundle_2.7.0...\gwt-2.7.0
-
-File / Import:
-
-    Choose the directory of the clone'd repository as the directory to search
-	(this is one level below the workspace directory).
-	
-	Choose ONLY the eclipse-aggregate-gae and odk-gae-settings projects.
-
-	This should refresh and build with one error (a missing odk-settings-latest.jar).
-	
-(4)	Edit odk-gae-settings / common / security.properties
-
-In this file:
-
-Set the security.server.superUser to your gmail account.
-
-Additionally, set the security.server.hostname=
-(blank) to a dynamic DNS name or IP for your development box.
-
-Save.
-
-(5) In the odk-gae-settings project, select 
-the 'build.xml' (Ant Buildfile), right-click, and 
-choose Run As / Ant Build.  This will rebuild the configuration 
-jar and copy it into the eclipse project.
-
-(6) Refresh the eclipse-aggregate-gae project (to pick up the updated jar file).
-
-This should now build without errors.  
-
-On Eclipse, these additional steps may also be required:
-
-Select eclipse-aggregate-gae
-right-click Properties
-
-under /Builders
-
-de-select Enhancer (based on the bug: http://code.google.com/p/googleappengine/issues/detail?id=1970 )
-
-under /Google/App Engine
-
-toggle the App Engine SDK between the default and specific settings (to make a 
-rebuild as per instructions http://code.google.com/p/opendatakit/wiki/EclipseDebugging )
-
-(7) Select eclipse-aggregate-gae project.
-
-Click on the red toolbox (GWT compile) to compile the GWT Java code into javascript.
-For the Project, specify 'eclipse-gae-project'. This should auto-populate the 
-'Entry Point Modules' section and highlight 'AggregateUI'.  If not, click Add and 
-choose 'AggregateUI' as the entry point module to compile. If you ever need to browse
-to this, it is located under:
-
-  Package: org.opendatakit.aggregate
-  Filename: AggregateUI.gwt.xml
-
-Click on 'Advanced' to open more options.
-
-In the 'VM Arguments' section, add:
-
--Xmx1536m
-
-Click 'Compile'
-
-This should now compile.
-
-==================================
-Running or Debugging under Eclipse
-==================================
-
-Select eclipse-aggregate-gae project.
-
-Launch ODK Aggregate under the debugger with 'Debug As' choosing
-'Web Application (GWT Super Dev Mode)'
-
-This will fail with an Out-of-Memory error.
-
-Stop the server (click on the small red square on the 'Development Mode' tab).
-
-Repeat for 'Run As'
-
-Now, to increase the JVM size:
-
-For each of these configuration screens:
-
-Run As 'Run Configurations...'
-Debug As 'Debug Configurations...'
-
-Open the above dialog (repeat this for each of these)
-
-Choose 'Web Application'
-
-Open this up, and select 'index.html'
-
-On the '(X)= Arguments' tab,
-
-under the 'Program Arguments' section, add an argument with whatever
-hostname or IP address you have configured in your 
-security.properties file. i.e., if that IP is 192.168.10.2, you would
-add:
+(5)  Download "Google AppEngine SDK for Java". We currently use 1.9.34
+https://cloud.google.com/appengine/downloads 
+ (scroll down).
  
- -bindAddress 192.168.10.2 
+ And extract the SDK.
  
-replace the '-Xmx512m' at the front of the 'VM Arguments' section with:
+(6) Download "GWT SDK". We currently use 2.7.0
+http://www.gwtproject.org/download.html
 
--Xmx2048m -XX:MaxPermSize=1536m 
+And extract the SDK.
 
-Click 'Apply'
+===============================
+Minimal AppEngine Eclipse Setup
+-------------------------------
+This assumes you have completed "Minimal Eclipse Installation Setup"
 
-Now close and repeat for the other configuration.
+(1) Finally, start Eclipse (Mars) and select this ODK Aggregate workspace. 
 
-To Debug or Run the application, you will then:
+Go to Help / Install New Software.
 
-choose 'Debug As' or 'Run As', 
-choose 'Web Application (GWT Super Dev Mode)'
-choose 'index.html' 
+Choose Add...
 
-And it will use this revised configuration.
+And register an entry for this URL  https://dl.google.com/eclipse/plugin/4.4
 
-See the documentation for GWT SuperDevMode to understand how to use 
-that execution mode. GWT UI debugging generally needs to be done on
-a Chrome browser.
+After registering, when it presents available software to install, do not install
+the SDKs. At a minimum, you need to install:
 
-==================================
-Debugging GWT UI in Chrome Browser
-==================================
+Google Plugin for Eclipse / Google Plugin for Eclipse 4.4/4.5
 
-See the documentation for running GWT SuperDevMode
-e.g., http://www.gwtproject.org/articles/superdevmode.html
+(you don't need anything else)
 
-=====================
-MySQL Eclipse Setup
----------------------
+Proceed with installing this and restarting Eclipse.
 
-First, get the eclipse-aggregate-gae project working.
+(2) Re-open Eclipse, go to Window / Preferences
 
-You will then copy the war directory of that project over to the 
-eclipse-aggregate-mysql project, and tweak it. 
+Open Google / App Engine and add the AppEngine SDK path that you downloaded and exploded in (5) in earlier section
 
-See the SETUP.txt instructions in the eclipse-aggregate-mysql
-directory for further information.
+Open Google / Web Toolkit and add the GWT SDK path of what you downloaded and exploded in (6) in earlier section
 
-The class files seem to get stuck and not Publish when running
-under Tomcat 6.0 and MySQL. The work-around for this is to 
-Stop the server and Clean... it, then Start it. This seems to 
-make everything current.
+Choose OK to accept changes and close the preferences dialog.
+
+(3) Once again, go to Window / Preferences
+
+Open Server /Runtime Environment
+
+Select Google AppEngine 
+
+If it complains about not having an AppEngine SDK then delete this and 
+Select Add, choose Google / AppEngine, and accept the defaults to re-create it.
+
+Choose OK to accept changes and close the preferences dialog.
+
+(At this point, Eclipse has the basic AppEngine / GWT configuration.)
+
+(4) If you haven't already, go to the Workbench view. Then, 
+Import / Import... / General / Existing Projects into Workspace
+
+import these existing projects:
+
+odk-gae-settings
+eclipse-default
+eclipse-n-background
+eclipse-ear
+
+(5) Within odk-gae-settings, open common and edit security.settings
+
+Update the security.server.hostname to correspond to your system IP address.
+Remember the IP address. You could use "localhost" for this if you are not
+attempting to debug the communications between ODK Aggregate and a device 
+(i.e., only working on the web UI).
+
+You can find out your IP address by opening a cmd window and running 
+ipconfig (or, on Mac/Linux, running ifconfig -a).
+
+By default, when running the AppEngine Development Server, it uses port 8888. 
+Be sure that this file has
+
+security.server.port=8888
+
+Save changes.
+
+(6) Select build.xml within odk-gae-settings. Right-click, Run As / Ant Build
+
+(7) Select eclipse-default, right-click, Refresh
+
+(8) Select eclipse-n-background, right-click, Refresh
+
+(9) Choose File / New / Other / Server / Server
+
+Select Google / Google App Engine as the server type
+
+Enter your computer's IP address as the Server's host name.
+
+Click Next.
+
+Enter 0  in HRD unapplied job percentage.
+
+Click Next.
+
+Add eclipse-ear to the configured resources.
+
+Click Finish.
+
+(10) Now, Select eclipse-default, right-click, Properties
+
+Select "Deployment Assembly"
+
+Select any "Google App Engine Web Libraries" or "Google App Engine" entries and remove them.
+Select and remove the "App Engine SDK" entry.
+
+Click Apply
+
+Go to Java Build Path / Libraries
+
+Select "Server Library" and remove it.
+Select any "Google App Engine Web Libraries" or "Google App Engine" entries and remove them.
+Select and remove the "App Engine SDK" entry.
+
+Click "Add Library"
+
+Choose Server Runtime / Google AppEngine (1.9.34)
+
+And accept it (this will create a Google App Engine entry).
+
+Click "Add Library"
+
+Choose Google App Engine
+
+And accept it (this will create an App Engine SDK entry).
+
+Go to Java Build Path / Order and Export
+
+Ensure that:
+ Web App Libraries
+ GWT
+ App Engine SDK
+
+are checked and in that order
+
+Click Apply
+
+Select "Deployment Assembly"
+
+Choose Add... / Java Build Path Entries 
+
+Select:
+  AppEngine SDK
+
+Click Apply
+(you may need to repeat this twice to get it to remain)
+
+Select "Project Facets"  
+
+Choose "Google AppEngine (for single module)"
+
+Click on the Runtimes tab.
+
+Check the "Google App Engine" entry that has the stylized airplane icon.
+(the one that looks like a server box is missing from your workspace; uncheck that).
+
+Click Apply
+
+Choose "Server"
+
+Choose the server that you configured earlier (in step (9)).
+
+Click OK
+
+(11) Now, Select eclipse-n-background, right-click, Properties
+
+and repeat all the steps in (10) above.
+
+(12) Now, Select eclipse-ear, right-click, Properties
+
+Select "Project Facets"  
+
+Choose "Google AppEngine (for multiple modules)"
+
+Click on the Runtimes tab.
+
+Check the "Google App Engine" entry that has the stylized airplane icon.
+(the one that looks like a server box is missing from your workspace; uncheck that).
+
+Click Apply
+
+Choose "Server"
+
+Choose the server that you configured earlier (in step (9)).
+
+Click OK
+
+(13) Select eclipse-default, right-click Google / GWT Compile
+
+open Advanced
+
+Verify that "Additional compiler arguments" has:
+
+-war WebContent
+
+Verify that VM Arguments has:
+
+-Xmx512m
+
+Choose Compile.
+
+(14) Select eclipse-default, right-click Refresh to pick up the 
+changes to the compiled GWT files (this is important!!!)
+
+(15) Create an explicit development server configuration
+
+Select eclipse-ear, right-click, Debug As / Debug Configurations
+
+Double-click to choose Google App Engine
+
+Rename "New_Configuration" to something of your choosing (e.g., devServerGAE)
+
+Click Apply
+
+Close.
+
+(16) Now, choose eclipse-ear, right-click, Debug As / Debug on Server
+
+This will initialize and start the server configuration you created above.
+It will fail with an out-of-memory error.
+
+Stop the server by clicking the red square box on the Console output window.
+
+----------------------------------------
+(17) Select eclipse-ear, right-click, Debug As / Debug Configurations
+
+Select the Google App Engine configuration you created in step (15).
+
+Select the (X)= Arguments tab.
+
+In the Program Arguments section, add:
+
+--address=0.0.0.0 
+
+before the --port entry.
+
+In the VM Arguments section, replace "-Xmx512m" with
+
+ "-XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m "
+ 
+Click Apply
+
+Choose Close
+-------
+If you've done this correctly, the Program Arguments would be something like:
+
+--address=0.0.0.0 --port=8888 --disable_update_check [path...to...]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\eclipse-ear
+
+And the VM Arguments section should become something like:
+
+-javaagent:[path...to...]\appengine-java-sdk-1.9.34\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
+
+If you tried to skip a step, the server might not be configured correctly.
+
+(after Applying these changes, choose Close if you haven't already)
+
+----------------------------------------
+(18) Select the Servers tab in the output area.
+
+Right-click on the server you created. Choose Clean....
+
+This will delete the datastore and rebuild the server based upon the updated configuration.
+
+(19) To run or debug, **YOU CANNOT right-click the server and choose Run or Debug**
+If you do this, all of the settings you changed in step (17) will be lost.
+
+Instead, **YOU MUST** select eclipse-ear, right-click, Debug As / Debug Configurations (Run As / Run Configurations)
+
+This will open up the configuration you made in step (17).
+
+Choose Debug (Run)
+
+Now open a browser at http://localhost:8888
+
+It should redirect to your Aggregate instance at the IP address you specified.
+
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
+
+========================================
+AppEngine Edit-Debug Cycle Considerations
+========================================
+
+Now, you should be able to Debug the server-side code using the
+AppEngine development server. When you are developing, as you 
+change code, you will probably need to start and stop the server.
+
+If you change the UI layer, you will want to re-run the GWT compiler,
+and Refresh the project (in the eclipse-default project, where the UI
+code is).
+
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
+
+If you are working with GWT code, you can work in SuperDevMode
+where you set breakpoints within the Chrome development environment.
+
+See farther down (below) for configuring GWT.
+
+If something is not picked up, you can try cleaning all the projects
+and also Clean the server (via right-click on the server on the Servers
+tab). This should refresh everything.  Note, however, that this will
+delete the datastore, too.
+
+The most likely problem during development is the inadvertent clearing of 
+the settings you configured in step 17, above. 
+
+======================================
+Minimal Tomcat6 MySQL/PostgreSQL Eclipse Setup
+--------------------------------------
+
+This assumes you have completed "Minimal Eclipse Installation Setup"
+
+(including the download of the AppEngine SDK and GWT SDK. These are needed to resolve symbols when
+compiling the source code, even when running under Tomcat6.)
+
+(1) Install Tomcat6 on your computer.
+
+(2) download MySQL Connector/J and place it in the lib directory of the Tomcat install.
+Stop and restart the Tomcat6 server so it picks up that library. This must be present
+for MySQL connections to work. It does not harm anything if this is present when using 
+PostgreSQL.
+
+(3) install the database server of your choice (MySQL or PostgreSQL).
+NOTE:  Be sure that it is configured using a UTF-8 character set as the default.
+
+(4) Start Eclipse (Mars) and select this ODK Aggregate workspace. 
+
+Go to Help / Install New Software.
+
+Choose Add...
+
+And register an entry for this URL  https://dl.google.com/eclipse/plugin/4.4
+
+After registering, when it presents available software to install, do not install
+the SDKs. At a minimum, you need to install:
+
+Google Plugin for Eclipse / Google Plugin for Eclipse 4.4/4.5
+
+(you don't need anything else)
+
+Proceed with installing this and restarting Eclipse.
+
+(5) Re-open Eclipse, go to Window / Preferences
+
+Open Google / App Engine and add the AppEngine SDK path that you downloaded and exploded in (5) in earlier section
+
+Open Google / Web Toolkit and add the GWT SDK path of what you downloaded and exploded in (6) in earlier section
+
+Choose OK to accept changes and close the preferences dialog.
+
+(6) Once again, go to Window / Preferences
+
+Open Server /Runtime Environment
+
+Select Google AppEngine. If it complains about not having an AppEngine SDK the delete this
+and select Add, choose Google / AppEngine, and accept the defaults to re-create it.
+
+Select Apache Tomcat v6.0. If it complains about not having a configured runtime, then delete this.
+Select Add..., Select Apache / Apache Tomcat v6.0 and set it up to point to your 
+installation of Tomcat v6.0 on your system. Do not choose to create a new server; you are re-using 
+the existing server.
+
+Click OK to save changes.
+
+(7) If you haven't already, go to the Workbench view. Then, 
+Import / Import... / General / Existing Projects into Workspace
+
+import these existing projects:
+
+odk-mysql-settings
+odk-posgres-settings
+eclipse-tomcat6
+
+(8) Depending upon which database you want to use:
+
+(8a) MySQL: 
+
+open odk-mysql-settings/common
+
+edit security.properties to set the hostname to the IP address of your 
+computer.
+
+open odk-mysql-settings/mysql
+
+edit jdbc.properties to specify a username, password and database name in the
+url.
+
+------e.g.,----------
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.resourceName=jdbc/odk_aggregate
+jdbc.url=jdbc:mysql://127.0.0.1/odk_db?autoDeserialize=true
+jdbc.username=odk_unit
+jdbc.password=test
+jdbc.schema=odk_db
+----------------
+
+Save changes. 
+
+Now open MySQL Workbench. If you have not yet created that database, 
+issue the following commands, with the names changed for what you 
+specified above. The names to substitute above/below are:
+
+odk_db -- replace with your database name
+odk_unit -- replace with your username
+test -- replace with your password
+
+-----corresponding db script------------
+create database `odk_db`;
+create user 'odk_unit'@'localhost' identified by 'test';
+grant all on `odk_db`.* to 'odk_unit'@'localhost' identified by 'test';
+flush privileges;
+----------------------------------------
+
+Finally, return to Eclipse, select the build.xml script within the odk-mysql-settings
+project, right-click, Run As / Ant Build.
+
+This will bundle up these changes and copy the changes into the eclipse-tomcat6 project.
+
+(8b) PostgreSQL: 
+
+open odk-postgres-settings/common
+
+edit security.properties to set the hostname to the IP address of your 
+computer.
+
+open odk-postgres-settings/postgres
+
+edit jdbc.properties to specify a username, password and database name in the
+url.
+
+------e.g.,----------
+jdbc.driverClassName=org.postgresql.Driver
+jdbc.resourceName=jdbc/odk_aggregate
+jdbc.url=jdbc:postgresql://127.0.0.1/odk_db?autoDeserialize=true
+jdbc.username=odk_unit
+jdbc.password=test
+jdbc.schema=odk_db
+----------------
+
+Save changes. 
+
+Now open pgAdmin III. If you have not yet created that database, 
+issue the following commands, with the names changed for what you 
+specified above. The names to substitute above/below are:
+
+odk_db -- replace with your database name
+odk_unit -- replace with your username
+test -- replace with your password
+
+-----corresponding db script------------
+create database "odk_db";
+SELECT datname FROM pg_database WHERE datistemplate = false;
+create user "odk_unit" with unencrypted password 'test';
+grant all privileges on database "odk_db" to "odk_unit";
+alter database "odk_db" owner to "odk_unit";
+\c "odk_db";
+create schema "odk_db";
+grant all privileges on schema "odk_db" to "odk_unit";
+----------------------------------------
+
+Finally, return to Eclipse, select the build.xml script within the odk-postgres-settings
+project, right-click, Run As / Ant Build.
+
+This will bundle up these changes and copy the changes into the eclipse-tomcat6 project.
+
+(9) Select eclipse-tomcat6, right-click, Refresh. (to pick up file changes).
+
+(10) Select eclipse-tomcat6, right-click, Google / GWT Compile
+
+Verify the program arguments are 
+
+   -war WebContent
+   
+And the VM arguments are
+
+    -Xmx512m
+	
+Apply and Compile.
+
+(11) Select eclipse-tomcat6, right-click, Refresh. (to pick up GWT file changes).
+
+(12) Select eclipse-tomcat6, right-click, properties, 
+
+(13) Select the Servers tab in the Output area
+
+Delete any existing Tomcat v6.0 server.
+
+Click to create a server.
+
+Choose Tomcat v6.0 Server
+
+Enter the IP address of your computer. If you leave this as localhost, then ODK Collect
+and ODK Briefcase will not be able to fully communicate with your development server.
+
+Click Next
+
+Configure to deploy eclipse-tomcat6 on this server.
+
+Click Finish
+
+(14) Select eclipse-tomcat6 project, right-click Properties
+ 
+Go to Project Facets, select Dynamic Web App, click Runtimes tab, 
+verify that Tomcat v6.0 is chosen.
+
+Apply
+
+Go to Server, select the Tomcat v6.0 server that you just created
+
+Apply
+
+Click OK
+
+(13) You should now be able to run ODK Aggregate on this Tomcat6 server by 
+right-click, Debug As / Debug on Server
+
+The project may report a validation error (web.xml not found in WebContent).
+You can ignore this. The web.xml is provided in war-base.
+
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
+
+========================================
+Tomcat6 Edit-Debug Cycle Considerations
+========================================
+
+Now, you should be able to Debug the server-side code using the
+Tomcat6 development server. When you are developing, as you 
+change code, you will probably need to start and stop the server.
+
+If you change the UI layer, you will want to re-run the GWT compiler,
+and Refresh the eclipse-tomcat6 project, where the UI
+code is.
+
+You may need to clear your browser cache if you are using GWT SuperDevMode
+and re-configure the browser for that (e.g., the bookmark buttons).
+
+If you are working with GWT code, you can work in SuperDevMode
+where you set breakpoints within the Chrome development environment.
+
+See farther down (below) for configuring GWT.
+
+If something is not picked up, you can try cleaning the project
+and also Clean the server (via right-click on the server on the Servers
+tab). This should refresh everything.  Unlike with AppEngine, this 
+will not clear the content of your database. You would need to do 
+that through your database admin tool (MySQL Workbench or pgAdmin III).
+
+===============================
+GWT debugging with SuperDevMode
+-------------------------------
+
+These instructions are taken from this video:  https://www.youtube.com/watch?v=w9270Yqt-5I
+
+(1) In either the eclipse-ear or eclipse-tomcat6 project, 
+right-click, Debug As / Debug Configurations
+
+Double-click "Java Application" to configure a Java Application execution.
+
+Change the name to, e.g., "AppEngine GWT Codeserver" or "Tomcat6 GWT Codeserver"
+
+Choose Search... and type in Code
+
+Select "CodeServer"
+
+Choose Apply
+
+Click on the (X)= Arguments tab
+
+In Program Arguments, insert the 4 arguments (on one line):
+
+--bindAddress [your IP address]
+-src [path-to-workspace]\src\main\java 
+-launcherDir [path-to-workspace]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\eclipse-tomcat6  
+org.opendatakit.aggregate.AggregateUI
+
+The -launcherDir "tmp0" may be a different directory name (e.g., tmp1, tmp2...). 
+Whichever one contains the eclipse-tomcat6 or eclipse-default is the one you would use.
+If confused, you can stop all servers, blow away all the tmpX directories, and re-publish 
+and re-run the server you have configured to determine what directory has the active content.
+
+Choose Apply
+
+Close
+
+(2) Now, run the server (EAR or Tomcat6)
+
+(3) And run the codeserver you just configured via Debug As / Debug Configurations, and select the configuration.
+
+This will take a long long time, and then emit a URL that the code server is using.
+
+(4) Open a Chrome browser to this URL.
+
+Copy the Dev Mode On / Dev Mode Off buttons up to the bookmarks bar.  
+You may need to delete an earlier copy of these by right-click / Delete.
+And if you have been using Dev Mode, you may need to clear your browser cache.
+
+(5) Now, open the URL to your server (tomcat6 or eclipse-ear).
+
+It will pause compiling aggregateui
+
+And then render the page. 
+
+Choose "Dev Mode On"
+
+(6) Then, to debug, go to Developer Tools 
+
+There will be the standard Javascript Sources tab, and a new tab, Content Scripts.
+
+The content Scripts tab will contain the Java code, and you can set breakpoints in that
+to take effect on the browser, and step through everything there.
+
+I believe you can make code changes in the Java source in Eclipse, and, when you 
+save those changes, they will be picked up and applied after a short delay.
+
+More info here:
+
+http://www.gwtproject.org/articles/superdevmode.html
 
 ==========================================
 Troubleshooting Debugging/Running 
@@ -250,17 +757,18 @@ delete your local datastore (instructions below)
 
 (2) Odd behaviors under Eclipse
 
-The Eclipse GWT plugin does not normally keep the compiled
-client-side javascript up to date with the debug-enabled
-GWT Java client code.  This can cause a number of inconsistencies
-when the ?gwt.codesvr=127.0.0.1:9997 query string is dropped 
-off the URL during redirects when logging in, etc.
+When you stop your server, be sure to recompile GWT files
+(click on the red toolbox). And then right-click, Refresh.
 
-First, verify that if you are running under debug, you have
-the ?gwt.codesvr=127.0.0.1:9997 query string on your URLs.
+You may also need to Clean and Publish to the server to 
+ensure that the server has the very latest copies of those
+files. 
 
-Second, periodically, when stopped, click on the red toolbox
-to compile the javascript.
+Otherwise, when you restart the server, it may use a stale
+copy of the compiled code.
+
+You may also need to stop and start the codeserver during this
+process.
 
 Third, periodically clear your browser cache to force a complete
 re-loading of the clientside javascript.
@@ -282,11 +790,11 @@ and delete the datastore to clear this problem.
 Clearing your Datastore
 -----------------------
 
-To delete the local datastore:
-
-(1) In Eclipse, browse to war/WEB-INF/appengine-generated
-(2) Hit Refresh
-(3) delete "local_db.bin"
+To delete the local datastore, the easiest way to do this is to 
+Clean your server, which will delete everything and republish it.
+If you do this, you will first need to stop your server, stop
+your codeserver (if debugging the UI), and then Clean, start the
+server, and then start the codeserver (if debugging the UI). 
 
 ==========================================
 Full Maven Development Environment Configuration
@@ -454,3 +962,9 @@ On Windows, the generated installers are placed under:
 
 C:\Users\Administrator\Documents\InstallBuilder\output
 
+NOTE: the bitrock installer construction process copies configuration files
+from the eclipse-ear (EarContent/appengine-application.xml),
+eclipse-default (WebContent/appengine-web.xml, WebContent/cron.xml, WebContent/queue.xml)
+and eclipse-n-background (WebContent/appengine-web.xml) projects.
+
+Changing those configuration files will alter the installer image.

@@ -18,8 +18,8 @@ package org.opendatakit.aggregate.task.gae;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-import com.google.appengine.api.backends.BackendService;
-import com.google.appengine.api.backends.BackendServiceFactory;
+import com.google.appengine.api.modules.ModulesService;
+import com.google.appengine.api.modules.ModulesServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
@@ -52,8 +52,8 @@ public class TaskOptionsBuilder {
 
   public void enqueue() {
     // these tasks run on the background thread...
-    BackendService backendsApi = BackendServiceFactory.getBackendService();
-    String hostname = backendsApi.getBackendAddress(ServletConsts.BACKEND_GAE_SERVICE);
+	ModulesService modulesApi = ModulesServiceFactory.getModulesService();
+	String hostname = modulesApi.getVersionHostname(ServletConsts.BACKEND_GAE_SERVICE, null);
     task.header(ServletConsts.HOST, hostname);
 
     Queue queue = QueueFactory.getDefaultQueue();

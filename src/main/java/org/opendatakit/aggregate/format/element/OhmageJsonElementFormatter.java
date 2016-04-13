@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.externalservice.OhmageJsonTypes;
@@ -71,7 +72,7 @@ public class OhmageJsonElementFormatter implements ElementFormatter {
 						element.getElementName(), photoUUID);
 				responses.add(photo);
 				photos.put(photoUUID,
-	new ByteArrayBody(imageBlob, blobSubmission.getContentType(1, cc), photoUUID.toString()));
+				new ByteArrayBody(imageBlob, ContentType.create(blobSubmission.getContentType(1, cc)), photoUUID.toString()));
 			}
 		}
 	}
