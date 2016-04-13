@@ -34,8 +34,8 @@
     </customLanguageFileList>
     <finalPageActionList>
         <runProgram>
-            <program>cmd</program>
-            <programArguments>/S /C start /D "${installdir}" /B .${platform_path_separator}uploadAggregateToAppEngine.hta</programArguments>
+            <program>java</program>
+            <programArguments>-jar .${platform_path_separator}ODKAggregateAppEngineUpdater.jar</programArguments>
             <progressText>Launch installation script (3-10 minutes).</progressText>
             <useMSDOSPath>0</useMSDOSPath>
             <workingDirectory>${installdir}</workingDirectory>

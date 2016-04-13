@@ -53,20 +53,21 @@
             </ruleList>
         </folder>
         <folder>
-            <description>Google AppEngine Windows HTA</description>
+            <description>Google AppEngine Windows cmd</description>
             <destination>${installdir}</destination>
-            <name>windowsOnlyGaeScripts</name>
+            <name>sharedGaeScripts</name>
             <platforms>all</platforms>
             <distributionFileList>
                 <distributionFile>
-                    <allowWildcards>1</allowWildcards>
-                    <origin>files/gae_scripts/*.hta</origin>
+                    <allowWildcards>0</allowWildcards>
+                    <origin>files/gae_scripts/DataStorageWarning.txt</origin>
+                </distributionFile>
+                <distributionFile>
+                    <allowWildcards>0</allowWildcards>
+                    <origin>files/gae_scripts/ODKAggregateAppEngineUpdater.jar</origin>
                 </distributionFile>
             </distributionFileList>
             <ruleList>
-                <platformTest>
-                    <type>windows</type>
-                </platformTest>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
@@ -673,7 +674,7 @@ Tomcat installation.
 ${html_steps_end_item}${html_steps_begin_item}
 start Apache (if not already started)
 ${html_steps_end_item}${html_steps_begin_item}
-visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; Log in using the super-user's Aggregate username with password  and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; Log in using the super-user's Aggregate username with password &lt;code&gt;aggregate/&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
 ${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
 If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
 rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
@@ -741,7 +742,7 @@ Tomcat installation.
 ${html_steps_end_item}${html_steps_begin_item}
 start Apache (if not already started)
 ${html_steps_end_item}${html_steps_begin_item}
-visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; Log in using the super-user's Aggregate username with password  and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; Log in using the super-user's Aggregate username with password &lt;code&gt;aggregate&lt;code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
 ${html_steps_end_item}&lt;/ol&gt;&lt;p&gt;
 If you want ODKAggregate to be reached at just &lt;code&gt;http://${host_port}/&lt;/code&gt;, you can
 rename it to ROOT.war before copying it to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory.
@@ -759,9 +760,9 @@ ${html_steps_end}</text>
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}Browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;uploadAggregateToAppEngine.hta&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance and the password for that account. 
+${html_steps_begin_item}Browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into this updater's pop-up dialog. 
 ${html_steps_end_item}${html_steps_begin_item}
-Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with password  and go to the Site Admin / Permissions tab to change that password and to complete configuring the
+Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
@@ -780,7 +781,7 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account that created or that has the administrative rights for your appspot instance, and the password for that account. 
+${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into this updater's pop-up dialog. 
 ${html_steps_end_item}${html_steps_begin_item}After the upload script completes successfully, 
 visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
@@ -801,7 +802,7 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance and the password for that account.
+${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into this updater's pop-up dialog.
 ${html_steps_end_item}${html_steps_begin_item}
 Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
