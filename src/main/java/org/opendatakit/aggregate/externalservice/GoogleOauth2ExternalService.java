@@ -198,14 +198,15 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       newPermission.setKind("drive#permission");
       newPermission.setRole("owner");
       newPermission.setType("user");
-      newPermission.setValue(userName);
+      newPermission.setEmailAddress(userName);
 
       // NOTE: Dropped the check because name was not a good value to compare
 
-      Drive.Permissions.Insert insertPerm = drive.permissions().insert(fileId, newPermission);
-      insertPerm.setSendNotificationEmails(false);
-      insertPerm.set("transferOwnership", Boolean.TRUE.toString());
-      Permission response = insertPerm.execute();
+      Drive.Permissions.Create createPerm = drive.permissions().create(fileId, newPermission);
+      // ownership transfer now requires notification e-mail
+      // createPerm.setSendNotificationEmail(false);
+      createPerm.setTransferOwnership(true);
+      Permission response = createPerm.execute();
 
       if (response == null) {
         oauth2logger.error(NO_PERM_RETURNED);

@@ -22,7 +22,7 @@ import java.util.HashMap;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.KmlSettings;
+import org.opendatakit.aggregate.client.form.GeopointElementList;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.table.BinaryPopupClickHandler;
@@ -170,13 +170,13 @@ public final class VisualizationPopup extends AbstractPopupBase {
       }
     }, PieChart.PACKAGE, Table.PACKAGE);
 
-    SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<KmlSettings>() {
+    SecureGWT.getFormService().getGpsCoordnates(formId, new AsyncCallback<GeopointElementList>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
       }
 
-      public void onSuccess(KmlSettings result) {
-        geoPoints.updateValues(result.getGeopointNodes());
+      public void onSuccess(GeopointElementList result) {
+        geoPoints.updateValues(result.getGeopointElements(), false);
       }
     });
 
@@ -245,7 +245,9 @@ public final class VisualizationPopup extends AbstractPopupBase {
   }
 
   private void updateUIoptions() {
-    ChartType selected = chartType.getSelectedEnumValue();
+    String chartTypeString = chartType.getSelectedValue();
+    ChartType selected = (chartTypeString == null) ? null : ChartType.valueOf(chartTypeString);
+
     executeButton.setHTML(selected.getButtonText());
     if (selected.equals(ChartType.MAP)) {
       typeControlBar.setHTML(0, COLUMN_TEXT, GPS_TXT);
@@ -550,9 +552,12 @@ public final class VisualizationPopup extends AbstractPopupBase {
         Window.alert("Modules are not loaded yet, please try again!");
         return;
       }
+      
+      String chartTypeString = chartType.getSelectedValue();
+      ChartType selected = (chartTypeString == null) ? null : ChartType.valueOf(chartTypeString);
 
       Widget chart;
-      switch (chartType.getSelectedEnumValue()) {
+      switch (selected) {
       case MAP:
         chart = createMap();
         break;

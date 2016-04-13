@@ -69,6 +69,7 @@ public class Column implements Serializable {
 
   /**
    * This is the ColumnType of the field. It is either:
+   *    boolean
    *    integer
    *    number
    *    configpath
@@ -79,6 +80,13 @@ public class Column implements Serializable {
    *    string(len)
    *    typename
    *    typename(len)
+   *    
+   *    or
+   *    
+   *    typename:datatype
+   *    typename:datatype(len)
+   *    
+   *    where datatype can be one of boolean, integer, number, array, object
    *
    *    Where:
    *
@@ -111,7 +119,7 @@ public class Column implements Serializable {
    *      string is a string value
    *
    *      anything else, if it has no child element key, it is a string
-   *            (simple user-defined data type).
+   *            (simple user-defined data type). Unless a datatype is specified.
    *
    *      anything else, if it has one or more child element keys, is a
    *            JSON serialization of an object containing those keys
@@ -156,12 +164,14 @@ public class Column implements Serializable {
    * adjacent columns, or what exactly. Either way, its implementation should be
    * brought into alignment with ColumnClient, which has both display and
    * backing names when the answer to the above questions is decided.
-   *
+   * 
    * @param tableId
    * @param elementKey
    * @param elementName
    * @param elementType
-   * @param listChildElementKeys
+   * @param listChildElementKeys - a JSON serialization of a list of child
+   *                 elementKey values. These must be in the (alphabetical) order 
+   *                 produced by Javascript sort().
    */
   public Column(final String elementKey, final String elementName,
       final String elementType, final String listChildElementKeys) {

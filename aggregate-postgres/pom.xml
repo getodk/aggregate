@@ -81,7 +81,7 @@
                     <phase>pre-integration-test</phase>
                 </execution>
                 <execution>
-                    <id>add-emma-to-war-folder</id>
+                    <id>add-jacoco-to-war-folder</id>
                     <phase>pre-integration-test</phase>
                 </execution>
                 <execution>
@@ -101,14 +101,9 @@
             </executions>
         </plugin>
         <plugin>
-            <!--  This references the emma plugin, configuration is in the parent -->
-            <groupId>org.sonatype.maven.plugin</groupId>
-            <artifactId>emma-maven-plugin</artifactId>
-        </plugin>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>tomcat-maven-plugin</artifactId>
-            <version>1.1</version>
+			<!--  This references the jacoco plugin, configuration is in the parent -->
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
         </plugin>
         <plugin>
           <!-- This configures the running of odktables integration tests. -->
@@ -118,7 +113,7 @@
           <configuration>
             <argLine>${surefire.argLine}</argLine>
             <skipTests>true</skipTests>
-            <classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>
+            <classesDirectory>${project.build.directory}/generated-classes/jacoco/classes</classesDirectory>
             <excludes>
               <exclude>**/integration/**</exclude>
             </excludes>
@@ -163,12 +158,12 @@
  </build>
     <reporting>
         <plugins>
-          <plugin>
-            <groupId>org.sonatype.maven.plugin</groupId>
-            <artifactId>emma-maven-plugin</artifactId>
-            <version>${emma.maven.plugin.version}</version>
-            <inherited>true</inherited>
-          </plugin>
+		  <plugin>
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>${jacoco.maven.plugin.version}</version>
+			<inherited>true</inherited>
+		  </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-report-plugin</artifactId>

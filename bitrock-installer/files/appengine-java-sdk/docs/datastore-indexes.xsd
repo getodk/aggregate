@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- CAUTION: the following files implement the parsing and validation of -->
-<!-- the index definition schema, and so they all must be kep in sync: -->
+<!-- the index definition schema, and so they all must be kept in sync: -->
 
 <!--     apphosting/datastore/datastore_index.py -->
 <!--     apphosting/datastore/datastore_index_xml.py -->
 <!--     java/com/google/apphosting/utils/config/IndexesXmlReader.java -->
 <!--     java/com/google/apphosting/utils/config/IndexYamlReader.java -->
 <!--     java/com/google/appengine/tools/development/datastore-indexes.xsd -->
-<!--     java/com/google/appengine/tools/development/datastore-indexes.xsd -->
+<!--     java/com/google/appengine/tools/development/datastore-indexes.dtd -->
+<!--     java/com/google/appengine/api/datastore/dev/LocalCompositeIndexManager.java -->
+<!--     java/com/google/appengine/api/datastore/CompositeIndexManager.java -->
 
 <!-- TODO(flyboy): add to this list when we discover even more places -->
 <!-- that are sensitive to schema changes -->

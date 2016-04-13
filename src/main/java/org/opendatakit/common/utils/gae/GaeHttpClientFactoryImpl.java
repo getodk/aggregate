@@ -15,11 +15,13 @@
  */
 package org.opendatakit.common.utils.gae;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpParams;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.ConnectionConfig;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.opendatakit.common.utils.HttpClientFactory;
-import org.opendatakit.http.conn.GaeClientConnectionManager;
+import org.opendatakit.http.conn.GaeHttpClientConnectionManager;
 
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.http.HttpTransport;
@@ -37,9 +39,9 @@ public class GaeHttpClientFactoryImpl implements HttpClientFactory {
   }
 
   @Override
-  public HttpClient createHttpClient(HttpParams params) {
-    return new DefaultHttpClient(new GaeClientConnectionManager(
-        GaeClientConnectionManager.DEFAULT_SCHEME_REGISTRY), params);
+  public CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig) {
+	  
+	  return HttpClientBuilder.create().setConnectionManager(new GaeHttpClientConnectionManager(socketConfig, connectionConfig, requestConfig)).build();
   }
 
   @Override
