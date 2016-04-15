@@ -1,3 +1,7 @@
+# need to prevent cl/lf on this file since Linux hates that
+#
+bitrock-installer/files/gae_scripts/uploadAggregateToAppEngine.sh   text eol=lf
+
 *.bin	filter=lfs diff=lfs merge=lfs -text
 *.dll	filter=lfs diff=lfs merge=lfs -text
 *.gwt-log	filter=lfs diff=lfs merge=lfs -text
