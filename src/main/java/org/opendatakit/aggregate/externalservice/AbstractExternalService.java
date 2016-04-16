@@ -27,21 +27,18 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.opendatakit.aggregate.ContextFactory;
@@ -156,31 +153,28 @@ public abstract class AbstractExternalService implements ExternalService{
   protected HttpResponse sendHttpRequest(String method, String url, HttpEntity entity, List<NameValuePair> qparams, CallingContext cc) throws
       IOException {
 
-    HttpParams httpParams = new BasicHttpParams();
-    HttpConnectionParams.setConnectionTimeout(httpParams, SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS);
-    HttpConnectionParams.setSoTimeout(httpParams, SERVICE_TIMEOUT_MILLISECONDS);
-
     // setup client
     HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
-    HttpClient client = factory.createHttpClient(httpParams);
+    
+    SocketConfig socketConfig = SocketConfig.copy(SocketConfig.DEFAULT)
+        .setSoTimeout(SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS)
+        .build();
+    RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
+        .setConnectTimeout(SERVICE_TIMEOUT_MILLISECONDS)
+        .setRedirectsEnabled(true)
+        .setAuthenticationEnabled(true)
+        .setMaxRedirects(32)
+        .setCircularRedirectsAllowed(true)
+        .build();
 
-    // support redirecting to handle http: => https: transition
-    HttpClientParams.setRedirecting(httpParams, true);
-    // support authenticating
-    HttpClientParams.setAuthenticating(httpParams, true);
-
-    // redirect limit is set to some unreasonably high number
-    // resets of the socket cause a retry up to MAX_REDIRECTS times,
-    // so we should be careful not to set this too high...
-    httpParams.setParameter(ClientPNames.MAX_REDIRECTS, 32);
-    httpParams.setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
+    HttpClient client = factory.createHttpClient(socketConfig, null, requestConfig);
 
     // context holds authentication state machine, so it cannot be
     // shared across independent activities.
     HttpContext localContext = new BasicHttpContext();
 
-    localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
-    localContext.setAttribute(ClientContext.CREDS_PROVIDER, credsProvider);
+    localContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
+    localContext.setAttribute(HttpClientContext.CREDS_PROVIDER, credsProvider);
 
     HttpUriRequest request = null;
     if ( entity == null && (POST.equals(method) || PATCH.equals(method) || PUT.equals(method)) ) {

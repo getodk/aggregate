@@ -39,7 +39,8 @@ public class JsonServerConsts {
     typeMap.put(ElementType.INTEGER, JsonServerType.NUMBER);
     typeMap.put(ElementType.DECIMAL, JsonServerType.NUMBER);
     typeMap.put(ElementType.GEOPOINT, JsonServerType.GPS);
-
+    typeMap.put(ElementType.GEOSHAPE, JsonServerType.STRING);
+    typeMap.put(ElementType.GEOTRACE, JsonServerType.STRING);
     typeMap.put(ElementType.BOOLEAN, JsonServerType.STRING);
     typeMap.put(ElementType.BINARY, JsonServerType.CONTENT_TYPE);
     typeMap.put(ElementType.SELECT1, JsonServerType.STRING);

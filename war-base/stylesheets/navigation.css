@@ -1,0 +1,92 @@
+.gwt-DecoratedTabBar .gwt-TabBarItem {
+	border-collapse: collapse;
+}
+.gwt-DecoratedTabBar .tabTopCenter {
+	padding: 0px;
+	background: #777984;
+}
+.gwt-DecoratedTabBar .tabTopLeft,
+.gwt-DecoratedTabBar .tabTopRight {
+	padding: 0px;
+	zoom: 1;
+}
+.gwt-DecoratedTabBar .tabTopLeftInner,
+.gwt-DecoratedTabBar .tabTopRightInner {
+	width: 8px;
+	height: 5px;
+}
+.gwt-DecoratedTabBar .tabTopLeft {
+	background: url("../images/tabCorners.png") no-repeat -16px 0px;
+}
+.gwt-DecoratedTabBar .tabTopRight {
+	background: url("../images/tabCorners.png") no-repeat -24px 0px;
+}
+.gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopLeft {
+	background-position: 0px 0px;
+}
+.gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopRight {
+	background-position: -8px 0px;
+}
+.gwt-DecoratedTabBar .tabMiddleLeft,
+.gwt-DecoratedTabBar .tabMiddleRight,
+.gwt-DecoratedTabBar .tabTopCenter,
+.gwt-DecoratedTabBar .tabMiddleCenter {
+	background: #777984;
+	color: #dfdfdf;
+	width: 8px;
+	padding: 0px;
+}
+.gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabMiddleLeft,
+.gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabMiddleRight,
+.gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabTopCenter,
+.gwt-DecoratedTabBar .gwt-TabBarItem-selected .tabMiddleCenter {
+	background: #07115A;
+	color: #f5bb30;
+}
+* html .gwt-DecoratedTabBar .tabTopLeftInner,
+* html .gwt-DecoratedTabBar .tabTopRightInner {
+	width: 8px;
+	height: 5px;
+	overflow: hidden;
+}
+.gwt-DecoratedTabBar .tabMiddleLeftInner,
+.gwt-DecoratedTabBar .tabMiddleRightInner {
+	width: 1px;
+	height: 1px;
+}
+.gwt-DecoratedTabBar .tabMiddleCenter {
+	padding: 0px 20px 4px 20px;
+	font-weight: bold;
+	cursor: pointer;
+}
+.gwt-DecoratedTabBar .gwt-TabBarItem {
+	margin-right: 10px;
+}
+.gwt-DecoratedTabBar .gwt-TabBarFirst {
+	width: 98px;
+}
+.gwt-TabBar {
+	background: #07115A;
+}
+.gwt-TabBarItem {
+	color: #dfdfdf;
+	padding: 4px 12px 4px 12px;
+	margin-right: 15px;
+	font-weight: bold;
+	cursor: pointer;
+}
+.gwt-TabBarItem:hover {
+	padding-top: 3px;
+	padding-bottom: 5px;
+}
+.gwt-TabBarItem-selected {
+	color: #f5bb30;
+}
+.gwt-TabBar .gwt-TabBarFirst {
+	width: 15px;
+}
+
+.gwt-AccessConfigurationSheet {
+	margin-left: 20px;
+	margin-right: 20px;	
+}

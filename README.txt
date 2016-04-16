@@ -9,7 +9,7 @@ GWT Upgrade Guide
 -----------------
 
 If you are updating this project to work with something other than
-GWT 2.5, you should verify that the code in:
+GWT 2.7, you should verify that the code in:
 
 GWTAccessDeniedHandler.AccessDeniedRemoteServiceServlet.processCall()
 
@@ -37,8 +37,16 @@ You'll need a pom dependency analyzer to uncover why Maven has
 pulled in the down-version jar.
 
 After that, you should copy the jars from the WEB-INF/lib directory 
-of the build back into the eclipse-aggregate-gae/war/WEB-INF/lib
-directory and update the eclipse project to reflect the new set
-of jars.
+of the build back into the war-base/WEB-INF/lib
+directory and refresh the eclipse projects to reflect the new set
+of jars.  When doing this, you will likely need to hand-edit the 
+spring-web jar to remove the servlet-3.0 compatible files:
+
+  overview.html
+  META-INF/web-fragment.xml
+
+Beginning sometime after the 1.9.28 AppEngine SDK, it now scans and
+deletes jars with servlet 3.0 functionality (even if it is not 
+being exercised, as is the case with ODK Aggregate).
 
 And, of course, test to verify this all works.

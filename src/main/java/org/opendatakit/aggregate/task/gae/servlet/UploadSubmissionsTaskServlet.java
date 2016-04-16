@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -34,8 +35,8 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.appengine.api.backends.BackendService;
-import com.google.appengine.api.backends.BackendServiceFactory;
+import com.google.appengine.api.modules.ModulesService;
+import com.google.appengine.api.modules.ModulesServiceFactory;
 
 /**
  *
@@ -99,8 +100,8 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
     }
 
     // determine whether we are running on a backend or not...
-    BackendService bes = BackendServiceFactory.getBackendService();
-    boolean isBackend = (bes.getCurrentBackend() != null);
+	ModulesService modulesApi = ModulesServiceFactory.getModulesService();
+    boolean isBackend = modulesApi.getCurrentModule().equals(ServletConsts.BACKEND_GAE_SERVICE);
     logger.info("Request is running on " + (isBackend ? "backend" : "frontend"));
 
     try {

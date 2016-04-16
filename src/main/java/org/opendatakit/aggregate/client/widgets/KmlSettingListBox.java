@@ -18,7 +18,8 @@ package org.opendatakit.aggregate.client.widgets;
 
 import java.util.ArrayList;
 
-import org.opendatakit.aggregate.client.form.KmlSettingOption;
+import org.opendatakit.aggregate.client.form.KmlOptionSetting;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 public final class KmlSettingListBox extends AggregateListBox {
 
@@ -26,10 +27,14 @@ public final class KmlSettingListBox extends AggregateListBox {
     super(tooltipText, false, balloonText);
   }
 
-  public void updateValues(ArrayList<KmlSettingOption> options) {
+  public void updateValues(ArrayList<KmlOptionSetting> options, boolean addNoneOption) {
     clear();
-    for (KmlSettingOption kSO : options) {
+    for (KmlOptionSetting kSO : options) {
       addItem(kSO.getDisplayName(), kSO.getElementKey());
+    }
+    
+    if(addNoneOption) {
+      addItem(UIConsts.KML_NONE_OPTION, UIConsts.KML_NONE_ENCODE_KEY);
     }
   }
 

@@ -29,10 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
@@ -163,42 +163,39 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
       URISyntaxException {
 
 
-    MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.STRICT, null, UTF_CHARSET);
+    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+    builder.setMode(HttpMultipartMode.STRICT)
+           .setCharset(UTF_CHARSET);
+    
+    ContentType utf8Text = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), UTF_CHARSET);
     // emit the configured publisher parameters if the values are non-empty...
     String value;
     value = getOhmageCampaignUrn();
     if ( value != null && value.length() != 0 ) {
-      StringBody campaignUrn = new StringBody(getOhmageCampaignUrn(), UTF_CHARSET);
-      reqEntity.addPart("campaign_urn", campaignUrn);
+      builder.addTextBody("campaign_urn", getOhmageCampaignUrn(), utf8Text);
     }
     value = getOhmageCampaignCreationTimestamp();
     if ( value != null && value.length() != 0 ) {
-      StringBody campaignCreationTimestamp = new StringBody(getOhmageCampaignCreationTimestamp(),
-          UTF_CHARSET);
-      reqEntity.addPart("campaign_creation_timestamp", campaignCreationTimestamp);
+      builder.addTextBody("campaign_creation_timestamp", getOhmageCampaignCreationTimestamp(), utf8Text);
     }
     value = getOhmageUsername();
     if ( value != null && value.length() != 0 ) {
-      StringBody user = new StringBody(getOhmageUsername(), UTF_CHARSET);
-      reqEntity.addPart("user", user);
+      builder.addTextBody("user", getOhmageUsername(), utf8Text);
     }
     value = getOhmageHashedPassword();
     if ( value != null && value.length() != 0 ) {
-      StringBody hashedPassword = new StringBody(getOhmageHashedPassword(), UTF_CHARSET);
-      reqEntity.addPart("passowrd", hashedPassword);
+      builder.addTextBody("passowrd", getOhmageHashedPassword(), utf8Text);
     }
     // emit the client identity and the json representation of the survey...
-    StringBody clientParam = new StringBody(cc.getServerURL());
-    reqEntity.addPart("client", clientParam);
-    StringBody surveyData = new StringBody(gson.toJson(surveys));
-    reqEntity.addPart("survey", surveyData);
+    builder.addTextBody("client", cc.getServerURL(), utf8Text);
+    builder.addTextBody("survey", gson.toJson(surveys), utf8Text);
 
     // emit the file streams for all the media attachments
     for (Entry<UUID, ByteArrayBody> entry : photos.entrySet()) {
-      reqEntity.addPart(entry.getKey().toString(), entry.getValue());
+      builder.addPart(entry.getKey().toString(), entry.getValue());
     }
 
-    HttpResponse response = super.sendHttpRequest(POST, getServerUrl(), reqEntity, null, cc);
+    HttpResponse response = super.sendHttpRequest(POST, getServerUrl(), builder.build(), null, cc);
     String responseString = WebUtils.readResponse(response);
     int statusCode = response.getStatusLine().getStatusCode();
 

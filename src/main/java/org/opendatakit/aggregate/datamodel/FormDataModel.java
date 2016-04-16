@@ -83,9 +83,9 @@ public final class FormDataModel extends CommonFieldsBase {
   /* xform element types */
   public static enum ElementType {
     // xform tag types
-    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, BINARY, // identifies
-                                                                            // BinaryContent
-                                                                            // table
+    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
+     
+    BINARY, // identifies BinaryContent table
     BOOLEAN, SELECT1, // identifies SelectChoice table
     SELECTN, // identifies SelectChoice table
     REPEAT, GROUP,
@@ -136,6 +136,8 @@ public final class FormDataModel extends CommonFieldsBase {
     case INTEGER:
     case DECIMAL:
     case GEOPOINT:
+    case GEOTRACE:
+    case GEOSHAPE:
     case BOOLEAN:
     case SELECT1: // identifies SelectChoice table
     case GROUP:
@@ -363,6 +365,8 @@ public final class FormDataModel extends CommonFieldsBase {
     case INTEGER:
     case DECIMAL:
     case GEOPOINT:
+    case GEOTRACE:
+    case GEOSHAPE:
     case BINARY: // identifies BinaryContent table
     case BOOLEAN:
     case SELECT1: // identifies SelectChoice table

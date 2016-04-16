@@ -16,6 +16,8 @@
 package org.opendatakit.aggregate.task.gae.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,9 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.datamodel.FormElementKey;
-import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -96,15 +97,9 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
       errorBadParam(resp);
       return;
     }
-    // optional fields
-    String geopointFieldName = getParameter(req, KmlGenerator.GEOPOINT_FIELD);
-    String titleFieldName = getParameter(req, KmlGenerator.TITLE_FIELD);
-    String imageFieldName = getParameter(req, KmlGenerator.IMAGE_FIELD);
 
     IForm form = null;
-    FormElementModel titleField = null;
-    FormElementModel geopointField = null;
-    FormElementModel imageField = null;
+    List<KmlSelection> kmlElementsToInclude = new ArrayList<KmlSelection>();
     try {
       form = FormFactory.retrieveFormByFormId(formId, cc);
 
@@ -114,18 +109,16 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
         return; // ill-formed definition
       }
 
-      if (titleFieldName != null) {
-        FormElementKey titleKey = new FormElementKey(titleFieldName);
-        titleField = FormElementModel.retrieveFormElementModel(form, titleKey);
-      }
-      if (geopointFieldName != null) {
-        FormElementKey geopointKey = new FormElementKey(geopointFieldName);
-        geopointField = FormElementModel.retrieveFormElementModel(form, geopointKey);
-      }
-      if (imageFieldName != null) {
-        if (!imageFieldName.equals(KmlGenerator.NONE)) {
-          FormElementKey imageKey = new FormElementKey(imageFieldName);
-          imageField = FormElementModel.retrieveFormElementModel(form, imageKey);
+      String encodedString =  getParameter(req, KmlGenerator.KML_SELECTIONS_KEY);
+      if (encodedString != null) {
+        String[] kmlSelectionsEncodedStrings = encodedString
+            .split(KmlGenerator.KML_SELECTIONS_DELIMITER);
+        for (String kmlSelectionEncodedString : kmlSelectionsEncodedStrings) {
+          KmlSelection kmlElement = KmlSelection
+              .createKmlSelectionFromEncodedString(kmlSelectionEncodedString);
+          if (kmlElement != null) {
+            kmlElementsToInclude.add(kmlElement);
+          }
         }
       }
     } catch (ODKFormNotFoundException e) {
@@ -149,8 +142,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
       return;
     }
 
-    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, titleField,
-        geopointField, imageField, cc);
+    KmlWorkerImpl worker = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, kmlElementsToInclude, cc);
     worker.generateKml();
   }
 }
