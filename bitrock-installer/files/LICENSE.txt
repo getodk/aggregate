@@ -112,7 +112,7 @@ https://github.com/jai-imageio/jai-imageio-core   /3-clause BSD with nuclear dis
     All Rights Reserved.
 https://bitbucket.org/javarosa/javarosa/wiki/Home        /Apache 2.0/
 now at: https://bitbucket.org/m.sundt/javarosa/src/
-    javarosa-libraries-2016-04-14.jar
+    javarosa-libraries-2016-04-21.jar
 http://code.google.com/p/atinject/                       /Apache 2.0/
     javax.inject-1.jar
 https://jaxb.java.net/                                     /CDDL 1.1/
@@ -132,7 +132,7 @@ http://nekohtml.sourceforge.net/                         /Apache 2.0/
     nekohtml-1.9.22.jar
 https://opendatakit.org/                                 /Apache 2.0/
 at: https://github.com/opendatakit/aggregate-components
-    odk-httpclient-gae-4.5.2.jar
+    odk-httpclient-gae-4.5.2-1.jar
     odk-tomcatutil-1.0.1.jar
     See the ODK Aggregate (Components) README.txt
     for how these are built.
