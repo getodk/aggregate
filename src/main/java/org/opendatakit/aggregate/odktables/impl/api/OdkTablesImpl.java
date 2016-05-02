@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -21,6 +23,8 @@ import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.odktables.rest.entity.AppNameList;
+import org.opendatakit.aggregate.odktables.rest.entity.ClientVersionList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
@@ -36,7 +40,8 @@ public class OdkTablesImpl implements OdkTables {
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
     String preferencesAppId = ContextFactory.getOdkTablesAppId(cc);
 
-    return Response.status(Status.OK).entity("[\"" + preferencesAppId + "\"]")
+    AppNameList appNames = new AppNameList(Collections.singletonList(preferencesAppId));
+    return Response.ok(appNames)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Credentials", "true").build();
@@ -88,7 +93,8 @@ public class OdkTablesImpl implements OdkTables {
       UriBuilder ub = info.getBaseUriBuilder();
       ub.path(OdkTables.class, "getOdkClientVersions");
 
-      return Response.ok(distinctOdkClientVersions).header(HttpHeaders.ETAG, eTagOdkClientVersions)
+      ClientVersionList clientVersions = new ClientVersionList(distinctOdkClientVersions);
+      return Response.ok(clientVersions).header(HttpHeaders.ETAG, eTagOdkClientVersions)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
