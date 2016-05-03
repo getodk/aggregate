@@ -386,6 +386,12 @@ And the VM Arguments section should become something like:
 
 If you tried to skip a step, the server might not be configured correctly.
 
+NOTE: if you need to preserve the datastore across cleans and publishing, you can add to the Program Arguments:
+
+   --generated_dir=[path to]\generated
+
+and the datastore and index hints file will be written to the directory 'generated' at location.
+
 (after Applying these changes, choose Close if you haven't already)
 
 ----------------------------------------

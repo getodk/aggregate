@@ -255,6 +255,9 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry entry = tm.getTable(tableId);
+      if ( entry == null || entry.getSchemaETag() == null ) {
+        throw new ODKEntityNotFoundException();
+      }
       ArrayList<String> elementKeys = DbColumnDefinitions.queryForDbColumnNames(tableId,
           entry.getSchemaETag(), cc);
       return elementKeys;
@@ -433,7 +436,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
-      if (table == null) { // you couldn't find the table
+      if (table == null || table.getSchemaETag() == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
       }
       List<DbTableFileInfo.DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles(table.getTableId(), cc);
@@ -514,7 +517,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
-      if (table == null) { // you couldn't find the table
+      if (table == null || table.getSchemaETag() == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
       }
       String schemaETag = table.getSchemaETag();
@@ -647,7 +650,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       TableManager tm = new TableManager(appId, userPermissions, cc);
       TableEntry table = tm.getTable(tableId);
-      if (table == null) { // you couldn't find the table
+      if (table == null || table.getSchemaETag() == null) { // you couldn't find the table
         throw new ODKEntityNotFoundException();
       }
       if( !filepath.startsWith(rowId + "/")) {

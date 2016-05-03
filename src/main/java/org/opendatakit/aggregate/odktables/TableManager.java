@@ -208,7 +208,7 @@ public class TableManager {
       return null;
     }
 
-    if (entryEntity != null && entryEntity.getSchemaETag() != null) {
+    if (entryEntity != null) {
       return converter.toTableEntry(entryEntity);
     } else {
       return null;
@@ -278,7 +278,12 @@ public class TableManager {
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_TABLE_ENTRY);
     // get table entry entity
     DbTableEntryEntity entryEntity = DbTableEntry.getTableIdEntry(tableId, cc);
-    return converter.toTableEntry(entryEntity);
+    // check if table exists
+    if (entryEntity != null && entryEntity.getSchemaETag() != null) {
+      return converter.toTableEntry(entryEntity);
+    } else {
+      return null;
+    }
   }
 
   /**
