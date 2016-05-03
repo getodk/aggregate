@@ -95,7 +95,7 @@ public class TableServiceImpl implements TableService {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private static final String ERROR_TABLE_NOT_FOUND = "Table not found";
+  public static final String ERROR_TABLE_NOT_FOUND = "Table not found";
   private static final String ERROR_SCHEMA_DIFFERS = "SchemaETag differs";
 
   private final ServletContext sc;
@@ -253,16 +253,16 @@ public class TableServiceImpl implements TableService {
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
     TableEntry entry = tm.getTable(tableId);
-    if (entry == null || entry.getSchemaETag() == null) {
+    if (entry == null) {
       // the table doesn't exist yet (or something is there that is database
       // cruft)
       throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
-    if (!entry.getSchemaETag().equals(schemaETag)) {
+    if (entry.getSchemaETag() != null && !entry.getSchemaETag().equals(schemaETag)) {
       throw new SchemaETagMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + entry.getSchemaETag());
     }
     RealizedTableService service = new RealizedTableServiceImpl(sc, req, headers, info, appId,
-        tableId, schemaETag, userPermissions, tm, cc);
+        tableId, schemaETag, (entry.getSchemaETag() == null), userPermissions, tm, cc);
     return service;
 
   }
