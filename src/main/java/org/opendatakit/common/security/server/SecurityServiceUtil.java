@@ -103,6 +103,7 @@ public class SecurityServiceUtil {
     List<String> iadministerTablesGrants = new ArrayList<String>();
     iadministerTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
     iadministerTablesGrants.add(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name());
+    iadministerTablesGrants.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
     iadministerTablesGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
     administerTablesGrants = Collections.unmodifiableList(iadministerTablesGrants);
 
