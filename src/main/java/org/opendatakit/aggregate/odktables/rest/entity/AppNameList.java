@@ -31,6 +31,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class AppNameList extends ArrayList<String> {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = -8124923511487754240L;
+
+  /**
    * Constructor used by Jackson
    */
   public AppNameList() {
