@@ -31,6 +31,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class ClientVersionList extends ArrayList<String> {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = -5668906194279093300L;
+
+  /**
    * Constructor used by Jackson
    */
   public ClientVersionList() {
