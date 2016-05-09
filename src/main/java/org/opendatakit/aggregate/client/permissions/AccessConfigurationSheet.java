@@ -183,14 +183,11 @@ public class AccessConfigurationSheet extends Composite {
         }
         return true;
       case GROUP_SYNCHRONIZE_TABLES:
-        if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+        if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+        	|| assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
           return false;
         }
-        // TODO: relax this
-        // table synchronizers must be anonymous
-        // or have a gmail (OAuth2) account
-        return (info.getType() == UserType.ANONYMOUS) ||
-            (info.getUsername() == null);
+        return true;
       case GROUP_ADMINISTER_TABLES:
         if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
           return false;
@@ -301,7 +298,8 @@ public class AccessConfigurationSheet extends Composite {
         return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
             || assignedGroups.contains(auth);
       case GROUP_SYNCHRONIZE_TABLES:
-        return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+        return assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
             || assignedGroups.contains(auth);
       case GROUP_ADMINISTER_TABLES:
         return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
@@ -371,10 +369,6 @@ public class AccessConfigurationSheet extends Composite {
         if (i.getUsername() == null) {
           // don't allow Google users to be data collectors
           i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
-        } else {
-          // TODO: relax this
-          // don't allow non-Google users to synchronize tables
-          i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
         }
       }
     }

@@ -81,8 +81,8 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
 
   private static ObjectMapper mapper = new ObjectMapper();
 
-  private static final String FUSION_TABLE_QUERY_API = "https://www.googleapis.com/fusiontables/v1/query";
-  private static final String FUSION_TABLE_TABLE_API = "https://www.googleapis.com/fusiontables/v1/tables";
+  private static final String FUSION_TABLE_QUERY_API = "https://www.googleapis.com/fusiontables/v2/query";
+  private static final String FUSION_TABLE_TABLE_API = "https://www.googleapis.com/fusiontables/v2/tables";
 
   private static final String FUSION_TABLE_OAUTH2_SCOPE = "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/fusiontables";
 

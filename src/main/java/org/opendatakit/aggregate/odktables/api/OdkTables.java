@@ -41,8 +41,14 @@ public interface OdkTables {
    */
   @GET
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*ArrayList<String>*/ getAppNames(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders) throws AppNameMismatchException,
+  public Response /*AppNameList*/ getAppNames(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders) throws AppNameMismatchException,
       PermissionDeniedException, ODKDatastoreException;
+
+  @GET
+  @Path("{appId}/clientVersions")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*ClientVersionList*/ getOdkClientVersions(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
+      @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
 
   @Path("{appId}/manifest")
   public FileManifestServiceImpl getFileManifestService(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,

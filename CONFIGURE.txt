@@ -137,9 +137,9 @@ Minimal AppEngine Eclipse Setup
 -------------------------------
 This assumes you have completed "Minimal Eclipse Installation Setup"
 
-(1) Finally, start Eclipse (Mars) and select this ODK Aggregate workspace. 
+(1) Finally, start Eclipse (Mars) and select the cloned source code directory/folder as the workspace folder.
 
-Go to Help / Install New Software.
+(2) Go to Help / Install New Software.
 
 Choose Add...
 
@@ -154,7 +154,7 @@ Google Plugin for Eclipse / Google Plugin for Eclipse 4.4/4.5
 
 Proceed with installing this and restarting Eclipse.
 
-(2) Re-open Eclipse, go to Window / Preferences
+(3) Re-open Eclipse, go to Window / Preferences
 
 Open Google / App Engine and add the AppEngine SDK path that you downloaded and exploded in (5) in earlier section
 
@@ -162,7 +162,7 @@ Open Google / Web Toolkit and add the GWT SDK path of what you downloaded and ex
 
 Choose OK to accept changes and close the preferences dialog.
 
-(3) Once again, go to Window / Preferences
+(4) Once again, go to Window / Preferences
 
 Open Server /Runtime Environment
 
@@ -175,7 +175,7 @@ Choose OK to accept changes and close the preferences dialog.
 
 (At this point, Eclipse has the basic AppEngine / GWT configuration.)
 
-(4) If you haven't already, go to the Workbench view. Then, 
+(5) If you haven't already, go to the Workbench view. Then, 
 Import / Import... / General / Existing Projects into Workspace
 
 import these existing projects:
@@ -185,7 +185,7 @@ eclipse-default
 eclipse-n-background
 eclipse-ear
 
-(5) Within odk-gae-settings, open common and edit security.settings
+(6) Within odk-gae-settings, open common and edit security.settings
 
 Update the security.server.hostname to correspond to your system IP address.
 Remember the IP address. You could use "localhost" for this if you are not
@@ -202,13 +202,13 @@ security.server.port=8888
 
 Save changes.
 
-(6) Select build.xml within odk-gae-settings. Right-click, Run As / Ant Build
+(7) Select build.xml within odk-gae-settings. Right-click, Run As / Ant Build
 
-(7) Select eclipse-default, right-click, Refresh
+(8) Select eclipse-default, right-click, Refresh
 
-(8) Select eclipse-n-background, right-click, Refresh
+(9) Select eclipse-n-background, right-click, Refresh
 
-(9) Choose File / New / Other / Server / Server
+(10) Choose File / New / Other... / Server / Server
 
 Select Google / Google App Engine as the server type
 
@@ -224,7 +224,7 @@ Add eclipse-ear to the configured resources.
 
 Click Finish.
 
-(10) Now, Select eclipse-default, right-click, Properties
+(11) Now, Select eclipse-default, right-click, Properties
 
 Select "Deployment Assembly"
 
@@ -279,21 +279,23 @@ Choose "Google AppEngine (for single module)"
 Click on the Runtimes tab.
 
 Check the "Google App Engine" entry that has the stylized airplane icon.
-(the one that looks like a server box is missing from your workspace; uncheck that).
+(if there is one that looks like a server box, that App Engine sdk is missing from your workspace; uncheck it).
 
 Click Apply
 
 Choose "Server"
 
-Choose the server that you configured earlier (in step (9)).
+Choose the server that you configured earlier (in step (10)).
+
+Click Apply
 
 Click OK
 
-(11) Now, Select eclipse-n-background, right-click, Properties
+(12) Now, Select eclipse-n-background, right-click, Properties
 
-and repeat all the steps in (10) above.
+and repeat all the steps in (11) above.
 
-(12) Now, Select eclipse-ear, right-click, Properties
+(13) Now, Select eclipse-ear, right-click, Properties
 
 Select "Project Facets"  
 
@@ -308,11 +310,13 @@ Click Apply
 
 Choose "Server"
 
-Choose the server that you configured earlier (in step (9)).
+Choose the server that you configured earlier (in step (10)).
+
+Click Apply
 
 Click OK
 
-(13) Select eclipse-default, right-click Google / GWT Compile
+(14) Select eclipse-default, right-click Google / GWT Compile
 
 open Advanced
 
@@ -326,10 +330,13 @@ Verify that VM Arguments has:
 
 Choose Compile.
 
-(14) Select eclipse-default, right-click Refresh to pick up the 
+Wait for the compile to complete (it is compiling the Java code into 
+5 different sets of Javascript to support 5 different browsers).
+
+(15) Select eclipse-default, right-click Refresh to pick up the 
 changes to the compiled GWT files (this is important!!!)
 
-(15) Create an explicit development server configuration
+(16) Create an explicit development server configuration
 
 Select eclipse-ear, right-click, Debug As / Debug Configurations
 
@@ -341,7 +348,7 @@ Click Apply
 
 Close.
 
-(16) Now, choose eclipse-ear, right-click, Debug As / Debug on Server
+(17) Now, choose eclipse-ear, right-click, Debug As / Debug on Server
 
 This will initialize and start the server configuration you created above.
 It will fail with an out-of-memory error.
@@ -349,9 +356,9 @@ It will fail with an out-of-memory error.
 Stop the server by clicking the red square box on the Console output window.
 
 ----------------------------------------
-(17) Select eclipse-ear, right-click, Debug As / Debug Configurations
+(18) Select eclipse-ear, right-click, Debug As / Debug Configurations
 
-Select the Google App Engine configuration you created in step (15).
+Select the Google App Engine configuration you created in step (16).
 
 Select the (X)= Arguments tab.
 
@@ -379,21 +386,27 @@ And the VM Arguments section should become something like:
 
 If you tried to skip a step, the server might not be configured correctly.
 
+NOTE: if you need to preserve the datastore across cleans and publishing, you can add to the Program Arguments:
+
+   --generated_dir=[path to]\generated
+
+and the datastore and index hints file will be written to the directory 'generated' at location.
+
 (after Applying these changes, choose Close if you haven't already)
 
 ----------------------------------------
-(18) Select the Servers tab in the output area.
+(19) Select the Servers tab in the output area.
 
 Right-click on the server you created. Choose Clean....
 
 This will delete the datastore and rebuild the server based upon the updated configuration.
 
-(19) To run or debug, **YOU CANNOT right-click the server and choose Run or Debug**
-If you do this, all of the settings you changed in step (17) will be lost.
+(20) To run or debug, **YOU CANNOT right-click the server and choose Run or Debug**
+If you do this, all of the settings you changed in step (18) will be lost.
 
 Instead, **YOU MUST** select eclipse-ear, right-click, Debug As / Debug Configurations (Run As / Run Configurations)
 
-This will open up the configuration you made in step (17).
+This will open up the configuration you made in step (18).
 
 Choose Debug (Run)
 

@@ -99,6 +99,7 @@ public interface TableService {
    * the data type definitions which are defined in the 
    * TableDefinition's Column array.
    * 
+   * @param odkClientVersion
    * @return
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -107,9 +108,9 @@ public interface TableService {
    * @throws FileNotFoundException 
    */
   @GET
-  @Path("properties")
+  @Path("properties/{odkClientVersion}")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*PropertyEntryList*/ getTableProperties() throws ODKDatastoreException,
+  public Response /*PropertyEntryList*/ getTableProperties(@PathParam("odkClientVersion") String odkClientVersion) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException, TableNotFoundException, FileNotFoundException;
 
   /**
@@ -119,6 +120,7 @@ public interface TableService {
    * 
    * This is the XML variant of this API. See putJsonTableProperties, below.
    * 
+   * @param odkClientVersion
    * @param propertiesList
    * @return
    * @throws ODKDatastoreException
@@ -127,10 +129,10 @@ public interface TableService {
    * @throws TableNotFoundException
    */
   @PUT
-  @Path("properties")
+  @Path("properties/{odkClientVersion}")
   @Consumes({ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*void*/ putXmlTableProperties(PropertyEntryXmlList propertiesList) throws ODKDatastoreException,
+  public Response /*void*/ putXmlTableProperties(@PathParam("odkClientVersion") String odkClientVersion, PropertyEntryXmlList propertiesList) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
 
   /**
@@ -140,6 +142,7 @@ public interface TableService {
    * 
    * This is the JSON variant of this API. See putXmlTableProperties, above.
    * 
+   * @param odkClientVersion
    * @param propertiesList
    * @return
    * @throws ODKDatastoreException
@@ -148,10 +151,10 @@ public interface TableService {
    * @throws TableNotFoundException
    */
   @PUT
-  @Path("properties")
+  @Path("properties/{odkClientVersion}")
   @Consumes({MediaType.APPLICATION_JSON})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*void*/ putJsonTableProperties(ArrayList<Map<String,Object>> propertiesList) throws ODKDatastoreException,
+  public Response /*void*/ putJsonTableProperties(@PathParam("odkClientVersion") String odkClientVersion, ArrayList<Map<String,Object>> propertiesList) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
 
   /**
