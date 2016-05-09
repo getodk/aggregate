@@ -106,6 +106,8 @@ public class TableAclManager {
     if (e == null) {
       throw new IllegalArgumentException("tableId does not exist!");
     }
+    // tableId may be in the process of being deleted.
+    // we allow everything to work up until the pending-deleted table is removed.
   }
 
   /**

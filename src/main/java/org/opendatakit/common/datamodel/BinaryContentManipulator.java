@@ -580,6 +580,7 @@ public class BinaryContentManipulator {
       q.addSort(ctntRelation.parentAuri, Direction.ASCENDING); // GAE work-around
       q.addSort(ctntRelation.ordinalNumber, Direction.ASCENDING);
 
+      List<String> errors = new ArrayList<String>();
       List<? extends CommonFieldsBase> contentHits = q.executeQuery();
       attachments.clear();
       long expectedOrdinal = 1L;
@@ -590,12 +591,21 @@ public class BinaryContentManipulator {
           String errString = "SELECT * FROM " + bc.getTableName()
               + " WHERE _TOP_LEVEL_AURI = " + bc.getTopLevelAuri()
               + " AND _PARENT_AURI = " + bc.getParentAuri() + " is missing an attachment instance OR has extra copies.";
-          throw new ODKEnumeratedElementException(errString);
+          errors.add(errString);
         }
+        attachments.put(expectedOrdinal, bc);
         ++expectedOrdinal;
-        attachments.put(bc.getOrdinalNumber(), bc);
       }
       refreshBeforeUse = false;
+      
+      if ( !errors.isEmpty() ) {
+        StringBuilder b = new StringBuilder();
+        b.append("Attachment errors:");
+        for ( String errString : errors ) {
+          b.append("\n").append(errString);
+        }
+        throw new ODKEnumeratedElementException(b.toString());
+      }
     }
   }
 
@@ -616,7 +626,12 @@ public class BinaryContentManipulator {
    */
   public synchronized void deleteAll(CallingContext cc) throws ODKDatastoreException {
 
-    updateAttachments(cc);
+    // don't care if there are problems with the attachments -- we are deleting everything.
+    try {
+      updateAttachments(cc);
+    } catch ( ODKEnumeratedElementException e ) {
+      // ignore
+    }
     boolean success = false;
     List<EntityKey> keys = new ArrayList<EntityKey>();
     try {

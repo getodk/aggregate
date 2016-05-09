@@ -128,15 +128,7 @@ public class FileManager {
   public FileContentInfo getFile(String odkClientVersion, String tableId, String wholePath)
       throws ODKDatastoreException, FileNotFoundException {
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
-    if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
 
-      String propertiesPath = getPropertiesFilePath(tableId);
-      if (propertiesPath.equals(wholePath)) {
-        // properties are always stored as version 1 files...
-        // the format is not changeable...
-        odkClientVersion = "1";
-      }
-    }
     // otherwise, it is an app-level file, and that is accessible to anyone with
     // synchronize tables privileges
 
@@ -170,15 +162,6 @@ public class FileManager {
       TablesUserPermissions userPermissions, FileContentInfo fi) throws ODKDatastoreException {
 
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
-    if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
-
-      String propertiesPath = getPropertiesFilePath(tableId);
-      if (propertiesPath.equals(filePath)) {
-        // properties are always stored as version 1 files...
-        // the format is not changeable...
-        odkClientVersion = "1";
-      }
-    }
 
     // -1) clear the eTag for the manifest of this tableId
 
@@ -264,15 +247,6 @@ public class FileManager {
       throws ODKDatastoreException {
 
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
-    if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
-
-      String propertiesPath = getPropertiesFilePath(tableId);
-      if (propertiesPath.equals(wholePath)) {
-        // properties are always stored as version 1 files...
-        // the format is not changeable...
-        odkClientVersion = "1";
-      }
-    }
 
     // if we find nothing, we are happy.
     List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion,

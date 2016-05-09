@@ -28,6 +28,7 @@ import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
+import org.opendatakit.common.persistence.Query.Direction;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -239,7 +240,7 @@ public class DbTableFileInfo extends Relation {
   public static List<DbTableFileInfoEntity> queryForAppLevelFiles(String odkClientVersion, CallingContext cc)
       throws ODKDatastoreException {
 
-    Query query = getRelation(cc).query("DbTableFileInfo.queryForApp()", cc);
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForAppLevelFiles()", cc);
     query.addFilter(TABLE_ID,  FilterOperation.EQUAL, NO_TABLE_ID);
     query.addFilter(ODK_CLIENT_VERSION, FilterOperation.EQUAL, odkClientVersion);
 
@@ -257,7 +258,7 @@ public class DbTableFileInfo extends Relation {
   public static List<DbTableFileInfoEntity> queryForTableIdFiles(String odkClientVersion, String tableId, CallingContext cc)
       throws ODKDatastoreException {
 
-    Query query = getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc);
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForTableIdFiles()", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
     query.addFilter(ODK_CLIENT_VERSION, FilterOperation.EQUAL, odkClientVersion);
 
@@ -269,10 +270,20 @@ public class DbTableFileInfo extends Relation {
     return results;
   }
 
+  public static List<String> queryForAllOdkClientVersions(CallingContext cc)
+      throws ODKDatastoreException {
+
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForAllOdkClientVersions()", cc);
+    query.addSort(ODK_CLIENT_VERSION, Direction.ASCENDING);
+    @SuppressWarnings("unchecked")
+	List<String> results = (List<String>) query.getDistinct(ODK_CLIENT_VERSION);
+    return results;
+  }
+
   public static List<DbTableFileInfoEntity> queryForAllOdkClientVersionsOfAppLevelFiles(CallingContext cc)
       throws ODKDatastoreException {
 
-    Query query = getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc);
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForAllOdkClientVersionsOfAppLevelFiles()", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, NO_TABLE_ID);
 
     List<Entity> list = query.execute();
@@ -289,7 +300,7 @@ public class DbTableFileInfo extends Relation {
   public static List<DbTableFileInfoEntity> queryForAllOdkClientVersionsOfTableIdFiles(String tableId, CallingContext cc)
       throws ODKDatastoreException {
 
-    Query query = getRelation(cc).query("DbTableFileInfo.queryForTableId()", cc);
+    Query query = getRelation(cc).query("DbTableFileInfo.queryForAllOdkClientVersionsOfTableIdFiles()", cc);
     query.addFilter(TABLE_ID, FilterOperation.EQUAL, tableId);
 
     List<Entity> list = query.execute();

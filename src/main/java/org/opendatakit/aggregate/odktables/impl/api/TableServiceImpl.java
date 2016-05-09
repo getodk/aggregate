@@ -95,7 +95,7 @@ public class TableServiceImpl implements TableService {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private static final String ERROR_TABLE_NOT_FOUND = "Table not found";
+  public static final String ERROR_TABLE_NOT_FOUND = "Table not found";
   private static final String ERROR_SCHEMA_DIFFERS = "SchemaETag differs";
 
   private final ServletContext sc;
@@ -253,16 +253,16 @@ public class TableServiceImpl implements TableService {
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
     TableEntry entry = tm.getTable(tableId);
-    if (entry == null || entry.getSchemaETag() == null) {
+    if (entry == null) {
       // the table doesn't exist yet (or something is there that is database
       // cruft)
       throw new TableNotFoundException(ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
-    if (!entry.getSchemaETag().equals(schemaETag)) {
+    if (entry.getSchemaETag() != null && !entry.getSchemaETag().equals(schemaETag)) {
       throw new SchemaETagMismatchException(ERROR_SCHEMA_DIFFERS + "\n" + entry.getSchemaETag());
     }
     RealizedTableService service = new RealizedTableServiceImpl(sc, req, headers, info, appId,
-        tableId, schemaETag, userPermissions, tm, cc);
+        tableId, schemaETag, (entry.getSchemaETag() == null), userPermissions, tm, cc);
     return service;
 
   }
@@ -311,7 +311,8 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response getTableProperties() throws ODKDatastoreException, PermissionDeniedException,
+  public Response getTableProperties(@PathParam("odkClientVersion") String odkClientVersion) 
+      throws ODKDatastoreException, PermissionDeniedException,
       ODKTaskLockException, TableNotFoundException, FileNotFoundException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
@@ -324,7 +325,7 @@ public class TableServiceImpl implements TableService {
 
     FileManager fm = new FileManager(appId, cc);
 
-    fi = fm.getFile("1", tableId, appRelativePath);
+    fi = fm.getFile(odkClientVersion, tableId, appRelativePath);
 
     // And now prepare everything to be returned to the caller.
     if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null
@@ -507,14 +508,14 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response putXmlTableProperties(PropertyEntryXmlList propertiesList)
+  public Response putXmlTableProperties(@PathParam("odkClientVersion") String odkClientVersion, PropertyEntryXmlList propertiesList)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
       TableNotFoundException {
-    return putInternalTableProperties(propertiesList);
+    return putInternalTableProperties(odkClientVersion, propertiesList);
   }
 
   @Override
-  public Response putJsonTableProperties(ArrayList<Map<String, Object>> propertiesList)
+  public Response putJsonTableProperties(@PathParam("odkClientVersion") String odkClientVersion, ArrayList<Map<String, Object>> propertiesList)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
       TableNotFoundException {
     ArrayList<PropertyEntryXml> properties = new ArrayList<PropertyEntryXml>();
@@ -557,10 +558,10 @@ public class TableServiceImpl implements TableService {
       properties.add(e);
     }
     PropertyEntryXmlList pl = new PropertyEntryXmlList(properties);
-    return putInternalTableProperties(pl);
+    return putInternalTableProperties(odkClientVersion, pl);
   }
 
-  public Response putInternalTableProperties(PropertyEntryXmlList propertiesList)
+  public Response putInternalTableProperties(String odkClientVersion, PropertyEntryXmlList propertiesList)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException,
       TableNotFoundException {
 
@@ -632,7 +633,7 @@ public class TableServiceImpl implements TableService {
         content);
 
     @SuppressWarnings("unused")
-    FileChangeDetail outcome = fm.putFile("1", tableId, appRelativePath, userPermissions, fi);
+    FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, appRelativePath, userPermissions, fi);
     return Response.status(Status.ACCEPTED)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
