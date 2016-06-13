@@ -893,7 +893,6 @@ public class DataManager {
    * @throws ODKEntityNotFoundException
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
-   * @throws ETagMismatchException
    * @throws BadColumnNameException
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
@@ -901,7 +900,7 @@ public class DataManager {
    */
   public RowOutcomeList insertOrUpdateRows(RowList rows) throws ODKEntityPersistException,
       ODKEntityNotFoundException, ODKDatastoreException, ODKTaskLockException,
-      ETagMismatchException, BadColumnNameException, PermissionDeniedException,
+      BadColumnNameException, PermissionDeniedException,
       InconsistentStateException, TableDataETagMismatchException {
 
     long startTime = System.currentTimeMillis();

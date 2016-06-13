@@ -82,7 +82,7 @@ public class DataServiceImpl implements DataService {
   
   @Override
   public Response /*RowOutcomeList*/ alterRows(RowList rows)
-      throws ODKTaskLockException, ODKDatastoreException, ETagMismatchException,
+      throws ODKTaskLockException, ODKDatastoreException,
       PermissionDeniedException, BadColumnNameException, InconsistentStateException, TableDataETagMismatchException {
 
     RowOutcomeList outcomes = dm.insertOrUpdateRows(rows);
