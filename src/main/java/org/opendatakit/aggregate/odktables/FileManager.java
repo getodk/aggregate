@@ -116,9 +116,15 @@ public class FileManager {
         String secondFolder = pathParts[1];
         if (secondFolder.equals(FileManager.CSV_FOLDER)) {
           String fileName = pathParts[2];
-          String splits[] = fileName.split("\\.");
-          if (splits[splits.length - 1].toLowerCase(Locale.ENGLISH).equals(FileManager.CSV_EXTENSION)) {
-            tableId = splits[0];
+          // if the csv folder contains a directory (which won't contain a period), 
+          // then that directory is a tableId
+          if ( fileName.indexOf('.') == -1 ) {
+            tableId = fileName;
+          } else {
+            String splits[] = fileName.split("\\.");
+            if (splits[splits.length - 1].toLowerCase(Locale.ENGLISH).equals(FileManager.CSV_EXTENSION)) {
+              tableId = splits[0];
+            }
           }
         }
       }
