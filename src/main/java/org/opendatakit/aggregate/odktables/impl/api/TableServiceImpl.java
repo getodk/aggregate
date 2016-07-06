@@ -46,9 +46,9 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opendatakit.aggregate.odktables.ConfigFileChangeDetail;
+import org.opendatakit.aggregate.odktables.FileContentInfo;
 import org.opendatakit.aggregate.odktables.FileManager;
-import org.opendatakit.aggregate.odktables.FileManager.FileChangeDetail;
-import org.opendatakit.aggregate.odktables.FileManager.FileContentInfo;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.TableManager.WebsafeTables;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
@@ -629,11 +629,11 @@ public class TableServiceImpl implements TableService {
 
     FileManager fm = new FileManager(appId, cc);
 
-    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), null,
+    FileContentInfo fi = new FileContentInfo(appRelativePath, contentType, Long.valueOf(content.length), null,
         content);
 
     @SuppressWarnings("unused")
-    FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, appRelativePath, userPermissions, fi);
+    ConfigFileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, fi, userPermissions);
     return Response.status(Status.ACCEPTED)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")

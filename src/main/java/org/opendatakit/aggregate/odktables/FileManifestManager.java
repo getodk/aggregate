@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifestEntry;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -63,14 +64,24 @@ public class FileManifestManager {
    * @param tableId
    * @return
    * @throws ODKDatastoreException
+   * @throws ODKTaskLockException 
    */
-  public OdkTablesFileManifest getManifestForTable(String tableId) throws ODKDatastoreException {
+  public OdkTablesFileManifest getManifestForTable(String tableId) throws ODKDatastoreException, ODKTaskLockException {
     // TODO: need to handle access control.
-    DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableIdFiles(odkClientVersion, tableId, cc);
-    ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
-    OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-    return manifest;
+
+    LockTemplate propsLock = new LockTemplate(tableId, null, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();  
+
+      DbTableFiles dbTableFiles = new DbTableFiles(cc);
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableIdFiles(odkClientVersion, tableId, cc);
+      ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
+      OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
+      return manifest;
+
+    } finally {
+      propsLock.release();
+    }
   }
 
   /**
@@ -80,14 +91,24 @@ public class FileManifestManager {
    *
    * @return
    * @throws ODKDatastoreException
+   * @throws ODKTaskLockException 
    */
-  public OdkTablesFileManifest getManifestForAppLevelFiles() throws ODKDatastoreException {
+  public OdkTablesFileManifest getManifestForAppLevelFiles() throws ODKDatastoreException, ODKTaskLockException {
     // TODO: need to handle access control.
-    DbTableFiles dbTableFiles = new DbTableFiles(cc);
-    List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAppLevelFiles(odkClientVersion, cc);
-    ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
-    OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-    return manifest;
+
+    LockTemplate propsLock = new LockTemplate(DbTableFileInfo.NO_TABLE_ID, null, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    try {
+      propsLock.acquire();  
+  
+      DbTableFiles dbTableFiles = new DbTableFiles(cc);
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAppLevelFiles(odkClientVersion, cc);
+      ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
+      OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
+      return manifest;
+
+    } finally {
+      propsLock.release();
+    }
   }
 
   /**

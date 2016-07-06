@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
+import org.opendatakit.aggregate.odktables.exception.InstanceFileModificationException;
 import org.opendatakit.aggregate.odktables.exception.NotModifiedException;
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -114,6 +115,12 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
           .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof FileNotFoundException) {
       return Response.status(Status.NOT_FOUND).entity(new Error(ErrorType.RESOURCE_NOT_FOUND, msg))
+          .type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
+    } else if (e instanceof InstanceFileModificationException) {
+      return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_REQUEST, msg))
           .type(type)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
