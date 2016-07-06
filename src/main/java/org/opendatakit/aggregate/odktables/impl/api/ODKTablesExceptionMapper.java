@@ -90,7 +90,7 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof PermissionDeniedException) {
-      return Response.status(Status.FORBIDDEN).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
+      return Response.status(Status.UNAUTHORIZED).entity(new Error(ErrorType.PERMISSION_DENIED, msg))
           .type(type)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
