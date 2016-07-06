@@ -80,12 +80,19 @@ public class FileManager {
    * If it is not associated with a table, it returns DbTableFileInfo.NO_TABLE_ID
    * <p>
    * The convention is that any table-related file must be under:
-   * /tables/tableid OR a csv file: /assets/csv/tableid....csv
+   * /tables/tableid OR a csv file: /assets/csv/tableid....csv OR
+   * /assets/csv/tableid/instances/...
    *
    * So the 2nd position (0 indexed) will be the table id if the first position
    * is "tables", and the 3rd position (0 indexed) will begin with the table id
-   * if it is a csv file under the assets/csv directory.
+   * if it is a csv file under the assets/csv directory. Otherwise, if there are
+   * more than 3 positions, it should be the table id (and there should be instance
+   * files underneath that are referenced by one or more of the csv files).
    *  
+   * And verify that the presumptive tableId does not contain a period. If the 
+   * data came via a Mac OSX system, there might be hidden .DS_Store directories
+   * that we should not treat as table ids.
+   * 
    * @param appRelativeFilePath
    * @return tableId or DbTableFileInfo.NO_TABLE_ID
    */
@@ -94,15 +101,22 @@ public class FileManager {
       String tableId = DbTableFileInfo.NO_TABLE_ID;
       String firstFolder = pathParts[0];
       if ((pathParts.length >= 2) && firstFolder.equals(FileManager.TABLES_FOLDER)) {
-        tableId = pathParts[1];
-      } else if ((pathParts.length == 3) && firstFolder.equals(FileManager.ASSETS_FOLDER)) {
+        // ensure that we ignore sub-directories that have periods in them
+        // e.g., .DS_Store.
+        String secondFolder = pathParts[1];
+        if ( secondFolder.indexOf('.') == -1) {
+          tableId = secondFolder;
+        }
+      } else if ((pathParts.length >= 3) && firstFolder.equals(FileManager.ASSETS_FOLDER)) {
         String secondFolder = pathParts[1];
         if (secondFolder.equals(FileManager.CSV_FOLDER)) {
           String fileName = pathParts[2];
-          // if the csv folder contains a directory (which won't contain a period), 
-          // then that directory is a tableId
-          if ( fileName.indexOf('.') == -1 ) {
-            tableId = fileName;
+          if (pathParts.length > 3) {
+            // ensure that we ignore sub-directories that have periods in them
+            // e.g., .DS_Store.
+            if (fileName.indexOf('.') == -1) {
+              tableId = fileName;
+            }
           } else {
             String splits[] = fileName.split("\\.");
             if (splits[splits.length - 1].toLowerCase(Locale.ENGLISH).equals(FileManager.CSV_EXTENSION)) {
