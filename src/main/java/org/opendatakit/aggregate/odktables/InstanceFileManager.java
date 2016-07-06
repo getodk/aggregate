@@ -22,8 +22,6 @@ import java.io.InputStream;
 
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HeaderElement;
 import org.apache.http.message.BasicHeaderValueParser;
 import org.apache.http.message.HeaderValueParser;
@@ -62,8 +60,6 @@ public class InstanceFileManager {
   public interface FileContentHandler {
     void processFileContent(FileContentInfo content, FetchBlobHandler fetcher);
   };
-  
-  private static final Log LOGGER = LogFactory.getLog(InstanceFileManager.class);
 
   private static final String ERROR_FILE_VERSION_DIFFERS = "File on server does not match file being uploaded. Aborting upload. ";
 
