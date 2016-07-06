@@ -354,7 +354,11 @@ public class InstanceFileManager {
       
        try {
          propsLock.acquire();  
-           
+         
+         // fetch these once and then continue to re-use them.
+         DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
+         BlobEntitySet instance = blobStore.newBlobEntitySet(rowId, cc);
+
          ODKTablesException e = null;
          // Parse the request
          while (inMP.hasNext()) {
@@ -410,8 +414,6 @@ public class InstanceFileManager {
              // ignore... it might already be deleted or have never existed
            }
              
-           DbTableInstanceFiles blobStore = new DbTableInstanceFiles(tableId, cc);
-           BlobEntitySet instance = blobStore.newBlobEntitySet(rowId, cc);
            int count = instance.getAttachmentCount(cc);
            boolean found = false;
            for (int i = 1; i <= count; ++i) {
