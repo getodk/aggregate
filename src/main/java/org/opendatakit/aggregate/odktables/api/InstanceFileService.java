@@ -33,6 +33,7 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
 import org.apache.wink.common.model.multipart.InMultiPart;
+import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -83,7 +84,7 @@ public interface InstanceFileService {
   @GET
   @Path("manifest")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException;
 
   /**
    * The JSON is a OdkTablesFileManifest containing the list of files to be returned.
@@ -112,16 +113,17 @@ public interface InstanceFileService {
    * @return string describing error on failure, otherwise empty and Status.CREATED.
    * @throws IOException
    * @throws ODKTaskLockException
+   * @throws ODKTablesException 
    */
   @POST
   @Path("upload")
   @Consumes({MediaType.MULTIPART_FORM_DATA})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP) throws IOException, ODKTaskLockException;
+  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP) throws IOException, ODKTaskLockException, ODKTablesException;
   
   @GET
   @Path("file/{filePath:.*}")
-  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException;
 
   @POST
   @Path("file/{filePath:.*}")

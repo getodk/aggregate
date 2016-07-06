@@ -36,9 +36,9 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.odktables.ConfigFileChangeDetail;
+import org.opendatakit.aggregate.odktables.FileContentInfo;
 import org.opendatakit.aggregate.odktables.FileManager;
-import org.opendatakit.aggregate.odktables.FileManager.FileChangeDetail;
-import org.opendatakit.aggregate.odktables.FileManager.FileContentInfo;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
@@ -179,10 +179,9 @@ public class FileServiceImpl implements FileService {
 
     FileManager fm = new FileManager(appId, cc);
 
-    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), null, content);
+    FileContentInfo fi = new FileContentInfo(appRelativePath, contentType, Long.valueOf(content.length), null, content);
 
-    FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, appRelativePath,
-        userPermissions, fi);
+    ConfigFileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, fi, userPermissions);
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getFilesService");
@@ -192,7 +191,7 @@ public class FileServiceImpl implements FileService {
 
     return Response
         .status(
-            (outcome == FileChangeDetail.FILE_UPDATED) ? Status.ACCEPTED : Status.CREATED)
+            (outcome == ConfigFileChangeDetail.FILE_UPDATED) ? Status.ACCEPTED : Status.CREATED)
         .header("Location", locationUrl)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
