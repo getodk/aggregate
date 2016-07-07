@@ -90,9 +90,9 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   private final String rowId;
   private final String schemaETag;
 
-  public InstanceFileServiceImpl(String appId, String tableId, String schemaETag, String rowId, UriInfo info,
-      TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
-      ODKDatastoreException {
+  public InstanceFileServiceImpl(String appId, String tableId, String schemaETag, String rowId,
+      UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+      throws ODKEntityNotFoundException, ODKDatastoreException {
     this.cc = cc;
     this.appId = appId;
     this.tableId = tableId;
@@ -103,11 +103,15 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   }
 
   @Override
-  public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, PermissionDeniedException {
+  public Response getManifest(@Context HttpHeaders httpHeaders,
+      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
+      throws IOException, ODKTaskLockException, PermissionDeniedException {
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
-    UriBuilder full = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest");
+    UriBuilder full = ub.clone().path(TableService.class, "getRealizedTable")
+        .path(RealizedTableService.class, "getInstanceFiles")
+        .path(InstanceFileService.class, "getManifest");
     URI self = full.build(appId, tableId, schemaETag, rowId);
     String manifestUrl = self.toURL().toExternalForm();
 
@@ -118,12 +122,11 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     try {
       try {
         eTagEntity = DbTableInstanceManifestETags.getRowIdEntry(tableId, rowId, cc);
-      } catch ( ODKEntityNotFoundException e ) {
+      } catch (ODKEntityNotFoundException e) {
         // ignore...
       }
 
-      if ( eTag != null && eTagEntity != null && 
-           eTag.equals( eTagEntity.getManifestETag() ) ) {
+      if (eTag != null && eTagEntity != null && eTag.equals(eTagEntity.getManifestETag())) {
         return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
             .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
             .header("Access-Control-Allow-Origin", "*")
@@ -131,22 +134,23 @@ public class InstanceFileServiceImpl implements InstanceFileService {
       }
 
       InstanceFileManager fm = new InstanceFileManager(appId, cc);
-      
+
       // get the manifest entries
       final TreeMap<String, FileContentInfo> contents = new TreeMap<String, FileContentInfo>();
-      
+
       fm.getInstanceAttachments(tableId, rowId, new FileContentHandler() {
 
         @Override
         public void processFileContent(FileContentInfo content, FetchBlobHandler fetcher) {
-          contents.put(content.partialPath,  content);
-          
-        }}, userPermissions);
-      
+          contents.put(content.partialPath, content);
+
+        }
+      }, userPermissions);
+
       // transform to the class used in the REST api
       ArrayList<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
 
-      for ( Map.Entry<String, FileContentInfo> sfci : contents.entrySet()) {
+      for (Map.Entry<String, FileContentInfo> sfci : contents.entrySet()) {
         // these are in sorted order
         OdkTablesFileManifestEntry entry = new OdkTablesFileManifestEntry();
         entry.filename = sfci.getValue().partialPath;
@@ -154,28 +158,31 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         entry.contentType = sfci.getValue().contentType;
         entry.md5hash = sfci.getValue().contentHash;
 
-        URI getFile = ub.clone().path(TableService.class, "getRealizedTable").path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
-              .build(appId, tableId, schemaETag, rowId, entry.filename);
+        URI getFile = ub.clone().path(TableService.class, "getRealizedTable")
+            .path(RealizedTableService.class, "getInstanceFiles")
+            .path(InstanceFileService.class, "getFile")
+            .build(appId, tableId, schemaETag, rowId, entry.filename);
         String locationUrl = getFile.toURL().toExternalForm();
         entry.downloadUrl = locationUrl;
 
         manifestEntries.add(entry);
       }
       OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
-      
+
       String newETag = Integer.toHexString(manifest.hashCode());
       // create a new eTagEntity if there isn't one already...
-      if ( eTagEntity == null ) {
+      if (eTagEntity == null) {
         eTagEntity = DbTableInstanceManifestETags.createNewEntity(tableId, rowId, cc);
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);
-      } else if ( !newETag.equals(eTagEntity.getManifestETag()) ) {
+      } else if (!newETag.equals(eTagEntity.getManifestETag())) {
         Log log = LogFactory.getLog(FileManifestServiceImpl.class);
-        log.error("TableInstance (" + tableId + "," + rowId + ") Manifest ETag does not match computed value!");
+        log.error("TableInstance (" + tableId + "," + rowId
+            + ") Manifest ETag does not match computed value!");
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);
       }
-      
+
       // and whatever the eTag is in that entity is the eTag we should return...
       eTag = eTagEntity.getManifestETag();
 
@@ -185,8 +192,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
           .header("Access-Control-Allow-Credentials", "true");
       if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
-        rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
-            + "manifest.json" + "\"");
+        rBuild.header(HtmlConsts.CONTENT_DISPOSITION,
+            "attachment; " + "filename=\"" + "manifest.json" + "\"");
       }
       return rBuild.build();
     } catch (ODKDatastoreException e) {
@@ -199,23 +206,26 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     }
   }
 
-
   @Override
-  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments,
-      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, PermissionDeniedException {
+  public Response getFile(@Context HttpHeaders httpHeaders,
+      @PathParam("filePath") List<PathSegment> segments,
+      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
+      throws IOException, ODKTaskLockException, PermissionDeniedException {
     // The appId and tableId are from the surrounding TableService.
     // The rowId is already pulled out.
     // The segments are just rest/of/path in the full app-centric
     // path of:
     // appid/data/attachments/tableid/instances/instanceId/rest/of/path
     if (rowId == null || rowId.length() == 0) {
-      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INVALID_ROW_ID)
+      return Response.status(Status.BAD_REQUEST)
+          .entity(InstanceFileService.ERROR_MSG_INVALID_ROW_ID)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     }
     if (segments.size() < 1) {
-      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
+      return Response.status(Status.BAD_REQUEST)
+          .entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
@@ -231,8 +241,9 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     ub.path(OdkTables.class, "getTablesService");
 
     URI getFile = ub.clone().path(TableService.class, "getRealizedTable")
-        .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
-          .build(appId, tableId, schemaETag, rowId, partialPath);
+        .path(RealizedTableService.class, "getInstanceFiles")
+        .path(InstanceFileService.class, "getFile")
+        .build(appId, tableId, schemaETag, rowId, partialPath);
 
     String locationUrl = getFile.toURL().toExternalForm();
 
@@ -244,24 +255,26 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         // And now prepare everything to be returned to the caller.
         if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null
             && fi.contentLength != 0L) {
-          
+
           // test if we should return a NOT_MODIFIED response...
-          if ( eTag != null && eTag.equals(fi.contentHash) ) {
+          if (eTag != null && eTag.equals(fi.contentHash)) {
             return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
-                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER,
+                    ApiConstants.OPEN_DATA_KIT_VERSION)
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true").build();
           }
-          
-          ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType).header(HttpHeaders.ETAG, fi.contentHash)
+
+          ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType)
+              .header(HttpHeaders.ETAG, fi.contentHash)
               .header(HttpHeaders.CONTENT_LENGTH, fi.contentLength)
               .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
               .header("Access-Control-Allow-Origin", "*")
               .header("Access-Control-Allow-Credentials", "true");
           if (asAttachment != null && !"".equals(asAttachment)) {
             // Set the filename we're downloading to the disk.
-            rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\""
-                + partialPath + "\"");
+            rBuild.header(HtmlConsts.CONTENT_DISPOSITION,
+                "attachment; " + "filename=\"" + partialPath + "\"");
           }
           return rBuild.build();
         } else {
@@ -286,34 +299,37 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     }
   }
 
-
   @Override
-  public Response getFiles(@Context HttpHeaders httpHeaders, final OdkTablesFileManifest manifest) throws IOException, ODKTaskLockException, PermissionDeniedException {
+  public Response getFiles(@Context HttpHeaders httpHeaders, final OdkTablesFileManifest manifest)
+      throws IOException, ODKTaskLockException, PermissionDeniedException {
     // The appId and tableId are from the surrounding TableService.
     // The rowId is already pulled out.
     // The segments are in the manifest as filenames.
-    // On the device, these filenames are just rest/of/path in the full app-centric
+    // On the device, these filenames are just rest/of/path in the full
+    // app-centric
     // path of:
     // appid/data/attachments/tableid/instances/instanceId/rest/of/path
     if (rowId == null || rowId.length() == 0) {
-      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INVALID_ROW_ID)
+      return Response.status(Status.BAD_REQUEST)
+          .entity(InstanceFileService.ERROR_MSG_INVALID_ROW_ID)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     }
-    if ( manifest.getFiles() == null || manifest.getFiles().isEmpty() ) {
-      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_MANIFEST_IS_EMPTY_OR_MISSING)
+    if (manifest.getFiles() == null || manifest.getFiles().isEmpty()) {
+      return Response.status(Status.BAD_REQUEST)
+          .entity(InstanceFileService.ERROR_MSG_MANIFEST_IS_EMPTY_OR_MISSING)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     }
-    
+
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
 
     URI getFile = ub.clone().path(TableService.class, "getRealizedTable")
-        .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFiles")
-          .build(appId, tableId, schemaETag, rowId);
+        .path(RealizedTableService.class, "getInstanceFiles")
+        .path(InstanceFileService.class, "getFiles").build(appId, tableId, schemaETag, rowId);
 
     String locationUrl = getFile.toURL().toExternalForm();
 
@@ -325,29 +341,29 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
       BufferedOutMultiPart mpEntity = new BufferedOutMultiPart();
       mpEntity.setBoundary(boundary);
-      
+
       final OutPart[] outParts = new OutPart[manifest.getFiles().size()];
-      
+
       fm.getInstanceAttachments(tableId, rowId, new FileContentHandler() {
 
         @Override
         public void processFileContent(FileContentInfo content, FetchBlobHandler fetcher) {
           // NOTE: this is processed within a critical section
-          
-          // see if the server's file entry is in the requested set of files. 
-          // 
+
+          // see if the server's file entry is in the requested set of files.
+          //
           int entryIndex = -1;
-          for ( int i = 0 ; i < manifest.getFiles().size() ; ++i ) {
+          for (int i = 0; i < manifest.getFiles().size(); ++i) {
             OdkTablesFileManifestEntry entry = manifest.getFiles().get(i);
-            if ( entry.filename.equals(content.partialPath) ) {
+            if (entry.filename.equals(content.partialPath)) {
               entryIndex = i;
               break;
             }
           }
-          
-          if ( entryIndex != -1 ) {
-            // it is in the requested set. 
-            
+
+          if (entryIndex != -1) {
+            // it is in the requested set.
+
             // verify that there is content
             if (content.contentType != null && content.contentLength != null
                 && content.contentLength != 0L) {
@@ -361,12 +377,13 @@ public class InstanceFileServiceImpl implements InstanceFileService {
                 // silently ignore this -- error in this record
                 fileBlob = null;
               }
-              
-              if ( fileBlob != null ) {
+
+              if (fileBlob != null) {
                 // we got the content -- create an OutPart to hold it
                 OutPart op = new OutPart();
-                op.addHeader("Name", "file-"+Integer.toString(entryIndex));
-                String disposition = "file; filename=\"" + content.partialPath.replace("\"", "\"\"") + "\"";
+                op.addHeader("Name", "file-" + Integer.toString(entryIndex));
+                String disposition = "file; filename=\"" + content.partialPath.replace("\"", "\"\"")
+                    + "\"";
                 op.addHeader("Content-Disposition", disposition);
                 op.addHeader("Content-Type", content.contentType);
                 op.setBody(fileBlob);
@@ -374,13 +391,14 @@ public class InstanceFileServiceImpl implements InstanceFileService {
               }
             }
           }
-       
-        }}, userPermissions);
-      
-      // assemble the outParts into the body. 
+
+        }
+      }, userPermissions);
+
+      // assemble the outParts into the body.
       // These are returned in the same order as they were called.
-      for ( int i = 0 ; i < outParts.length ; ++ i ) {
-        if ( outParts[i] != null ) {
+      for (int i = 0; i < outParts.length; ++i) {
+        if (outParts[i] != null) {
           mpEntity.addPart(outParts[i]);
         }
       }
@@ -401,33 +419,35 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   }
 
   @Override
-  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP) throws IOException, ODKTaskLockException, ODKTablesException, ODKDatastoreException {
+  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP)
+      throws IOException, ODKTaskLockException, ODKTablesException, ODKDatastoreException {
 
     InstanceFileManager fm = new InstanceFileManager(appId, cc);
 
     fm.postFiles(tableId, rowId, inMP, userPermissions);
-      
+
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
 
-	 URI getManifest = ub.clone().path(TableService.class, "getRealizedTable")
-	        .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getManifest")
-           .build(appId, tableId, schemaETag, rowId);
+    URI getManifest = ub.clone().path(TableService.class, "getRealizedTable")
+        .path(RealizedTableService.class, "getInstanceFiles")
+        .path(InstanceFileService.class, "getManifest").build(appId, tableId, schemaETag, rowId);
 
-	 String locationUrl = getManifest.toURL().toExternalForm();
+    String locationUrl = getManifest.toURL().toExternalForm();
     return Response.status(Status.CREATED).header("Location", locationUrl)
-       .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-       .header("Access-Control-Allow-Origin", "*")
-       .header("Access-Control-Allow-Credentials", "true").build();
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
-  
+
   @Override
   public Response putFile(@Context HttpServletRequest req,
-      @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException,
-      ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
+      @PathParam("filePath") List<PathSegment> segments, byte[] content)
+      throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
     if (segments.size() < 1) {
-      return Response.status(Status.BAD_REQUEST).entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
+      return Response.status(Status.BAD_REQUEST)
+          .entity(InstanceFileService.ERROR_MSG_INSUFFICIENT_PATH)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
@@ -440,22 +460,24 @@ public class InstanceFileServiceImpl implements InstanceFileService {
     String partialPath = constructPathFromSegments(segments);
     String contentType = req.getContentType();
     String md5Hash = PersistenceUtils.newMD5HashUri(content);
-    
+
     InstanceFileManager fm = new InstanceFileManager(appId, cc);
 
-    FileContentInfo fi = new FileContentInfo(partialPath, contentType, (long) content.length, md5Hash, content);
+    FileContentInfo fi = new FileContentInfo(partialPath, contentType, (long) content.length,
+        md5Hash, content);
     InstanceFileChangeDetail outcome = fm.putFile(tableId, rowId, fi, userPermissions);
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getTablesService");
 
     URI getFile = ub.clone().path(TableService.class, "getRealizedTable")
-        .path(RealizedTableService.class, "getInstanceFiles").path(InstanceFileService.class, "getFile")
-          .build(appId, tableId, schemaETag, rowId, partialPath);
+        .path(RealizedTableService.class, "getInstanceFiles")
+        .path(InstanceFileService.class, "getFile")
+        .build(appId, tableId, schemaETag, rowId, partialPath);
 
     String locationUrl = getFile.toURL().toExternalForm();
 
-    if ( outcome == InstanceFileChangeDetail.FILE_PRESENT ) {
+    if (outcome == InstanceFileChangeDetail.FILE_PRESENT) {
 
       return Response.status(Status.CREATED).header("Location", locationUrl)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)

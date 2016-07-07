@@ -73,11 +73,11 @@ public class FileManager {
   }
 
   /**
-   * Retrieve the table id given the appRelativeFilePath. The first path
-   * segment (position 0) is a directory under /sdcard/opendatakit/{app_id}/,
-   * as all files must be associated with an app id. Not all files must be
-   * associated with a table, however, so it parses to find the table id.
-   * If it is not associated with a table, it returns DbTableFileInfo.NO_TABLE_ID
+   * Retrieve the table id given the appRelativeFilePath. The first path segment
+   * (position 0) is a directory under /sdcard/opendatakit/{app_id}/, as all
+   * files must be associated with an app id. Not all files must be associated
+   * with a table, however, so it parses to find the table id. If it is not
+   * associated with a table, it returns DbTableFileInfo.NO_TABLE_ID
    * <p>
    * The convention is that any table-related file must be under:
    * /tables/tableid OR a csv file: /assets/csv/tableid....csv OR
@@ -86,10 +86,11 @@ public class FileManager {
    * So the 2nd position (0 indexed) will be the table id if the first position
    * is "tables", and the 3rd position (0 indexed) will begin with the table id
    * if it is a csv file under the assets/csv directory. Otherwise, if there are
-   * more than 3 positions, it should be the table id (and there should be instance
-   * files underneath that are referenced by one or more of the csv files).
-   *  
-   * And verify that the presumptive tableId does not contain a period. If the 
+   * more than 3 positions, it should be the table id (and there should be
+   * instance files underneath that are referenced by one or more of the csv
+   * files).
+   * 
+   * And verify that the presumptive tableId does not contain a period. If the
    * data came via a Mac OSX system, there might be hidden .DS_Store directories
    * that we should not treat as table ids.
    * 
@@ -97,53 +98,55 @@ public class FileManager {
    * @return tableId or DbTableFileInfo.NO_TABLE_ID
    */
   public static String getTableIdForFilePath(String appRelativeFilePath) {
-      String[] pathParts = appRelativeFilePath.split(BasicConsts.FORWARDSLASH);
-      String tableId = DbTableFileInfo.NO_TABLE_ID;
-      String firstFolder = pathParts[0];
-      if ((pathParts.length >= 2) && firstFolder.equals(FileManager.TABLES_FOLDER)) {
-        // ensure that we ignore sub-directories that have periods in them
-        // e.g., .DS_Store.
-        String secondFolder = pathParts[1];
-        if ( secondFolder.indexOf('.') == -1) {
-          tableId = secondFolder;
-        }
-      } else if ((pathParts.length >= 3) && firstFolder.equals(FileManager.ASSETS_FOLDER)) {
-        String secondFolder = pathParts[1];
-        if (secondFolder.equals(FileManager.CSV_FOLDER)) {
-          String fileName = pathParts[2];
-          if (pathParts.length > 3) {
-            // ensure that we ignore sub-directories that have periods in them
-            // e.g., .DS_Store.
-            if (fileName.indexOf('.') == -1) {
-              tableId = fileName;
-            }
-          } else {
-            String splits[] = fileName.split("\\.");
-            if (splits[splits.length - 1].toLowerCase(Locale.ENGLISH).equals(FileManager.CSV_EXTENSION)) {
-              tableId = splits[0];
-            }
+    String[] pathParts = appRelativeFilePath.split(BasicConsts.FORWARDSLASH);
+    String tableId = DbTableFileInfo.NO_TABLE_ID;
+    String firstFolder = pathParts[0];
+    if ((pathParts.length >= 2) && firstFolder.equals(FileManager.TABLES_FOLDER)) {
+      // ensure that we ignore sub-directories that have periods in them
+      // e.g., .DS_Store.
+      String secondFolder = pathParts[1];
+      if (secondFolder.indexOf('.') == -1) {
+        tableId = secondFolder;
+      }
+    } else if ((pathParts.length >= 3) && firstFolder.equals(FileManager.ASSETS_FOLDER)) {
+      String secondFolder = pathParts[1];
+      if (secondFolder.equals(FileManager.CSV_FOLDER)) {
+        String fileName = pathParts[2];
+        if (pathParts.length > 3) {
+          // ensure that we ignore sub-directories that have periods in them
+          // e.g., .DS_Store.
+          if (fileName.indexOf('.') == -1) {
+            tableId = fileName;
+          }
+        } else {
+          String splits[] = fileName.split("\\.");
+          if (splits[splits.length - 1].toLowerCase(Locale.ENGLISH)
+              .equals(FileManager.CSV_EXTENSION)) {
+            tableId = splits[0];
           }
         }
       }
-      return tableId;
+    }
+    return tableId;
   }
-  
+
   public FileContentInfo getFile(String odkClientVersion, String tableId, String wholePath)
       throws ODKDatastoreException, FileNotFoundException, ODKTaskLockException {
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
 
-    if ( wholePath == null ) {
+    if (wholePath == null) {
       throw new IllegalArgumentException("filePath cannot be null!");
     }
-    
-    
-    LockTemplate propsLock = new LockTemplate(tableId, null, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+
+    LockTemplate propsLock = new LockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
       propsLock.acquire();
-  
-      // otherwise, it is an app-level file, and that is accessible to anyone with
+
+      // otherwise, it is an app-level file, and that is accessible to anyone
+      // with
       // synchronize tables privileges
-  
+
       List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion,
           tableId, wholePath, cc);
       if (entities.size() > 1) {
@@ -163,11 +166,10 @@ public class FileManager {
       if (blobEntitySet.getAttachmentCount(cc) < 1) {
         throw new FileNotFoundException("No file found for path: " + wholePath);
       }
-  
-      FileContentInfo fo = new FileContentInfo(blobEntitySet.getUnrootedFilename(1,  cc),
-          blobEntitySet.getContentType(1, cc),
-          blobEntitySet.getContentLength(1, cc), blobEntitySet.getContentHash(1, cc),
-          blobEntitySet.getBlob(1, cc));
+
+      FileContentInfo fo = new FileContentInfo(blobEntitySet.getUnrootedFilename(1, cc),
+          blobEntitySet.getContentType(1, cc), blobEntitySet.getContentLength(1, cc),
+          blobEntitySet.getContentHash(1, cc), blobEntitySet.getBlob(1, cc));
       return fo;
 
     } finally {
@@ -178,15 +180,16 @@ public class FileManager {
   public ConfigFileChangeDetail putFile(String odkClientVersion, String tableId, FileContentInfo fi,
       TablesUserPermissions userPermissions) throws ODKDatastoreException, ODKTaskLockException {
 
-    if ( fi.partialPath == null ) {
+    if (fi.partialPath == null) {
       throw new IllegalArgumentException("partialPath cannot be null!");
     }
-    
+
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
 
-    LockTemplate propsLock = new LockTemplate(tableId, null, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
-      propsLock.acquire();  
+      propsLock.acquire();
 
       // -1) clear the eTag for the manifest of this tableId
       {
@@ -198,24 +201,24 @@ public class FileManager {
             etag = DbManifestETags.getTableIdEntry(tableId, cc);
           }
           etag.delete(cc);
-        } catch ( ODKEntityNotFoundException e ) {
+        } catch (ODKEntityNotFoundException e) {
           // ignore...
         }
       }
-  
+
       // 0) Delete anything that is already stored
-  
+
       List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion,
           tableId, fi.partialPath, cc);
       for (DbTableFileInfoEntity entity : entities) {
-  
+
         String uri = entity.getId();
         DbTableFiles dbTableFiles = new DbTableFiles(cc);
         BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(uri, cc);
         blobEntitySet.remove(cc);
         entity.delete(cc);
       }
-  
+
       // We are going to store the file in two tables: 1) a user-friendly table
       // that relates an app and table id to the name of a file; 2) a table
       // that holds the actual blob.
@@ -237,7 +240,7 @@ public class FileManager {
       DbTableFileInfoEntity tableFileInfoRow = ec.newTableFileInfoEntity(odkClientVersion, tableId,
           fi.partialPath, userPermissions, cc);
       String rowUri = tableFileInfoRow.getId();
-  
+
       // 2) Put the blob in the datastore.
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
       // Although this is called an entity set, it in fact represents a single
@@ -248,13 +251,13 @@ public class FileManager {
       // TODO: this being set to true is probably where some sort of versioning
       // should happen.
       BlobSubmissionOutcome outcome = null;
-  
+
       if (fi.fileBlob != null && fi.contentType != null) {
         outcome = instance.addBlob(fi.fileBlob, fi.contentType, null, true, cc);
       }
       // 3) persist the user-friendly table entry about the blob
       tableFileInfoRow.put(cc);
-  
+
       switch (outcome) {
       case FILE_UNCHANGED:
         return ConfigFileChangeDetail.FILE_NOT_CHANGED;
@@ -274,21 +277,22 @@ public class FileManager {
   public void deleteFile(String odkClientVersion, String tableId, String wholePath)
       throws ODKDatastoreException, ODKTaskLockException {
 
-    if ( wholePath == null ) {
+    if (wholePath == null) {
       throw new IllegalArgumentException("wholePath cannot be null!");
     }
-    
+
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
 
-    LockTemplate propsLock = new LockTemplate(tableId, null, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
-      propsLock.acquire();  
+      propsLock.acquire();
 
       // if we find nothing, we are happy.
       List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForEntity(odkClientVersion,
           tableId, wholePath, cc);
-      
-      if ( !entities.isEmpty() ) {
+
+      if (!entities.isEmpty()) {
         // -1) clear the eTag for the manifest of this tableId
         try {
           DbManifestETagEntity etag;
@@ -298,11 +302,11 @@ public class FileManager {
             etag = DbManifestETags.getTableIdEntry(tableId, cc);
           }
           etag.delete(cc);
-        } catch ( ODKEntityNotFoundException e ) {
+        } catch (ODKEntityNotFoundException e) {
           // ignore...
         }
       }
-      
+
       // 0) delete the matching entities
       for (DbTableFileInfoEntity entity : entities) {
         String uri = entity.getId();
