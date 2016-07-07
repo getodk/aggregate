@@ -64,18 +64,22 @@ public class FileManifestManager {
    * @param tableId
    * @return
    * @throws ODKDatastoreException
-   * @throws ODKTaskLockException 
+   * @throws ODKTaskLockException
    */
-  public OdkTablesFileManifest getManifestForTable(String tableId) throws ODKDatastoreException, ODKTaskLockException {
+  public OdkTablesFileManifest getManifestForTable(String tableId)
+      throws ODKDatastoreException, ODKTaskLockException {
     // TODO: need to handle access control.
 
-    LockTemplate propsLock = new LockTemplate(tableId, null, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    LockTemplate propsLock = new LockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
-      propsLock.acquire();  
+      propsLock.acquire();
 
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
-      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableIdFiles(odkClientVersion, tableId, cc);
-      ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForTableIdFiles(odkClientVersion,
+          tableId, cc);
+      ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities,
+          dbTableFiles);
       OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
       return manifest;
 
@@ -91,18 +95,22 @@ public class FileManifestManager {
    *
    * @return
    * @throws ODKDatastoreException
-   * @throws ODKTaskLockException 
+   * @throws ODKTaskLockException
    */
-  public OdkTablesFileManifest getManifestForAppLevelFiles() throws ODKDatastoreException, ODKTaskLockException {
+  public OdkTablesFileManifest getManifestForAppLevelFiles()
+      throws ODKDatastoreException, ODKTaskLockException {
     // TODO: need to handle access control.
 
-    LockTemplate propsLock = new LockTemplate(DbTableFileInfo.NO_TABLE_ID, null, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    LockTemplate propsLock = new LockTemplate(DbTableFileInfo.NO_TABLE_ID, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
     try {
-      propsLock.acquire();  
-  
+      propsLock.acquire();
+
       DbTableFiles dbTableFiles = new DbTableFiles(cc);
-      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAppLevelFiles(odkClientVersion, cc);
-      ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities, dbTableFiles);
+      List<DbTableFileInfoEntity> entities = DbTableFileInfo.queryForAppLevelFiles(odkClientVersion,
+          cc);
+      ArrayList<OdkTablesFileManifestEntry> manifestEntries = getEntriesFromQuery(entities,
+          dbTableFiles);
       OdkTablesFileManifest manifest = new OdkTablesFileManifest(manifestEntries);
       return manifest;
 
@@ -121,7 +129,8 @@ public class FileManifestManager {
    * @throws ODKDatastoreException
    */
   private ArrayList<OdkTablesFileManifestEntry> getEntriesFromQuery(
-      List<DbTableFileInfoEntity> entities, DbTableFiles dbTableFiles) throws ODKDatastoreException {
+      List<DbTableFileInfoEntity> entities, DbTableFiles dbTableFiles)
+      throws ODKDatastoreException {
     // TODO: need to handle access control.
     ArrayList<OdkTablesFileManifestEntry> manifestEntries = new ArrayList<OdkTablesFileManifestEntry>();
     // A map of static url get parameters. In this case we only want to download
@@ -130,7 +139,7 @@ public class FileManifestManager {
     properties.put(ServletConsts.AS_ATTACHMENT, "true");
     for (DbTableFileInfoEntity entity : entities) {
       // ignore deleted entities
-      if ( entity.getDeleted() ) {
+      if (entity.getDeleted()) {
         continue;
       }
       // TODO: apply filter
@@ -142,7 +151,8 @@ public class FileManifestManager {
       BlobEntitySet blobEntitySet = dbTableFiles.getBlobEntitySet(rowUri, cc);
       // We should only ever have one.
       if (blobEntitySet.getAttachmentCount(cc) > 1) {
-        log.error("more than one entity for appId: " + appId + ", " + ", pathToFile: " + pathToFile);
+        log.error(
+            "more than one entity for appId: " + appId + ", " + ", pathToFile: " + pathToFile);
       } else if (blobEntitySet.getAttachmentCount(cc) < 1) {
         log.error("file not found for: " + appId + ", pathToFile: " + pathToFile);
         continue;
