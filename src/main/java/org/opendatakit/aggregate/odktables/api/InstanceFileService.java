@@ -33,8 +33,11 @@ import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 
 import org.apache.wink.common.model.multipart.InMultiPart;
+import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
+import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
 /**
@@ -83,7 +86,7 @@ public interface InstanceFileService {
   @GET
   @Path("manifest")
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getManifest(@Context HttpHeaders httpHeaders, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, PermissionDeniedException;
 
   /**
    * The JSON is a OdkTablesFileManifest containing the list of files to be returned.
@@ -94,12 +97,13 @@ public interface InstanceFileService {
    * @return
    * @throws IOException
    * @throws ODKTaskLockException
+   * @throws PermissionDeniedException 
    */
   @POST
   @Path("download")
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @Produces({MediaType.MULTIPART_FORM_DATA})
-  public Response getFiles(@Context HttpHeaders httpHeaders, OdkTablesFileManifest manifest) throws IOException, ODKTaskLockException;
+  public Response getFiles(@Context HttpHeaders httpHeaders, OdkTablesFileManifest manifest) throws IOException, ODKTaskLockException, PermissionDeniedException;
 
   /**
    * Takes a multipart form containing the files to be uploaded.
@@ -112,20 +116,22 @@ public interface InstanceFileService {
    * @return string describing error on failure, otherwise empty and Status.CREATED.
    * @throws IOException
    * @throws ODKTaskLockException
+   * @throws ODKTablesException 
+   * @throws ODKDatastoreException 
    */
   @POST
   @Path("upload")
   @Consumes({MediaType.MULTIPART_FORM_DATA})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP) throws IOException, ODKTaskLockException;
+  public Response postFiles(@Context HttpServletRequest req, InMultiPart inMP) throws IOException, ODKTaskLockException, ODKTablesException, ODKDatastoreException;
   
   @GET
   @Path("file/{filePath:.*}")
-  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException;
+  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("filePath") List<PathSegment> segments, @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException, ODKTaskLockException, PermissionDeniedException;
 
   @POST
   @Path("file/{filePath:.*}")
   @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
-  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException, ODKTaskLockException;
+  public Response putFile(@Context HttpServletRequest req, @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException;
 
 }

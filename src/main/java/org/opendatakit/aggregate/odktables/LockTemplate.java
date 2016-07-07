@@ -46,6 +46,36 @@ public class LockTemplate {
   private long maxBackoffMs;
   private Random rand;
 
+  /**
+   * File-manager-specific lock for accessing app-level, table-level and instance-level files and manifests.
+   * For app-level and table-level files, the rowId should be an empty string or null. For instance-level files,
+   * the rowId is mapped into one of 256 buckets to allow for multiple simultaneous instance-level file
+   * accesses.
+   * 
+   * @param tableId
+   * @param rowId
+   * @param type
+   * @param cc
+   */
+  public LockTemplate(String tableId, String rowId, ODKTablesTaskLockType type, CallingContext cc) {
+    if ( rowId == null || rowId.length() == 0 ) {
+      if ( tableId.length() == 0 ) {
+        this.tableId = "app-level|";
+      } else {
+        this.tableId = "table-level|" + tableId;
+      }
+    } else {
+      this.tableId = "row-level|" + tableId + "|" + Integer.toHexString(rowId.hashCode() & 0xff);
+    }
+    
+    this.type = type;
+    this.ds = cc.getDatastore();
+    this.user = cc.getCurrentUser();
+    this.lockId = UUID.randomUUID().toString();
+    this.maxBackoffMs = INITIAL_MAX_BACKOFF;
+    this.rand = new Random();
+  }
+
   public LockTemplate(String tableId, ODKTablesTaskLockType type, CallingContext cc) {
     this.tableId = tableId;
     this.type = type;
