@@ -18,7 +18,10 @@ package org.opendatakit.common.persistence.engine.gae;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.TaskLock;
@@ -38,6 +41,9 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
+import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 
 /**
  *
@@ -48,7 +54,9 @@ import com.google.appengine.api.datastore.Transaction;
 public class TaskLockImpl implements TaskLock {
 
   private static final String NO_TRANSACTION_ACTIVE = "Transaction was no longer active";
-  private static final String MULTIPLE_RESULTS_ERROR = "SOMETHING HORRIBLE!! - Some how a second lock was created";
+  private static final String MULTIPLE_RESULTS_ERROR = "Too close to call: Two locks were created within the settle time of each other";
+  private static final String MULTIPLE_MEMCACHE_RESULTS_ERROR = "Memcache: Collision of lock timestamps";
+  private static final String HOT_MEMCACHE_ENTRY_ERROR = "Memcache: Unable to record lock due to contention";
   private static final String OTHER_ERROR = "Datastore or other failure";
   private static final String ENTITY_GROUP_KIND = "TASK_LOCK_GROUP";
   private static final String ENTITY_GROUP_KEY = "TASK_LOCKS";
@@ -59,10 +67,12 @@ public class TaskLockImpl implements TaskLock {
   private static final String TIMESTAMP_PROPERTY = "TIMESTAMP";
 
   private final DatastoreAccessMetrics dam;
+  private final MemcacheService syncCache;
   private final DatastoreService ds;
 
-  public TaskLockImpl(DatastoreAccessMetrics dam) {
+  public TaskLockImpl(DatastoreAccessMetrics dam, MemcacheService syncCache) {
     this.dam = dam;
+    this.syncCache = syncCache;
     ds = DatastoreServiceFactory.getDatastoreService();
   }
 
@@ -130,6 +140,8 @@ public class TaskLockImpl implements TaskLock {
       }
     } catch (Exception e) { // primarily datastore exceptions
       e.printStackTrace();
+    } finally {
+	  deleteLockIdMemCache(lockId, formId, taskType);
     }
   }
 
@@ -308,56 +320,60 @@ public class TaskLockImpl implements TaskLock {
       throws ODKTaskLockException {
     System.out.println("Releasing lock : " + lockId + " " + formId + " " + taskType.getName());
     boolean result = false;
-    Transaction transaction = ds.beginTransaction();
-    try {
-      Entity gaeEntity = queryForLock(formId, taskType);
-      if (gaeEntity == null) {
-        // might have been deleted in an earlier sweep...
-        result = true;
-      } else {
-        String retrievedLockId = getLockId(gaeEntity);
-        if (retrievedLockId.equals(lockId)) {
-          dam.recordDeleteUsage(KIND);
-          ds.delete(transaction, gaeEntity.getKey());
-          result = true;
-        }
-      }
-    } catch (ODKTaskLockException e) {
-      throw e;
-    } catch (Exception e) { // catches datastore issues...
-      e.printStackTrace();
-      throw new ODKTaskLockException(OTHER_ERROR, e);
-    } finally {
-      if (result) {
-        try {
-          transaction.commit();
-        } catch (DatastoreFailureException e) {
-          throw new ODKTaskLockException(OTHER_ERROR, e);
-        } catch (Exception e) { // might be a ConcurrentModificationException ...
-          System.out.println("UNEXPECTED EXCEPTION " + e.toString());
-          e.printStackTrace();
-          throw new ODKTaskLockException(OTHER_ERROR, e);
-        }
-      } else {
-        try {
-          transaction.rollback();
-          System.out.println("Rollback releaseLock : " + lockId + " " + formId + " " + taskType.getName());
-        } catch (DatastoreFailureException e) {
-          throw new ODKTaskLockException(OTHER_ERROR, e);
-        } catch (Exception e) { // might be a ConcurrentModificationException ...
-          System.out.println("UNEXPECTED EXCEPTION " + e.toString());
-          e.printStackTrace();
-          throw new ODKTaskLockException(OTHER_ERROR, e);
-        }
-      }
-    }
-    if ( !result ) {
-      // if there was contention and the other party hasn't removed its lock
-      // yet, then our queryForLock() will fail.  Call delete, which has
-      // less restrictive logic than queryForLock().
-      deleteLock(lockId, formId, taskType);
-      System.out.println("releaseLock -- FALLBACK: deleteLock : " + lockId + " " + formId + " " + taskType.getName());
-    }
+	try {
+		Transaction transaction = ds.beginTransaction();
+		try {
+		  Entity gaeEntity = queryForLock(formId, taskType);
+		  if (gaeEntity == null) {
+			// might have been deleted in an earlier sweep...
+			result = true;
+		  } else {
+			String retrievedLockId = getLockId(gaeEntity);
+			if (retrievedLockId.equals(lockId)) {
+			  dam.recordDeleteUsage(KIND);
+			  ds.delete(transaction, gaeEntity.getKey());
+			  result = true;
+			}
+		  }
+		} catch (ODKTaskLockException e) {
+		  throw e;
+		} catch (Exception e) { // catches datastore issues...
+		  e.printStackTrace();
+		  throw new ODKTaskLockException(OTHER_ERROR, e);
+		} finally {
+		  if (result) {
+			try {
+			  transaction.commit();
+			} catch (DatastoreFailureException e) {
+			  throw new ODKTaskLockException(OTHER_ERROR, e);
+			} catch (Exception e) { // might be a ConcurrentModificationException ...
+			  System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+			  e.printStackTrace();
+			  throw new ODKTaskLockException(OTHER_ERROR, e);
+			}
+		  } else {
+			try {
+			  transaction.rollback();
+			  System.out.println("Rollback releaseLock : " + lockId + " " + formId + " " + taskType.getName());
+			} catch (DatastoreFailureException e) {
+			  throw new ODKTaskLockException(OTHER_ERROR, e);
+			} catch (Exception e) { // might be a ConcurrentModificationException ...
+			  System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+			  e.printStackTrace();
+			  throw new ODKTaskLockException(OTHER_ERROR, e);
+			}
+		  }
+		}
+	} finally {
+		deleteLockIdMemCache(lockId, formId, taskType);
+	}
+	if ( !result ) {
+	  // if there was contention and the other party hasn't removed its lock
+	  // yet, then our queryForLock() will fail.  Call delete, which has
+	  // less restrictive logic than queryForLock().
+	  deleteLock(lockId, formId, taskType);
+	  System.out.println("releaseLock -- FALLBACK: deleteLock : " + lockId + " " + formId + " " + taskType.getName());
+	}
     return result;
   }
 
@@ -373,6 +389,15 @@ public class TaskLockImpl implements TaskLock {
       throw new ODKTaskLockException("SOMEONE OVERWROTE THE LOCK" + " Actual: " + retrievedLockId
           + " Expected: " + lockId);
     }
+    String retrievedLockIdMemCache = queryForLockIdMemCache(formId, taskType);
+    // if it is null, that is OK -- we might have a contention failure or memcache might be down
+    if ( retrievedLockIdMemCache != null && !lockId.equals(retrievedLockIdMemCache) ) {
+      LogFactory.getLog(TaskLockImpl.class).error("MemCache: lock verification failure. Actual: " + retrievedLockIdMemCache
+          + " Expected: " + lockId);
+
+      throw new ODKTaskLockException("MemCache: Undetected Datastore Overwriting of Lock" + " Actual: " + retrievedLockIdMemCache
+          + " Expected: " + lockId);
+    }
   }
 
   private void updateValuesNpersist(Transaction transaction, String lockId, String formId,
@@ -386,15 +411,184 @@ public class TaskLockImpl implements TaskLock {
       gaeEntity.setProperty(LOCK_ID_PROPERTY, lockId);
       gaeEntity.setProperty(FORM_ID_PROPERTY, formId);
       gaeEntity.setProperty(TASK_TYPE_PROPERTY, taskType.getName());
-      ds.put(transaction, gaeEntity);
+      try {
+        updateLockIdTimestampMemCache(lockId, formId, taskType, timestamp);
+      } finally {
+        ds.put(transaction, gaeEntity);
+      }
     } catch (IllegalStateException e) {
       throw new ODKTaskLockException(NO_TRANSACTION_ACTIVE, e);
+    } catch (ODKTaskLockException e) {
+      throw e;
     } catch (Exception e) { // catches datastore issues...
       e.printStackTrace();
       throw new ODKTaskLockException(OTHER_ERROR, e);
     }
   }
 
+  /**
+   * Update the MemCache for (formId, taskType) to record the given timestamp as the gain-time of the lockId.
+   * The lockId with the earliest gain-time wins.
+   * 
+   * @param lockId
+   * @param formId
+   * @param taskType
+   * @param timestamp
+   * @throws ODKTaskLockException
+   */
+  private synchronized void updateLockIdTimestampMemCache(String lockId, String formId, ITaskLockType taskType, Long timestamp) throws ODKTaskLockException {
+    if ( syncCache != null ) {
+      int i;
+      try {
+        String formTask = ((formId == null) ? "" : formId) + "@" + taskType.getName();
+        for (i = 0 ; i < 10 ; i++ ) {
+          IdentifiableValue v = syncCache.contains(formTask) ? syncCache.getIdentifiable(formTask) : null;
+          if ( v == null || v.getValue() == null ) {
+            TreeMap<Long,String> tm = new TreeMap<Long,String>();
+            tm.put(timestamp, lockId);
+            if ( syncCache.put(formTask, tm, null, SetPolicy.ADD_ONLY_IF_NOT_PRESENT) ) {
+              break;
+            }
+          } else {
+            TreeMap<Long,String> tmOrig = (TreeMap<Long,String>) v.getValue();
+            TreeMap<Long,String> tm = new TreeMap<Long,String>(tmOrig);
+            
+            // remove any old entries for lockId and any that are very old
+            Long currentTimestamp = System.currentTimeMillis();
+            Long oldTimestamp;
+            do {
+              oldTimestamp = null;
+              for ( Map.Entry<Long,String> entry : tm.entrySet() ) {
+                if ( entry.getKey() + 300000L < currentTimestamp ) {
+                  // more than 5 minutes old -- remove it
+                  oldTimestamp = entry.getKey();
+                  break;
+                }
+                if ( entry.getValue().equals(lockId) ) {
+                  oldTimestamp = entry.getKey();
+                  break;
+                }
+              }
+              if ( oldTimestamp != null ) {
+                tm.remove(oldTimestamp);
+              }
+            } while ( oldTimestamp != null );
+            
+            // update with new timestamp
+            if ( tm.put(timestamp, lockId) != null ) {
+              // some other thread gained the lock first for this timestamp
+              throw new ODKTaskLockException(MULTIPLE_MEMCACHE_RESULTS_ERROR);
+            }
+            
+            // try to update the Memcache with these changes.
+            if ( syncCache.putIfUntouched(formTask, v, tm) ) {
+              break;
+            }
+          }
+        }
+      } catch ( ODKTaskLockException e ) {
+        throw e;
+      } catch ( Throwable t ) {
+        t.printStackTrace();
+        throw new ODKTaskLockException(OTHER_ERROR, t);
+      }
+      
+      if ( i == 10 ) {
+        // crazy contention
+        throw new ODKTaskLockException(HOT_MEMCACHE_ENTRY_ERROR);
+      }
+    }
+  }
+  
+  /**
+   * Remove the given lockId from the (formId, taskType) entry.
+   * 
+   * @param lockId
+   * @param formId
+   * @param taskType
+   */
+  private synchronized void deleteLockIdMemCache(String lockId, String formId, ITaskLockType taskType) {
+    if ( syncCache != null ) {
+      int i;
+      try {
+        String formTask = ((formId == null) ? "" : formId) + "@" + taskType.getName();
+        for (i = 0 ; i < 10 ; i++ ) {
+          
+          IdentifiableValue v = syncCache.contains(formTask) ? syncCache.getIdentifiable(formTask) : null;
+          if ( v == null || v.getValue() == null ) {
+            break;
+          } else {
+            TreeMap<Long,String> tmOrig = (TreeMap<Long,String>) v.getValue();
+            TreeMap<Long,String> tm = new TreeMap<Long,String>(tmOrig);
+   
+            // remove any old entries for lockId and any that are very old
+            Long currentTimestamp = System.currentTimeMillis();
+            Long oldTimestamp;
+            do {
+              oldTimestamp = null;
+              for ( Map.Entry<Long,String> entry : tm.entrySet() ) {
+                if ( entry.getKey() + 300000L < currentTimestamp ) {
+                  // more than 5 minutes old -- remove it
+                  oldTimestamp = entry.getKey();
+                  break;
+                }
+                if ( entry.getValue().equals(lockId) ) {
+                  oldTimestamp = entry.getKey();
+                  break;
+                }
+              }
+              if ( oldTimestamp != null ) {
+                tm.remove(oldTimestamp);
+              }
+            } while ( oldTimestamp != null );
+            
+            if ( syncCache.putIfUntouched(formTask, v, tm) ) {
+              break;
+            }
+          }
+        }
+      } catch ( Throwable t ) {
+        t.printStackTrace();
+        // ignore
+      }
+      // don't care if we had contention and didn't do anything.
+      // This will eventually self-correct.
+    }
+  }
+
+  /**
+   * Find the winning lockId for the lock, according to MemCache.
+   * 
+   * @param formId
+   * @param taskType
+   * @return
+   * @throws ODKTaskLockException
+   */
+  private synchronized String queryForLockIdMemCache(String formId, ITaskLockType taskType) throws ODKTaskLockException {
+    if ( syncCache != null ) {
+      try {
+        String formTask = ((formId == null) ? "" : formId)  + "@" + taskType.getName();
+        IdentifiableValue v = syncCache.contains(formTask) ? syncCache.getIdentifiable(formTask) : null;
+        if ( v == null || v.getValue() == null ) {
+          return null;
+        } else {
+          TreeMap<Long,String> tm = (TreeMap<Long,String>) v.getValue();
+          Long currentTimestamp = System.currentTimeMillis();
+          for ( Long timestamp : tm.keySet() ) {
+            if ( timestamp >= currentTimestamp ) {
+              return tm.get(timestamp);
+            }
+          }
+          return null;
+        }
+      } catch ( Throwable t ) {
+        t.printStackTrace();
+        // ignore
+      }
+    }
+    return null;
+  }
+  
   private Entity queryForLock(String formId, ITaskLockType taskType) throws ODKTaskLockException {
     int readCount = 0;
     try {
