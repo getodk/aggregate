@@ -33,12 +33,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.odktables.ConfigFileChangeDetail;
+import org.opendatakit.aggregate.odktables.FileContentInfo;
 import org.opendatakit.aggregate.odktables.FileManager;
-import org.opendatakit.aggregate.odktables.FileManager.FileChangeDetail;
-import org.opendatakit.aggregate.odktables.FileManager.FileContentInfo;
 import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
@@ -57,8 +55,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 public class FileServiceImpl implements FileService {
-
-  private static final Log LOGGER = LogFactory.getLog(FileServiceImpl.class);
 
   private final ServletContext sc;
   private final HttpServletRequest req;
@@ -82,10 +78,12 @@ public class FileServiceImpl implements FileService {
   }
 
   @Override
-  public Response getFile(@Context HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion,
+  public Response getFile(@Context HttpHeaders httpHeaders,
+      @PathParam("odkClientVersion") String odkClientVersion,
       @PathParam("filePath") List<PathSegment> segments,
-      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment) throws IOException,
-      ODKTaskLockException, PermissionDeniedException, ODKDatastoreException, FileNotFoundException {
+      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
+      throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException,
+      FileNotFoundException {
 
     // First we need to get the table id from the path. We're
     // going to be assuming that you're passing the entire path of the file
@@ -120,9 +118,9 @@ public class FileServiceImpl implements FileService {
     // And now prepare everything to be returned to the caller.
     if (fi.fileBlob != null && fi.contentType != null && fi.contentLength != null
         && fi.contentLength != 0L) {
-      
+
       // test if we should return a NOT_MODIFIED response...
-      if ( eTag != null && eTag.equals(fi.contentHash)) {
+      if (eTag != null && eTag.equals(fi.contentHash)) {
         return Response.status(Status.NOT_MODIFIED).header(HttpHeaders.ETAG, eTag)
             .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
             .header("Access-Control-Allow-Origin", "*")
@@ -131,15 +129,15 @@ public class FileServiceImpl implements FileService {
 
       ResponseBuilder rBuild = Response.ok(fi.fileBlob, fi.contentType)
           .header(HttpHeaders.CONTENT_LENGTH, fi.contentLength)
-          .header(HttpHeaders.ETAG,fi.contentHash)
+          .header(HttpHeaders.ETAG, fi.contentHash)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true");
 
       if (asAttachment != null && !"".equals(asAttachment)) {
         // Set the filename we're downloading to the disk.
-        rBuild.header(HtmlConsts.CONTENT_DISPOSITION, "attachment; " + "filename=\"" + appRelativePath
-            + "\"");
+        rBuild.header(HtmlConsts.CONTENT_DISPOSITION,
+            "attachment; " + "filename=\"" + appRelativePath + "\"");
       }
       return rBuild.build();
     } else {
@@ -153,8 +151,8 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response putFile(@PathParam("odkClientVersion") String odkClientVersion,
-      @PathParam("filePath") List<PathSegment> segments, byte[] content) throws IOException,
-      ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
+      @PathParam("filePath") List<PathSegment> segments, byte[] content)
+      throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
     if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
@@ -179,20 +177,20 @@ public class FileServiceImpl implements FileService {
 
     FileManager fm = new FileManager(appId, cc);
 
-    FileContentInfo fi = new FileContentInfo(contentType, Long.valueOf(content.length), null, content);
+    FileContentInfo fi = new FileContentInfo(appRelativePath, contentType,
+        Long.valueOf(content.length), null, content);
 
-    FileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, appRelativePath,
-        userPermissions, fi);
+    ConfigFileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, fi, userPermissions);
 
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getFilesService");
-    URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion, appRelativePath);
+    URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion,
+        appRelativePath);
 
     String locationUrl = self.toURL().toExternalForm();
 
     return Response
-        .status(
-            (outcome == FileChangeDetail.FILE_UPDATED) ? Status.ACCEPTED : Status.CREATED)
+        .status((outcome == ConfigFileChangeDetail.FILE_UPDATED) ? Status.ACCEPTED : Status.CREATED)
         .header("Location", locationUrl)
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
@@ -201,8 +199,8 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response deleteFile(@PathParam("odkClientVersion") String odkClientVersion,
-      @PathParam("filePath") List<PathSegment> segments) throws IOException, ODKTaskLockException,
-      PermissionDeniedException, ODKDatastoreException {
+      @PathParam("filePath") List<PathSegment> segments)
+      throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
     if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
@@ -218,15 +216,15 @@ public class FileServiceImpl implements FileService {
     String appRelativePath = constructPathFromSegments(segments);
     String tableId = FileManager.getTableIdForFilePath(appRelativePath);
 
-    
-    // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level permissions
+    // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
+    // permissions
     if (!DbTableFileInfo.NO_TABLE_ID.equals(tableId)) {
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_PROPERTIES);
     }
 
     FileManager fm = new FileManager(appId, cc);
     fm.deleteFile(odkClientVersion, tableId, appRelativePath);
-    
+
     return Response.ok()
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
