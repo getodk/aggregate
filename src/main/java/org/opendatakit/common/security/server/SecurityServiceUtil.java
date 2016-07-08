@@ -73,6 +73,10 @@ public class SecurityServiceUtil {
       GrantedAuthorityName.GROUP_ADMINISTER_TABLES.name());
   public static final List<String> administerTablesGrants;
 
+  public static final GrantedAuthority superUserTablesAuth = new SimpleGrantedAuthority(
+      GrantedAuthorityName.GROUP_SUPER_USER_TABLES.name());
+  public static final List<String> superUserTablesGrants;
+
   public static final GrantedAuthority synchronizeTablesAuth = new SimpleGrantedAuthority(
       GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
   public static final List<String> synchronizeTablesGrants;
@@ -103,9 +107,17 @@ public class SecurityServiceUtil {
     List<String> iadministerTablesGrants = new ArrayList<String>();
     iadministerTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
     iadministerTablesGrants.add(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name());
-    iadministerTablesGrants.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
+    iadministerTablesGrants.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES.name());
     iadministerTablesGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
     administerTablesGrants = Collections.unmodifiableList(iadministerTablesGrants);
+
+
+    List<String> isuperUserTablesGrants = new ArrayList<String>();
+    isuperUserTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
+    isuperUserTablesGrants.add(GrantedAuthorityName.ROLE_SUPER_USER_TABLES.name());
+    isuperUserTablesGrants.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
+    isuperUserTablesGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
+    superUserTablesGrants = Collections.unmodifiableList(isuperUserTablesGrants);
 
     List<String> isynchronizeTablesGrants = new ArrayList<String>();
     isynchronizeTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
@@ -541,6 +553,8 @@ public class SecurityServiceUtil {
           SecurityServiceUtil.siteAdministratorGrants, cc);
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(administerTablesAuth,
           SecurityServiceUtil.administerTablesGrants, cc);
+      GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(superUserTablesAuth,
+          SecurityServiceUtil.superUserTablesGrants, cc);
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(synchronizeTablesAuth,
           SecurityServiceUtil.synchronizeTablesGrants, cc);
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataOwnerAuth,
@@ -557,6 +571,7 @@ public class SecurityServiceUtil {
           .getAllPermissionsAssignableGrantedAuthorities(cc.getDatastore(), cc.getCurrentUser());
       authorities.remove(siteAuth.getAuthority());
       authorities.remove(administerTablesAuth.getAuthority());
+      authorities.remove(superUserTablesAuth.getAuthority());
       authorities.remove(synchronizeTablesAuth.getAuthority());
       authorities.remove(dataOwnerAuth.getAuthority());
       authorities.remove(dataViewerAuth.getAuthority());
@@ -573,6 +588,7 @@ public class SecurityServiceUtil {
       Map<UserSecurityInfo, String> pkMap = setUsers(users, cc);
       setUsersOfGrantedAuthority(pkMap, siteAuth, cc);
       setUsersOfGrantedAuthority(pkMap, administerTablesAuth, cc);
+      setUsersOfGrantedAuthority(pkMap, superUserTablesAuth, cc);
       setUsersOfGrantedAuthority(pkMap, synchronizeTablesAuth, cc);
       setUsersOfGrantedAuthority(pkMap, dataOwnerAuth, cc);
       setUsersOfGrantedAuthority(pkMap, dataViewerAuth, cc);
