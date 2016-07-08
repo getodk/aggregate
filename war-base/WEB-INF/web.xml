@@ -224,6 +224,15 @@
 	</servlet-mapping>
 
     <servlet>
+        <servlet-name>get-granted-roles</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.GetGrantedRolesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>get-granted-roles</servlet-name>
+        <url-pattern>/roles/granted</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>manage-passwords</servlet-name>
         <servlet-class>org.opendatakit.aggregate.servlet.UserManagePasswordsServlet</servlet-class>
     </servlet>
