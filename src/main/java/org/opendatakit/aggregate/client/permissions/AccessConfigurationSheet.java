@@ -98,6 +98,7 @@ public class AccessConfigurationSheet extends Composite {
 
   private GroupMembershipColumn formsAdmin;
   private GroupMembershipColumn synchronizeTables;
+  private GroupMembershipColumn superUserTables;
   private GroupMembershipColumn administerTables;
   private GroupMembershipColumn siteAdmin;
 
@@ -183,6 +184,13 @@ public class AccessConfigurationSheet extends Composite {
         }
         return true;
       case GROUP_SYNCHRONIZE_TABLES:
+        if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+            || assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
+         || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+          return false;
+        }
+        return true;
+      case GROUP_SUPER_USER_TABLES:
         if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
         	|| assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
           return false;
@@ -298,6 +306,11 @@ public class AccessConfigurationSheet extends Composite {
         return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
             || assignedGroups.contains(auth);
       case GROUP_SYNCHRONIZE_TABLES:
+        return assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
+            || assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+            || assignedGroups.contains(auth);
+      case GROUP_SUPER_USER_TABLES:
         return assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
             || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
             || assignedGroups.contains(auth);
@@ -349,6 +362,7 @@ public class AccessConfigurationSheet extends Composite {
     ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
     allGroups.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
     allGroups.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
+    allGroups.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
     allGroups.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
     allGroups.add(GrantedAuthorityName.GROUP_FORM_MANAGERS);
     allGroups.add(GrantedAuthorityName.GROUP_DATA_VIEWERS);
@@ -732,12 +746,18 @@ public class AccessConfigurationSheet extends Composite {
       userTable.addColumn(synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
     }
 
+    superUserTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
+    if ( Preferences.getOdkTablesEnabled() ) {
+      userTable.addColumn(superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
+    }
+
     administerTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
     if ( Preferences.getOdkTablesEnabled() ) {
       userTable.addColumn(administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
     }
 
     columnSortHandler.setComparator(synchronizeTables, synchronizeTables.getComparator());
+    columnSortHandler.setComparator(superUserTables, superUserTables.getComparator());
     columnSortHandler.setComparator(administerTables, administerTables.getComparator());
 
     siteAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SITE_ADMINS);
@@ -758,6 +778,20 @@ public class AccessConfigurationSheet extends Composite {
       idxNow = userTable.getColumnIndex(formsAdmin);
       if ( idxNow != -1) {
         userTable.insertColumn(idxNow+1, synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
+        // make idxNow point to the synchronizeTables column
+        ++idxNow; 
+      }
+    } else if ( !isVisible && idxNow != -1) {
+      userTable.removeColumn(idxNow);
+    }
+
+    // insert or remove the superUserTables permissions
+    int idxPrior = idxNow;
+    idxNow = userTable.getColumnIndex(superUserTables);
+    if ( isVisible && idxNow == -1) {
+      idxNow = idxPrior;
+      if ( idxNow != -1) {
+        userTable.insertColumn(idxNow+1, superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
       }
     } else if ( !isVisible && idxNow != -1) {
       userTable.removeColumn(idxNow);
