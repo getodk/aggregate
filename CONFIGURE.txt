@@ -145,10 +145,10 @@ Choose Add...
 
 And register an entry for this URL  https://dl.google.com/eclipse/plugin/4.4
 
-After registering, when it presents available software to install, do not install
+(While this is for Luna, it also supports Mars and Neon). After registering, when it presents available software to install, do not install
 the SDKs. At a minimum, you need to install:
 
-Google Plugin for Eclipse / Google Plugin for Eclipse 4.4/4.5
+Google Plugin for Eclipse / Google Plugin for Eclipse 4.4/4.5/4.6
 
 (you don't need anything else)
 
@@ -199,6 +199,12 @@ By default, when running the AppEngine Development Server, it uses port 8888.
 Be sure that this file has
 
 security.server.port=8888
+
+Also in this file, edit the value for:
+
+security.server.superUserUsername=msundt
+
+To be a username that you will use as your server's privileged super-user.
 
 Save changes.
 
