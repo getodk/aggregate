@@ -42,6 +42,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
 
 /**
@@ -69,6 +71,8 @@ public class DatastoreImpl implements Datastore {
 
   private DatastoreService ds;
 
+  private MemcacheService syncCache;
+
   private StringFieldLengthMapping stringFieldLengthMap = new StringFieldLengthMapping();
   
   private DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
@@ -79,6 +83,14 @@ public class DatastoreImpl implements Datastore {
     
     LogFactory.getLog(DatastoreImpl.class).info("Running on " + 
           ds.getDatastoreAttributes().getDatastoreType().toString() + " datastore");
+    
+    try {
+      syncCache = MemcacheServiceFactory.getMemcacheService();
+    } catch (Throwable t) {
+      // if we can't get a syncCache, that is OK
+      syncCache = null;
+      LogFactory.getLog(DatastoreImpl.class).info("MemcacheService could not be created");
+    }
   }
 
   DatastoreService getDatastoreService() {
@@ -463,6 +475,6 @@ public class DatastoreImpl implements Datastore {
 
   @Override
   public TaskLock createTaskLock(User user) {
-    return new TaskLockImpl(dam);
+    return new TaskLockImpl(dam, syncCache);
   }
 }
