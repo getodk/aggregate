@@ -58,6 +58,7 @@ import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -350,6 +351,10 @@ public class SubmissionServlet extends ServletUtilBase {
       logger.error("Datastore failure - " + e.getMessage());
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.PARSING_PROBLEM);
+    } catch (ODKTaskLockException e) {
+      logger.error("Task lock failure - " + e.getMessage());
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.TASK_LOCK_PROBLEM);
     } catch (FileUploadException e) {
       logger.warn("Attachments parsing failure - " + e.getMessage());
       e.printStackTrace();
