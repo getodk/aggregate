@@ -108,7 +108,6 @@ public class SecurityServiceUtil {
     iadministerTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
     iadministerTablesGrants.add(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name());
     iadministerTablesGrants.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES.name());
-    iadministerTablesGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
     administerTablesGrants = Collections.unmodifiableList(iadministerTablesGrants);
 
 
@@ -116,13 +115,11 @@ public class SecurityServiceUtil {
     isuperUserTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
     isuperUserTablesGrants.add(GrantedAuthorityName.ROLE_SUPER_USER_TABLES.name());
     isuperUserTablesGrants.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
-    isuperUserTablesGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
     superUserTablesGrants = Collections.unmodifiableList(isuperUserTablesGrants);
 
     List<String> isynchronizeTablesGrants = new ArrayList<String>();
     isynchronizeTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
     isynchronizeTablesGrants.add(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name());
-    isynchronizeTablesGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
     synchronizeTablesGrants = Collections.unmodifiableList(isynchronizeTablesGrants);
 
     List<String> idataOwnerGrants = new ArrayList<String>();
