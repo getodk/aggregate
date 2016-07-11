@@ -176,6 +176,7 @@ public class TaskLockImpl implements TaskLock {
           transaction.commit();
         } else {
           transaction.rollback();
+          deleteLockIdMemCache(lockId, formId, taskType);
           System.out
               .println("Rollback obtainLock : " + lockId + " " + formId + " " + taskType.getName());
           // if we fail, sleep, since there must be another server in contention
@@ -280,6 +281,7 @@ public class TaskLockImpl implements TaskLock {
           transaction.commit();
         } else {
           transaction.rollback();
+          deleteLockIdMemCache(lockId, formId, taskType);
           System.out
               .println("Rollback renewLock : " + lockId + " " + formId + " " + taskType.getName());
           // if we fail, sleep, since there must be another server in contention
