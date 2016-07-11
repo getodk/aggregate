@@ -57,6 +57,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -145,10 +146,11 @@ public class SubmissionParser {
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKFormSubmissionsDisabledException
+   * @throws ODKTaskLockException 
    */
   public SubmissionParser(InputStream inputStreamXML, CallingContext cc) throws IOException,
       ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData,
-      ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException {
+      ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
     constructorHelper(inputStreamXML, false, cc);
   }
 
@@ -170,11 +172,12 @@ public class SubmissionParser {
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKFormSubmissionsDisabledException
+   * @throws ODKTaskLockException 
    */
   public SubmissionParser(MultiPartFormData submissionFormParser, boolean isIncomplete,
       CallingContext cc) throws IOException, ODKFormNotFoundException, ODKParseException,
       ODKIncompleteSubmissionData, ODKConversionException, ODKDatastoreException,
-      ODKFormSubmissionsDisabledException {
+      ODKFormSubmissionsDisabledException, ODKTaskLockException {
     if (submissionFormParser == null) {
       // TODO: review best error handling strategy
       throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
@@ -291,10 +294,11 @@ public class SubmissionParser {
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKFormSubmissionsDisabledException
+   * @throws ODKTaskLockException 
    */
   private void constructorHelper(InputStream inputStreamXML, boolean isIncomplete, CallingContext cc)
       throws IOException, ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData,
-      ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException {
+      ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
@@ -368,65 +372,71 @@ public class SubmissionParser {
     if (markedAsCompleteDateString != null && markedAsCompleteDateString.length() != 0) {
       markedAsCompleteDate = WebUtils.parseDate(markedAsCompleteDateString);
     }
-
-    // retrieve the record with this instanceId from the database or
-    // create a new one. This supports submissions having more than
-    // 10MB of attachments. In that case, ODK Collect will post the
-    // submission in multiple parts and Aggregate needs to be able to
-    // merge the parts together. This SHOULD NOT be used to 'update'
-    // an existing submission, only to attach additional binary content
-    // to an already-uploaded submission.
-    boolean preExisting = false;
+    
+    SubmissionLockTemplate modificationLock = new SubmissionLockTemplate(formId, instanceId, cc);
     try {
-      Datastore ds = cc.getDatastore();
-      User user = cc.getCurrentUser();
-      TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement()
-          .getFormDataModel().getBackingObjectPrototype(), instanceId, user);
+      modificationLock.acquire();
+      // retrieve the record with this instanceId from the database or
+      // create a new one. This supports submissions having more than
+      // 10MB of attachments. In that case, ODK Collect will post the
+      // submission in multiple parts and Aggregate needs to be able to
+      // merge the parts together. This SHOULD NOT be used to 'update'
+      // an existing submission, only to attach additional binary content
+      // to an already-uploaded submission.
+      boolean preExisting = false;
       try {
-        submission = new Submission(fi, form, cc);
-      } catch (ODKDatastoreException e) {
-        Log logger = LogFactory.getLog(Submission.class);
-        e.printStackTrace();
-        logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
-            + fi.getTableName() + " uri " + fi.getUri());
-        if ( (e instanceof ODKEntityNotFoundException) ||
-            (e instanceof ODKEnumeratedElementException) ) {
-          // this is a malformed submission...
-          // try to clean this up...
-          DeleteHelper.deleteDamagedSubmission(fi, form.getAllBackingObjects(), cc);
+        Datastore ds = cc.getDatastore();
+        User user = cc.getCurrentUser();
+        TopLevelInstanceData fi = (TopLevelInstanceData) ds.getEntity(form.getTopLevelGroupElement()
+            .getFormDataModel().getBackingObjectPrototype(), instanceId, user);
+        try {
+          submission = new Submission(fi, form, cc);
+        } catch (ODKDatastoreException e) {
+          Log logger = LogFactory.getLog(Submission.class);
+          e.printStackTrace();
+          logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
+              + fi.getTableName() + " uri " + fi.getUri());
+          if ( (e instanceof ODKEntityNotFoundException) ||
+              (e instanceof ODKEnumeratedElementException) ) {
+            // this is a malformed submission...
+            // try to clean this up...
+            DeleteHelper.deleteDamagedSubmission(fi, form.getAllBackingObjects(), cc);
+          }
+          throw e;
         }
-        throw e;
+        preExisting = true;
+        preExistingComplete = submission.isComplete();
+      } catch (ODKEntityNotFoundException e) {
+        submission = new Submission(modelVersion, uiVersion, instanceId, form, submissionDate, cc);
       }
-      preExisting = true;
-      preExistingComplete = submission.isComplete();
-    } catch (ODKEntityNotFoundException e) {
-      submission = new Submission(modelVersion, uiVersion, instanceId, form, submissionDate, cc);
-    }
-
-    topLevelTableKey = submission.getKey();
-
-    Map<String, Integer> repeatGroupIndices = new HashMap<String, Integer>();
-    FormElementModel formRoot = form.getTopLevelGroupElement();
-    // if the submission is pre-existing in the datastore, ONLY update binaries
-    boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission,
-                                                          repeatGroupIndices, preExisting, cc);
-    submission.setIsComplete(uploadAllBinaries);
-    if (uploadAllBinaries) {
-      submission.setMarkedAsCompleteDate(markedAsCompleteDate);
-    }
-    // save the elements inserted into the top-level submission
-    try {
-      submission.persist(cc);
-    } catch (Exception e) {
-      List<EntityKey> keys = new ArrayList<EntityKey>();
-      submission.recursivelyAddEntityKeysForDeletion(keys, cc);
-      keys.add(submission.getKey());
+  
+      topLevelTableKey = submission.getKey();
+  
+      Map<String, Integer> repeatGroupIndices = new HashMap<String, Integer>();
+      FormElementModel formRoot = form.getTopLevelGroupElement();
+      // if the submission is pre-existing in the datastore, ONLY update binaries
+      boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission,
+                                                            repeatGroupIndices, preExisting, cc);
+      submission.setIsComplete(uploadAllBinaries);
+      if (uploadAllBinaries) {
+        submission.setMarkedAsCompleteDate(markedAsCompleteDate);
+      }
+      // save the elements inserted into the top-level submission
       try {
-        DeleteHelper.deleteEntities(keys, cc);
-      } catch (Exception ex) {
-        // ignore... we are rolling back...
+        submission.persist(cc);
+      } catch (Exception e) {
+        List<EntityKey> keys = new ArrayList<EntityKey>();
+        submission.recursivelyAddEntityKeysForDeletion(keys, cc);
+        keys.add(submission.getKey());
+        try {
+          DeleteHelper.deleteEntities(keys, cc);
+        } catch (Exception ex) {
+          // ignore... we are rolling back...
+        }
+        throw new ODKDatastoreException("Unable to persist data", e);
       }
-      throw new ODKDatastoreException("Unable to persist data", e);
+    } finally {
+      modificationLock.release();
     }
   }
 

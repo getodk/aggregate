@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.FormConsts;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -69,40 +70,44 @@ public class FormsSubTab extends AggregateSubTabBase {
 
   @Override
   public void update() {
-    // Set up the callback object.
-    AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_DATA_VIEWER)) {
 
-      public void onSuccess(ArrayList<FormSummary> forms) {
-        AggregateUI.getUI().clearError();
-        boolean resizeFormTable = false;
-        boolean newShowEnketoIntegration = Preferences.showEnketoIntegration();
-        if ( newShowEnketoIntegration != showEnketoIntegration ) {
-          resizeFormTable = true;
-          FormTable t = listOfForms;
-          @SuppressWarnings("unused")
-          boolean success = true;
-          if ( t != null ) {
-            listOfForms = null;
-            success = remove(t);
+      // Set up the callback object.
+      AsyncCallback<ArrayList<FormSummary>> callback = new AsyncCallback<ArrayList<FormSummary>>() {
+        public void onFailure(Throwable caught) {
+          AggregateUI.getUI().reportError(caught);
+        }
+  
+        public void onSuccess(ArrayList<FormSummary> forms) {
+          AggregateUI.getUI().clearError();
+          boolean resizeFormTable = false;
+          boolean newShowEnketoIntegration = Preferences.showEnketoIntegration();
+          if ( newShowEnketoIntegration != showEnketoIntegration ) {
+            resizeFormTable = true;
+            FormTable t = listOfForms;
+            @SuppressWarnings("unused")
+            boolean success = true;
+            if ( t != null ) {
+              listOfForms = null;
+              success = remove(t);
+            }
+            showEnketoIntegration = newShowEnketoIntegration;
+            listOfForms = new FormTable();
+            listOfForms.getElement().setId("form_management_table");
+            add(listOfForms);
           }
-          showEnketoIntegration = newShowEnketoIntegration;
-          listOfForms = new FormTable();
-          listOfForms.getElement().setId("form_management_table");
-          add(listOfForms);
+          listOfForms.updateFormTable(forms);
+          if ( resizeFormTable ) {
+            // we need to force FormTable to be full width
+            AggregateUI.resize();
+          }
         }
-        listOfForms.updateFormTable(forms);
-        if ( resizeFormTable ) {
-          // we need to force FormTable to be full width
-          AggregateUI.resize();
-        }
-      }
-    };
-
-    // Make the call to the form service.
-    SecureGWT.getFormService().getForms(callback);
+      };
+  
+      // Make the call to the form service.
+      SecureGWT.getFormService().getForms(callback);
+    }
 
   }
 

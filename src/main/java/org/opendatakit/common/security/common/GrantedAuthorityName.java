@@ -47,6 +47,7 @@ public enum GrantedAuthorityName implements Serializable {
 	ROLE_DATA_VIEWER("required to view submissions and to generate csv and kml files and download them"),
 	ROLE_DATA_OWNER("required to upload new xforms, upload modifications to existing xforms, configure external services and data publishing, and to delete xforms or thier data"),
    ROLE_SYNCHRONIZE_TABLES("required to synchronize (download, upload and modify ODK Tables data)"),
+   ROLE_SUPER_USER_TABLES("required to administer row-level permissions in ODK Tables"),
    ROLE_ADMINISTER_TABLES("required to administer ODK Tables"),
 	ROLE_SITE_ACCESS_ADMIN("required for the permissions-management pages, including the registered users, group access rights, and user membership in groups"),
 
@@ -54,8 +55,9 @@ public enum GrantedAuthorityName implements Serializable {
 	GROUP_DATA_VIEWERS("Data Viewer"),
    GROUP_FORM_MANAGERS("Form Manager"),
    GROUP_SYNCHRONIZE_TABLES("Synchronize Tables"),
+   GROUP_SUPER_USER_TABLES("Tables Super-user"),
    GROUP_ADMINISTER_TABLES("Administer Tables"),
-	GROUP_SITE_ADMINS("Site Administrator")
+   GROUP_SITE_ADMINS("Site Administrator")
 	;
 
 	private String displayText;

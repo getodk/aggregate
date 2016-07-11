@@ -229,10 +229,12 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
     Collection<? extends GrantedAuthority> roles = rh.getReachableGrantedAuthorities(grants);
     boolean hasSynchronize = roles.contains(new SimpleGrantedAuthority(
         GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name()));
+    boolean hasSuperUser = roles.contains(new SimpleGrantedAuthority(
+        GrantedAuthorityName.ROLE_SUPER_USER_TABLES.name()));
     boolean hasAdminister = roles.contains(new SimpleGrantedAuthority(
         GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name()));
 
-    if (hasSynchronize || hasAdminister) {
+    if (hasSynchronize || hasSuperUser || hasAdminister) {
 
       String uriForUser = null;
       String externalUID = null;
