@@ -387,12 +387,13 @@ public class AggregateUI implements EntryPoint {
     AdminTabUI admin = new AdminTabUI(this);
     addTabToDatastructures(admin, Tabs.ADMIN);
 
-    // Create the only tab that ALL users can see sub menu navigation
-    mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
-    mainNav.getElement().getFirstChildElement().getFirstChildElement()
-        .addClassName("tab_measure_1");
-
     if (userInfo != null) {
+      if (authorizedForTab(Tabs.SUBMISSIONS)) {
+	    mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
+       // If this is visible, mark it as the tab to use to size the screen
+	    mainNav.getElement().getFirstChildElement().getFirstChildElement()
+	        .addClassName("tab_measure_1");
+      }
 
       if (authorizedForTab(Tabs.MANAGEMENT)) {
         mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
@@ -401,6 +402,11 @@ public class AggregateUI implements EntryPoint {
 
       if (authorizedForTab(Tabs.ODKTABLES)) {
     	  mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
+    	  if ( !authorizedForTab(Tabs.SUBMISSIONS) ) {
+          // If submissions is not visible, mark it as the tab to use to size the screen
+  		    mainNav.getElement().getFirstChildElement().getFirstChildElement()
+    	        .addClassName("tab_measure_1");
+    	  }
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
@@ -575,7 +581,8 @@ public class AggregateUI implements EntryPoint {
       return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
     case ODKTABLES:
     	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) ||
-             userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES);
+    		   userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SUPER_USER_TABLES) ||
+               userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES);
     default:
       return false;
     }

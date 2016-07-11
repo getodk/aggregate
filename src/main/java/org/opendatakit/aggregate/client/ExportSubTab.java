@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.client.table.ExportTable;
 import org.opendatakit.aggregate.constants.common.ExportConsts;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -45,20 +46,23 @@ public class ExportSubTab extends AggregateSubTabBase {
 
   @Override
   public void update() {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_DATA_VIEWER)) {
 
-    AsyncCallback<ArrayList<ExportSummary>> callback = new AsyncCallback<ArrayList<ExportSummary>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
-
-      @Override
-      public void onSuccess(ArrayList<ExportSummary> result) {
-        exportTable.updateExportPanel(result);
-      }
-    };
-
-    SecureGWT.getFormService().getExports(callback);
+      AsyncCallback<ArrayList<ExportSummary>> callback = new AsyncCallback<ArrayList<ExportSummary>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          AggregateUI.getUI().reportError(caught);
+        }
+  
+        @Override
+        public void onSuccess(ArrayList<ExportSummary> result) {
+          exportTable.updateExportPanel(result);
+        }
+      };
+  
+      SecureGWT.getFormService().getExports(callback);
+    }
   }
 
   @Override
