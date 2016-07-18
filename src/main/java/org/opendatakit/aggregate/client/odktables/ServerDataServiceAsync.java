@@ -28,8 +28,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface ServerDataServiceAsync {
 
-  void getRows(String tableId, AsyncCallback<ArrayList<RowClient>> callback);
-
   void getRow(String tableId, String rowId, AsyncCallback<TableContentsClient> callback);
 
   void createOrUpdateRow(String tableId, String rowId, RowClient row,
@@ -41,7 +39,7 @@ public interface ServerDataServiceAsync {
 
   void getFileRowInfoColumnNames(AsyncCallback<ArrayList<String>> callback);
 
-  void getTableContents(String tableId, AsyncCallback<TableContentsClient> callback);
+  void getTableContents(String tableId, String resumeCursor, AsyncCallback<TableContentsClient> callback);
 
   void getAppLevelFileInfoContents(AsyncCallback<TableContentsForFilesClient> callback);
 

@@ -65,6 +65,7 @@ import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.ermodel.BlobEntitySet;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -88,8 +89,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
 	 */
   private static final long serialVersionUID = -5051558217315955180L;
 
-  @Override
-  public ArrayList<RowClient> getRows(String tableId) throws AccessDeniedException,
+  private WebsafeRows getRows(String tableId, QueryResumePoint resumePoint) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -98,20 +98,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
       String appId = ServerPreferencesProperties.getOdkTablesAppId(cc);
       DataManager dm = new DataManager(appId, tableId, userPermissions, cc);
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      // TODO: paginate this
-      WebsafeRows websafeResult = dm.getRows(null, 2000);
-      List<Row> rows = websafeResult.rows;
-      return transformRows(rows);
+      return dm.getRows(resumePoint, 100);
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
       throw new EntityNotFoundExceptionClient(e);
@@ -150,6 +137,11 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       ArrayList<RowClient> rows = new ArrayList<RowClient>();
       rows.add(UtilTransforms.transform(row));
       tcc.rows = rows;
+      tcc.websafeBackwardCursor = null;
+      tcc.websafeRefetchCursor = null;
+      tcc.websafeResumeCursor = null;
+      tcc.hasMore = false;
+      tcc.hasPrior = false;
       return tcc;
     } catch (ODKEntityNotFoundException e) {
       e.printStackTrace();
@@ -335,12 +327,22 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
   }
 
   @Override
-  public TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
+  public TableContentsClient getTableContents(String tableId, String resumeCursor) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
     TableContentsClient tcc = new TableContentsClient();
-    tcc.rows = getRows(tableId);
+    
+    WebsafeRows websafeResult = getRows(tableId, 
+    		QueryResumePoint.fromWebsafeCursor(resumeCursor));
+    List<Row> rows = websafeResult.rows;
+    tcc.rows = transformRows(rows);
     tcc.columnNames = getColumnNames(tableId);
+    tcc.websafeBackwardCursor = websafeResult.websafeBackwardCursor;
+    tcc.websafeRefetchCursor = websafeResult.websafeRefetchCursor;
+    tcc.websafeResumeCursor = websafeResult.websafeResumeCursor;
+    tcc.hasMore = websafeResult.hasMore;
+    tcc.hasPrior = websafeResult.hasPrior;
+
     return tcc;
   }
 
