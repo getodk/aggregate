@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
+import org.opendatakit.aggregate.client.widgets.OdkTablesAdvanceRowsButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -64,6 +65,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
   private final ArrayList<TableEntryClient> currentTables;
   // the box that shows the data
   private OdkTablesViewTable tableData;
+  private OdkTablesAdvanceRowsButton tableAdvanceButton;
 
   // whether or not to display the deleted rows
   // private Boolean displayDeleted;
@@ -106,7 +108,9 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
     });
 
     tableData = new OdkTablesViewTable(this);
-
+    tableAdvanceButton = new OdkTablesAdvanceRowsButton(tableData);
+    tableData.setAdvanceButton(tableAdvanceButton);
+    
     selectTablePanel = new FlexTable();
     selectTablePanel.getElement().setId("select_table_panel");
     selectTablePanel.setHTML(0, 0, "<h2 id=\"table_name\"> Select a Table </h2>");
@@ -167,7 +171,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
   public void update() {
     parent.update(this);
   }
-
+  
   public boolean addTablesToListBox(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
     if (currentTables.size() == tables.size() && !tableListChanged
         && currentTables.containsAll(tables)) {
@@ -210,6 +214,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
       selectTablePanel.setHTML(1, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
       selectTablePanel.setHTML(1, 1, "<h2 id=\table_name\"> " + currentTable.getTableId()
           + " </h2>");
+      selectTablePanel.setWidget(1,  2, tableAdvanceButton);
       add(tableData);
     }
   }
