@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.odktables.rest.ElementType;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
@@ -200,33 +201,25 @@ public class EntityConverter {
     return fields;
   }
 
-  public Scope getDbLogTableFilterScope(Entity entity) {
+  public static RowFilterScope getDbLogTableRowFilterScope(Entity entity) {
     String filterType = entity.getString(DbLogTable.FILTER_TYPE);
     if (filterType != null) {
-      Scope.Type type = Scope.Type.valueOf(filterType);
-      if (filterType.equals(Scope.Type.DEFAULT)) {
-        return new Scope(Scope.Type.DEFAULT, null);
-      } else {
-        String value = entity.getString(DbLogTable.FILTER_VALUE);
-        return new Scope(type, value);
-      }
+      RowFilterScope.Type type = RowFilterScope.Type.valueOf(filterType);
+      String value = entity.getString(DbLogTable.FILTER_VALUE);
+      return new RowFilterScope(type, value);
     } else {
-      return Scope.EMPTY_SCOPE;
+      return RowFilterScope.EMPTY_ROW_FILTER;
     }
   }
 
-  public Scope getDbTableFilterScope(Entity entity) {
+  public static RowFilterScope getDbTableRowFilterScope(Entity entity) {
     String filterType = entity.getString(DbTable.FILTER_TYPE);
     if (filterType != null) {
-      Scope.Type type = Scope.Type.valueOf(filterType);
-      if (filterType.equals(Scope.Type.DEFAULT)) {
-        return new Scope(Scope.Type.DEFAULT, null);
-      } else {
-        String value = entity.getString(DbTable.FILTER_VALUE);
-        return new Scope(type, value);
-      }
+		RowFilterScope.Type type = RowFilterScope.Type.valueOf(filterType);
+		String value = entity.getString(DbTable.FILTER_VALUE);
+		return new RowFilterScope(type, value);
     } else {
-      return Scope.EMPTY_SCOPE;
+      return RowFilterScope.EMPTY_ROW_FILTER;
     }
   }
 
@@ -263,7 +256,7 @@ public class EntityConverter {
     row.setDataETagAtModification(entity.getString(DbTable.DATA_ETAG_AT_MODIFICATION));
     row.setCreateUser(entity.getString(DbTable.CREATE_USER));
     row.setLastUpdateUser(entity.getString(DbTable.LAST_UPDATE_USER));
-    row.setFilterScope(getDbTableFilterScope(entity));
+    row.setRowFilterScope(getDbTableRowFilterScope(entity));
     row.setDeleted(entity.getBoolean(DbTable.DELETED));
 
     row.setFormId(entity.getString(DbTable.FORM_ID));
@@ -294,7 +287,7 @@ public class EntityConverter {
     row.setLastUpdateUser(entity.getString(DbLogTable.LAST_UPDATE_USER));
     row.setDeleted(entity.getBoolean(DbLogTable.DELETED));
 
-    row.setFilterScope(getDbLogTableFilterScope(entity));
+    row.setRowFilterScope(getDbLogTableRowFilterScope(entity));
     row.setFormId(entity.getString(DbLogTable.FORM_ID));
     row.setLocale(entity.getString(DbLogTable.LOCALE));
     row.setSavepointType(entity.getString(DbLogTable.SAVEPOINT_TYPE));
