@@ -23,6 +23,7 @@ import java.util.List;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
 /**
@@ -56,7 +57,7 @@ public class SyncRow {
   /**
    * Filtering field
    */
-  private Scope filterScope;
+  private RowFilterScope filterScope;
 
   /**
    * The savepoint type of the file.
@@ -79,7 +80,7 @@ public class SyncRow {
 
   public SyncRow(final String rowId, final String rowETag, final boolean deleted,
       final String formId, final String locale, final String savepointType,
-      final String savepointTimestamp, final String savepointCreator, final Scope filterScope,
+      final String savepointTimestamp, final String savepointCreator, final RowFilterScope filterScope,
       final ArrayList<DataKeyValue> values, final ArrayList<ColumnDefinition> fileAttachmentColumns) {
     this.rowId = rowId;
     this.rowETag = rowETag;
@@ -174,11 +175,11 @@ public class SyncRow {
     this.locale = locale;
   }
 
-  public Scope getFilterScope() {
+  public RowFilterScope getFilterScope() {
     return filterScope;
   }
 
-  public void setFilterScope(Scope filterScope) {
+  public void setFilterScope(RowFilterScope filterScope) {
     this.filterScope = filterScope;
   }
 

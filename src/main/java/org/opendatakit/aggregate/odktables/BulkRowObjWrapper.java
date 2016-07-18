@@ -1,9 +1,9 @@
 package org.opendatakit.aggregate.odktables;
 
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome.OutcomeType;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.PersistenceUtils;
 
@@ -12,7 +12,7 @@ class BulkRowObjWrapper {
   private Entity entity;
   private RowOutcome outcome;
   
-  private Scope filterScope;
+  private RowFilterScope rowFilterScope;
   
   private boolean newRowId;
   private boolean nullIncomingScope;
@@ -26,11 +26,11 @@ class BulkRowObjWrapper {
       row.setRowId(PersistenceUtils.newUri());
     }
     nullIncomingScope = false;
-    filterScope = row.getFilterScope();
-    if (filterScope == null) {
+    rowFilterScope = row.getRowFilterScope();
+    if (rowFilterScope == null) {
       nullIncomingScope = true;
-      filterScope = Scope.EMPTY_SCOPE;
-      row.setFilterScope(filterScope);
+      rowFilterScope = RowFilterScope.EMPTY_ROW_FILTER;
+      row.setRowFilterScope(rowFilterScope);
     }
   }
 
@@ -54,7 +54,7 @@ class BulkRowObjWrapper {
       }
       if (nullIncomingScope) {
         // restore to null.
-        row.setFilterScope(null);
+        row.setRowFilterScope(null);
       }
     }
     RowOutcome newOutcome = new RowOutcome(row);
@@ -81,8 +81,21 @@ class BulkRowObjWrapper {
     return row.getRowId();
   }
 
-  public Scope getFilterScope() {
-    return filterScope;
+  public RowFilterScope getRowFilterScope() {
+    return rowFilterScope;
+  }
+
+  /**
+   * Should only be called if the request didn't specify a rowFilterScope
+   * 
+   * @param rowFilterScope
+   */
+  public void setRowFilterScope(RowFilterScope rowFilterScope) {
+    if ( !nullIncomingScope ) {
+      throw new IllegalStateException("Should not be called");
+    }
+    this.rowFilterScope = rowFilterScope;
+    row.setRowFilterScope(rowFilterScope);
   }
 
   public boolean hasNewRowId() {

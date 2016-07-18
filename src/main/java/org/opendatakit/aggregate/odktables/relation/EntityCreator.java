@@ -32,6 +32,7 @@ import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo.DbTableFileI
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
@@ -205,7 +206,7 @@ public class EntityCreator {
 
   public void setRowFields(Entity row, String rowETag, String dataETagAtModification,
       String lastUpdateUser, boolean deleted,
-      Scope filterScope, String formId, String locale, String savepointType,
+      RowFilterScope rowFilterScope, String formId, String locale, String savepointType,
       String savepointTimestamp, String savepointCreator, ArrayList<DataKeyValue> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_ETAG, rowETag);
@@ -213,19 +214,12 @@ public class EntityCreator {
     row.set(DbTable.LAST_UPDATE_USER, lastUpdateUser);
     row.set(DbTable.DELETED, deleted);
 
-    // if filterScope is null, don't change the value
-    // if filterScope is the empty scope, set both filter type and value to null
-    // if filterScope is the default scope, make sure filter value is null
-    // else set both filter type and value to the values in filterScope
-    if (filterScope != null) {
-      Scope.Type filterType = filterScope.getType();
-      String filterValue = filterScope.getValue();
+    // if filterScope is null, this is an error. Expect at least the FILTER_TYPE to be non-null.
+    if (rowFilterScope != null) {
+      RowFilterScope.Type filterType = rowFilterScope.getType();
+      String filterValue = rowFilterScope.getValue();
       if (filterType == null) {
-        row.set(DbTable.FILTER_TYPE, (String) null);
-        row.set(DbTable.FILTER_VALUE, (String) null);
-      } else if (filterType.equals(Scope.Type.DEFAULT)) {
-        row.set(DbTable.FILTER_TYPE, filterType.name());
-        row.set(DbTable.FILTER_VALUE, (String) null);
+        throw new IllegalArgumentException("Unexpected null filterType in row");
       } else {
         row.set(DbTable.FILTER_TYPE, filterType.name());
         row.set(DbTable.FILTER_VALUE, filterValue);

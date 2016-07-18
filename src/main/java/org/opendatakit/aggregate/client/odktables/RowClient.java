@@ -35,7 +35,7 @@ public class RowClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = -3396839962551463L;
+  private static final long serialVersionUID = -339683962551463L;
 
   private String rowId;
 
@@ -47,7 +47,7 @@ public class RowClient implements Serializable {
 
   private String lastUpdateUser;
 
-  private ScopeClient filterScope;
+  private RowFilterScopeClient rowFilterScope;
 
   private String formId;
 
@@ -58,6 +58,8 @@ public class RowClient implements Serializable {
   private String savepointTimestampIso8601Date;
 
   private String savepointCreator;
+  
+  private String dataETagAtModification;
 
   private HashMap<String,String> values;
 
@@ -71,7 +73,7 @@ public class RowClient implements Serializable {
     RowClient row = new RowClient();
     row.rowId = rowId;
     row.values = values;
-    row.filterScope = ScopeClient.EMPTY_SCOPE;
+    row.rowFilterScope = RowFilterScopeClient.EMPTY_ROW_FILTER_SCOPE;
     return row;
   }
 
@@ -96,12 +98,13 @@ public class RowClient implements Serializable {
     this.deleted = false;
     this.createUser = null;
     this.lastUpdateUser = null;
-    this.filterScope = null;
+    this.rowFilterScope = null;
     this.savepointType = null;
     this.formId = null;
     this.locale = null;
     this.savepointTimestampIso8601Date = null;
     this.savepointCreator = null;
+    this.dataETagAtModification = null;
     this.values = new HashMap<String,String>();
   }
 
@@ -111,12 +114,13 @@ public class RowClient implements Serializable {
     this.deleted = r.deleted;
     this.createUser = r.createUser;
     this.lastUpdateUser = r.lastUpdateUser;
-    this.filterScope = r.filterScope;
+    this.rowFilterScope = r.rowFilterScope;
     this.savepointType = r.savepointType;
     this.formId = r.formId;
     this.locale = r.locale;
     this.savepointTimestampIso8601Date = r.savepointTimestampIso8601Date;
     this.savepointCreator = r.savepointCreator;
+    this.dataETagAtModification = r.dataETagAtModification;
     this.values = r.values;
   }
 
@@ -140,8 +144,8 @@ public class RowClient implements Serializable {
     return lastUpdateUser;
   }
 
-  public ScopeClient getFilterScope() {
-    return filterScope;
+  public RowFilterScopeClient getRowFilterScope() {
+    return rowFilterScope;
   }
 
   public HashMap<String,String> getValues() {
@@ -167,6 +171,10 @@ public class RowClient implements Serializable {
   public String getSavepointTimestampIso8601Date() {
     return this.savepointTimestampIso8601Date;
   }
+  
+  public String getDataETagAtModification() {
+    return this.dataETagAtModification;
+  }
 
   public void setRowId(final String rowId) {
     this.rowId = rowId;
@@ -188,8 +196,8 @@ public class RowClient implements Serializable {
     this.lastUpdateUser = lastUpdateUser;
   }
 
-  public void setFilterScope(ScopeClient filterScope) {
-    this.filterScope = filterScope;
+  public void setRowFilterScope(RowFilterScopeClient rowFilterScope) {
+    this.rowFilterScope = rowFilterScope;
   }
 
   public void setValues(final HashMap<String,String> values) {
@@ -221,6 +229,10 @@ public class RowClient implements Serializable {
     this.savepointTimestampIso8601Date = savepointTimestampIso8601Date;
   }
 
+  public void setDataETagAtModification(String dataETagAtModification) {
+    this.dataETagAtModification = dataETagAtModification;
+  }
+  
   /*
    * (non-Javadoc)
    *
@@ -235,12 +247,13 @@ public class RowClient implements Serializable {
     result = prime * result + (deleted ? 1231 : 1237);
     result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
     result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
-    result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
+    result = prime * result + ((rowFilterScope == null) ? 0 : rowFilterScope.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
     result = prime * result + ((savepointType == null) ? 0 : savepointType.hashCode());
     result = prime * result + ((savepointTimestampIso8601Date == null) ? 0 : savepointTimestampIso8601Date.hashCode());
     result = prime * result + ((savepointCreator == null) ? 0 : savepointCreator.hashCode());
+    result = prime * result + ((dataETagAtModification == null) ? 0 : dataETagAtModification.hashCode());
     result = prime * result + ((values == null) ? 0 : values.hashCode());
     return result;
   }
@@ -293,10 +306,10 @@ public class RowClient implements Serializable {
     } else if (!lastUpdateUser.equals(other.lastUpdateUser))
       return false;
 
-    if (filterScope == null) {
-      if (other.filterScope != null)
+    if (rowFilterScope == null) {
+      if (other.rowFilterScope != null)
         return false;
-    } else if (!filterScope.equals(other.filterScope))
+    } else if (!rowFilterScope.equals(other.rowFilterScope))
       return false;
 
     if (formId == null) {
@@ -316,11 +329,17 @@ public class RowClient implements Serializable {
         return false;
     } else if (!savepointType.equals(other.savepointType))
       return false;
-
+    
     if (savepointTimestampIso8601Date == null) {
       if (other.savepointTimestampIso8601Date != null)
         return false;
     } else if (!savepointTimestampIso8601Date.equals(other.savepointTimestampIso8601Date))
+      return false;
+
+    if (dataETagAtModification == null) {
+      if (other.dataETagAtModification != null)
+        return false;
+    } else if (!dataETagAtModification.equals(other.dataETagAtModification))
       return false;
 
     if (savepointCreator == null) {
@@ -355,8 +374,8 @@ public class RowClient implements Serializable {
     builder.append(createUser);
     builder.append(", lastUpdateUser=");
     builder.append(lastUpdateUser);
-    builder.append(", filterScope=");
-    builder.append(filterScope);
+    builder.append(", rowFilterScope=");
+    builder.append(rowFilterScope.toString());
     builder.append(", formId=");
     builder.append(formId);
     builder.append(", locale=");
@@ -367,6 +386,8 @@ public class RowClient implements Serializable {
     builder.append(savepointTimestampIso8601Date);
     builder.append(", savepointCreator=");
     builder.append(savepointCreator);
+    builder.append(", dataETagAtModification=");
+    builder.append(dataETagAtModification);
     builder.append(", values=");
     builder.append(values);
     builder.append("]");

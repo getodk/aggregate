@@ -56,21 +56,24 @@ public class OdkTablesViewTable extends FlexTable {
   private static final String DELETE_ROW_HEADING = "Delete";
 
   // these are far right
-  private static final String SAVEPOINT_TYPE = "Status";
+  private static final String SAVEPOINT_TYPE = "Savepoint Type";
   private static final String FORM_ID = "Form Id";
   private static final String LOCALE = "Locale";
-  private static final String SAVEPOINT_TIMESTAMP = "Last Updated At";
-  private static final String SAVEPOINT_CREATOR = "Last Updated By";
+  private static final String SAVEPOINT_TIMESTAMP = "Savepoint Timestamp";
+  private static final String SAVEPOINT_CREATOR = "Savepoint Creator";
   private static final String ROW_ID = "Row ID";
   private static final String ROW_ETAG = "Row ETag";
   private static final String FILTER_TYPE = "Filter Type";
   private static final String FILTER_VALUE = "Filter Value";
+  private static final String DATA_ETAG_AT_MODIFICATION = "Changeset Data ETag";
+  private static final String LAST_UPDATE_USER = "Last Update By Verified User";
+  private static final String CREATED_BY_USER = "Created By Verified User";
 
   private AggregateSubTabBase tableSubTab;
 
   // this is the number of columns that exist for a table as returned
   // by the server that are NOT user defined.
-  private static final int NUMBER_ADMIN_COLUMNS = 10;
+  private static final int NUMBER_ADMIN_COLUMNS = 13;
 
   // the message to display when there is no data in the table.
   private static String NO_DATA_MESSAGE = "There is no data in this table.";
@@ -263,6 +266,10 @@ public class OdkTablesViewTable extends FlexTable {
       setText(0, i++, ROW_ETAG);
       setText(0, i++, FILTER_TYPE);
       setText(0, i++, FILTER_VALUE);
+      setText(0, i++, LAST_UPDATE_USER);
+      setText(0, i++, CREATED_BY_USER);
+      setText(0, i++, DATA_ETAG_AT_MODIFICATION);
+
 
       getRowFormatter().addStyleName(0, "titleBar");
     }
@@ -323,8 +330,11 @@ public class OdkTablesViewTable extends FlexTable {
           setWidget(currentRow, j++, new HTML(row.getSavepointCreator()));
           setWidget(currentRow, j++, new HTML(row.getRowId()));
           setWidget(currentRow, j++, new HTML(row.getRowETag()));
-          setWidget(currentRow, j++, new HTML(row.getFilterScope().getType().name()));
-          setWidget(currentRow, j++, new HTML(row.getFilterScope().getValue()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getType().name()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getValue()));
+          setWidget(currentRow, j++, new HTML(row.getLastUpdateUser()));
+          setWidget(currentRow, j++, new HTML(row.getCreateUser()));
+          setWidget(currentRow, j++, new HTML(row.getDataETagAtModification()));
 
           if (currentRow % 2 == 0) {
             getRowFormatter().addStyleName(currentRow, "evenTableRow");
