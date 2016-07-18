@@ -1,6 +1,5 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
