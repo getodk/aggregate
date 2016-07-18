@@ -35,7 +35,7 @@ public class TableContentsClient implements Serializable {
   /**
    *
    */
-  private static final long serialVersionUID = -61478297837108751L;
+  private static final long serialVersionUID = -6147829783718751L;
 
   public TableContentsClient() {
     // necessary for gwt serialization
@@ -50,5 +50,12 @@ public class TableContentsClient implements Serializable {
    * The names of the table's columns.
    */
   public ArrayList<String> columnNames;
+  
+  
+  public String websafeRefetchCursor;
+  public String websafeBackwardCursor;
+  public String websafeResumeCursor;
+  public boolean hasMore;
+  public boolean hasPrior;
 
 }

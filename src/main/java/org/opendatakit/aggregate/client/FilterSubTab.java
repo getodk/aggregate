@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.client;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.FilterNavigationTable;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
 import org.opendatakit.aggregate.constants.common.FilterConsts;
@@ -27,7 +26,6 @@ import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 

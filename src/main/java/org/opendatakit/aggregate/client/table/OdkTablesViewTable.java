@@ -27,6 +27,7 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.TableContentsClient;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
+import org.opendatakit.aggregate.client.widgets.OdkTablesAdvanceRowsButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteRowButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
@@ -51,26 +52,35 @@ public class OdkTablesViewTable extends FlexTable {
 
   // that table's column names
   private ArrayList<String> columnNames;
+  
+  private String refreshCursor;
+  private String resumeCursor;
+  private boolean hasMore;
 
   // this is the heading for the delete row button.
   private static final String DELETE_ROW_HEADING = "Delete";
 
   // these are far right
-  private static final String SAVEPOINT_TYPE = "Status";
+  private static final String SAVEPOINT_TYPE = "Savepoint Type";
   private static final String FORM_ID = "Form Id";
   private static final String LOCALE = "Locale";
-  private static final String SAVEPOINT_TIMESTAMP = "Last Updated At";
-  private static final String SAVEPOINT_CREATOR = "Last Updated By";
+  private static final String SAVEPOINT_TIMESTAMP = "Savepoint Timestamp";
+  private static final String SAVEPOINT_CREATOR = "Savepoint Creator";
   private static final String ROW_ID = "Row ID";
   private static final String ROW_ETAG = "Row ETag";
   private static final String FILTER_TYPE = "Filter Type";
   private static final String FILTER_VALUE = "Filter Value";
+  private static final String DATA_ETAG_AT_MODIFICATION = "Changeset Data ETag";
+  private static final String LAST_UPDATE_USER = "Last Update By Verified User";
+  private static final String CREATED_BY_USER = "Created By Verified User";
 
   private AggregateSubTabBase tableSubTab;
 
+  private OdkTablesAdvanceRowsButton tableAdvanceButton;
+  
   // this is the number of columns that exist for a table as returned
   // by the server that are NOT user defined.
-  private static final int NUMBER_ADMIN_COLUMNS = 10;
+  private static final int NUMBER_ADMIN_COLUMNS = 13;
 
   // the message to display when there is no data in the table.
   private static String NO_DATA_MESSAGE = "There is no data in this table.";
@@ -90,6 +100,9 @@ public class OdkTablesViewTable extends FlexTable {
 
     // no current table.
     this.currentTable = null;
+    this.refreshCursor = null;
+    this.resumeCursor = null;
+    this.hasMore = false;
   }
 
   public OdkTablesViewTable(AggregateSubTabBase tableSubTab,
@@ -100,18 +113,34 @@ public class OdkTablesViewTable extends FlexTable {
 
     this.currentTable = table;
   }
-
+  
+  public void setAdvanceButton(OdkTablesAdvanceRowsButton tableAdvanceButton) {
+    this.tableAdvanceButton = tableAdvanceButton;
+    if ( this.tableAdvanceButton != null ) {
+      this.tableAdvanceButton.setEnabled(hasMore);
+    }
+  }
+  
   /**
    * This updates the display to show the contents of the table.
    */
   public void updateDisplay(TableEntryClient table) {
-    @SuppressWarnings("unused")
     TableEntryClient oldTable = this.currentTable;
 
     // for testing timing
     // Window.alert("in odktablesViewTable.updateDisplay()");
 
     this.currentTable = table;
+    
+    if ( oldTable == null || currentTable == null ||
+         !oldTable.getTableId().equals(currentTable.getTableId()) ) {
+      this.refreshCursor = null;
+      this.resumeCursor = null;
+      this.hasMore = false;
+      if ( tableAdvanceButton != null ) {
+        this.tableAdvanceButton.setEnabled(hasMore);
+      }
+    }
 
     if (table == null) {
       this.removeAllRows();
@@ -123,61 +152,56 @@ public class OdkTablesViewTable extends FlexTable {
 
   }
 
+  // set up the callback object
+  AsyncCallback<TableContentsClient> getDataCallback =
+      new AsyncCallback<TableContentsClient>() {
+    @Override
+    public void onFailure(Throwable caught) {
+      if (caught instanceof EntityNotFoundExceptionClient) {
+        // if this happens it is PROBABLY, but not necessarily, because
+        // we've deleted the table.
+        // TODO ensure the correct exception makes it here
+        ((OdkTablesViewTableSubTab) AggregateUI.getUI()
+            .getSubTab(SubTabs.VIEWTABLE)).setTabToDisplayZero();
+      } else if (caught instanceof PermissionDeniedExceptionClient) {
+        // do nothing, b/c it's probably legitimate that you don't get an
+        // error if there are rows you're not allowed to see.
+
+      } else {
+        AggregateUI.getUI().reportError(caught);
+      }
+    }
+
+    @Override
+    public void onSuccess(TableContentsClient tcc) {
+      columnNames = tcc.columnNames;
+      refreshCursor = tcc.websafeRefetchCursor;
+      resumeCursor = tcc.websafeResumeCursor;
+      hasMore = tcc.hasMore;
+      if ( tableAdvanceButton != null ) {
+        tableAdvanceButton.setEnabled(hasMore);
+      }
+      setColumnHeadings(columnNames);
+
+      rows = tcc.rows;
+      setRows(rows);
+
+    }
+  };
+
+  public void nextPage() {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
+        .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) && hasMore) {
+      SecureGWT.getServerDataService().getTableContents(currentTable.getTableId(), resumeCursor,
+        getDataCallback);
+    }
+  }
+  
   public void updateData(TableEntryClient table) {
-    // set up the callback object
-    AsyncCallback<TableContentsClient> getDataCallback =
-        new AsyncCallback<TableContentsClient>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        if (caught instanceof EntityNotFoundExceptionClient) {
-          // if this happens it is PROBABLY, but not necessarily, because
-          // we've deleted the table.
-          // TODO ensure the correct exception makes it here
-          ((OdkTablesViewTableSubTab) AggregateUI.getUI()
-              .getSubTab(SubTabs.VIEWTABLE)).setTabToDisplayZero();
-        } else if (caught instanceof PermissionDeniedExceptionClient) {
-          // do nothing, b/c it's probably legitimate that you don't get an
-          // error if there are rows you're not allowed to see.
-
-        } else {
-          AggregateUI.getUI().reportError(caught);
-        }
-      }
-
-      @Override
-      public void onSuccess(TableContentsClient tcc) {
-        columnNames = tcc.columnNames;
-        setColumnHeadings(columnNames);
-
-        rows = tcc.rows;
-        setRows(rows);
-
-      }
-    };
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
-    // TODO: paginate this
     // TODO: paginate this
     if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
-      SecureGWT.getServerDataService().getTableContents(table.getTableId(),
+      SecureGWT.getServerDataService().getTableContents(table.getTableId(), refreshCursor,
         getDataCallback);
     }
   }
@@ -263,6 +287,10 @@ public class OdkTablesViewTable extends FlexTable {
       setText(0, i++, ROW_ETAG);
       setText(0, i++, FILTER_TYPE);
       setText(0, i++, FILTER_VALUE);
+      setText(0, i++, LAST_UPDATE_USER);
+      setText(0, i++, CREATED_BY_USER);
+      setText(0, i++, DATA_ETAG_AT_MODIFICATION);
+
 
       getRowFormatter().addStyleName(0, "titleBar");
     }
@@ -323,8 +351,11 @@ public class OdkTablesViewTable extends FlexTable {
           setWidget(currentRow, j++, new HTML(row.getSavepointCreator()));
           setWidget(currentRow, j++, new HTML(row.getRowId()));
           setWidget(currentRow, j++, new HTML(row.getRowETag()));
-          setWidget(currentRow, j++, new HTML(row.getFilterScope().getType().name()));
-          setWidget(currentRow, j++, new HTML(row.getFilterScope().getValue()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getType().name()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getValue()));
+          setWidget(currentRow, j++, new HTML(row.getLastUpdateUser()));
+          setWidget(currentRow, j++, new HTML(row.getCreateUser()));
+          setWidget(currentRow, j++, new HTML(row.getDataETagAtModification()));
 
           if (currentRow % 2 == 0) {
             getRowFormatter().addStyleName(currentRow, "evenTableRow");
