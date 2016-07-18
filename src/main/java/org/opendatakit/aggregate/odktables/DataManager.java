@@ -192,7 +192,7 @@ public class DataManager {
             priorLogEntity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION),
             priorLogEntity.getString(DbLogTable.LAST_UPDATE_USER),
             priorLogEntity.getBoolean(DbLogTable.DELETED),
-            converter.getDbLogTableRowFilterScope(priorLogEntity),
+            EntityConverter.getDbLogTableRowFilterScope(priorLogEntity),
             priorLogEntity.getString(DbLogTable.FORM_ID),
             priorLogEntity.getString(DbLogTable.LOCALE),
             priorLogEntity.getString(DbLogTable.SAVEPOINT_TYPE),
@@ -1210,7 +1210,7 @@ public class DataManager {
 
           if (nullIncomingScope) {
             // preserve the scope of the existing entity if the incoming Row didn't specify one.
-        	  rowFilterScope = converter.getDbTableRowFilterScope(entity);
+        	  rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
         	  // and update the value
         	  row.setRowFilterScope(rowFilterScope);
           }
@@ -1424,7 +1424,7 @@ public class DataManager {
               + "for rowId %s", currentRowETag, serverRowETag, rowId));
         }
 
-        RowFilterScope rowFilterScope = converter.getDbTableRowFilterScope(entity);
+        RowFilterScope rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
 
         // check for read access
         boolean hasPermissions = false;

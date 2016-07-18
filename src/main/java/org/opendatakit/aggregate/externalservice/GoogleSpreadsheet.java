@@ -70,6 +70,7 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
@@ -218,7 +219,8 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
         String response = executeDriveStmt(spreadsheetName, spreadsheetDescription, cc);
         
         // convert response from json to Java
-        HashMap<Object,Object> map = mapper.readValue(response, HashMap.class);
+        TypeReference<HashMap<Object,Object>> ref = new TypeReference<HashMap<Object,Object>>() {};
+        HashMap<Object,Object> map = mapper.readValue(response, ref);
 
         // get document ID (spreadsheet 'key')
         spreadKey = (String) map.get("id");
