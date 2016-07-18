@@ -147,7 +147,7 @@ public class Row {
   private String savepointCreator;
 
   /**
-   * FilterScope is passed down to device.
+   * RowFilterScope is passed down to device.
    *
    * This is a placeholder for 
    * security filtering.
@@ -159,7 +159,7 @@ public class Row {
    * (trusted executor)
    */
   @JsonProperty(required = false)
-  private Scope filterScope;
+  private RowFilterScope rowFilterScope;
 
   /**
    * Array of user-defined column name to
@@ -179,7 +179,7 @@ public class Row {
    * @param values
    */
   public static Row forInsert(String rowId, String formId, String locale, String savepointType,
-      String savepointTimestamp, String savepointCreator, Scope filterScope,
+      String savepointTimestamp, String savepointCreator, RowFilterScope filterScope,
       ArrayList<DataKeyValue> values) {
     Row row = new Row();
     row.rowId = rowId;
@@ -188,7 +188,7 @@ public class Row {
     row.savepointType = savepointType;
     row.savepointTimestamp = savepointTimestamp;
     row.savepointCreator = savepointCreator;
-    row.filterScope = filterScope;
+    row.rowFilterScope = filterScope;
     if ( values == null ) {
       row.orderedColumns = new ArrayList<DataKeyValue>();
     } else {
@@ -213,7 +213,7 @@ public class Row {
    * @param values
    */
   public static Row forUpdate(String rowId, String rowETag, String formId, String locale,
-      String savepointType, String savepointTimestamp, String savepointCreator, Scope filterScope,
+      String savepointType, String savepointTimestamp, String savepointCreator, RowFilterScope filterScope,
       ArrayList<DataKeyValue> values) {
     Row row = new Row();
     row.rowId = rowId;
@@ -223,7 +223,7 @@ public class Row {
     row.savepointType = savepointType;
     row.savepointTimestamp = savepointTimestamp;
     row.savepointCreator = savepointCreator;
-    row.filterScope = filterScope;
+    row.rowFilterScope = filterScope;
     if ( values == null ) {
       row.orderedColumns = new ArrayList<DataKeyValue>();
     } else {
@@ -274,7 +274,7 @@ public class Row {
     this.savepointType = null;
     this.savepointTimestamp = null;
     this.savepointCreator = null;
-    this.filterScope = null;
+    this.rowFilterScope = null;
     this.orderedColumns = new ArrayList<DataKeyValue>();
   }
 
@@ -291,7 +291,7 @@ public class Row {
     this.savepointType = r.savepointType;
     this.savepointTimestamp = r.savepointTimestamp;
     this.savepointCreator = r.savepointCreator;
-    this.filterScope = r.filterScope;
+    this.rowFilterScope = r.rowFilterScope;
     this.orderedColumns = r.orderedColumns;
   }
 
@@ -319,8 +319,8 @@ public class Row {
     return lastUpdateUser;
   }
 
-  public Scope getFilterScope() {
-    return filterScope;
+  public RowFilterScope getRowFilterScope() {
+    return rowFilterScope;
   }
 
   public String getSavepointCreator() {
@@ -372,8 +372,8 @@ public class Row {
     this.lastUpdateUser = lastUpdateUser;
   }
 
-  public void setFilterScope(Scope filterScope) {
-    this.filterScope = filterScope;
+  public void setRowFilterScope(RowFilterScope filterScope) {
+    this.rowFilterScope = filterScope;
   }
 
   public void setSavepointCreator(String savepointCreator) {
@@ -430,7 +430,7 @@ public class Row {
     result = prime * result + ((deleted) ? 0 : 1);
     result = prime * result + ((createUser == null) ? 0 : createUser.hashCode());
     result = prime * result + ((lastUpdateUser == null) ? 0 : lastUpdateUser.hashCode());
-    result = prime * result + ((filterScope == null) ? 0 : filterScope.hashCode());
+    result = prime * result + ((rowFilterScope == null) ? 0 : rowFilterScope.hashCode());
     result = prime * result + ((savepointCreator == null) ? 0 : savepointCreator.hashCode());
     result = prime * result + ((formId == null) ? 0 : formId.hashCode());
     result = prime * result + ((locale == null) ? 0 : locale.hashCode());
@@ -460,7 +460,7 @@ public class Row {
         && (createUser == null ? other.createUser == null : createUser.equals(other.createUser))
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
             .equals(other.lastUpdateUser))
-        && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
+        && (rowFilterScope == null ? other.rowFilterScope == null : rowFilterScope.equals(other.rowFilterScope))
         && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
             .equals(other.savepointCreator))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
@@ -507,7 +507,7 @@ public class Row {
       return false;
     boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (deleted == other.deleted)
-        && (filterScope == null ? other.filterScope == null : filterScope.equals(other.filterScope))
+        && (rowFilterScope == null ? other.rowFilterScope == null : rowFilterScope.equals(other.rowFilterScope))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
         && (savepointType == null ? other.savepointType == null : savepointType
@@ -554,8 +554,8 @@ public class Row {
     builder.append(createUser);
     builder.append(", lastUpdateUser=");
     builder.append(lastUpdateUser);
-    builder.append(", filterScope=");
-    builder.append(filterScope);
+    builder.append(", rowFilterScope=");
+    builder.append(rowFilterScope);
     builder.append(", formId=");
     builder.append(formId);
     builder.append(", locale=");

@@ -42,9 +42,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("serverdataservice")
 public interface ServerDataService extends RemoteService {
 
-  ArrayList<RowClient> getRows(String tableId) throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException, PermissionDeniedExceptionClient, EntityNotFoundExceptionClient, BadColumnNameExceptionClient;
-
   TableContentsClient getRow(String tableId, String rowId) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient;
@@ -63,7 +60,7 @@ public interface ServerDataService extends RemoteService {
 
   ArrayList<String> getFileRowInfoColumnNames();
 
-  TableContentsClient getTableContents(String tableId) throws AccessDeniedException,
+  TableContentsClient getTableContents(String tableId, String resumeCursor) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, PermissionDeniedExceptionClient,
       EntityNotFoundExceptionClient, BadColumnNameExceptionClient;
 

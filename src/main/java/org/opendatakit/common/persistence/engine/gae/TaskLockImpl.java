@@ -460,6 +460,7 @@ public class TaskLockImpl implements TaskLock {
               break;
             }
           } else {
+            @SuppressWarnings("unchecked")
             TreeMap<Long, String> tmOrig = (TreeMap<Long, String>) v.getValue();
             TreeMap<Long, String> tm = new TreeMap<Long, String>(tmOrig);
 
@@ -530,6 +531,7 @@ public class TaskLockImpl implements TaskLock {
           if (v == null || v.getValue() == null) {
             break;
           } else {
+            @SuppressWarnings("unchecked")
             TreeMap<Long, String> tmOrig = (TreeMap<Long, String>) v.getValue();
             TreeMap<Long, String> tm = new TreeMap<Long, String>(tmOrig);
 
@@ -586,6 +588,7 @@ public class TaskLockImpl implements TaskLock {
         if (v == null || v.getValue() == null) {
           return null;
         } else {
+          @SuppressWarnings("unchecked")
           TreeMap<Long, String> tm = (TreeMap<Long, String>) v.getValue();
           Long currentTimestamp = System.currentTimeMillis();
           for (Long timestamp : tm.keySet()) {

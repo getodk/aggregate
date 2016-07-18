@@ -93,7 +93,7 @@ public class RowOutcome extends Row {
 
         this.setRowETag(null);
         this.setDataETagAtModification(null);
-        this.setFilterScope(null);
+        this.setRowFilterScope(null);
       }
     }
   }
