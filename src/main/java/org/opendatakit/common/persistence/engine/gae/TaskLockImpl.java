@@ -28,7 +28,6 @@ import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-import com.google.appengine.api.datastore.DatastoreAttributes.DatastoreType;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -44,6 +43,7 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
+import com.google.gwt.user.client.Random;
 
 /**
  *
@@ -76,9 +76,64 @@ public class TaskLockImpl implements TaskLock {
     ds = DatastoreServiceFactory.getDatastoreService();
   }
 
+  /**
+   * To minimize the occurrence of ConcurrentModificationException, do not
+   * use just one parent entity for all task locks. Instead, use the hashCode()
+   * of the concatenation (formId + taskType.getName()) to create one of 256
+   * possible parent entities, and use that entity when manipulating this task lock. 
+   * 
+   * @param formId
+   * @param taskType
+   * @return parent entity to use for strong consistency enforcement
+   */
+  private Key createTaskGroupKey(String formId, ITaskLockType taskType) {
+    // reduce ConcurrentModificationException likelihood by spreading ownership 
+    // of a given lock (identified by formId + taskType.getName())
+    // across 256 different parent entity group kinds.
+    //
+    String code = formId + taskType.getName();
+    String qualifier = Integer.toHexString(code.hashCode() & 0xff);
+    if ( qualifier.length() == 1 ) {
+      qualifier = "_0" + qualifier;
+    } else {
+      qualifier = "_" + qualifier;
+    }
+    Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND + qualifier, ENTITY_GROUP_KEY);
+    return entityGroupKey;
+  }
+  
+  /**
+   * By using specific parent entities and the High Replication datastore, we avoid
+   * the long settle times required by the earlier Master-Slave datastore. But, when 
+   * things go south, we need to back off and wait for the parent entity to settle.
+   * 
+   * No idea how long that back-off should be. Try 500ms plus a bit.
+   */
+  private void sleepBriefly() {
+    long sleepInterval = 500L + (0xff & Random.nextInt());
+    try {
+      Thread.sleep(sleepInterval);
+    } catch (InterruptedException e1) {
+      e1.printStackTrace();
+    }
+  }
+  
+  /**
+   * Sleep longer if the lock is busy so as to allow the other thread to complete its
+   * work.  Most requests should be done in 1000 ms. Start there.
+   */
+  private void sleepBecauseLockIsBusy() {
+    long sleepInterval = 1000L + (0xff & Random.nextInt());
+    try {
+      Thread.sleep(sleepInterval);
+    } catch (InterruptedException e1) {
+      e1.printStackTrace();
+    }
+  }
+  
   private void deleteLock(String lockId, String formId, ITaskLockType taskType) {
     try {
-      Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
+      Key entityGroupKey = createTaskGroupKey(formId, taskType);
       Query query = new Query(KIND, entityGroupKey);
       query.setAncestor(entityGroupKey);
       query.setFilter(new Query.CompositeFilter(CompositeFilterOperator.AND,
@@ -133,9 +188,8 @@ public class TaskLockImpl implements TaskLock {
             deleteTransaction.rollback();
             System.out.println(
                 "Rollback deleteLock : " + lockId + " " + formId + " " + taskType.getName());
-            // if we fail, sleep, since there must be another server in
-            // contention
-            Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
+            // if we fail, sleep, since there must be another server in contention
+            sleepBecauseLockIsBusy();
           }
         }
       }
@@ -158,7 +212,7 @@ public class TaskLockImpl implements TaskLock {
         System.out
             .println("Trying to get lock : " + lockId + " " + formId + " " + taskType.getName());
         if (gaeEntity == null) {
-          Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
+          Key entityGroupKey = createTaskGroupKey(formId, taskType);
           gaeEntity = new Entity(KIND, entityGroupKey);
           updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
           result = true;
@@ -180,7 +234,7 @@ public class TaskLockImpl implements TaskLock {
           System.out
               .println("Rollback obtainLock : " + lockId + " " + formId + " " + taskType.getName());
           // if we fail, sleep, since there must be another server in contention
-          Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
+          sleepBecauseLockIsBusy();
           return result;
         }
       }
@@ -196,15 +250,7 @@ public class TaskLockImpl implements TaskLock {
     // and outside the transaction, double-check that we hold the lock
     try {
       // rely on strong consistency guarantee on a High Replication datastore.
-      // For Master-Slave, we cannot do that. Must wait for data to settle.
-      if (ds.getDatastoreAttributes().getDatastoreType() != DatastoreType.HIGH_REPLICATION) {
-        // sleep a little to let GAE datastore stabilize
-        try {
-          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
+      // No longer have to worry about Master-Slave datastore.
       // verify no one else made a lock
       lockVerification(lockId, formId, taskType);
     } catch (ODKTaskLockException e) {
@@ -285,7 +331,7 @@ public class TaskLockImpl implements TaskLock {
           System.out
               .println("Rollback renewLock : " + lockId + " " + formId + " " + taskType.getName());
           // if we fail, sleep, since there must be another server in contention
-          Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
+          sleepBecauseLockIsBusy();
           return result;
         }
       }
@@ -301,15 +347,7 @@ public class TaskLockImpl implements TaskLock {
     // and outside the transaction, double-check that we hold the lock
     try {
       // rely on strong consistency guarantee on a High Replication datastore.
-      // For Master-Slave, we cannot do that. Must wait for data to settle.
-      if (ds.getDatastoreAttributes().getDatastoreType() != DatastoreType.HIGH_REPLICATION) {
-        // sleep a little to let GAE datastore stabilize
-        try {
-          Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
+      // No longer have to worry about Master-Slave datastore.
       // verify no one else made a lock
       lockVerification(lockId, formId, taskType);
     } catch (ODKTaskLockException e) {
@@ -366,6 +404,7 @@ public class TaskLockImpl implements TaskLock {
             tle = new ODKTaskLockException(OTHER_ERROR, e);
           }
           if (tle != null) {
+            sleepBriefly();
             // we have contention - attempt to deleteLock
             System.out.println("releaseLock -- commit Exception Retry#1: deleteLock : " + lockId + " " + formId + " "
                 + taskType.getName());
@@ -374,11 +413,7 @@ public class TaskLockImpl implements TaskLock {
               deleteLock(lockId, formId, taskType);
             } catch (Exception e) {
               System.out.println("releaseLock -- commit Retry#1 UNEXPECTED EXCEPTION " + e.toString());
-              try {
-                Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
-              } catch (InterruptedException e1) {
-                e1.printStackTrace();
-              }
+              sleepBriefly();
               System.out.println("releaseLock -- commit Exception Retry#2: deleteLock : " + lockId + " " + formId + " "
                   + taskType.getName());
               try {
@@ -645,7 +680,7 @@ public class TaskLockImpl implements TaskLock {
   private Entity queryForLock(String formId, ITaskLockType taskType) throws ODKTaskLockException {
     int readCount = 0;
     try {
-      Key entityGroupKey = KeyFactory.createKey(ENTITY_GROUP_KIND, ENTITY_GROUP_KEY);
+      Key entityGroupKey = createTaskGroupKey(formId, taskType);
       Query query = new Query(KIND, entityGroupKey);
       query.setAncestor(entityGroupKey);
       query.setFilter(new Query.CompositeFilter(CompositeFilterOperator.AND,
