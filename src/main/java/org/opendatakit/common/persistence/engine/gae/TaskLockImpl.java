@@ -345,15 +345,51 @@ public class TaskLockImpl implements TaskLock {
         throw new ODKTaskLockException(OTHER_ERROR, e);
       } finally {
         if (result) {
+          // Annoyingly, if there is a lot of contention on the entity or group,
+          // the datastore can throw a ConcurrentModificationException or other 
+          // exception. In this case, we save this triggering exception and 
+          // attempt a harsh delete on the lock. If that also fails, we sleep
+          // for a long time then re-try the harsh delete.
+          //
+          // This is an attempt to fully release the lock. If it is unsuccessful,
+          // the functionality guarded by this lock will be shut-out for the remaining
+          // duration of this lock, which can be a long time.
+          ODKTaskLockException tle = null;
           try {
             transaction.commit();
           } catch (DatastoreFailureException e) {
-            throw new ODKTaskLockException(OTHER_ERROR, e);
+            tle = new ODKTaskLockException(OTHER_ERROR, e);
           } catch (Exception e) { // might be a ConcurrentModificationException
                                   // ...
-            System.out.println("UNEXPECTED EXCEPTION " + e.toString());
+            System.out.println("releaseLock -- commit UNEXPECTED EXCEPTION " + e.toString());
             e.printStackTrace();
-            throw new ODKTaskLockException(OTHER_ERROR, e);
+            tle = new ODKTaskLockException(OTHER_ERROR, e);
+          }
+          if (tle != null) {
+            // we have contention - attempt to deleteLock
+            System.out.println("releaseLock -- commit Exception Retry#1: deleteLock : " + lockId + " " + formId + " "
+                + taskType.getName());
+
+            try {
+              deleteLock(lockId, formId, taskType);
+            } catch (Exception e) {
+              System.out.println("releaseLock -- commit Retry#1 UNEXPECTED EXCEPTION " + e.toString());
+              try {
+                Thread.sleep(PersistConsts.MAX_SETTLE_MILLISECONDS);
+              } catch (InterruptedException e1) {
+                e1.printStackTrace();
+              }
+              System.out.println("releaseLock -- commit Exception Retry#2: deleteLock : " + lockId + " " + formId + " "
+                  + taskType.getName());
+              try {
+                deleteLock(lockId, formId, taskType);
+              } catch (Exception ex) {
+                System.out.println("releaseLock -- commit Retry#2 UNEXPECTED EXCEPTION " + ex.toString());
+              }
+            }
+            System.out.println("releaseLock -- commit Exception now thrown : " + lockId + " " + formId + " "
+                + taskType.getName());
+            throw tle;
           }
         } else {
           try {
