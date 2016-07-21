@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +44,6 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
-import com.google.gwt.user.client.Random;
 
 /**
  *
@@ -65,6 +65,8 @@ public class TaskLockImpl implements TaskLock {
   private static final String FORM_ID_PROPERTY = "FORM_ID";
   private static final String TASK_TYPE_PROPERTY = "TASK_TYPE";
   private static final String TIMESTAMP_PROPERTY = "TIMESTAMP";
+
+  private static final Random RNG = new Random();
 
   private final DatastoreAccessMetrics dam;
   private final MemcacheService syncCache;
@@ -110,7 +112,7 @@ public class TaskLockImpl implements TaskLock {
    * No idea how long that back-off should be. Try 500ms plus a bit.
    */
   private void sleepBriefly() {
-    long sleepInterval = 500L + (0xff & Random.nextInt());
+    long sleepInterval = 500L + (0xff & RNG.nextInt());
     try {
       Thread.sleep(sleepInterval);
     } catch (InterruptedException e1) {
@@ -123,7 +125,7 @@ public class TaskLockImpl implements TaskLock {
    * work.  Most requests should be done in 1000 ms. Start there.
    */
   private void sleepBecauseLockIsBusy() {
-    long sleepInterval = 1000L + (0xff & Random.nextInt());
+    long sleepInterval = 1000L + (0xff & RNG.nextInt());
     try {
       Thread.sleep(sleepInterval);
     } catch (InterruptedException e1) {
