@@ -103,7 +103,7 @@
 	<name>parent_installdir</name>
             <title>Select an output parent directory</title>
             <description></description>
-            <explanation>This "installer" does not actually install anything.  Instead, it guides you through configuring ODK Aggregate.  As the last step of the installer, it will either launch the install script for uploading to Google's AppEngine cloud services or open a README.html containing the final installation instructions for MySQL or PostgreSQL deployments.
+            <explanation>This "installer" does not actually install anything.  Instead, it guides you through configuring ODK Aggregate.  As the last step of the installer, it will either launch the upload tool for uploading to Google's AppEngine cloud services or open a README.html containing the final installation instructions for MySQL or PostgreSQL deployments.
 
 Please select the parent directory under which an 'ODK Aggregate' directory will be created to contain the configured software.</explanation>
             <value></value>
@@ -662,7 +662,7 @@ NOTE: During subsequent upgrades, any changes to this text will invalidate all t
             <description>Please enter an ODK Aggregate Username:</description>
             <explanation>The user with this account will always have full permissions on the system.  
 
-The first time ODK Aggregate runs, only this user is allowed to log onto the system. Upon first logging in, they should change their password and complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system.
+The first time ODK Aggregate runs, only this user is allowed to log onto the system. Upon first logging in, they should change their password and complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system. This user's password will be set to 'aggregate' upon initial install or upon changing the ODK Aggregate instance name.
 </explanation>
             <value></value>
             <default></default>
@@ -689,19 +689,29 @@ Please enter a name starting with a letter and containing only letters and numbe
         <parameterGroup>
             <name>app_id_group</name>
             <title>Google AppEngine application ID</title>
-            <explanation>Before continuing, you should obtain an application identifier in Google's AppEngine cloud services. Click the link below and select the 'Create Application' button on that page to create an application identifier. 
+            <explanation>Before continuing, you must create a project on Google Cloud Platform. Click the Google Cloud Platform installation instructions link (first link below) for how to do this. 
 
-If you are replacing an existing application already on appspot, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'opendatakit.appspot.com' you would enter 'opendatakit' below.</explanation>
+If you are updating an existing ODK Aggregate application, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'https://opendatakit.appspot.com' you would enter 'opendatakit' below. When updating, please follow the upgrade steps in the Aggregate Release Notes (see second link below).</explanation>
             <value></value>
             <default></default>
             <parameterList>
                 <linkParameter>
                     <name>appengine_link</name>
-                    <description>https://appengine.google.com/</description>
+                    <description>Google Cloud Platform installation instructions</description>
                     <explanation></explanation>
                     <clickedActionList>
                         <launchBrowser>
-                            <url>https://appengine.google.com/</url>
+                            <url>https://opendatakit.org/use/aggregate/</url>
+                        </launchBrowser>
+                    </clickedActionList>
+                </linkParameter>
+                <linkParameter>
+                    <name>release_note_link</name>
+                    <description>Upgrade steps</description>
+                    <explanation></explanation>
+                    <clickedActionList>
+                        <launchBrowser>
+                            <url>https://github.com/opendatakit/opendatakit/wiki/Aggregate-Release-Notes</url>
                         </launchBrowser>
                     </clickedActionList>
                 </linkParameter>

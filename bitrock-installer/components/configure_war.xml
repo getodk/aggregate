@@ -760,7 +760,7 @@ ${html_steps_end}</text>
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}Browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into this updater's pop-up dialog. 
+${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This upload tool will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool. 
 ${html_steps_end_item}${html_steps_begin_item}
 Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
@@ -781,9 +781,9 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into this updater's pop-up dialog. 
-${html_steps_end_item}${html_steps_begin_item}After the upload script completes successfully, 
-visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool. 
+${html_steps_end_item}${html_steps_begin_item}After the upload tool completes successfully, 
+visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
@@ -802,9 +802,9 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}If the upload script failed, please resolve any errors that caused the failure.  Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This script will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into this updater's pop-up dialog.
+${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.
 ${html_steps_end_item}${html_steps_begin_item}
-Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; to complete configuring the
+Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
