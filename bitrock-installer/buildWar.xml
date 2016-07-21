@@ -36,7 +36,7 @@
         <runProgram>
             <program>java</program>
             <programArguments>-jar .${platform_path_separator}ODKAggregateAppEngineUpdater.jar</programArguments>
-            <progressText>Launch installation script (3-10 minutes).</progressText>
+            <progressText>Launch upload tool (3-10 minutes).</progressText>
             <useMSDOSPath>0</useMSDOSPath>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
@@ -53,7 +53,7 @@
         <runProgram>
             <program>osascript</program>
             <programArguments>'${installdir}/uploadAggregateToAppEngine.app'</programArguments>
-            <progressText>Launch installation script (3-10 minutes).</progressText>
+            <progressText>Launch upload tool (3-10 minutes).</progressText>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
                 <compareText>
@@ -69,7 +69,7 @@
         <runProgram>
             <program>bash</program>
             <programArguments>-c '"${installdir}/uploadAggregateToAppEngine.sh"'</programArguments>
-            <progressText>Launch installation script (3-10 minutes).</progressText>
+            <progressText>Launch upload tool (3-10 minutes).</progressText>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
                 <compareText>
