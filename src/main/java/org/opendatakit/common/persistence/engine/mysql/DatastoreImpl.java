@@ -483,10 +483,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           DataField.DataType type = f.getDataType();
           switch (type) {
           case BINARY:
-            b.append(" BLOB");
+            b.append(" MEDIUMBLOB");
             break;
           case LONG_STRING:
-            b.append(" TEXT CHARACTER SET utf8");
+            b.append(" MEDIUMTEXT CHARACTER SET utf8");
             break;
           case STRING:
             b.append(" VARCHAR(");
