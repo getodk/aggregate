@@ -269,9 +269,14 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           if (dataType.contains(K_TINY)) {
             this.maxCharLen = 255L;
           } else if (dataType.contains(K_MEDIUM)) {
+            // protocol restriction is max_allowed_packet setting.
+            // defaults to:    1048576L
             this.maxCharLen = 16777215L;
           } else if (dataType.contains(K_LONG)) {
-            this.maxCharLen = 4294967295L;
+            // potential storage: this.maxCharLen = 4294967295L;
+            // protocol restriction is max_allowed_packet setting.
+            // which is limited to less than 1GB; budget 65k overhead.
+            this.maxCharLen = 1073741823L - 65536L;
           } else {
             this.maxCharLen = 65535L;
           }
@@ -280,9 +285,14 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           if (dataType.contains(K_TINY)) {
             this.maxCharLen = 255L;
           } else if (dataType.contains(K_MEDIUM)) {
+            // protocol restriction is max_allowed_packet setting.
+            // defaults to:    1048576L
             this.maxCharLen = 16777215L;
           } else if (dataType.contains(K_LONG)) {
-            this.maxCharLen = 4294967295L;
+            // potential storage: this.maxCharLen = 4294967295L;
+            // protocol restriction is max_allowed_packet setting.
+            // which is limited to less than 1GB; budget 65k overhead.
+            this.maxCharLen = 1073741823L - 65536L;
           } else {
             this.maxCharLen = 65535L;
           }
@@ -473,10 +483,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           DataField.DataType type = f.getDataType();
           switch (type) {
           case BINARY:
-            b.append(" LONGBLOB");
+            b.append(" BLOB");
             break;
           case LONG_STRING:
-            b.append(" LONGTEXT CHARACTER SET utf8");
+            b.append(" TEXT CHARACTER SET utf8");
             break;
           case STRING:
             b.append(" VARCHAR(");
