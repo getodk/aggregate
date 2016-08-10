@@ -233,6 +233,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>get-all-access</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.GetUsersAndPermissionsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>get-all-access</servlet-name>
+        <url-pattern>/ssl/get-users-and-permissions</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>manage-all-access</servlet-name>
         <servlet-class>org.opendatakit.aggregate.servlet.ResetUsersAndPermissionsServlet</servlet-class>
     </servlet>

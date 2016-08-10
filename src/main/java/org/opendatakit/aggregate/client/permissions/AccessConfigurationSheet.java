@@ -30,6 +30,7 @@ import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.widgets.UploadUsersAndPermsServletPopupButton;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.EmailParser;
@@ -58,6 +59,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -705,6 +707,8 @@ public class AccessConfigurationSheet extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
     sinkEvents(Event.ONCHANGE | Event.ONCLICK);
     
+    downloadCsv.setHref(UIConsts.GET_USERS_AND_PERMS_CSV_SERVLET_ADDR);
+
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<img src=\"images/red_x.png\" />");
     UIEnabledActionColumn<UserSecurityInfo> deleteMe = new UIEnabledActionColumn<UserSecurityInfo>(
@@ -825,6 +829,8 @@ public class AccessConfigurationSheet extends Composite {
   TextArea addedUsers;
   @UiField
   UploadUsersAndPermsServletPopupButton uploadCsv;
+  @UiField
+  Anchor downloadCsv;
   @UiField
   Button addNow;
   @UiField
