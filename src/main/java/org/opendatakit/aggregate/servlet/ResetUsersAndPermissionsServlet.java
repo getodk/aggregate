@@ -427,7 +427,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
           String fullname = (idxFullName == -1 || columns.length < idxFullName) ? null : columns[idxFullName]; 
           
           if ( accType == null ) {
-            username = null;
+            username = User.ANONYMOUS_USER;
             email = null;
             fullname = User.ANONYMOUS_USER_NICKNAME;
           } else if ("ODK".equals(accType)) {
@@ -440,16 +440,15 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
                       columns[idxUsername] + "\' contains illegal characters (e.g., spaces)");
               return;
             }
+            email = null;
             Email parsedValue = emails.iterator().next();
             if ( parsedValue.getType() == Form.EMAIL ) {
-              username = parsedValue.getEmail();
+              username = parsedValue.getEmail().substring(EmailParser.K_MAILTO.length());
             } else {
               username = parsedValue.getUsername();
             }
-            
-            email = null;
             if ( fullname == null ) {
-              fullname = username;
+              fullname = parsedValue.getFullName();
             }
           } else if ("Google".equals(accType)) {
             username = null;
