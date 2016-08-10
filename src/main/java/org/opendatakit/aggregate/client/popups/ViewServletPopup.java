@@ -38,6 +38,7 @@ public class ViewServletPopup extends AbstractPopupBase {
 
     FlowPanel panel = new FlowPanel();
     panel.setPixelSize(innerWidth+6,innerHeight+30);
+    
     ClosePopupButton closeButton = new ClosePopupButton(this);
     closeButton.addStyleName("uploadCloseButton");
     panel.add(closeButton);

@@ -122,7 +122,7 @@ public class FormUploadServlet extends ServletUtilBase {
       + "<br><br>"
       + "<p id=\"note\"><b><font color=\"red\">NOTE:</font> If the form definition contains string answers the string data will be truncated to "
       + Long.toString(PersistConsts.DEFAULT_MAX_STRING_LENGTH)
-      + " characters.</b>  See ODK Aggregate 1.0 documentation for how to increase (or decrease) this size.</p>"
+      + " characters.</b>  See ODK Aggregate 1.x documentation for how to increase (or decrease) this size.</p>"
       + "<br>"
       + "<p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\","
       + "if present in the media folder, will be displayed as the form's logo. </p>" + "</div>\n";

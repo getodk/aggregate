@@ -522,6 +522,9 @@ public class SecurityServiceUtil {
    * Method to enforce an access configuration constraining only registered
    * users, authenticated users and anonymous access.
    * 
+   * Add additional checks of the incoming parameters and patch things up
+   * if the incoming list of users omits the super-user.
+   * 
    * @param users
    * @param anonGrants
    * @param allGroups
@@ -533,19 +536,129 @@ public class SecurityServiceUtil {
       ArrayList<GrantedAuthorityName> allGroups, CallingContext cc)
       throws DatastoreFailureException, AccessDeniedException {
 
+    // remove anonymousUser from the set of users and collect its 
+    // permissions (anonGrantStrings) which will be placed in 
+    // the granted authority hierarchy table. 
     List<String> anonGrantStrings = new ArrayList<String>();
-    for (UserSecurityInfo i : users) {
-      if (i.getType() == UserType.ANONYMOUS) {
-        for (GrantedAuthorityName a : i.getAssignedUserGroups()) {
-          if (anonAuth.getAuthority().equals(a.name()))
-            continue; // avoid circularity...
-          anonGrantStrings.add(a.name());
+    {
+      UserSecurityInfo anonUser = null;
+      for (UserSecurityInfo i : users) {
+        if (i.getType() == UserType.ANONYMOUS) {
+          anonUser = i;
+          // clean up grants for anonymousUser --
+          // ignore anonAuth (the grant under which we will place things) 
+          // and forbid Site Admin
+          for (GrantedAuthorityName a : i.getAssignedUserGroups()) {
+            if (anonAuth.getAuthority().equals(a.name()))
+              continue; // avoid circularity...
+            if (GrantedAuthorityName.GROUP_SITE_ADMINS.equals(a) ||
+                GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.equals(a)) {
+              continue; // do not allow Site Admin assignments for Anonymous.
+            }
+            anonGrantStrings.add(a.name());
+          }
+          break;
         }
-        break;
+      }
+      users.remove(anonUser);
+    }
+
+    // scan through the users and remove any entries under assigned user groups 
+    // that do not begin with GROUP_.
+    //
+    // Additionally, if the user is an e-mail, remove the GROUP_DATA_COLLECTORS
+    // permission since ODK Collect does not support oauth2 authentication.
+    {
+      TreeSet<GrantedAuthorityName> toRemove = new TreeSet<GrantedAuthorityName>();
+      for (UserSecurityInfo i : users) {
+        // only working with registered users
+        if (i.getType() != UserType.REGISTERED) {
+          continue;
+        }
+        // get the list of assigned groups 
+        // -- this is not a copy -- we can directly manipulate this.
+        TreeSet<GrantedAuthorityName> assignedGroups = i.getAssignedUserGroups();
+
+        // scan the set of assigned groups and remove any that don't begin with GROUP_
+        toRemove.clear();
+        for ( GrantedAuthorityName name : assignedGroups ) {
+          if ( !name.name().startsWith(GrantedAuthorityName.GROUP_PREFIX) ) {
+            toRemove.add(name);
+          }
+        }
+        if ( !toRemove.isEmpty() ) {
+          assignedGroups.removeAll(toRemove);
+        }
+        // for e-mail accounts, remove the Data Collector permission since ODK Collect 
+        // does not support an oauth2 authentication mechanism.
+        if (i.getEmail() != null) {
+          assignedGroups.remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+        }
       }
     }
 
+    // find the entry(entries) for the designated super-user(s)
+    String superUserEmail = cc.getUserService().getSuperUserEmail();
+    String superUserUsername = cc.getUserService().getSuperUserUsername();
+    int expectedSize = ((superUserEmail != null) ? 1 : 0) + ((superUserUsername != null) ? 1 : 0);
+    ArrayList<UserSecurityInfo> superUsers = new ArrayList<UserSecurityInfo>();
+    for ( UserSecurityInfo i : users ) {
+      if ( i.getType() == UserType.REGISTERED ) {
+        if ( i.getEmail() != null && superUserEmail != null && i.getEmail().equals(superUserEmail)) {
+          superUsers.add(i);
+        }
+        if ( i.getUsername() != null && superUserUsername != null && i.getUsername().equals(superUserUsername)) {
+          superUsers.add(i);
+        }
+      }
+    }
+    
+    if ( superUsers.size() != expectedSize ) {
+      // we are missing one or both super-users.
+      // remove any we have and recreate them from scratch.
+      users.removeAll(superUsers);
+      superUsers.clear();
+      
+      // Synthesize a UserSecurityInfo object for the super-user(s)
+      // and add it(them) to the list.
+      MessageDigestPasswordEncoder mde = null;
+      try {
+        Object obj = cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
+        if (obj != null) {
+          mde = (MessageDigestPasswordEncoder) obj;
+        }
+      } catch (Exception e) {
+        mde = null;
+      }
+      try {
+        List<RegisteredUsersTable> tList = RegisteredUsersTable.assertSuperUsers(mde, cc);
+        
+        for ( RegisteredUsersTable t : tList ) {
+          UserSecurityInfo i = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(),
+              UserSecurityInfo.UserType.REGISTERED);
+          superUsers.add(i);
+          users.add(i);
+        }
+        
+      } catch (ODKDatastoreException e) {
+        e.printStackTrace();
+        throw new DatastoreFailureException("Incomplete update");
+      }
+    }
+    
+    // reset super-user privileges to have (just) site admin privileges
+    // even if caller attempts to change, add, or remove them.
+    for ( UserSecurityInfo i : superUsers ) {
+      TreeSet<GrantedAuthorityName> grants = new TreeSet<GrantedAuthorityName>();
+      grants.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
+      grants.add(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
+      // override whatever the user gave us.
+      i.setAssignedUserGroups(grants);
+    }
+    
     try {
+      // enforce our fixed set of groups and their inclusion hierarchy.
+      // this is generally a no-op during normal operations.
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(siteAuth,
           SecurityServiceUtil.siteAdministratorGrants, cc);
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(administerTablesAuth,
@@ -561,11 +674,14 @@ public class SecurityServiceUtil {
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataCollectorAuth,
           SecurityServiceUtil.dataCollectorGrants, cc);
 
+      // place the anonymous user's permissions in the granted authority table.
       GrantedAuthorityHierarchyTable
           .assertGrantedAuthorityHierarchy(anonAuth, anonGrantStrings, cc);
 
+      // get all granted authority names
       TreeSet<String> authorities = GrantedAuthorityHierarchyTable
           .getAllPermissionsAssignableGrantedAuthorities(cc.getDatastore(), cc.getCurrentUser());
+      // remove the groups that have structure (i.e., those defined above).
       authorities.remove(siteAuth.getAuthority());
       authorities.remove(administerTablesAuth.getAuthority());
       authorities.remove(superUserTablesAuth.getAuthority());
@@ -575,14 +691,21 @@ public class SecurityServiceUtil {
       authorities.remove(dataCollectorAuth.getAuthority());
       authorities.remove(anonAuth.getAuthority());
 
-      // remove anything else from database...
+      // delete all hierarchy structures under anything else. 
+      // i.e., if somehow USER_IS_REGISTERED had been granted GROUP_FORM_MANAGER
+      // then this loop would leave USER_IS_REGISTERED without any grants.
+      // (it repairs the database to conform to our privilege hierarchy expectations).
       List<String> empty = Collections.emptyList();
       for (String s : authorities) {
         GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(
             new SimpleGrantedAuthority(s), empty, cc);
       }
 
+      // declare all the users (and remove users that are not in this set)
       Map<UserSecurityInfo, String> pkMap = setUsers(users, cc);
+
+      // now, for each GROUP_..., update the user granted authority
+      // table with the users that have that GROUP_... assignment.
       setUsersOfGrantedAuthority(pkMap, siteAuth, cc);
       setUsersOfGrantedAuthority(pkMap, administerTablesAuth, cc);
       setUsersOfGrantedAuthority(pkMap, superUserTablesAuth, cc);
@@ -590,6 +713,12 @@ public class SecurityServiceUtil {
       setUsersOfGrantedAuthority(pkMap, dataOwnerAuth, cc);
       setUsersOfGrantedAuthority(pkMap, dataViewerAuth, cc);
       setUsersOfGrantedAuthority(pkMap, dataCollectorAuth, cc);
+      // all super-users would already have their site admin role and
+      // we leave that unchanged. The key is to ensure that the 
+      // super users are in the users list so they don't get 
+      // accidentally removed and that they have siteAuth group
+      // membership.  I.e., we don't need to manage ROLE_SITE_ACCESS_ADMIN
+      // here. it is done elsewhere.
 
     } catch (ODKDatastoreException e) {
       e.printStackTrace();

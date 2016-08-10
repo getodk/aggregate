@@ -74,6 +74,7 @@ public enum GrantedAuthorityName implements Serializable {
 		return displayText;
 	}
 
+   public static final String GROUP_PREFIX = "GROUP_";
 	public static final String ROLE_PREFIX = "ROLE_";
 	public static final String RUN_AS_PREFIX = "RUN_AS_";
 

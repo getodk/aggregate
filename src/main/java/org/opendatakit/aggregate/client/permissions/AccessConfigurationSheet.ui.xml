@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:odk="urn:import:org.opendatakit.aggregate.client.widgets"
 	xmlns:c="urn:import:com.google.gwt.user.cellview.client">
 <g:HTMLPanel styleName="gwt-AccessConfigurationSheet">
 <h1>Configure Site Access</h1>
@@ -22,6 +23,8 @@
    <li>Administer Tables - able to administer tables and row-level and table-access privileges.</li>
    <li>Site Administrator - all the capabilities of a Form Manager plus the ability to add users,
    set passwords, and grant these capabilities to other users.</li></ul>
+<h3>Configure Users and Capabilities using .csv file</h3>
+<odk:UploadUsersAndPermsServletPopupButton styleName="gwt-Button" ui:field="uploadCsv"/>
 <h3>Edit Users</h3>
 <p>Change usernames, delete usernames, grant capabilities and set passwords for ODK accounts below.</p>
 <c:CellTable ui:field="userTable" />
