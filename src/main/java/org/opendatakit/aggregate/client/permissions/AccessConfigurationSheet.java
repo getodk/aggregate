@@ -29,6 +29,7 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.widgets.UploadUsersAndPermsServletPopupButton;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.EmailParser;
@@ -94,6 +95,7 @@ public class AccessConfigurationSheet extends Composite {
 
   private boolean anonymousAttachmentBoolean = false;
 
+  private PermissionsSubTab permissionsTab;
   private boolean changesHappened = false;
 
   private GroupMembershipColumn formsAdmin;
@@ -699,8 +701,10 @@ public class AccessConfigurationSheet extends Composite {
   };
 
   public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
+    this.permissionsTab = permissionsTab;
     initWidget(uiBinder.createAndBindUi(this));
     sinkEvents(Event.ONCHANGE | Event.ONCLICK);
+    
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<img src=\"images/red_x.png\" />");
     UIEnabledActionColumn<UserSecurityInfo> deleteMe = new UIEnabledActionColumn<UserSecurityInfo>(
@@ -820,6 +824,8 @@ public class AccessConfigurationSheet extends Composite {
   @UiField
   TextArea addedUsers;
   @UiField
+  UploadUsersAndPermsServletPopupButton uploadCsv;
+  @UiField
   Button addNow;
   @UiField
   CellTable<UserSecurityInfo> userTable;
@@ -834,6 +840,11 @@ public class AccessConfigurationSheet extends Composite {
     uiOutOfSyncWithServer();
   }
 
+  @UiHandler("uploadCsv")
+  void onUploadCsvClick(ClickEvent e) {
+    uploadCsv.onClick(permissionsTab, e);
+  }
+  
   @UiHandler("addNow")
   void onAddUsersClick(ClickEvent e) {
     String text = addedUsers.getText();
