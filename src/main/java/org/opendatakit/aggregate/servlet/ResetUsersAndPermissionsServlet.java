@@ -20,6 +20,9 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import javax.servlet.ServletException;
@@ -262,16 +265,25 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
             return;
           }
           
+          // count non-blank columns
+          int nonBlankColCount = 0;
+          for ( String col : columns ) {
+            if ( col != null && col.trim().length() != 0 ) {
+              ++nonBlankColCount;
+            }
+          }
+
           // if there are fewer than 4 columns, it must be a comment field.
           // if there are 4 or more columns, then we expect it to be the column headers
-          // for the users and capabilities table
-          if ( columns.length < 4 ) continue;
+          // for the users and capabilities table. We could require just 3, but that
+          // would not be very useful or realistic.
+          if ( nonBlankColCount < 4 ) continue;
           
           break;
         }
         if ( row != 1 ) {
           logger.warn("users and capabilities .csv upload -- interpreting row " + row + " as the column header row");
-          warnings.append("\nusers and capabilities .csv upload -- interpreting row " + row + " as the column header row");
+          warnings.append("<tr><td>Interpreting row " + row + " as the column header row.</td></tr>");
         }
        
         // TODO: validate column headings....
@@ -387,8 +399,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
             idxSiteAdmin = i;
           } else {
             logger.warn("users and capabilities .csv upload - invalid csv file -- column header '" + heading + "' is not recognized");
-            warnings.append("\nusers and capabilities invalid .csv -- column header '" + heading + "' is not recognized");
-            return;
+            warnings.append("<tr><td>Column header '" + heading + "' is not recognized and will be ignored.</tr></td>");
           }
         }
 
@@ -406,11 +417,38 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         }
         
         while ( (columns = csvReader.readNext()) != null ) {
+          ++row;
+
+          // empty -- silently skip
           if ( columns.length == 0 ) continue;
-          if ( columns.length < idxUsername || columns.length < idxUserType ) {
-            warnings.append("ignoring row that terminates before specifying username and user type");
+          
+          // count non-blank columns
+          int nonBlankColCount = 0;
+          for ( String col : columns ) {
+            if ( col != null && col.trim().length() != 0 ) {
+              ++nonBlankColCount;
+            }
+            
+          }
+          
+          // all blank-- silently skip
+          if ( nonBlankColCount == 0 ) continue;
+          
+          // ignore rows where...
+          // the row is not long enough to include the Username and Account Type columns
+          if ( columns.length <= idxUsername || columns.length <= idxUserType ) {
+            warnings.append("<tr><td>Ignoring row " + row + " -- does not specify a Username and/or Account Type.</tr></td>");
             continue;
           }
+
+          // ignore rows where...
+          // Username is not specified or it is not the anonymousUser and Account Type is blank
+          if ( (columns[idxUsername] == null || columns[idxUsername].trim().length() == 0) ||
+               (!columns[idxUsername].equals(User.ANONYMOUS_USER) && (columns[idxUserType] == null || columns[idxUserType].trim().length() == 0)) ) {
+            warnings.append("<tr><td>Ignoring row " + row + " -- Username is not the " + User.ANONYMOUS_USER + " and no Account Type specified.</tr></td>");
+            continue;
+          }
+          
           
           String accType = (idxUserType == -1) ? "ODK" : columns[idxUserType];
           UserType type = (accType == null) ? UserType.ANONYMOUS : UserType.REGISTERED;
@@ -525,6 +563,101 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         // allGroups is empty. This is currently not used.
         ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
         
+        // now scan for duplicate entries for the same username
+        {
+          HashMap<String,HashSet<UserSecurityInfo>> multipleRows = new HashMap<String,HashSet<UserSecurityInfo>>();
+          for ( UserSecurityInfo i : users ) {
+            if ( i.getType() != UserType.REGISTERED ) {
+              continue;
+            }
+            if ( i.getUsername() != null ) {
+              HashSet<UserSecurityInfo> existing;
+              existing = multipleRows.get(i.getUsername());
+              if ( existing == null ) {
+                existing = new HashSet<UserSecurityInfo>();
+                multipleRows.put(i.getUsername(), existing);
+              }
+              existing.add(i);
+            }
+          }
+          for ( Entry<String, HashSet<UserSecurityInfo>> entry : multipleRows.entrySet() ) {
+            if ( entry.getValue().size() != 1 ) {
+              logger.error("users and capabilities .csv upload - invalid csv file");
+              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- " +
+                      "multiple rows define the capabilities for the same username: " + entry.getKey());
+              return;
+            }
+          }
+        }
+        
+        // and scan for duplicate entries for the same e-mail address
+        {
+          HashMap<String,HashSet<UserSecurityInfo>> multipleRows = new HashMap<String,HashSet<UserSecurityInfo>>();
+          for ( UserSecurityInfo i : users ) {
+            if ( i.getType() != UserType.REGISTERED ) {
+              continue;
+            }
+            if ( i.getEmail() != null ) {
+              HashSet<UserSecurityInfo> existing;
+              existing = multipleRows.get(i.getEmail());
+              if ( existing == null ) {
+                existing = new HashSet<UserSecurityInfo>();
+                multipleRows.put(i.getEmail(), existing);
+              }
+              existing.add(i);
+            }
+          }
+          for ( Entry<String, HashSet<UserSecurityInfo>> entry : multipleRows.entrySet() ) {
+            if ( entry.getValue().size() != 1 ) {
+              logger.error("users and capabilities .csv upload - invalid csv file");
+              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- " +
+                      "multiple rows define the capabilities for the same e-mail: " +
+                      entry.getKey().substring(EmailParser.K_MAILTO.length()));
+              return;
+            }
+          }
+        }
+        
+        // now scan for the anonymousUser
+        UserSecurityInfo anonUser = null;
+        for ( UserSecurityInfo i : users ) {
+          if ( i.getType() == UserType.ANONYMOUS ) {
+            if ( anonUser != null ) {
+              logger.error("users and capabilities .csv upload - invalid csv file");
+              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- " +
+                      "multiple rows define the capabilities for the anonymousUser - did you forget to specify Account Type?");
+              return;
+            }
+            anonUser = i;
+          }
+        }
+
+        // and figure out whether the anonymousUser currently has ROLE_ATTACHMENT_VIEWER capabilities
+        // (these allow Google Earth to access the server). 
+        //
+        // If it does, preserve that capability.
+        // To do this, fetch the existing info for anonymous...
+        UserSecurityInfo anonExisting = new UserSecurityInfo(User.ANONYMOUS_USER,
+            User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS);
+        SecurityServiceUtil.setAuthenticationListsForSpecialUser(anonExisting,
+              GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
+        // test if the existing anonymous had the capability
+        if ( anonExisting.getAssignedUserGroups().contains(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER) ) {
+          if ( anonUser == null ) {
+            // no anonUser specified in the incoming .csv -- add it with just that capability.
+            TreeSet<GrantedAuthorityName> auths = new TreeSet<GrantedAuthorityName>();
+            auths.add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+            anonExisting.setAssignedUserGroups(auths);
+            users.add(anonExisting);
+          } else {
+            // add this capability to the existing set of capabilities
+            anonUser.getAssignedUserGroups().add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+          }
+        }
+
         SecurityServiceUtil.setStandardSiteAccessConfiguration( users, allGroups, cc ); 
         
         // GAE requires some settle time before these entries will be
@@ -536,11 +669,26 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
           resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
           resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
           PrintWriter out = resp.getWriter();
-          out.write(HtmlConsts.HTML_OPEN);
-          out.write(HtmlConsts.BODY_OPEN);
+
+          StringBuilder headerString = new StringBuilder();
+          headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
+          headerString.append("\" />");
+          headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_BUTTON_STYLE_RESOURCE));
+          headerString.append("\" />");
+          headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_TABLE_STYLE_RESOURCE));
+          headerString.append("\" />");
+          headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_NAVIGATION_STYLE_RESOURCE));
+          headerString.append("\" />");
+
+          // header info
+          beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
           if (warnings.length() != 0) {
             out.write("<p>users and capabilities .csv uploaded with warnings.</p>"
-                + "<table><th><td>Field Name</td></th>");
+                + "<table>");
             out.write(warnings.toString());
             out.write("</table>");
           } else {
@@ -549,9 +697,8 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
           out.write("<p>Click ");
   
           out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
-          out.write(" to return to reset users and capabilities page.</p>");
-          out.write(HtmlConsts.BODY_CLOSE);
-          out.write(HtmlConsts.HTML_CLOSE);
+          out.write(" to return to Upload users and capabilities .csv page.</p>");
+          finishBasicHtmlResponse(resp);
         } else {
           addOpenRosaHeaders(resp);
           resp.setContentType(HtmlConsts.RESP_TYPE_XML);
@@ -561,7 +708,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
           if (warnings.length() != 0) {
             StringBuilder b = new StringBuilder();
             b.append("<p>users and capabilities .csv uploaded with warnings.</p>"
-                + "<table><th><td>Field Name</td></th>");
+                + "<table>");
             b.append(warnings.toString());
             b.append("</table>");
             out.write("<message>");
