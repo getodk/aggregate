@@ -135,7 +135,13 @@ public class AccessConfigurationSheet extends Composite {
       // site admin must not be the anonymous user
       boolean badSiteAdmin = auth.equals(GrantedAuthorityName.GROUP_SITE_ADMINS)
           && (key.getType() == UserType.ANONYMOUS);
-      return !(badCollector || badSiteAdmin);
+      // tables admin must not be the anonymous user
+      boolean badTablesAdmin = auth.equals(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+          && (key.getType() == UserType.ANONYMOUS);
+      // tables super-user must not be the anonymous user
+      boolean badTablesSuperUser = auth.equals(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
+          && (key.getType() == UserType.ANONYMOUS);
+      return !(badCollector || badSiteAdmin || badTablesAdmin || badTablesSuperUser);
     }
   }
 
@@ -151,6 +157,16 @@ public class AccessConfigurationSheet extends Composite {
     public boolean isVisible(UserSecurityInfo key) {
       if (auth == GrantedAuthorityName.GROUP_SITE_ADMINS) {
         // anonymous user should not be able to be a site admin
+        return (key.getType() != UserType.ANONYMOUS);
+      }
+
+      if (auth == GrantedAuthorityName.GROUP_ADMINISTER_TABLES) {
+        // anonymous user should not be able to be a tables admin
+        return (key.getType() != UserType.ANONYMOUS);
+      }
+
+      if (auth == GrantedAuthorityName.GROUP_SUPER_USER_TABLES) {
+        // anonymous user should not be able to be a tables super-user
         return (key.getType() != UserType.ANONYMOUS);
       }
 
