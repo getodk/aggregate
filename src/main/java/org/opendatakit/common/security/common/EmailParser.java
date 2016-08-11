@@ -405,7 +405,7 @@ public final class EmailParser {
    *
    */
   public static class Email {
-    enum Form {
+    public static enum Form {
       EMAIL, USERNAME
     };
 
@@ -429,6 +429,10 @@ public final class EmailParser {
       this.email = email;
     }
 
+    public Form getType() {
+      return type;
+    }
+    
     public String getUri() {
       return uri;
     }

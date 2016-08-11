@@ -233,6 +233,33 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>get-users-list</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.GetActiveUsersServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>get-users-list</servlet-name>
+        <url-pattern>/users/list</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>get-all-access</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.GetUsersAndPermissionsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>get-all-access</servlet-name>
+        <url-pattern>/ssl/get-users-and-permissions</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>manage-all-access</servlet-name>
+        <servlet-class>org.opendatakit.aggregate.servlet.ResetUsersAndPermissionsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>manage-all-access</servlet-name>
+        <url-pattern>/ssl/reset-users-and-permissions</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>manage-passwords</servlet-name>
         <servlet-class>org.opendatakit.aggregate.servlet.UserManagePasswordsServlet</servlet-class>
     </servlet>
