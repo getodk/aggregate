@@ -84,7 +84,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
   /**
    * Title for generated webpage
    */
-  private static final String TITLE_INFO = "Reset Users and Permssions via .csv Upload";
+  private static final String TITLE_INFO = "Define Users and Permssions via .csv Upload";
 
   private static final String UPLOAD_PAGE_BODY_START =
 
@@ -96,10 +96,10 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
       + "     <table id=\"uploadTable\">"
       + "      <tr>"
       + "         <td><label for=\"access_def_file\">users and capabilities csv file:</label></td>"
+      + "      </tr><tr>"
       + "         <td><input id=\"access_def_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
       + "            name=\"access_def_file\" /></td>"
-      + "      </tr>\n"
-      + "      <tr>"
+      + "      </tr><tr>"
       + "         <td><input id=\"reset_permissions\" type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Update Permissions\" /></td>"
       + "         <td />"
       + "      </tr>"
@@ -240,13 +240,15 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         inputCsv = usersAndPermissionsCsv.getStream().toString(HtmlConsts.UTF8_ENCODE);
       }
 
+      StringReader csvContentReader = null;
+      RFC4180CsvReader csvReader = null;
       try {
         // we need to build up the UserSecurityInfo records for all the users
         ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>(); 
         
         // build reader for the csv content
-        StringReader csvContentReader = new StringReader(inputCsv);
-        RFC4180CsvReader csvReader = new RFC4180CsvReader(csvContentReader);
+        csvContentReader = new StringReader(inputCsv);
+        csvReader = new RFC4180CsvReader(csvContentReader);
         
         // get the column headings -- these mimic those in Site Admin / Permissions table. 
         // Order is irrelevant; no change-password column.
@@ -730,6 +732,13 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             e.toString());
+      } finally {
+        if (csvReader != null ) {
+          csvReader.close();
+        }
+        if (csvContentReader != null ) {
+          csvContentReader.close();
+        }
       }
 
     } catch (FileUploadException e) {
