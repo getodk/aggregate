@@ -122,7 +122,7 @@ public class FormUploadServlet extends ServletUtilBase {
       + "<br><br>"
       + "<p id=\"note\"><b><font color=\"red\">NOTE:</font> If the form definition contains string answers the string data will be truncated to "
       + Long.toString(PersistConsts.DEFAULT_MAX_STRING_LENGTH)
-      + " characters.</b>  See ODK Aggregate 1.0 documentation for how to increase (or decrease) this size.</p>"
+      + " characters.</b>  See ODK Aggregate 1.x documentation for how to increase (or decrease) this size.</p>"
       + "<br>"
       + "<p>On ODK Collect 1.1.7 and higher, the file named \"<code>form_logo.png</code>\","
       + "if present in the media folder, will be displayed as the form's logo. </p>" + "</div>\n";
@@ -264,9 +264,24 @@ public class FormUploadServlet extends ServletUtilBase {
           // web page -- show HTML response
           resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
           resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+
+          StringBuilder headerString = new StringBuilder();
+          headerString.append("<script type=\"application/javascript\" src=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_SCRIPT_RESOURCE));
+          headerString.append("\"></script>");
+          headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_STYLE_RESOURCE));
+          headerString.append("\" />");
+          headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.UPLOAD_BUTTON_STYLE_RESOURCE));
+          headerString.append("\" />");
+          headerString.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+          headerString.append(cc.getWebApplicationURL(ServletConsts.AGGREGATE_STYLE));
+          headerString.append("\" />");
+
+          // header info
+          beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
           PrintWriter out = resp.getWriter();
-          out.write(HtmlConsts.HTML_OPEN);
-          out.write(HtmlConsts.BODY_OPEN);
           if (warnings.length() != 0) {
             out.write("<p>Form uploaded with warnings. There are value fields in the form that do not "
                 + "have <code>&lt;bind/&gt;</code> declarations or those <code>&lt;bind/&gt;</code> "
@@ -287,8 +302,7 @@ public class FormUploadServlet extends ServletUtilBase {
 
           out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
           out.write(" to return to add new form page.</p>");
-          out.write(HtmlConsts.BODY_CLOSE);
-          out.write(HtmlConsts.HTML_CLOSE);
+          finishBasicHtmlResponse(resp);
         } else {
           addOpenRosaHeaders(resp);
           resp.setContentType(HtmlConsts.RESP_TYPE_XML);

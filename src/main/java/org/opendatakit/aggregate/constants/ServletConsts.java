@@ -147,6 +147,10 @@ public final class ServletConsts {
 
   public static final String UPLOAD_BUTTON_STYLE_RESOURCE = "stylesheets/button.css";
 
+  public static final String UPLOAD_TABLE_STYLE_RESOURCE = "stylesheets/table.css";
+
+  public static final String UPLOAD_NAVIGATION_STYLE_RESOURCE = "stylesheets/navigation.css";
+
   public static final String AGGREGATE_STYLE = "AggregateUI.css";
 
 }
