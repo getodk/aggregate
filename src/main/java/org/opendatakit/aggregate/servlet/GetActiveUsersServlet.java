@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -56,16 +57,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Servlet to return a list of the active users on the system. This servlet requires
  * that the caller be a registered user of the system (access is denied to anonymous).
  * 
- * The returned list will contain just the current user_id if the user does not have
- * Site Admin, Tables Admin or Tables super-user privileges.
+ * The returned list will contain just the entry for the current user_id if that
+ * user does not have Site Admin, Tables Admin or Tables super-user privileges.
  * 
  * The list is a JSON serialization of:
  * 
- * ArrayList<Map<String,String>>
+ * ArrayList<Map<String,Object>>
  * 
- * Where the map contains 2 entries:
- *    user_id:  
+ * Where the map contains 3 entries:
+ *    user_id: 
  *    full_name:
+ *    roles:
  *    
  * user_id is of the form:
  *    anonymous
@@ -75,6 +77,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * full_name is the full name for that user and is guaranteed to not be null.
  * If the user does not have Site Admin, Tables Admin or Tables Super-user privileges, 
  * then we return a list with just that user's user id and friendly name. 
+ * 
+ * roles is a list of roles that this user has.
  * 
  * @author mitchellsundt@gmail.com
  *
@@ -95,9 +99,20 @@ public class GetActiveUsersServlet extends HttpServlet {
 
   private static final String USER_ID = "user_id";
   private static final String FULL_NAME = "full_name";
+  private static final String ROLES = "roles";
   
   private static final Log logger = LogFactory.getLog(GetActiveUsersServlet.class);
 
+  private void processRoles(TreeSet<GrantedAuthorityName> grants, HashMap<String,Object> hashMap) {
+    ArrayList<String> roleNames = new ArrayList<String>();
+    for ( GrantedAuthorityName grant : grants ) {
+      if (grant.name().startsWith(GrantedAuthorityName.ROLE_PREFIX)) {
+        roleNames.add(grant.name());
+      }
+    }
+    hashMap.put(ROLES,  roleNames);
+  }
+  
   /**
    * Handler for HTTP Get request that returns the list of roles assigned to this user.
    * 
@@ -110,26 +125,34 @@ public class GetActiveUsersServlet extends HttpServlet {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    Set<GrantedAuthority> grants = cc.getCurrentUser().getDirectAuthorities();
-    RoleHierarchy rh = (RoleHierarchy) cc.getBean(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER);
-    Collection<? extends GrantedAuthority> roles = rh.getReachableGrantedAuthorities(grants);
+    TreeSet<GrantedAuthorityName> grants;
+    try {
+      grants = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
+    } catch (ODKDatastoreException e) {
+      logger.error("Retrieving users persistence error: " + e.toString());
+      e.printStackTrace();
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.toString());
+      return;
+    }
+    
     boolean returnFullList = false;
-    for ( GrantedAuthority a : roles ) {
-      if (a.getAuthority().equals(GrantedAuthorityName.GROUP_SITE_ADMINS.name()) ||
-          a.getAuthority().equals(GrantedAuthorityName.GROUP_ADMINISTER_TABLES.name()) ||
-          a.getAuthority().equals(GrantedAuthorityName.GROUP_SUPER_USER_TABLES.name())) {
+    for ( GrantedAuthorityName grant : grants ) {
+      if (grant.equals(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN) ||
+          grant.equals(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ||
+          grant.equals(GrantedAuthorityName.ROLE_SUPER_USER_TABLES)) {
         returnFullList = true;
         break;
       }
     }
     
     // returned object (will be JSON serialized).
-    ArrayList<HashMap<String,String>> listOfUsers = new ArrayList<HashMap<String,String>>();
+    ArrayList<HashMap<String,Object>> listOfUsers = new ArrayList<HashMap<String,Object>>();
     
-    HashMap<String,String> hashMap; 
+    HashMap<String,Object> hashMap; 
     if ( !returnFullList ) {
       // only return ourself -- we don't have privileges to see everyone
-      hashMap = new HashMap<String,String>();
+      hashMap = new HashMap<String,Object>();
       User user = cc.getCurrentUser();
       if ( user.isAnonymous() ) {
         hashMap.put(USER_ID, "anonymous"); 
@@ -161,13 +184,14 @@ public class GetActiveUsersServlet extends HttpServlet {
           }
         }
       }
+      processRoles(grants, hashMap);
       listOfUsers.add(hashMap);
     } else {
       // we have privileges to see all users -- return the full mapping
       try {
-        ArrayList<UserSecurityInfo> allUsers = SecurityServiceUtil.getAllUsers(false, cc);
+        ArrayList<UserSecurityInfo> allUsers = SecurityServiceUtil.getAllUsers(true, cc);
         for (UserSecurityInfo i : allUsers ) {
-          hashMap = new HashMap<String,String>();
+          hashMap = new HashMap<String,Object>();
           if ( i.getType() == UserType.ANONYMOUS ) {
             hashMap.put(USER_ID, "anonymous"); 
             hashMap.put(FULL_NAME, User.ANONYMOUS_USER_NICKNAME);
@@ -187,6 +211,7 @@ public class GetActiveUsersServlet extends HttpServlet {
               hashMap.put(FULL_NAME, i.getFullName());
             }
           }
+          processRoles(i.getGrantedAuthorities(), hashMap);
           listOfUsers.add(hashMap);
         }
       } catch (DatastoreFailureException e) {
