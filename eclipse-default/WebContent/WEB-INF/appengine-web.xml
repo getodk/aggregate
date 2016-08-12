@@ -13,9 +13,9 @@
     <threadsafe>true</threadsafe>
 			
 	<automatic-scaling>
-		<max-concurrent-requests>20</max-concurrent-requests>
+		<max-concurrent-requests>100</max-concurrent-requests>
 		<!-- Increase latency trigger for new instance. We take about 15 seconds to spin up -->
-		<max-pending-latency>12s</max-pending-latency>
+		<max-pending-latency>14s</max-pending-latency>
 	</automatic-scaling>
 
 	<!--  Configure static error handlers -->
