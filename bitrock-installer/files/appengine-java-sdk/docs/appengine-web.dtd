@@ -7,7 +7,7 @@
                              public-root?, inbound-services?, env?,
                              precompilation-enabled?, admin-console?,
                              static-error-handlers?, warmup-requests-enabled?,
-                             threadsafe?, servers?, code-lock?, vm?, pagespeed?,
+                             threadsafe?, servers?, code-lock?, vm?,
                              class-loader-config?, url-stream-handler?,
                              use-google-connector-j?, vm-health-check?)>
 <!ATTLIST appengine-web-app
@@ -125,7 +125,6 @@
 <!ELEMENT resident (#PCDATA)>
 <!ELEMENT access (#PCDATA)>
 <!ELEMENT threads (#PCDATA)>
-<!ELEMENT pagespeed (url-blacklist|domain-to-rewrite|enabled-rewriter|disabled-rewriter)*>
 <!ELEMENT url-blacklist (#PCDATA)>
 <!ELEMENT domain-to-rewrite (#PCDATA)>
 <!ELEMENT enabled-rewriter (#PCDATA)>
