@@ -11,7 +11,13 @@
 
     <!-- Allows App Engine to send multiple requests to one instance in parallel: -->
     <threadsafe>true</threadsafe>
-	
+			
+	<automatic-scaling>
+		<max-concurrent-requests>20</max-concurrent-requests>
+		<!-- Increase latency trigger for new instance. We take about 15 seconds to spin up -->
+		<max-pending-latency>12s</max-pending-latency>
+	</automatic-scaling>
+
 	<!--  Configure static error handlers -->
 	<static-error-handlers>
 		<handler file="service-error.html"/>
