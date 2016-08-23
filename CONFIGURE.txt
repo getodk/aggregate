@@ -121,7 +121,7 @@ openFile
 -XX:MaxPermSize=1536m
 ------------------------------end----------------------
 
-(5)  Download "Google AppEngine SDK for Java". We currently use 1.9.34
+(5)  Download "Google AppEngine SDK for Java". We currently use 1.9.42
 https://cloud.google.com/appengine/downloads 
  (scroll down).
  
@@ -247,7 +247,7 @@ Select and remove the "App Engine SDK" entry.
 
 Click "Add Library"
 
-Choose Server Runtime / Google AppEngine (1.9.34)
+Choose Server Runtime / Google AppEngine (1.9.42)
 
 And accept it (this will create a Google App Engine entry).
 
@@ -388,7 +388,7 @@ If you've done this correctly, the Program Arguments would be something like:
 
 And the VM Arguments section should become something like:
 
--javaagent:[path...to...]\appengine-java-sdk-1.9.34\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
+-javaagent:[path...to...]\appengine-java-sdk-1.9.42\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
 
 If you tried to skip a step, the server might not be configured correctly.
 

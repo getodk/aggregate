@@ -281,7 +281,7 @@ public class SecurityServiceUtil {
     removeBadGrantedAuthorities(badGrants, cc);
   }
 
-  static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo,
+  public static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo,
       GrantedAuthorityName specialGroup, CallingContext cc) throws DatastoreFailureException {
     RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
     Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
@@ -551,16 +551,29 @@ public class SecurityServiceUtil {
           for (GrantedAuthorityName a : i.getAssignedUserGroups()) {
             if (anonAuth.getAuthority().equals(a.name()))
               continue; // avoid circularity...
+            // only allow ROLE_ATTACHMENT_VIEWER and GROUP_ assignments.
+            if (!GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER.equals(a) &&
+                !a.name().startsWith(GrantedAuthorityName.GROUP_PREFIX)) {
+              continue;
+            }
+            // do not allow Site Admin assignments for Anonymous --
+            // or Tables super-user or Tables Administrator.
+            // those all give access to the full set of users on the system
+            // and giving that information to Anonymous is a security
+            // risk.
             if (GrantedAuthorityName.GROUP_SITE_ADMINS.equals(a) ||
-                GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.equals(a)) {
-              continue; // do not allow Site Admin assignments for Anonymous.
+                GrantedAuthorityName.GROUP_ADMINISTER_TABLES.equals(a) ||
+                GrantedAuthorityName.GROUP_SUPER_USER_TABLES.equals(a)) {
+              continue; 
             }
             anonGrantStrings.add(a.name());
           }
           break;
         }
       }
-      users.remove(anonUser);
+      if (anonUser != null ) {
+        users.remove(anonUser);
+      }
     }
 
     // scan through the users and remove any entries under assigned user groups 
