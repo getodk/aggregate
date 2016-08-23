@@ -25,6 +25,11 @@
    set passwords, and grant these capabilities to other users.</li></ul>
 <h3>Configure Users and Capabilities using .csv file</h3>
 <odk:UploadUsersAndPermsServletPopupButton styleName="gwt-Button" ui:field="uploadCsv"/>
+<br/>
+<br/>
+<g:Anchor ui:field="downloadCsv" text="Download current UsersAndCapabilities.csv"/>
+<br/>
+<hr/>
 <h3>Edit Users</h3>
 <p>Change usernames, delete usernames, grant capabilities and set passwords for ODK accounts below.</p>
 <c:CellTable ui:field="userTable" />

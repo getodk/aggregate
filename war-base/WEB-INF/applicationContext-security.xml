@@ -95,6 +95,7 @@
 
 		<!-- require that the client be a real username or google account; returns roles granted to that user -->
 		<intercept-url pattern="/roles/granted" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
+		<intercept-url pattern="/users/list" access="isFullyAuthenticated() and hasRole('ROLE_USER')" />
 
 		<intercept-url pattern="/view/binaryData" access="hasRole('ROLE_DATA_VIEWER') or hasRole('ROLE_ATTACHMENT_VIEWER')" />
 		<intercept-url pattern="/view/**" access="hasRole('ROLE_DATA_VIEWER')" />
