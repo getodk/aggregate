@@ -26,4 +26,6 @@ public interface ITaskLockType {
 	public String getName();
 	
 	public long getLockExpirationTimeout();
+	
+	public long getMinSettleTime();
 }
