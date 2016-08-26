@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.ITaskLockType;
+import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
@@ -42,12 +43,15 @@ public class SubmissionLockTemplate {
   private static final int INITIAL_MAX_BACKOFF = 250;
   
   private enum SubmissionTaskLockType implements ITaskLockType {
-    MODIFICATION(66000);
+    MODIFICATION(66000, PersistConsts.MIN_SETTLE_MILLISECONDS);
 
     private long timeout;
+    private long minSettleTime;
 
-    private SubmissionTaskLockType(long timeout) {
+
+    private SubmissionTaskLockType(long timeout, long minSettle) {
       this.timeout = timeout;
+      this.minSettleTime = minSettle;
     }
 
     @Override
@@ -58,6 +62,11 @@ public class SubmissionLockTemplate {
     @Override
     public String getName() {
       return name();
+    }
+    
+    @Override
+    public long getMinSettleTime() {
+      return minSettleTime;
     }
   }
   

@@ -228,8 +228,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -313,8 +313,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -413,8 +413,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -730,8 +730,8 @@ public class DataManager {
 
       List<DbColumnDefinitionsEntity> columns = null;
       Entity entity = null;
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
       try {
         propsLock.acquire();
 
@@ -914,8 +914,8 @@ public class DataManager {
       
       String dataETagAtModification = null;
       
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
 
       List<DbColumnDefinitionsEntity> columns = null;
       try {
@@ -944,7 +944,7 @@ public class DataManager {
 
         revertPendingChanges(entry, columns, table, logTable);
 
-        logger.error("Before loop Time elpased: " + (System.currentTimeMillis() - startTime));
+        logger.info("Before loop Time elpased: " + (System.currentTimeMillis() - startTime));
 
         DataKeyValueDeepComparator dc = new DataKeyValueDeepComparator(columns);
 
@@ -1070,7 +1070,7 @@ public class DataManager {
           rowOutcomes.add(rowWrapper.getOutcome());
         }
 
-        logger.error("End loop Time elpased: " + (System.currentTimeMillis() - startTime));
+        logger.info("End loop Time elpased: " + (System.currentTimeMillis() - startTime));
       } finally {
         propsLock.release();
       }
@@ -1082,7 +1082,7 @@ public class DataManager {
       if (rows != null) {
         long time = (System.currentTimeMillis() - startTime);
         int numRows = rows.getRows().size();
-        logger.error("Time: " + time + " size: " + numRows + " per iteration " + (time / numRows));
+        logger.info("Time: " + time + " size: " + numRows + " per iteration " + (time / numRows));
       }
 
       return new RowOutcomeList(rowOutcomes, dataETagAtModification);
@@ -1160,8 +1160,8 @@ public class DataManager {
 
       List<DbColumnDefinitionsEntity> columns = null;
       Entity entity = null;
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
       try {
         propsLock.acquire();
         Sequencer sequencer = new Sequencer(cc);
@@ -1381,8 +1381,8 @@ public class DataManager {
 
       userPermissions.checkPermission(appId, tableId, TablePermission.DELETE_ROW);
       String dataETagAtModification = null;
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
       try {
         propsLock.acquire();
         Sequencer sequencer = new Sequencer(cc);
@@ -1559,8 +1559,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     List<?> result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
       Sequencer sequencer = new Sequencer(cc);
@@ -1650,8 +1650,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 

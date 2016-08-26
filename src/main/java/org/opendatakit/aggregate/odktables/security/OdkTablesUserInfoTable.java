@@ -23,7 +23,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
-import org.opendatakit.aggregate.odktables.LockTemplate;
+import org.opendatakit.aggregate.odktables.OdkTablesLockTemplate;
 import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -261,8 +261,8 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
       if (odkTablesUserInfo == null) {
         //
         // GAIN LOCK
-        LockTemplate tablesUserPermissions = new LockTemplate(externalUID,
-            ODKTablesTaskLockType.TABLES_USER_PERMISSION_CREATION, cc);
+        OdkTablesLockTemplate tablesUserPermissions = new OdkTablesLockTemplate(externalUID,
+            ODKTablesTaskLockType.TABLES_USER_PERMISSION_CREATION, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
         try {
           tablesUserPermissions.acquire();
           // attempt to re-fetch the record.
