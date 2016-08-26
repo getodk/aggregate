@@ -104,37 +104,36 @@ public class ElementType {
     }
     String elementType = type.substring(0, idxMax);
 
-    ElementDataType dataType = null;
+    ElementDataType elementDataType = null;
     try {
-      dataType = ElementDataType.valueOf(elementType);
+      elementDataType = ElementDataType.valueOf(elementType);
     } catch (IllegalArgumentException e) {
       // this is expected
     }
-    if (dataType == null && hasChildren) {
-      dataType = ElementDataType.object;
-    }
 
-    if (hasChildren && !(dataType == ElementDataType.object || dataType == ElementDataType.array)) {
-      throw new IllegalArgumentException(
-          "malformed ElementType - invalid primitive name for elementType that is an object type");
-    }
-    ElementDataType elementDataType = dataType;
-
+    ElementDataType dataType = null;
     if (databaseType != null) {
       // NOTE: throws IllegaArgumentException if unrecognized type
       dataType = ElementDataType.valueOf(databaseType);
-      if (dataType == ElementDataType.object && !hasChildren) {
-        throw new IllegalArgumentException("malformed elementType -- cannot declare a leaf object");
-      }
+    } else {
+	  dataType = elementDataType;
+	  if (dataType == null) {
+        dataType = (hasChildren ? ElementDataType.object : ElementDataType.string);
+	  }
+	}
+
+    if (hasChildren && !(dataType == ElementDataType.object || dataType == ElementDataType.array)) {
+      throw new IllegalArgumentException(
+          "malformed ElementType - invalid primitive datatype for elementType with children: " + type);
+    }
+	
+    if (!hasChildren && (dataType == ElementDataType.object || dataType == ElementDataType.array)) {
+	  throw new IllegalArgumentException("malformed elementType -- cannot declare an object or array having no children: " + type);
     }
 
     if (elementDataType != null && elementDataType != dataType) {
       throw new IllegalArgumentException(
-          "malformed elementType -- attempting to explicitly re-type a primitive type");
-    }
-
-    if (dataType == null) {
-      dataType = ElementDataType.string;
+          "malformed elementType -- attempting to explicitly re-type a primitive type: " + type);
     }
 
     return new ElementType(elementType, dataType, auxInfo);

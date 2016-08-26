@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.odktables;
 
 import org.opendatakit.common.persistence.ITaskLockType;
+import org.opendatakit.common.persistence.PersistConsts;
 
 /**
  * There is only one lock for ODK Tables data.
@@ -25,13 +26,15 @@ import org.opendatakit.common.persistence.ITaskLockType;
  *
  */
 public enum ODKTablesTaskLockType implements ITaskLockType {
-  TABLES_NON_PERMISSIONS_CHANGES(66000),
-  TABLES_USER_PERMISSION_CREATION(66000);
+  TABLES_NON_PERMISSIONS_CHANGES(66000, PersistConsts.MIN_SETTLE_MILLISECONDS),
+  TABLES_USER_PERMISSION_CREATION(66000, PersistConsts.MIN_SETTLE_MILLISECONDS);
 
   private long timeout;
+  private long minSettleTime;
 
-  private ODKTablesTaskLockType(long timeout) {
+  private ODKTablesTaskLockType(long timeout, long minSettle) {
     this.timeout = timeout;
+    this.minSettleTime = minSettle;
   }
 
   @Override
@@ -43,4 +46,10 @@ public enum ODKTablesTaskLockType implements ITaskLockType {
   public String getName() {
     return name();
   }
+
+  @Override
+  public long getMinSettleTime() {
+    return minSettleTime;
+  }
+  
 }

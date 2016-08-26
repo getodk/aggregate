@@ -138,8 +138,8 @@ public class FileManager {
       throw new IllegalArgumentException("filePath cannot be null!");
     }
 
-    LockTemplate propsLock = new LockTemplate(tableId, null,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.MEDIUM, cc);
     try {
       propsLock.acquire();
 
@@ -186,8 +186,8 @@ public class FileManager {
 
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
 
-    LockTemplate propsLock = new LockTemplate(tableId, null,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.MEDIUM, cc);
     try {
       propsLock.acquire();
 
@@ -283,8 +283,8 @@ public class FileManager {
 
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
 
-    LockTemplate propsLock = new LockTemplate(tableId, null,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.MEDIUM, cc);
     try {
       propsLock.acquire();
 
