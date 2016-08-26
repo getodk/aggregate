@@ -104,8 +104,8 @@ public class InstanceFileManager {
 
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
-      LockTemplate propsLock = new LockTemplate(tableId, rowId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, rowId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.LONG, cc);
       try {
         propsLock.acquire();
 
@@ -192,8 +192,8 @@ public class InstanceFileManager {
 
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
 
-      LockTemplate propsLock = new LockTemplate(tableId, rowId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, rowId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.LONG, cc);
       try {
         propsLock.acquire();
 
@@ -294,8 +294,8 @@ public class InstanceFileManager {
 
       userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
-      LockTemplate propsLock = new LockTemplate(tableId, rowId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, rowId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.LONG, cc);
 
       try {
         propsLock.acquire();
@@ -356,8 +356,8 @@ public class InstanceFileManager {
 
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
 
-      LockTemplate propsLock = new LockTemplate(tableId, rowId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, rowId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.LONG, cc);
 
       try {
         propsLock.acquire();

@@ -19,6 +19,8 @@ package org.opendatakit.aggregate.odktables;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -29,61 +31,85 @@ import org.opendatakit.common.web.CallingContext;
  * Make datastore locks a little easier. NOT threadsafe.
  *
  * @author the.dylan.price@gmail.com
+ * @author wbrunette@gmail.com
  *
  */
-public class LockTemplate {
-  // At 4 tries and 250 initial backoff, the maximum amount of time a single
-  // acquire or release can take is:
-  // 250 + 500 + 1000 + 2000 = 3750
-  private static final int TRIES = 4;
-  private static final int INITIAL_MAX_BACKOFF = 250;
+public class OdkTablesLockTemplate {
+  public enum DelayStrategy {
+    SHORT(200), MEDIUM(1200), LONG(2500);
+
+    private final long baseBackOffTime;
+
+    private DelayStrategy(long baseBackOffTime) {
+      this.baseBackOffTime = baseBackOffTime;
+    }
+
+    public long getBaseBackOffTime() {
+      return baseBackOffTime;
+    }
+
+  }
+
+  // At 4 tries and 250 baseBackOffTime, the maximum amount of time a single
+  // acquire or release can take is: 250 + 500 + 1000 + 2000 = 3750
+  private static final int TRIES = 5;
 
   private String tableId;
   private ODKTablesTaskLockType type;
   private Datastore ds;
   private User user;
   private String lockId;
+  private DelayStrategy delay;
   private long maxBackoffMs;
   private Random rand;
+  private Log log;
 
   /**
-   * File-manager-specific lock for accessing app-level, table-level and instance-level files and manifests.
-   * For app-level and table-level files, the rowId should be an empty string or null. For instance-level files,
-   * the rowId is mapped into one of 256 buckets to allow for multiple simultaneous instance-level file
-   * accesses.
+   * File-manager-specific lock for accessing app-level, table-level and
+   * instance-level files and manifests. For app-level and table-level files,
+   * the rowId should be an empty string or null. For instance-level files, the
+   * rowId is mapped into one of 256 buckets to allow for multiple simultaneous
+   * instance-level file accesses.
    * 
    * @param tableId
    * @param rowId
    * @param type
+   * @param delay
+   *          TODO
    * @param cc
    */
-  public LockTemplate(String tableId, String rowId, ODKTablesTaskLockType type, CallingContext cc) {
-    if ( rowId == null || rowId.length() == 0 ) {
-      if ( tableId.length() == 0 ) {
-        this.tableId = "app-level|";
+  public OdkTablesLockTemplate(String tableId, String rowId, ODKTablesTaskLockType type,
+      DelayStrategy delay, CallingContext cc) {
+    String tmpTableId;
+    if (rowId == null || rowId.length() == 0) {
+      if (tableId.length() == 0) {
+        tmpTableId = "app-level|";
       } else {
-        this.tableId = "table-level|" + tableId;
+        tmpTableId = "table-level|" + tableId;
       }
     } else {
-      this.tableId = "row-level|" + tableId + "|" + Integer.toHexString(rowId.hashCode() & 0xff);
+      tmpTableId = "row-level|" + tableId + "|" + Integer.toHexString(rowId.hashCode() & 0xff);
     }
-    
-    this.type = type;
-    this.ds = cc.getDatastore();
-    this.user = cc.getCurrentUser();
-    this.lockId = UUID.randomUUID().toString();
-    this.maxBackoffMs = INITIAL_MAX_BACKOFF;
-    this.rand = new Random();
+
+    constructorHelper(tmpTableId, type, cc, delay);
   }
 
-  public LockTemplate(String tableId, ODKTablesTaskLockType type, CallingContext cc) {
+  public OdkTablesLockTemplate(String tableId, ODKTablesTaskLockType type, DelayStrategy delay,
+      CallingContext cc) {
+    constructorHelper(tableId, type, cc, delay);
+  }
+
+  private void constructorHelper(String tableId, ODKTablesTaskLockType type, CallingContext cc,
+      DelayStrategy delay) {
     this.tableId = tableId;
     this.type = type;
     this.ds = cc.getDatastore();
     this.user = cc.getCurrentUser();
     this.lockId = UUID.randomUUID().toString();
-    this.maxBackoffMs = INITIAL_MAX_BACKOFF;
+    this.delay = delay;
+    this.maxBackoffMs = delay.getBaseBackOffTime();
     this.rand = new Random();
+    this.log = LogFactory.getLog(FileManifestManager.class);
   }
 
   /**
@@ -95,14 +121,16 @@ public class LockTemplate {
   public void acquire() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
     boolean acquired = false;
-    maxBackoffMs = INITIAL_MAX_BACKOFF;
+    maxBackoffMs = delay.getBaseBackOffTime();
     for (int i = 0; i < TRIES; i++) {
       if (lock.obtainLock(lockId, tableId, type)) {
         acquired = true;
         break;
       } else {
         try {
-          Thread.sleep(getNextBackoff());
+          long backOffTime = getNextBackoff();
+          log.info("acquire lock sleeping for: " + backOffTime);
+          Thread.sleep(backOffTime);
         } catch (RuntimeException e) {
           throw new ODKTaskLockException(e);
         } catch (Exception e) {
@@ -111,8 +139,9 @@ public class LockTemplate {
       }
     }
     if (!acquired) {
-      throw new ODKTaskLockException(String.format("Timed out acquiring lock. "
-          + "lockId: %s, tableId: %s, type: %s", lockId, tableId, type));
+      throw new ODKTaskLockException(
+          String.format("Timed out acquiring lock. " + "lockId: %s, tableId: %s, type: %s", lockId,
+              tableId, type));
     }
   }
 
@@ -124,13 +153,15 @@ public class LockTemplate {
    */
   public void release() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
-    maxBackoffMs = INITIAL_MAX_BACKOFF;
+    maxBackoffMs = delay.getBaseBackOffTime();
     for (int i = 0; i < TRIES; i++) {
       if (lock.releaseLock(lockId, tableId, type)) {
         break;
       } else {
         try {
-          Thread.sleep(getNextBackoff());
+          long backOffTime = getNextBackoff();
+          log.info("release lock sleeping for: " + backOffTime);
+          Thread.sleep(backOffTime);
         } catch (RuntimeException e) {
           throw new ODKTaskLockException(e);
         } catch (Exception e) {
@@ -143,7 +174,8 @@ public class LockTemplate {
   }
 
   private long getNextBackoff() {
-    long backoff = (long) (rand.nextDouble() * maxBackoffMs);
+    long backoff = (long) (rand.nextDouble() * delay.getBaseBackOffTime());
+    backoff += maxBackoffMs;
     maxBackoffMs *= 2;
     return backoff;
   }

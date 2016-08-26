@@ -113,10 +113,11 @@ public class TaskLockImpl implements TaskLock {
    * But, when things go south, we need to back off and wait for the parent
    * entity to settle.
    * 
-   * No idea how long that back-off should be. Try 500ms plus a bit.
+   * No idea how long that back-off should be. Try 1100ms plus a bit since
+   * appengine transactions can take over a second for database to settle
    */
   private void sleepBriefly() {
-    long sleepInterval = 500L + (0xff & RNG.nextInt());
+    long sleepInterval = 1100L + (0xff & RNG.nextInt());
     try {
       Thread.sleep(sleepInterval);
     } catch (InterruptedException e1) {
@@ -183,8 +184,7 @@ public class TaskLockImpl implements TaskLock {
         ODKTaskLockException tle = null;
         String loggingString;
         if (key.equals(lockIdKey)) {
-          loggingString = "removing " +  " lockId: " + lockId
-              + " ";
+          loggingString = "removing " + " lockId: " + lockId + " ";
         } else {
           loggingString = "removing stale lock ";
         }
@@ -242,6 +242,7 @@ public class TaskLockImpl implements TaskLock {
   @Override
   public boolean obtainLock(String lockId, String formId, ITaskLockType taskType) {
     boolean result = false;
+    boolean delayOtherLockExist = false;
     if (lockId == null || formId == null || taskType == null) {
       throw new IllegalArgumentException();
     }
@@ -252,18 +253,26 @@ public class TaskLockImpl implements TaskLock {
         Entity gaeEntity = queryForLock(formId, taskType);
         log.info("Trying to get lock : " + lockId + " " + formId + " " + taskType.getName());
         if (gaeEntity == null) {
+          log.info("No pre-existing lock");
           Key entityGroupKey = createTaskGroupKey(formId, taskType);
           gaeEntity = new Entity(KIND, entityGroupKey);
           updateValuesNpersist(transaction, lockId, formId, taskType, gaeEntity);
           result = true;
         } else {
+          log.info("FOUND pre-existing lock");
           // see if the lock is ours (generally will not be)
           String retrievedLockId = getLockId(gaeEntity);
-          result = lockId.equals(retrievedLockId);
+          if (lockId.equals(retrievedLockId)) {
+            result = true;
+          } else {
+            result = false;
+            delayOtherLockExist = true;
+          }
         }
       } catch (ODKTaskLockException e) {
         // else you did not get the lock
         result = false;
+        log.info("ODK Task Lock Exception: " + e.getMessage());
         e.printStackTrace();
       } catch (Exception e) {
         // might be a ConcurrentModificationException if another transaction is
@@ -285,6 +294,9 @@ public class TaskLockImpl implements TaskLock {
           log.info("Rollback obtainLock : " + lockId + " " + formId + " " + taskType.getName());
           transaction.rollback();
           deleteLockIdMemCache(lockId, formId, taskType);
+          if (delayOtherLockExist) {
+            sleepBriefly();
+          }
           return false;
         }
       }
@@ -299,6 +311,8 @@ public class TaskLockImpl implements TaskLock {
         log.info("Rollback obtainLock : " + lockId + " " + formId + " " + taskType.getName());
         transaction.rollback();
         deleteLockIdMemCache(lockId, formId, taskType);
+      }
+      if (!result) {
         return false;
       }
     }
@@ -356,7 +370,14 @@ public class TaskLockImpl implements TaskLock {
     }
     Long timestamp = getTimestamp(entity);
     Long current = System.currentTimeMillis();
-    log.info("Time left on lock: " + Long.toString(timestamp - current));
+
+    // log the lock
+    String lockId = "UNKNOWN LOCK";
+    Object obj = entity.getProperty(LOCK_ID_PROPERTY);
+    if (obj instanceof String) {
+      lockId = (String) obj;
+    }
+    log.info("LockId: " + lockId + " Time left: " + Long.toString(timestamp - current));
     if (current.compareTo(timestamp) > 0) {
       return true;
     }
@@ -370,14 +391,14 @@ public class TaskLockImpl implements TaskLock {
   public boolean renewLock(String lockId, String formId, ITaskLockType taskType) {
     boolean result = false;
     long originalTimestamp = -1;
-    
+
     if (lockId == null || formId == null || taskType == null) {
       throw new IllegalArgumentException();
     }
-    
+
     Transaction transaction = ds.beginTransaction();
     try {
-     
+
       try {
         Entity gaeEntity = queryForLock(formId, taskType);
         if (gaeEntity != null) {
@@ -411,14 +432,13 @@ public class TaskLockImpl implements TaskLock {
           log.info("Rollback renewLock : " + lockId + " " + formId + " " + taskType.getName());
           transaction.rollback();
           // restore memcache
-          if(originalTimestamp > -1) {
+          if (originalTimestamp > -1) {
             updateLockIdTimestampMemCache(lockId, formId, taskType, originalTimestamp);
           }
           return false;
         }
       }
-      
-      
+
     } catch (Exception e) {
       result = false;
       log.warn("EXCEPTION OUTSIDE try/catch renewing lock, roll back transaction if still active");
@@ -430,13 +450,16 @@ public class TaskLockImpl implements TaskLock {
         transaction.rollback();
         try {
           // restore memcache
-          if(originalTimestamp > -1) {
+          if (originalTimestamp > -1) {
             updateLockIdTimestampMemCache(lockId, formId, taskType, originalTimestamp);
           }
         } catch (ODKTaskLockException e) {
-          // trying to restore memCache back to proper state, letting it report error and moving on
+          // trying to restore memCache back to proper state, letting it report
+          // error and moving on
           e.printStackTrace();
         }
+      }
+      if (!result) {
         return false;
       }
     }
@@ -482,15 +505,18 @@ public class TaskLockImpl implements TaskLock {
    * @throws ODKTaskLockException
    */
   private boolean lockVerification(String lockId, String formId, ITaskLockType taskType) {
+    log.info("Starting lock verification");
     Transaction transaction = ds.beginTransaction();
     try {
       Entity verificationEntity = queryForLock(formId, taskType);
       if (verificationEntity == null) {
+        log.error("UNABLE TO LOCATE LOCK");
         throw new ODKTaskLockException("UNABLE TO LOCATE LOCK: " + lockId + " For: " + formId
             + " Task: " + taskType.getName());
       }
       String retrievedLockId = getLockId(verificationEntity);
       if (!lockId.equals(retrievedLockId)) {
+        log.error("OVERWROTE LOCK");
         throw new ODKTaskLockException(
             "SOMEONE OVERWROTE THE LOCK" + " Actual: " + retrievedLockId + " Expected: " + lockId);
       }
@@ -506,12 +532,39 @@ public class TaskLockImpl implements TaskLock {
       }
 
     } catch (ODKTaskLockException e) {
-      // need to roll back transaction before trying to delete the lock that was assumed to be created
-      transaction.rollback(); 
+      // need to roll back transaction before trying to delete the lock that was
+      // assumed to be created
+      transaction.rollback();
       try {
-        log.error("******** LOCK VERIFICATION FAILED ******** !!!!!! Deleting lock just created/updated ....");
+        log.error("******** LOCK VERIFICATION FAILED ********");
+        log.error("CAUSE OF FAILURE: " + e.getMessage());
+        log.error("EXCEPTION TO STRING: " + e.toString());
+        e.printStackTrace();
+        log.error("******** LOCK VERIFICATION FAILED ********");
+        log.error("Deleting lock just created/updated ....");
         deleteLock(lockId, formId, taskType);
       } catch (ODKTaskLockException ex) {
+        log.error("******** LOCK VERIFICATION FAILED ********");
+        log.error("!!!!!! UNABLE TO DELETE LOCK BECAUSE OF EXCEPTION: !!!!!!");
+        ex.printStackTrace();
+      }
+      return false;
+    } catch (Exception e) {
+      // need to roll back transaction before trying to delete the lock that was
+      // assumed to be created
+      transaction.rollback();
+      try {
+        log.error("UNEXPECTED EXCEPTION!!!!");
+        log.error("###### LOCK VERIFICATION FAILED ######");
+        log.error("CAUSE OF FAILURE: " + e.getMessage());
+        log.error("EXCEPTION TO STRING: " + e.toString());
+        e.printStackTrace();
+        log.error("###### LOCK VERIFICATION FAILED ######");
+        log.error("Deleting lock just created/updated ....");
+        deleteLock(lockId, formId, taskType);
+      } catch (ODKTaskLockException ex) {
+        log.error("###### LOCK VERIFICATION FAILED ######");
+        log.error("!!!!!! UNABLE TO DELETE LOCK BECAUSE OF EXCEPTION: !!!!!!");
         ex.printStackTrace();
       }
       return false;
@@ -737,8 +790,7 @@ public class TaskLockImpl implements TaskLock {
                 youngestActiveTimestamp = timestamp;
               } else {
                 // same logic as datastore
-                if (Math.abs(youngestActiveTimestamp
-                    - timestamp) < taskType.getMinSettleTime()) {
+                if (Math.abs(youngestActiveTimestamp - timestamp) < taskType.getMinSettleTime()) {
                   throw new ODKTaskLockException(MULTIPLE_RESULTS_ERROR);
                 }
                 if (youngestActiveTimestamp > timestamp) {
