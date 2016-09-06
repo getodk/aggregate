@@ -111,9 +111,25 @@
 		<intercept-url pattern="/remote_api" access="true" />
 
 		<!-- ODK Tables API (order is important) -->
-		<intercept-url pattern="/odktables/*/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<intercept-url pattern="/odktables/*/manifest/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/files/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/instances/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/diff" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/query/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/attachments/*/manifest" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/attachments/*/download" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="POST" />
+
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/rows/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/attachments/*/file/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		
+		<intercept-url pattern="/odktables/*/**" access="hasRole('ROLE_ADMINISTER_TABLES')" />
+		
 		<intercept-url pattern="/odktables/" access="hasRole('ROLE_USER')" />
 		<intercept-url pattern="/odktables" access="hasRole('ROLE_USER')" />
+
 
 		<!-- odk tables file upload and download stuff -->
 		<intercept-url pattern="/appLevelFileUpload/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES') or hasRole('ROLE_ADMINISTER_TABLES')" />
