@@ -111,7 +111,41 @@
 		<intercept-url pattern="/remote_api" access="true" />
 
 		<!-- ODK Tables API (order is important) -->
-		<intercept-url pattern="/odktables/*/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<!-- FileManifestService -->
+		<intercept-url pattern="/odktables/*/manifest/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<!--  FileService -->
+		<intercept-url pattern="/odktables/*/files/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<!--  TableService -->
+		<intercept-url pattern="/odktables/*/tables/*" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/properties/*" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<!-- RealizedTableService -->
+		<intercept-url pattern="/odktables/*/tables/*/ref/*" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<!-- OdkTables -->
+		<intercept-url pattern="/odktables/*/clientVersions" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<!--  TableAclService (not exposed) -->
+		<!--  
+		   <intercept-url pattern="/odktables/*/tables/*/acl/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		   <intercept-url pattern="/odktables/*/tables/*/acl" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		 -->
+		<!--  DiffService -->
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/diff/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/diff" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<!--  QueryService -->
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/query/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<!-- InstanceFileService -->
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/attachments/*/manifest" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="GET" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/attachments/*/download" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="POST" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/attachments/*/upload" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" method="POST" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/attachments/*/file/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<!--  DataService -->
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/rows/**" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+		<intercept-url pattern="/odktables/*/tables/*/ref/*/rows" access="hasRole('ROLE_SYNCHRONIZE_TABLES')" />
+
+		<!--  all other APIs require administer-tables permissions -->		
+		<intercept-url pattern="/odktables/*/**" access="hasRole('ROLE_ADMINISTER_TABLES')" />
+		
+		<!--  except the get-supported-application-names API does not require much at all -->
 		<intercept-url pattern="/odktables/" access="hasRole('ROLE_USER')" />
 		<intercept-url pattern="/odktables" access="hasRole('ROLE_USER')" />
 
