@@ -18,6 +18,7 @@ import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
@@ -72,11 +73,11 @@ public class CreateTableTest implements PerfTest {
         }
 
         Row row = Row.forInsert(UUID.randomUUID().toString(), T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
-            T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values);
+            T.savepoint_timestamp_1, T.savepoint_creator_1, RowFilterScope.EMPTY_ROW_FILTER, values);
         rows.add(row);
         SyncRow sr = new SyncRow(row.getRowId(), row.getRowETag(), row.isDeleted(),
             row.getFormId(), row.getLocale(), row.getSavepointType(),
-            row.getSavepointTimestamp(), row.getSavepointCreator(), row.getFilterScope(),
+            row.getSavepointTimestamp(), row.getSavepointCreator(), row.getRowFilterScope(),
             row.getValues(), new ArrayList<ColumnDefinition>());
         syncRows.add(sr);
       }
@@ -93,7 +94,7 @@ public class CreateTableTest implements PerfTest {
         row.setValues(values);
         SyncRow sr = new SyncRow(row.getRowId(), row.getRowETag(), row.isDeleted(),
             row.getFormId(), row.getLocale(), row.getSavepointType(),
-            row.getSavepointTimestamp(), row.getSavepointCreator(), row.getFilterScope(),
+            row.getSavepointTimestamp(), row.getSavepointCreator(), row.getRowFilterScope(),
             row.getValues(), new ArrayList<ColumnDefinition>());
         syncRows.add(sr);
       }

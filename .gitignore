@@ -65,3 +65,7 @@ aggregate-postgres/src/
 
 build/chromedriver_mac32-2.20.zip
 build/selenium-java-2.45.0.zip
+Servers/
+generated/
+build/appengine-java-sdk-1.9.42.zip
+build/appengine-java-sdk-1.9.42/

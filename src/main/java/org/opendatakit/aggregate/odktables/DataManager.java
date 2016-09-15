@@ -44,6 +44,7 @@ import org.opendatakit.aggregate.odktables.relation.EntityConverter;
 import org.opendatakit.aggregate.odktables.relation.EntityCreator;
 import org.opendatakit.aggregate.odktables.rest.entity.ChangeSetList;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.RowList;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcome.OutcomeType;
@@ -191,7 +192,7 @@ public class DataManager {
             priorLogEntity.getString(DbLogTable.DATA_ETAG_AT_MODIFICATION),
             priorLogEntity.getString(DbLogTable.LAST_UPDATE_USER),
             priorLogEntity.getBoolean(DbLogTable.DELETED),
-            converter.getDbLogTableFilterScope(priorLogEntity),
+            EntityConverter.getDbLogTableRowFilterScope(priorLogEntity),
             priorLogEntity.getString(DbLogTable.FORM_ID),
             priorLogEntity.getString(DbLogTable.LOCALE),
             priorLogEntity.getString(DbLogTable.SAVEPOINT_TYPE),
@@ -227,8 +228,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -273,7 +274,7 @@ public class DataManager {
       if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
       } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-          row.getRowId(), row.getFilterScope())) {
+          row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE )) {
         rows.add(row);
       }
     }
@@ -312,8 +313,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -372,7 +373,7 @@ public class DataManager {
       if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
       } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-          row.getRowId(), row.getFilterScope())) {
+          row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
         rows.add(row);
       }
     }
@@ -412,8 +413,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -495,7 +496,7 @@ public class DataManager {
       if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
       } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-          row.getRowId(), row.getFilterScope())) {
+          row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
         rows.add(row);
       }
     }
@@ -729,8 +730,8 @@ public class DataManager {
 
       List<DbColumnDefinitionsEntity> columns = null;
       Entity entity = null;
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
       try {
         propsLock.acquire();
 
@@ -765,7 +766,7 @@ public class DataManager {
       if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         return row;
       } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-          row.getRowId(), row.getFilterScope())) {
+          row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
         return row;
       }
       throw new PermissionDeniedException(String.format("Denied table %s row %s access to user %s",
@@ -812,12 +813,12 @@ public class DataManager {
     Row row = rowWrapper.getRow();
     Entity entity = rowWrapper.getEntity();
     String rowId = rowWrapper.getRowId();
-    Scope scope = rowWrapper.getFilterScope();
+    RowFilterScope rowFilterScope = rowWrapper.getRowFilterScope();
 
     if (rowWrapper.hasNullIncomingScope() && entity.isFromDatabase()) {
-      // preserve the scope of the existing entity if the incoming Row didn't
-      // specify one.
-      scope = converter.getDbTableFilterScope(entity);
+      // use the row scope for the existing entity if the incoming Row didn't specify one.
+      rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
+      rowWrapper.setRowFilterScope(rowFilterScope);
     }
 
     // confirm that the user has the ability to read the row
@@ -825,7 +826,7 @@ public class DataManager {
     if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
       hasPermissions = true;
     } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, rowId,
-        scope)) {
+        /* some transform of rowFilterScope */ Scope.EMPTY_SCOPE)) {
       hasPermissions = true;
     }
 
@@ -841,7 +842,7 @@ public class DataManager {
       if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_DELETE)) {
         hasPermissions = true;
       } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.DELETE_ROW, rowId,
-          scope)) {
+          /* some transform of rowFilterScope */ Scope.EMPTY_SCOPE)) {
         hasPermissions = true;
       }
 
@@ -851,7 +852,7 @@ public class DataManager {
       if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
         hasPermissions = true;
       } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.WRITE_ROW, rowId,
-          scope)) {
+          /* some transform of rowFilterScope */ Scope.EMPTY_SCOPE)) {
         hasPermissions = true;
       }
     }
@@ -913,8 +914,8 @@ public class DataManager {
       
       String dataETagAtModification = null;
       
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
 
       List<DbColumnDefinitionsEntity> columns = null;
       try {
@@ -943,7 +944,7 @@ public class DataManager {
 
         revertPendingChanges(entry, columns, table, logTable);
 
-        logger.error("Before loop Time elpased: " + (System.currentTimeMillis() - startTime));
+        logger.info("Before loop Time elpased: " + (System.currentTimeMillis() - startTime));
 
         DataKeyValueDeepComparator dc = new DataKeyValueDeepComparator(columns);
 
@@ -999,7 +1000,7 @@ public class DataManager {
 
           // OK we are able to update or insert or delete the record
           if (!rowWrapper.outcomeAlreadySet()) {
-            Scope scope = rowWrapper.getFilterScope();
+            RowFilterScope rowFilterScope = rowWrapper.getRowFilterScope();
 
             String previousRowETag;
 
@@ -1019,7 +1020,7 @@ public class DataManager {
 
               // update the fields in the DbTable entity...
               creator.setRowFields(entity, PersistenceUtils.newUri(), dataETagAtModification,
-                  userPermissions.getOdkTablesUserId(), false, scope, row.getFormId(),
+                  userPermissions.getOdkTablesUserId(), false, rowFilterScope, row.getFormId(),
                   row.getLocale(), row.getSavepointType(), row.getSavepointTimestamp(),
                   row.getSavepointCreator(), row.getValues(), columns);
 
@@ -1069,7 +1070,7 @@ public class DataManager {
           rowOutcomes.add(rowWrapper.getOutcome());
         }
 
-        logger.error("End loop Time elpased: " + (System.currentTimeMillis() - startTime));
+        logger.info("End loop Time elpased: " + (System.currentTimeMillis() - startTime));
       } finally {
         propsLock.release();
       }
@@ -1081,7 +1082,7 @@ public class DataManager {
       if (rows != null) {
         long time = (System.currentTimeMillis() - startTime);
         int numRows = rows.getRows().size();
-        logger.error("Time: " + time + " size: " + numRows + " per iteration " + (time / numRows));
+        logger.info("Time: " + time + " size: " + numRows + " per iteration " + (time / numRows));
       }
 
       return new RowOutcomeList(rowOutcomes, dataETagAtModification);
@@ -1159,8 +1160,8 @@ public class DataManager {
 
       List<DbColumnDefinitionsEntity> columns = null;
       Entity entity = null;
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
       try {
         propsLock.acquire();
         Sequencer sequencer = new Sequencer(cc);
@@ -1192,11 +1193,11 @@ public class DataManager {
           row.setRowId(rowId);
         }
         boolean nullIncomingScope = false;
-        Scope scope = row.getFilterScope();
-        if (scope == null) {
+        RowFilterScope rowFilterScope = row.getRowFilterScope();
+        if (rowFilterScope == null) {
           nullIncomingScope = true;
-          scope = Scope.EMPTY_SCOPE;
-          row.setFilterScope(scope);
+          rowFilterScope = RowFilterScope.EMPTY_ROW_FILTER;
+          row.setRowFilterScope(rowFilterScope);
         }
 
         try {
@@ -1208,9 +1209,10 @@ public class DataManager {
           }
 
           if (nullIncomingScope) {
-            // preserve the scope of the existing entity if the incoming Row
-            // didn't specify one.
-            scope = converter.getDbTableFilterScope(entity);
+            // preserve the scope of the existing entity if the incoming Row didn't specify one.
+        	  rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
+        	  // and update the value
+        	  row.setRowFilterScope(rowFilterScope);
           }
 
           // confirm that the user has the ability to read the row
@@ -1218,7 +1220,7 @@ public class DataManager {
           if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
             hasPermissions = true;
           } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-              rowId, scope)) {
+              rowId, /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
             hasPermissions = true;
           }
 
@@ -1233,7 +1235,7 @@ public class DataManager {
           if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_WRITE)) {
             hasPermissions = true;
           } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.WRITE_ROW,
-              rowId, scope)) {
+              rowId, /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
             hasPermissions = true;
           }
 
@@ -1290,7 +1292,7 @@ public class DataManager {
 
         // update the fields in the DbTable entity...
         creator.setRowFields(entity, PersistenceUtils.newUri(), dataETagAtModification,
-            userPermissions.getOdkTablesUserId(), false, scope, row.getFormId(), row.getLocale(),
+            userPermissions.getOdkTablesUserId(), false, rowFilterScope, row.getFormId(), row.getLocale(),
             row.getSavepointType(), row.getSavepointTimestamp(), row.getSavepointCreator(),
             row.getValues(), columns);
 
@@ -1379,8 +1381,8 @@ public class DataManager {
 
       userPermissions.checkPermission(appId, tableId, TablePermission.DELETE_ROW);
       String dataETagAtModification = null;
-      LockTemplate propsLock = new LockTemplate(tableId,
-          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+      OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+          ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
       try {
         propsLock.acquire();
         Sequencer sequencer = new Sequencer(cc);
@@ -1422,14 +1424,14 @@ public class DataManager {
               + "for rowId %s", currentRowETag, serverRowETag, rowId));
         }
 
-        Scope scope = converter.getDbTableFilterScope(entity);
+        RowFilterScope rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
 
         // check for read access
         boolean hasPermissions = false;
         if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
           hasPermissions = true;
         } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW, rowId,
-            scope)) {
+            /* scope from dbTable */ Scope.EMPTY_SCOPE)) {
           hasPermissions = true;
         }
 
@@ -1444,7 +1446,7 @@ public class DataManager {
         if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_DELETE)) {
           hasPermissions = true;
         } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.DELETE_ROW,
-            rowId, scope)) {
+            rowId, /* scope from dbTable */ Scope.EMPTY_SCOPE)) {
           hasPermissions = true;
         }
 
@@ -1557,8 +1559,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     List<?> result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
       Sequencer sequencer = new Sequencer(cc);
@@ -1648,8 +1650,8 @@ public class DataManager {
     
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
-    LockTemplate propsLock = new LockTemplate(tableId,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -1722,7 +1724,7 @@ public class DataManager {
         if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
           rows.add(row);
         } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-            row.getRowId(), row.getFilterScope())) {
+            row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
           rows.add(row);
         }
       }
@@ -1734,7 +1736,7 @@ public class DataManager {
         if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
           rows.add(row);
         } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-            row.getRowId(), row.getFilterScope())) {
+            row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
           rows.add(row);
         }
       }

@@ -230,7 +230,7 @@ public class TableManager {
     TableEntry entry = null;
     DbTableDefinitionsEntity definitionEntity = null;
     List<DbColumnDefinitionsEntity> columnEntities = null;
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -313,7 +313,7 @@ public class TableManager {
 
     // lock table
     DbTableEntryEntity tableEntry = null;
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
 
@@ -639,7 +639,7 @@ public class TableManager {
 
     DbTableEntryEntity tableEntry = DbTableEntry.getTableIdEntry(tableId, cc);
 
-    LockTemplate propsLock = new LockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
     try {
       propsLock.acquire();
       deleteVersionedTable(tableEntry, true, cc);

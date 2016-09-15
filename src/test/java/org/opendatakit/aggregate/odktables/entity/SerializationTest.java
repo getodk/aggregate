@@ -28,6 +28,7 @@ import org.opendatakit.aggregate.odktables.T;
 import org.opendatakit.aggregate.odktables.rest.SavepointTypeManipulator;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
+import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResource;
 import org.opendatakit.aggregate.odktables.rest.entity.RowResourceList;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
@@ -53,7 +54,7 @@ public class SerializationTest {
   @Test
   public void testRowForUpdate() throws Exception {
     Row expected = Row.forUpdate("1", "5", T.form_id_2, T.locale_2,  SavepointTypeManipulator.complete(),
-        T.savepoint_timestamp_2, T.savepoint_creator_2, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues());
+        T.savepoint_timestamp_2, T.savepoint_creator_2, RowFilterScope.EMPTY_ROW_FILTER, T.Data.DYLAN.getValues());
     serializer.writeValue(writer, expected);
     String xml = writer.toString();
     System.out.println(xml);
@@ -64,7 +65,7 @@ public class SerializationTest {
   @Test
   public void testRowInsert() throws Exception {
     Row expected = Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues());
+        T.savepoint_timestamp_1, T.savepoint_creator_1, RowFilterScope.EMPTY_ROW_FILTER, T.Data.DYLAN.getValues());
 
     serializer.writeValue(writer, expected);
     String xml = writer.toString();
@@ -109,7 +110,7 @@ public class SerializationTest {
   public void testRowResource() throws Exception {
     ArrayList<DataKeyValue> values = T.Data.DYLAN.getValues();
     RowResource expected = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, values));
+        T.savepoint_timestamp_1, T.savepoint_creator_1, RowFilterScope.EMPTY_ROW_FILTER, values));
     expected.setSelfUri("http://localhost:8080/odktables/tables/1/rows/1");
 
     serializer.writeValue(writer, expected);
@@ -165,10 +166,10 @@ public class SerializationTest {
   public void testListOfRowResource() throws Exception {
     ArrayList<RowResource> expected = new ArrayList<RowResource>();
     RowResource one = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.DYLAN.getValues()));
+        T.savepoint_timestamp_1, T.savepoint_creator_1, RowFilterScope.EMPTY_ROW_FILTER, T.Data.DYLAN.getValues()));
     one.setSelfUri("http://localhost/tables/1/rows/1");
     RowResource two = new RowResource(Row.forInsert("1", T.form_id_1, T.locale_1, SavepointTypeManipulator.complete(),
-        T.savepoint_timestamp_1, T.savepoint_creator_1, Scope.EMPTY_SCOPE, T.Data.JOHN.getValues()));
+        T.savepoint_timestamp_1, T.savepoint_creator_1, RowFilterScope.EMPTY_ROW_FILTER, T.Data.JOHN.getValues()));
     two.setSelfUri("http://localhost/tables/1/rows/2");
     expected.add(one);
     expected.add(two);

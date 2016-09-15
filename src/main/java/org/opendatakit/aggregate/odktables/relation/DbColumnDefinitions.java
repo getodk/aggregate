@@ -36,6 +36,7 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -160,7 +161,8 @@ public class DbColumnDefinitions extends Relation {
       } else {
         ArrayList<String> childElementKeys;
         try {
-          childElementKeys = mapper.readValue(listChildren, ArrayList.class);
+          TypeReference<ArrayList<String>> ref = new TypeReference<ArrayList<String>>() {};
+          childElementKeys = mapper.readValue(listChildren, ref);
         } catch (JsonParseException e) {
           e.printStackTrace();
           return new ArrayList<String>();

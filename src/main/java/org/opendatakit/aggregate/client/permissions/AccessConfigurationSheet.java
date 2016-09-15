@@ -29,6 +29,8 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.widgets.UploadUsersAndPermsServletPopupButton;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.EmailParser;
@@ -57,6 +59,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -94,6 +97,7 @@ public class AccessConfigurationSheet extends Composite {
 
   private boolean anonymousAttachmentBoolean = false;
 
+  private PermissionsSubTab permissionsTab;
   private boolean changesHappened = false;
 
   private GroupMembershipColumn formsAdmin;
@@ -131,7 +135,13 @@ public class AccessConfigurationSheet extends Composite {
       // site admin must not be the anonymous user
       boolean badSiteAdmin = auth.equals(GrantedAuthorityName.GROUP_SITE_ADMINS)
           && (key.getType() == UserType.ANONYMOUS);
-      return !(badCollector || badSiteAdmin);
+      // tables admin must not be the anonymous user
+      boolean badTablesAdmin = auth.equals(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+          && (key.getType() == UserType.ANONYMOUS);
+      // tables super-user must not be the anonymous user
+      boolean badTablesSuperUser = auth.equals(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
+          && (key.getType() == UserType.ANONYMOUS);
+      return !(badCollector || badSiteAdmin || badTablesAdmin || badTablesSuperUser);
     }
   }
 
@@ -147,6 +157,16 @@ public class AccessConfigurationSheet extends Composite {
     public boolean isVisible(UserSecurityInfo key) {
       if (auth == GrantedAuthorityName.GROUP_SITE_ADMINS) {
         // anonymous user should not be able to be a site admin
+        return (key.getType() != UserType.ANONYMOUS);
+      }
+
+      if (auth == GrantedAuthorityName.GROUP_ADMINISTER_TABLES) {
+        // anonymous user should not be able to be a tables admin
+        return (key.getType() != UserType.ANONYMOUS);
+      }
+
+      if (auth == GrantedAuthorityName.GROUP_SUPER_USER_TABLES) {
+        // anonymous user should not be able to be a tables super-user
         return (key.getType() != UserType.ANONYMOUS);
       }
 
@@ -699,8 +719,12 @@ public class AccessConfigurationSheet extends Composite {
   };
 
   public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
+    this.permissionsTab = permissionsTab;
     initWidget(uiBinder.createAndBindUi(this));
     sinkEvents(Event.ONCHANGE | Event.ONCLICK);
+    
+    downloadCsv.setHref(UIConsts.GET_USERS_AND_PERMS_CSV_SERVLET_ADDR);
+
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<img src=\"images/red_x.png\" />");
     UIEnabledActionColumn<UserSecurityInfo> deleteMe = new UIEnabledActionColumn<UserSecurityInfo>(
@@ -820,6 +844,10 @@ public class AccessConfigurationSheet extends Composite {
   @UiField
   TextArea addedUsers;
   @UiField
+  UploadUsersAndPermsServletPopupButton uploadCsv;
+  @UiField
+  Anchor downloadCsv;
+  @UiField
   Button addNow;
   @UiField
   CellTable<UserSecurityInfo> userTable;
@@ -834,6 +862,11 @@ public class AccessConfigurationSheet extends Composite {
     uiOutOfSyncWithServer();
   }
 
+  @UiHandler("uploadCsv")
+  void onUploadCsvClick(ClickEvent e) {
+    uploadCsv.onClick(permissionsTab, e);
+  }
+  
   @UiHandler("addNow")
   void onAddUsersClick(ClickEvent e) {
     String text = addedUsers.getText();

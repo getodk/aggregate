@@ -70,8 +70,8 @@ public class FileManifestManager {
       throws ODKDatastoreException, ODKTaskLockException {
     // TODO: need to handle access control.
 
-    LockTemplate propsLock = new LockTemplate(tableId, null,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.MEDIUM, cc);
     try {
       propsLock.acquire();
 
@@ -101,8 +101,8 @@ public class FileManifestManager {
       throws ODKDatastoreException, ODKTaskLockException {
     // TODO: need to handle access control.
 
-    LockTemplate propsLock = new LockTemplate(DbTableFileInfo.NO_TABLE_ID, null,
-        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, cc);
+    OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(DbTableFileInfo.NO_TABLE_ID, null,
+        ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.MEDIUM, cc);
     try {
       propsLock.acquire();
 
