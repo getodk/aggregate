@@ -183,7 +183,9 @@ public class EntityConverter {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true);
     } else {
       // string length explicitly specified for this field...
-      long len = Long.valueOf(type.getAuxInfo().trim());
+      String parenLen = type.getAuxInfo().trim();
+      String rawLen = parenLen.substring(1, parenLen.length()-1);
+      long len = Long.valueOf(rawLen);
       return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true, len);
     }
   }
