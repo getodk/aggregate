@@ -64,7 +64,7 @@ public class DiffServiceImpl implements DiffService {
   @Override
   public Response getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.valueOf(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsSince(dataETag, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
         websafeResult.dataETag, getTableUri(),
@@ -139,7 +139,7 @@ public class DiffServiceImpl implements DiffService {
 
     boolean bIsActive = (isActive == null || isActive.length() == 0 || !isActive.equalsIgnoreCase("true")) 
         ? false : true;
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.valueOf(fetchLimit);
     WebsafeRows websafeResult = dm.getChangeSetRows(dataETag, bIsActive, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
         websafeResult.dataETag, getTableUri(),

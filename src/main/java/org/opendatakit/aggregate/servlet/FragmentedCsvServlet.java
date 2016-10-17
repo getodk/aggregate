@@ -226,7 +226,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
         if (numEntriesStr == null) {
           numEntriesToFetch = DEFAULT_NUM_ENTRIES;
         } else {
-          numEntriesToFetch = Integer.parseInt(numEntriesStr);
+          numEntriesToFetch = Integer.valueOf(numEntriesStr);
         }
       } catch (NumberFormatException e) {
         throw new ODKParseException("Invalid number of entries parameter", e);

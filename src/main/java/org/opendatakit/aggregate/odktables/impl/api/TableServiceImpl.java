@@ -139,8 +139,8 @@ public class TableServiceImpl implements TableService {
 
     TableManager tm = new TableManager(appId, userPermissions, cc);
 
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer
-        .parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ?
+    		2000 : Integer.valueOf(fetchLimit);
     WebsafeTables websafeResult = tm.getTables(
         QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
