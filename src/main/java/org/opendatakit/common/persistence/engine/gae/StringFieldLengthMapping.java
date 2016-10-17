@@ -146,7 +146,7 @@ public class StringFieldLengthMapping {
         String vStr = splits[i+1];
         
         try {
-          Long v = Long.parseLong(vStr);
+          Long v = Long.valueOf(vStr);
           lenMap.put(k, v);
         } catch ( NumberFormatException ex ) {
           throw new ODKDatastoreException("column name: " + k +

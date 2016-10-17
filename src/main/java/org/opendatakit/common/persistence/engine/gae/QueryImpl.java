@@ -131,7 +131,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
               } else if (o instanceof String) {
                 String s = (String) o;
                 try {
-                  Long l = Long.parseLong(s);
+                  Long l = Long.valueOf(s);
                   if (newValue == null || newValue.compareTo(l) > 0) {
                     newValue = l;
                   } else {
