@@ -13,7 +13,6 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -26,6 +25,7 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -291,7 +291,7 @@ public class DatastoreImpl implements Datastore {
           row.setDateField(d, date);
           break;
         case DECIMAL:
-          BigDecimal bd = new BigDecimal((Double) o);
+          WrappedBigDecimal bd = WrappedBigDecimal.fromDouble((Double) o);
           row.setNumericField(d, bd);
           break;
         case INTEGER:
@@ -368,7 +368,7 @@ public class DatastoreImpl implements Datastore {
             e.setProperty(d.getName(), entity.getDateField(d));
             break;
           case DECIMAL:
-            BigDecimal bd = entity.getNumericField(d);
+        	WrappedBigDecimal bd = entity.getNumericField(d);
             e.setProperty(d.getName(), bd.doubleValue());
             break;
           case INTEGER:

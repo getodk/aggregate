@@ -262,7 +262,7 @@ public abstract class CommonFieldsBase {
     fieldValueMap.put(f, value);
   }
 
-  public final BigDecimal getNumericField(DataField f) {
+  public final WrappedBigDecimal getNumericField(DataField f) {
     if (f == null) {
       throw new IllegalArgumentException("Field value is null!");
     }
@@ -273,10 +273,10 @@ public abstract class CommonFieldsBase {
     Object o = fieldValueMap.get(f);
     if (o == null)
       return null;
-    return (BigDecimal) o;
+    return (WrappedBigDecimal) o;
   }
 
-  public final void setNumericField(DataField f, BigDecimal value) {
+  public final void setNumericField(DataField f, WrappedBigDecimal value) {
     if (f == null) {
       throw new IllegalArgumentException("Field value is null!");
     }
@@ -297,7 +297,7 @@ public abstract class CommonFieldsBase {
       return;
     }
     // enforce scaling here...
-    fieldValueMap.put(f, value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
+	fieldValueMap.put(f, value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
   }
 
   public final Date getDateField(DataField f) {
