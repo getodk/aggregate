@@ -17,12 +17,11 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import java.math.BigDecimal;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
@@ -34,7 +33,7 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class DecimalSubmissionType extends
-		SubmissionSingleValueBase<BigDecimal> {
+		SubmissionSingleValueBase<WrappedBigDecimal> {
 	/**
 	 * Constructor
 	 * 
@@ -57,13 +56,13 @@ public class DecimalSubmissionType extends
 		if ( value == null ) {
 			setValue(null);
 		} else {
-			setValue(new BigDecimal(value));
+			setValue(new WrappedBigDecimal(value));
 		}
 	}
 
 	@Override
 	public void getValueFromEntity(CallingContext cc) {
-		BigDecimal value = backingObject.getNumericField(element.getFormDataModel().getBackingKey());
+		WrappedBigDecimal value = backingObject.getNumericField(element.getFormDataModel().getBackingKey());
 		setValue(value);
 	}
 
@@ -95,7 +94,7 @@ public class DecimalSubmissionType extends
 	}
 
 	@Override
-	public BigDecimal getValue() {
+	public WrappedBigDecimal getValue() {
 		return backingObject.getNumericField(element.getFormDataModel().getBackingKey());
 	}
 
@@ -105,8 +104,7 @@ public class DecimalSubmissionType extends
 	 * @param value
 	 *            value to set
 	 */
-	protected void setValue(BigDecimal value) {
-		backingObject.setNumericField(element.getFormDataModel().getBackingKey(),
-				(BigDecimal) value);
+	protected void setValue(WrappedBigDecimal value) {
+		backingObject.setNumericField(element.getFormDataModel().getBackingKey(), value);
 	}
 }

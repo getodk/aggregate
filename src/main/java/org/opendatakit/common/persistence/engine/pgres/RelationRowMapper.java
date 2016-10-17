@@ -19,6 +19,7 @@ import java.util.Date;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -69,7 +70,7 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
         }
         break;
       case DECIMAL:
-        row.setNumericField(f, rs.getBigDecimal(f.getName()));
+        row.setNumericField(f, new WrappedBigDecimal(rs.getString(f.getName())));
         break;
       case BOOLEAN:
         Boolean b = rs.getBoolean(f.getName());

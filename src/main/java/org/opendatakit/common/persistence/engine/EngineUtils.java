@@ -18,6 +18,7 @@ import java.util.Date;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.utils.WebUtils;
 
 public class EngineUtils {
@@ -64,8 +65,8 @@ public class EngineUtils {
 			break;
 		case DECIMAL:
 		{
-			BigDecimal a1 = odkLastEntity.getNumericField(dominantAttr);
-			BigDecimal a2 = odkEntity.getNumericField(dominantAttr);
+			WrappedBigDecimal a1 = odkLastEntity.getNumericField(dominantAttr);
+			WrappedBigDecimal a2 = odkEntity.getNumericField(dominantAttr);
 			matchingDominantAttr = (a1 == null) ? (a2 == null) : ((a2 != null) && a1.compareTo(a2) == 0);
 		}
 			break;
@@ -109,7 +110,7 @@ public class EngineUtils {
 			break;
 		}
 		case DECIMAL: {
-			BigDecimal bd = cb.getNumericField(dominantAttr);
+			WrappedBigDecimal bd = cb.getNumericField(dominantAttr);
 			if ( bd == null ) {
 				value = null;
 			} else {
@@ -161,13 +162,13 @@ public class EngineUtils {
          break;
       }
       case DECIMAL: {
-         BigDecimal bd;
+    	 WrappedBigDecimal bd;
          if ( o == null ) {
            bd = null;
          } else if ( o instanceof Double ) {
-           bd = new BigDecimal(((Double) o).toString());
+           bd = WrappedBigDecimal.fromDouble((Double) o);
          } else {
-           bd = new BigDecimal(o.toString());
+           bd = new WrappedBigDecimal(o.toString());
          }
          if ( bd == null ) {
             value = null;
@@ -222,7 +223,7 @@ public class EngineUtils {
 			if ( v == null ) {
 				value = null;
 			} else {
-				BigDecimal bd = new BigDecimal(v);
+				WrappedBigDecimal bd = new WrappedBigDecimal(v);
 				value = bd.setScale(dominantAttr.getNumericScale(), BigDecimal.ROUND_HALF_UP);
 			}
 			break;
