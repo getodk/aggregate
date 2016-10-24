@@ -55,7 +55,8 @@ public class Realm implements InitializingBean {
 		log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no") );
 		log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no") );
 		log.info("RealmString: " + realmString);
-        log.info("isGaeEnvironment: " + (isGaeEnvironment ? "yes" : "no") );
+      log.info("isGaeEnvironment: " + (isGaeEnvironment ? "yes" : "no") );
+      log.info("java.library.path: " + System.getProperty("java.library.path"));
 	}
 
 	public void setSecureChannelType(String type) {

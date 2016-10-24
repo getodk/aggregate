@@ -34,6 +34,7 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
@@ -323,9 +324,15 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       ol[idx] = entity.getLongField(f);
       il[idx] = java.sql.Types.BIGINT;
       break;
-    case DECIMAL:
-      ol[idx] = entity.getNumericField(f);
+    case DECIMAL: {
+      WrappedBigDecimal wbd = entity.getNumericField(f);
+      if ( wbd.isSpecialValue() ) {
+        ol[idx] = wbd.d;
+      } else {
+        ol[idx] = wbd.bd;
+      }
       il[idx] = java.sql.Types.DECIMAL;
+    }
       break;
     case DATETIME:
       ol[idx] = entity.getDateField(f);
