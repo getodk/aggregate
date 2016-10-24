@@ -822,6 +822,7 @@ public class Relation {
   /**
    * Execute a set of commands sharing the same SQL but with different bind parameters.
    * This may either insert or update data (one or the other, across all alterations).
+   * I.e., you cannot mix updates and inserts -- they are either all updates or all inserts.
    * 
    * @param bulkAlterEntities
    * @param cc
