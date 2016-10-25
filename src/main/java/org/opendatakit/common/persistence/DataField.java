@@ -45,11 +45,11 @@ public final class DataField {
 	private String name;
 	private DataType dataType;
 	private boolean nullable;
-	private String persistenceType = null;
 	private Long maxCharLen;
 	private Integer numericScale;
 	private Integer numericPrecision;
 	private IndexType indexable = IndexType.NONE; // clue for persistence layer to define index.
+	private boolean hasNumericSpecialValues = false;
 	
 	/**
 	 * Constructor for most uses.
@@ -136,12 +136,12 @@ public final class DataField {
 		return nullable;
 	}
 
-	public String getPersistenceType() {
-		return persistenceType;
+	public boolean hasNumericSpecialValues() {
+		return hasNumericSpecialValues;
 	}
 
-	public void setPersistenceType(String persistenceType) {
-		this.persistenceType = persistenceType;
+	public void setHasNumericSpecialValues(boolean hasNumericSpecialValues) {
+		this.hasNumericSpecialValues = hasNumericSpecialValues;
 	}
 
 	public Long getMaxCharLen() {

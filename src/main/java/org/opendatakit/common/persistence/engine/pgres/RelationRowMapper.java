@@ -50,6 +50,9 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
       throw new IllegalStateException("failed to create empty row", e);
     }
 
+    /**
+     * Correct for the funky handling of nulls by the various accessors...
+     */
     for (DataField f : relation.getFieldList()) {
       switch (f.getDataType()) {
       case BINARY:

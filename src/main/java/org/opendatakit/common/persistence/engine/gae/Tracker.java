@@ -104,8 +104,10 @@ abstract class Tracker {
       WrappedBigDecimal vDec;
       if (value == null) {
         vDec = null;
-      } else {
+      } else if ( value instanceof WrappedBigDecimal ) {
         vDec = (WrappedBigDecimal) value;
+      } else {
+        vDec = new WrappedBigDecimal(value.toString());
       }
       return compareObjects(eDec, vDec);
     case BOOLEAN:

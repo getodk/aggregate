@@ -20,13 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 
 /**
  *
@@ -44,9 +44,9 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(1, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("3.0"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("3.0"), point.getAltitude());
       assertEquals(null, point.getAccuracy());
     } catch (ODKParseException e) {
       fail();
@@ -106,13 +106,13 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(2, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("3.0"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("3.0"), point.getAltitude());
       point = points.get(1);
-      assertEquals(new BigDecimal("-1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("0.0"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("-1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("0.0"), point.getAltitude());
     } catch (ODKParseException e) {
       fail();
     }
@@ -125,17 +125,17 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(3, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("3.0"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("3.0"), point.getAltitude());
       point = points.get(1);
-      assertEquals(new BigDecimal("-1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("0.0"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("-1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("0.0"), point.getAltitude());
       point = points.get(2);
-      assertEquals(new BigDecimal("10"), point.getLatitude());
-      assertEquals(new BigDecimal("20"), point.getLongitude());
-      assertEquals(new BigDecimal("0"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("10"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("20"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("0"), point.getAltitude());
     } catch (ODKParseException e) {
       fail();
     }
@@ -148,8 +148,8 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(1, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("2.0"), point.getLongitude());
       assertEquals(null, point.getAltitude());
       assertEquals(null, point.getAccuracy());
     } catch (ODKParseException e) {
@@ -164,13 +164,13 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(2, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("2.0"), point.getLongitude());
       assertEquals(null, point.getAltitude());
       assertEquals(null, point.getAccuracy());
       point = points.get(1);
-      assertEquals(new BigDecimal("-1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("-1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-2.0"), point.getLongitude());
       assertEquals(null, point.getAltitude());
       assertEquals(null, point.getAccuracy());
     } catch (ODKParseException e) {
@@ -185,18 +185,18 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(3, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("97.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-5"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("97.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-5"), point.getLongitude());
       assertEquals(null, point.getAltitude());
       assertEquals(null, point.getAccuracy());
       point = points.get(1);
-      assertEquals(new BigDecimal("-10.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("-10.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-2.0"), point.getLongitude());
       assertEquals(null, point.getAltitude());
       assertEquals(null, point.getAccuracy());
       point = points.get(2);
-      assertEquals(new BigDecimal("100"), point.getLatitude());
-      assertEquals(new BigDecimal("20"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("100"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("20"), point.getLongitude());
       assertEquals(null, point.getAltitude());
       assertEquals(null, point.getAccuracy());
     } catch (ODKParseException e) {
@@ -211,10 +211,10 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(1, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("3"), point.getLatitude());
-      assertEquals(new BigDecimal("7.0"), point.getLongitude());
-      assertEquals(new BigDecimal("13"), point.getAltitude());
-      assertEquals(new BigDecimal("0.0"), point.getAccuracy());
+      assertEquals(new WrappedBigDecimal("3"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("7.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("13"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("0.0"), point.getAccuracy());
     } catch (ODKParseException e) {
       fail();
     }
@@ -227,15 +227,15 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(2, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("30"), point.getAltitude());
-      assertEquals(new BigDecimal("50"), point.getAccuracy());
+      assertEquals(new WrappedBigDecimal("1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("30"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("50"), point.getAccuracy());
       point = points.get(1);
-      assertEquals(new BigDecimal("-1.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("300"), point.getAltitude());
-      assertEquals(new BigDecimal("0"), point.getAccuracy());
+      assertEquals(new WrappedBigDecimal("-1.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("300"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("0"), point.getAccuracy());
     } catch (ODKParseException e) {
       fail();
     }
@@ -248,20 +248,20 @@ public class KmlGeoTraceParsingTest {
       List<GeoPoint> points = KmlGeoTraceNGeoShapeGenerator.parseGeoLineCoordinates(coordinate);
       assertEquals(3, points.size());
       GeoPoint point = points.get(0);
-      assertEquals(new BigDecimal("91.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-50."), point.getLongitude());
-      assertEquals(new BigDecimal("14"), point.getAltitude());
-      assertEquals(new BigDecimal("1"), point.getAccuracy());
+      assertEquals(new WrappedBigDecimal("91.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-50."), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("14"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("1"), point.getAccuracy());
       point = points.get(1);
-      assertEquals(new BigDecimal("-10.0"), point.getLatitude());
-      assertEquals(new BigDecimal("-2.0"), point.getLongitude());
-      assertEquals(new BigDecimal("1"), point.getAltitude());
-      assertEquals(new BigDecimal("40"), point.getAccuracy());
+      assertEquals(new WrappedBigDecimal("-10.0"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("-2.0"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("1"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("40"), point.getAccuracy());
       point = points.get(2);
-      assertEquals(new BigDecimal("100"), point.getLatitude());
-      assertEquals(new BigDecimal("20"), point.getLongitude());
-      assertEquals(new BigDecimal("33"), point.getAltitude());
-      assertEquals(new BigDecimal("55"), point.getAccuracy());
+      assertEquals(new WrappedBigDecimal("100"), point.getLatitude());
+      assertEquals(new WrappedBigDecimal("20"), point.getLongitude());
+      assertEquals(new WrappedBigDecimal("33"), point.getAltitude());
+      assertEquals(new WrappedBigDecimal("55"), point.getAccuracy());
     } catch (ODKParseException e) {
       fail();
     }

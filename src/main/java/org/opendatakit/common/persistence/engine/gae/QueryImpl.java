@@ -33,6 +33,7 @@ import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
@@ -181,15 +182,17 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     // do everything locally except the first one (later)...
     if (attribute.getDataType() == DataType.DECIMAL) {
       if (value != null) {
-        // ensure the value is always a BigDecimal and always rounded to scale
-        BigDecimal bd;
-        if (value instanceof BigDecimal) {
-          bd = (BigDecimal) value;
+        WrappedBigDecimal wbd;
+        if (value instanceof WrappedBigDecimal) {
+          wbd = (WrappedBigDecimal) value;
         } else {
-          bd = new BigDecimal(value.toString());
+          // ensure the value is always a BigDecimal and always rounded to scale
+          wbd = new WrappedBigDecimal(value.toString());
+          if ( !wbd.isSpecialValue() ) {
+            wbd = wbd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
+          }
         }
-        bd = bd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
-        return new SimpleFilterTracker(attribute, op, bd);
+        return new SimpleFilterTracker(attribute, op, wbd);
       } else {
         return new SimpleFilterTracker(attribute, op, null);
       }

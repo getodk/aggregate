@@ -85,14 +85,14 @@ public class QueryResultTest {
 	static class DataValue {
 		String str;
 		Long l;
-		BigDecimal bd;
+		WrappedBigDecimal bd;
 		Date d;
 		Boolean b;
 		
 		DataValue(String str, Integer n, Double bd, String dateStr, Boolean b ) {
 			this.str = str;
 			this.l = (n == null) ? null : Long.valueOf(n);
-			this.bd = (bd == null) ? null : BigDecimal.valueOf(bd);
+			this.bd = (bd == null) ? null : WrappedBigDecimal.fromDouble(bd);
 			this.d = WebUtils.parseDate(dateStr);
 			this.b = b;
 		}
@@ -116,7 +116,7 @@ public class QueryResultTest {
 				MyRelation element = ds.createEntityUsingRelation(rel, user);
 				element.setStringField(MyRelation.fieldStr, str);
 				element.setLongField(MyRelation.fieldInt, Long.valueOf(i));
-				element.setNumericField(MyRelation.fieldDbl, BigDecimal.valueOf(i));
+				element.setNumericField(MyRelation.fieldDbl, new WrappedBigDecimal(Integer.toString(i)));
 				element.setDateField(MyRelation.fieldDate, d);
 				element.setBooleanField(MyRelation.fieldBool, b);
 				

@@ -173,6 +173,9 @@ public class EngineUtils {
          if ( bd == null ) {
             value = null;
          } else {
+            if ( !bd.isSpecialValue() ) {
+              bd = bd.setScale(dominantAttr.getNumericScale(), BigDecimal.ROUND_HALF_UP);
+            }
             value = bd.toString();
          }
          break;

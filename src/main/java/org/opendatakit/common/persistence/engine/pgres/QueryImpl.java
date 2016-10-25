@@ -31,6 +31,7 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -148,6 +149,19 @@ public class QueryImpl implements Query {
     return baseQueryBuilder.toString();
   }
 
+  private Object getBindValue(Object value) {
+    if ( value instanceof WrappedBigDecimal ) {
+      WrappedBigDecimal wbd = (WrappedBigDecimal) value;
+      if ( wbd.isSpecialValue() ) {
+        return wbd.d;
+      } else {
+        return wbd.bd;
+      }
+    } else {
+      return value;
+    }
+  }
+  
   @Override
   public void addFilter(DataField attributeName, FilterOperation op, Object value) {
     if (queryBindBuilder.length() == 0) {
@@ -165,7 +179,7 @@ public class QueryImpl implements Query {
     } else {
       queryBindBuilder.append(operationMap.get(op));
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(value);
+      bindValues.add(getBindValue(value));
     }
   }
 
@@ -175,8 +189,9 @@ public class QueryImpl implements Query {
    * 
    * @param queryContinuationBindBuilder
    * @param continuationValue
+   * @return the updated bindArgs
    */
-  private void addContinuationFilter(StringBuilder queryContinuationBindBuilder,
+  private ArrayList<Object> addContinuationFilter(StringBuilder queryContinuationBindBuilder,
       Object continuationValue) {
     if (dominantSortAttr == null) {
       throw new IllegalStateException("unexpected state");
@@ -197,6 +212,12 @@ public class QueryImpl implements Query {
         .equals(Direction.ASCENDING) ? FilterOperation.GREATER_THAN_OR_EQUAL
         : FilterOperation.LESS_THAN_OR_EQUAL));
     queryContinuationBindBuilder.append(K_BIND_VALUE);
+    
+    ArrayList<Object> values = new ArrayList<Object>();
+    values.addAll(bindValues);
+    values.add(getBindValue(continuationValue));
+    
+    return values;
   }
 
   @Override
@@ -217,7 +238,7 @@ public class QueryImpl implements Query {
       }
       first = false;
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(o);
+      bindValues.add(getBindValue(o));
     }
     queryBindBuilder.append(K_IN_CLOSE);
   }
@@ -398,10 +419,7 @@ public class QueryImpl implements Query {
 
       Object continuationValue = EngineUtils.getDominantSortAttributeValueFromString(
           startCursor.getValue(), dominantSortAttr);
-      addContinuationFilter(queryContinuationBindBuilder, continuationValue);
-      values = new ArrayList<Object>();
-      values.addAll(bindValues);
-      values.add(continuationValue);
+      values = addContinuationFilter(queryContinuationBindBuilder, continuationValue);
     } else {
       values = bindValues;
     }
