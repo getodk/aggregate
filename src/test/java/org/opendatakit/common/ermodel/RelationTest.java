@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.PersistConsts;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -90,11 +92,41 @@ public class RelationTest {
 	    Query query;
 	    List<Entity> entities;
 
-	    query = rel.query("DbTable.testCase1.fieldDbl-lessThan", cc);
-	    query.addFilter(MyRelation.fieldDbl.getName(), FilterOperation.LESS_THAN, 5.0);
-	    entities = query.execute();
+	   query = rel.query("DbTable.testCase1.fieldDbl-lessThan", cc);
+	   query.addFilter(MyRelation.fieldDbl.getName(), FilterOperation.LESS_THAN, 5.0);
+	   entities = query.execute();
 	   assertEquals(1, entities.size());
 		assertEquals( e.getId(), entities.get(0).getId());
+
+      query = rel.query("DbTable.testCase1.fieldDbl-lessThanBigDecimal", cc);
+      query.addFilter(MyRelation.fieldDbl.getName(), FilterOperation.LESS_THAN, new BigDecimal(5.0));
+      entities = query.execute();
+      assertEquals(1, entities.size());
+      assertEquals( e.getId(), entities.get(0).getId());
+
+      query = rel.query("DbTable.testCase1.fieldDbl-lessThanWrappedBigDecimal", cc);
+      query.addFilter(MyRelation.fieldDbl.getName(), FilterOperation.LESS_THAN, WrappedBigDecimal.fromDouble(5.0));
+      entities = query.execute();
+      assertEquals(1, entities.size());
+      assertEquals( e.getId(), entities.get(0).getId());
+
+      query = rel.query("DbTable.testCase1.fieldDbl-greaterThan", cc);
+      query.addFilter(MyRelation.fieldDbl.getName(), FilterOperation.GREATER_THAN, 4.0);
+      entities = query.execute();
+      assertEquals(1, entities.size());
+      assertEquals( e.getId(), entities.get(0).getId());
+
+      query = rel.query("DbTable.testCase1.fieldDbl-greaterThanBigDecimal", cc);
+      query.addFilter(MyRelation.fieldDbl.getName(), FilterOperation.GREATER_THAN, new BigDecimal(4.0));
+      entities = query.execute();
+      assertEquals(1, entities.size());
+      assertEquals( e.getId(), entities.get(0).getId());
+
+      query = rel.query("DbTable.testCase1.fieldDbl-greaterThanWrappedBigDecimal", cc);
+      query.addFilter(MyRelation.fieldDbl.getName(), FilterOperation.GREATER_THAN, WrappedBigDecimal.fromDouble(4.0));
+      entities = query.execute();
+      assertEquals(1, entities.size());
+      assertEquals( e.getId(), entities.get(0).getId());
 
       query = rel.query("DbTable.testCase1.intMinValue", cc);
       query.addFilter(MyRelation.fieldInt.getName(), FilterOperation.EQUAL, Integer.MIN_VALUE);

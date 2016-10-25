@@ -367,9 +367,13 @@ public class DatastoreImpl implements Datastore {
           case DATETIME:
             e.setProperty(d.getName(), entity.getDateField(d));
             break;
-          case DECIMAL:
-        	WrappedBigDecimal bd = entity.getNumericField(d);
-            e.setProperty(d.getName(), bd.doubleValue());
+          case DECIMAL: 
+            WrappedBigDecimal bd = entity.getNumericField(d);
+            if ( bd == null ) {
+              e.setProperty(d.getName(), null);
+            } else {
+              e.setProperty(d.getName(), bd.doubleValue());
+            }
             break;
           case INTEGER:
             e.setProperty(d.getName(), entity.getLongField(d));

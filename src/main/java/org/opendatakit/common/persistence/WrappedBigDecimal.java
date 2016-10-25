@@ -20,19 +20,27 @@ import java.math.BigDecimal;
 
 /**
  * Wrapper to encapsulate and pass through the special double values
- * of NaN, -Inf and +Inf while still preserving decimal precision returned 
+ * of NaN, -Infinity and Infinity while still preserving decimal precision returned 
  * from the database layer. 
  * 
  * @author mitchellsundt@gmail.com
  *
  */
 public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
-	private static final String S_NaN = Double.toString(Double.NaN);
+
+  private static final String S_NaN = Double.toString(Double.NaN);
 	private static final String S_NegInf = Double.toString(Double.NEGATIVE_INFINITY);
+	private static final String S_NegInf_Alt = "-Inf";
 	private static final String S_PosInf = Double.toString(Double.POSITIVE_INFINITY);
+	private static final String S_PosInf_Alt = "+Inf";
 
 	public final BigDecimal bd;
 	public final Double d;
+	
+	private WrappedBigDecimal(WrappedBigDecimal wbdArg) {
+	  this.d = wbdArg.d;
+	  this.bd = wbdArg.bd;
+	}
 	
 	private WrappedBigDecimal(BigDecimal bdArg) {
 		if ( bdArg == null ) {
@@ -57,10 +65,10 @@ public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
 		} else if ( value.equals(S_NaN) ) {
 			d = Double.NaN;
 			bd = null;
-		} else if ( value.equals(S_NegInf) ) {
+		} else if ( value.equals(S_NegInf) || value.equals(S_NegInf_Alt) ) {
 			d = Double.NEGATIVE_INFINITY;
 			bd = null;
-		} else if ( value.equals(S_PosInf) ) {
+		} else if ( value.equals(S_PosInf) || value.equals(S_PosInf_Alt) ) {
 			d = Double.POSITIVE_INFINITY;
 			bd = null;
 		} else {
@@ -152,4 +160,34 @@ public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
 			throw new IllegalStateException("should have decided by now");
 		}
 	}
+	
+	  @Override
+	  public boolean equals(Object obj) {
+	    if ( obj == null ) {
+	      return false;
+	    }
+	    
+	    if ( obj instanceof WrappedBigDecimal ) {
+	      WrappedBigDecimal other = (WrappedBigDecimal) obj;
+	      return other.compareTo(this) == 0;
+	    }
+	    
+	    WrappedBigDecimal other = new WrappedBigDecimal(obj.toString());
+	    return other.compareTo(this) == 0;
+	  }
+
+	  @Override
+	  public int hashCode() {
+	    if ( isSpecialValue() ) {
+	      return (d.hashCode() << 1);
+	    } else {
+	      return (bd.hashCode() << 1) + 1;
+	    }
+	  }
+
+	  @Override
+	  protected Object clone() throws CloneNotSupportedException {
+	    return new WrappedBigDecimal(this);
+	  }
+
 }

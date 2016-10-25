@@ -62,12 +62,16 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   // issue 868 - assume this is also true of table names...
   private static final int MAX_TABLE_NAME_LEN = 59; // reserve 4 char for idx
                                                     // name
+  
+  // limit on postgresql capacity (minus about 100 for where clause filters)
+  private static final int MAX_BIND_PARAMS = 34300;
+
+  private static final Long MAX_BLOB_SIZE = 65536 * 4096L;
 
   private final DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
   private DataSource dataSource = null;
   private DataSourceTransactionManager tm = null;
 
-  private static final Long MAX_BLOB_SIZE = 65536 * 4096L;
   private String schemaName = null;
 
   public DatastoreImpl() throws ODKDatastoreException {
@@ -269,7 +273,9 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       break;
     case DECIMAL: {
       WrappedBigDecimal wbd = entity.getNumericField(f);
-      if ( wbd.isSpecialValue() ) {
+      if ( wbd == null ) {
+        ol[idx] = null;
+      } else if ( wbd.isSpecialValue() ) {
         ol[idx] = wbd.d;
       } else {
         ol[idx] = wbd.bd;
@@ -436,6 +442,8 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         paramTransactionDefinition.setReadOnly(false);
         status = tm.getTransaction(paramTransactionDefinition);
 
+        // total number of columns must be less than MAX_BIND_PARAMS
+        int countColumns = 0;
         // need to create the table...
         StringBuilder b = new StringBuilder();
         b.append(K_CREATE_TABLE);
@@ -452,6 +460,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           if (!firstTime) {
             b.append(K_CS);
           }
+          ++countColumns;
           firstTime = false;
           b.append(K_BQ);
           b.append(f.getName());
@@ -528,6 +537,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           }
         }
         b.append(K_CLOSE_PAREN);
+
+        if ( countColumns > MAX_BIND_PARAMS ) {
+          throw new IllegalArgumentException("Table size exceeds bind parameter limit");
+        }
 
         String createTableStmt = b.toString();
         LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + createTableStmt);
