@@ -69,3 +69,8 @@ Servers/
 generated/
 build/appengine-java-sdk-1.9.42.zip
 build/appengine-java-sdk-1.9.42/
+odk-sqlserver-it-settings/target/
+odk-sqlserver-settings/target/
+odk-sqlserver-unit-settings/target/
+aggregate-sqlserver/src/
+aggregate-sqlserver/target/

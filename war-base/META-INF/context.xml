@@ -1,0 +1,5 @@
+<Context useHttpOnly="false">
+  <JarScanner>
+    <JarScanFilter pluggabilitySkip="*" pluggabilityScan="sqljdbc*" tldSkip="*" tldScan="sqljdbc*" />
+  </JarScanner>
+</Context>
