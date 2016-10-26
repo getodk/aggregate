@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0   http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.opendatakit</groupId>
+		<artifactId>aggregate</artifactId>
+		<version>1.0.1</version>
+		<relativePath>pom.xml</relativePath>
+	</parent>
+	<artifactId>aggregate-sqlserver-specific</artifactId>
+	<version>1.0.1</version>
+	<packaging>pom</packaging>
+	<name>ODK Aggregate Microsoft SQL Server Specific</name>
+	<modules>
+		<module>aggregate-sqlserver</module>
+		<module>sqlserver-unit-tests</module>
+	</modules>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${maven.antrun.plugin.version}</version>
+					<executions>
+						<execution>
+							<!--  Makes sure we start with a clean sqlserver (no pre-existing database that we want to create) -->
+							<id>sqlserver-teardown-clean</id>
+							<phase>pre-clean</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+							    <exec executable="${sqlserver.client.executable}" failonerror="false">
+								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Makes sure we start with a clean sqlserver (no pre-existing database that we want to create) -->
+							<id>pre-sqlserver-teardown</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+							    <exec executable="${sqlserver.client.executable}" failonerror="false">
+								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Sets up the sqlserver database for use in integration testing -->
+							<id>sqlserver-setup</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+								<exec executable="${sqlserver.client.executable}" failonerror="true">
+								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_setup.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+						<execution>
+							<!--  Tears down whatever we set up in the sqlserver-setup execution -->
+							<id>sqlserver-teardown</id>
+							<phase>verify</phase>
+							<goals>
+							  <goal>run</goal>
+							</goals>
+							<configuration>
+							  <target>
+								<exec executable="${sqlserver.client.executable}" failonerror="true">
+								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+								</exec>
+							  </target>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

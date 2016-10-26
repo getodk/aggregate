@@ -49,7 +49,7 @@
         <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
         <surefire.argLine>-Xms300m -Xmx3048m -XX:+UseParallelGC -XX:+UseParallelOldGC</surefire.argLine> <!-- need a huge JVM size for GAE datastore -->
         <maven.failsafe.plugin.version>2.19.1</maven.failsafe.plugin.version>
-        <cargo.maven2.plugin.version>1.4.19</cargo.maven2.plugin.version>
+        <cargo.maven2.plugin.version>1.6.0</cargo.maven2.plugin.version>
         <build.helper.maven.plugin.version>1.10</build.helper.maven.plugin.version>
         <gwt.maven.plugin.version>2.7.0</gwt.maven.plugin.version>
         <maven.gae.plugin.version>0.9.6</maven.gae.plugin.version>
@@ -64,7 +64,7 @@
         <com.fasterxml.jackson.core.version>2.7.3</com.fasterxml.jackson.core.version>
         <com.fasterxml.jackson.version>2.7.3</com.fasterxml.jackson.version>
         <org.codehaus.woodstox.version>4.4.1</org.codehaus.woodstox.version> <!-- used by jackson2 XML serializer -->
-        <org.springframework.version>4.2.5.RELEASE</org.springframework.version>
+        <org.springframework.version>4.3.3.RELEASE</org.springframework.version>
         <org.slf4j.version>1.7.20</org.slf4j.version>
         <!-- log4j is not used -->
         <org.springframework.security.version>3.2.9.RELEASE</org.springframework.security.version>
@@ -85,7 +85,18 @@
         <module>odk-postgres-settings</module>
         <module>odk-postgres-it-settings</module>
         <module>odk-postgres-unit-settings</module>
+        <module>odk-sqlserver-settings</module>
+        <module>odk-sqlserver-it-settings</module>
+        <module>odk-sqlserver-unit-settings</module>
         
+        <!-- aggregate-sqlserver-specific -->
+        <module>aggregate-sqlserver</module>
+
+        <!-- aggregate-mysql-specific -->
+        <module>mysql-unit-tests</module>
+        <!-- aggregate-postgresql-specific -->
+        <module>postgres-unit-tests</module>
+
         <!-- aggregate-mysql-specific -->
         <module>aggregate-mysql</module>
         <!-- aggregate-postgresql-specific -->
@@ -95,16 +106,12 @@
         <module>aggregate-gae-default</module>
         <module>aggregate-gae-n-background</module>
         <module>aggregate-gae</module>
+        <!-- aggregate-gae-specific -->
+        <module>gae-unit-tests</module>
 
         <!-- odk tables client libraries -->
         <module>odk-tables-api</module>
 
-        <!-- aggregate-postgresql-specific -->
-        <module>postgres-unit-tests</module>
-        <!-- aggregate-mysql-specific -->
-        <module>mysql-unit-tests</module>
-        <!-- aggregate-gae-specific -->
-        <module>gae-unit-tests</module>
     </modules>
     <repositories>
         <!-- main repository -->
@@ -160,12 +167,21 @@
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.mchange</groupId>
-            <artifactId>c3p0</artifactId>
-            <version>0.9.5.2</version>
-          <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+			<version>2.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>sqljdbc4</artifactId>
+			<version>4.1</version>
+		</dependency>
         <dependency> <!-- required by spring-security -->
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
@@ -542,9 +558,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-          <groupId>postgresql</groupId>
+          <groupId>org.postgresql</groupId>
           <artifactId>postgresql</artifactId>
-          <version>9.0-801.jdbc4</version>
+          <version>9.4.1211.jre7</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
@@ -1428,14 +1444,14 @@
                       <wait>false</wait>
                       <container>
                         <timeout>180000</timeout>
-                        <containerId>tomcat7x</containerId>
-                        <output>${project.build.directory}/cargo-tree/tomcat7x/tomcat.log</output>
-                        <log>${project.build.directory}/cargo-tree/tomcat7x/cargo.log</log>
+                        <containerId>tomcat8x</containerId>
+                        <output>${project.build.directory}/cargo-tree/tomcat8x/tomcat.log</output>
+                        <log>${project.build.directory}/cargo-tree/tomcat8x/cargo.log</log>
                         <artifactInstaller>
                           <groupId>org.apache.tomcat</groupId>
                           <artifactId>tomcat</artifactId>
-                          <version>7.0.54</version>
-                          <extractDir>${project.build.directory}/tomcat7x</extractDir>
+                          <version>8.0.38</version>
+                          <extractDir>${project.build.directory}/tomcat8x</extractDir>
                         </artifactInstaller>
                         <dependencies>
                             <dependency>
@@ -1446,9 +1462,9 @@
                       </container>
                       <configuration>
                         <type>standalone</type>
-                        <home>${project.build.directory}/tomcat7x-container</home>
+                        <home>${project.build.directory}/tomcat8x-container</home>
                         <properties>
-                          <cargo.jvmargs>${jacoco.it.argLine}</cargo.jvmargs>
+                          <cargo.jvmargs>'-Djava.library.path=${env.PATH};${project.basedir}/../src/main/libs/sqlserver-auth' ${jacoco.it.argLine}</cargo.jvmargs>
                           <cargo.servlet.port>${test.server.port}</cargo.servlet.port>
                           <cargo.tomcat.useHttpOnly>false</cargo.tomcat.useHttpOnly>
                         </properties>
@@ -1461,7 +1477,7 @@
                           </properties>
                           <type>war</type>
                           <pingURL>http://localhost:${test.server.port}/${project.artifactId}/</pingURL>
-                          <pingTimeout>30000</pingTimeout>
+                          <pingTimeout>60000</pingTimeout>
                         </deployable>
                       </deployables>
                     </configuration>

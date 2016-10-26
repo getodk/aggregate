@@ -926,6 +926,7 @@ A minimal file is:
 		<mysql.root.password>MYSQLROOTPASSWORDHERE</mysql.root.password>
 		<postgres.client.executable>C:\\Program Files\\PostgreSQL\\9.4\\bin\\psql.exe</postgres.client.executable>
 		<postgres.root.password>POSTGRESQLROOTPASSWORDHERE</postgres.root.password>
+		<sqlserver.client.executable>C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\130\\Tools\\Binn\\sqlcmd.exe</sqlserver.client.executable>
 		<test.server.hostname>YOUR.FULLY.QUALIFIED.HOSTNAME.AND.ORG</test.server.hostname>
 		<test.server.port>7070</test.server.port>
 		<test.server.secure.port>7443</test.server.secure.port>
