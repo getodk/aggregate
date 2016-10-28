@@ -77,7 +77,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   // limit on SqlServer capacity (minus about 100 for where clause filters)
   private static final int MAX_BIND_PARAMS = 2000;
 
-  private static final String PATTERN_ISO8601_NO_ZONE = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+  static final String PATTERN_ISO8601_NO_ZONE = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
   // limit to 256MB blob size; don't know the impact of this...
   private static final Long MAX_BLOB_SIZE = 65536 * 4096L;
@@ -302,7 +302,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         }
       }
     }
-  };
+  }
 
   private static RowMapper<TableDefinition> tableDef = new RowMapper<TableDefinition>() {
     @Override
@@ -311,49 +311,113 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   };
 
+  static SqlParameterValue getBindValue(DataField f, Object value) {
+    switch (f.getDataType()) {
+    case BOOLEAN:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.BIT, null);
+      } else if ( value instanceof Boolean ) {
+        return new SqlParameterValue(java.sql.Types.BIT, (((Boolean) value) ? 1 : 0));
+      } else {
+        Boolean b = Boolean.valueOf(value.toString());
+        return new SqlParameterValue(java.sql.Types.BIT, (b ? 1 : 0));
+      }
+    case STRING:
+    case URI:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.NVARCHAR, null);
+      } else {
+        return new SqlParameterValue(java.sql.Types.NVARCHAR, value.toString());
+      }
+    case INTEGER:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.BIGINT, null);
+      } else if ( value instanceof Long ) {
+        return new SqlParameterValue(java.sql.Types.BIGINT, (Long) value);
+      } else {
+        Long l = Long.valueOf(value.toString());
+        return new SqlParameterValue(java.sql.Types.BIGINT, l);
+      }
+    case DECIMAL: {
+      if ( value == null ) {
+        // nulls may not go through as DECIMAL -- assert they are strings
+        return new SqlParameterValue(java.sql.Types.NVARCHAR, null);
+      } else {
+        WrappedBigDecimal wbd;
+        if ( value instanceof WrappedBigDecimal ) {
+          wbd = (WrappedBigDecimal) value;
+        } else {
+          wbd = new WrappedBigDecimal(value.toString());
+        }
+        if ( wbd.isSpecialValue() ) {
+          return new SqlParameterValue(java.sql.Types.DOUBLE, wbd.d);
+        } else {
+          return new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd);
+        }
+      }
+    }
+    case DATETIME: {
+      // This doesn't like TIMESTAMP data type
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.TIMESTAMP, null);
+      } else if ( value instanceof Date ) {
+        // This doesn't like TIMESTAMP data type
+        Date v = (Date) value;
+        String dateTime = null;
+        if (v != null) {
+          SimpleDateFormat asGMTiso8601 = new SimpleDateFormat(DatastoreImpl.PATTERN_ISO8601_NO_ZONE);
+          asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
+          dateTime = asGMTiso8601.format(v);
+        }
+        return new SqlParameterValue(java.sql.Types.TIMESTAMP, dateTime);
+      } else {
+        throw new IllegalArgumentException("expected Date for DATETIME bind parameter");
+      }
+    }
+    case BINARY:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.LONGVARBINARY, null);
+      } else if ( value instanceof byte[] ) {
+        return new SqlParameterValue(java.sql.Types.LONGVARBINARY, value);
+      } else {
+        throw new IllegalArgumentException("expected byte[] for BINARY bind parameter");
+      }
+    case LONG_STRING:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.LONGNVARCHAR, null);
+      } else {
+        return new SqlParameterValue(java.sql.Types.LONGNVARCHAR, value.toString());
+      }
+
+    default:
+      throw new IllegalStateException("Unexpected data type");
+    }
+  }
+
   public static void buildArgumentList(List<SqlParameterValue> pv, CommonFieldsBase entity,
       DataField f) {
     switch (f.getDataType()) {
-    case BOOLEAN: {
-      Boolean v = entity.getBooleanField(f);
-      pv.add(new SqlParameterValue(java.sql.Types.BIT, (v == null) ? null : (v ? 1 : 0)));
-    }
+    case BOOLEAN:
+      pv.add(getBindValue(f, entity.getBooleanField(f)));
       break;
     case STRING:
     case URI:
-      pv.add(new SqlParameterValue(java.sql.Types.NVARCHAR, entity.getStringField(f)));
+      pv.add(getBindValue(f, entity.getStringField(f)));
       break;
     case INTEGER:
-      pv.add(new SqlParameterValue(java.sql.Types.BIGINT, entity.getLongField(f)));
+      pv.add(getBindValue(f, entity.getLongField(f)));
       break;
-    case DECIMAL: {
-      WrappedBigDecimal wbd = entity.getNumericField(f);
-      if ( wbd == null ) {
-        pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, null));
-      } else if ( wbd.isSpecialValue() ) {
-        pv.add(new SqlParameterValue(java.sql.Types.DOUBLE, wbd.d));
-      } else {
-        pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd));
-      }
-    }
+    case DECIMAL:
+      pv.add(getBindValue(f, entity.getNumericField(f)));
       break;
-    case DATETIME: {
-      // This doesn't like TIMESTAMP data type
-      Date v = entity.getDateField(f);
-      String dateTime = null;
-      if (v != null) {
-        SimpleDateFormat asGMTiso8601 = new SimpleDateFormat(PATTERN_ISO8601_NO_ZONE);
-        asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
-        dateTime = asGMTiso8601.format(v);
-      }
-      pv.add(new SqlParameterValue(java.sql.Types.TIMESTAMP, dateTime));
-    }
+    case DATETIME:
+      pv.add(getBindValue(f, entity.getDateField(f)));
       break;
     case BINARY:
-      pv.add(new SqlParameterValue(java.sql.Types.LONGVARBINARY, entity.getBlobField(f)));
+      pv.add(getBindValue(f, entity.getBlobField(f)));
       break;
     case LONG_STRING:
-      pv.add(new SqlParameterValue(java.sql.Types.LONGNVARCHAR, entity.getStringField(f)));
+      pv.add(getBindValue(f, entity.getStringField(f)));
       break;
 
     default:
@@ -814,6 +878,9 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       case java.sql.Types.DECIMAL:
         b.append("DECIMAL");
         break;
+      case java.sql.Types.DOUBLE:
+        b.append("DOUBLE");
+        break;
       case java.sql.Types.TIMESTAMP:
         b.append("TIMESTAMP");
         break;
@@ -862,7 +929,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             ps.setObject(i + 1, arg.getValue(), java.sql.Types.NVARCHAR);
           }
         } else if (arg.getSqlType() == java.sql.Types.DECIMAL) {
-          // we actually bind an iso8601 string
+          // nulls don't go through as DECIMAL -- assert they are strings
           if ( arg.getValue() == null ) {
             // DECIMAL seems to require a type but doesn't like itself
             ps.setNull(i + 1, java.sql.Types.NVARCHAR);

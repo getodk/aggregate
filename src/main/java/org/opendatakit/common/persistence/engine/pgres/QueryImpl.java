@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
  * 
@@ -149,28 +151,6 @@ public class QueryImpl implements Query {
     return baseQueryBuilder.toString();
   }
 
-  private Object getBindValue(DataField field, Object value) {
-    if ( (value != null) &&
-         ((field.getDataType() == DataField.DataType.DECIMAL) ||
-          (value instanceof WrappedBigDecimal)) ) {
-      WrappedBigDecimal wbd;
-      if ( value instanceof WrappedBigDecimal ) {
-        wbd = (WrappedBigDecimal) value;
-      } else {
-        wbd = new WrappedBigDecimal(value.toString());
-      }
-      
-      if ( wbd.isSpecialValue() ) {
-        return wbd.d;
-      } else {
-        return wbd.bd;
-      }
-      
-    } else {
-      return value;
-    }
-  }
-
   @Override
   public void addFilter(DataField attributeName, FilterOperation op, Object value) {
     if (queryBindBuilder.length() == 0) {
@@ -188,7 +168,7 @@ public class QueryImpl implements Query {
     } else {
       queryBindBuilder.append(operationMap.get(op));
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(getBindValue(attributeName, value));
+      bindValues.add(DatastoreImpl.getBindValue(attributeName, value));
     }
   }
 
@@ -224,7 +204,7 @@ public class QueryImpl implements Query {
     
     ArrayList<Object> values = new ArrayList<Object>();
     values.addAll(bindValues);
-    values.add(getBindValue(dominantSortAttr, continuationValue));
+    values.add(DatastoreImpl.getBindValue(dominantSortAttr, continuationValue));
     
     return values;
   }
@@ -247,7 +227,7 @@ public class QueryImpl implements Query {
       }
       first = false;
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(getBindValue(attributeName, o));
+      bindValues.add(DatastoreImpl.getBindValue(attributeName, o));
     }
     queryBindBuilder.append(K_IN_CLOSE);
   }
