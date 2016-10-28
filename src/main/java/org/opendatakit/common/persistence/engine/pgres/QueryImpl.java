@@ -149,19 +149,28 @@ public class QueryImpl implements Query {
     return baseQueryBuilder.toString();
   }
 
-  private Object getBindValue(Object value) {
-    if ( value instanceof WrappedBigDecimal ) {
-      WrappedBigDecimal wbd = (WrappedBigDecimal) value;
+  private Object getBindValue(DataField field, Object value) {
+    if ( (value != null) &&
+         ((field.getDataType() == DataField.DataType.DECIMAL) ||
+          (value instanceof WrappedBigDecimal)) ) {
+      WrappedBigDecimal wbd;
+      if ( value instanceof WrappedBigDecimal ) {
+        wbd = (WrappedBigDecimal) value;
+      } else {
+        wbd = new WrappedBigDecimal(value.toString());
+      }
+      
       if ( wbd.isSpecialValue() ) {
         return wbd.d;
       } else {
         return wbd.bd;
       }
+      
     } else {
       return value;
     }
   }
-  
+
   @Override
   public void addFilter(DataField attributeName, FilterOperation op, Object value) {
     if (queryBindBuilder.length() == 0) {
@@ -179,7 +188,7 @@ public class QueryImpl implements Query {
     } else {
       queryBindBuilder.append(operationMap.get(op));
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(getBindValue(value));
+      bindValues.add(getBindValue(attributeName, value));
     }
   }
 
@@ -215,7 +224,7 @@ public class QueryImpl implements Query {
     
     ArrayList<Object> values = new ArrayList<Object>();
     values.addAll(bindValues);
-    values.add(getBindValue(continuationValue));
+    values.add(getBindValue(dominantSortAttr, continuationValue));
     
     return values;
   }
@@ -238,7 +247,7 @@ public class QueryImpl implements Query {
       }
       first = false;
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(getBindValue(o));
+      bindValues.add(getBindValue(attributeName, o));
     }
     queryBindBuilder.append(K_IN_CLOSE);
   }

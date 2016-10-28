@@ -74,3 +74,6 @@ odk-sqlserver-settings/target/
 odk-sqlserver-unit-settings/target/
 aggregate-sqlserver/src/
 aggregate-sqlserver/target/
+eclipse-tomcat8/gwt-unitCache/
+eclipse-tomcat8/WebContent/
+sqlserver-unit-tests/target/

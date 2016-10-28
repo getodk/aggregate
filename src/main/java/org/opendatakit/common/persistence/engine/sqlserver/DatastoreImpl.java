@@ -63,9 +63,10 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
-  private static final String K_DOUBLE_UNDERSCORE = "__";
+  private static final boolean logBindDetails = false;
+  
   // SQL Server has a 116-character limit in column names.
-  // limit to two less for hasSpecialNumericValue column
+  // limit to two for future uses
   private static final int MAX_COLUMN_NAME_LEN = 114;
   // and the same limit applies to table names.
   private static final int MAX_TABLE_NAME_LEN = 112; // reserve 4 char for idx
@@ -173,6 +174,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       return numericPrecision;
     }
 
+    public boolean isDoublePrecision() {
+      return isDoublePrecision;
+    }
+    
     public static final String COLUMN_NAME = "column_name";
     public static final String CHARACTER_MAXIMUM_LENGTH = "character_maximum_length";
     public static final String NUMERIC_PRECISION = "numeric_precision";
@@ -205,18 +210,22 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     private static final String TIME = "time";
 
     private static final String INT = "int";
+    private static final String FLOAT = "float";
 
     private String columnName;
     private boolean isNullable;
     private Long maxCharLen = null;
     private Integer numericScale = null;
     private Integer numericPrecision = null;
+    private boolean isDoublePrecision = false;
     private DataField.DataType dataType;
 
     TableDefinition(ResultSet rs) throws SQLException {
       columnName = rs.getString(COLUMN_NAME);
       int i = rs.getInt(IS_NULLABLE);
       isNullable = (i == 1);
+      isDoublePrecision = false;
+
       String type = rs.getString(DATA_TYPE);
       BigDecimal num = rs.getBigDecimal(CHARACTER_MAXIMUM_LENGTH);
 
@@ -264,21 +273,32 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
       } else {
         // must be numeric...
-        num = rs.getBigDecimal(NUMERIC_SCALE);
-        if (num == null) {
-          throw new IllegalArgumentException("unrecognized data type in schema: " + type);
-        } else {
-          // discriminate between decimal and integer by looking at value...
-          // We assume that nobody is going crazy with the scale here...
-          if (BigDecimal.ZERO.equals(num)) {
-            dataType = DataField.DataType.INTEGER;
-            numericScale = 0;
-          } else {
-            numericScale = num.intValueExact();
-            dataType = DataField.DataType.DECIMAL;
-          }
+        if (type.contains(FLOAT)) {
+
+          dataType = DataField.DataType.DECIMAL;
+          numericScale = null;
           num = rs.getBigDecimal(NUMERIC_PRECISION);
           numericPrecision = num.intValueExact();
+          isDoublePrecision = true;
+          
+        } else {
+          
+          num = rs.getBigDecimal(NUMERIC_SCALE);
+          if (num == null) {
+            throw new IllegalArgumentException("unrecognized data type in schema: " + type);
+          } else {
+            // discriminate between decimal and integer by looking at value...
+            // We assume that nobody is going crazy with the scale here...
+            if (BigDecimal.ZERO.equals(num)) {
+              dataType = DataField.DataType.INTEGER;
+              numericScale = 0;
+            } else {
+              numericScale = num.intValueExact();
+              dataType = DataField.DataType.DECIMAL;
+            }
+            num = rs.getBigDecimal(NUMERIC_PRECISION);
+            numericPrecision = num.intValueExact();
+          }
         }
       }
     }
@@ -308,26 +328,12 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       break;
     case DECIMAL: {
       WrappedBigDecimal wbd = entity.getNumericField(f);
-      if ( f.hasNumericSpecialValues() ) {
-        if ( wbd == null ) {
-          pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, null));
-          pv.add(new SqlParameterValue(java.sql.Types.NVARCHAR, null));
-        } else if ( wbd.isSpecialValue() ) {
-          pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, null));
-          pv.add(new SqlParameterValue(java.sql.Types.NVARCHAR, 
-              ((wbd.d == Double.NaN) ? "N" : ((wbd.d == Double.NEGATIVE_INFINITY) ? "-" : "+") )) );
-        } else {
-          pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd));
-          pv.add(new SqlParameterValue(java.sql.Types.NVARCHAR, "V"));
-        }
+      if ( wbd == null ) {
+        pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, null));
+      } else if ( wbd.isSpecialValue() ) {
+        pv.add(new SqlParameterValue(java.sql.Types.DOUBLE, wbd.d));
       } else {
-        if ( wbd == null ) {
-          pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, null));
-        } else  if ( wbd.isSpecialValue() ) {
-          pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, wbd.d));
-        } else {
-          pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd));
-        }
+        pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd));
       }
     }
       break;
@@ -463,15 +469,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         f.setMaxCharLen(d.getMaxCharLen());
         f.setNumericPrecision(d.getNumericPrecision());
         f.setNumericScale(d.getNumericScale());
-        
-        // and lastly, if it is a decimal field, detect whether the special-values 
-        // column is present in the database.
-        if ( f.getDataType() == DataType.DECIMAL ) {
-          d = map.get(K_DOUBLE_UNDERSCORE + f.getName());
-          if ( d != null && (d.getDataType() == DataType.STRING) ) {
-            f.setHasNumericSpecialValues(true);
-          }
-        }
+        f.asDoublePrecision(d.isDoublePrecision());
       }
       return true;
     } else {
@@ -581,28 +579,23 @@ public class DatastoreImpl implements Datastore, InitializingBean {
               throw new IllegalStateException("cannot use decimal columns as primary keys");
             }
 
-            Integer dbl_digits = f.getNumericPrecision();
-            Integer dbl_fract = f.getNumericScale();
-            if (dbl_digits == null) {
-              dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+            if (f.isDoublePrecision()) {
+              b.append(" float(53) ").append(nullClause);
+            } else {
+              Integer dbl_digits = f.getNumericPrecision();
+              Integer dbl_fract = f.getNumericScale();
+              if (dbl_digits == null) {
+                dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+              }
+              if (dbl_fract == null) {
+                dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
+              }
+              b.append(" decimal(");
+              b.append(dbl_digits.toString());
+              b.append(K_CS);
+              b.append(dbl_fract.toString());
+              b.append(K_CLOSE_PAREN).append(nullClause);
             }
-            if (dbl_fract == null) {
-              dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
-            }
-            b.append(" decimal(");
-            b.append(dbl_digits.toString());
-            b.append(K_CS);
-            b.append(dbl_fract.toString());
-            b.append(K_CLOSE_PAREN).append(K_NULL);
-            // 
-            // and add a field to track whether this is a special value
-            // flag field for V = value, N = NaN, + = Infinity, - = -Infinity
-            ++countColumns;
-            b.append(K_CS);
-            b.append(K_BQ);
-            b.append(K_DOUBLE_UNDERSCORE).append(f.getName());
-            b.append(K_BQ);
-            b.append(" char(1)").append(nullClause);
             break;
           case DATETIME:
             b.append(" datetime2(7)").append(nullClause);
@@ -842,13 +835,15 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
     @Override
     public void setValues(PreparedStatement ps) throws SQLException {
-      StringBuilder b = new StringBuilder();
-      b.append(sql);
-      for (int i = 0; i < argList.size(); ++i) {
-        SqlParameterValue arg = argList.get(i);
-        createLogContent(b, i+1, arg);
+      if ( logBindDetails ) {
+        StringBuilder b = new StringBuilder();
+        b.append(sql);
+        for (int i = 0; i < argList.size(); ++i) {
+          SqlParameterValue arg = argList.get(i);
+          createLogContent(b, i+1, arg);
+        }
+        LogFactory.getLog(DatastoreImpl.class).info(b.toString());
       }
-      LogFactory.getLog(DatastoreImpl.class).info(b.toString());
       for (int i = 0; i < argList.size(); ++i) {
         SqlParameterValue arg = argList.get(i);
         if ((arg.getSqlType() == java.sql.Types.LONGVARBINARY) ||
@@ -922,15 +917,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
           b.append(K_EQ);
           b.append(K_BIND_VALUE);
-          
-          if (f.hasNumericSpecialValues() ) {
-            b.append(K_CS);
-            b.append(K_BQ);
-            b.append(K_DOUBLE_UNDERSCORE).append(f.getName());
-            b.append(K_BQ);
-            b.append(K_EQ);
-            b.append(K_BIND_VALUE);
-          }
           buildArgumentList(pv, entity, f);
         }
         b.append(K_WHERE);
@@ -966,12 +952,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           b.append(K_BQ);
           b.append(f.getName());
           b.append(K_BQ);
-          if ( f.hasNumericSpecialValues() ) {
-            b.append(K_CS);
-            b.append(K_BQ);
-            b.append(K_DOUBLE_UNDERSCORE).append(f.getName());
-            b.append(K_BQ);
-          }
         }
         b.append(K_CLOSE_PAREN);
         b.append(K_VALUES);
@@ -987,10 +967,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           }
           first = false;
           b.append(K_BIND_VALUE);
-          if ( f.hasNumericSpecialValues() ) {
-            b.append(K_CS);
-            b.append(K_BIND_VALUE);
-          }
           buildArgumentList(pv, entity, f);
         }
         b.append(K_CLOSE_PAREN);
@@ -1115,14 +1091,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             b.append(K_BQ);
             b.append(K_EQ);
             b.append(K_BIND_VALUE);
-            if ( f.hasNumericSpecialValues() ) {
-              b.append(K_CS);
-              b.append(K_BQ);
-              b.append(K_DOUBLE_UNDERSCORE).append(f.getName());
-              b.append(K_BQ);
-              b.append(K_EQ);
-              b.append(K_BIND_VALUE);
-            }
           }
 
           buildArgumentList(pv, entity, f);
@@ -1159,12 +1127,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             b.append(K_BQ);
             b.append(f.getName());
             b.append(K_BQ);
-            if ( f.hasNumericSpecialValues() ) {
-              b.append(K_CS);
-              b.append(K_BQ);
-              b.append(K_DOUBLE_UNDERSCORE).append(f.getName());
-              b.append(K_BQ);
-            }
           }
           b.append(K_CLOSE_PAREN);
           b.append(K_VALUES);
@@ -1180,10 +1142,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             }
             first = false;
             b.append(K_BIND_VALUE);
-            if ( f.hasNumericSpecialValues() ) {
-              b.append(K_CS);
-              b.append(K_BIND_VALUE);
-            }
           }
           buildArgumentList(pv, entity, f);
         }

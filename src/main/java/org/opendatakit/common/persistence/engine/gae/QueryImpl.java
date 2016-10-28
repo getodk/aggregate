@@ -185,12 +185,10 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         WrappedBigDecimal wbd;
         if (value instanceof WrappedBigDecimal) {
           wbd = (WrappedBigDecimal) value;
+        } else if ( value instanceof Double) {
+          wbd = WrappedBigDecimal.fromDouble((Double) value);
         } else {
-          // ensure the value is always a BigDecimal and always rounded to scale
           wbd = new WrappedBigDecimal(value.toString());
-          if ( !wbd.isSpecialValue() ) {
-            wbd = wbd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
-          }
         }
         return new SimpleFilterTracker(attribute, op, wbd);
       } else {
@@ -209,6 +207,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   @Override
   public void addValueSetFilter(DataField attribute, Collection<?> valueSet) {
     // do everything locally except the first one (later)...
+    // TODO: this is not correct for WrappedDecimal filters
+    // TODO: fortunately, there are no uses of that pathway.
     if (attribute.getDataType() == DataType.DECIMAL) {
       List<BigDecimal> bdList = new ArrayList<BigDecimal>();
       for (Object value : valueSet) {
@@ -220,13 +220,16 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           } else {
             bd = new BigDecimal(value.toString());
           }
-          bd = bd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
+          if ( !attribute.isDoublePrecision() ) {
+            bd = bd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
+          }
           bdList.add(bd);
         } else {
           bdList.add(null);
         }
       }
       filterList.add(new ValueSetFilterTracker(attribute, bdList));
+      throw new IllegalStateException("addValueSetFilter for DECIMAL is not correctly implemented");
     } else {
       filterList.add(new ValueSetFilterTracker(attribute, valueSet));
     }

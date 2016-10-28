@@ -15,7 +15,9 @@ package org.opendatakit.common.persistence.engine.sqlserver;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.SimpleTimeZone;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -72,8 +74,14 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
           row.setLongField(f, Long.valueOf(l));
         }
         break;
-      case DECIMAL:
-        row.setNumericField(f, new WrappedBigDecimal(rs.getString(f.getName())));
+      case DECIMAL: {
+        String value = rs.getString(f.getName());
+        if ( value == null ) {
+          row.setNumericField(f, null);
+        } else {
+          row.setNumericField(f, new WrappedBigDecimal(value));
+        }
+      }
         break;
       case BOOLEAN:
         Boolean b = rs.getBoolean(f.getName());
@@ -84,7 +92,8 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
         }
         break;
       case DATETIME:
-        Date d = rs.getTimestamp(f.getName());
+        Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "UTC"));
+        Date d = rs.getTimestamp(f.getName(), cal);
         if (d == null) {
           row.setDateField(f, null);
         } else {

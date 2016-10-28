@@ -142,7 +142,7 @@ Please select the parent directory under which an 'ODK Aggregate' directory will
 	<name>platform</name>
             <title>Choose Platform</title>
             <description></description>
-            <explanation>Choose the data storage and execution environment on which you would like ODK Aggregate to run. If you choose MySQL or PostgreSQL, you will need to first install that database server and an Apache Tomcat 6 webserver.</explanation>
+            <explanation>Choose the data storage and execution environment on which you would like ODK Aggregate to run. If you choose MySQL or PostgreSQL, you will need to first install that database server and an Apache Tomcat 8 webserver.</explanation>
             <value></value>
             <default></default>
             <allowEmptyValue>0</allowEmptyValue>
@@ -157,13 +157,13 @@ Please select the parent directory under which an 'ODK Aggregate' directory will
                     <value>gae</value>
                 </option>
                 <option>
-                    <description>Uses a MySQL database and an Apache Tomcat 6 webserver that you install.</description>
+                    <description>Uses a MySQL database and an Apache Tomcat 8 webserver that you install.</description>
                     <image></image>
                     <text>MySQL</text>
                     <value>mysql</value>
                 </option>
                 <option>
-                    <description>Uses a PostgreSQL database and an Apache Tomcat 6 webserver that you install.</description>
+                    <description>Uses a PostgreSQL database and an Apache Tomcat 8 webserver that you install.</description>
                     <image></image>
                     <text>PostgreSQL</text>
                     <value>postgresql</value>
@@ -174,16 +174,16 @@ Please select the parent directory under which an 'ODK Aggregate' directory will
 	<!-- infoTomcat -->
 	<name>infoTomcat</name>
             <title>Pre-installation Requirements - Apache Tomcat</title>
-            <description>http://tomcat.apache.org/download-60.cgi</description>
-            <explanation>Before continuing, you should download and install an Apache Tomcat 6 webserver within which you will run ODK Aggregate (instructions on installing your chosen database will be presented later).  
+            <description>http://tomcat.apache.org/download-80.cgi</description>
+            <explanation>Before continuing, you should download and install an Apache Tomcat 8 webserver within which you will run ODK Aggregate (instructions on installing your chosen database will be presented later).  
 
-Apache Tomcat 6 can be downloaded from the link below.
+Apache Tomcat 8 can be downloaded from the link below.
 
 If you modify any of the Apache Tomcat defaults, please make note of them.</explanation>
             <insertAfter>${platform}</insertAfter>
             <clickedActionList>
                 <launchBrowser>
-                    <url>http://tomcat.apache.org/download-60.cgi</url>
+                    <url>http://tomcat.apache.org/download-80.cgi</url>
                 </launchBrowser>
             </clickedActionList>
             <ruleList>
@@ -199,17 +199,17 @@ If you modify any of the Apache Tomcat defaults, please make note of them.</expl
             <title>Apache Tomcat SSL configuration</title>
             <explanation>SSL certificates allow a client to verify the identity of a webserver and to establish secured (encrypted) communications with that webserver (https:). SSL certificates are typically purchased from Verisign or another issuing authority; that process can take weeks to complete.  
 
-If you do have an SSL certificate, please refer to the Apache Tomcat documentation for how to install the certificate on your system.  Within the Tomcat 6.0 documentation, refer to the User Guide section 12: SSL.</explanation>
+If you do have an SSL certificate, please refer to the Apache Tomcat documentation for how to install the certificate on your system.  Within the Tomcat 8.0 documentation, refer to the User Guide section 12: SSL.</explanation>
             <value></value>
             <default></default>
             <parameterList>
                 <linkParameter>
                     <name>ssl_how_to</name>
-                    <description>http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</description>
+                    <description>http://tomcat.apache.org/tomcat-8.0-doc/ssl-howto.html</description>
                     <explanation></explanation>
                     <clickedActionList>
                         <launchBrowser>
-                            <url>http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</url>
+                            <url>http://tomcat.apache.org/tomcat-8.0-doc/ssl-howto.html</url>
                         </launchBrowser>
                     </clickedActionList>
                 </linkParameter>
@@ -456,7 +456,7 @@ The top-level directory should contain a file named:
 
   mysql-connector-java-...-bin.jar
   
-Copy this file into the /lib directory of your Apache Tomcat 6 installation.  On Windows, the default location for this is 'C:\Program Files\Apache Software Foundation\Tomcat 6.0\lib'
+Copy this file into the /lib directory of your Apache Tomcat 8 installation.  On Windows, the default location for this is 'C:\Program Files\Apache Software Foundation\Tomcat 8.0\lib'
 
 Stop and restart your Apache webserver (so it can discover this new library).
 </explanation>
