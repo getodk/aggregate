@@ -77,3 +77,11 @@ aggregate-sqlserver/target/
 eclipse-tomcat8/gwt-unitCache/
 eclipse-tomcat8/WebContent/
 sqlserver-unit-tests/target/
+build/selenium-java-3.0.1/
+build/chromedriver_mac64-2.25/
+build/chromedriver_win32-2.25/
+build/chromedriver_mac64-2.25.zip
+build/chromedriver_win32-2.25.zip
+build/selenium-java-3.0.1.zip
+build/selenium-java-2.53.1/
+build/selenium-java-2.53.1.zip

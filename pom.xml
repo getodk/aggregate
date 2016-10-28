@@ -21,10 +21,16 @@
     <properties>
         <toplevel.directory>${project.basedir}/../</toplevel.directory>
         <!-- must match the gae version below and the build/build.xml ant script defn -->
-        <gae.home>${project.basedir}/../build/appengine-java-sdk-1.9.42/appengine-java-sdk-1.9.42</gae.home>
+        <gooogle.appengine.sdk.version>1.9.42</gooogle.appengine.sdk.version>
+        <gae.home>${project.basedir}/../build/appengine-java-sdk-${gooogle.appengine.sdk.version}/appengine-java-sdk-${gooogle.appengine.sdk.version}</gae.home>
+        <!-- selenium 3.0.x is built using Java 8. We need to stay at Java 7 for AppEngine compatibility -->
         <!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
-        <selenium.home>${project.basedir}/../build/selenium-java-2.45.0/selenium-2.45.0</selenium.home>
-        <selenium.libs>${project.basedir}/../build/selenium-java-2.45.0/selenium-2.45.0/libs</selenium.libs>
+        <org.seleniumhq.version>2.53.1</org.seleniumhq.version>
+        <selenium.home>${project.basedir}/../build/selenium-java-${org.seleniumhq.version}/selenium-${org.seleniumhq.version}</selenium.home>
+        <selenium.libs>${project.basedir}/../build/selenium-java-${org.seleniumhq.version}/selenium-${org.seleniumhq.version}/libs</selenium.libs>
+        <!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
+        <!-- change the webdriver.chrome.drivername in .m2/settings.xml when running on a MacOSX or Linux system -->
+        <webdriver.chrome.driver>${project.basedir}/../build/${webdriver.chrome.drivername}-2.25/chromedriver${webdriver.chrome.driverext}</webdriver.chrome.driver>
         <war.directory>${project.basedir}/../war-base</war.directory>
         <gae.ear.earcontent.directory>${project.basedir}/../eclipse-ear/EarContent</gae.ear.earcontent.directory>
         <gae.default.webcontent.directory>${project.basedir}/../eclipse-default/WebContent</gae.default.webcontent.directory>
@@ -33,7 +39,6 @@
         <itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
         <itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gooogle.appengine.sdk.version>1.9.42</gooogle.appengine.sdk.version> <!-- NOTE: change gae.home too! --> 
         <gae.version>${gooogle.appengine.sdk.version}</gae.version>
         <apache.httpclient.version>4.5.2</apache.httpclient.version>
         <apache.httpcore.version>4.4.4</apache.httpcore.version>
@@ -68,7 +73,6 @@
         <org.slf4j.version>1.7.20</org.slf4j.version>
         <!-- log4j is not used -->
         <org.springframework.security.version>3.2.9.RELEASE</org.springframework.security.version>
-        <org.seleniumhq.version>2.45.0</org.seleniumhq.version>
         <!--
             keystore.propertyfile - define this in your settings.xml - the
             location of the properties file for the keystore
@@ -88,13 +92,6 @@
         <module>odk-sqlserver-settings</module>
         <module>odk-sqlserver-it-settings</module>
         <module>odk-sqlserver-unit-settings</module>
-        
-        <!-- aggregate-sqlserver-specific -->
-        <module>sqlserver-unit-tests</module>
-        <!-- aggregate-mysql-specific -->
-        <module>mysql-unit-tests</module>
-        <!-- aggregate-postgresql-specific -->
-        <module>postgres-unit-tests</module>
 
         <!-- aggregate-sqlserver-specific -->
         <module>aggregate-sqlserver</module>
@@ -102,6 +99,13 @@
         <module>aggregate-mysql</module>
         <!-- aggregate-postgresql-specific -->
         <module>aggregate-postgres</module>
+        
+        <!-- aggregate-postgresql-specific -->
+        <module>postgres-unit-tests</module>
+        <!-- aggregate-mysql-specific -->
+        <module>mysql-unit-tests</module>
+        <!-- aggregate-sqlserver-specific -->
+        <module>sqlserver-unit-tests</module>
 
         <!-- aggregate-gae-specific -->
         <module>aggregate-gae-default</module>
@@ -366,6 +370,12 @@
           <version>${google.api-client.version}</version>
           <type>jar</type>
           <scope>compile</scope>
+          <exclusions>
+            <exclusion>
+            <groupId>javax.servlet</groupId>
+              <artifactId>javax.servlet-api</artifactId>
+            </exclusion>
+          </exclusions>
         </dependency>
         <dependency>
           <groupId>com.google.inject</groupId>
@@ -1366,45 +1376,29 @@
                         <configuration>
                           <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
                           <additionalClasspathElements>
-                            <additionalClasspathElement>${selenium.home}/selenium-java-2.45.0.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.home}/selenium-java-2.53.1.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/bsh-1.3.0.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/bsh-2.0b4.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/commons-codec-1.9.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/commons-collections-3.2.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/commons-exec-1.1.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/commons-codec-1.10.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/commons-exec-1.3.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/commons-io-2.4.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/commons-jxpath-1.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/commons-lang3-3.3.2.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/commons-logging-1.1.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/cssparser-0.9.14.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/commons-logging-1.2.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/gson-2.3.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/guava-18.0.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/guava-19.0.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/hamcrest-core-1.3.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/hamcrest-library-1.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/htmlunit-2.15.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.15.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/httpclient-4.3.6.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/httpcore-4.3.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/httpmime-4.3.6.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/httpclient-4.5.1.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/httpcore-4.4.3.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/httpmime-4.5.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/ini4j-0.5.2.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/jcommander-1.29.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/jetty-websocket-8.1.8.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/jna-3.4.0.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/jna-platform-3.4.0.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/junit-dep-4.11.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${localRepository}/junit/junit/${junit.version}/junit-${junit.version}.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/nekohtml-1.9.21.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/jcommander-1.48.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/jna-4.1.0.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/jna-platform-4.1.0.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/junit-4.12.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/netty-3.5.7.Final.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/operadriver-1.5.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.2.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/protobuf-java-2.4.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/serializer-2.7.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/testng-6.8.5.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/xalan-2.7.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/xercesImpl-2.11.0.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/xml-apis-1.4.01.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/testng-6.9.9.jar</additionalClasspathElement>
                           </additionalClasspathElements>
                           <testSourceDirectory>${project.parent.basedir}/src/it/java</testSourceDirectory>
                           <classesDirectory>${project.build.directory}/generated-classes/jacoco/classes</classesDirectory>

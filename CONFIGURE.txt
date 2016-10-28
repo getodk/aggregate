@@ -461,6 +461,8 @@ compiling the source code, even when running under Tomcat8.)
 (1) Install Tomcat8 on your computer.
 
 (2a) download MySQL Connector/J and place it in the lib directory of the Tomcat install.
+This **MUST** be version 5.1.40 or higher. It is known that there are issues with 5.1.6 
+and earlier. We have only tested with 5.1.40.
 Stop and restart the Tomcat8 server so it picks up that library. This must be present
 for MySQL connections to work. It does not harm anything if this is present when using 
 PostgreSQL.
@@ -929,7 +931,9 @@ GRANT ALL PRIVILEGES ON odk_unit.* TO 'odk_unit'@'localhost' WITH GRANT OPTION;
 
 (6b)
 For MySQL, download and copy the MySQL Connector J jar into the Tomcat /lib
-directory (mysql-connector-java-5.1.17.jar to apache-tomcat-8.0.38/lib).
+directory (mysql-connector-java-5.1.40.jar to apache-tomcat-8.0.38/lib).
+This **MUST** be version 5.1.40 or higher. It is known that there are issues with 5.1.6 
+and earlier. We have only tested with 5.1.40.
 You must stop tomcat, if it is running, in order for the library to be detected.
 
 For Maven (3) is optional; (4), (5) and (6) are required in order
@@ -1018,7 +1022,8 @@ A minimal file is:
 		<test.server.secure.port>7443</test.server.secure.port>
 		<test.server.gae.monitor.port>7075</test.server.gae.monitor.port>
 		<unix.display>:20.0</unix.display>
-		<webdriver.chrome.driver>\C:\\Users\\Administrator\\Documents\\workspace\\aggregate\\build\\chromedriver_win32-2.20\\chromedriver.exe</webdriver.chrome.driver>
+		<webdriver.chrome.drivername>chromedriver_win32</webdriver.chrome.drivername>
+		<webdriver.chrome.driverext>.exe</webdriver.chrome.driverext>
 	  </properties>
   	</profile>
   </profiles>
@@ -1026,9 +1031,13 @@ A minimal file is:
 
 Be sure to update the paths and passwords to match those of your environment.
 
-If you are running on a Mac, change the webdriver.chrome.driver entry to:
+If you are running on a Mac, change the webdriver.chrome.driver* entries to:
 
-		<webdriver.chrome.driver>/Users/Administrator/Documents/workspace/aggregate/build/chromedriver_mac32-2.20/chromedriver</webdriver.chrome.driver>
+		<webdriver.chrome.drivername>chromedriver_mac64</webdriver.chrome.drivername>
+		<webdriver.chrome.driverext></webdriver.chrome.driverext>
+
+If you are running on Linux, you will need to modify the build.xml to download the Linux drivers
+and modify these entries with the appropriate values for those drivers.
 
 The installer is not hooked into the parent Maven project, but identifies that project as its
 parent.  So you can build the top-level project to build and run unit tests, integration tests, 
@@ -1040,7 +1049,7 @@ The aggregate-mysql war file is used as the starting point for the installer bui
 Maven Command Line Builds
 =========================
 
-(12) Maven command-line builds are done as follows:
+(11) Maven command-line builds are done as follows:
 
 mvn clean 
 
@@ -1055,7 +1064,7 @@ This will build and install the projects, running the unit tests
 against the 4 datastores (Google BigTable, MySQL, Postgresql, SQLServer),
 and building the wars for the 4 platforms.
 
-(13) If you have bitrock installed and licensed, you can 
+(12) If you have bitrock installed and licensed, you can 
 build the bitrock installer.  First, 
  copy aggregate-mysql\target\aggregate-mysql-1.0.war bitrock-installer
  cd bitrock-installer

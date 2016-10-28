@@ -263,7 +263,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         }
       }
     }
-  };
+  }
 
   private static RowMapper<TableDefinition> tableDef = new RowMapper<TableDefinition>() {
     @Override
@@ -272,41 +272,104 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   };
 
+  static SqlParameterValue getBindValue(DataField f, Object value) {
+    switch (f.getDataType()) {
+    case BOOLEAN:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.BOOLEAN, null);
+      } else if ( value instanceof Boolean ) {
+        return new SqlParameterValue(java.sql.Types.BOOLEAN, (Boolean) value);
+      } else {
+        Boolean b = Boolean.valueOf(value.toString());
+        return new SqlParameterValue(java.sql.Types.BOOLEAN, b);
+      }
+    case STRING:
+    case URI:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.VARCHAR, null);
+      } else {
+        return new SqlParameterValue(java.sql.Types.VARCHAR, value.toString());
+      }
+    case INTEGER:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.BIGINT, null);
+      } else if ( value instanceof Long ) {
+        return new SqlParameterValue(java.sql.Types.BIGINT, (Long) value);
+      } else {
+        Long l = Long.valueOf(value.toString());
+        return new SqlParameterValue(java.sql.Types.BIGINT, l);
+      }
+    case DECIMAL: {
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.DECIMAL, null);
+      } else {
+        WrappedBigDecimal wbd;
+        if ( value instanceof WrappedBigDecimal ) {
+          wbd = (WrappedBigDecimal) value;
+        } else {
+          wbd = new WrappedBigDecimal(value.toString());
+        }
+        if ( wbd.isSpecialValue() ) {
+          return new SqlParameterValue(java.sql.Types.DOUBLE, wbd.d);
+        } else {
+          return new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd);
+        }
+      }
+    }
+    case DATETIME: {
+      // This doesn't like TIMESTAMP data type
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.TIMESTAMP, null);
+      } else if ( value instanceof Date ) {
+        return new SqlParameterValue(java.sql.Types.TIMESTAMP, (Date) value);
+      } else {
+        throw new IllegalArgumentException("expected Date for DATETIME bind parameter");
+      }
+    }
+    case BINARY:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.LONGVARBINARY, null);
+      } else if ( value instanceof byte[] ) {
+        return new SqlParameterValue(java.sql.Types.LONGVARBINARY, value);
+      } else {
+        throw new IllegalArgumentException("expected byte[] for BINARY bind parameter");
+      }
+    case LONG_STRING:
+      if ( value == null ) {
+        return new SqlParameterValue(java.sql.Types.LONGVARCHAR, null);
+      } else {
+        return new SqlParameterValue(java.sql.Types.LONGVARCHAR, value.toString());
+      }
+
+    default:
+      throw new IllegalStateException("Unexpected data type");
+    }
+  }
+
   public static void buildArgumentList(List<SqlParameterValue> pv, CommonFieldsBase entity,
       DataField f) {
     switch (f.getDataType()) {
     case BOOLEAN:
-      pv.add(new SqlParameterValue(java.sql.Types.BOOLEAN, entity.getBooleanField(f)));
+      pv.add(getBindValue(f, entity.getBooleanField(f)));
       break;
     case STRING:
     case URI:
-      pv.add(new SqlParameterValue(java.sql.Types.VARCHAR, entity.getStringField(f)));
+      pv.add(getBindValue(f, entity.getStringField(f)));
       break;
     case INTEGER:
-      pv.add(new SqlParameterValue(java.sql.Types.BIGINT, entity.getLongField(f)));
+      pv.add(getBindValue(f, entity.getLongField(f)));
       break;
-    case DECIMAL: {
-      WrappedBigDecimal wbd = entity.getNumericField(f);
-      if ( wbd == null ) {
-        pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, null));
-      } else if ( wbd.isSpecialValue() ) {
-        pv.add(new SqlParameterValue(java.sql.Types.DOUBLE, wbd.d));
-      } else {
-        pv.add(new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd));
-      }
-    }
+    case DECIMAL:
+      pv.add(getBindValue(f, entity.getNumericField(f)));
       break;
-    case DATETIME: {
-      // This doesn't like TIMESTAMP data type
-      Date v = entity.getDateField(f);
-      pv.add(new SqlParameterValue(java.sql.Types.TIMESTAMP, v));
-    }
+    case DATETIME:
+      pv.add(getBindValue(f, entity.getDateField(f)));
       break;
     case BINARY:
-      pv.add(new SqlParameterValue(java.sql.Types.LONGVARBINARY, entity.getBlobField(f)));
+      pv.add(getBindValue(f, entity.getBlobField(f)));
       break;
     case LONG_STRING:
-      pv.add(new SqlParameterValue(java.sql.Types.LONGVARCHAR, entity.getStringField(f)));
+      pv.add(getBindValue(f, entity.getStringField(f)));
       break;
 
     default:
