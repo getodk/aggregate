@@ -1,4 +1,4 @@
-<project name="UpdateGae" default="dist" basedir=".">
+<project name="UpdateSqlServerUnit" default="dist" basedir=".">
     <description>
         simple Ant script to build the odk-settings jar
     	and copy it into the eclipse-non-app-engine project.
@@ -24,7 +24,7 @@
   	
     <!-- Build the jar file -->
     <jar jarfile="${target}/odk-settings-latest.jar">
-    	   <fileset dir="${resources}/mysql"/>
+    	   <fileset dir="${resources}/sqlserver-unit"/>
     	   <fileset dir="${resources}/common"/>
     </jar>
   	<!-- Copy the jar to the war lib (default) -->

@@ -30,9 +30,7 @@ public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
 
   private static final String S_NaN = Double.toString(Double.NaN);
 	private static final String S_NegInf = Double.toString(Double.NEGATIVE_INFINITY);
-	private static final String S_NegInf_Alt = "-Inf";
 	private static final String S_PosInf = Double.toString(Double.POSITIVE_INFINITY);
-	private static final String S_PosInf_Alt = "+Inf";
 
 	public final BigDecimal bd;
 	public final Double d;
@@ -65,10 +63,10 @@ public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
 		} else if ( value.equals(S_NaN) ) {
 			d = Double.NaN;
 			bd = null;
-		} else if ( value.equals(S_NegInf) || value.equals(S_NegInf_Alt) ) {
+		} else if ( value.equals(S_NegInf) ) {
 			d = Double.NEGATIVE_INFINITY;
 			bd = null;
-		} else if ( value.equals(S_PosInf) || value.equals(S_PosInf_Alt) ) {
+		} else if ( value.equals(S_PosInf) ) {
 			d = Double.POSITIVE_INFINITY;
 			bd = null;
 		} else {

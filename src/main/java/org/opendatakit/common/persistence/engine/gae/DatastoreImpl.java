@@ -159,6 +159,7 @@ public class DatastoreImpl implements Datastore {
       case DECIMAL:
         d.setNumericPrecision(DEFAULT_DBL_NUMERIC_PRECISION);
         d.setNumericScale(DEFAULT_DBL_NUMERIC_SCALE);
+        d.asDoublePrecision(true);
         nBytes += 8;
         ++nColumns;
         break;

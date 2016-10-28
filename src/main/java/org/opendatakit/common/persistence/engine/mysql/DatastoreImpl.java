@@ -149,11 +149,17 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       return numericPrecision;
     }
 
+    public boolean isDoublePrecision() {
+      return isDoublePrecision;
+    }
+    
     final private String columnName;
     final private boolean isNullable;
     final private Long maxCharLen;
     final private Integer numericScale;
     final private Integer numericPrecision;
+    final private boolean isDoublePrecision;
+    
     private DataField.DataType dataType;
 
     private static final String K_SHOW = "SHOW COLUMNS FROM ";
@@ -163,6 +169,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     private static final String K_VARCHAR = "varchar";
     private static final String K_BINARY = "binary";
     private static final String K_DECIMAL = "decimal";
+    private static final String K_DOUBLE = "double";
     private static final String K_INT = "int";
     private static final String K_CHAR = "char";
     private static final String K_DATE = "date";
@@ -238,26 +245,37 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         this.dataType = DataField.DataType.STRING;
         this.numericPrecision = null;
         this.numericScale = null;
+        this.isDoublePrecision = false;
       } else if (dataType.contains(K_DECIMAL)) {
         if (secondTerm.equals(0)) {
           this.dataType = DataField.DataType.INTEGER;
           this.maxCharLen = null;
           this.numericPrecision = firstTerm;
           this.numericScale = null;
+          this.isDoublePrecision = false;
         } else {
           this.dataType = DataField.DataType.DECIMAL;
           this.maxCharLen = null;
           this.numericPrecision = firstTerm;
           this.numericScale = secondTerm;
+          this.isDoublePrecision = false;
         }
+      } else if (dataType.contains(K_DOUBLE)) {
+        this.dataType = DataField.DataType.DECIMAL;
+        this.maxCharLen = null;
+        this.numericPrecision = 53;
+        this.numericScale = null;
+        this.isDoublePrecision = true;
       } else if (dataType.contains(K_INT)) {
         this.dataType = DataField.DataType.INTEGER;
         this.maxCharLen = null;
         this.numericPrecision = firstTerm;
         this.numericScale = null;
+        this.isDoublePrecision = false;
       } else {
         this.numericPrecision = null;
         this.numericScale = null;
+        this.isDoublePrecision = false;
 
         if (dataType.contains(K_DATE) || dataType.contains(K_TIME)) {
           this.maxCharLen = null;
@@ -326,12 +344,16 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       break;
     case DECIMAL: {
       WrappedBigDecimal wbd = entity.getNumericField(f);
-      if ( wbd.isSpecialValue() ) {
+      if ( wbd == null ) {
+        ol[idx] = null;
+        il[idx] = java.sql.Types.DECIMAL;
+      } else if ( wbd.isSpecialValue() ) {
         ol[idx] = wbd.d;
+        il[idx] = java.sql.Types.DOUBLE;
       } else {
         ol[idx] = wbd.bd;
+        il[idx] = java.sql.Types.DECIMAL;
       }
-      il[idx] = java.sql.Types.DECIMAL;
     }
       break;
     case DATETIME:
@@ -448,6 +470,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         f.setMaxCharLen(d.getMaxCharLen());
         f.setNumericPrecision(d.getNumericPrecision());
         f.setNumericScale(d.getNumericScale());
+        f.asDoublePrecision(d.isDoublePrecision());
       }
       return true;
     } else {
@@ -525,22 +548,26 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             }
             break;
           case DECIMAL:
-            Integer dbl_digits = f.getNumericPrecision();
-            Integer dbl_fract = f.getNumericScale();
-            if (dbl_digits == null) {
-              dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+            if ( f.isDoublePrecision() ) {
+              b.append(" FLOAT(53)");
+            } else {
+              Integer dbl_digits = f.getNumericPrecision();
+              Integer dbl_fract = f.getNumericScale();
+              if (dbl_digits == null) {
+                dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+              }
+              if (dbl_fract == null) {
+                dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
+              }
+              b.append(" DECIMAL(");
+              b.append(dbl_digits.toString());
+              b.append(K_CS);
+              b.append(dbl_fract.toString());
+              b.append(K_CLOSE_PAREN);
             }
-            if (dbl_fract == null) {
-              dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
-            }
-            b.append(" DECIMAL(");
-            b.append(dbl_digits.toString());
-            b.append(K_CS);
-            b.append(dbl_fract.toString());
-            b.append(K_CLOSE_PAREN);
             break;
           case DATETIME:
-            b.append(" DATETIME");
+            b.append(" DATETIME(6)");
             break;
           case URI:
             b.append(" VARCHAR(");

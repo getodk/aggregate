@@ -296,8 +296,12 @@ public abstract class CommonFieldsBase {
       fieldValueMap.remove(f);
       return;
     }
-    // enforce scaling here...
-	fieldValueMap.put(f, value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
+    if ( !f.isDoublePrecision()  && !value.isSpecialValue() ) {
+      // enforce scaling here...
+      fieldValueMap.put(f, value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
+    } else {
+      fieldValueMap.put(f, value);
+    }
   }
 
   public final Date getDateField(DataField f) {

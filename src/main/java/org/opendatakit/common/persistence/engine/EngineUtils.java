@@ -173,7 +173,7 @@ public class EngineUtils {
          if ( bd == null ) {
             value = null;
          } else {
-            if ( !bd.isSpecialValue() ) {
+            if ( !dominantAttr.isDoublePrecision() && !bd.isSpecialValue() ) {
               bd = bd.setScale(dominantAttr.getNumericScale(), BigDecimal.ROUND_HALF_UP);
             }
             value = bd.toString();
@@ -227,7 +227,10 @@ public class EngineUtils {
 				value = null;
 			} else {
 				WrappedBigDecimal bd = new WrappedBigDecimal(v);
-				value = bd.setScale(dominantAttr.getNumericScale(), BigDecimal.ROUND_HALF_UP);
+				if ( !dominantAttr.isDoublePrecision() && !bd.isSpecialValue() ) {
+				  bd = bd.setScale(dominantAttr.getNumericScale(), BigDecimal.ROUND_HALF_UP);
+				}
+				value = bd;
 			}
 			break;
 		}

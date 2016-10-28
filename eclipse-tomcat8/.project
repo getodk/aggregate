@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>eclipse-tomcat6</name>
+	<name>eclipse-tomcat8</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -54,6 +54,11 @@
 			<name>java</name>
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/src/main/java</locationURI>
+		</link>
+		<link>
+			<name>test-java</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/src/test/java</locationURI>
 		</link>
 		<link>
 			<name>war-base</name>

@@ -72,8 +72,14 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
           row.setLongField(f, Long.valueOf(l));
         }
         break;
-      case DECIMAL:
-        row.setNumericField(f, new WrappedBigDecimal(rs.getString(f.getName())));
+      case DECIMAL: {
+        String value = rs.getString(f.getName());
+        if ( value == null ) {
+          row.setNumericField(f, null);
+        } else {
+          row.setNumericField(f, new WrappedBigDecimal(value));
+        }
+      }
         break;
       case BOOLEAN:
         Boolean b = rs.getBoolean(f.getName());

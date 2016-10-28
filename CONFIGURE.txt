@@ -1,15 +1,10 @@
-NOTE: this is preliminary documentation!
-NOTE: this is preliminary documentation!
-NOTE: this is preliminary documentation!
-NOTE: this is preliminary documentation!
-NOTE: this is preliminary documentation!
 
 ==================================
 Configuring your Build Environment
 ----------------------------------
 
 The build tree relies on Maven 3 for executing unit tests and 
-integration tests across the 3 platforms (GAE, MySQL, PostgreSQL).
+integration tests across the 4 platforms (GAE, MySQL, PostgreSQL, SQLServer).
 
 Sources are located under
 
@@ -28,9 +23,9 @@ For AppEngine:
    eclipse-default
    eclipse-n-background
    
-For MySQL or PostgreSQL:
+For MySQL or PostgreSQL or SQLServer:
 
-   eclipse-tomcat6
+   eclipse-tomcat8
 
 Additionally, when using Eclipse, you must also import one of these projects
 into your environment:
@@ -38,6 +33,7 @@ into your environment:
   odk-gae-settings
   odk-mysql-settings
   odk-postgresql-settings
+  odk-sqlserver-settings
   
 
 If you're a Maven expert and have suggestions about the Maven 
@@ -50,12 +46,14 @@ Critically Important Configuration Notes!!!!
 (1) You MUST use Java 7. 
 
 Java 8 (and anything other than Servlet 2.5) are not supported by AppEngine.
+While the codebase now uses Tomcat8 (Servlet 3.1) for non-AppEngine deployments,
+it does not make use of functionality above Servlet 2.5 for this reason.
 If you use Java 8, Springframework will use a blacklisted reflection API
 and you will NOT be able to run the server locally under AppEngine or
 deploy it remotely.
 
 (2) When running Google's AppEngine Eclipse plug-in and development server, the 
-plug-in will scan files and delete any that contain Servlet-3.0 functionality.
+plug-in will scan files and delete any that contain Servlet-3.x functionality.
 
 Unfortunately, this includes the spring-web jar. To work around this, you must
 explode the jar, remove the overview.html and WEB-INF/web-fragment.xml files, 
@@ -452,23 +450,37 @@ The most likely problem during development is the inadvertent clearing of
 the settings you configured in step 17, above. 
 
 ======================================
-Minimal Tomcat6 MySQL/PostgreSQL Eclipse Setup
+Minimal Tomcat8 MySQL/PostgreSQL Eclipse Setup
 --------------------------------------
 
 This assumes you have completed "Minimal Eclipse Installation Setup"
 
 (including the download of the AppEngine SDK and GWT SDK. These are needed to resolve symbols when
-compiling the source code, even when running under Tomcat6.)
+compiling the source code, even when running under Tomcat8.)
 
-(1) Install Tomcat6 on your computer.
+(1) Install Tomcat8 on your computer.
 
-(2) download MySQL Connector/J and place it in the lib directory of the Tomcat install.
-Stop and restart the Tomcat6 server so it picks up that library. This must be present
+(2a) download MySQL Connector/J and place it in the lib directory of the Tomcat install.
+Stop and restart the Tomcat8 server so it picks up that library. This must be present
 for MySQL connections to work. It does not harm anything if this is present when using 
 PostgreSQL.
 
-(3) install the database server of your choice (MySQL or PostgreSQL).
+(2b) SQLServer configuration requires running on a Windows system. Copy the
+    src\main\sqlserver-auth\sqljdbc_auth.dll
+  to your C:\Windows\System32 directory. This is the authentication library for JDBC 4.1
+  that uses Windows authentication to verify user identity.
+
+(3) install the database server of your choice (MySQL or PostgreSQL or SQLServer).
 NOTE:  Be sure that it is configured using a UTF-8 character set as the default.
+
+For MySQL: Stop the MySQL database server, then configure the database (via the "my.cnf" or
+the "my.ini" file) with these lines added to the [mysqld] section:
+
+   character_set_server=utf8
+   collation_server=utf8_unicode_ci
+   max_allowed_packet=1073741824
+
+For SQLServer, we configure it to use Windows authentication mode, but it can be mixed-mode.
 
 (4) Start Eclipse (Mars) and select this ODK Aggregate workspace. 
 
@@ -502,9 +514,9 @@ Open Server /Runtime Environment
 Select Google AppEngine. If it complains about not having an AppEngine SDK the delete this
 and select Add, choose Google / AppEngine, and accept the defaults to re-create it.
 
-Select Apache Tomcat v6.0. If it complains about not having a configured runtime, then delete this.
-Select Add..., Select Apache / Apache Tomcat v6.0 and set it up to point to your 
-installation of Tomcat v6.0 on your system. Do not choose to create a new server; you are re-using 
+Select Apache Tomcat v8.0. If it complains about not having a configured runtime, then delete this.
+Select Add..., Select Apache / Apache Tomcat v8.0 and set it up to point to your 
+installation of Tomcat v8.0 on your system. Do not choose to create a new server; you are re-using 
 the existing server.
 
 Click OK to save changes.
@@ -516,7 +528,7 @@ import these existing projects:
 
 odk-mysql-settings
 odk-posgres-settings
-eclipse-tomcat6
+eclipse-tomcat8
 
 (8) Depending upon which database you want to use:
 
@@ -561,7 +573,7 @@ flush privileges;
 Finally, return to Eclipse, select the build.xml script within the odk-mysql-settings
 project, right-click, Run As / Ant Build.
 
-This will bundle up these changes and copy the changes into the eclipse-tomcat6 project.
+This will bundle up these changes and copy the changes into the eclipse-tomcat8 project.
 
 (8b) PostgreSQL: 
 
@@ -608,11 +620,62 @@ grant all privileges on schema "odk_db" to "odk_unit";
 Finally, return to Eclipse, select the build.xml script within the odk-postgres-settings
 project, right-click, Run As / Ant Build.
 
-This will bundle up these changes and copy the changes into the eclipse-tomcat6 project.
+This will bundle up these changes and copy the changes into the eclipse-tomcat8 project.
 
-(9) Select eclipse-tomcat6, right-click, Refresh. (to pick up file changes).
+(8c) SQLServer: 
 
-(10) Select eclipse-tomcat6, right-click, Google / GWT Compile
+open odk-sqlserver-settings/common
+
+edit security.properties to set the hostname to the IP address of your 
+computer.
+
+open odk-sqlserver-settings/sqlserver
+
+edit jdbc.properties to specify a database name in the url.
+The url is configured to use Windows authentication for accessing the database, so
+no username or password is present in this file. If you do not want to use Windows
+authentication, compare the odk_settings.xml file for sqlserver with that for postgres
+to see where to add settings for username and password so that you can use those for 
+authentication.
+
+------e.g.,----------
+jdbc.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver
+jdbc.resourceName=jdbc/odk_aggregate
+jdbc.url=jdbc:sqlserver://127.0.0.1\\MSSQLSERVER:1433;databaseName=odk_unit;applicationName=ODKAggregate;encrypt=true;trustServerCertificate=true;integratedSecurity=true;authentication=ActiveDirectoryIntegrated;
+jdbc.schema=odk_schema
+----------------
+
+Save changes. 
+
+Now open Microsoft SQL Server Management Studio. If you have not yet created that database, 
+issue the following commands, with the names changed for what you 
+specified above. The names to substitute above/below are:
+
+odk_unit -- replace with your database name
+odk_schema -- replace with the schema name
+
+-----corresponding db script------------
+USE master;
+go
+CREATE DATABASE odk_unit;
+go
+USE odk_unit;
+go
+CREATE SCHEMA odk_schema;
+go
+----------------------------------------
+
+Because we are using Windows authentication, the run-as user under Eclipse will be your
+user. Since you are an admin on the database, we don't need to set permissions.
+
+Finally, return to Eclipse, select the build.xml script within the odk-postgres-settings
+project, right-click, Run As / Ant Build.
+
+This will bundle up these changes and copy the changes into the eclipse-tomcat8 project.
+
+(9) Select eclipse-tomcat8, right-click, Refresh. (to pick up file changes).
+
+(10) Select eclipse-tomcat8, right-click, Google / GWT Compile
 
 Verify the program arguments are 
 
@@ -624,41 +687,41 @@ And the VM arguments are
 	
 Apply and Compile.
 
-(11) Select eclipse-tomcat6, right-click, Refresh. (to pick up GWT file changes).
+(11) Select eclipse-tomcat8, right-click, Refresh. (to pick up GWT file changes).
 
-(12) Select eclipse-tomcat6, right-click, properties, 
+(12) Select eclipse-tomcat8, right-click, properties, 
 
 (13) Select the Servers tab in the Output area
 
-Delete any existing Tomcat v6.0 server.
+Delete any existing Tomcat v8.0 server.
 
 Click to create a server.
 
-Choose Tomcat v6.0 Server
+Choose Tomcat v8.0 Server
 
 Enter the IP address of your computer. If you leave this as localhost, then ODK Collect
 and ODK Briefcase will not be able to fully communicate with your development server.
 
 Click Next
 
-Configure to deploy eclipse-tomcat6 on this server.
+Configure to deploy eclipse-tomcat8 on this server.
 
 Click Finish
 
-(14) Select eclipse-tomcat6 project, right-click Properties
+(14) Select eclipse-tomcat8 project, right-click Properties
  
 Go to Project Facets, select Dynamic Web App, click Runtimes tab, 
-verify that Tomcat v6.0 is chosen.
+verify that Tomcat v8.0 is chosen.
 
 Apply
 
-Go to Server, select the Tomcat v6.0 server that you just created
+Go to Server, select the Tomcat v8.0 server that you just created
 
 Apply
 
 Click OK
 
-(13) You should now be able to run ODK Aggregate on this Tomcat6 server by 
+(13) You should now be able to run ODK Aggregate on this Tomcat8 server by 
 right-click, Debug As / Debug on Server
 
 The project may report a validation error (web.xml not found in WebContent).
@@ -668,15 +731,15 @@ You may need to clear your browser cache if you are using GWT SuperDevMode
 and re-configure the browser for that (e.g., the bookmark buttons).
 
 ========================================
-Tomcat6 Edit-Debug Cycle Considerations
+Tomcat8 Edit-Debug Cycle Considerations
 ========================================
 
 Now, you should be able to Debug the server-side code using the
-Tomcat6 development server. When you are developing, as you 
+Tomcat8 development server. When you are developing, as you 
 change code, you will probably need to start and stop the server.
 
 If you change the UI layer, you will want to re-run the GWT compiler,
-and Refresh the eclipse-tomcat6 project, where the UI
+and Refresh the eclipse-tomcat8 project, where the UI
 code is.
 
 You may need to clear your browser cache if you are using GWT SuperDevMode
@@ -699,12 +762,12 @@ GWT debugging with SuperDevMode
 
 These instructions are taken from this video:  https://www.youtube.com/watch?v=w9270Yqt-5I
 
-(1) In either the eclipse-ear or eclipse-tomcat6 project, 
+(1) In either the eclipse-ear or eclipse-tomcat8 project, 
 right-click, Debug As / Debug Configurations
 
 Double-click "Java Application" to configure a Java Application execution.
 
-Change the name to, e.g., "AppEngine GWT Codeserver" or "Tomcat6 GWT Codeserver"
+Change the name to, e.g., "AppEngine GWT Codeserver" or "Tomcat8 GWT Codeserver"
 
 Choose Search... and type in Code
 
@@ -718,11 +781,11 @@ In Program Arguments, insert the 4 arguments (on one line):
 
 --bindAddress [your IP address]
 -src [path-to-workspace]\src\main\java 
--launcherDir [path-to-workspace]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\eclipse-tomcat6  
+-launcherDir [path-to-workspace]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\eclipse-tomcat8  
 org.opendatakit.aggregate.AggregateUI
 
 The -launcherDir "tmp0" may be a different directory name (e.g., tmp1, tmp2...). 
-Whichever one contains the eclipse-tomcat6 or eclipse-default is the one you would use.
+Whichever one contains the eclipse-tomcat8 or eclipse-default is the one you would use.
 If confused, you can stop all servers, blow away all the tmpX directories, and re-publish 
 and re-run the server you have configured to determine what directory has the active content.
 
@@ -730,7 +793,7 @@ Choose Apply
 
 Close
 
-(2) Now, run the server (EAR or Tomcat6)
+(2) Now, run the server (EAR or Tomcat8)
 
 (3) And run the codeserver you just configured via Debug As / Debug Configurations, and select the configuration.
 
@@ -742,7 +805,7 @@ Copy the Dev Mode On / Dev Mode Off buttons up to the bookmarks bar.
 You may need to delete an earlier copy of these by right-click / Delete.
 And if you have been using Dev Mode, you may need to clear your browser cache.
 
-(5) Now, open the URL to your server (tomcat6 or eclipse-ear).
+(5) Now, open the URL to your server (tomcat8 or eclipse-ear).
 
 It will pause compiling aggregateui
 
@@ -829,7 +892,7 @@ Full Maven Development Environment Configuration
 
 (4) Install Google Eclipse Plugin with App Engine SDK and Google Web Toolkit SDK.
 
-(5) Optionally Install Tomcat 6.0.  
+(5) Optionally Install Tomcat 8.0.  
     This is required unless you do not import or always keep closed
     the MySQL and Postgres projects and don't use maven.
 
@@ -866,15 +929,38 @@ GRANT ALL PRIVILEGES ON odk_unit.* TO 'odk_unit'@'localhost' WITH GRANT OPTION;
 
 (6b)
 For MySQL, download and copy the MySQL Connector J jar into the Tomcat /lib
-directory (mysql-connector-java-5.1.17.jar to apache-tomcat-6.0.26/lib).
+directory (mysql-connector-java-5.1.17.jar to apache-tomcat-8.0.38/lib).
 You must stop tomcat, if it is running, in order for the library to be detected.
 
 For Maven (3) is optional; (4), (5) and (6) are required in order
 to perform a full build.
 
+(7) Optionally: Install SQL Server
+We use Windows authentication for connecting to SQL Server.
+This requires running on a Windows platform.
+
+(7a)
+For SQLServer, run this script:
+
+USE master;
+go
+CREATE DATABASE odk_unit;
+go
+USE odk_unit;
+go
+CREATE SCHEMA odk_schema;
+go
+
+(7b)
+For SQLServer, copy the src\main\libs\sqlserver-auth\sqljdbc_auth.dll to your 
+C:\Windows\System32 directory. Or, place it in your PATH and reboot your machine.
+
+For Maven (3) is optional; (4), (5), (6) and (7) are required in order
+to perform a full build.
+
 ----------
 
-(7) Register libraries in Maven: (this is also required for Eclipse builds)
+(8) Register libraries in Maven: (this is also required for Eclipse builds)
 
 Run the ANT script (build.xml) under:
 
@@ -884,12 +970,12 @@ To run, just cd to this directory and type 'ant'
 
 See the src/main/libs/readme.txt for information about these jars.
 
-(8a) Download and install Chrome. The test scripts now use Chrome for 
+(9a) Download and install Chrome. The test scripts now use Chrome for 
 the selenium testing rather than Firefox, which changed so often as to 
 be unusable. You might need to update selenium and the Chrome Driver
 for UI testing to work.  This is done in the build\build.xml file.
 
-(8b) Download the App Engine SDK and selenium java client for full-stack integration / web UI tests.
+(9b) Download the App Engine SDK and selenium java client for full-stack integration / web UI tests.
 
 Run the ANT script (build.xml) under:
 
@@ -897,7 +983,7 @@ build/   -- downloads the App Engine SDK and selenium java client (for full-stac
 
 To run, just cd to this directory and type 'ant'
  
-(9) Edit Maven's settings.xml file (this is in the .m2 directory).
+(10) Edit Maven's settings.xml file (this is in the .m2 directory).
 
 A minimal file is:
 
@@ -966,8 +1052,8 @@ a java database background process running.
 mvn install
 
 This will build and install the projects, running the unit tests
-against the 3 datastores (Google BigTable, MySQL, Postgresql),
-and building the wars for the 3 platforms.
+against the 4 datastores (Google BigTable, MySQL, Postgresql, SQLServer),
+and building the wars for the 4 platforms.
 
 (13) If you have bitrock installed and licensed, you can 
 build the bitrock installer.  First, 

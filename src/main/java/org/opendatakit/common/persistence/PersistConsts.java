@@ -55,9 +55,10 @@ public class PersistConsts {
 
   /**
    * The shortest interval for which all datetime values are preserved across
-   * all platforms. MySql's TIMESTAMP only keeps time to the nearest second... .
+   * all platforms. MySql's TIMESTAMP can keep time to microseconds but clock
+   * time is only in multiples of a minimal millisecond.
    */
-  public static final Long MIN_DATETIME_RESOLUTION = 1000L;
+  public static final Long MIN_DATETIME_RESOLUTION = 10L;
 
   /**
    * The maximum length of the URI strings. An exception will be thrown if the

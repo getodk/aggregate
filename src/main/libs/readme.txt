@@ -67,4 +67,9 @@ The ANT build script has code commented out that would pull from
 the github repo. Instead, we explode the googlecode zip and register
 the jars within it.
 
+# sqljdbc41.jar:
+# sqlserver-auth\sqljdbc_auth.dll
+
+Microsoft SQL Server JDBC 4.1 libraries.
+https://www.microsoft.com/en-us/download/details.aspx?id=11774
 
