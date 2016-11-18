@@ -69,10 +69,10 @@
         <com.fasterxml.jackson.core.version>2.7.3</com.fasterxml.jackson.core.version>
         <com.fasterxml.jackson.version>2.7.3</com.fasterxml.jackson.version>
         <org.codehaus.woodstox.version>4.4.1</org.codehaus.woodstox.version> <!-- used by jackson2 XML serializer -->
-        <org.springframework.version>4.3.3.RELEASE</org.springframework.version>
+        <org.springframework.version>4.3.4.RELEASE</org.springframework.version>
         <org.slf4j.version>1.7.20</org.slf4j.version>
         <!-- log4j is not used -->
-        <org.springframework.security.version>3.2.9.RELEASE</org.springframework.security.version>
+        <org.springframework.security.version>4.2.0.RELEASE</org.springframework.security.version>
         <!--
             keystore.propertyfile - define this in your settings.xml - the
             location of the properties file for the keystore
