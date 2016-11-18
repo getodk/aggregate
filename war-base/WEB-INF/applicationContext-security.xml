@@ -3,7 +3,7 @@
 <beans:beans xmlns="http://www.springframework.org/schema/security"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
 	<beans:import resource="classpath:odk-security-settings.xml"/>
 
@@ -30,7 +30,7 @@
 	</beans:bean>
 
 	<!--	Configure the access policy to the pages here	-->
-	<!--	You can do things like this: and hasRole('AUTH_LOCAL') -->
+	<!--	You can do things like this: and hasAuthority('AUTH_LOCAL') -->
 
 <!--	NOTE: for debugging applets, it is useful to allow anonymous access to the pages-->
 <!--	they utilize.  This means that the isFullyAuthenticated() criteria cannot be used-->
@@ -79,7 +79,7 @@
 		<intercept-url pattern="/odk_color.png" access="true" />
 		<intercept-url pattern="/multimode_login.html" access="true" />
 		<intercept-url pattern="/relogin.html" access="true" />
-		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasRole('AUTH_LOCAL')" />
+		<intercept-url pattern="/local_login.html" access="isFullyAuthenticated() and hasAuthority('AUTH_LOCAL')" />
 
 		<!-- grant access to various servlets -->
 		<intercept-url pattern="/formList" access="hasRole('ROLE_DATA_COLLECTOR') or hasRole('ROLE_DATA_VIEWER')" />
@@ -165,14 +165,56 @@
 	<!-- Prerequisite for the applying of the access policies above.   -->
 	<beans:bean id="serverSpringSecurityFilterChain"
 		class="org.springframework.security.web.FilterChainProxy">
-		<filter-chain-map request-matcher="ant">
-			<filter-chain pattern="/local_login.html"
-				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,anonymousFilter,securityContextHolderAwareFilter,sessionManagerFilter,localExceptionTranslationFilter,filterSecurityInterceptor" />
-			<filter-chain pattern="/*"
-				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,anonymousFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
-			<filter-chain pattern="/**"
-				filters="channelProcessingFilter,securityContextPersistenceFilter,logoutFilter,oauth2ResourceFilter,oobAuthFilter,${security.server.deviceAuthentication}AuthFilter,requestCacheAwareFilter,anonymousFilter,securityContextHolderAwareFilter,sessionManagerFilter,exceptionTranslationFilter,filterSecurityInterceptor" />
-		</filter-chain-map>
+		<beans:constructor-arg>
+			<beans:list>
+				<beans:bean class="org.springframework.security.web.DefaultSecurityFilterChain">
+					<beans:constructor-arg>
+						<beans:bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+							<beans:constructor-arg type="java.lang.String" value="/local_login.html"/>
+						</beans:bean>
+					</beans:constructor-arg>
+					<beans:constructor-arg>
+						<beans:list>
+							<beans:ref bean="channelProcessingFilter"/>
+							<beans:ref bean="securityContextPersistenceFilter"/>
+							<beans:ref bean="logoutFilter"/>
+							<beans:ref bean="oauth2ResourceFilter"/>
+							<beans:ref bean="oobAuthFilter"/>
+							<beans:ref bean="${security.server.deviceAuthentication}AuthFilter"/>
+							<!-- stateless <beans:ref bean="requestCacheAwareFilter"/> -->
+							<beans:ref bean="anonymousFilter"/>
+							<beans:ref bean="securityContextHolderAwareFilter"/>
+							<beans:ref bean="sessionManagerFilter"/>
+							<beans:ref bean="localExceptionTranslationFilter"/>
+							<beans:ref bean="filterSecurityInterceptor"/>
+						</beans:list>
+					</beans:constructor-arg>
+				</beans:bean>
+				<beans:bean class="org.springframework.security.web.DefaultSecurityFilterChain">
+					<beans:constructor-arg>
+						<beans:bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+							<beans:constructor-arg type="java.lang.String" value="/**"/>
+						</beans:bean>
+					</beans:constructor-arg>
+					<beans:constructor-arg>
+						<beans:list>
+							<beans:ref bean="channelProcessingFilter"/>
+							<beans:ref bean="securityContextPersistenceFilter"/>
+							<beans:ref bean="logoutFilter"/>
+							<beans:ref bean="oauth2ResourceFilter"/>
+							<beans:ref bean="oobAuthFilter"/>
+							<beans:ref bean="${security.server.deviceAuthentication}AuthFilter"/>
+							<!-- stateless <beans:ref bean="requestCacheAwareFilter"/> -->
+							<beans:ref bean="anonymousFilter"/>
+							<beans:ref bean="securityContextHolderAwareFilter"/>
+							<beans:ref bean="sessionManagerFilter"/>
+							<beans:ref bean="exceptionTranslationFilter"/>
+							<beans:ref bean="filterSecurityInterceptor"/>
+						</beans:list>
+					</beans:constructor-arg>
+				</beans:bean>
+			</beans:list>
+		</beans:constructor-arg>
 	</beans:bean>
 
     <!-- Secure channel processing -->
@@ -180,7 +222,7 @@
 	<beans:bean id="channelProcessingFilter" class="org.springframework.security.web.access.channel.ChannelProcessingFilter">
 	  <beans:property name="channelDecisionManager" ref="channelDecisionManager"/>
 	  <beans:property name="securityMetadataSource">
-	    <filter-security-metadata-source request-matcher="ant">
+	    <filter-security-metadata-source request-matcher="ant" use-expressions="false">
 	        <intercept-url pattern="/_ah/**" access="ANY_CHANNEL" /> <!-- local GAE admin console -->
         	<intercept-url pattern="/favicon.ico" access="ANY_CHANNEL" />
 	        <intercept-url pattern="/odk_color.png" access="ANY_CHANNEL" />
@@ -250,7 +292,7 @@
 
 	<beans:bean id="securityContextPersistenceFilter"
 		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
-		<beans:constructor-arg name="repo" ref="securityContextRepository" />
+		<beans:constructor-arg ref="securityContextRepository" />
 	</beans:bean>
 
 	<beans:bean id="securityContextRepository"
@@ -272,10 +314,12 @@
 				</beans:bean>
 			</beans:list>
 		</beans:constructor-arg>
+		<beans:property name="filterProcessesUrl" value="/j_spring_security_logout"/>
 	</beans:bean>
 
 	<beans:bean id="requestCacheAwareFilter"
-		class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter" />
+		class="org.springframework.security.web.savedrequest.RequestCacheAwareFilter">
+	</beans:bean>
 
 	<!--  <beans:bean id="securityContextHolderAwareFilter"
 		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" /> -->
@@ -284,7 +328,7 @@
 
 	<beans:bean id="sessionManagerFilter"
 		class="org.springframework.security.web.session.SessionManagementFilter">
-		<beans:constructor-arg name="securityContextRepository" ref="securityContextRepository" />
+		<beans:constructor-arg ref="securityContextRepository" />
 	</beans:bean>
 
 	<!--	This class determines what authentication to initiate.  It uses the -->
@@ -292,7 +336,7 @@
 	<!--	browser or the device.  If it is not a browser, it does basic or digest auth.-->
 	<beans:bean id="exceptionTranslationFilter"
 		class="org.springframework.security.web.access.ExceptionTranslationFilter">
-		<beans:property name="authenticationEntryPoint" ref="delegatingAuthenticationEntryPoint"/>
+		<beans:constructor-arg ref="delegatingAuthenticationEntryPoint"/>
 		<beans:property name="accessDeniedHandler">
 			<beans:bean class="org.opendatakit.common.security.spring.GWTAccessDeniedHandlerImpl">
 				<beans:property name="gwtHeader" value="X-opendatakit-gwt"/>
@@ -319,41 +363,48 @@
 	<!-- This forces the login to use the configured locally-held credential mechanism -->
 	<beans:bean id="localExceptionTranslationFilter"
 		class="org.springframework.security.web.access.ExceptionTranslationFilter">
-		<beans:property name="authenticationEntryPoint" ref="${security.server.deviceAuthentication}EntryPoint" />
+		<beans:constructor-arg ref="${security.server.deviceAuthentication}EntryPoint" />
 	</beans:bean>
 
 	<!-- 			Anonymous User -->
 
 	<beans:bean id="anonymousFilter"
 		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
-		<beans:property name="key">
+		<beans:constructor-arg>
 		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
-		</beans:property>
-		<beans:property name="userAttribute" value="anonymousUser,USER_IS_ANONYMOUS" />
+		</beans:constructor-arg>
+	    <beans:constructor-arg value="anonymousUser"/>
+	    <beans:constructor-arg>
+	    	<beans:list>
+	    		<beans:bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<beans:constructor-arg value="USER_IS_ANONYMOUS"/>
+				</beans:bean>
+			</beans:list>
+	    </beans:constructor-arg>
 	</beans:bean>
 
 	<beans:bean id="anonymousProvider"
 		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
-		<beans:property name="key">
+		<beans:constructor-arg type="java.lang.String">
 		    <beans:bean id="sitePreferencesBean.siteKey" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
-		</beans:property>
+		</beans:constructor-arg>
 	</beans:bean>
 
 	<!--			Basic Authentication -->
 
 	<beans:bean id="basicAuthFilter"
 		class="org.opendatakit.common.security.spring.BasicAuthenticationFilter">
-		<beans:property name="authenticationManager">
+		<beans:constructor-arg>
 			<beans:bean class="org.springframework.security.authentication.ProviderManager">
-				<beans:property name="providers">
+				<beans:constructor-arg>
 					<beans:list>
 						<beans:ref bean="basicAuthenticationProvider" />
 						<beans:ref bean="anonymousProvider" />
 					</beans:list>
-				</beans:property>
+				</beans:constructor-arg>
 			</beans:bean>
-		</beans:property>
-		<beans:property name="authenticationEntryPoint" ref="basicEntryPoint" />
+		</beans:constructor-arg>
+		<beans:constructor-arg ref="basicEntryPoint" />
 	</beans:bean>
 
 	<beans:bean id="basicEntryPoint"
@@ -381,7 +432,9 @@
 		<beans:property name="credentialType" value="Username"/>
 		<beans:property name="authorities">
 			<beans:list>
-				<beans:value>AUTH_LOCAL</beans:value>
+	    		<beans:bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<beans:constructor-arg value="AUTH_LOCAL"/>
+				</beans:bean>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
@@ -421,7 +474,9 @@
 		<beans:property name="credentialType" value="Username"/>
 		<beans:property name="authorities">
 			<beans:list>
-				<beans:value>AUTH_LOCAL</beans:value>
+	    		<beans:bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<beans:constructor-arg value="AUTH_LOCAL"/>
+				</beans:bean>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
@@ -504,7 +559,7 @@
 
 	<beans:bean id="accessDecisionManager"
 		class="org.springframework.security.access.vote.AffirmativeBased">
-		<beans:property name="decisionVoters">
+		<beans:constructor-arg>
 			<beans:list>
 				<beans:bean class="org.springframework.security.web.access.expression.WebExpressionVoter">
 		        	<beans:property name="expressionHandler">
@@ -518,7 +573,7 @@
 		        </beans:bean>
 				<beans:bean	class="org.springframework.security.access.vote.AuthenticatedVoter" />
 			</beans:list>
-		</beans:property>
+		</beans:constructor-arg>
 	</beans:bean>
 	<beans:bean id="webPrivilegeEvaluator"
 		class="org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator">
@@ -527,7 +582,7 @@
 
 	<beans:bean id="authenticationManager"
 		class="org.springframework.security.authentication.ProviderManager">
-		<beans:property name="providers">
+		<beans:constructor-arg>
 			<beans:list>
 				<beans:ref bean="digestAuthenticationProvider" />
 				<beans:ref bean="basicAuthenticationProvider" />
@@ -535,7 +590,7 @@
 				<beans:ref bean="oauth2AuthenticationProvider" />
 				<beans:ref bean="anonymousProvider" />
 			</beans:list>
-		</beans:property>
+		</beans:constructor-arg>
 	</beans:bean>
 
 
