@@ -181,7 +181,7 @@
 							<beans:ref bean="oauth2ResourceFilter"/>
 							<beans:ref bean="oobAuthFilter"/>
 							<beans:ref bean="${security.server.deviceAuthentication}AuthFilter"/>
-							<!-- stateless <beans:ref bean="requestCacheAwareFilter"/> -->
+							<beans:ref bean="requestCacheAwareFilter"/>
 							<beans:ref bean="anonymousFilter"/>
 							<beans:ref bean="securityContextHolderAwareFilter"/>
 							<beans:ref bean="sessionManagerFilter"/>
