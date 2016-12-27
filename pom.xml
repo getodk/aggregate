@@ -21,7 +21,7 @@
     <properties>
         <toplevel.directory>${project.basedir}/../</toplevel.directory>
         <!-- must match the gae version below and the build/build.xml ant script defn -->
-        <gooogle.appengine.sdk.version>1.9.42</gooogle.appengine.sdk.version>
+        <gooogle.appengine.sdk.version>1.9.48</gooogle.appengine.sdk.version>
         <gae.home>${project.basedir}/../build/appengine-java-sdk-${gooogle.appengine.sdk.version}/appengine-java-sdk-${gooogle.appengine.sdk.version}</gae.home>
         <!-- selenium 3.0.x is built using Java 8. We need to stay at Java 7 for AppEngine compatibility -->
         <!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
@@ -30,7 +30,7 @@
         <selenium.libs>${project.basedir}/../build/selenium-java-${org.seleniumhq.version}/selenium-${org.seleniumhq.version}/libs</selenium.libs>
         <!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
         <!-- change the webdriver.chrome.drivername in .m2/settings.xml when running on a MacOSX or Linux system -->
-        <webdriver.chrome.driver>${project.basedir}/../build/${webdriver.chrome.drivername}-2.25/chromedriver${webdriver.chrome.driverext}</webdriver.chrome.driver>
+        <webdriver.chrome.driver>${project.basedir}/../build/${webdriver.chrome.drivername}-2.26/chromedriver${webdriver.chrome.driverext}</webdriver.chrome.driver>
         <war.directory>${project.basedir}/../war-base</war.directory>
         <gae.ear.earcontent.directory>${project.basedir}/../eclipse-ear/EarContent</gae.ear.earcontent.directory>
         <gae.default.webcontent.directory>${project.basedir}/../eclipse-default/WebContent</gae.default.webcontent.directory>
@@ -93,10 +93,10 @@
         <module>odk-sqlserver-it-settings</module>
         <module>odk-sqlserver-unit-settings</module>
 
-        <!-- aggregate-sqlserver-specific -->
-        <module>aggregate-sqlserver</module>
         <!-- aggregate-mysql-specific -->
         <module>aggregate-mysql</module>
+        <!-- aggregate-sqlserver-specific -->
+        <module>aggregate-sqlserver</module>
         <!-- aggregate-postgresql-specific -->
         <module>aggregate-postgres</module>
         
@@ -172,6 +172,11 @@
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
+		<dependency> <!-- Google Cloud MySQL version 2 -->
+			<groupId>com.google.cloud.sql</groupId>
+			<artifactId>mysql-socket-factory</artifactId>
+			<version>1.0.2</version>
+		</dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
@@ -305,6 +310,19 @@
         <dependency>
           <groupId>com.google.api-client</groupId>
           <artifactId>google-api-client</artifactId>
+          <version>${google.api-client.version}</version>
+          <type>jar</type>
+          <scope>compile</scope>
+          <exclusions>
+            <exclusion>
+              <groupId>com.google.guava</groupId>
+              <artifactId>guava-jdk5</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>com.google.api-client</groupId>
+          <artifactId>google-api-client-appengine</artifactId>
           <version>${google.api-client.version}</version>
           <type>jar</type>
           <scope>compile</scope>
@@ -1472,7 +1490,7 @@
                           </properties>
                           <type>war</type>
                           <pingURL>http://localhost:${test.server.port}/${project.artifactId}/</pingURL>
-                          <pingTimeout>60000</pingTimeout>
+                          <pingTimeout>180000</pingTimeout>
                         </deployable>
                       </deployables>
                     </configuration>

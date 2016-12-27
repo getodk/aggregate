@@ -85,3 +85,9 @@ build/chromedriver_win32-2.25.zip
 build/selenium-java-3.0.1.zip
 build/selenium-java-2.53.1/
 build/selenium-java-2.53.1.zip
+build/appengine-java-sdk-1.9.48/
+build/chromedriver_mac64-2.26/
+build/chromedriver_win32-2.26/
+build/chromedriver_mac64-2.26.zip
+build/chromedriver_win32-2.26.zip
+build/appengine-java-sdk-1.9.48.zip

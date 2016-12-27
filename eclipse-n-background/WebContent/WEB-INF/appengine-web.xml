@@ -3,6 +3,7 @@
   <application>test</application>
   <module>background</module>
   <version>1</version>
+  <use-google-connector-j>false</use-google-connector-j>
 
 	<instance-class>B2</instance-class>
 	

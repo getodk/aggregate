@@ -163,6 +163,7 @@
 
 	<!-- Pages being filtered and the filters applied to them (everything). -->
 	<!-- Prerequisite for the applying of the access policies above.   -->
+	<!-- We are stateless except for login screen. If that can be reworked, we can remove requestCacheAwareFilter -->
 	<beans:bean id="serverSpringSecurityFilterChain"
 		class="org.springframework.security.web.FilterChainProxy">
 		<beans:constructor-arg>
@@ -204,7 +205,7 @@
 							<beans:ref bean="oauth2ResourceFilter"/>
 							<beans:ref bean="oobAuthFilter"/>
 							<beans:ref bean="${security.server.deviceAuthentication}AuthFilter"/>
-							<!-- stateless <beans:ref bean="requestCacheAwareFilter"/> -->
+							<beans:ref bean="requestCacheAwareFilter"/> 
 							<beans:ref bean="anonymousFilter"/>
 							<beans:ref bean="securityContextHolderAwareFilter"/>
 							<beans:ref bean="sessionManagerFilter"/>
