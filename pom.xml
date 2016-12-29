@@ -45,8 +45,8 @@
         <apache.httpmime.version>4.5.2</apache.httpmime.version>
         <findbugs.jsr305.version>3.0.1</findbugs.jsr305.version>
         <google.gdata.version>1.47.1</google.gdata.version>
-        <google.api-client.version>1.21.0</google.api-client.version>
-        <google.api-services-drive.version>v3-rev17-1.21.0</google.api-services-drive.version>
+        <google.api-client.version>1.22.0</google.api-client.version>
+        <google.api-services-drive.version>v3-rev52-1.22.0</google.api-services-drive.version>
         <google.gwt.version>2.7.0</google.gwt.version>
         <org.apache.wink.version>1.4</org.apache.wink.version>
         <jacoco.maven.plugin.version>0.7.6.201602180812</jacoco.maven.plugin.version>
