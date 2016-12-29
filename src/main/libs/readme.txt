@@ -36,16 +36,16 @@ See the Aggregate (Components) README.txt file for how this was built. It
 uses the sources that were originally located here (but have since been removed):
 http://code.google.com/p/gwt-google-maps-v3/
 
-----------------------
-JARs built by others
-----------------------
-
 # gwt-visualization-1.1.2:
 
 The sources are in the jar. The full project can be found in 
 the Aggregate (Components) project. It is copied from the download
 formerly available here:
   http://code.google.com/p/gwt-google-apis/
+
+----------------------
+JARs built by others
+----------------------
 
 # gdata-src.java-1.47.1 -- various jars:
 
@@ -67,9 +67,11 @@ The ANT build script has code commented out that would pull from
 the github repo. Instead, we explode the googlecode zip and register
 the jars within it.
 
-# sqljdbc41.jar:
 # sqlserver-auth\sqljdbc_auth.dll
 
 Microsoft SQL Server JDBC 4.1 libraries.
 https://www.microsoft.com/en-us/download/details.aspx?id=11774
+
+This must be manually downloaded and copied to the path so that 
+Windows authentication can be used when connecting to SQLServer
 
