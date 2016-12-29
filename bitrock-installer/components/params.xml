@@ -158,12 +158,12 @@ NOTE: If you want to use the Microsoft Azure SQL Server, you must configure Tomc
                     <text>Google App Engine</text>
                     <value>gae</value>
                 </option>
-                <option>
+                <!-- <option>
                     <description>Uses Google's cloud-based MySQL storage and webserver services.</description>
                     <image></image>
                     <text>Google App Engine with Cloud MySQL</text>
                     <value>gae_mysql</value>
-                </option>
+                </option> -->
                 <option>
                     <description>Uses a MySQL database and an Apache Tomcat 8 webserver that you install.</description>
                     <image></image>
