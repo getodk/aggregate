@@ -17,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,13 +31,11 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
-import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
  * 

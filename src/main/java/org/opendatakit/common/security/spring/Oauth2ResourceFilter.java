@@ -34,7 +34,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.Charsets;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -254,7 +254,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
              BufferedReader reader = null;
              InputStreamReader isr = null;
              try {
-               reader = new BufferedReader(isr = new InputStreamReader(entity.getContent(), Charsets.UTF_8));
+               reader = new BufferedReader(isr = new InputStreamReader(entity.getContent(), CharEncoding.UTF_8));
                @SuppressWarnings("unchecked")
 			   Map<String,Object> userData = mapper.readValue(reader, Map.class);
                return userData;

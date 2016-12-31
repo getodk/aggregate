@@ -360,9 +360,12 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       if (es == null) {
         throw new RequestFailureException("Service description not found for this publisher");
       }
-      if (fsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS) {
+      OperationalStatus status = fsc.getOperationalStatus();
+      if ( status != OperationalStatus.BAD_CREDENTIALS && 
+           status != OperationalStatus.ABANDONED &&
+           status != OperationalStatus.PAUSED ) {
         throw new RequestFailureException(
-            "Credentials have not failed for this publisher -- rejecting change request");
+            "Rejecting change request -- publisher is not in a failure state");
       }
       es.initiate(cc);
     } catch (RequestFailureException e) {
