@@ -36,10 +36,6 @@ See the Aggregate (Components) README.txt file for how this was built. It
 uses the sources that were originally located here (but have since been removed):
 http://code.google.com/p/gwt-google-maps-v3/
 
-----------------------
-JARs built by others
-----------------------
-
 # gwt-visualization-1.1.2:
 
 The sources are in the jar. The full project can be found in 
@@ -47,24 +43,18 @@ the Aggregate (Components) project. It is copied from the download
 formerly available here:
   http://code.google.com/p/gwt-google-apis/
 
-# gdata-src.java-1.47.1 -- various jars:
+----------------------
+JARs built by others
+----------------------
 
-maven_gdata_installs -- a list of the jars used and the maven commands to install them.
+# sqlserver-auth\sqljdbc_auth.dll
+# sqljdbc41.jar
 
-The gdata libraries need to be locally installed into Maven.  
+Microsoft SQL Server JDBC 4.1 libraries.
+https://www.microsoft.com/en-us/download/details.aspx?id=11774
 
-The googlecode-gdata-src.java-1.47.1.zip contains the sources from:
- http://code.google.com/p/gdata-java-client/downloads/list
-
- The new location for this is here:
- https://github.com/google/gdata-java-client/archive/master.zip
- 
-but that is not binary-identical to what was on googlecode. e.g.,
-the spreadsheet library is the version 1.0 library, instead of the 
-3.0 library found on googlecode.
-
-The ANT build script has code commented out that would pull from 
-the github repo. Instead, we explode the googlecode zip and register
-the jars within it.
-
+This must be manually downloaded and copied to the path so that 
+Windows authentication can be used when connecting to SQLServer
+Note that the installer will use either the 41 or 42 library, 
+based upon whether you are connecting to Azure SQL Server.
 

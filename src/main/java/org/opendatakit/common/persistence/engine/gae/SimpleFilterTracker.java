@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.Query.FilterOperation;
 
@@ -69,8 +70,21 @@ final class SimpleFilterTracker extends Tracker {
     if (attribute.getDataType() == DataType.DECIMAL) {
       Double d = null;
       if (value != null) {
-        BigDecimal bd = (BigDecimal) value;
-        d = bd.doubleValue();
+        if ( value instanceof WrappedBigDecimal ) {
+          WrappedBigDecimal wbd = (WrappedBigDecimal) value;
+          if ( wbd.isSpecialValue() ) {
+            d = wbd.d;
+          } else {
+            d = wbd.doubleValue();
+          }
+        } else if ( value instanceof BigDecimal ) {
+          BigDecimal bd = (BigDecimal) value;
+          d = bd.doubleValue();
+        } else if ( value instanceof Double ) {
+          d = (Double) value;
+        } else {
+          d = Double.valueOf(value.toString());
+        }
       }
       filters.add(new FilterPredicate(attribute.getName(), QueryImpl.operationMap.get(op), d));
     } else {

@@ -13,7 +13,6 @@
  */
 package org.opendatakit.common.ermodel;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -27,6 +26,7 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -420,12 +420,12 @@ public class Relation {
 
     @Override
     public Double getDouble(DataField field) {
-      BigDecimal d = backingObject.getNumericField(verify(field));
+    	WrappedBigDecimal d = backingObject.getNumericField(verify(field));
       return (d == null) ? null : d.doubleValue();
     }
 
     @Override
-    public BigDecimal getNumeric(DataField field) {
+    public WrappedBigDecimal getNumeric(DataField field) {
       return backingObject.getNumericField(verify(field));
     }
 
@@ -460,12 +460,12 @@ public class Relation {
     @Override
     public Double getDouble(String fieldName) {
       DataField field = getDataField(fieldName);
-      BigDecimal d = backingObject.getNumericField(verify(field));
+      WrappedBigDecimal d = backingObject.getNumericField(verify(field));
       return (d == null) ? null : d.doubleValue();
     }
 
     @Override
-    public BigDecimal getNumeric(String fieldName) {
+    public WrappedBigDecimal getNumeric(String fieldName) {
       DataField field = getDataField(fieldName);
       return backingObject.getNumericField(verify(field));
     }
@@ -502,11 +502,11 @@ public class Relation {
     @Override
     public void set(DataField field, Double value) {
       backingObject.setNumericField(verify(field),
-          (value == null) ? null : BigDecimal.valueOf(value));
+          (value == null) ? null : WrappedBigDecimal.fromDouble(value));
     }
 
     @Override
-    public void set(DataField field, BigDecimal value) {
+    public void set(DataField field, WrappedBigDecimal value) {
       backingObject.setNumericField(verify(field), value);
     }
 
@@ -544,11 +544,11 @@ public class Relation {
     public void set(String fieldName, Double value) {
       DataField field = getDataField(fieldName);
       backingObject.setNumericField(verify(field),
-          (value == null) ? null : BigDecimal.valueOf(value));
+          (value == null) ? null : WrappedBigDecimal.fromDouble(value));
     }
 
     @Override
-    public void set(String fieldName, BigDecimal value) {
+    public void set(String fieldName, WrappedBigDecimal value) {
       DataField field = getDataField(fieldName);
       backingObject.setNumericField(verify(field), value);
     }
@@ -589,7 +589,7 @@ public class Relation {
           return null;
         return l.toString();
       case DECIMAL:
-        BigDecimal v = backingObject.getNumericField(f);
+        WrappedBigDecimal v = backingObject.getNumericField(f);
         if (v == null)
           return null;
         return v.toString();
@@ -624,7 +624,7 @@ public class Relation {
       switch (f.getDataType()) {
       case INTEGER:
         try {
-          backingObject.setLongField(f, (value == null || value.length() == 0) ? null : Long.parseLong(value));
+          backingObject.setLongField(f, (value == null || value.length() == 0) ? null : Long.valueOf(value));
         } catch (NumberFormatException e) {
           throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
               + f.getName());
@@ -632,7 +632,7 @@ public class Relation {
         break;
       case DECIMAL:
         try {
-          backingObject.setNumericField(f, (value == null || value.length() == 0) ? null : new BigDecimal(value));
+          backingObject.setNumericField(f, (value == null || value.length() == 0) ? null : new WrappedBigDecimal(value));
         } catch (NumberFormatException e) {
           throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
               + f.getName());
@@ -822,6 +822,7 @@ public class Relation {
   /**
    * Execute a set of commands sharing the same SQL but with different bind parameters.
    * This may either insert or update data (one or the other, across all alterations).
+   * I.e., you cannot mix updates and inserts -- they are either all updates or all inserts.
    * 
    * @param bulkAlterEntities
    * @param cc

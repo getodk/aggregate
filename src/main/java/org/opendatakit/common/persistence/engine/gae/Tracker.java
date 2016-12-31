@@ -13,12 +13,12 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 
 /**
  * Track the attributes that we are querying and sorting on...
@@ -96,16 +96,18 @@ abstract class Tracker {
       } else if (value instanceof Long) {
         vLong = (Long) value;
       } else {
-        vLong = Long.parseLong(value.toString());
+        vLong = Long.valueOf(value.toString());
       }
       return compareObjects(eLong, vLong);
     case DECIMAL:
-      BigDecimal eDec = record.getNumericField(attribute);
-      BigDecimal vDec;
+      WrappedBigDecimal eDec = record.getNumericField(attribute);
+      WrappedBigDecimal vDec;
       if (value == null) {
         vDec = null;
+      } else if ( value instanceof WrappedBigDecimal ) {
+        vDec = (WrappedBigDecimal) value;
       } else {
-        vDec = (BigDecimal) value;
+        vDec = new WrappedBigDecimal(value.toString());
       }
       return compareObjects(eDec, vDec);
     case BOOLEAN:

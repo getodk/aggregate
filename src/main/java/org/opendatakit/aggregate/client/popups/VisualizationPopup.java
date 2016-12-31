@@ -313,7 +313,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
         addend = 1;
       } else {
         try {
-          addend = Double.parseDouble(s.getValues().get(secondIndex));
+          addend = Double.valueOf(s.getValues().get(secondIndex));
         } catch (Exception e) {
           // move on because we couldn't parse the value
         }
@@ -383,8 +383,8 @@ public final class VisualizationPopup extends AbstractPopupBase {
     LatLng gpsPoint;
     ArrayList<String> values = sub.getValues();
     try {
-      Double lat = Double.parseDouble(values.get(latIndex));
-      Double lon = Double.parseDouble(values.get(lonIndex));
+      Double lat = Double.valueOf(values.get(latIndex));
+      Double lon = Double.valueOf(values.get(lonIndex));
       gpsPoint = new LatLng(lat, lon);
     } catch (Exception e) {
       // just set the gps point to null, no need to figure out problem

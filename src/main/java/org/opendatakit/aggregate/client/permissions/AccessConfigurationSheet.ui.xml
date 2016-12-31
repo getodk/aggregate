@@ -19,7 +19,7 @@
    <li>Form Manager - all the capabilities of a Data Viewer plus the abilities to upload a form definition,
    delete a form and its data, and upload submissions manually through the ODK Aggregate website.</li>
    <li>Synchronize Tables - able to download, upload and alter data records within ODK Tables as restricted by table-access privileges granted to the user.</li>
-   <li>Tables Super-user - able to administer row-level and table-access privilegesns.</li>
+   <li>Tables Super-user - able to administer row-level and table-access privileges.</li>
    <li>Administer Tables - able to administer tables and row-level and table-access privileges.</li>
    <li>Site Administrator - all the capabilities of a Form Manager plus the ability to add users,
    set passwords, and grant these capabilities to other users.</li></ul>

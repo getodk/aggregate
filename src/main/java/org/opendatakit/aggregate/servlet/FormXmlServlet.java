@@ -82,7 +82,7 @@ public class FormXmlServlet extends ServletUtilBase {
     String readable = getParameter(req, ServletConsts.HUMAN_READABLE);
     boolean humanReadable = false;
     if (readable != null) {
-      humanReadable = Boolean.parseBoolean(readable);
+      humanReadable = Boolean.valueOf(readable);
     }
 
     CallingContext cc = ContextFactory.getCallingContext(this, req);

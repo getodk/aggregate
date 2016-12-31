@@ -19,65 +19,46 @@ http://www.oracle.com/technetwork/java/jaf11-139815.html      /standard extensio
 http://aopalliance.sourceforge.net                      /Public domain/
     aopalliance-1.0.jar
 https://cloud.google.com/appengine/docs/java/release-notes  /Apache 2.0/
-    appengine-api-1.0-sdk-1.9.34.jar
-    appengine-api-labs-1.9.34.jar
-    appengine-jsr107cache-1.9.34.jar
+    appengine-api-1.0-sdk-1.9.48.jar
+    appengine-api-labs-1.9.48.jar
+    appengine-jsr107cache-1.9.48.jar
 http://www.eclipse.org/aspectj        /Eclipse Public License - v 1.0/
-    aspectjweaver-1.8.8.jar
-http://www.mchange.com/projects/c3p0/ /Eclipse Public License - v 1.0/
-    c3p0-0.9.5.2.jar
+    aspectjweaver-1.8.9.jar
 http://apache.org/                                        /Apache 2.0/
     commons-codec-1.10.jar
-    commons-fileupload-1.3.1.jar
-    commons-io-2.4.jar
+	commons-dbcp2-2.1.1.jar
+    commons-fileupload-1.3.2.jar
+    commons-io-2.5.jar
     commons-lang-2.3.jar
-    commons-lang3-3.4.jar
+    commons-lang3-3.5.jar
     commons-logging-1.2.jar
-http://ehcache.org/                                       /Apache 2.0/
-    ehcache-2.8.3.jar
-https://developers.google.com/gdata/
-https://github.com/google/gdata-java-client               /Apache 2.0/
-
-Our googlecode-gdata-src.java-1.47.1.zip contains the sources from:
- http://code.google.com/p/gdata-java-client/downloads/list
-The new location for this is here:
- https://github.com/google/gdata-java-client/archive/master.zip
-
-but that is not binary-identical to what was on googlecode. e.g.,
-the spreadsheet library is the version 1.0 library, instead of the
-3.0 library found on googlecode.
-
-    gdata-client-1.0-1.47.1.jar
-    gdata-client-meta-1.0-1.47.1.jar
-    gdata-core-1.0-1.47.1.jar
-    gdata-media-1.0-1.47.1.jar
-    gdata-spreadsheet-3.0-1.47.1.jar
-    gdata-spreadsheet-meta-3.0-1.47.1.jar
+	commons-pool2-2.4.2.jar
 http://geronimo.apache.org/                               /Apache 2.0/
     geronimo-annotation_1.1_spec-1.0.jar
     geronimo-jaxrs_1.1_spec-1.0.jar
-http://code.google.com/p/google-gin/                      /Apache 2.0/
-    gin-1.5.0.jar
 https://github.com/google/google-api-java-client          /Apache 2.0/
-    google-api-client-1.21.0.jar
+    google-api-client-1.22.0.jar
+    google-api-client-appengine-1.22.0.jar
+    google-api-client-servlet-1.22.0.jar
 https://developers.google.com/api-client-library/java/apis/drive/v3   /Apache 2.0/
-    google-api-services-drive-v3-rev17-1.21.0.jar
+    google-api-services-drive-v3-rev52-1.22.0.jar
+https://developers.google.com/api-client-library/java/apis/sheets/v4   /Apache 2.0/
+    google-api-services-sheets-v4-rev38-1.22.0.jar
+https://developers.google.com/api-client-library/java/apis/sqladmin/v1beta4   /Apache 2.0/
+    google-api-services-sqladmin-v1beta4-rev25-1.22.0.jar
 https://github.com/google/google-http-java-client         /Apache 2.0/
-    google-http-client-1.21.0.jar
-    google-http-client-appengine-1.21.0.jar
-    google-http-client-jackson2-1.21.0.jar
-    google-http-client-jdo-1.21.0.jar
+    google-http-client-1.22.0.jar
+    google-http-client-appengine-1.22.0.jar
+    google-http-client-jackson2-1.22.0.jar
+    google-http-client-jdo-1.22.0.jar
 https://github.com/google/google-oauth-java-client        /Apache 2.0/
-    google-oauth-client-1.21.0.jar
-    google-oauth-client-appengine-1.21.0.jar
-    google-oauth-client-servlet-1.21.0.jar
+    google-oauth-client-1.22.0.jar
+    google-oauth-client-appengine-1.22.0.jar
+    google-oauth-client-servlet-1.22.0.jar
 https://github.com/google/gson                            /Apache 2.0/
-    gson-2.6.2.jar
+    gson-2.8.0.jar
 https://github.com/google/guava                           /Apache 2.0/
     guava-19.0.jar
-https://github.com/google/guice                           /Apache 2.0/
-    guice-3.0.jar
-    guice-assistedinject-3.0-rc2.jar
 http://code.google.com/p/gwt-google-maps-v3/              /Apache 2.0/
 now at: https://github.com/opendatakit/aggregate-components
     gwt-google-maps-v3-1.0.1.jar
@@ -92,17 +73,17 @@ now at: https://github.com/opendatakit/aggregate-components
     for how this is built.
 http://apache.org/                                       /Apache 2.0/
     httpclient-4.5.2.jar
-    httpcore-4.4.4.jar
+    httpcore-4.4.5.jar
     httpmime-4.5.2.jar
 https://github.com/FasterXML/jackson                     /Apache 2.0/
-    jackson-annotations-2.7.3.jar
-    jackson-core-2.7.3.jar
-    jackson-databind-2.7.3.jar
-    jackson-databind-xml-2.7.3.jar
-    jackson-jaxrs-base-2.7.3.jar
-    jackson-jaxrs-json-provider-2.7.3.jar
-    jackson-jaxrs-xml-provider-2.7.3.jar
-    jackson-module-jaxb-annotations-2.7.3.jar
+    jackson-annotations-2.8.5.jar
+    jackson-core-2.8.5.jar
+    jackson-databind-2.8.5.jar
+    jackson-databind-xml-2.8.5.jar
+    jackson-jaxrs-base-2.8.5.jar
+    jackson-jaxrs-json-provider-2.8.5.jar
+    jackson-jaxrs-xml-provider-2.8.5.jar
+    jackson-module-jaxb-annotations-2.8.5.jar
 https://github.com/jai-imageio/jai-imageio-core   /3-clause BSD with nuclear disclaimer/
     jai-imageio-core-1.30.jar
     Copyright (c) 2005 Sun Microsystems, Inc.
@@ -113,8 +94,6 @@ https://github.com/jai-imageio/jai-imageio-core   /3-clause BSD with nuclear dis
 https://bitbucket.org/javarosa/javarosa/wiki/Home        /Apache 2.0/
 now at: https://bitbucket.org/m.sundt/javarosa/src/
     javarosa-libraries-2016-04-21.jar
-http://code.google.com/p/atinject/                       /Apache 2.0/
-    javax.inject-1.jar
 https://jaxb.java.net/                                     /CDDL 1.1/
     jaxb-api-2.2.jar
     jaxb-impl-2.2.1.1.jar
@@ -126,10 +105,9 @@ https://github.com/findbugsproject                  /New BSD license/
     jsr305-3.0.1.jar
 http://kxml.sourceforge.net/kxml2/                      /BSD license/
     kxml2-2.3.0.jar
-http://www.mchange.com/projects/c3p0/  /Eclipse Public License - v 1.0/
-    mchange-commons-java-0.2.11.jar
-http://nekohtml.sourceforge.net/                         /Apache 2.0/
-    nekohtml-1.9.22.jar
+https://github.com/GoogleCloudPlatform/cloud-sql-mysql-socket-factory    /Apache 2.0/
+    mysql-socket-factory-1.0.2.jar
+	mysql-socket-factory-core-1.0.2.jar
 https://opendatakit.org/                                 /Apache 2.0/
 at: https://github.com/opendatakit/aggregate-components
     odk-httpclient-gae-4.5.2-1.jar
@@ -137,32 +115,30 @@ at: https://github.com/opendatakit/aggregate-components
     See the ODK Aggregate (Components) README.txt
     for how these are built.
 http://www.postgresql.org/   /Modified BSD / MIT Open Source License/
-    postgresql-9.0-801.jdbc4.jar
-https://github.com/google/protobuf                  /New BSD license/
-    protobuf-java-2.6.1.jar
-http://xml.apache.org/xalan-j/                           /Apache 2.0/
-    serializer-2.7.2.jar
+    postgresql-9.4.1211.jre7.jar
 http://www.slf4j.org/                                   /MIT License/
-    slf4j-api-1.7.20.jar
-    slf4j-jcl-1.7.20.jar
+    slf4j-api-1.7.22.jar
+    slf4j-jcl-1.7.22.jar
 http://projects.spring.io/spring-framework/              /Apache 2.0/
-    spring-aop-4.2.5.RELEASE.jar
-    spring-aspects-4.2.5.RELEASE.jar
-    spring-beans-4.2.5.RELEASE.jar
-    spring-context-4.2.5.RELEASE.jar
-    spring-context-support-4.2.5.RELEASE.jar
-    spring-core-4.2.5.RELEASE.jar
-    spring-expression-4.2.5.RELEASE.jar
-    spring-instrument-4.2.5.RELEASE.jar
-    spring-instrument-tomcat-4.2.5.RELEASE.jar
-    spring-jdbc-4.2.5.RELEASE.jar
-    spring-tx-4.2.5.RELEASE.jar
-    spring-web-4.2.5.RELEASE.jar
+    spring-aop-4.3.4.RELEASE.jar
+    spring-aspects-4.3.4.RELEASE.jar
+    spring-beans-4.3.4.RELEASE.jar
+    spring-context-4.3.4.RELEASE.jar
+    spring-context-support-4.3.4.RELEASE.jar
+    spring-core-4.3.4.RELEASE.jar
+    spring-expression-4.3.4.RELEASE.jar
+    spring-instrument-4.3.4.RELEASE.jar
+    spring-instrument-tomcat-4.3.4.RELEASE.jar
+    spring-jdbc-4.3.4.RELEASE.jar
+    spring-tx-4.3.4.RELEASE.jar
+    spring-web-4.3.4.RELEASE.jar
 http://projects.spring.io/spring-security/               /Apache 2.0/
-    spring-security-config-3.2.9.RELEASE.jar
-    spring-security-core-3.2.9.RELEASE.jar
-    spring-security-crypto-3.2.9.RELEASE.jar
-    spring-security-web-3.2.9.RELEASE.jar
+    spring-security-config-4.2.0.RELEASE.jar
+    spring-security-core-4.2.0.RELEASE.jar
+    spring-security-crypto-4.2.0.RELEASE.jar
+    spring-security-web-4.2.0.RELEASE.jar
+https://www.microsoft.com/en-us/download/details.aspx?id=11774   /Microsoft/
+	sqljdbc4-4.1.jar
 https://github.com/codehaus/stax                         /Apache 2.0/
     stax2-api-3.1.4.jar
     stax-api-1.0-2.jar
@@ -171,15 +147,7 @@ https://jcp.org/en/jsr/detail?id=907                       /CDDL 1.1/
 http://wink.apache.org/                                  /Apache 2.0/
     wink-common-1.4.jar
     wink-server-1.4.jar
+https://github.com/FasterXML/woodstox                    /Apache 2.0/
+    woodstox-core-5.0.3.jar
 https://github.com/codehaus/woodstox                     /Apache 2.0/
-    woodstox-core-4.4.1.jar
-https://xalan.apache.org/xalan-j/                        /Apache 2.0/
-    xalan-2.7.2.jar
-https://xerces.apache.org/xerces2-j/                     /Apache 2.0/
-    xercesImpl-2.11.0.jar
-https://xerces.apache.org/xml-commons/                   /Apache 2.0/
-    xml-apis-1.4.01.jar
-http://santuario.apache.org/                             /Apache 2.0/
-    xmlsec-1.5.1.jar
-http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/          /Custom/
-    xpp3-1.1.4c.jar
+    woodstox-core-asl-4.4.1.jar

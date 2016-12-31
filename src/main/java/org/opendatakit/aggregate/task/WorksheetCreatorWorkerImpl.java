@@ -25,7 +25,6 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
-import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -41,8 +40,6 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
-
-import com.google.gdata.util.AuthenticationException;
 
 /**
  * Common worker implementation for the creation of google spreadsheets.
@@ -191,10 +188,6 @@ public class WorksheetCreatorWorkerImpl {
 			spreadsheet.generateWorksheets(cc);
          logger.info("doWorksheetCreator: " + miscTasksKey.toString() +
                " form " + form.getFormId() + " Successful worksheet creation!");
-		} catch ( AuthenticationException e ) {
-        logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
-            " form " + form.getFormId() + " Exception: " + e.toString());
-		  throw new ODKExternalServiceCredentialsException(e);
 		} catch (ODKExternalServiceException e ) {
         logger.error("doWorksheetCreator: " + miscTasksKey.toString() +
             " form " + form.getFormId() + " Exception: " + e.toString());

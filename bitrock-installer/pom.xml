@@ -47,9 +47,25 @@
 				</includes>
 			</resource>
 			<resource>
+				<targetPath>${conf.directory}/sqlserver</targetPath>
+				<filtering>false</filtering>
+				<directory>${toplevel.directory}/src/main/resources/sqlserver/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
+			<resource>
 				<targetPath>${conf.directory}/gae</targetPath>
 				<filtering>false</filtering>
 				<directory>${toplevel.directory}/src/main/resources/gae/</directory>
+				<includes>
+				  <include>**/*</include>
+				</includes>
+			</resource>
+			<resource>
+				<targetPath>${conf.directory}/gae_mysql</targetPath>
+				<filtering>false</filtering>
+				<directory>${toplevel.directory}/src/main/resources/gae_mysql/</directory>
 				<includes>
 				  <include>**/*</include>
 				</includes>
@@ -161,6 +177,9 @@
 								<delete quiet="true">
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
 										includes="odk*setting*.jar" />
+									<!-- Microsoft SQL Server jar - use files tree content instead -->
+									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
+										includes="sqljdbc*.jar" />
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
 										includes="appengine-web.xml" />
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"

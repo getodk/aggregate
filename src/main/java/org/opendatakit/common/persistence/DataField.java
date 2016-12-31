@@ -45,11 +45,11 @@ public final class DataField {
 	private String name;
 	private DataType dataType;
 	private boolean nullable;
-	private String persistenceType = null;
 	private Long maxCharLen;
 	private Integer numericScale;
 	private Integer numericPrecision;
 	private IndexType indexable = IndexType.NONE; // clue for persistence layer to define index.
+	private boolean isDoublePrecision = false;
 	
 	/**
 	 * Constructor for most uses.
@@ -121,6 +121,7 @@ public final class DataField {
 		this.maxCharLen = src.maxCharLen;
 		this.numericScale = src.numericScale;
 		this.numericPrecision = src.numericPrecision;
+		this.isDoublePrecision = src.isDoublePrecision;
 		this.indexable = src.indexable;
 	}
 	
@@ -136,12 +137,13 @@ public final class DataField {
 		return nullable;
 	}
 
-	public String getPersistenceType() {
-		return persistenceType;
+	public boolean isDoublePrecision() {
+		return isDoublePrecision;
 	}
 
-	public void setPersistenceType(String persistenceType) {
-		this.persistenceType = persistenceType;
+	public DataField asDoublePrecision(boolean isDoublePrecision) {
+		this.isDoublePrecision = isDoublePrecision;
+		return this;
 	}
 
 	public Long getMaxCharLen() {

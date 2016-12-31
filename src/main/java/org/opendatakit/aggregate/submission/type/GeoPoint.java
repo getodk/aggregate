@@ -17,8 +17,7 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import java.math.BigDecimal;
-
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
@@ -37,13 +36,13 @@ public class GeoPoint {
   public static final String ACCURACY = "Accuracy";
 
   
-  private BigDecimal latitude;
+  private WrappedBigDecimal latitude;
 
-  private BigDecimal longitude;
+  private WrappedBigDecimal longitude;
   
-  private BigDecimal altitude;
+  private WrappedBigDecimal altitude;
   
-  private BigDecimal accuracy;  
+  private WrappedBigDecimal accuracy;  
 
   /**
    * Constructs a GeoPoint with given latitude and longitude coordinates
@@ -53,7 +52,7 @@ public class GeoPoint {
    * @param altitudeValue
    * @param accuracyValue
    */
-  public GeoPoint(BigDecimal latitudeCoordinate, BigDecimal longitudeCoordinate, BigDecimal altitudeValue, BigDecimal accuracyValue) {
+  public GeoPoint(WrappedBigDecimal latitudeCoordinate, WrappedBigDecimal longitudeCoordinate, WrappedBigDecimal altitudeValue, WrappedBigDecimal accuracyValue) {
     latitude = latitudeCoordinate;
     longitude = longitudeCoordinate;
     altitude = altitudeValue;
@@ -67,7 +66,7 @@ public class GeoPoint {
    * @param longitudeCoordinate
    * @param altitudeValue
    */
-  public GeoPoint(BigDecimal latitudeCoordinate, BigDecimal longitudeCoordinate, BigDecimal altitudeValue) {
+  public GeoPoint(WrappedBigDecimal latitudeCoordinate, WrappedBigDecimal longitudeCoordinate, WrappedBigDecimal altitudeValue) {
     this(latitudeCoordinate, longitudeCoordinate, altitudeValue, null);
   }
   
@@ -77,7 +76,7 @@ public class GeoPoint {
    * @param latitudeCoordinate
    * @param longitudeCoordinate
    */
-  public GeoPoint(BigDecimal latitudeCoordinate, BigDecimal longitudeCoordinate) {
+  public GeoPoint(WrappedBigDecimal latitudeCoordinate, WrappedBigDecimal longitudeCoordinate) {
     this(latitudeCoordinate, longitudeCoordinate, null, null);
   }
   
@@ -94,7 +93,7 @@ public class GeoPoint {
    * @return
    *    the latitude
    */
-  public BigDecimal getLatitude() {
+  public WrappedBigDecimal getLatitude() {
     return latitude;
   }
 
@@ -104,7 +103,7 @@ public class GeoPoint {
    * @return
    *    the longitude
    */
-  public BigDecimal getLongitude() {
+  public WrappedBigDecimal getLongitude() {
     return longitude;
   }
   
@@ -114,7 +113,7 @@ public class GeoPoint {
    * @return
    *    the altitude
    */
-  public BigDecimal getAltitude() {
+  public WrappedBigDecimal getAltitude() {
     return altitude;
   }
 
@@ -124,7 +123,7 @@ public class GeoPoint {
    * @return
    *    the accuracy
    */
-  public BigDecimal getAccuracy() {
+  public WrappedBigDecimal getAccuracy() {
     return accuracy;
   }
 
