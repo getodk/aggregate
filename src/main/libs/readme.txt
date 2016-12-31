@@ -47,31 +47,14 @@ formerly available here:
 JARs built by others
 ----------------------
 
-# gdata-src.java-1.47.1 -- various jars:
-
-maven_gdata_installs -- a list of the jars used and the maven commands to install them.
-
-The gdata libraries need to be locally installed into Maven.  
-
-The googlecode-gdata-src.java-1.47.1.zip contains the sources from:
- http://code.google.com/p/gdata-java-client/downloads/list
-
- The new location for this is here:
- https://github.com/google/gdata-java-client/archive/master.zip
- 
-but that is not binary-identical to what was on googlecode. e.g.,
-the spreadsheet library is the version 1.0 library, instead of the 
-3.0 library found on googlecode.
-
-The ANT build script has code commented out that would pull from 
-the github repo. Instead, we explode the googlecode zip and register
-the jars within it.
-
 # sqlserver-auth\sqljdbc_auth.dll
+# sqljdbc41.jar
 
 Microsoft SQL Server JDBC 4.1 libraries.
 https://www.microsoft.com/en-us/download/details.aspx?id=11774
 
 This must be manually downloaded and copied to the path so that 
 Windows authentication can be used when connecting to SQLServer
+Note that the installer will use either the 41 or 42 library, 
+based upon whether you are connecting to Azure SQL Server.
 
