@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.format.structure;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +38,7 @@ import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -219,9 +219,9 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
     String geopoint = BasicConsts.EMPTY_STRING;
     if (gp != null) {
       if (gp.getLatitude() != null && gp.getLongitude() != null) {
-        BigDecimal altitude;
+    	  WrappedBigDecimal altitude;
         if (gp.getAltitude() == null) {
-          altitude = new BigDecimal(0.0);
+          altitude = WrappedBigDecimal.fromDouble(0.0);
         } else {
           altitude = gp.getAltitude();
         }

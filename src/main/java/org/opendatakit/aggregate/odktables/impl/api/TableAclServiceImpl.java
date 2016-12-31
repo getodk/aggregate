@@ -62,7 +62,7 @@ public class TableAclServiceImpl implements TableAclService {
 
   @Override
   public Response getAcls(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException {
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.valueOf(fetchLimit);
     WebsafeAcls websafeResult = am.getAcls(QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     TableAclResourceList list = new TableAclResourceList(getResources(websafeResult.acls),
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
@@ -78,7 +78,7 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response getUserAcls(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException {
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.valueOf(fetchLimit);
     WebsafeAcls websafeResult = am.getAcls(Scope.Type.USER, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     TableAclResourceList list = new TableAclResourceList(getResources(websafeResult.acls),
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),
@@ -94,7 +94,7 @@ public class TableAclServiceImpl implements TableAclService {
   @Override
   public Response getGroupAcls(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException {
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.valueOf(fetchLimit);
     WebsafeAcls websafeResult = am.getAcls(Scope.Type.GROUP, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     TableAclResourceList list = new TableAclResourceList(getResources(websafeResult.acls),
         WebUtils.safeEncode(websafeResult.websafeRefetchCursor),

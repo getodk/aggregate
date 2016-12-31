@@ -105,12 +105,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
 		}
 	}
 	
-	public void setAuthorities(List<String> authorities) {
+	public void setAuthorities(List<SimpleGrantedAuthority> authorities) {
 		this.authorities.clear();
-		for ( String a : authorities ) {
-			if ( a.length() != 0 ) {
-				this.authorities.add(new SimpleGrantedAuthority(a));
-			}
+		for ( SimpleGrantedAuthority a : authorities ) {
+			this.authorities.add(a);
 		}
 	}
 	

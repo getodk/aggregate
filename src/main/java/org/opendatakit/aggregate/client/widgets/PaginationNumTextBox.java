@@ -50,7 +50,7 @@ public class PaginationNumTextBox extends AggregateTextBox implements ValueChang
     String querySize = event.getValue();
 
     try {
-      int querySizeLimit = Integer.parseInt(querySize);
+      int querySizeLimit = Integer.valueOf(querySize);
       filterSubTab.setQueryFetchLimit(querySizeLimit);
       filterSubTab.update();
     } catch (NumberFormatException e) {

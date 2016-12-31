@@ -165,7 +165,7 @@ public class QueryImpl implements Query {
     } else {
       queryBindBuilder.append(operationMap.get(op));
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(value);
+      bindValues.add(DatastoreImpl.getBindValue(attributeName, value));
     }
   }
 
@@ -175,8 +175,9 @@ public class QueryImpl implements Query {
    * 
    * @param queryContinuationBindBuilder
    * @param continuationValue
+   * @return the updated bindArgs
    */
-  private void addContinuationFilter(StringBuilder queryContinuationBindBuilder,
+  private ArrayList<Object> addContinuationFilter(StringBuilder queryContinuationBindBuilder,
       Object continuationValue) {
     if (dominantSortAttr == null) {
       throw new IllegalStateException("unexpected state");
@@ -197,6 +198,12 @@ public class QueryImpl implements Query {
         .equals(Direction.ASCENDING) ? FilterOperation.GREATER_THAN_OR_EQUAL
         : FilterOperation.LESS_THAN_OR_EQUAL));
     queryContinuationBindBuilder.append(K_BIND_VALUE);
+    
+    ArrayList<Object> values = new ArrayList<Object>();
+    values.addAll(bindValues);
+    values.add(DatastoreImpl.getBindValue(dominantSortAttr, continuationValue));
+    
+    return values;
   }
 
   @Override
@@ -217,7 +224,7 @@ public class QueryImpl implements Query {
       }
       first = false;
       queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(o);
+      bindValues.add(DatastoreImpl.getBindValue(attributeName, o));
     }
     queryBindBuilder.append(K_IN_CLOSE);
   }
@@ -398,10 +405,7 @@ public class QueryImpl implements Query {
 
       Object continuationValue = EngineUtils.getDominantSortAttributeValueFromString(
           startCursor.getValue(), dominantSortAttr);
-      addContinuationFilter(queryContinuationBindBuilder, continuationValue);
-      values = new ArrayList<Object>();
-      values.addAll(bindValues);
-      values.add(continuationValue);
+      values = addContinuationFilter(queryContinuationBindBuilder, continuationValue);
     } else {
       values = bindValues;
     }

@@ -15,8 +15,6 @@
  */
 package org.opendatakit.aggregate.format.element;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -30,6 +28,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -62,8 +61,6 @@ public class BasicElementFormatter implements ElementFormatter {
    * Format dates appropriately for googleDocs
    */
   private boolean googleDocsDate;
-
-  private DecimalFormat decimalFormatter;
   
   /**
    * Construct a Basic Element Formatter
@@ -82,7 +79,6 @@ public class BasicElementFormatter implements ElementFormatter {
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
     this.googleDocsDate = googleDocsDate;
-    decimalFormatter = new DecimalFormat("########.0#######");
   }
 
   public void formatUid(String uri, String propertyName, Row row) {
@@ -141,7 +137,7 @@ public class BasicElementFormatter implements ElementFormatter {
     }
   }
 
-  public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
+  public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     formatBigDecimalToString(dub, row);
   }
 
@@ -196,12 +192,7 @@ public class BasicElementFormatter implements ElementFormatter {
     }
   }
 
-  protected void formatBigDecimalToString(BigDecimal dub, Row row) {
-    if(dub == null) {
-      basicStringConversion(dub, row);
-    } else {
-      String data = decimalFormatter.format(dub.doubleValue());
-      basicStringConversion(data, row);
-    }
+  protected void formatBigDecimalToString(WrappedBigDecimal dub, Row row) {
+    basicStringConversion(dub, row);
   }
 }

@@ -19,6 +19,7 @@ import java.util.Date;
 
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -49,6 +50,9 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
       throw new IllegalStateException("failed to create empty row", e);
     }
 
+    /**
+     * Correct for the funky handling of nulls by the various accessors...
+     */
     for (DataField f : relation.getFieldList()) {
       switch (f.getDataType()) {
       case BINARY:
@@ -68,8 +72,14 @@ public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
           row.setLongField(f, Long.valueOf(l));
         }
         break;
-      case DECIMAL:
-        row.setNumericField(f, rs.getBigDecimal(f.getName()));
+      case DECIMAL: {
+        String value = rs.getString(f.getName());
+        if ( value == null ) {
+          row.setNumericField(f, null);
+        } else {
+          row.setNumericField(f, new WrappedBigDecimal(value));
+        }
+      }
         break;
       case BOOLEAN:
         Boolean b = rs.getBoolean(f.getName());
