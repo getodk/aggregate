@@ -578,7 +578,15 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
         List<CellData> cells = data.getRowData().get(0).getValues();
         
         for ( CellData cell : cells ) {
+          if ( cell == null ) {
+            startCol++;
+            continue;
+          }
           String header = cell.getFormattedValue();
+          if ( header == null ) {
+            startCol++;
+            continue;
+          }
           for ( int i = 0 ; i < sheetInfo.headers.size() ; ++i ) {
             String hcol = sheetInfo.headers.get(i);
             if ( hcol.equals(header) ) {
@@ -649,17 +657,16 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   }
 
   /**
-   * Inserts the data in the given submissionSet as a new entry (i.e. a new row)
+   * Creates the request to append the data in the given submissionSet as a new entry (i.e. a new row)
    * in the given worksheet, including only the data specified by headers.
    * 
    * @param submissionSet
    *          the set of data from a single submission
-   * @param headers
-   *          a list of headers corresponding to the headers in worksheet. Only
-   *          the data in submissionSet corresponding to these headers will be
-   *          submitted.
-   * @param worksheet
-   *          the worksheet representing the worksheet in a Google Spreadsheet.
+   * @param sheetInfo
+   *          encapsulates information about the Sheet (worksheet) and the 
+   *          list of headers we are publishing into, and the mapping between the two.
+   * @param cc
+   *          the calling context
    * @throws ODKDatastoreException
    *           if there was a problem in the datastore
    * @throws IOException
@@ -728,6 +735,9 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     List<CellData> cells = new ArrayList<CellData>();
     for ( int col = 0 ; col <= maxNewCol; ++col ) {
       CellData cell = cellReorderMap.get(col);
+      if ( cell == null ) {
+        cell = new CellData();
+      }
       cells.add(cell);
     }
     rowData.setValues(cells);
