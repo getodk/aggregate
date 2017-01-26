@@ -183,7 +183,7 @@ eclipse-default
 eclipse-n-background
 eclipse-ear
 
-(6) Within odk-gae-settings, open common and edit security.settings
+(6) Within odk-gae-settings, open common and edit security.properties
 
 Update the security.server.hostname to correspond to your system IP address.
 Remember the IP address. You could use "localhost" for this if you are not
