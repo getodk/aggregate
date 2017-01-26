@@ -165,7 +165,7 @@ public class WebUtils {
   public static final Boolean parseBoolean(String value) {
     Boolean b = null;
     if (value != null && value.length() != 0) {
-      b = Boolean.parseBoolean(value);
+      b = Boolean.FALSE;
       if (value.compareToIgnoreCase("ok") == 0) {
         b = Boolean.TRUE;
       } else if (value.compareToIgnoreCase("yes") == 0) {

@@ -78,9 +78,11 @@ public class PublishTable extends FlexTable {
       String displayName = UserSecurityInfo.getDisplayName(user);
       this.setText(i + STARTING_ROW, CREATED_BY, displayName);
       if ( e.getStatus() == OperationalStatus.BAD_CREDENTIALS)  {
-        this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, true));
+        this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, RestartButton.Circumstance.CREDENTIALS));
       } else if (e.getStatus() == OperationalStatus.ABANDONED ) {
-        this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, false));
+        this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, RestartButton.Circumstance.ABANDONED));
+      } else if (e.getStatus() == OperationalStatus.PAUSED ) {
+        this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, RestartButton.Circumstance.PAUSED));
       } else {
         this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
       }

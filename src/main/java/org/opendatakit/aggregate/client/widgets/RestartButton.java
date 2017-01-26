@@ -31,6 +31,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public final class RestartButton extends AggregateButton implements ClickHandler {
 
+  public enum Circumstance { CREDENTIALS, ABANDONED, PAUSED };
+  
   private static final String BUTTON_BAD_CREDENTIAL_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Credential was BAD";
   private static final String TOOLTIP_BAD_CREDENTIAL_TEXT = "Publish failure because of bad credential - click to Restart the Publisher";
   private static final String HELP_BALLOON_BAD_CREDENTIAL_TXT = "The external service was failing or the credentials were bad. Click to restart the publisher.";
@@ -39,12 +41,19 @@ public final class RestartButton extends AggregateButton implements ClickHandler
   private static final String TOOLTIP_FAILURE_TEXT = "Publish failure because of repeated failure - click to Restart the Publisher";
   private static final String HELP_BALLOON_FAILURE_TXT = "The external service was failing. Click to restart the publisher.";
 
+  private static final String BUTTON_PAUSED_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Paused";
+  private static final String TOOLTIP_PAUSED_TEXT = "Publish paused due to error from service - click to Restart the Publisher";
+  private static final String HELP_BALLOON_PAUSED_TXT = "The external service failed (will retry in several minutes). Click to restart the publisher.";
+
   private final ExternServSummary publisher;
 
-  public RestartButton(ExternServSummary publisher, boolean credentialFailure) {
-    super(credentialFailure ? BUTTON_BAD_CREDENTIAL_TXT : BUTTON_FAILURE_TXT,
-        credentialFailure ? TOOLTIP_BAD_CREDENTIAL_TEXT : TOOLTIP_FAILURE_TEXT,
-        credentialFailure ? HELP_BALLOON_BAD_CREDENTIAL_TXT : HELP_BALLOON_FAILURE_TXT);
+  public RestartButton(ExternServSummary publisher, Circumstance credentialFailure) {
+    super((credentialFailure == Circumstance.CREDENTIALS) ? BUTTON_BAD_CREDENTIAL_TXT : 
+          ((credentialFailure == Circumstance.CREDENTIALS) ? BUTTON_FAILURE_TXT : BUTTON_PAUSED_TXT),
+          (credentialFailure == Circumstance.CREDENTIALS) ? TOOLTIP_BAD_CREDENTIAL_TEXT : 
+            ((credentialFailure == Circumstance.CREDENTIALS) ? TOOLTIP_FAILURE_TEXT : TOOLTIP_PAUSED_TEXT),
+            (credentialFailure == Circumstance.CREDENTIALS) ? HELP_BALLOON_BAD_CREDENTIAL_TXT : 
+              ((credentialFailure == Circumstance.CREDENTIALS) ? HELP_BALLOON_FAILURE_TXT : HELP_BALLOON_PAUSED_TXT));
     this.publisher = publisher;
     addStyleDependentName("negative");
   }

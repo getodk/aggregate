@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.format.element;
 
-import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -37,6 +36,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -136,7 +136,7 @@ public class KmlElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatDecimal(BigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
+  public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     generateDataElement(dub, element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 

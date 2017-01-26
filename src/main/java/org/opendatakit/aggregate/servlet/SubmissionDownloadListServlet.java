@@ -128,7 +128,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
     int numEntries = DEFAULT_NUM_ENTRIES;
     String numEntriesString = getParameter(req, ServletConsts.NUM_ENTRIES);
     if (numEntriesString != null && numEntriesString.trim().length() != 0) {
-      numEntries = Integer.parseInt(numEntriesString.trim());
+      numEntries = Integer.valueOf(numEntriesString.trim());
     }
 
     IForm form;

@@ -18,8 +18,6 @@
 package org.opendatakit.aggregate.externalservice;
 
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,9 +37,9 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
-import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
+import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -67,30 +65,40 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
-import com.google.gdata.client.spreadsheet.CellQuery;
-import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.Link;
-import com.google.gdata.data.PlainTextConstruct;
-import com.google.gdata.data.batch.BatchOperationType;
-import com.google.gdata.data.batch.BatchStatus;
-import com.google.gdata.data.batch.BatchUtils;
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.CustomElementCollection;
-import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.data.spreadsheet.WorksheetEntry;
-import com.google.gdata.util.AuthenticationException;
-import com.google.gdata.util.ServiceException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.Sheets.Spreadsheets.Get;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.AddSheetRequest;
+import com.google.api.services.sheets.v4.model.AddSheetResponse;
+import com.google.api.services.sheets.v4.model.AppendCellsRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetResponse;
+import com.google.api.services.sheets.v4.model.CellData;
+import com.google.api.services.sheets.v4.model.DeleteSheetRequest;
+import com.google.api.services.sheets.v4.model.ExtendedValue;
+import com.google.api.services.sheets.v4.model.GridData;
+import com.google.api.services.sheets.v4.model.GridProperties;
+import com.google.api.services.sheets.v4.model.GridRange;
+import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.Response;
+import com.google.api.services.sheets.v4.model.RowData;
+import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.SheetProperties;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
+import com.google.api.services.sheets.v4.model.UpdateCellsRequest;
 
 /**
  * 
@@ -103,7 +111,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
 
   private static final String GOOGLE_DRIVE_FILES_API = "https://www.googleapis.com/drive/v2/files";
 
-  private static final String GOOGLE_SPREADSHEET_OAUTH2_SCOPE = "https://www.googleapis.com/auth/drive https://docs.google.com/feeds/ https://docs.googleusercontent.com/ https://spreadsheets.google.com/feeds/";
+  private static final String GOOGLE_SPREADSHEET_OAUTH2_SCOPE = "https://www.googleapis.com/auth/drive " + SheetsScopes.SPREADSHEETS;
 
   private static ObjectMapper mapper = new ObjectMapper();
 
@@ -117,7 +125,11 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
    */
   private final List<GoogleSpreadsheet2RepeatParameterTable> repeatElementEntities = new ArrayList<GoogleSpreadsheet2RepeatParameterTable>();
 
-  private final SpreadsheetService spreadsheetService;
+  private final Sheets spreadsheetService;
+
+  /** Global instance of the JSON factory. */
+  private static final JsonFactory JSON_FACTORY =
+      JacksonFactory.getDefaultInstance();
 
   /**
    * Common base constructor that initializes final values.
@@ -126,6 +138,8 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
    * @param fpObject
    * @param cc
    * @throws ODKExternalServiceException
+   * @throws IOException 
+   * @throws GeneralSecurityException 
    */
 
   private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable gsObject,
@@ -133,15 +147,22 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     super(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, form, formServiceCursor, new LinkElementFormatter(
         cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true, true),
         new GoogleSpreadsheetHeaderFormatter(true, true, true), logger, cc);
+    
+    try {
+      HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-    spreadsheetService = new SpreadsheetService(ServletConsts.APPLICATION_NAME);
+      spreadsheetService = new Sheets.Builder(httpTransport, JSON_FACTORY, credential)
+          .setApplicationName(ServletConsts.APPLICATION_NAME)
+          .build();
+    } catch (GeneralSecurityException e) {
+      e.printStackTrace();
+      throw new ODKExternalServiceCredentialsException(e);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new ODKExternalServiceException(e);
+    }
+
     objectEntity = gsObject;
-    // TODO: REMOVE after bug is fixed
-    // http://code.google.com/p/gdata-java-client/issues/detail?id=103
-    spreadsheetService.setProtocolVersion(SpreadsheetService.Versions.V3);
-    spreadsheetService.setConnectTimeout(SpreadsheetConsts.SERVER_TIMEOUT);
-    spreadsheetService.setOAuth2Credentials(credential);
-
   }
 
   private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable entity,
@@ -175,7 +196,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   }
   
   protected String executeDriveStmt(String spreadsheetTitle, String spreadsheetDescription,
-      CallingContext cc) throws ServiceException,
+      CallingContext cc) throws
       IOException, ODKExternalServiceException, GeneralSecurityException {
 
     HashMap<String,String> requestBody = new HashMap<String,String>();
@@ -225,9 +246,6 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
         // get document ID (spreadsheet 'key')
         spreadKey = (String) map.get("id");
         
-      } catch (ServiceException e) {
-        e.printStackTrace();
-        throw new ODKExternalServiceException(e);
       } catch (IOException e) {
         e.printStackTrace();
         throw new ODKExternalServiceException(e);
@@ -293,49 +311,147 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   }
 
   public void generateWorksheets(CallingContext cc) throws ODKDatastoreException, IOException,
-      ServiceException, ODKExternalServiceException {
+      ODKExternalServiceException {
 
-    // retrieve pre-existing worksheets
-    URL url = new URL(SpreadsheetConsts.SPREADSHEETS_FEED
-        + URLEncoder.encode(objectEntity.getSpreadsheetKey(), HtmlConsts.UTF8_ENCODE));
-    com.google.gdata.data.spreadsheet.SpreadsheetEntry entry = spreadsheetService.getEntry(url,
-        com.google.gdata.data.spreadsheet.SpreadsheetEntry.class);
-    List<WorksheetEntry> preExistingWorksheets = entry.getWorksheets();
+    // TODO: throw meaningful credentials-failure exception
+    // TODO: throw meaningful credentials-failure exception
+    
+    
+    List<Integer> sheetIds = new ArrayList<Integer>();
 
+    // delete pre-existing worksheets and create the new sheets.
+    // we first create the new sheets so that we are able to delete all of the old ones
+    // (the spreadsheet is initially created with one worksheet which cannot be deleted).
+    
+    {    
+      List<Request> requests = new ArrayList<Request>();
+      Spreadsheet entry = spreadsheetService.spreadsheets().get(objectEntity.getSpreadsheetKey()).execute();
+      List<Sheet> preExistingWorksheets = entry.getSheets();
+
+      // create the sheets -- these are empty at first.
+      {
+        // create top level worksheet
+        List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(),
+            null);
+        // set the sheet properties
+        {
+          SheetProperties sheetProperties = new SheetProperties();
+          
+          sheetProperties.setTitle(form.getFormId());
+          GridProperties gridProperties = new GridProperties();
+          gridProperties.setRowCount(2);
+          gridProperties.setColumnCount(headers.size());
+          sheetProperties.setGridProperties(gridProperties);
+          
+          AddSheetRequest asr = new AddSheetRequest();
+          asr.setProperties(sheetProperties);
+          requests.add(new Request().setAddSheet(asr));
+        }
+    
+        // create worksheets for the repeat groups
+        for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
+          headers = headerFormatter.generateHeaders(form, repeatGroupElement, null);
+          
+          // set the sheet properties
+          {
+            SheetProperties sheetProperties = new SheetProperties();
+            
+            sheetProperties.setTitle(repeatGroupElement.getElementName());
+            GridProperties gridProperties = new GridProperties();
+            gridProperties.setRowCount(2);
+            gridProperties.setColumnCount(headers.size());
+            sheetProperties.setGridProperties(gridProperties);
+            
+            AddSheetRequest asr = new AddSheetRequest();
+            asr.setProperties(sheetProperties);
+            requests.add(new Request().setAddSheet(asr));
+          }
+        }
+      }
+
+      // now delete the old sheets
+      for (Sheet worksheet : preExistingWorksheets) {
+        DeleteSheetRequest dsr = new DeleteSheetRequest();
+        dsr.setSheetId(worksheet.getProperties().getSheetId());
+        Request req = new Request().setDeleteSheet(dsr);
+        requests.add(req);
+      }
+
+      if ( !requests.isEmpty() ) {
+        BatchUpdateSpreadsheetRequest req = new BatchUpdateSpreadsheetRequest();
+        req.setRequests(requests);
+        req.setIncludeSpreadsheetInResponse(false);
+        BatchUpdateSpreadsheetResponse rsp = 
+            spreadsheetService.spreadsheets().batchUpdate(objectEntity.getSpreadsheetKey(), req).execute();
+        List<Response> responses = rsp.getReplies();
+        
+        // And now stitch everything back together
+        if ( responses.size() != 1 + form.getRepeatGroupsInModel().size() + preExistingWorksheets.size() ) {
+          throw new IllegalStateException("Mismatch in number of responses for number of requests in batch");
+        }
+        AddSheetResponse asrsp = responses.get(0).getAddSheet();
+    
+        Integer sheetId = asrsp.getProperties().getSheetId();
+        sheetIds.add(sheetId);
+        objectEntity.setTopLevelWorksheetId(sheetId.toString());
+    
+        // get relation prototype for creating repeat parameter table entries
+        GoogleSpreadsheet2RepeatParameterTable repeatPrototype = GoogleSpreadsheet2RepeatParameterTable
+            .assertRelation(cc);
+    
+        // create repeat worksheets
+        Datastore ds = cc.getDatastore();
+        User user = cc.getCurrentUser();
+        int repeatGroupCount = -1;
+        for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
+          ++repeatGroupCount;
+          // create the worksheet
+          asrsp = responses.get(1+repeatGroupCount).getAddSheet();
+          // add the worksheet id to the repeat element table -- NOTE: the added
+          // entry is not actually persisted here
+          GoogleSpreadsheet2RepeatParameterTable t = ds
+              .createEntityUsingRelation(repeatPrototype, user);
+          t.setUriGoogleSpreadsheet(objectEntity.getUri());
+          t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
+          sheetId = asrsp.getProperties().getSheetId();
+          sheetIds.add(sheetId);
+          t.setWorksheetId(sheetId.toString());
+          repeatElementEntities.add(t);
+        }
+      }
+    }
+    
+    List<Request> requests = new ArrayList<Request>();
+    // Write the header cells in these sheets. 
+    
     // create top level worksheet
     List<String> headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(),
         null);
-    WorksheetEntry topLevelWorksheet = executeCreateWorksheet(entry, form.getFormId(), headers);
-    objectEntity.setTopLevelWorksheetId(extractWorksheetId(topLevelWorksheet));
-
-    // delete pre-existing worksheets
-    for (WorksheetEntry worksheet : preExistingWorksheets) {
-      worksheet.getSelf().delete();
-    }
-
-    // get relation prototype for creating repeat parameter table entries
-    GoogleSpreadsheet2RepeatParameterTable repeatPrototype = GoogleSpreadsheet2RepeatParameterTable
-        .assertRelation(cc);
+    UpdateCellsRequest topLevelWorksheet = writeColumnHeadingsCells( 
+        form.getFormId(), headers, sheetIds.get(0));
+    
+    requests.add(new Request().setUpdateCells(topLevelWorksheet));
 
     // create repeat worksheets
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
+    int repeatGroupCount = -1;
     for (FormElementModel repeatGroupElement : form.getRepeatGroupsInModel()) {
+      ++repeatGroupCount;
       // create the worksheet
       headers = headerFormatter.generateHeaders(form, repeatGroupElement, null);
-      WorksheetEntry repeatWorksheet = executeCreateWorksheet(entry,
-          repeatGroupElement.getElementName(), headers);
+      UpdateCellsRequest repeatWorksheet = writeColumnHeadingsCells(
+          repeatGroupElement.getElementName(), headers, sheetIds.get(1+repeatGroupCount));
 
-      // add the worksheet id to the repeat element table -- NOTE: the added
-      // entry is not actually persisted here
-      GoogleSpreadsheet2RepeatParameterTable t = ds
-          .createEntityUsingRelation(repeatPrototype, user);
-      t.setUriGoogleSpreadsheet(objectEntity.getUri());
-      t.setFormElementKey(repeatGroupElement.constructFormElementKey(form));
-      t.setWorksheetId(extractWorksheetId(repeatWorksheet));
-      repeatElementEntities.add(t);
+      requests.add(new Request().setUpdateCells(repeatWorksheet));
     }
-
+    
+    if ( !requests.isEmpty() ) {
+      BatchUpdateSpreadsheetRequest req = new BatchUpdateSpreadsheetRequest();
+      req.setRequests(requests);
+      req.setIncludeSpreadsheetInResponse(false);
+      BatchUpdateSpreadsheetResponse rsp = 
+          spreadsheetService.spreadsheets().batchUpdate(objectEntity.getSpreadsheetKey(), req).execute();
+    }
+    
     persist(cc);
 
     // transfer ownership before marking service as prepared...
@@ -349,94 +465,171 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     persist(cc);
   }
 
-  private String extractWorksheetId(WorksheetEntry entry) throws IOException, ServiceException {
-    String[] urlElements = entry.getSelf().getId().split("/");
-    String worksheetId = urlElements[urlElements.length - 1];
-    return worksheetId;
+  private UpdateCellsRequest writeColumnHeadingsCells(String title, List<String> headers, Integer sheetId)
+      throws IOException {
+
+    // build the update request.
+    UpdateCellsRequest req = new UpdateCellsRequest();
+    GridRange gridRange = new GridRange();
+    
+    gridRange.setSheetId(sheetId);
+    gridRange.setStartColumnIndex(0);
+    gridRange.setEndColumnIndex(headers.size());
+    gridRange.setStartRowIndex(0);
+    gridRange.setEndRowIndex(1);
+    
+    req.setRange(gridRange);
+    
+    req.setFields("*");
+    
+    List<CellData> cells = new ArrayList<CellData>();
+    int index = 0;
+    for ( index = 0 ; index < headers.size(); ++index) {
+      String header = headers.get(index);
+      CellData cellData = new CellData();
+      ExtendedValue ev = new ExtendedValue();
+      ev.setStringValue(header);
+      cellData.setUserEnteredValue(ev);
+      cells.add(cellData);
+    }
+    
+    RowData rowData = new RowData();
+    rowData.setValues(cells);
+    List<RowData> rows = new ArrayList<RowData>();
+    rows.add(rowData);
+    
+    req.setRows(rows);
+
+    return req;
   }
 
-  private WorksheetEntry executeCreateWorksheet(
-      com.google.gdata.data.spreadsheet.SpreadsheetEntry entry, String title, List<String> headers)
-      throws IOException, ServiceException {
+  private static class SheetInfo {
+    Integer sheetId;
+    List<String> headers;
+    List<ElementType> headerTypes;
+    Map<Integer,Integer> fieldMap = new HashMap<Integer,Integer>();
+  }
+  
+  private Map<String, SheetInfo> sheetInfoMap = null;
+  
+  private void buildSheetInfoMap(CallingContext cc) throws IOException {
+    if ( sheetInfoMap != null ) return;
 
-    // create the worksheet
-    WorksheetEntry uncreatedWorksheet = new WorksheetEntry();
-    uncreatedWorksheet.setTitle(new PlainTextConstruct(title));
-    uncreatedWorksheet.setRowCount(2);
-    uncreatedWorksheet.setColCount(headers.size());
-    URL worksheetFeedUrl = entry.getWorksheetFeedUrl();
-    logger.info("WorksheetFeedUrl: " + worksheetFeedUrl.toString());
-    WorksheetEntry createdWorksheet = spreadsheetService.insert(worksheetFeedUrl,
-        uncreatedWorksheet);
-    logger.info("CellFeedUrl: " + createdWorksheet.getCellFeedUrl().toString());
-
-    // update the cells of the worksheet with the proper headers
-    // first query the worksheet for the cells we need to change
-    CellQuery query = new CellQuery(createdWorksheet.getCellFeedUrl());
-    query.setMinimumRow(1);
-    query.setMaximumRow(1);
-    query.setMinimumCol(1);
-    query.setMaximumCol(headers.size());
-    query.setReturnEmpty(true);
-    CellFeed existingCellFeed = spreadsheetService.query(query, CellFeed.class);
-    // create the new cell feed based on our headers
-    CellFeed batchRequest = new CellFeed();
-    List<CellEntry> cells = existingCellFeed.getEntries();
-    int index = 0;
-    for (CellEntry cell : cells) {
-      String header = headers.get(index);
-      cell.changeInputValueLocal(header);
-      BatchUtils.setBatchId(cell, Integer.toString(index));
-      BatchUtils.setBatchOperationType(cell, BatchOperationType.UPDATE);
-      batchRequest.getEntries().add(cell);
-      index++;
+    List<Sheet> sheets = spreadsheetService.spreadsheets().get(objectEntity.getSpreadsheetKey()).execute().getSheets();
+    Map<Integer, Sheet> sheetMap = new HashMap<Integer, Sheet>();
+    for ( Sheet sheet : sheets ) {
+      sheetMap.put(sheet.getProperties().getSheetId(), sheet);
     }
-    // submit the cell feed update as a batch operation
-    Link batchLink = existingCellFeed.getLink(Link.Rel.FEED_BATCH, Link.Type.ATOM);
-    URL batchLinkUrl = new URL(batchLink.getHref());
-    logger.info("BatchLinkUrl: " + batchLinkUrl.toString());
-    spreadsheetService.setHeader("If-Match", "*");
-    CellFeed batchResponse = spreadsheetService.batch(batchLinkUrl, batchRequest);
-    spreadsheetService.setHeader("If-Match", null);
+    Sheet existingSheet;
+    GridRange range;
+    
+    Map<String, SheetInfo> workingSheetInfoMap = new HashMap<String, SheetInfo>();
 
-    // Check the results
-    for (CellEntry cellEntry : batchResponse.getEntries()) {
-      String batchId = BatchUtils.getBatchId(cellEntry);
-      if (!BatchUtils.isSuccess(cellEntry)) {
-        BatchStatus status = BatchUtils.getBatchStatus(cellEntry);
-        System.out.printf("%s failed (%s) %s", batchId, status.getReason(), status.getContent());
-        // TODO: throw exception?
+    Get req = spreadsheetService.spreadsheets().get(objectEntity.getSpreadsheetKey());
+    SheetInfo sheetInfo;
+    List<String> ranges = new ArrayList<String>();
+
+    // build sheetInfo map
+    sheetInfo = new SheetInfo();
+    sheetInfo.sheetId = Integer.valueOf(objectEntity.getTopLevelWorksheetId());
+    sheetInfo.headers = headerFormatter.generateHeaders(form, form.getTopLevelGroupElement(), null);
+    sheetInfo.headerTypes = headerFormatter.getHeaderTypes();
+    
+    workingSheetInfoMap.put(objectEntity.getTopLevelWorksheetId(), sheetInfo);
+    
+    // build gridRange request for top-level sheet headers
+    existingSheet = sheetMap.get(sheetInfo.sheetId);
+    ranges.add(existingSheet.getProperties().getTitle() + "!R1C1:R1C" 
+    + Integer.valueOf(existingSheet.getProperties().getGridProperties().getColumnCount()));
+    
+    // build gridRange request for repeat group sheet headers
+    for (GoogleSpreadsheet2RepeatParameterTable tableId : repeatElementEntities) {
+
+      FormElementKey elementKey = tableId.getFormElementKey();
+      FormElementModel element = FormElementModel.retrieveFormElementModel(form, elementKey);
+
+      // build sheetInfo map
+      sheetInfo = new SheetInfo();
+      sheetInfo.sheetId = Integer.valueOf(tableId.getWorksheetId());
+      sheetInfo.headers =  headerFormatter.generateHeaders(form, element, null);
+      sheetInfo.headerTypes = headerFormatter.getHeaderTypes();
+      
+      workingSheetInfoMap.put(tableId.getWorksheetId(), sheetInfo);
+      
+      existingSheet = sheetMap.get(sheetInfo.sheetId);
+      ranges.add(existingSheet.getProperties().getTitle() + "!R1C1:R1C" 
+          + Integer.valueOf(existingSheet.getProperties().getGridProperties().getColumnCount()));
+    }
+    req.setRanges(ranges);
+    req.setIncludeGridData(true);
+    Spreadsheet entry = req.execute();
+
+    for ( Sheet sheet : entry.getSheets() ) {
+      Integer id = sheet.getProperties().getSheetId();
+      sheetInfo = workingSheetInfoMap.get(Integer.toString(id));
+      
+      for ( GridData data : sheet.getData() ) {
+        // there may be extra entries to ignore
+        if ( data == null ) {
+          continue;
+        }
+        Integer startCol = 0;
+        // there may be extra rows to ignore
+        List<CellData> cells = data.getRowData().get(0).getValues();
+        
+        for ( CellData cell : cells ) {
+          if ( cell == null ) {
+            startCol++;
+            continue;
+          }
+          String header = cell.getFormattedValue();
+          if ( header == null ) {
+            startCol++;
+            continue;
+          }
+          for ( int i = 0 ; i < sheetInfo.headers.size() ; ++i ) {
+            String hcol = sheetInfo.headers.get(i);
+            if ( hcol.equals(header) ) {
+              sheetInfo.fieldMap.put(i, startCol);
+              break;
+            }
+          }
+          startCol++;
+        }
       }
     }
-
-    return createdWorksheet;
+    sheetInfoMap = workingSheetInfoMap;
   }
-
+  
   @Override
   protected void insertData(Submission submission, CallingContext cc)
       throws ODKExternalServiceException {
     if (getReady()) {
       try {
+        buildSheetInfoMap(cc);
+        
+        SheetInfo sheetInfo;
+        List<Request> requests = new ArrayList<Request>();
+        
         // upload base submission values
-        List<String> headers = headerFormatter.generateHeaders(form,
-            form.getTopLevelGroupElement(), null);
-        WorksheetEntry topLevelWorksheet = getWorksheet(objectEntity.getTopLevelWorksheetId());
-        executeInsertData(submission, headers, topLevelWorksheet, cc);
+        sheetInfo = sheetInfoMap.get(objectEntity.getTopLevelWorksheetId());
+        AppendCellsRequest acr = createAppendCellsRequest(submission, sheetInfo, cc);
+        requests.add(new Request().setAppendCells(acr));
 
         // upload repeat values
         for (GoogleSpreadsheet2RepeatParameterTable tableId : repeatElementEntities) {
           FormElementKey elementKey = tableId.getFormElementKey();
           FormElementModel element = FormElementModel.retrieveFormElementModel(form, elementKey);
-          headers = headerFormatter.generateHeaders(form, element, null);
-
+          sheetInfo = sheetInfoMap.get(tableId.getWorksheetId());
+          
           List<SubmissionValue> values = submission.findElementValue(element);
           for (SubmissionValue value : values) {
             if (value instanceof RepeatSubmissionType) {
               RepeatSubmissionType repeat = (RepeatSubmissionType) value;
               if (repeat.getElement().equals(element)) {
                 for (SubmissionSet set : repeat.getSubmissionSets()) {
-                  WorksheetEntry repeatWorksheet = getWorksheet(tableId.getWorksheetId());
-                  executeInsertData(set, headers, repeatWorksheet, cc);
+                  acr = createAppendCellsRequest(set, sheetInfo, cc);
+                  requests.add(new Request().setAppendCells(acr));
                 }
               }
             } else {
@@ -445,20 +638,15 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
             }
           }
         }
-      } catch (AuthenticationException e) {
-        logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName()
-            + " exception: " + e.getMessage());
-        e.printStackTrace();
-        fsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
-        try {
-          persist(cc);
-        } catch (Exception e1) {
-          e1.printStackTrace();
-          throw new ODKExternalServiceException(
-              "Unable to set OperationalStatus to Bad Credentials: " + e.toString(), e1);
+        
+        if ( !requests.isEmpty() ) {
+          BatchUpdateSpreadsheetRequest req = new BatchUpdateSpreadsheetRequest();
+          req.setRequests(requests);
+          req.setIncludeSpreadsheetInResponse(false);
+          BatchUpdateSpreadsheetResponse rsp = 
+              spreadsheetService.spreadsheets().batchUpdate(objectEntity.getSpreadsheetKey(), req).execute();
         }
-        e.printStackTrace();
-        throw new ODKExternalServiceCredentialsException(e);
+
       } catch (Exception e) {
         e.printStackTrace();
         logger.error("Unable to insert data into spreadsheet " + objectEntity.getSpreadsheetName()
@@ -469,17 +657,16 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   }
 
   /**
-   * Inserts the data in the given submissionSet as a new entry (i.e. a new row)
+   * Creates the request to append the data in the given submissionSet as a new entry (i.e. a new row)
    * in the given worksheet, including only the data specified by headers.
    * 
    * @param submissionSet
    *          the set of data from a single submission
-   * @param headers
-   *          a list of headers corresponding to the headers in worksheet. Only
-   *          the data in submissionSet corresponding to these headers will be
-   *          submitted.
-   * @param worksheet
-   *          the worksheet representing the worksheet in a Google Spreadsheet.
+   * @param sheetInfo
+   *          encapsulates information about the Sheet (worksheet) and the 
+   *          list of headers we are publishing into, and the mapping between the two.
+   * @param cc
+   *          the calling context
    * @throws ODKDatastoreException
    *           if there was a problem in the datastore
    * @throws IOException
@@ -488,34 +675,76 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
    * @throws ServiceException
    *           if there was a problem with the GData service
    */
-  private void executeInsertData(SubmissionSet submissionSet, List<String> headers,
-      WorksheetEntry worksheet, CallingContext cc) throws ODKDatastoreException, IOException,
-      ServiceException {
-    ListEntry newEntry = new ListEntry();
-    CustomElementCollection values = newEntry.getCustomElements();
+  private AppendCellsRequest createAppendCellsRequest(SubmissionSet submissionSet, SheetInfo sheetInfo,
+      CallingContext cc) throws ODKDatastoreException, IOException {
 
     Row row = submissionSet.getFormattedValuesAsRow(null, formatter, true, cc);
     List<String> formattedValues = row.getFormattedValues();
 
     String rowString = null;
-    String headerString = null;
-    for (int colIndex = 0; colIndex < headers.size(); colIndex++) {
-      headerString = headers.get(colIndex);
+    Map<Integer, CellData> cellReorderMap = new HashMap<Integer, CellData>();
+
+    // expect columns to be zero-based (0..n)
+    // should typically correspond to the column order we define,
+    // but allow the user to re-order the columns (during quiescent times)
+    int minNewCol = 0;
+    int maxNewCol = 0;
+    for (int colIndex = 0; colIndex < sheetInfo.headers.size(); colIndex++) {
+      Integer newCol = sheetInfo.fieldMap.get(colIndex);;
+      minNewCol = (minNewCol < newCol) ? minNewCol : newCol;
+      maxNewCol = (maxNewCol > newCol) ? maxNewCol : newCol;
+      ElementType type = sheetInfo.headerTypes.get(colIndex);
       rowString = formattedValues.get(colIndex);
-      values.setValueLocal(headerString, (rowString == null) ? BasicConsts.SPACE : rowString);
+      CellData cellData = new CellData();
+      if ( rowString == null ) {
+        cellData.setUserEnteredValue(new ExtendedValue());
+      } else {
+        ExtendedValue ev;
+        switch ( type ) {
+          case BOOLEAN:
+            ev = new ExtendedValue();
+            ev.setBoolValue(Boolean.valueOf(rowString));
+            cellData.setUserEnteredValue(ev);
+            break;
+          case INTEGER:
+          case DECIMAL:
+            ev = new ExtendedValue();
+            ev.setNumberValue(Double.valueOf(rowString));
+            cellData.setUserEnteredValue(ev);
+            break;
+          case JRDATE:
+          case JRDATETIME:
+          case JRTIME:
+          default:
+            ev = new ExtendedValue();
+            ev.setStringValue(rowString);
+            cellData.setUserEnteredValue(ev);
+        }
+      }
+      cellReorderMap.put(newCol, cellData);
     }
-
-    URL listFeedUrl = worksheet.getListFeedUrl();
-    logger.info("listFeedUrl: " + listFeedUrl.toString());
-    spreadsheetService.insert(listFeedUrl, newEntry);
-  }
-
-  public WorksheetEntry getWorksheet(String worksheetId) throws IOException, ServiceException {
-    URL url = new URL(SpreadsheetConsts.WORKSHEETS_FEED
-        + URLEncoder.encode(objectEntity.getSpreadsheetKey(), HtmlConsts.UTF8_ENCODE)
-        + SpreadsheetConsts.FEED_PERMISSIONS + URLEncoder.encode(worksheetId, HtmlConsts.UTF8_ENCODE));
-    WorksheetEntry worksheetEntry = spreadsheetService.getEntry(url, WorksheetEntry.class);
-    return worksheetEntry;
+    
+    if ( minNewCol < 0 ) {
+      throw new IllegalStateException("Expected columns in row to start at index 0");
+    }
+    
+    AppendCellsRequest acr = new AppendCellsRequest();
+    acr.setFields("*");
+    acr.setSheetId(sheetInfo.sheetId);
+    RowData rowData = new RowData();
+    List<CellData> cells = new ArrayList<CellData>();
+    for ( int col = 0 ; col <= maxNewCol; ++col ) {
+      CellData cell = cellReorderMap.get(col);
+      if ( cell == null ) {
+        cell = new CellData();
+      }
+      cells.add(cell);
+    }
+    rowData.setValues(cells);
+    List<RowData> rows = new ArrayList<RowData>();
+    rows.add(rowData);
+    acr.setRows(rows);
+    return acr;
   }
 
   /**

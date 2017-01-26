@@ -79,8 +79,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.google.appengine.api.datastore.EntityNotFoundException;
-
 public class REDCapServer extends AbstractExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
 
@@ -212,7 +210,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
   }
 
   public void submitFile(String recordID, String fileField, BlobSubmissionType blob_value,
-      CallingContext cc) throws MalformedURLException, IOException, EntityNotFoundException,
+      CallingContext cc) throws MalformedURLException, IOException,
       ODKDatastoreException {
 
     String contentType = blob_value.getContentType(1, cc);

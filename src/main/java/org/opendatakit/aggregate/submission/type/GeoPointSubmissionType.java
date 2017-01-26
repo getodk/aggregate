@@ -17,7 +17,6 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import org.opendatakit.aggregate.constants.common.GeoPointConsts;
@@ -29,6 +28,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -61,17 +61,17 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 		} else {
 			String[] values = value.split("\\s+");
 			if (values.length == 2) {
-				coordinates = new GeoPoint( new BigDecimal(values[0]), 
-											new BigDecimal(values[1]));
+				coordinates = new GeoPoint( new WrappedBigDecimal(values[0]), 
+											new WrappedBigDecimal(values[1]));
 			} else if (values.length == 3) {
-				coordinates = new GeoPoint( new BigDecimal(values[0]), 
-											new BigDecimal(values[1]),
-											new BigDecimal(values[2]));
+				coordinates = new GeoPoint( new WrappedBigDecimal(values[0]), 
+											new WrappedBigDecimal(values[1]),
+											new WrappedBigDecimal(values[2]));
 			} else if (values.length == 4) {
-				coordinates = new GeoPoint( new BigDecimal(values[0]), 
-											new BigDecimal(values[1]),
-											new BigDecimal(values[2]),
-											new BigDecimal(values[3]));
+				coordinates = new GeoPoint( new WrappedBigDecimal(values[0]), 
+											new WrappedBigDecimal(values[1]),
+											new WrappedBigDecimal(values[2]),
+											new WrappedBigDecimal(values[3]));
 			} else {
 				throw new ODKConversionException(
 						"Problem with GPS Coordinates being parsed from XML");
@@ -115,10 +115,10 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 
 	@Override
 	public void getValueFromEntity(CallingContext cc) {
-		BigDecimal latCoor = null;
-		BigDecimal longCoor = null;
-		BigDecimal altitude = null;
-		BigDecimal accuracy = null;
+		WrappedBigDecimal latCoor = null;
+		WrappedBigDecimal longCoor = null;
+		WrappedBigDecimal altitude = null;
+		WrappedBigDecimal accuracy = null;
 		for ( FormDataModel m : element.getFormDataModel().getChildren()) {
 			switch ( m.getOrdinalNumber().intValue() ) {
 			case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:

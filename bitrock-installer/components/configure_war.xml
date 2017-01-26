@@ -10,14 +10,17 @@
             <destination>${temp_dir}</destination>
             <name>temp</name>
             <platforms>all</platforms>
+            <actionList>
+                <changePermissions files="${temp_dir}/files/sqljdbc_6.0/*.jar" permissions="0755"/>
+            </actionList>
             <distributionFileList>
-	        <!-- as follows:
+                <!-- as follows:
 			files/conf - configuration extracted from maven build tree.
 			files/mf - fake Manifest.mf directory structure
 			files/qualified_hostname - QualifiedHostname class for printing this host's fully qualified hostname to stdout
 			files/ODKAggregate.war - war file minus site-specific settings.
 			-->
-	            <distributionDirectory>
+                <distributionDirectory>
                     <origin>files/conf</origin>
                 </distributionDirectory>
                 <distributionDirectory>
@@ -29,7 +32,31 @@
                 <distributionFile>
                     <origin>files/ODKAggregate.war</origin>
                 </distributionFile>
+                <distributionFile>
+                    <origin>files/sqljdbc_6.0/sqljdbc41.jar</origin>
+                </distributionFile>
+                <distributionFile>
+                    <origin>files/sqljdbc_6.0/sqljdbc42.jar</origin>
+                </distributionFile>
             </distributionFileList>
+        </folder>
+        <folder>
+            <description>Microsoft SQL Server JDBC Driver</description>
+            <destination>${installdir}</destination>
+            <name>sqljdbc_6_0</name>
+            <platforms>all</platforms>
+            <distributionFileList>
+                <distributionFile>
+                    <origin>files/sqljdbc_6.0</origin>
+                </distributionFile>
+            </distributionFileList>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>sqlserver</value>
+                </compareText>
+            </ruleList>
         </folder>
         <folder>
             <description>Google AppEngine SDK</description>
@@ -45,11 +72,21 @@
                 </distributionDirectory>
             </distributionFileList>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </folder>
         <folder>
@@ -59,20 +96,28 @@
             <platforms>all</platforms>
             <distributionFileList>
                 <distributionFile>
-                    <allowWildcards>0</allowWildcards>
                     <origin>files/gae_scripts/DataStorageWarning.txt</origin>
                 </distributionFile>
                 <distributionFile>
-                    <allowWildcards>0</allowWildcards>
                     <origin>files/gae_scripts/ODKAggregateAppEngineUpdater.jar</origin>
                 </distributionFile>
             </distributionFileList>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </folder>
         <folder>
@@ -94,11 +139,21 @@
                 <platformTest>
                     <type>osx</type>
                 </platformTest>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </folder>
         <folder>
@@ -120,11 +175,21 @@
                     <negate>1</negate>
                     <type>windows</type>
                 </platformTest>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </folder>
     </folderList>
@@ -143,7 +208,14 @@
         </setInstallerVariable>
         <setInstallerVariable>
             <name>html_steps_begin</name>
-            <value>&lt;html&gt;&lt;head&gt;&lt;title&gt;Remaining Configuration Steps&lt;/title&gt;&lt;/head&gt;&lt;body&gt;
+            <value>&lt;html&gt;&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;style&gt;
+html {font-family:arial;}
+&lt;/style&gt;
+&lt;title&gt;Remaining Configuration Steps&lt;/title&gt;
+	&lt;/head&gt;&lt;body&gt;
 &lt;p&gt;To complete the installation, you need to:
 &lt;/p&gt;&lt;ol&gt;</value>
         </setInstallerVariable>
@@ -178,8 +250,8 @@
             </actionList>
         </actionGroup>
         <actionGroup>
-	<!-- Sets the JDBC properties in jdbc.properties based on parameters -->
-	<explanation>Set jdbc properties</explanation>
+            <!-- Sets the JDBC properties in jdbc.properties based on parameters -->
+            <explanation>Set jdbc properties</explanation>
             <progressText>Setting jdbc properties</progressText>
             <actionList>
                 <propertiesFileSet>
@@ -204,21 +276,84 @@
                 </propertiesFileSet>
             </actionList>
             <ruleList>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>mysql</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>postgresql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+            <!-- Sets the JDBC properties in jdbc.properties based on parameters -->
+            <explanation>Set jdbc properties</explanation>
+            <progressText>Setting jdbc properties</progressText>
+            <actionList>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.url</key>
+                    <value>${jdbc_url}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.schema</key>
+                    <value>${jdbc_schema}</value>
+                </propertiesFileSet>
+            </actionList>
+            <ruleList>
                 <compareText>
-                    <logic>does_not_equal</logic>
+                    <logic>equals</logic>
                     <text>${platform}</text>
-                    <value>gae</value>
+                    <value>sqlserver</value>
                 </compareText>
             </ruleList>
         </actionGroup>
         <actionGroup>
-	<!-- Sets the security properties in security.properties
+            <!-- Sets the JDBC properties in jdbc.properties based on parameters -->
+            <explanation>Set jdbc properties</explanation>
+            <progressText>Setting jdbc properties</progressText>
+            <actionList>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.url</key>
+                    <value>${jdbc_url}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.password</key>
+                    <value>${jdbc_password}</value>
+                </propertiesFileSet>
+                <propertiesFileSet>
+                    <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+                    <key>jdbc.schema</key>
+                    <value>${jdbc_schema}</value>
+                </propertiesFileSet>
+            </actionList>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae_mysql</value>
+                </compareText>
+            </ruleList>
+        </actionGroup>
+        <actionGroup>
+            <!-- Sets the security properties in security.properties
                  based on previous user input -->
-	<explanation>Set security properties</explanation>
+            <explanation>Set security properties</explanation>
             <progressText>Setting up security properties</progressText>
             <actionList>
                 <actionGroup>
-	<!-- Sets the Authentication properties
+                    <!-- Sets the Authentication properties
                          secureChannelType, deviceAuthentication, and
                          channelType 
 
@@ -236,7 +371,7 @@
 							security.server.channelType=REQUIRES_SECURE_CHANNEL 
 							security.server.secureChannelType=REQUIRES_SECURE_CHANNEL 
                     -->
-	<explanation>Authentication</explanation>
+                    <explanation>Authentication</explanation>
                     <progressText>Setting authentication choices</progressText>
                     <actionList>
                         <propertiesFileSet>
@@ -253,11 +388,21 @@
                                 <isTrue>
                                     <value>${tomcat_authentication_should_configure}</value>
                                 </isTrue>
-                                <compareText>
-                                    <logic>equals</logic>
-                                    <text>gae</text>
-                                    <value>${platform}</value>
-                                </compareText>
+                                <ruleGroup>
+                                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                                    <ruleList>
+                                        <compareText>
+                                            <logic>equals</logic>
+                                            <text>${platform}</text>
+                                            <value>gae</value>
+                                        </compareText>
+                                        <compareText>
+                                            <logic>equals</logic>
+                                            <text>${platform}</text>
+                                            <value>gae_mysql</value>
+                                        </compareText>
+                                    </ruleList>
+                                </ruleGroup>
                             </ruleList>
                         </propertiesFileSet>
                         <propertiesFileSet>
@@ -270,8 +415,13 @@
                                 </isFalse>
                                 <compareText>
                                     <logic>does_not_equal</logic>
-                                    <text>gae</text>
-                                    <value>${platform}</value>
+                                    <text>${platform}</text>
+                                    <value>gae</value>
+                                </compareText>
+                                <compareText>
+                                    <logic>does_not_equal</logic>
+                                    <text>${platform}</text>
+                                    <value>gae_mysql</value>
                                 </compareText>
                             </ruleList>
                         </propertiesFileSet>
@@ -284,11 +434,21 @@
                                 <isTrue>
                                     <value>${tomcat_authentication_should_configure}</value>
                                 </isTrue>
-                                <compareText>
-                                    <logic>equals</logic>
-                                    <text>gae</text>
-                                    <value>${platform}</value>
-                                </compareText>
+                                <ruleGroup>
+                                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                                    <ruleList>
+                                        <compareText>
+                                            <logic>equals</logic>
+                                            <text>${platform}</text>
+                                            <value>gae</value>
+                                        </compareText>
+                                        <compareText>
+                                            <logic>equals</logic>
+                                            <text>${platform}</text>
+                                            <value>gae_mysql</value>
+                                        </compareText>
+                                    </ruleList>
+                                </ruleGroup>
                             </ruleList>
                         </propertiesFileSet>
                         <propertiesFileSet>
@@ -301,8 +461,13 @@
                                 </isFalse>
                                 <compareText>
                                     <logic>does_not_equal</logic>
-                                    <text>gae</text>
-                                    <value>${platform}</value>
+                                    <text>${platform}</text>
+                                    <value>gae</value>
+                                </compareText>
+                                <compareText>
+                                    <logic>does_not_equal</logic>
+                                    <text>${platform}</text>
+                                    <value>gae_mysql</value>
                                 </compareText>
                             </ruleList>
                         </propertiesFileSet>
@@ -384,24 +549,71 @@
         <deleteFile>
             <path>${temp_dir}/cfg-war/WEB-INF/appengine-web.xml</path>
             <ruleList>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
+            </ruleList>
+        </deleteFile>
+        <copyFile>
+            <destination>${temp_dir}/cfg-war/WEB-INF/lib/sqljdbc4-4.1.jar</destination>
+            <origin>${temp_dir}/sqljdbc41.jar</origin>
+            <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
-                    <value>gae</value>
+                    <value>sqlserver</value>
                 </compareText>
+                <isFalse>
+                    <value>${is_azure_database_server}</value>
+                </isFalse>
             </ruleList>
-        </deleteFile>
+        </copyFile>
+        <copyFile>
+            <destination>${temp_dir}/cfg-war/WEB-INF/lib/sqljdbc4-4.2.jar</destination>
+            <origin>${temp_dir}/sqljdbc42.jar</origin>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>sqlserver</value>
+                </compareText>
+                <isTrue>
+                    <value>${is_azure_database_server}</value>
+                </isTrue>
+            </ruleList>
+        </copyFile>
         <zip>
             <baseDirectory>${temp_dir}/cfg-war</baseDirectory>
             <files>${temp_dir}/cfg-war/*</files>
             <progressText>Reassembling ODKAggregate.war</progressText>
             <zipFile>${installdir}/ODKAggregate.war</zipFile>
             <ruleList>
-                <compareText>
-                    <logic>does_not_equal</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleList>
+                        <compareText>
+                            <logic>does_not_equal</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>does_not_equal</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </zip>
         <deleteFile>
@@ -411,11 +623,21 @@
             <path>${installdir}/LegacyRemoval</path>
             <progressText>Creating legacy backend removal directory</progressText>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </createDirectory>
         <copyFile>
@@ -423,11 +645,21 @@
             <origin>${temp_dir}/legacyremoval/*</origin>
             <progressText>Copy legacy deployment files to LegacyRemoval directory</progressText>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </copyFile>
         <xmlFileSet>
@@ -436,22 +668,42 @@
             <file>${installdir}/LegacyRemoval/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </xmlFileSet>
         <createDirectory>
             <path>${installdir}/ODKAggregate</path>
             <progressText>Creating ear directory</progressText>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </createDirectory>
         <copyFile>
@@ -459,11 +711,21 @@
             <origin>${temp_dir}/cfg-war/*</origin>
             <progressText>Copy war files to ear/default directory</progressText>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </copyFile>
         <copyFile>
@@ -471,11 +733,21 @@
             <origin>${temp_dir}/cfg-war/*</origin>
             <progressText>Copy war files to ear/background directory</progressText>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </copyFile>
         <copyFile>
@@ -483,11 +755,21 @@
             <origin>${temp_dir}/conf/ear/*</origin>
             <progressText>Copy ear files to ear directory</progressText>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </copyFile>
         <xmlFileSet>
@@ -496,6 +778,29 @@
             <file>${installdir}/ODKAggregate/default/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
             <ruleList>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
+            </ruleList>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="use-google-connector-j"]</element>
+            <file>${installdir}/ODKAggregate/default/WEB-INF/appengine-web.xml</file>
+            <value>false</value>
+            <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
@@ -505,9 +810,58 @@
         </xmlFileSet>
         <xmlFileSet>
             <attribute></attribute>
+            <element>//*[local-name()="use-google-connector-j"]</element>
+            <file>${installdir}/ODKAggregate/default/WEB-INF/appengine-web.xml</file>
+            <value>true</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae_mysql</value>
+                </compareText>
+            </ruleList>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
             <element>//*[local-name()="application"]</element>
             <file>${installdir}/ODKAggregate/background/WEB-INF/appengine-web.xml</file>
             <value>${app_id}</value>
+            <ruleList>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
+            </ruleList>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="use-google-connector-j"]</element>
+            <file>${installdir}/ODKAggregate/background/WEB-INF/appengine-web.xml</file>
+            <value>true</value>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae_mysql</value>
+                </compareText>
+            </ruleList>
+        </xmlFileSet>
+        <xmlFileSet>
+            <attribute></attribute>
+            <element>//*[local-name()="use-google-connector-j"]</element>
+            <file>${installdir}/ODKAggregate/background/WEB-INF/appengine-web.xml</file>
+            <value>false</value>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
@@ -522,11 +876,21 @@
             <file>${installdir}/ODKAggregate/META-INF/appengine-application.xml</file>
             <value>${app_id}</value>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </xmlFileSet>
         <xmlFileSet>
@@ -535,11 +899,21 @@
             <file>${installdir}/ODKAggregate/META-INF/application.xml</file>
             <value>${instance_display_name}</value>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </xmlFileSet>
         <setInstallerVariable>
@@ -613,6 +987,45 @@ grant all privileges on schema "${jdbc_schema}" to "${jdbc_username}";
                     <logic>equals</logic>
                     <text>${platform}</text>
                     <value>postgresql</value>
+                </compareText>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/create_db_and_user.sql</path>
+            <progressText>Write Microsoft SQL Server database and schema creation script</progressText>
+            <text>-- create the database
+create database [${jdbc_database}];
+go
+-- switch to it
+use [${jdbc_database}];
+go
+-- create the schema
+create schema [${jdbc_schema}];
+go
+-- declare the group (to which the user belongs) or the user that will access this database and schema
+--
+-- new mechanism leverages users contained within databases (for Azure SQL Server) vs. in server:
+create user [${jdbc_username}] FROM EXTERNAL PROVIDER;
+-- alternative old-school mechanism was:
+--    create login [${jdbc_username}] from windows
+--    with default_database = [${jdbc_database}];
+--
+go
+-- grant access for this group or user.
+--
+-- this group or user can connect to the database and see what objects are defined within
+GRANT CONNECT, VIEW DEFINITION TO [${jdbc_username}];
+go
+-- this group can query all tables and see the objects within the schema
+GRANT SELECT, VIEW DEFINITION, CREATE TABLE ON OBJECT::[${jdbc_schema}] TO [${jdbc_username}];
+go
+</text>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>sqlserver</value>
                 </compareText>
             </ruleList>
         </writeFile>
@@ -760,17 +1173,45 @@ ${html_steps_end}</text>
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This upload tool will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool. 
+${html_steps_begin_item}Copy the &lt;code&gt;${installdir}\sqljdbc_6.0\auth\x64\sqljdbc_auth.dll&lt;/code&gt; file to your &lt;code&gt;C:\Windows\System32&lt;/code&gt; directory (or somewhere in your PATH).
+${html_steps_end_item}${html_steps_begin_item}Create the ${jdbc_username} Windows user (or group) or Azure Active Directory user (or group). ODK Aggregate will use this credential to access the database.
+${html_steps_end_item}${html_steps_begin_item}Go to the Windows Services management console and configure the Tomcat 8 server to run as this user, or as a user belonging to this group.
+${html_steps_end_item}${html_steps_begin_item}Launch Microsoft SQL Server Management Studio.
+${html_steps_end_item}${html_steps_begin_item}Open a new query window and copy the content of &lt;code&gt;create_db_and_user.sql&lt;/code&gt; into it.
+${html_steps_end_item}${html_steps_begin_item}Execute the commands in that query window. You may need to execute them individually.
+${html_steps_end_item}${html_steps_begin_item}Upon refreshing the database view, you should see the new database. And if you expand the Security folder and Schemas within, you should find the schema used by this ODK Aggregate.
 ${html_steps_end_item}${html_steps_begin_item}
-Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
-access rights for ODK Aggregate.${html_steps_end_item}
-&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+copy the &lt;code&gt;ODKAggregate.war&lt;/code&gt; to the &lt;code&gt;${platform_path_separator}webapps&lt;/code&gt; directory of the Apache
+Tomcat installation.
+${html_steps_end_item}${html_steps_begin_item}
+start Apache (if not already started)
+${html_steps_end_item}${html_steps_begin_item}
+visit &lt;a href="http://${host_port}/ODKAggregate/"&gt;http://${host_port}/ODKAggregate/&lt;/a&gt; Log in using the super-user's Aggregate username with password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate. NOTE: It may take a few moments for the Apache Tomcat server to detect the ODKAggregate.war; if you get a 404 error, wait a few moments then refresh your browser.
+${html_steps_end_item}${html_steps_end}</text>
             <ruleList>
                 <compareText>
                     <logic>equals</logic>
                     <text>${platform}</text>
-                    <value>gae</value>
+                    <value>sqlserver</value>
                 </compareText>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This upload tool will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool. 
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
+access rights for ODK Aggregate.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+				<compareText>
+					<logic>equals</logic>
+					<text>${platform}</text>
+					<value>gae</value>
+				</compareText>
                 <platformTest>
                     <type>windows</type>
                 </platformTest>
@@ -781,17 +1222,17 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool. 
+${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool. 
 ${html_steps_end_item}${html_steps_begin_item}After the upload tool completes successfully, 
-visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
+visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+				<compareText>
+					<logic>equals</logic>
+					<text>${platform}</text>
+					<value>gae</value>
+				</compareText>
                 <platformTest>
                     <type>linux</type>
                 </platformTest>
@@ -802,17 +1243,90 @@ access rights for ODK Aggregate.${html_steps_end_item}
             <path>${installdir}/README.html</path>
             <progressText>Write README</progressText>
             <text>${html_steps_begin}
-${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.
+${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.
 ${html_steps_end_item}${html_steps_begin_item}
-Visit &lt;a href="http://${hostname}"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
+Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with  password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>gae</value>
-                </compareText>
+				<compareText>
+					<logic>equals</logic>
+					<text>${platform}</text>
+					<value>gae</value>
+				</compareText>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+		<!-- Google Cloud SQL next-steps file -->
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Download the MySQL Connector/J zip file from &lt;a href="http://www.mysql.com/downloads/connector/j/5.1.html" target="_blank"&gt;&lt;code&gt;http://www.mysql.com/downloads/connector/j/5.1.html&lt;/code&gt;&lt;/a&gt;.
+${html_steps_end_item}${html_steps_begin_item}Unzip or extract the contents of that file to a directory on your system.
+${html_steps_end_item}${html_steps_begin_item}The resulting directory should contain a file named &lt;code&gt;mysql-connector-java-...-bin.jar&lt;/code&gt; Copy this file into both the &lt;code&gt;${installdir}\ODKAggregate\background\WEB-INF\lib&lt;/code&gt; and &lt;code&gt;${installdir}\ODKAggregate\default\WEB-INF\lib&lt;/code&gt;	directories within the ODK Aggregate installation directory.
+${html_steps_end_item}${html_steps_begin_item}Launch the upload tool by browsing to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This upload tool will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool. 
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with the initial password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate.
+${html_steps_end_item}${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This upload tool will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+				<compareText>
+					<logic>equals</logic>
+					<text>${platform}</text>
+					<value>gae_mysql</value>
+				</compareText>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Download the MySQL Connector/J zip file from &lt;a href="http://www.mysql.com/downloads/connector/j/5.1.html" target="_blank"&gt;&lt;code&gt;http://www.mysql.com/downloads/connector/j/5.1.html&lt;/code&gt;&lt;/a&gt;.
+${html_steps_end_item}${html_steps_begin_item}Unzip or extract the contents of that file to a directory on your system.
+${html_steps_end_item}${html_steps_begin_item}The resulting directory should contain a file named &lt;code&gt;mysql-connector-java-...-bin.jar&lt;/code&gt; Copy this file into both the &lt;code&gt;${installdir}/ODKAggregate/background/WEB-INF/lib&lt;/code&gt; and &lt;code&gt;${installdir}/ODKAggregate/default/WEB-INF/lib&lt;/code&gt;	directories within the ODK Aggregate installation directory.
+${html_steps_end_item}${html_steps_begin_item}Launch the upload tool by  opening a &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with the initial password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate.
+${html_steps_end_item}${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+				<compareText>
+					<logic>equals</logic>
+					<text>${platform}</text>
+					<value>gae_mysql</value>
+				</compareText>
+                <platformTest>
+                    <type>linux</type>
+                </platformTest>
+            </ruleList>
+        </writeFile>
+        <writeFile>
+            <encoding>utf-8</encoding>
+            <path>${installdir}/README.html</path>
+            <progressText>Write README</progressText>
+            <text>${html_steps_begin}
+${html_steps_begin_item}Download the MySQL Connector/J zip file from &lt;a href="http://www.mysql.com/downloads/connector/j/5.1.html" target="_blank"&gt;&lt;code&gt;http://www.mysql.com/downloads/connector/j/5.1.html&lt;/code&gt;&lt;/a&gt;.
+${html_steps_end_item}${html_steps_begin_item}Unzip or extract the contents of that file to a directory on your system.
+${html_steps_end_item}${html_steps_begin_item}The resulting directory should contain a file named &lt;code&gt;mysql-connector-java-...-bin.jar&lt;/code&gt; Copy this file into both the &lt;code&gt;${installdir}/ODKAggregate/background/WEB-INF/lib&lt;/code&gt; and &lt;code&gt;${installdir}/ODKAggregate/default/WEB-INF/lib&lt;/code&gt;	directories within the ODK Aggregate installation directory.
+${html_steps_end_item}${html_steps_begin_item}Launch the upload tool by opening &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.
+${html_steps_end_item}${html_steps_begin_item}
+Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;/a&gt; Log in using the super-user's Aggregate username with the initial password &lt;code&gt;aggregate&lt;/code&gt; if you have not previously changed its password and go to the Site Admin / Permissions tab to change that password and to complete configuring the access rights for ODK Aggregate.
+${html_steps_end_item}${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.${html_steps_end_item}
+&lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
+            <ruleList>
+				<compareText>
+					<logic>equals</logic>
+					<text>${platform}</text>
+					<value>gae_mysql</value>
+				</compareText>
                 <platformTest>
                     <type>osx</type>
                 </platformTest>

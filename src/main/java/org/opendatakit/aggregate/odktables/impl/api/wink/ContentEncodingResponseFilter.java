@@ -51,6 +51,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
@@ -187,7 +188,8 @@ public class ContentEncodingResponseFilter implements Filter {
 
     static abstract class EncodedOutputStream extends ServletOutputStream {
 
-        private boolean              isWritten = false;
+    	private boolean  isReady = false;
+		private boolean              isWritten = false;
 
         private DeflaterOutputStream outputStream = null;
         private ByteArrayOutputStream byteStream = null;
@@ -200,7 +202,16 @@ public class ContentEncodingResponseFilter implements Filter {
             this.outputStream = outputStream;
             this.byteStream = byteStream;
             this.actualOutputStream = actualOutputStream;
+            isReady = true;
         }
+
+		public boolean isReady() {
+			return isReady;
+		}
+
+		public void setWriteListener(WriteListener arg0) {
+			throw new IllegalStateException("WriteListener functionality is not implemented!");
+		}
 
         @Override
         public void write(int b) throws IOException {

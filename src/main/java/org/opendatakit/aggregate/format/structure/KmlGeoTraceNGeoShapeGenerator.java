@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.format.structure;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.SubmissionValue;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -190,13 +190,13 @@ public class KmlGeoTraceNGeoShapeGenerator extends AbstractKmlElementBase {
                   + gpsCoordinate);
             }
           } else if (values.length == 2) {
-            coordinates = new GeoPoint(new BigDecimal(values[0]), new BigDecimal(values[1]));
+            coordinates = new GeoPoint(new WrappedBigDecimal(values[0]), new WrappedBigDecimal(values[1]));
           } else if (values.length == 3) {
-            coordinates = new GeoPoint(new BigDecimal(values[0]), new BigDecimal(values[1]),
-                new BigDecimal(values[2]));
+            coordinates = new GeoPoint(new WrappedBigDecimal(values[0]), new WrappedBigDecimal(values[1]),
+                new WrappedBigDecimal(values[2]));
           } else if (values.length == 4) {
-            coordinates = new GeoPoint(new BigDecimal(values[0]), new BigDecimal(values[1]),
-                new BigDecimal(values[2]), new BigDecimal(values[3]));
+            coordinates = new GeoPoint(new WrappedBigDecimal(values[0]), new WrappedBigDecimal(values[1]),
+                new WrappedBigDecimal(values[2]), new WrappedBigDecimal(values[3]));
           } else {
             throw new ODKParseException(PARSE_PROBLEM_GEOTRACE_OR_GEOSHAPES_STRING);
           }

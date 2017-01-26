@@ -65,7 +65,7 @@ public class QueryServiceImpl implements QueryService {
   @Override
   public Response getRowsInTimeRangeBasedOnLastUpdateDate(@QueryParam(QUERY_START_TIME) String startTime, @QueryParam(QUERY_END_TIME) String endTime, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException, ParseException {
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.valueOf(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsInTimeRange(DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME, startTime, endTime, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
         websafeResult.dataETag, getTableUri(),
@@ -79,7 +79,7 @@ public class QueryServiceImpl implements QueryService {
   @Override
   public Response getRowsInTimeRangeBasedOnSavepointTimestamp(@QueryParam(QUERY_START_TIME) String startTime, @QueryParam(QUERY_END_TIME) String endTime, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException, ParseException {
-    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.parseInt(fetchLimit);
+    int limit = (fetchLimit == null || fetchLimit.length() == 0) ? 2000 : Integer.valueOf(fetchLimit);
     WebsafeRows websafeResult = dm.getRowsInTimeRange(DbLogTable.SAVEPOINT_TIMESTAMP.getName(), startTime, endTime, QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     RowResourceList rowResourceList = new RowResourceList(getResources(websafeResult.rows),
         websafeResult.dataETag, getTableUri(),

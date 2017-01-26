@@ -16,10 +16,10 @@
 
 package org.opendatakit.common.ermodel;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 import org.opendatakit.common.persistence.DataField;
+import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
@@ -63,7 +63,7 @@ public interface Entity {
 
   public abstract Double getDouble(DataField field);
 
-  public abstract BigDecimal getNumeric(DataField field);
+  public abstract WrappedBigDecimal getNumeric(DataField field);
 
   public abstract Integer getInteger(DataField field);
 
@@ -79,7 +79,7 @@ public interface Entity {
 
   public abstract Double getDouble(String fieldName);
 
-  public abstract BigDecimal getNumeric(String fieldName);
+  public abstract WrappedBigDecimal getNumeric(String fieldName);
 
   public abstract Integer getInteger(String fieldName);
 
@@ -95,7 +95,7 @@ public interface Entity {
 
   public abstract void set(DataField field, Double value);
 
-  public abstract void set(DataField field, BigDecimal value);
+  public abstract void set(DataField field, WrappedBigDecimal value);
 
   public abstract void set(DataField field, Integer value);
 
@@ -111,7 +111,7 @@ public interface Entity {
 
   public abstract void set(String fieldName, Double value);
 
-  public abstract void set(String fieldName, BigDecimal value);
+  public abstract void set(String fieldName, WrappedBigDecimal value);
 
   public abstract void set(String fieldName, Integer value);
 
