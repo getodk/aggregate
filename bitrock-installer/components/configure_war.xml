@@ -981,6 +981,7 @@ alter database "${jdbc_database}" owner to "${jdbc_username}";
 \c "${jdbc_database}";
 create schema "${jdbc_schema}";
 grant all privileges on schema "${jdbc_schema}" to "${jdbc_username}";
+alter schema "${jdbc_schema}" owner to "${jdbc_username}";
 </text>
             <ruleList>
                 <compareText>
