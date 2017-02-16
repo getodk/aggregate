@@ -75,7 +75,7 @@ public class XFormsXmlTable {
 
     // build XML table of form information
     for (IForm form : forms) {
-      if (!form.getDownloadEnabled())
+      if (!form.hasValidFormDefinition() || !form.getDownloadEnabled())
         continue;
 
       idx = generateFormXmlEntry(d, e, idx, form, cc);
