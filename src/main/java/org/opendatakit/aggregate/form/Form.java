@@ -563,6 +563,7 @@ class Form implements IForm {
       if ( viewableName == null ) {
         viewableName = getFormId();
       }
+      viewableName = "<<Broken>> " + viewableName;
       String viewableURL = HtmlUtil.createHrefWithProperties(
           cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, viewableName, false);
       
