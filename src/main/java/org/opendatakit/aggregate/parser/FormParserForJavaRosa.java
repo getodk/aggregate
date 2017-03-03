@@ -587,7 +587,9 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
               // patch up tbl with desired lengths of string
               // fields...
               for (FormDataModel m : fdmList) {
-                if (m.getElementType().equals(ElementType.STRING)) {
+                if (m.getElementType().equals(ElementType.GEOTRACE) ||
+                    m.getElementType().equals(ElementType.GEOSHAPE) ||
+                    m.getElementType().equals(ElementType.STRING)) {
                   DataField f = m.getBackingKey();
                   Integer i = fieldLengths.get(m);
                   if (f != null && i != null) {
@@ -1355,20 +1357,10 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     d.setPersistAsTable(persistAsTable);
     d.setPersistAsSchema(fdm.getSchemaName());
 
-    if (et.equals(ElementType.STRING)) {
-      // track the preferred string lengths of the string fields
-      Integer len = getNodesetStringLength(treeElement);
-      if (len != null) {
-        fieldLengths.put(d, len);
-      }
-    }
-
     // and patch up the tree elements that have multiple fields...
     switch (et) {
     case BINARY_CONTENT_REF_BLOB:
     case BOOLEAN:
-    case GEOTRACE:
-    case GEOSHAPE:
     case DECIMAL:
     case INTEGER:
     case JRDATE:
@@ -1378,8 +1370,16 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     case REF_BLOB:
     case SELECT1:
     case SELECTN:
-    case STRING:
       // This case keeps lint messages down...
+      break;
+    case GEOTRACE:
+    case GEOSHAPE:
+    case STRING:
+      // track the preferred string lengths of the string fields
+      Integer len = getNodesetStringLength(treeElement);
+      if (len != null) {
+        fieldLengths.put(d, len);
+      }
       break;
     case BINARY:
       // binary elements have two additional tables associated with them
