@@ -2,8 +2,7 @@
 
 These instructions are taken from this video:  https://www.youtube.com/watch?v=w9270Yqt-5I
 
-1. In either the eclipse-ear or eclipse-tomcat8 project,
-right-click, Debug As / Debug Configurations
+1. In either the eclipse-ear or eclipse-tomcat8 project, right-click, Debug As / Debug Configurations
 1. Double-click "Java Application" to configure a Java Application execution.
 1. Change the name to, e.g., "AppEngine GWT Codeserver" or "Tomcat8 GWT Codeserver"
 1. Choose Search... and type in Code
@@ -12,48 +11,46 @@ right-click, Debug As / Debug Configurations
 1. Click on the (X)= Arguments tab
 1. In Program Arguments, insert the 4 arguments (on one line):
 
-```
---bindAddress [your IP address]
--src [path-to-workspace]\src\main\java
--launcherDir [path-to-workspace]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\eclipse-tomcat8
-org.opendatakit.aggregate.AggregateUI
-```
+   ```
+   --bindAddress [your IP address]
+   -src [path-to-workspace]\src\main\java
+   -launcherDir [path-to-workspace]\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\eclipse-tomcat8
+   org.opendatakit.aggregate.AggregateUI
+   ```
 
-The -launcherDir "tmp0" may be a different directory name (e.g., tmp1, tmp2...).
-Whichever one contains the eclipse-tomcat8 or eclipse-default is the one you would use.
-If confused, you can stop all servers, blow away all the tmpX directories, and re-publish
-and re-run the server you have configured to determine what directory has the active content.
-
+   The -launcherDir "tmp0" may be a different directory name (e.g., tmp1, tmp2...).
+   
+   Whichever one contains the eclipse-tomcat8 or eclipse-default is the one you would use.
+   
+   If confused, you can stop all servers, blow away all the tmpX directories, and re-publish and re-run the server you have configured to determine what directory has the active content.
 1. Choose Apply
 1. Close
 1. Now, run the server (EAR or Tomcat8)
 1. And run the codeserver you just configured via Debug As / Debug Configurations, and select the configuration.
 
-This will take a long long time, and then emit a URL that the code server is using.
-
+   This will take a long long time, and then emit a URL that the code server is using.
 1. Open a Chrome browser to this URL.
 
-Copy the Dev Mode On / Dev Mode Off buttons up to the bookmarks bar.
-You may need to delete an earlier copy of these by right-click / Delete.
-And if you have been using Dev Mode, you may need to clear your browser cache.
-
+   Copy the Dev Mode On / Dev Mode Off buttons up to the bookmarks bar.
+  
+   You may need to delete an earlier copy of these by right-click / Delete.
+  
+   And if you have been using Dev Mode, you may need to clear your browser cache.
 1. Now, open the URL to your server (tomcat8 or eclipse-ear).
-  - It will pause compiling aggregateui
-  - And then render the page.
-  - Choose "Dev Mode On"
+    - It will pause compiling aggregateui
+    - And then render the page.
+    - Choose "Dev Mode On"
 1. Then, to debug, go to Developer Tools
 
-There will be the standard Javascript Sources tab, and a new tab, Content Scripts.
-
-The content Scripts tab will contain the Java code, and you can set breakpoints in that
-to take effect on the browser, and step through everything there.
-
-I believe you can make code changes in the Java source in Eclipse, and, when you
-save those changes, they will be picked up and applied after a short delay.
-
-More info here:
-
-http://www.gwtproject.org/articles/superdevmode.html
+  There will be the standard Javascript Sources tab, and a new tab, Content Scripts.
+  
+  The content Scripts tab will contain the Java code, and you can set breakpoints in that to take effect on the browser, and step through everything there.
+  
+  I believe you can make code changes in the Java source in Eclipse, and, when you save those changes, they will be picked up and applied after a short delay.
+  
+  More info here:
+  
+  http://www.gwtproject.org/articles/superdevmode.html
 
 ## Troubleshooting Debugging/Running
 
@@ -101,3 +98,4 @@ Clean your server, which will delete everything and republish it.
 If you do this, you will first need to stop your server, stop
 your codeserver (if debugging the UI), and then Clean, start the
 server, and then start the codeserver (if debugging the UI).
+

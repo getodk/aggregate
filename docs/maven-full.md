@@ -11,93 +11,79 @@
     the MySQL and Postgres projects and don't use maven.
 1. Optionally: Install Postgres
 
-For Postgres, run these commands:
+   For Postgres, run these commands:
 
-```
-create database "odk_unit";
-create schema "odk_unit";
-create user "odk_unit" with unencrypted password 'odk_unit';
-grant all privileges on database "odk_unit" to "odk_unit";
-alter database "odk_unit" owner to "odk_unit";
-```
+   ```
+   create database "odk_unit";
+   create schema "odk_unit";
+   create user "odk_unit" with unencrypted password 'odk_unit';
+   grant all privileges on database "odk_unit" to "odk_unit";
+   alter database "odk_unit" owner to "odk_unit";
+   ```
 
-From the Postgres SQL shell (psql) commandline client,
-using the root account and password, if the above commands
-are in the file postgres.sql, you can type:
+   From the Postgres SQL shell (psql) commandline client,
+   using the root account and password, if the above commands
+   are in the file postgres.sql, you can type:
 
-```
-\cd C:/your_path_no_spaces_forward_slashes_only
-\i postgres.sql
-\q
-```
-
+   ```
+   \cd C:/your_path_no_spaces_forward_slashes_only
+   \i postgres.sql
+   \q
+   ```
 1. Optionally: Install MySQL
 
-For MySQL, run this script:
+   For MySQL, run this script:
 
-```
-UPDATE mysql.user SET Password=PASSWORD('odk_unit') WHERE User='root';
-FLUSH PRIVILEGES;
-CREATE USER 'odk_unit'@'localhost' IDENTIFIED BY 'odk_unit';
-CREATE DATABASE odk_unit;
-GRANT ALL PRIVILEGES ON odk_unit.* TO 'odk_unit'@'localhost' WITH GRANT OPTION;
-```
+   ```
+   UPDATE mysql.user SET Password=PASSWORD('odk_unit') WHERE User='root';
+   FLUSH PRIVILEGES;
+   CREATE USER 'odk_unit'@'localhost' IDENTIFIED BY 'odk_unit';
+   CREATE DATABASE odk_unit;
+   GRANT ALL PRIVILEGES ON odk_unit.* TO 'odk_unit'@'localhost' WITH GRANT OPTION;
+   ```
 
-For MySQL, download and copy the MySQL Connector J jar into the Tomcat /lib
-directory (mysql-connector-java-5.1.40.jar to apache-tomcat-8.0.38/lib).
-This **MUST** be version 5.1.40 or higher. It is known that there are issues with 5.1.6
-and earlier. We have only tested with 5.1.40.
-You must stop tomcat, if it is running, in order for the library to be detected.
+   For MySQL, download and copy the MySQL Connector J jar into the Tomcat /lib directory (mysql-connector-java-5.1.40.jar to apache-tomcat-8.0.38/lib).
+   
+   This **MUST** be version 5.1.40 or higher. It is known that there are issues with 5.1.6 and earlier. We have only tested with 5.1.40. You must stop tomcat, if it is running, in order for the library to be detected.
 
-For Maven (3) is optional; (4), (5) and (6) are required in order
-to perform a full build.
-
+   For Maven (3) is optional; (4), (5) and (6) are required in order
+   to perform a full build.
 1. Optionally: Install SQL Server
-We use Windows authentication for connecting to SQL Server.
-This requires running on a Windows platform.
 
+   We use Windows authentication for connecting to SQL Server.
+   This requires running on a Windows platform.
 1. For SQLServer, run this script:
 
-```
-USE master;
-go
-CREATE DATABASE odk_unit;
-go
-USE odk_unit;
-go
-CREATE SCHEMA odk_schema;
-go
-```
+   ```
+   USE master;
+   go
+   CREATE DATABASE odk_unit;
+   go
+   USE odk_unit;
+   go
+   CREATE SCHEMA odk_schema;
+   go
+   ```
+1. For SQLServer, copy the src\main\libs\sqlserver-auth\sqljdbc_auth.dll to your C:\Windows\System32 directory. Or, place it in your PATH and reboot your machine.
 
-1. For SQLServer, copy the src\main\libs\sqlserver-auth\sqljdbc_auth.dll to your
-C:\Windows\System32 directory. Or, place it in your PATH and reboot your machine.
-
-For Maven installing Eclipse is optional; Google SDK, Tomcat and Postgres (or SQLServer) are required in order
-to perform a full build.
-
+   For Maven installing Eclipse is optional; Google SDK, Tomcat and Postgres (or SQLServer) are required in order to perform a full build.
 1. Register libraries in Maven: (this is also required for Eclipse builds)
 
-Run the ANT script (build.xml) under:
+   Run the ANT script (build.xml) under:
 
-`src/main/libs/` -- registers various jars into your local maven repo.
+   `src/main/libs/` -- registers various jars into your local maven repo.
 
-To run, just cd to this directory and type `ant`
+   To run, just cd to this directory and type `ant`
 
-See the src/main/libs/readme.txt for information about these jars.
-
-1. Download and install Chrome. The test scripts now use Chrome for
-the selenium testing rather than Firefox, which changed so often as to
-be unusable. You might need to update selenium and the Chrome Driver
-for UI testing to work.  This is done in the build\build.xml file.
-
+   See the src/main/libs/readme.txt for information about these jars.
+1. Download and install Chrome. The test scripts now use Chrome for the selenium testing rather than Firefox, which changed so often as to be unusable. You might need to update selenium and the Chrome Driver for UI testing to work.  This is done in the build\build.xml file.
 1. Download the App Engine SDK and selenium java client for full-stack integration / web UI tests.
 
-Run the ANT script (build.xml) under:
+   Run the ANT script (build.xml) under:
 
-- `build/`   -- downloads the App Engine SDK and selenium java client (for full-stack integration / web UI tests)
+   `build/`   -- downloads the App Engine SDK and selenium java client (for full-stack integration / web UI tests)
 
-To run, just cd to this directory and type `ant`
-
+   To run, just cd to this directory and type `ant`
 1. Edit Maven's settings.xml file (this is in the .m2 directory).
 
 A minimal file is:
@@ -205,3 +191,4 @@ eclipse-default (WebContent/appengine-web.xml, WebContent/cron.xml, WebContent/q
 and eclipse-n-background (WebContent/appengine-web.xml) projects.
 
 Changing those configuration files will alter the installer image.
+
