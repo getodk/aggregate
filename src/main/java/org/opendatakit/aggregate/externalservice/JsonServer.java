@@ -191,7 +191,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       entity.addProperty("formVersion", form.getMajorMinorVersionString());
       entity.add("data", submissionJsonObj);
 
-      StringEntity postentity = new StringEntity(entity.toString());
+      StringEntity postentity = new StringEntity(entity.toString(), HtmlConsts.UTF8_ENCODE);
       postentity.setContentType("application/json");
 
       this.sendRequest(getServerUrl(), postentity, cc);
