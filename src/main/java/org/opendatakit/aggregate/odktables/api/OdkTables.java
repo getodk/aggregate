@@ -2,7 +2,9 @@ package org.opendatakit.aggregate.odktables.api;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -49,6 +51,24 @@ public interface OdkTables {
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*ClientVersionList*/ getOdkClientVersions(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
       @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
+
+  @GET
+  @Path("{appId}/privilegesInfo")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*PrivilegesInfo*/ getPrivilegesInfo(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
+      @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
+
+  @GET
+  @Path("{appId}/usersInfo")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*UserInfoList*/ getUsersInfo(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
+      @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
+
+  @POST
+  @Path("{appId}/installationInfo")
+  @Consumes({MediaType.APPLICATION_JSON})
+  public Response /*OK*/ postInstallationInfo(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
+      @Context UriInfo info, @PathParam("appId") String appId, Object body) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
 
   @Path("{appId}/manifest")
   public FileManifestServiceImpl getFileManifestService(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,

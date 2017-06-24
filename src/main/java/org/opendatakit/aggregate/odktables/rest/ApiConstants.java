@@ -32,6 +32,8 @@ public final class ApiConstants {
 
   public static final String OPEN_DATA_KIT_VERSION = "2.0";
 
+  public static final String OPEN_DATA_KIT_INSTALLATION_HEADER = "X-OpenDataKit-Installation-Id";
+
   public static final String DATE_HEADER = "Date";
 
   public static final String ACCEPT_HEADER = "Accept";

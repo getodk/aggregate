@@ -12,12 +12,6 @@ maven_local_installs -- contains the maven commands to register these jars into 
 
 Summary of what is installed.
 
-# javarosa-libraries:
-
-This is a special build of javarosa using the tree at https://bitbucket.org/m.sundt/javarosa
-It incorporates multithread-safe KoBo collect changes (from Clayton), abandons J2ME support, 
-exposes bind and prompt attributes, and numerous contributed fixes from SurveyCTO and others.
-
 # odk-httpclient-gae-4.5.2:
 
 This can be installed by pulling the Aggregate (Components) sources

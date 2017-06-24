@@ -131,7 +131,7 @@ public class SubmissionServlet extends ServletUtilBase {
       + "        </tr>"
       + "        <![endif]-->"
       + "     <tr>"
-      + "        <td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Submission\" /></td>"
+      + "        <td><input id=\"upload_submission\" type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Upload Submission\" /></td>"
       + "        <td />"
       + "     </tr>"
       + "    </table>"
@@ -278,9 +278,9 @@ public class SubmissionServlet extends ServletUtilBase {
         PrintWriter out = resp.getWriter();
         out.write(HtmlConsts.HTML_OPEN);
         out.write(HtmlConsts.BODY_OPEN);
-        out.write("Successful submission upload.  Click ");
+        out.write("<p>Successful submission upload.</p><p>Click ");
         out.write(HtmlUtil.createHref(cc.getWebApplicationURL(ADDR), "here", false));
-        out.write(" to return to upload submissions page.");
+        out.write(" to return to upload submissions page.</p>");
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
       } else {

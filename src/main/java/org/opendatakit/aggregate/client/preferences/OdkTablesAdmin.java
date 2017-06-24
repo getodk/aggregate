@@ -31,10 +31,6 @@ public class OdkTablesAdmin implements Serializable{
 
   private String name;
 
-  private String phoneNumber;
-
-  private String xBearerCode;
-
   public OdkTablesAdmin() {
 
   }
@@ -61,21 +57,5 @@ public class OdkTablesAdmin implements Serializable{
 
   public void setOdkTablesUserId(String odkTablesUserId) {
     this.odkTablesUserId = odkTablesUserId;
-  }
-
-  public String getPhoneNumber() {
-    return phoneNumber;
-  }
-
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = phoneNumber;
-  }
-
-  public String getXBearerCode() {
-    return xBearerCode;
-  }
-
-  public void setXBearerCode(String xBearerCode) {
-    this.xBearerCode = xBearerCode;
   }
 }

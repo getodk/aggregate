@@ -18,10 +18,6 @@ public interface TablesUserPermissions {
 
   public abstract String getOdkTablesUserId();
 
-  public abstract String getPhoneNumber();
-
-  public abstract String getXBearerCode();
-
   /**
    * Checks that the current user has the given permission on the table.
    *

@@ -31,8 +31,18 @@
 							</goals>
 							<configuration>
 							  <target>
-							    <exec executable="${sqlserver.client.executable}" failonerror="false">
-								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+							    <exec executable="${sqlserver.client.executable}" osfamily="windows" failonerror="false">
+								  <arg line=" -S &quot;${sqlserver.server}&quot; -d ${sqlserver.database} -U &quot;${sqlserver.root.username}&quot; -P &quot;${sqlserver.root.password}&quot; -I -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+								</exec>
+								<!-- http://www.sql-workbench.net/ -->
+							    <exec executable="java" osfamily="unix" dir="${toplevel.directory}/war-base/WEB-INF/lib" failonerror="false">
+								  <arg value="-Dworkbench.log.level=DEBUG" />
+								  <arg value="-jar" />
+								  <arg value="${sqlserver.linux.sqlworkbench.dir}/sqlworkbench.jar" />
+								  <arg value="-url=jdbc:sqlserver://${sqlserver.server}:1433;database=${sqlserver.database};user=&quot;${sqlserver.root.username}&quot;;password=&quot;${sqlserver.root.password}&quot;;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" />
+								  <arg value="-driver=com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+								  <arg value="-driverjar=mssql-jdbc-6.1.5.jre8-preview.jar;${toplevel.directory}/war-base/WEB-INF/lib/**" />
+								  <arg value="-script=${scriptSourceDirectory}/sqlserver_teardown.sql" />
 								</exec>
 							  </target>
 							</configuration>
@@ -46,8 +56,18 @@
 							</goals>
 							<configuration>
 							  <target>
-							    <exec executable="${sqlserver.client.executable}" failonerror="false">
-								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+							    <exec executable="${sqlserver.client.executable}" osfamily="windows" failonerror="false">
+								  <arg line=" -S &quot;${sqlserver.server}&quot; -d ${sqlserver.database} -U &quot;${sqlserver.root.username}&quot; -P &quot;${sqlserver.root.password}&quot; -I -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+								</exec>
+								<!-- http://www.sql-workbench.net/ -->
+							    <exec executable="java" osfamily="unix" dir="${toplevel.directory}/war-base/WEB-INF/lib" failonerror="false">
+								  <arg value="-Dworkbench.log.level=DEBUG" />
+								  <arg value="-jar" />
+								  <arg value="${sqlserver.linux.sqlworkbench.dir}/sqlworkbench.jar" />
+								  <arg value="-url=jdbc:sqlserver://${sqlserver.server}:1433;database=${sqlserver.database};user=&quot;${sqlserver.root.username}&quot;;password=&quot;${sqlserver.root.password}&quot;;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" />
+								  <arg value="-driver=com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+								  <arg value="-driverjar=mssql-jdbc-6.1.5.jre8-preview.jar;${toplevel.directory}/war-base/WEB-INF/lib/**" />
+								  <arg value="-script=${scriptSourceDirectory}/sqlserver_teardown.sql" />
 								</exec>
 							  </target>
 							</configuration>
@@ -61,8 +81,18 @@
 							</goals>
 							<configuration>
 							  <target>
-								<exec executable="${sqlserver.client.executable}" failonerror="true">
-								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_setup.sql&quot;" />
+								<exec executable="${sqlserver.client.executable}" osfamily="windows" failonerror="true">
+								  <arg line=" -S &quot;${sqlserver.server}&quot; -d ${sqlserver.database} -U &quot;${sqlserver.root.username}&quot; -P &quot;${sqlserver.root.password}&quot; -I -i &quot;${scriptSourceDirectory}/sqlserver_setup.sql&quot;" />
+								</exec>
+								<!-- http://www.sql-workbench.net/ -->
+							    <exec executable="java" osfamily="unix" dir="${toplevel.directory}/war-base/WEB-INF/lib" failonerror="true">
+								  <arg value="-Dworkbench.log.level=DEBUG" />
+								  <arg value="-jar" />
+								  <arg value="${sqlserver.linux.sqlworkbench.dir}/sqlworkbench.jar" />
+								  <arg value="-url=jdbc:sqlserver://${sqlserver.server}:1433;database=${sqlserver.database};user=&quot;${sqlserver.root.username}&quot;;password=&quot;${sqlserver.root.password}&quot;;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" />
+								  <arg value="-driver=com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+								  <arg value="-driverjar=mssql-jdbc-6.1.5.jre8-preview.jar;${toplevel.directory}/war-base/WEB-INF/lib/**" />
+								  <arg value="-script=${scriptSourceDirectory}/sqlserver_setup.sql" />
 								</exec>
 							  </target>
 							</configuration>
@@ -76,8 +106,18 @@
 							</goals>
 							<configuration>
 							  <target>
-								<exec executable="${sqlserver.client.executable}" failonerror="true">
-								  <arg line=" -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+								<exec executable="${sqlserver.client.executable}" osfamily="windows" failonerror="true">
+								  <arg line=" -S &quot;${sqlserver.server}&quot; -d ${sqlserver.database} -U &quot;${sqlserver.root.username}&quot; -P &quot;${sqlserver.root.password}&quot; -I -i &quot;${scriptSourceDirectory}/sqlserver_teardown.sql&quot;" />
+								</exec>
+								<!-- http://www.sql-workbench.net/ -->
+							    <exec executable="java" osfamily="unix" dir="${toplevel.directory}/war-base/WEB-INF/lib" failonerror="true">
+								  <arg value="-Dworkbench.log.level=DEBUG" />
+								  <arg value="-jar" />
+								  <arg value="${sqlserver.linux.sqlworkbench.dir}/sqlworkbench.jar" />
+								  <arg value="-url=jdbc:sqlserver://${sqlserver.server}:1433;database=${sqlserver.database};user=&quot;${sqlserver.root.username}&quot;;password=&quot;${sqlserver.root.password}&quot;;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;" />
+								  <arg value="-driver=com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+								  <arg value="-driverjar=mssql-jdbc-6.1.5.jre8-preview.jar;${toplevel.directory}/war-base/WEB-INF/lib/**" />
+								  <arg value="-script=${scriptSourceDirectory}/sqlserver_teardown.sql" />
 								</exec>
 							  </target>
 							</configuration>

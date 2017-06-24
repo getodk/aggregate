@@ -916,7 +916,7 @@ public class AggregateSynchronizer implements Synchronizer {
 
     // Get any assets/csv files that begin with tableId
     Set<String> dirsToExclude = new HashSet<String>();
-    File assetsCsvFolder = new File(ODKFileUtils.getAssetsFolder(appName) + "/csv");
+    File assetsCsvFolder = new File(ODKFileUtils.getAssetsCsvFolder(appName));
     List<String> relativePathsToTableIdAssetsCsvOnDevice = getAllFilesUnderFolder(assetsCsvFolder,
         dirsToExclude);
     relativePathsToTableIdAssetsCsvOnDevice = filterInTableIdFiles(

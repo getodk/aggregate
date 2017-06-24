@@ -20,11 +20,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.opendatakit.aggregate.odktables.rest.TableConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
-import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
 /**
  * A SyncRow is an in-between class to map rows in the database to rows in the

@@ -67,10 +67,19 @@ public class DbLogTable extends Relation {
 
 
   // limited to 10 characters
-  public static final DataField FILTER_TYPE = new DataField(TableConstants.FILTER_TYPE.toUpperCase(),
+  public static final DataField DEFAULT_ACCESS = new DataField(TableConstants.DEFAULT_ACCESS.toUpperCase(),
       DataType.STRING, true, 10L);
   // limited to 50 characters
-  public static final DataField FILTER_VALUE = new DataField(TableConstants.FILTER_VALUE.toUpperCase(),
+  public static final DataField ROW_OWNER = new DataField(TableConstants.ROW_OWNER.toUpperCase(),
+      DataType.STRING, true, 50L).setIndexable(IndexType.HASH);
+  // limited to 10 characters
+  public static final DataField GROUP_READ_ONLY = new DataField(TableConstants.GROUP_READ_ONLY.toUpperCase(),
+      DataType.STRING, true, 50L);
+  // limited to 50 characters
+  public static final DataField GROUP_MODIFY = new DataField(TableConstants.GROUP_MODIFY.toUpperCase(),
+      DataType.STRING, true, 50L).setIndexable(IndexType.HASH);
+  // limited to 50 characters
+  public static final DataField GROUP_PRIVILEGED = new DataField(TableConstants.GROUP_PRIVILEGED.toUpperCase(),
       DataType.STRING, true, 50L).setIndexable(IndexType.HASH);
   // The FormId of the form that was in use when this record was last saved.
   // limited to 50 characters
@@ -105,8 +114,11 @@ public class DbLogTable extends Relation {
     dataFields.add(DELETED);
 
     // common metadata transmitted between server and device
-    dataFields.add(FILTER_TYPE);
-    dataFields.add(FILTER_VALUE);
+    dataFields.add(DEFAULT_ACCESS);
+    dataFields.add(ROW_OWNER);
+    dataFields.add(GROUP_READ_ONLY);
+    dataFields.add(GROUP_MODIFY);
+    dataFields.add(GROUP_PRIVILEGED);
     dataFields.add(FORM_ID);
     dataFields.add(LOCALE);
     dataFields.add(SAVEPOINT_TYPE);

@@ -37,7 +37,6 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -109,7 +108,7 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
        */
       byte[] bytes = null;
       {
-        Object obj = context.getAttribute(AppEngineHandlersFactory.NotModifiedHandler.jsonBufferKey);
+        Object obj = context.getAttribute(NotModifiedHandler.jsonBufferKey);
         if ( obj != null && obj instanceof JSONWrapper ) {
           JSONWrapper wrapper = (JSONWrapper) obj;
           bytes = wrapper.buffer;

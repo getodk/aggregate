@@ -19,9 +19,9 @@ http://www.oracle.com/technetwork/java/jaf11-139815.html      /standard extensio
 http://aopalliance.sourceforge.net                      /Public domain/
     aopalliance-1.0.jar
 https://cloud.google.com/appengine/docs/java/release-notes  /Apache 2.0/
-    appengine-api-1.0-sdk-1.9.48.jar
-    appengine-api-labs-1.9.48.jar
-    appengine-jsr107cache-1.9.48.jar
+    appengine-api-1.0-sdk-1.9.53.jar
+    appengine-api-labs-1.9.53.jar
+    appengine-jsr107cache-1.9.53.jar
 http://www.eclipse.org/aspectj        /Eclipse Public License - v 1.0/
     aspectjweaver-1.8.9.jar
 http://apache.org/                                        /Apache 2.0/
@@ -91,16 +91,17 @@ https://github.com/jai-imageio/jai-imageio-core   /3-clause BSD with nuclear dis
     Copyright © 2010-2015 Stian Soiland-Reyes
     Copyright © 2015 Peter Hull
     All Rights Reserved.
-https://bitbucket.org/javarosa/javarosa/wiki/Home        /Apache 2.0/
-now at: https://bitbucket.org/m.sundt/javarosa/src/
-    javarosa-libraries-2016-04-21.jar
+https://github.com/opendatakit/javarosa                  /Apache 2.0/
+modified from https://bitbucket.org/javarosa/javarosa/wiki/Home
+formerly at: https://bitbucket.org/m.sundt/javarosa/src/
+    opendatakit-javarosa.2.2.0.jar
 https://jaxb.java.net/                                     /CDDL 1.1/
     jaxb-api-2.2.jar
     jaxb-impl-2.2.1.1.jar
 http://db.apache.org/jdo/index.html                      /Apache 2.0/
     jdo2-api-2.3-eb.jar
 http://www.joda.org/joda-time/                           /Apache 2.0/
-    joda-time-2.9.3.jar
+    joda-time-2.9.9.jar
 https://github.com/findbugsproject                  /New BSD license/
     jsr305-3.0.1.jar
 http://kxml.sourceforge.net/kxml2/                      /BSD license/

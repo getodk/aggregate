@@ -216,13 +216,19 @@ public class EntityCreator {
 
     // if filterScope is null, this is an error. Expect at least the FILTER_TYPE to be non-null.
     if (rowFilterScope != null) {
-      RowFilterScope.Type filterType = rowFilterScope.getType();
-      String filterValue = rowFilterScope.getValue();
-      if (filterType == null) {
+      RowFilterScope.Access defaultAccess = rowFilterScope.getDefaultAccess();
+      String rowOwner = rowFilterScope.getRowOwner();
+      String groupReadOnly = rowFilterScope.getGroupReadOnly();
+      String groupModify = rowFilterScope.getGroupModify();
+      String groupPrivileged = rowFilterScope.getGroupPrivileged();
+      if (defaultAccess == null) {
         throw new IllegalArgumentException("Unexpected null filterType in row");
       } else {
-        row.set(DbTable.FILTER_TYPE, filterType.name());
-        row.set(DbTable.FILTER_VALUE, filterValue);
+        row.set(DbTable.DEFAULT_ACCESS, defaultAccess.name());
+        row.set(DbTable.ROW_OWNER, rowOwner);
+        row.set(DbTable.GROUP_READ_ONLY, groupReadOnly);
+        row.set(DbTable.GROUP_MODIFY, groupModify);
+        row.set(DbTable.GROUP_PRIVILEGED, groupPrivileged);
       }
     }
 
@@ -314,8 +320,11 @@ public class EntityCreator {
     entity.set(DbLogTable.DELETED, row.getBoolean(DbTable.DELETED));
 
     // common metadata
-    entity.set(DbLogTable.FILTER_TYPE, row.getString(DbTable.FILTER_TYPE));
-    entity.set(DbLogTable.FILTER_VALUE, row.getString(DbTable.FILTER_VALUE));
+    entity.set(DbLogTable.DEFAULT_ACCESS, row.getString(DbTable.DEFAULT_ACCESS));
+    entity.set(DbLogTable.ROW_OWNER, row.getString(DbTable.ROW_OWNER));
+    entity.set(DbLogTable.GROUP_READ_ONLY, row.getString(DbTable.GROUP_READ_ONLY));
+    entity.set(DbLogTable.GROUP_MODIFY, row.getString(DbTable.GROUP_MODIFY));
+    entity.set(DbLogTable.GROUP_PRIVILEGED, row.getString(DbTable.GROUP_PRIVILEGED));
     entity.set(DbLogTable.FORM_ID, row.getString(DbTable.FORM_ID));
     entity.set(DbLogTable.LOCALE, row.getString(DbTable.LOCALE));
     entity.set(DbLogTable.SAVEPOINT_TYPE, row.getString(DbTable.SAVEPOINT_TYPE));

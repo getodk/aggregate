@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.web.client.HttpStatusCodeException;
 
