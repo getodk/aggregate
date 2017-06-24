@@ -29,8 +29,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-
 /**
  * Synchronizer abstracts synchronization of tables to an external cloud/server.
  *

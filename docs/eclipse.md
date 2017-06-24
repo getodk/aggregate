@@ -49,7 +49,7 @@ On Windows, you can confirm the signature of the downloads using certutil. See h
     -XX:PermSize=1536m
     -XX:MaxPermSize=1536m
     ```
-1.  Download "Google AppEngine SDK for Java". We currently use 1.9.42 https://cloud.google.com/appengine/downloads (scroll down). 
+1.  Download "Google AppEngine SDK for Java". We currently use 1.9.53 https://cloud.google.com/appengine/downloads (scroll down). 
     - Extract the SDK.
 1. Download "GWT SDK". We currently use 2.7.0 http://www.gwtproject.org/download.html
     - Extract the SDK.

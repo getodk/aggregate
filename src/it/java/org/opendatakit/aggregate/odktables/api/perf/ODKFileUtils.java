@@ -17,7 +17,6 @@ import java.util.TreeSet;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.integration.utilities.GeneralUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -157,8 +156,7 @@ public class ODKFileUtils {
 
 
   public static String getOdkFolder() {
-    String path = GeneralUtils.getProperty("test.sync.dir",
-        "../../../../../src/it/testfiles/sync");
+    String path = System.getProperty("test.sync.dir");
     return path;
   }
 
@@ -199,6 +197,12 @@ public class ODKFileUtils {
   public static String getAssetsFolder(String appName) {
     String appFolder = ODKFileUtils.getAppFolder(appName);
     String result = appFolder + File.separator + ASSETS_FOLDER_NAME;
+    return result;
+  }
+
+  public static String getAssetsCsvFolder(String appName) {
+    String appFolder = ODKFileUtils.getAppFolder(appName);
+    String result = appFolder + File.separator + ASSETS_FOLDER_NAME + File.separator + CSV_FOLDER_NAME;
     return result;
   }
   

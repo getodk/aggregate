@@ -42,12 +42,11 @@ import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.TableNotFoundException;
+import org.opendatakit.aggregate.odktables.relation.DbInstallationInteractionLog;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinitionResource;
 import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -55,8 +54,12 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class RealizedTableServiceImpl implements RealizedTableService {
   private static final Log logger = LogFactory.getLog(RealizedTableServiceImpl.class);
+  
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   private final ServletContext sc;
   private final HttpServletRequest req;
@@ -99,10 +102,20 @@ public class RealizedTableServiceImpl implements RealizedTableService {
 
     tm.deleteTable(tableId);
     logger.info("tableId: " + tableId);
-    Datastore ds = cc.getDatastore();
-    if ( ds instanceof DatastoreImpl ) {
-      ((DatastoreImpl) ds).getDam().logUsage();
+
+    {
+      // if the request includes an installation header, 
+      // log that the user that has been changing the configuration from that installation.
+      String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
+      try {
+        if ( installationId != null ) {
+          DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
+        }
+      } catch ( Exception e ) {
+        LogFactory.getLog(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
+      }
     }
+
     return Response.ok()
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
@@ -174,6 +187,29 @@ public class RealizedTableServiceImpl implements RealizedTableService {
       throw new IllegalArgumentException("Unable to convert to URL");
     }
     return Response.ok(definitionResource)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
+  }
+
+  @Override
+  public Response /*OK*/ postInstallationStatus(Object syncDetails) 
+      throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
+
+    {
+      // if the request includes an installation header, 
+      // log that the user that has been changing the configuration from that installation.
+      String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
+      try {
+        if ( installationId != null ) {
+          DbInstallationInteractionLog.recordSyncStatusEntry(installationId, tableId, mapper.writeValueAsString(syncDetails), cc);
+        }
+      } catch ( Exception e ) {
+        LogFactory.getLog(RealizedTableServiceImpl.class).error("Unable to recordSyncStatusEntry", e);
+      }
+    }
+
+    return Response.ok()
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Credentials", "true").build();

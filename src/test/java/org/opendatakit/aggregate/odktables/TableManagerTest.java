@@ -65,16 +65,6 @@ public class TableManagerTest {
     }
 
     @Override
-    public String getPhoneNumber() {
-      return null;
-    }
-
-    @Override
-    public String getXBearerCode() {
-      return null;
-    }
-
-    @Override
     public void checkPermission(String appId, String tableId, TablePermission permission)
         throws ODKDatastoreException, PermissionDeniedException {
       return;

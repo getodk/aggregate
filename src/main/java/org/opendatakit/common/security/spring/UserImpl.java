@@ -62,7 +62,14 @@ public class UserImpl implements org.opendatakit.common.security.User {
 	public String getEmail() {
 		return email;
 	}
-	
+	  
+   public Set<GrantedAuthority> getAuthorities() {
+     HashSet<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
+     auths.addAll(groups);
+     auths.addAll(directAuthorities);
+     return Collections.unmodifiableSet(auths);
+   }
+
 	public Set<GrantedAuthority> getGroups() {
 		return Collections.unmodifiableSet(groups);
 	}

@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.opendatakit.aggregate.odktables.rest.entity.PrivilegesInfo;
+import org.opendatakit.aggregate.odktables.rest.entity.UserInfo;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
@@ -141,6 +143,101 @@ public class SecurityServiceUtil {
     List<String> ianonAttachmentViewerGrants = new ArrayList<String>();
     ianonAttachmentViewerGrants.add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER.name());
     anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
+  }
+
+  private static final class UserIdFullName {
+    final String user_id;
+    final String full_name;
+    
+    UserIdFullName(UserSecurityInfo userSecurityInfo) {
+      if ( userSecurityInfo.getType() == UserType.ANONYMOUS ) {
+        user_id = "anonymous"; 
+        full_name = User.ANONYMOUS_USER_NICKNAME;
+      } else if ( userSecurityInfo.getEmail() == null ) {
+        user_id = "username:" + userSecurityInfo.getUsername(); 
+        if ( userSecurityInfo.getFullName() == null ) {
+          full_name = userSecurityInfo.getUsername();
+        } else {
+          full_name = userSecurityInfo.getFullName();
+        }
+      } else {
+        // already has the mailto: prefix
+        user_id = userSecurityInfo.getEmail(); 
+        if ( userSecurityInfo.getFullName() == null ) {
+          full_name = userSecurityInfo.getEmail().substring(EmailParser.K_MAILTO.length());
+        } else {
+          full_name = userSecurityInfo.getFullName();
+        }
+      }
+    }
+    
+    UserIdFullName(User user) {
+      if ( user.isAnonymous() ) {
+        user_id = "anonymous";
+        full_name = User.ANONYMOUS_USER_NICKNAME;
+      } else if ( user.getEmail() == null ) {
+        // TODO: fix this in Aggregate back-port
+        user_id = "username:" + user.getUriUser();
+        if ( user.getNickname() == null ) {
+          full_name = user.getUriUser();
+        } else {
+          full_name = user.getNickname();
+        }
+      } else {
+        user_id = user.getEmail();
+        if ( user.getNickname() == null ) {
+          full_name = user.getEmail().substring(EmailParser.K_MAILTO.length());
+        } else {
+          full_name = user.getNickname();
+        }
+      }
+
+    }
+  }
+  private static final ArrayList<String> processRoles(TreeSet<GrantedAuthorityName> grants) {
+    ArrayList<String> roleNames = new ArrayList<String>();
+    for ( GrantedAuthorityName grant : grants ) {
+      roleNames.add(grant.name());
+    }
+    return roleNames;
+  }
+
+  /**
+   * Constructor to extract content from UserSecurityInfo
+   * 
+   * @param userSecurityInfo
+   */
+  public static final UserInfo createUserInfo(UserSecurityInfo userSecurityInfo) {
+    ArrayList<String> roles;
+    
+    UserIdFullName fields = new UserIdFullName(userSecurityInfo);
+    roles = processRoles(userSecurityInfo.getGrantedAuthorities());
+    
+    return new UserInfo(fields.user_id, fields.full_name, roles);
+  }
+  
+  public static PrivilegesInfo getRolesAndDefaultGroup(CallingContext cc) {
+    
+    User user = cc.getCurrentUser();
+    Set<GrantedAuthority> grants = new HashSet<GrantedAuthority>();
+    grants.addAll(user.getAuthorities());
+    
+    String defaultGroup = null;
+    boolean matchesMembershipGroup = (defaultGroup == null);
+    
+    ArrayList<String> roleNames = new ArrayList<String>();
+    for ( GrantedAuthority a : grants ) {
+      String authName = a.getAuthority();
+      roleNames.add(authName);
+      matchesMembershipGroup = matchesMembershipGroup || authName.equals(defaultGroup);
+    }
+    Collections.sort(roleNames);
+    UserIdFullName fields = new UserIdFullName(user);
+
+    PrivilegesInfo info = new PrivilegesInfo(fields.user_id, fields.full_name, 
+        roleNames, (matchesMembershipGroup ? defaultGroup : null));
+    
+    return info;
   }
 
   /**

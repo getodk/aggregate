@@ -150,7 +150,7 @@ public class Row {
    * RowFilterScope is passed down to device.
    *
    * Implements DEFAULT, MODIFY, READ_ONLY, HIDDEN
-   * with filterValue being the "owner" of the row.
+   * with rowOwner being the "owner" of the row.
    * 
    * It is passed down to the 
    * device so that the 

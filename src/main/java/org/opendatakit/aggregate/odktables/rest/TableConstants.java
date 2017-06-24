@@ -75,12 +75,34 @@ public class TableConstants {
    * be applied during a sync action (TBD).
    */
   public static final String FILTER_TYPE = "_filter_type";
+  public static final String DEFAULT_ACCESS = "_default_access";
   /**
    * Contains the value attribute of a Scope. The Scope describes the access
    * controls on this row. Changes to this value on the device may or may not
    * be applied during a sync action (TBD).
    */
   public static final String FILTER_VALUE = "_filter_value";
+  public static final String ROW_OWNER = "_row_owner";
+  
+  /**
+   * Contains the groupType attribute of a Scope. The Scope describes the access
+   * controls on this row. Changes to this value on the device may or may not
+   * be applied during a sync action (TBD).
+   */
+  public static final String GROUP_READ_ONLY = "_group_read_only";
+  /**
+   * Contains the groupsList attribute of a Scope. The Scope describes the access
+   * controls on this row. Changes to this value on the device may or may not
+   * be applied during a sync action (TBD).
+   */
+  public static final String GROUP_MODIFY = "_group_modify";
+  
+  /**
+   * Contains the ext attribute of a Scope. The Scope describes the access
+   * controls on this row. Changes to this value on the device may or may not
+   * be applied during a sync action (TBD).
+   */
+  public static final String GROUP_PRIVILEGED = "_group_privileged";
 
   /**
    * (form_id, locale, savepoint_type, savepoint_timestamp, savepoint_creator)
@@ -128,8 +150,11 @@ public class TableConstants {
   static {
     SHARED_COLUMN_NAMES = new HashSet<String>();
     CLIENT_ONLY_COLUMN_NAMES = new HashSet<String>();
-    SHARED_COLUMN_NAMES.add(FILTER_TYPE);
-    SHARED_COLUMN_NAMES.add(FILTER_VALUE);
+    SHARED_COLUMN_NAMES.add(DEFAULT_ACCESS);
+    SHARED_COLUMN_NAMES.add(ROW_OWNER);
+    SHARED_COLUMN_NAMES.add(GROUP_READ_ONLY);
+    SHARED_COLUMN_NAMES.add(GROUP_MODIFY);
+    SHARED_COLUMN_NAMES.add(GROUP_PRIVILEGED);
     SHARED_COLUMN_NAMES.add(SAVEPOINT_TYPE);
     SHARED_COLUMN_NAMES.add(SAVEPOINT_TIMESTAMP);
     SHARED_COLUMN_NAMES.add(SAVEPOINT_CREATOR);

@@ -28,12 +28,8 @@ public class OdkAdminListTable extends FlexTable {
   private static String DELETE_HEADING = "Delete";
   private static int USER_COLUMN = 1;
   private static String USER_HEADING = "User Name";
-  private static int PHONE_NUMBER_COLUMN = 2;
-  private static String PHONE_NUMBER_HEADING = "Phone Number";
-  private static int ODK_TABLES_USER_ID_COLUMN = 3;
+  private static int ODK_TABLES_USER_ID_COLUMN = 2;
   private static String ODK_TABLES_USER_HEADING = "User Id";
-  private static int X_BEARER_CODE_COLUMN = 4;
-  private static String X_BEARER_CODE_HEADING = "Auth Key";
 
   public OdkAdminListTable() {
     // add styling
@@ -55,9 +51,7 @@ public class OdkAdminListTable extends FlexTable {
     // create table headers
     setText(0, DELETE_COLUMN, DELETE_HEADING);
     setText(0, USER_COLUMN, USER_HEADING);
-    setText(0, PHONE_NUMBER_COLUMN, PHONE_NUMBER_HEADING);
     setText(0, ODK_TABLES_USER_ID_COLUMN, ODK_TABLES_USER_HEADING);
-    setText(0, X_BEARER_CODE_COLUMN, X_BEARER_CODE_HEADING);
     getRowFormatter().addStyleName(0, "titleBar");
 
     for (int i = 0; i < adminList.length; i++) {
@@ -65,9 +59,7 @@ public class OdkAdminListTable extends FlexTable {
       int j = i + 1;
       setWidget(j, DELETE_COLUMN, new TablesAdminDeleteButton(admin.getUriUser()));
       setWidget(j, USER_COLUMN, new HTML(admin.getName()));
-      setWidget(j, PHONE_NUMBER_COLUMN, new HTML(admin.getPhoneNumber() == null ? "" : admin.getPhoneNumber()));
       setWidget(j, ODK_TABLES_USER_ID_COLUMN, new HTML(admin.getOdkTablesUserId()));
-      setWidget(j, X_BEARER_CODE_COLUMN, new HTML(admin.getXBearerCode() == null ? "" : admin.getXBearerCode()));
 
       if (j % 2 == 0)
         getRowFormatter().addStyleName(j, "evenTableRow");

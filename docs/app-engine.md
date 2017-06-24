@@ -150,7 +150,7 @@ This assumes you have completed [**"Minimal Eclipse Installation Setup"**][eclip
          And the VM Arguments section should become something like:
 
          ```
-         -javaagent:[path...to...]\appengine-java-sdk-1.9.42\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
+         -javaagent:[path...to...]\appengine-java-sdk-1.9.53\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
          ```
 
          If you tried to skip a step, the server might not be configured correctly.
@@ -317,7 +317,7 @@ This assumes you have completed [**"Minimal Eclipse Installation Setup"**][eclip
          And the VM Arguments section should become something like:
 
          ```
-         -javaagent:[path...to...]\appengine-java-sdk-1.9.42\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
+         -javaagent:[path...to...]\appengine-java-sdk-1.9.53\lib\agent\appengine-agent.jar -XX:PermSize=1536m -XX:MaxPermSize=1536m -Xms256m -Xmx3048m  -Dappengine.fullscan.seconds=5
          ```
 
          If you tried to skip a step, the server might not be configured correctly.

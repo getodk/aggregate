@@ -137,12 +137,6 @@ public class RFC4180CsvReader {
         state = ParseState.atStartOfField;
       }
 
-      if ( ch == -1 ) {
-        // allow the last line to not have a terminator
-        // this is legal w.r.t. RFC4180, and is what Excel does on a Mac.
-        return results.toArray(new String[results.size()]);
-      }
-
       // NOTE: we must be in a ParseState other than atStartOfLine
       if ( state == ParseState.atStartOfField ) {
         // If we are expecting the start of a field and
@@ -157,7 +151,7 @@ public class RFC4180CsvReader {
           }
           results.add(null);
           return results.toArray(new String[results.size()]);
-        } else if ( ch == lf ) {
+        } else if ( ch == lf || ch == -1) {
           // alternate line terminator
           results.add(null);
           return results.toArray(new String[results.size()]);
@@ -177,7 +171,11 @@ public class RFC4180CsvReader {
           b.append((char) ch);
         }
       } else if ( state == ParseState.expectingComma ) {
-        if ( ch == cr ) {
+        if ( ch == -1 ) {
+          // allow the last line to not have a terminator
+          // this is legal w.r.t. RFC4180, and is what Excel does on a Mac.
+          return results.toArray(new String[results.size()]);
+        } else if ( ch == cr ) {
           // We are expecting a comma but hit a CR LF
           // return the current results array.
           br.mark(1);
@@ -197,7 +195,13 @@ public class RFC4180CsvReader {
           throw new IllegalStateException("Expected a comma or CR LF, but found: " + String.valueOf(ch) );
         }
       } else if ( state == ParseState.naked ) {
-        if ( ch == cr ) {
+        if ( ch == -1 ) {
+          // allow the last line to not have a terminator
+          // this is legal w.r.t. RFC4180, and is what Excel does on a Mac.
+          results.add(b.toString());
+          b.setLength(0);
+          return results.toArray(new String[results.size()]);
+        } else if ( ch == cr ) {
           // marks the end of this naked field (and the end of the line)
           br.mark(1);
           ch = br.read();
@@ -230,7 +234,9 @@ public class RFC4180CsvReader {
           b.append((char) ch);
         }
       } else if ( state == ParseState.quoted ) {
-        if ( ch == quotechar ) {
+        if ( ch == -1 ) {
+          throw new IllegalStateException("Unexpected end of file in quoted field value");
+        } else if ( ch == quotechar ) {
           // read the next character to see of it is an escaped quote
           ch = br.read();
           if ( ch != quotechar ) {

@@ -1,85 +1,71 @@
 package org.opendatakit.aggregate.externalservice;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.opendatakit.aggregate.integration.utilities.GeneralUtils;
-import org.opendatakit.aggregate.integration.utilities.Interact;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.opendatakit.aggregate.selenium.BaseWebDriver;
+import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+@RunWith(org.junit.runners.JUnit4.class)
 public class TestOhmageJsonServer {
 
-	private static WebDriver driver;
-	private static WebDriverWait wait;
-	private static String aggregateURL;
-	private static String dylansForm;
-	private static String dylansSubmissionsDir;
+  private static BaseWebDriver webDriver;
+  private static String dylansForm;
+  private static String dylansSubmissionsDir;
 
-	@BeforeClass
-	public static void setUpClass() throws Exception {
-		driver = new FirefoxDriver();
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		driver.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
-		wait = new WebDriverWait(driver, 10);
+  @BeforeClass
+  public static void setUpClass() throws Exception, Throwable {
+    String username = System.getProperty("test.server.username");
+    String password = System.getProperty("test.server.password");
+    webDriver = new BaseWebDriver();
+    webDriver.authenticateToSite(username, password);
 
-		String hostname = GeneralUtils.getProperty("test.server.hostname",
-				"localhost");
-		int port = Integer.parseInt(GeneralUtils.getProperty(
-				"test.server.port", "8888"));
-		String superUserName = GeneralUtils.getProperty("test.superusername",
-				"aggregate");
-		String superUserPassword = GeneralUtils.getProperty(
-				"test.superuserpassword", "aggregate");
+    String formsDir = System.getProperty("test.forms.dir");
+    dylansForm = formsDir + File.separatorChar + "dylan_form.xml";
 
-		String formsDir = GeneralUtils.getProperty("test.forms.dir",
-				"../../../../../src/it/testfiles/forms");
-		dylansForm = formsDir + File.separatorChar + "dylan_form.xml";
+    String submissionsDir = System.getProperty("test.submissions.dir");
+    dylansSubmissionsDir = submissionsDir + File.separatorChar + "dylan_form";
+  }
 
-		String submissionsDir = GeneralUtils.getProperty(
-				"test.submissions.dir",
-				"../../../../../src/it/testfiles/submissions");
-		dylansSubmissionsDir = submissionsDir + File.separatorChar
-				+ "dylan_form";
+  @Before
+  public void setUp() {
+    webDriver.get("Aggregate.html");
 
-		aggregateURL = String.format("http://%s:%d", hostname, port);
+    // and verify that the Form Management tab appears...
+    WebDriverWait wait = webDriver.webDriverWait();
+    Boolean found = wait.until(webDriver.byContainingText(By.className("gwt-Label"), "Info"));
+    
+    assertTrue("Login did not progress to Aggregate.html page", found);
+    assertEquals("ODK Aggregate", webDriver.getTitle());
+  }
 
-		driver.get(String.format("http://%s:%s@%s:%d/local_login.html",
-				superUserName, superUserPassword, hostname, port));
-	}
+  @Test
+  public void uploadFormAndSubmissions() throws Exception {
+    webDriver.uploadForm(dylansForm, null);
 
-	@Before
-	public void setUp() {
-		driver.get(aggregateURL + "/Aggregate.html");
-		wait.until(ExpectedConditions.titleIs("ODK Aggregate"));
-	}
+    for (int i = 1; i <= 9; i++) {
+      String submissionFile = StringUtils.join(new String[] { dylansSubmissionsDir,
+          "submission_" + i, String.format("submission_%d.xml", i) }, File.separatorChar);
 
-	public void uploadFormAndSubmissions() throws Exception {
-		Interact.uploadForm(driver, dylansForm, (String[]) null);
-		
-		for (int i = 0; i <= 9; i++) {
-			String submissionFile = StringUtils.join(
-					new String[] { dylansSubmissionsDir, "submission_" + i,
-							String.format("submission_%d.xml", i) },
-					File.separatorChar);
-			
-			String submissionPic = StringUtils.join(
-					new String[] { dylansSubmissionsDir, "submission_" + i,
-							String.format("img_%d.jpg", i) },
-					File.separatorChar);
-			
-			Interact.uploadSubmission(driver, submissionFile, submissionPic);
-		}
-	}
+      String submissionPic = StringUtils.join(
+          new String[] { dylansSubmissionsDir, "submission_" + i, String.format("img_%d.jpg", i) },
+          File.separatorChar);
 
-	@AfterClass
-	public static void tearDown() throws Exception {
-		driver.close();
-	}
+      webDriver.uploadSubmission(submissionFile, submissionPic);
+    }
+  }
+
+  @AfterClass
+  public static void tearDown() throws Exception {
+    webDriver.tearDown();
+  }
 }
