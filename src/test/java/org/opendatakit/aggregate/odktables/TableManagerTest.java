@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
@@ -42,8 +43,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
-
-import com.google.common.collect.Lists;
 
 // TODO: tests here have been updated and if they fail are likely due to config
 // errors as much as real errors.
@@ -223,7 +222,7 @@ public class TableManagerTest {
     expected.add(one);
     expected.add(two);
 
-    WebsafeTables result = tm.getTables(Lists.newArrayList(scope), null, 2000);
+    WebsafeTables result = tm.getTables(Collections.singletonList(scope), null, 2000);
     List<TableEntry> actual = result.tables;
 
     Util.assertCollectionSameElements(expected, actual);

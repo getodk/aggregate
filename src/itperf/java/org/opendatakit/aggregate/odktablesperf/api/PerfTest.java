@@ -1,4 +1,4 @@
-package org.opendatakit.aggregate.odktables.api.perf;
+package org.opendatakit.aggregate.odktablesperf.api;
 
 import java.util.Map;
 

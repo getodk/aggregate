@@ -1,4 +1,4 @@
-package org.opendatakit.aggregate.odktables.api.perf;
+package org.opendatakit.aggregate.odktablesperf.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.wink.client.ClientWebException;
 import org.opendatakit.aggregate.odktables.api.ColumnDefinition;
 import org.opendatakit.aggregate.odktables.api.SyncRow;
 import org.opendatakit.aggregate.odktables.api.T;
@@ -21,8 +20,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
 import org.opendatakit.aggregate.odktables.rest.entity.RowOutcomeList;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.web.client.HttpStatusCodeException;
-
-import com.google.common.collect.Lists;
 
 public class CreateTableTest implements PerfTest {
   private static final Log logger = LogFactory.getLog(CreateTableTest.class);
@@ -63,7 +60,7 @@ public class CreateTableTest implements PerfTest {
 
       // insert rows
       ArrayList<SyncRow> syncRows = new ArrayList<SyncRow>();
-      List<Row> rows = Lists.newArrayList();
+      List<Row> rows = new ArrayList<Row>();
       for (int i = 0; i < numRows; i++) {
         ArrayList<DataKeyValue> values = new ArrayList<DataKeyValue>();
         for (int j = 0; j < numCols; j++) {

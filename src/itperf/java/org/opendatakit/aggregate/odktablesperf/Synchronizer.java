@@ -13,13 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.odktables.api;
+package org.opendatakit.aggregate.odktablesperf;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wink.client.ClientWebException;
+import org.opendatakit.aggregate.odktables.api.SyncProgressState;
+import org.opendatakit.aggregate.odktables.api.SyncRow;
+import org.opendatakit.aggregate.odktables.api.SyncRowPending;
 import org.opendatakit.aggregate.odktables.api.exceptions.InvalidAuthTokenException;
 import org.opendatakit.aggregate.odktables.rest.entity.ChangeSetList;
 import org.opendatakit.aggregate.odktables.rest.entity.Column;

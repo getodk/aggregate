@@ -1,5 +1,5 @@
 
-package org.opendatakit.aggregate.odktables.api.perf;
+package org.opendatakit.aggregate.odktablesperf.api;
 
 import java.io.IOException;
 import java.util.ArrayList;

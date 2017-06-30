@@ -1,9 +1,11 @@
-package org.opendatakit.aggregate.odktables.api.perf;
+package org.opendatakit.aggregate.odktablesperf.api;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +14,8 @@ import java.util.Scanner;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.odktables.api.exceptions.InvalidAuthTokenException;
-import org.opendatakit.aggregate.odktables.api.perf.PerfTest.TestInfo;
+import org.opendatakit.aggregate.odktablesperf.api.PerfTest.TestInfo;
 
-import com.google.common.collect.Lists;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -117,7 +118,9 @@ public class TestRunner {
     AggregateSynchronizer synchronizer = new AggregateSynchronizer("context", "appName", "1",
         aggregateUrl, null);
 
-    // List<Integer> numRowsValues = Lists.newArrayList(100, 1000);//, 10000);
+    // Integer[] values = new Integer[] {100, 1000}; // ,10000 };
+    // List<Integer> numRowsValues = new ArrayList<Integer>();
+    // numRowsValues.addAll(Arrays.asList(values));
     // for (int numRows : numRowsValues) {
     // CreateTableTest test = new CreateTableTest(synchronizer, 5, numRows);
     // TestRunner runner = new TestRunner(test, "table_size_test.log");
@@ -125,7 +128,9 @@ public class TestRunner {
     // System.out.println("Running next test.");
     // }
 
-    List<Integer> numUsersValues = Lists.newArrayList(1, 10, 20, 30, 40, 100);
+    Integer[] values = new Integer[] {1, 10, 20, 30, 40, 100};
+    List<Integer> numUsersValues = new ArrayList<Integer>();
+    numUsersValues.addAll(Arrays.asList(values));
     for (int numUsers : numUsersValues) {
       MultipleUsersTest test = new MultipleUsersTest(synchronizer, numUsers, 5, 5);
       TestRunner runner = new TestRunner(test, "multiple_users_test.log");

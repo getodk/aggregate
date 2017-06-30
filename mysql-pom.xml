@@ -15,6 +15,16 @@
 		<module>aggregate-mysql</module>
 		<module>mysql-unit-tests</module>
 	</modules>
+	<dependencies>
+        <dependency>
+		  <!-- use jdk8 version -->
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+          <version>21.0</version>
+          <type>jar</type>
+          <scope>compile</scope>
+        </dependency>
+	</dependencies>
 	<build>
 		<pluginManagement>
 			<plugins>

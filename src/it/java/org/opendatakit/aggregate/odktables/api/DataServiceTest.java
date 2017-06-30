@@ -28,6 +28,7 @@ public class DataServiceTest extends AbstractServiceTest {
   
   @Before
   public void setUp() throws Exception, Throwable {
+    super.abstractServiceSetUp();
     super.createTable();
     TableResource resource = rt.getForObject(resolveUri(TABLE_API + T.tableId), TableResource.class);
     resourceUri = URI.create(resource.getDataUri());

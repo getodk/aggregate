@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
@@ -82,7 +81,7 @@ public abstract class AbstractServiceTest {
     }
   }
   
-  @Before
+  // call this from any Before action in derived class
   public void abstractServiceSetUp() throws Exception, Throwable {
     String hostname = System.getProperty("test.server.hostname");
     baseUrl = System.getProperty("test.server.baseUrl");
@@ -100,6 +99,7 @@ public abstract class AbstractServiceTest {
 
       Proxy proxyRef = new Proxy(Proxy.Type.HTTP, address);
       factory.setProxy(proxyRef);
+      factory.setOutputStreaming(false);
 
       rt.setRequestFactory(factory);
     } catch ( Throwable t ) {
