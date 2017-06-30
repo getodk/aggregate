@@ -177,9 +177,9 @@
 								<delete quiet="true">
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
 										includes="odk*setting*.jar" />
-									<!-- Microsoft SQL Server jar - use files tree content instead -->
+									<!-- GAE requires guava 19.0; use 21.0 for everything else -->
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
-										includes="sqljdbc*.jar" />
+										includes="guava*.jar" />
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
 										includes="appengine-web.xml" />
 									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"

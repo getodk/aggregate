@@ -171,15 +171,17 @@ public class SecurityServiceUtil {
       }
     }
     
-    UserIdFullName(User user) {
+    UserIdFullName(CallingContext cc, User user) throws ODKDatastoreException {
       if ( user.isAnonymous() ) {
         user_id = "anonymous";
         full_name = User.ANONYMOUS_USER_NICKNAME;
       } else if ( user.getEmail() == null ) {
         // TODO: fix this in Aggregate back-port
-        user_id = "username:" + user.getUriUser();
+        RegisteredUsersTable entry;
+        entry = RegisteredUsersTable.getUserByUri(user.getUriUser(), cc.getDatastore(), cc.getCurrentUser());
+        user_id = "username:" + entry.getUsername();
         if ( user.getNickname() == null ) {
-          full_name = user.getUriUser();
+          full_name = entry.getUsername();
         } else {
           full_name = user.getNickname();
         }
@@ -216,7 +218,7 @@ public class SecurityServiceUtil {
     return new UserInfo(fields.user_id, fields.full_name, roles);
   }
   
-  public static PrivilegesInfo getRolesAndDefaultGroup(CallingContext cc) {
+  public static PrivilegesInfo getRolesAndDefaultGroup(CallingContext cc) throws ODKDatastoreException {
     
     User user = cc.getCurrentUser();
     Set<GrantedAuthority> grants = new HashSet<GrantedAuthority>();
@@ -232,7 +234,7 @@ public class SecurityServiceUtil {
       matchesMembershipGroup = matchesMembershipGroup || authName.equals(defaultGroup);
     }
     Collections.sort(roleNames);
-    UserIdFullName fields = new UserIdFullName(user);
+    UserIdFullName fields = new UserIdFullName(cc, user);
 
     PrivilegesInfo info = new PrivilegesInfo(fields.user_id, fields.full_name, 
         roleNames, (matchesMembershipGroup ? defaultGroup : null));

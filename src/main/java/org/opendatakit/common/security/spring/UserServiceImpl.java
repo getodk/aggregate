@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -150,7 +149,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 
       CredentialsInfo credential;
       try {
-         credential = CredentialsInfoBuilder.build(superUserUsername, r, "aggregate");
+         credential = CredentialsInfoBuilderInternal.build(superUserUsername, r, "aggregate");
       } catch (NoSuchAlgorithmException e) {
          e.printStackTrace();
          throw new IllegalStateException("unrecognized algorithm");

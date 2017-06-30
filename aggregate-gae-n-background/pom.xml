@@ -26,6 +26,14 @@
       <artifactId>odk-gae-it-settings</artifactId>
       <version>latest</version>
     </dependency>
+	<dependency>
+	  <!-- use android version at runtime to retain java7 compatibility for GAE -->
+	  <groupId>com.google.guava</groupId>
+	  <artifactId>guava</artifactId>
+	  <version>20.0</version>
+	  <type>jar</type>
+	  <scope>compile</scope>
+	</dependency>
   </dependencies>
   <build>
     <plugins>

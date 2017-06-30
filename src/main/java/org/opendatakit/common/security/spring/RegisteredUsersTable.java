@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -500,7 +499,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
 
     CredentialsInfo credential;
     try {
-      credential = CredentialsInfoBuilder.build(localSuperUser, r, "aggregate");
+      credential = CredentialsInfoBuilderInternal.build(localSuperUser, r, "aggregate");
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
       throw new IllegalStateException("unrecognized algorithm");

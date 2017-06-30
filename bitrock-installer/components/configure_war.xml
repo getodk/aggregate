@@ -33,10 +33,10 @@
                     <origin>files/ODKAggregate.war</origin>
                 </distributionFile>
                 <distributionFile>
-                    <origin>files/sqljdbc_6.0/sqljdbc41.jar</origin>
+                    <origin>files/guava-20.0.jar</origin>
                 </distributionFile>
                 <distributionFile>
-                    <origin>files/sqljdbc_6.0/sqljdbc42.jar</origin>
+                    <origin>files/guava-21.0.jar</origin>
                 </distributionFile>
             </distributionFileList>
         </folder>
@@ -566,32 +566,66 @@ html {font-family:arial;}
                 </ruleGroup>
             </ruleList>
         </deleteFile>
-        <copyFile>
-            <destination>${temp_dir}/cfg-war/WEB-INF/lib/sqljdbc4-4.1.jar</destination>
-            <origin>${temp_dir}/sqljdbc41.jar</origin>
+        <deleteFile> <!-- java8 file -->
+            <path>${temp_dir}/cfg-war/WEB-INF/lib/mssql-jdbc-6.1.5.jre8-preview.jar</path>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>sqlserver</value>
-                </compareText>
-                <isFalse>
-                    <value>${is_azure_database_server}</value>
-                </isFalse>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
+            </ruleList>
+        </deleteFile>
+        <copyFile>
+            <destination>${temp_dir}/cfg-war/WEB-INF/lib/guava-21.0.jar</destination>
+            <origin>${temp_dir}/guava-21.0.jar</origin>
+            <ruleList>
+                <ruleGroup>
+                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>does_not_equal</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>does_not_equal</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </copyFile>
         <copyFile>
-            <destination>${temp_dir}/cfg-war/WEB-INF/lib/sqljdbc4-4.2.jar</destination>
-            <origin>${temp_dir}/sqljdbc42.jar</origin>
+            <destination>${temp_dir}/cfg-war/WEB-INF/lib/guava-20.0.jar</destination>
+            <origin>${temp_dir}/guava-20.0.jar</origin>
             <ruleList>
-                <compareText>
-                    <logic>equals</logic>
-                    <text>${platform}</text>
-                    <value>sqlserver</value>
-                </compareText>
-                <isTrue>
-                    <value>${is_azure_database_server}</value>
-                </isTrue>
+                <ruleGroup>
+                    <ruleEvaluationLogic>or</ruleEvaluationLogic>
+                    <ruleList>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae</value>
+                        </compareText>
+                        <compareText>
+                            <logic>equals</logic>
+                            <text>${platform}</text>
+                            <value>gae_mysql</value>
+                        </compareText>
+                    </ruleList>
+                </ruleGroup>
             </ruleList>
         </copyFile>
         <zip>
@@ -1208,11 +1242,11 @@ Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-				<compareText>
-					<logic>equals</logic>
-					<text>${platform}</text>
-					<value>gae</value>
-				</compareText>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
                 <platformTest>
                     <type>windows</type>
                 </platformTest>
@@ -1229,11 +1263,11 @@ visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-				<compareText>
-					<logic>equals</logic>
-					<text>${platform}</text>
-					<value>gae</value>
-				</compareText>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
                 <platformTest>
                     <type>linux</type>
                 </platformTest>
@@ -1250,17 +1284,18 @@ Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;
 access rights for ODK Aggregate.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-				<compareText>
-					<logic>equals</logic>
-					<text>${platform}</text>
-					<value>gae</value>
-				</compareText>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
                 <platformTest>
                     <type>osx</type>
                 </platformTest>
             </ruleList>
         </writeFile>
-		<!-- Google Cloud SQL next-steps file -->
+
+        <!-- Google Cloud SQL next-steps file -->
         <writeFile>
             <encoding>utf-8</encoding>
             <path>${installdir}/README.html</path>
@@ -1275,11 +1310,11 @@ Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;
 ${html_steps_end_item}${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, browse to &lt;code&gt;${installdir}&lt;/code&gt; and double-click &lt;code&gt;ODKAggregateAppEngineUpdater.jar&lt;/code&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This upload tool will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-				<compareText>
-					<logic>equals</logic>
-					<text>${platform}</text>
-					<value>gae_mysql</value>
-				</compareText>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae_mysql</value>
+                </compareText>
                 <platformTest>
                     <type>windows</type>
                 </platformTest>
@@ -1299,11 +1334,11 @@ Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;
 ${html_steps_end_item}${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;b&gt;Terminal&lt;/b&gt; and execute &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.sh&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account that created or that has the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-				<compareText>
-					<logic>equals</logic>
-					<text>${platform}</text>
-					<value>gae_mysql</value>
-				</compareText>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae_mysql</value>
+                </compareText>
                 <platformTest>
                     <type>linux</type>
                 </platformTest>
@@ -1323,11 +1358,11 @@ Visit &lt;a href="http://${hostname}" target="_blank"&gt;http://${hostname}/&lt;
 ${html_steps_end_item}${html_steps_begin_item}If the upload tool failed, please resolve any errors that caused the failure. Refer to &lt;a href="https://opendatakit.org/use/aggregate/" target="_blank"&gt;https://opendatakit.org/use/aggregate/&lt;/a&gt; for guidance. Then, open &lt;font color="blue"&gt;&lt;code&gt;${installdir}/uploadAggregateToAppEngine.app&lt;/code&gt;&lt;/font&gt; to deploy ${product_fullname} up into Google's AppEngine cloud. This will launch the upload tool which will ask for the email account with the administrative rights for your appspot instance; it will then launch a browser to obtain a code to be pasted into a pop-up dialog of this upload tool.${html_steps_end_item}
 &lt;/ol&gt;&lt;p&gt;${html_steps_end}</text>
             <ruleList>
-				<compareText>
-					<logic>equals</logic>
-					<text>${platform}</text>
-					<value>gae_mysql</value>
-				</compareText>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae_mysql</value>
+                </compareText>
                 <platformTest>
                     <type>osx</type>
                 </platformTest>

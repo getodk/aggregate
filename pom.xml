@@ -21,7 +21,7 @@
     <properties>
         <toplevel.directory>${project.basedir}/../</toplevel.directory>
         <!-- must match the gae version below and the build/build.xml ant script defn -->
-        <gooogle.appengine.sdk.version>1.9.53</gooogle.appengine.sdk.version>
+        <gooogle.appengine.sdk.version>1.9.54</gooogle.appengine.sdk.version>
         <gae.home>${project.basedir}/../build/appengine-java-sdk-${gooogle.appengine.sdk.version}/appengine-java-sdk-${gooogle.appengine.sdk.version}</gae.home>
         <!-- selenium 3.0.x is built using Java 8. Modify test compile to use java 8 so we can test using selenium -->
         <!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
@@ -50,7 +50,7 @@
         <google.api-services-drive.version>v3-rev52-1.22.0</google.api-services-drive.version>
         <google.gwt.version>2.7.0</google.gwt.version>
         <org.apache.wink.version>1.4</org.apache.wink.version>
-        <jacoco.maven.plugin.version>0.7.6.201602180812</jacoco.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.7.9</jacoco.maven.plugin.version>
         <maven.surefire.report.plugin.version>2.19.1</maven.surefire.report.plugin.version>
         <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
         <surefire.argLine>-Xms300m -Xmx3048m -XX:+UseParallelGC -XX:+UseParallelOldGC</surefire.argLine> <!-- need a huge JVM size for GAE datastore -->
@@ -94,26 +94,29 @@
         <module>odk-sqlserver-it-settings</module>
         <module>odk-sqlserver-unit-settings</module>
 
-        <!-- aggregate-mysql-specific -->
-        <module>aggregate-mysql</module>
-        <!-- aggregate-sqlserver-specific -->
-        <module>aggregate-sqlserver</module>
-        <!-- aggregate-postgresql-specific -->
-        <module>aggregate-postgres</module>
-        
-        <!-- aggregate-postgresql-specific -->
-        <module>postgres-unit-tests</module>
-        <!-- aggregate-mysql-specific -->
-        <module>mysql-unit-tests</module>
-        <!-- aggregate-sqlserver-specific -->
-        <module>sqlserver-unit-tests</module>
-
         <!-- aggregate-gae-specific -->
         <module>aggregate-gae-default</module>
         <module>aggregate-gae-n-background</module>
         <module>aggregate-gae</module>
+        
         <!-- aggregate-gae-specific -->
         <module>gae-unit-tests</module>
+
+        <!-- aggregate-sqlserver-specific -->
+        <module>aggregate-sqlserver</module>
+        <!-- aggregate-sqlserver-specific -->
+        <module>sqlserver-unit-tests</module>
+
+        <!-- aggregate-mysql-specific -->
+        <module>aggregate-mysql</module>
+        <!-- aggregate-mysql-specific -->
+        <module>mysql-unit-tests</module>
+
+        <!-- aggregate-postgresql-specific -->
+        <module>aggregate-postgres</module>
+        <!-- aggregate-postgresql-specific -->
+        <module>postgres-unit-tests</module>
+
 
         <!-- odk tables client libraries -->
         <module>odk-tables-api</module>
@@ -152,6 +155,17 @@
         </pluginRepository>
     </pluginRepositories>
     <dependencies>
+		<!-- non-gae projects should use the jdk8 version: 21.0
+		     for the gae projects, the war projects and unit test 
+			 project (aggregate-gae-default, aggregate-gae-n-background,
+			 gae-unit-tests) should use the jdk7 version (e.g., 22.0-android)
+			 and the test project for the ear should use jdk8. -->
+        <!-- <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+		  - version is varies based upon project -
+          <type>jar</type>
+        </dependency> -->
         <dependency>
           <groupId>com.google.appengine</groupId>
           <artifactId>appengine-api-1.0-sdk</artifactId>
@@ -312,13 +326,6 @@
           <groupId>com.google.code.gson</groupId>
           <artifactId>gson</artifactId>
           <version>2.8.0</version>
-          <type>jar</type>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-          <version>21.0</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
@@ -800,6 +807,27 @@
             <version>${jacoco.maven.plugin.version}</version>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<!-- this is used in the failsafe config below via direct 
+			     classpath injection from the local repository -->
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-client</artifactId>
+			<version>${org.apache.wink.version}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>xml-apis</groupId>
+		  <artifactId>xml-apis</artifactId>
+		  <version>1.4.01</version>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>javax.servlet</groupId>
+		  <artifactId>servlet-api</artifactId>
+		  <version>2.5</version>
+		  <scope>provided</scope>
+		</dependency>
     </dependencies>
     <build>
         <plugins>
@@ -881,6 +909,25 @@
                         </execution>
                     </executions>
                 </plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<version>1.1</version>
+					<executions>
+					  <execution>
+						<goals>
+						  <goal>toolchain</goal>
+						</goals>
+					  </execution>
+					</executions>
+					<configuration>
+					  <toolchains>
+						<jdk>
+						  <version>1.7</version>
+						</jdk>
+					  </toolchains>
+					</configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
@@ -1343,6 +1390,8 @@
 							<classpathDependencyExcludes>org.jacoco:org.jacoco.agent</classpathDependencyExcludes>
 						  </classpathDependencyExcludes>
                           <additionalClasspathElements>
+						    <!-- hack to get wink included; guava included as part of selenium -->
+                            <additionalClasspathElement>${localRepository}/org/apache/wink/wink-client/wink-client-${org.apache.wink.version}.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.home}/client-combined-3.4.0-nodeps.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/cglib-nodep-3.2.4.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/commons-codec-1.10.jar</additionalClasspathElement>

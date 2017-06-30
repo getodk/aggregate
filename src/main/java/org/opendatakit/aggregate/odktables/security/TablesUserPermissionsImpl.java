@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.security;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +31,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
-
-import com.google.common.collect.Lists;
 
 public class TablesUserPermissionsImpl implements TablesUserPermissions {
 
@@ -65,7 +64,7 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
    * @return a list of all scopes in which the current user participates
    */
   private List<Scope> getScopes() {
-    List<Scope> scopes = Lists.newArrayList();
+    List<Scope> scopes = new ArrayList<Scope>();
     scopes.add(new Scope(Type.DEFAULT, null));
     scopes.add(new Scope(Type.USER, cc.getCurrentUser().getUriUser()));
 

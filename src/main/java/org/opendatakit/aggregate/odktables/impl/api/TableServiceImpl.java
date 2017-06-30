@@ -84,6 +84,7 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -574,7 +575,7 @@ public class TableServiceImpl implements TableService {
 
     String appRelativePath = FileManager.getPropertiesFilePath(tableId);
 
-    String contentType = com.google.common.net.MediaType.CSV_UTF_8.toString();
+    String contentType = HtmlConsts.RESP_TYPE_CSV;
 
     // DbTableFileInfo.NO_TABLE_ID -- means that we are working with app-level
     // permissions
