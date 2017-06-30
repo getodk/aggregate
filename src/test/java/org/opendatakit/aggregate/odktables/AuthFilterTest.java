@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.odktables;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
@@ -39,8 +40,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
 
-import com.google.common.collect.Lists;
-
 @Ignore
 public class AuthFilterTest {
 
@@ -57,16 +56,6 @@ public class AuthFilterTest {
     @Override
     public String getOdkTablesUserId() {
       return "myid";
-    }
-
-    @Override
-    public String getPhoneNumber() {
-      return null;
-    }
-
-    @Override
-    public String getXBearerCode() {
-      return null;
     }
 
     @Override
@@ -100,7 +89,7 @@ public class AuthFilterTest {
     TableEntry te = tm.createTable(tableId, T.columns);
 
     this.am = new TableAclManager(T.appId, tableId, userPermissions, cc);
-    List<Scope> scopes = Lists.newArrayList();
+    List<Scope> scopes = new ArrayList<Scope>();
     scopes.add(new Scope(Type.DEFAULT, null));
     scopes.add(new Scope(Type.USER, userPermissions.getOdkTablesUserId()));
 

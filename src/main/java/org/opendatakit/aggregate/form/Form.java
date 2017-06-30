@@ -542,17 +542,35 @@ class Form implements IForm {
   }
 
   public FormSummary generateFormSummary(CallingContext cc) throws ODKDatastoreException {
-    boolean submit = getSubmissionEnabled();
-    boolean downloadable = getDownloadEnabled();
-    Map<String, String> xmlProperties = new HashMap<String, String>();
-    xmlProperties.put(ServletConsts.FORM_ID, getFormId());
-    xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
+    if ( hasValidFormDefinition() ) {
+      boolean submit = getSubmissionEnabled();
+      boolean downloadable = getDownloadEnabled();
+      Map<String, String> xmlProperties = new HashMap<String, String>();
+      xmlProperties.put(ServletConsts.FORM_ID, getFormId());
+      xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
 
-    String viewableURL = HtmlUtil.createHrefWithProperties(
-        cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, getViewableName(), false);
-    int mediaFileCount = getManifestFileset().getAttachmentCount(cc);
-    return new FormSummary(getViewableName(), getFormId(), getCreationDate(), getCreationUser(),
-        downloadable, submit, viewableURL, mediaFileCount);
+      String viewableURL = HtmlUtil.createHrefWithProperties(
+          cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, getViewableName(), false);
+      int mediaFileCount = getManifestFileset().getAttachmentCount(cc);
+      return new FormSummary(getViewableName(), getFormId(), getCreationDate(), getCreationUser(),
+          downloadable, submit, viewableURL, mediaFileCount);
+    } else {
+      Map<String, String> xmlProperties = new HashMap<String, String>();
+      xmlProperties.put(ServletConsts.FORM_ID, getFormId());
+      xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
+
+      String viewableName = (filesetRow == null) ? getFormId() : getViewableName();
+      if ( viewableName == null ) {
+        viewableName = getFormId();
+      }
+      viewableName = "<<Broken>> " + viewableName;
+      String viewableURL = HtmlUtil.createHrefWithProperties(
+          cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, viewableName, false);
+      
+      int mediaFileCount = (getManifestFileset() == null) ? 0 : getManifestFileset().getAttachmentCount(cc);
+      return new FormSummary(viewableName, getFormId(), getCreationDate(), getCreationUser(),
+          false, false, viewableURL, mediaFileCount);
+    }
   }
 
   /**

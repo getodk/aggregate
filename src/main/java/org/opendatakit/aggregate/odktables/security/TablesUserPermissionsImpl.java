@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.security;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,25 +32,21 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.springframework.security.core.GrantedAuthority;
 
-import com.google.common.collect.Lists;
-
 public class TablesUserPermissionsImpl implements TablesUserPermissions {
 
   private final CallingContext cc;
-  private final OdkTablesUserInfo userInfo;
   private final Map<String, AuthFilter> authFilters = new HashMap<String, AuthFilter>();
 
 
   public TablesUserPermissionsImpl(CallingContext cc, String uriUser, Set<GrantedAuthority> grants)
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     this.cc = cc;
-    this.userInfo = OdkTablesUserInfoTable.getOdkTablesUserInfo(uriUser, grants, cc);
   }
 
  
   public TablesUserPermissionsImpl(CallingContext cc) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException {
-    this(cc, cc.getCurrentUser().getUriUser(), cc.getCurrentUser().getDirectAuthorities());
+    this(cc, cc.getCurrentUser().getUriUser(), cc.getCurrentUser().getAuthorities());
   }
 
   /*
@@ -60,26 +57,16 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
    */
   @Override
   public String getOdkTablesUserId() {
-    return userInfo.getOdkTablesUserId();
-  }
-
-  @Override
-  public String getPhoneNumber() {
-    return userInfo.getPhoneNumber();
-  }
-
-  @Override
-  public String getXBearerCode() {
-    return userInfo.getXBearerCode();
+    return cc.getCurrentUser().getUriUser();
   }
 
   /**
    * @return a list of all scopes in which the current user participates
    */
   private List<Scope> getScopes() {
-    List<Scope> scopes = Lists.newArrayList();
+    List<Scope> scopes = new ArrayList<Scope>();
     scopes.add(new Scope(Type.DEFAULT, null));
-    scopes.add(new Scope(Type.USER, userInfo.getOdkTablesUserId()));
+    scopes.add(new Scope(Type.USER, cc.getCurrentUser().getUriUser()));
 
     // TODO: add this
     // List<String> groups = getGroupNames(userUri);
@@ -93,9 +80,6 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
 
   private AuthFilter getAuthFilter(String appId, String tableId) throws ODKEntityNotFoundException,
       ODKDatastoreException {
-    if (userInfo == null) {
-      return null;
-    }
     AuthFilter auth = authFilters.get(tableId);
     if (auth == null) {
       auth = new AuthFilter(appId, tableId, this, getScopes(), cc);
@@ -120,7 +104,7 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
       return;
     }
     throw new PermissionDeniedException(String.format("Denied table %s permission %s to user %s",
-        tableId, permission, userInfo.getOdkTablesUserId()));
+        tableId, permission, cc.getCurrentUser().getUriUser()));
   }
 
   /*

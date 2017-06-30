@@ -4,12 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.opendatakit.aggregate.odktables.rest.entity.TableDefinition;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.springframework.http.HttpEntity;
@@ -19,63 +22,160 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import net.lightbody.bmp.BrowserMobProxy;
+import net.lightbody.bmp.BrowserMobProxyServer;
+import net.lightbody.bmp.proxy.auth.AuthType;
+
 public abstract class AbstractServiceTest {
 
-  private String appId = "tables";
-  protected URI baseUri;
+  public static final String TABLE_API = "tables/";
+  private static BrowserMobProxy proxy;
+  private static int proxyPort;
+
+  private String baseUrl;
+  private String appId = "default";
+  private URI baseUri;
   protected RestTemplate rt;
   protected HttpHeaders reqHeaders;
+  private String tableDefinitionUri = null;
 
-  @Before
-  public void abstractServiceSetUp() throws Exception {
-    this.baseUri = URI.create("http://localhost:8888/odktables/tables/" + appId + "/");
+  @BeforeClass
+  public static void setupProxy() throws Throwable {
+    String hostname = System.getProperty("test.server.hostname");
+    String username = System.getProperty("test.server.username");
+    String password = System.getProperty("test.server.password");
+
+    try {
+      proxy = new BrowserMobProxyServer();
+    } catch (Throwable t) {
+      t.printStackTrace();
+      throw t;
+    }
+    proxy.start(0);
+    proxyPort = proxy.getPort();
+
+    proxy.stopAutoAuthorization(hostname);
+    if (username != null && username.length() != 0) {
+      proxy.autoAuthorization(hostname, username, password, AuthType.BASIC);
+    }
+  }
+  
+  @AfterClass
+  public static void teardownProxy() {
+    if ( proxy != null ) {
+      proxy.stop();
+      proxy = null;
+      try {
+        Thread.sleep(500L);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+  
+  // call this from any Before action in derived class
+  public void abstractServiceSetUp() throws Exception, Throwable {
+    String hostname = System.getProperty("test.server.hostname");
+    baseUrl = System.getProperty("test.server.baseUrl");
+    String port = System.getProperty("test.server.port");
+
+    this.baseUri = URI.create("http://" + hostname + ":" + port + baseUrl + "odktables/" + appId + "/");
 
     // RestTemplate
-    this.rt = new RestTemplate();
+    try {
+      this.rt = new RestTemplate();
+
+      SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+      InetSocketAddress address = 
+          new InetSocketAddress(proxy.getClientBindAddress().getHostAddress(), proxyPort);
+
+      Proxy proxyRef = new Proxy(Proxy.Type.HTTP, address);
+      factory.setProxy(proxyRef);
+      factory.setOutputStreaming(false);
+
+      rt.setRequestFactory(factory);
+    } catch ( Throwable t ) {
+      t.printStackTrace();
+      throw t;
+    }
+    
     this.rt.setErrorHandler(new ErrorHandler());
     List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 
-    converters.add(new AllEncompassingFormHttpMessageConverter());
+    converters.add(new MappingJackson2HttpMessageConverter());
+    // converters.add(new AllEncompassingFormHttpMessageConverter());
     this.rt.setMessageConverters(converters);
 
     // HttpHeaders
     List<MediaType> acceptableMediaTypes = new ArrayList<MediaType>();
-    acceptableMediaTypes.add(new MediaType("text", "xml"));
+    acceptableMediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 
     this.reqHeaders = new HttpHeaders();
     reqHeaders.setAccept(acceptableMediaTypes);
-    reqHeaders.setContentType(new MediaType("text", "xml"));
+    reqHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+  }
+  
+  protected URI resolveUri(String str) {
+    return baseUri.resolve(str);
   }
 
   @After
   public void abstractServiceTearDown() throws Exception {
     try {
-      baseUri = baseUri.resolve("/odktables/tables/" + appId + "/");
-      URI uri = baseUri.resolve(T.tableId);
-      this.rt.delete(uri);
+      if ( tableDefinitionUri != null ) {
+        URI uri = resolveUri(tableDefinitionUri);
+        this.rt.delete(uri);
+      }
     } catch (Exception e) {
       // ignore
       System.out.println(e);
     }
   }
 
-  protected TableResource createTable() {
-    URI uri = baseUri.resolve("/odktables/tables/" + appId + "/" + T.tableId);
+  protected TableResource createTable() throws Throwable  {
+    URI uri = resolveUri(TABLE_API + T.tableId);
 
     TableDefinition definition = new TableDefinition(T.tableId, null, T.columns);
     HttpEntity<TableDefinition> entity = entity(definition);
 
-    ResponseEntity<TableResource> resp = rt.exchange(uri, HttpMethod.PUT, entity,
-        TableResource.class);
-    return resp.getBody();
+    ResponseEntity<TableResource> resp;
+    try {
+      resp = rt.exchange(uri, HttpMethod.PUT, entity, TableResource.class);
+    } catch ( Throwable t ) {
+      t.printStackTrace();
+      throw t;
+    }
+    TableResource rsc = resp.getBody();
+    tableDefinitionUri = rsc.getDefinitionUri();
+    return rsc;
   }
+
+  protected TableResource createAltTable() throws Throwable  {
+    URI uri = resolveUri(TABLE_API + T.tableId);
+
+    TableDefinition definition = new TableDefinition(T.tableId, null, T.altcolumns);
+    HttpEntity<TableDefinition> entity = entity(definition);
+
+    ResponseEntity<TableResource> resp;
+    try {
+      resp = rt.exchange(uri, HttpMethod.PUT, entity, TableResource.class);
+    } catch ( Throwable t ) {
+      t.printStackTrace();
+      throw t;
+    }
+    TableResource rsc = resp.getBody();
+    tableDefinitionUri = rsc.getDefinitionUri();
+    return rsc;
+  }
+
 
   protected <V> HttpEntity<V> entity(V entity) {
     return new HttpEntity<V>(entity, reqHeaders);

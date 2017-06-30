@@ -4,40 +4,56 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
-import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
+import org.opendatakit.aggregate.odktables.rest.entity.TableResourceList;
 import org.springframework.web.client.HttpClientErrorException;
 
+@RunWith(org.junit.runners.JUnit4.class)
 public class TableServiceTest extends AbstractServiceTest {
+  
+  protected URI resourceUri;
+  
+  @Before
+  public void setup() throws Exception, Throwable {
+    super.abstractServiceSetUp();
+  }
 
   @Test
   public void testGetTablesEmpty() {
-    List<?> resp = rt.getForObject(baseUri, List.class);
-    assertTrue(resp.isEmpty());
+    TableResourceList tables = rt.getForObject(resolveUri(TABLE_API), TableResourceList.class);
+    assertTrue(tables.getTables().isEmpty());
   }
 
   @Test(expected = HttpClientErrorException.class)
   public void testGetTableDoesNotExist() {
-    URI uri = baseUri.resolve("non-existent-table");
+    URI uri = resolveUri(TABLE_API + "non-existent-table");
     rt.getForObject(uri, TableResource.class);
   }
 
   @Test
-  public void testCreateTable() {
+  public void testCreateTable() throws Throwable  {
     TableResource resource = createTable();
     assertEquals(T.tableId, resource.getTableId());
   }
 
-  @Test(expected = HttpClientErrorException.class)
-  public void testCreateTableAlreadyExists() {
+  @Test
+  public void testCreateTableTwice() throws Throwable  {
     createTable();
     createTable();
   }
 
+  @Test(expected = HttpClientErrorException.class)
+  public void testCreateTableAlreadyExists() throws Throwable  {
+    createTable();
+    createAltTable();
+  }
+
   @Test
-  public void testGetTable() {
+  public void testGetTable() throws Throwable  {
     TableResource expected = createTable();
     String uri = expected.getSelfUri();
     TableResource actual = rt.getForObject(uri, TableResource.class);

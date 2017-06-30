@@ -10,7 +10,6 @@ import org.opendatakit.aggregate.odktables.rest.entity.Column;
 import org.opendatakit.aggregate.odktables.rest.entity.DataKeyValue;
 import org.opendatakit.aggregate.odktables.rest.entity.Row;
 import org.opendatakit.aggregate.odktables.rest.entity.RowFilterScope;
-import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 
 @Ignore
 public class T {
@@ -36,6 +35,15 @@ public class T {
       add(T.Columns.column_weight);
     }
   };
+
+  @SuppressWarnings("serial")
+  public static final ArrayList<Column> altcolumns = new ArrayList<Column>() {
+    {
+      add(T.Columns.column_name);
+      add(T.Columns.column_age);
+    }
+  };
+
   @SuppressWarnings("serial")
   public static final List<Row> rows = new ArrayList<Row>() {
     {
@@ -52,9 +60,9 @@ public class T {
     public static final String name = "name";
     public static final String age = "age";
     public static final String weight = "weight";
-    public static final Column column_name = new Column(name, name, "STRING", null);
-    public static final Column column_age = new Column(age, age, "INTEGER", null);
-    public static final Column column_weight = new Column(weight, weight, "INTEGER", null);
+    public static final Column column_name = new Column(name, name, "string", null);
+    public static final Column column_age = new Column(age, age, "integer", null);
+    public static final Column column_weight = new Column(weight, weight, "integer", null);
   }
   public static enum Data {
     DYLAN("1", "dylan", "23", "175"),

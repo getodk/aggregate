@@ -68,8 +68,11 @@ public class OdkTablesViewTable extends FlexTable {
   private static final String SAVEPOINT_CREATOR = "Savepoint Creator";
   private static final String ROW_ID = "Row ID";
   private static final String ROW_ETAG = "Row ETag";
-  private static final String FILTER_TYPE = "Filter Type";
-  private static final String FILTER_VALUE = "Filter Value";
+  private static final String DEFAULT_ACCESS = "Default Access";
+  private static final String OWNER = "Owner";
+  private static final String GROUP_READ_ONLY = "Group Read Only";
+  private static final String GROUP_MODIFY = "Group Modify";
+  private static final String GROUP_PRIVILEGED = "Group Privileged";
   private static final String DATA_ETAG_AT_MODIFICATION = "Changeset Data ETag";
   private static final String LAST_UPDATE_USER = "Last Update By Verified User";
   private static final String CREATED_BY_USER = "Created By Verified User";
@@ -80,7 +83,7 @@ public class OdkTablesViewTable extends FlexTable {
   
   // this is the number of columns that exist for a table as returned
   // by the server that are NOT user defined.
-  private static final int NUMBER_ADMIN_COLUMNS = 13;
+  private static final int NUMBER_ADMIN_COLUMNS = 16;
 
   // the message to display when there is no data in the table.
   private static String NO_DATA_MESSAGE = "There is no data in this table.";
@@ -285,8 +288,11 @@ public class OdkTablesViewTable extends FlexTable {
       setText(0, i++, SAVEPOINT_CREATOR);
       setText(0, i++, ROW_ID);
       setText(0, i++, ROW_ETAG);
-      setText(0, i++, FILTER_TYPE);
-      setText(0, i++, FILTER_VALUE);
+      setText(0, i++, DEFAULT_ACCESS);
+      setText(0, i++, OWNER);
+      setText(0, i++, GROUP_READ_ONLY);
+      setText(0, i++, GROUP_MODIFY);
+      setText(0, i++, GROUP_PRIVILEGED);
       setText(0, i++, LAST_UPDATE_USER);
       setText(0, i++, CREATED_BY_USER);
       setText(0, i++, DATA_ETAG_AT_MODIFICATION);
@@ -351,8 +357,11 @@ public class OdkTablesViewTable extends FlexTable {
           setWidget(currentRow, j++, new HTML(row.getSavepointCreator()));
           setWidget(currentRow, j++, new HTML(row.getRowId()));
           setWidget(currentRow, j++, new HTML(row.getRowETag()));
-          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getType().name()));
-          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getValue()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getAccess().name()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getRowOwner()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getGroupReadOnly()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getGroupModify()));
+          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getGroupPrivileged()));
           setWidget(currentRow, j++, new HTML(row.getLastUpdateUser()));
           setWidget(currentRow, j++, new HTML(row.getCreateUser()));
           setWidget(currentRow, j++, new HTML(row.getDataETagAtModification()));

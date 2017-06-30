@@ -16,16 +16,22 @@ This software includes the following jar files (libraries):
 
 http://www.oracle.com/technetwork/java/jaf11-139815.html      /standard extension/
     activation-1.1.jar
+https://github.com/AzureAD/azure-activedirectory-library-for-java  /Apache 2.0/
+	adal4j-1.2.0.jar
 http://aopalliance.sourceforge.net                      /Public domain/
     aopalliance-1.0.jar
 https://cloud.google.com/appengine/docs/java/release-notes  /Apache 2.0/
-    appengine-api-1.0-sdk-1.9.48.jar
-    appengine-api-labs-1.9.48.jar
-    appengine-jsr107cache-1.9.48.jar
+    appengine-api-1.0-sdk-1.9.54.jar
+    appengine-api-labs-1.9.54.jar
+    appengine-jsr107cache-1.9.54.jar
 http://www.eclipse.org/aspectj        /Eclipse Public License - v 1.0/
     aspectjweaver-1.8.9.jar
+http://www.bouncycastle.org/java.html     /Bouncy Castle (MIT License)/
+	bcpkix-jdk15on-1.56.jar
+	bcprov-jdk15on-1.56.jar
 http://apache.org/                                        /Apache 2.0/
     commons-codec-1.10.jar
+	commons-collections4-4.1.jar
 	commons-dbcp2-2.1.1.jar
     commons-fileupload-1.3.2.jar
     commons-io-2.5.jar
@@ -58,7 +64,9 @@ https://github.com/google/google-oauth-java-client        /Apache 2.0/
 https://github.com/google/gson                            /Apache 2.0/
     gson-2.8.0.jar
 https://github.com/google/guava                           /Apache 2.0/
-    guava-19.0.jar
+    guava-21.0.jar
+    guava-20.0.jar         (for Google AppEngine deployments)
+    guava-22.0-android.jar (for Google AppEngine deployments)
 http://code.google.com/p/gwt-google-maps-v3/              /Apache 2.0/
 now at: https://github.com/opendatakit/aggregate-components
     gwt-google-maps-v3-1.0.1.jar
@@ -91,29 +99,44 @@ https://github.com/jai-imageio/jai-imageio-core   /3-clause BSD with nuclear dis
     Copyright © 2010-2015 Stian Soiland-Reyes
     Copyright © 2015 Peter Hull
     All Rights Reserved.
-https://bitbucket.org/javarosa/javarosa/wiki/Home        /Apache 2.0/
-now at: https://bitbucket.org/m.sundt/javarosa/src/
-    javarosa-libraries-2016-04-21.jar
 https://jaxb.java.net/                                     /CDDL 1.1/
+http://www.oracle.com/technetwork/middleware/oedq/help/edq11help-2152391.pdf
     jaxb-api-2.2.jar
     jaxb-impl-2.2.1.1.jar
+http://stephenc.github.com/jcip-annotations              /Apache 2.0/
+	jcip-annotations-1.0-1.jar
 http://db.apache.org/jdo/index.html                      /Apache 2.0/
     jdo2-api-2.3-eb.jar
 http://www.joda.org/joda-time/                           /Apache 2.0/
-    joda-time-2.9.3.jar
+    joda-time-2.9.9.jar
+http://www.minidev.net/                                  /Apache 2.0/
+	json-smart-1.3.1.jar
 https://github.com/findbugsproject                  /New BSD license/
     jsr305-3.0.1.jar
 http://kxml.sourceforge.net/kxml2/                      /BSD license/
     kxml2-2.3.0.jar
+https://bitbucket.org/connect2id/nimbus-language-tags    /Apache 2.0/
+	lang-tag-1.4.3.jar
+??                                                       /CDDL 1.1/	
+http://www.oracle.com/technetwork/middleware/oedq/help/edq11help-2152391.pdf
+	mail-1.4.7.jar
+https://github.com/Microsoft/mssql-jdbc                  /MIT license/	
+	mssql-jdbc-6.1.5.jre8-preview.jar
 https://github.com/GoogleCloudPlatform/cloud-sql-mysql-socket-factory    /Apache 2.0/
     mysql-socket-factory-1.0.2.jar
 	mysql-socket-factory-core-1.0.2.jar
+https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions /Apache 2.0/
+	oauth2-oidc-sdk-5.18.1.jar
 https://opendatakit.org/                                 /Apache 2.0/
 at: https://github.com/opendatakit/aggregate-components
     odk-httpclient-gae-4.5.2-1.jar
     odk-tomcatutil-1.0.1.jar
     See the ODK Aggregate (Components) README.txt
     for how these are built.
+https://github.com/opendatakit/javarosa                  /Apache 2.0/
+modified from https://bitbucket.org/javarosa/javarosa/wiki/Home
+formerly at: https://bitbucket.org/m.sundt/javarosa/src/
+    opendatakit-javarosa.2.2.0.jar
 http://www.postgresql.org/   /Modified BSD / MIT Open Source License/
     postgresql-9.4.1211.jre7.jar
 http://www.slf4j.org/                                   /MIT License/
@@ -137,8 +160,6 @@ http://projects.spring.io/spring-security/               /Apache 2.0/
     spring-security-core-4.2.0.RELEASE.jar
     spring-security-crypto-4.2.0.RELEASE.jar
     spring-security-web-4.2.0.RELEASE.jar
-https://www.microsoft.com/en-us/download/details.aspx?id=11774   /Microsoft/
-	sqljdbc4-4.1.jar
 https://github.com/codehaus/stax                         /Apache 2.0/
     stax2-api-3.1.4.jar
     stax-api-1.0-2.jar

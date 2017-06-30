@@ -52,6 +52,12 @@ public interface User {
 	 *      or ANONYMOUS_USER or DAEMON_USER
 	 */
 	public String getUriUser();
+	
+   /**
+    * @return set of all granted authorities.
+    */
+   public Set<GrantedAuthority> getAuthorities();
+
 
 	/**
 	 * @return set of groups the user belongs to.

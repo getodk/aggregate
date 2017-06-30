@@ -59,7 +59,6 @@ public enum TableRoleClient implements Serializable {
 
   TableRoleClient(String description, TablePermission... permissions) {
     this.description = description;
-    // this.permissions = Lists.newArrayList(permissions);
     this.permissions = new ArrayList<TablePermission>();
     for (TablePermission tp : permissions) {
       this.permissions.add(tp);

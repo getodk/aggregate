@@ -34,74 +34,132 @@ public class RowFilterScopeClient implements Serializable {
   /**
 	 *
 	 */
-  private static final long serialVersionUID = -760352144860371942L;
+  private static final long serialVersionUID = -76035214486037194L;
 
   public static final RowFilterScopeClient EMPTY_ROW_FILTER_SCOPE;
 
   static {
     EMPTY_ROW_FILTER_SCOPE = new RowFilterScopeClient();
-    EMPTY_ROW_FILTER_SCOPE.initFields(Type.DEFAULT, null);
+    EMPTY_ROW_FILTER_SCOPE.initFields(Access.FULL, null, null, null, null);
   }
 
-  public enum Type {
-    DEFAULT, MODIFY, READ_ONLY, HIDDEN,
+  public enum Access {
+    FULL, MODIFY, READ_ONLY, HIDDEN,
   }
 
-  private Type type;
+  private Access defaultAccess;
 
-  private String value;
+  private String rowOwner;
+  
+  private String groupReadOnly;
+  
+  private String groupModify;
+  
+  private String groupPrivileged;
 
   /**
    * Constructs a new Scope.
    *
-   * @param type
+   * @param access
    *          the type of the scope. Must not be null. The empty scope may be
    *          accessed as {@link Scope#EMPTY_SCOPE}.
-   * @param value
-   *          the userId if type is {@link Type#USER}, or the groupId of type is
-   *          {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
+   * @param rowOwner
+   *          the userId if type is {@link Access#USER}, or the groupId of type is
+   *          {@link Access#GROUP}. If type is {@link Access#FULL}, value is
    *          ignored (set to null).
    */
-  public RowFilterScopeClient(Type type, String value) {
-    initFields(type, value);
+  public RowFilterScopeClient(Access access, String rowOwner, String groupReadOnly, String groupModify, String groupPrivileged) {
+    initFields(access, rowOwner, groupReadOnly, groupModify, groupPrivileged);
   }
 
   private RowFilterScopeClient() {
   }
 
-  private void initFields(Type type, String value) {
-    this.type = type;
-    this.value = value;
+  private void initFields(Access access, String rowOwner, String groupReadOnly, String groupModify, String groupPrivileged) {
+    this.defaultAccess = access;
+    this.rowOwner = rowOwner;
+    this.groupReadOnly = groupReadOnly;
+    this.groupModify = groupModify;
+    this.groupPrivileged = groupPrivileged;
   }
 
   /**
-   * @return the type
+   * @return defaultAccess
    */
-  public Type getType() {
-    return type;
+  public Access getAccess() {
+    return defaultAccess;
   }
 
   /**
-   * @param type
-   *          the type to set
+   * @param access
+   *          the access to set
    */
-  public void setType(Type type) {
-    this.type = type;
+  public void setAccess(Access access) {
+    this.defaultAccess = access;
+  }
+  
+  /**
+   * @return the rowOwner
+   */
+  public String getRowOwner() {
+    return rowOwner;
   }
 
   /**
-   * @return the value
+   * @param rowOwner
+   *          the rowOwner to set
    */
-  public String getValue() {
-    return value;
+  public void setOwner(String rowOwner) {
+    this.rowOwner = rowOwner;
   }
-
+  
   /**
-   * @param value
-   *          the value to set
+   * @return groupReadOnly
    */
-  public void setValue(String value) {
-    this.value = value;
+  public String getGroupReadOnly() {
+    return groupReadOnly;
+  }
+  
+  /**
+   * @param groupReadOnly
+   *     groupReadOnly to set
+   */
+  public void setGroupReadOnly(String groupReadOnly) {
+    this.groupReadOnly = groupReadOnly;
+  }
+  
+  /**
+   * 
+   * @return groupModify
+   */
+  public String getGroupModify() {
+    return groupModify;
+  }
+  
+  /**
+   * 
+   * @param groupModify
+   *     groupModify to set
+   */
+  public void setGroupModify(String groupModify) {
+    this.groupModify = groupModify;
+  }
+  
+  /**
+   * 
+   * @return groupPrivileged
+   */
+  public String getGroupPrivileged() {
+    return groupPrivileged;
+  }
+  
+  /**
+   * 
+   * @param groupPrivileged
+   *        groupPrivileged to set
+   */
+  public void setGroupPrivileged(String groupPrivileged) {
+    this.groupPrivileged = groupPrivileged;
   }
 
   /*
@@ -113,8 +171,11 @@ public class RowFilterScopeClient implements Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    result = prime * result + ((defaultAccess == null) ? 0 : defaultAccess.hashCode());
+    result = prime * result + ((rowOwner == null) ? 0 : rowOwner.hashCode());
+    result = prime * result + ((groupReadOnly == null) ? 0 : groupReadOnly.hashCode());
+    result = prime * result + ((groupModify == null) ? 0 : groupModify.hashCode());
+    result = prime * result + ((groupPrivileged == null) ? 0 : groupPrivileged.hashCode());
     return result;
   }
 
@@ -131,15 +192,14 @@ public class RowFilterScopeClient implements Serializable {
       return false;
     if (!(obj instanceof RowFilterScopeClient))
       return false;
+    
     RowFilterScopeClient other = (RowFilterScopeClient) obj;
-    if (type != other.type)
-      return false;
-    if (value == null) {
-      if (other.value != null)
-        return false;
-    } else if (!value.equals(other.value))
-      return false;
-    return true;
+    
+    return (defaultAccess == null ? other.defaultAccess == null : defaultAccess.equals(other.defaultAccess))
+        && (rowOwner == null ? other.rowOwner == null : rowOwner.equals(other.rowOwner))
+        && (groupReadOnly == null ? other.groupReadOnly == null : groupReadOnly.equals(other.groupReadOnly))
+        && (groupModify == null ? other.groupModify == null : groupModify.equals(other.groupModify))
+        && (groupPrivileged == null ? other.groupPrivileged == null : groupPrivileged.equals(other.groupPrivileged));
   }
 
   /*
@@ -150,10 +210,16 @@ public class RowFilterScopeClient implements Serializable {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("RowFilterScope [type=");
-    builder.append(type);
-    builder.append(", value=");
-    builder.append(value);
+    builder.append("RowFilterScope [defaultAccess=");
+    builder.append(defaultAccess);
+    builder.append(", rowOwner=");
+    builder.append(rowOwner);
+    builder.append(", groupReadOnly=");
+    builder.append(groupReadOnly);
+    builder.append(", groupModify");
+    builder.append(groupModify);
+    builder.append(", groupPrivileged");
+    builder.append(groupPrivileged);
     builder.append("]");
     return builder.toString();
   }

@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.ConfigFileChangeDetail;
 import org.opendatakit.aggregate.odktables.FileContentInfo;
@@ -41,6 +42,7 @@ import org.opendatakit.aggregate.odktables.api.FileService;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
+import org.opendatakit.aggregate.odktables.relation.DbInstallationInteractionLog;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole.TablePermission;
@@ -182,6 +184,19 @@ public class FileServiceImpl implements FileService {
 
     ConfigFileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, fi, userPermissions);
 
+    if ( outcome != ConfigFileChangeDetail.FILE_NOT_CHANGED ) {
+      // if the request includes an installation header, 
+      // log that the user that has been changing the configuration from that installation.
+      String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
+      try {
+        if ( installationId != null ) {
+          DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
+        }
+      } catch ( Exception e ) {
+        LogFactory.getLog(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
+      }
+    }
+
     UriBuilder ub = info.getBaseUriBuilder();
     ub.path(OdkTables.class, "getFilesService");
     URI self = ub.path(FileService.class, "getFile").build(appId, odkClientVersion,
@@ -224,6 +239,19 @@ public class FileServiceImpl implements FileService {
 
     FileManager fm = new FileManager(appId, cc);
     fm.deleteFile(odkClientVersion, tableId, appRelativePath);
+
+    {
+      // if the request includes an installation header, 
+      // log that the user that has been changing the configuration from that installation.
+      String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
+      try {
+        if ( installationId != null ) {
+          DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
+        }
+      } catch ( Exception e ) {
+        LogFactory.getLog(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
+      }
+    }
 
     return Response.ok()
         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)

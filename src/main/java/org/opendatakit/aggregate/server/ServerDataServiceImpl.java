@@ -644,7 +644,6 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
       throws AccessDeniedException, RequestFailureException, DatastoreFailureException,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient {
 
-    TableContentsForFilesClient tcc = new TableContentsForFilesClient();
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     try {

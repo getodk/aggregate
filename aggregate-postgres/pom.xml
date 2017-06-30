@@ -106,20 +106,6 @@
 			<artifactId>jacoco-maven-plugin</artifactId>
         </plugin>
         <plugin>
-          <!-- This configures the running of odktables integration tests. -->
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven.surefire.plugin.version}</version>
-          <inherited>true</inherited>
-          <configuration>
-            <argLine>${surefire.argLine}</argLine>
-            <skipTests>true</skipTests>
-            <classesDirectory>${project.build.directory}/generated-classes/jacoco/classes</classesDirectory>
-            <excludes>
-              <exclude>**/integration/**</exclude>
-            </excludes>
-          </configuration>
-        </plugin>
-        <plugin>
             <artifactId>maven-failsafe-plugin</artifactId>
             <executions>
               <execution>

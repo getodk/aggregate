@@ -16,8 +16,10 @@
 
 package org.opendatakit.aggregate.odktables.api;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -136,4 +138,11 @@ public interface RealizedTableService {
    */
   @Path("query")
   public QueryService getQuery() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException;
+  
+
+  @POST
+  @Path("installationStatus")
+  @Consumes({MediaType.APPLICATION_JSON})
+  public Response /*OK*/ postInstallationStatus(Object body) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
+
 }

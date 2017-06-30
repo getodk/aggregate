@@ -97,8 +97,6 @@ public class OdkTablesAdminServiceImpl extends RemoteServiceServlet implements
 
         holder.setUriUser(uriUser);
         holder.setOdkTablesUserId(tablesUser.getOdkTablesUserId());
-        holder.setPhoneNumber(tablesUser.getPhoneNumber());
-        holder.setXBearerCode(tablesUser.getXBearerCode());
         holder.setName(canonicalName);
 
         results.add(holder);

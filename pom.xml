@@ -21,16 +21,16 @@
     <properties>
         <toplevel.directory>${project.basedir}/../</toplevel.directory>
         <!-- must match the gae version below and the build/build.xml ant script defn -->
-        <gooogle.appengine.sdk.version>1.9.48</gooogle.appengine.sdk.version>
+        <gooogle.appengine.sdk.version>1.9.54</gooogle.appengine.sdk.version>
         <gae.home>${project.basedir}/../build/appengine-java-sdk-${gooogle.appengine.sdk.version}/appengine-java-sdk-${gooogle.appengine.sdk.version}</gae.home>
-        <!-- selenium 3.0.x is built using Java 8. We need to stay at Java 7 for AppEngine compatibility -->
+        <!-- selenium 3.0.x is built using Java 8. Modify test compile to use java 8 so we can test using selenium -->
         <!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
-        <org.seleniumhq.version>2.53.1</org.seleniumhq.version>
+        <org.seleniumhq.version>3.4.0</org.seleniumhq.version>
         <selenium.home>${project.basedir}/../build/selenium-java-${org.seleniumhq.version}/selenium-${org.seleniumhq.version}</selenium.home>
         <selenium.libs>${project.basedir}/../build/selenium-java-${org.seleniumhq.version}/selenium-${org.seleniumhq.version}/libs</selenium.libs>
         <!-- must match the seleniumhq version below and the build/build.xml ant script defn -->
         <!-- change the webdriver.chrome.drivername in .m2/settings.xml when running on a MacOSX or Linux system -->
-        <webdriver.chrome.driver>${project.basedir}/../build/${webdriver.chrome.drivername}-2.26/chromedriver${webdriver.chrome.driverext}</webdriver.chrome.driver>
+        <webdriver.chrome.driver>${project.basedir}/../build/${webdriver.chrome.drivername}-2.29/chromedriver${webdriver.chrome.driverext}</webdriver.chrome.driver>
         <war.directory>${project.basedir}/../war-base</war.directory>
         <gae.ear.earcontent.directory>${project.basedir}/../eclipse-ear/EarContent</gae.ear.earcontent.directory>
         <gae.default.webcontent.directory>${project.basedir}/../eclipse-default/WebContent</gae.default.webcontent.directory>
@@ -38,6 +38,7 @@
         <scriptSourceDirectory>${project.basedir}/../src/it/scripts</scriptSourceDirectory>
         <itFormsDirectory>${project.basedir}/../src/it/testfiles/forms</itFormsDirectory>
         <itSubmissionsDirectory>${project.basedir}/../src/it/testfiles/submissions</itSubmissionsDirectory>
+        <itSyncDirectory>${project.basedir}/../src/it/testfiles/sync</itSyncDirectory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gae.version>${gooogle.appengine.sdk.version}</gae.version>
         <apache.httpclient.version>4.5.2</apache.httpclient.version>
@@ -49,7 +50,7 @@
         <google.api-services-drive.version>v3-rev52-1.22.0</google.api-services-drive.version>
         <google.gwt.version>2.7.0</google.gwt.version>
         <org.apache.wink.version>1.4</org.apache.wink.version>
-        <jacoco.maven.plugin.version>0.7.6.201602180812</jacoco.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.7.9</jacoco.maven.plugin.version>
         <maven.surefire.report.plugin.version>2.19.1</maven.surefire.report.plugin.version>
         <maven.surefire.plugin.version>2.19.1</maven.surefire.plugin.version>
         <surefire.argLine>-Xms300m -Xmx3048m -XX:+UseParallelGC -XX:+UseParallelOldGC</surefire.argLine> <!-- need a huge JVM size for GAE datastore -->
@@ -76,6 +77,7 @@
             keystore.propertyfile - define this in your settings.xml - the
             location of the properties file for the keystore
         -->
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <modules>
         <module>aggregate-src</module>
@@ -92,26 +94,29 @@
         <module>odk-sqlserver-it-settings</module>
         <module>odk-sqlserver-unit-settings</module>
 
-        <!-- aggregate-mysql-specific -->
-        <module>aggregate-mysql</module>
-        <!-- aggregate-sqlserver-specific -->
-        <module>aggregate-sqlserver</module>
-        <!-- aggregate-postgresql-specific -->
-        <module>aggregate-postgres</module>
-        
-        <!-- aggregate-postgresql-specific -->
-        <module>postgres-unit-tests</module>
-        <!-- aggregate-mysql-specific -->
-        <module>mysql-unit-tests</module>
-        <!-- aggregate-sqlserver-specific -->
-        <module>sqlserver-unit-tests</module>
-
         <!-- aggregate-gae-specific -->
         <module>aggregate-gae-default</module>
         <module>aggregate-gae-n-background</module>
         <module>aggregate-gae</module>
+        
         <!-- aggregate-gae-specific -->
         <module>gae-unit-tests</module>
+
+        <!-- aggregate-sqlserver-specific -->
+        <module>aggregate-sqlserver</module>
+        <!-- aggregate-sqlserver-specific -->
+        <module>sqlserver-unit-tests</module>
+
+        <!-- aggregate-mysql-specific -->
+        <module>aggregate-mysql</module>
+        <!-- aggregate-mysql-specific -->
+        <module>mysql-unit-tests</module>
+
+        <!-- aggregate-postgresql-specific -->
+        <module>aggregate-postgres</module>
+        <!-- aggregate-postgresql-specific -->
+        <module>postgres-unit-tests</module>
+
 
         <!-- odk tables client libraries -->
         <module>odk-tables-api</module>
@@ -150,6 +155,17 @@
         </pluginRepository>
     </pluginRepositories>
     <dependencies>
+		<!-- non-gae projects should use the jdk8 version: 21.0
+		     for the gae projects, the war projects and unit test 
+			 project (aggregate-gae-default, aggregate-gae-n-background,
+			 gae-unit-tests) should use the jdk7 version (e.g., 22.0-android)
+			 and the test project for the ear should use jdk8. -->
+        <!-- <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+		  - version is varies based upon project -
+          <type>jar</type>
+        </dependency> -->
         <dependency>
           <groupId>com.google.appengine</groupId>
           <artifactId>appengine-api-1.0-sdk</artifactId>
@@ -186,11 +202,45 @@
             <artifactId>commons-dbcp2</artifactId>
             <version>2.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
-            <version>4.1</version>
-        </dependency>
+		<!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
+		<!-- https://github.com/Microsoft/mssql-jdbc/blob/master/pom.xml -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>6.1.5.jre8-preview</version>
+          <scope>compile</scope>
+		</dependency>
+		<!-- required by mssql-jdbc -->
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>adal4j</artifactId>
+			<version>1.2.0</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+					<groupId>com.google.code.gson</groupId>
+					<artifactId>gson</artifactId>
+                </exclusion>
+                <exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+		</dependency>
+		<!-- required by mssql-jdbc -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.56</version>
+            <scope>compile</scope>
+		</dependency>
+		<!-- required by mssql-jdbc -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.56</version>
+            <scope>compile</scope>
+		</dependency>
         <dependency> <!-- required by spring-security -->
           <groupId>commons-codec</groupId>
           <artifactId>commons-codec</artifactId>
@@ -276,13 +326,6 @@
           <groupId>com.google.code.gson</groupId>
           <artifactId>gson</artifactId>
           <version>2.8.0</version>
-          <type>jar</type>
-          <scope>compile</scope>
-        </dependency>
-        <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-          <version>19.0</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
@@ -417,16 +460,16 @@
             <version>1.3.0</version>
         </dependency>
         <dependency>
-          <groupId>org.javarosa</groupId>
-          <artifactId>javarosa-libraries</artifactId> <!-- see src/main/libs/readme.txt -->
-          <version>2016-04-21</version>
+		  <groupId>org.opendatakit</groupId>
+		  <artifactId>opendatakit-javarosa</artifactId>
+		  <version>2.2.0</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.9.3</version>
+            <version>2.9.9</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -662,6 +705,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>net.lightbody.bmp</groupId>
+            <artifactId>browsermob-core</artifactId>
+            <version>2.1.4</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-stubs</artifactId>
             <version>${gooogle.appengine.sdk.version}</version>
@@ -734,12 +789,45 @@
           <version>${org.seleniumhq.version}</version>
           <scope>test</scope>
         </dependency>
+		<dependency>
+		  <groupId>io.netty</groupId>
+		  <artifactId>netty-all</artifactId>
+		  <version>4.0.42.Final</version>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>org.seleniumhq.selenium</groupId>
+		  <artifactId>selenium-remote-driver</artifactId>
+		  <version>${org.seleniumhq.version}</version>
+		  <scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.agent</artifactId>
             <version>${jacoco.maven.plugin.version}</version>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<!-- this is used in the failsafe config below via direct 
+			     classpath injection from the local repository -->
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-client</artifactId>
+			<version>${org.apache.wink.version}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>xml-apis</groupId>
+		  <artifactId>xml-apis</artifactId>
+		  <version>1.4.01</version>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>javax.servlet</groupId>
+		  <artifactId>servlet-api</artifactId>
+		  <version>2.5</version>
+		  <scope>provided</scope>
+		</dependency>
     </dependencies>
     <build>
         <plugins>
@@ -779,13 +867,15 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
-                    <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>compile-java-source</id>
+							<configuration>
+								<compilerArguments>
+									<source>1.7</source>
+									<target>1.7</target>
+								</compilerArguments>
+							</configuration>
                             <phase>compile</phase>
                             <goals>
                                 <goal>compile</goal>
@@ -793,13 +883,92 @@
                         </execution>
                         <execution>
                             <id>compile-test-source</id>
+							<configuration>
+								<compilerArguments>
+									<source>1.7</source>
+									<target>1.7</target>
+								</compilerArguments>
+							</configuration>
                             <phase>test-compile</phase>
                             <goals>
                                 <goal>testCompile</goal>
                             </goals>
                         </execution>
+                        <execution>
+                            <id>default-compile-test-source</id>
+							<configuration>
+								<compilerArguments>
+									<source>1.8</source>
+									<target>1.8</target>
+								</compilerArguments>
+							</configuration>
+                            <phase>testCompile</phase>
+                            <goals>
+                                <goal>default-testCompile</goal>
+                            </goals>
+                        </execution>
                     </executions>
                 </plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-toolchains-plugin</artifactId>
+					<version>1.1</version>
+					<executions>
+					  <execution>
+						<goals>
+						  <goal>toolchain</goal>
+						</goals>
+					  </execution>
+					</executions>
+					<configuration>
+					  <toolchains>
+						<jdk>
+						  <version>1.7</version>
+						</jdk>
+					  </toolchains>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.3.1</version>
+					<executions>
+					   <execution>
+						  <id>enforce-java</id>
+						  <goals>
+							 <goal>enforce</goal>
+						  </goals>
+						  <configuration>
+							 <rules>
+								<requireJavaVersion>
+								   <version>1.7</version>
+								</requireJavaVersion>
+							 </rules>
+						  </configuration>
+					   </execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<version>1.7</version>
+					<executions>
+					   <execution>
+						  <id>signature-check</id>
+						  <phase>verify</phase>
+						  <goals>
+							 <goal>check</goal>
+						  </goals>
+					   </execution>
+					</executions>
+					<configuration>
+					   <signature>
+						  <groupId>org.codehaus.mojo.signature</groupId>
+						  <artifactId>java17</artifactId>
+						  <version>1.0</version>
+					   </signature>
+					</configuration>
+				</plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -1217,36 +1386,51 @@
                           <goal>integration-test</goal>
                         </goals>
                         <configuration>
-                          <classpathDependencyScopeExclude>test</classpathDependencyScopeExclude>
+						  <classpathDependencyExcludes>
+							<classpathDependencyExcludes>org.jacoco:org.jacoco.agent</classpathDependencyExcludes>
+						  </classpathDependencyExcludes>
                           <additionalClasspathElements>
-                            <additionalClasspathElement>${selenium.home}/selenium-java-2.53.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/apache-mime4j-0.6.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/bsh-2.0b4.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/cglib-nodep-2.1_3.jar</additionalClasspathElement>
+						    <!-- hack to get wink included; guava included as part of selenium -->
+                            <additionalClasspathElement>${localRepository}/org/apache/wink/wink-client/wink-client-${org.apache.wink.version}.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.home}/client-combined-3.4.0-nodeps.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/cglib-nodep-3.2.4.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/commons-codec-1.10.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/commons-exec-1.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/commons-io-2.4.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/commons-io-2.5.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/commons-lang3-3.5.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/commons-logging-1.2.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/gson-2.3.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/guava-19.0.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/cssparser-0.9.22.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/gson-2.8.0.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/guava-21.0.jar</additionalClasspathElement>
                             <additionalClasspathElement>${selenium.libs}/hamcrest-core-1.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/hamcrest-library-1.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/httpclient-4.5.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/httpcore-4.4.3.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/httpmime-4.5.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/ini4j-0.5.2.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/jcommander-1.48.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/jna-4.1.0.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/jna-platform-4.1.0.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/junit-4.12.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/netty-3.5.7.Final.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.2.1.jar</additionalClasspathElement>
-                            <additionalClasspathElement>${selenium.libs}/testng-6.9.9.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/htmlunit-2.26.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/htmlunit-core-js-2.26.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/htmlunit-driver-2.26.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/httpclient-4.5.3.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/httpcore-4.4.6.jar</additionalClasspathElement>
+                            <additionalClasspathElement>${selenium.libs}/httpmime-4.5.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/javax.servlet-api-3.1.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/jetty-io-9.4.1.v20170120.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/jetty-util-9.4.1.v20170120.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/jna-4.1.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/jna-platform-4.1.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/junit-4.12.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/neko-htmlunit-2.25.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/phantomjsdriver-1.4.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/sac-1.3.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/serializer-2.7.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/websocket-api-9.4.3.v20170317.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/websocket-client-9.4.3.v20170317.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/websocket-common-9.4.3.v20170317.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/xalan-2.7.2.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/xercesImpl-2.11.0.jar</additionalClasspathElement>
+							<additionalClasspathElement>${selenium.libs}/xml-apis-1.4.01.jar</additionalClasspathElement>
                           </additionalClasspathElements>
                           <testSourceDirectory>${project.parent.basedir}/src/it/java</testSourceDirectory>
                           <classesDirectory>${project.build.directory}/generated-classes/jacoco/classes</classesDirectory>
                           <includes>
                             <include>**/integration/**</include>
+                            <include>**/odktables/**</include>
                           </includes>
                           <!-- pass through the DISPLAY environment variable -->
                           <environmentVariables>
@@ -1257,9 +1441,12 @@
                             <project.artifactId>${project.artifactId}</project.artifactId>
                             <test.forms.dir>${itFormsDirectory}</test.forms.dir>
                             <test.submissions.dir>${itSubmissionsDirectory}</test.submissions.dir>
+							<test.sync.dir>${itSyncDirectory}</test.sync.dir>
                             <test.server.port>${test.server.port}</test.server.port>
                             <test.server.hostname>${test.server.hostname}</test.server.hostname>
                             <test.server.baseUrl>${test.server.baseUrl}</test.server.baseUrl>
+                            <test.server.username>${test.server.username}</test.server.username>
+                            <test.server.password>${test.server.password}</test.server.password>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
                           </systemPropertyVariables>
                         </configuration>
