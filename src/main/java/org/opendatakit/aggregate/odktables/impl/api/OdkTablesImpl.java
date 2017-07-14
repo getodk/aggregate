@@ -34,6 +34,7 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
@@ -221,7 +222,10 @@ public class OdkTablesImpl implements OdkTables {
           }
           
           for (UserSecurityInfo i : allUsers ) {
-            UserInfo userInfo = SecurityServiceUtil.createUserInfo(i);
+            if ( i.getType() == UserType.ANONYMOUS ) {
+                continue;
+            }
+            UserInfo userInfo = SecurityServiceUtil.createUserInfo(cc, i);
             listOfUsers.add(userInfo);
           }
       }

@@ -462,7 +462,7 @@
         <dependency>
 		  <groupId>org.opendatakit</groupId>
 		  <artifactId>opendatakit-javarosa</artifactId>
-		  <version>2.2.0</version>
+		  <version>2.3.0</version>
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
