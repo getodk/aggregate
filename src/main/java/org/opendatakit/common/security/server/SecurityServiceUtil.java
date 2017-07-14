@@ -96,6 +96,8 @@ public class SecurityServiceUtil {
   // special grants for Google Earth work-around
   public static final List<String> anonAttachmentViewerGrants;
 
+  public static final Set<GrantedAuthority> tablesExclusions;
+  
   static {
     List<String> isiteAdministratorGrants = new ArrayList<String>();
     isiteAdministratorGrants.add(GrantedAuthorityName.ROLE_USER.name());
@@ -143,6 +145,20 @@ public class SecurityServiceUtil {
     List<String> ianonAttachmentViewerGrants = new ArrayList<String>();
     ianonAttachmentViewerGrants.add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER.name());
     anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
+    
+    // after we complete the set of roles and groups, exclude these from ODK Tables REST APIs
+    Set<GrantedAuthority> odkTablesExclusions = new HashSet<GrantedAuthority>();
+    odkTablesExclusions.add(siteAuth);
+    odkTablesExclusions.add(administerTablesAuth);
+    odkTablesExclusions.add(superUserTablesAuth);
+    odkTablesExclusions.add(synchronizeTablesAuth);
+    odkTablesExclusions.add(new SimpleGrantedAuthority(
+    	      GrantedAuthorityName.ROLE_DATA_OWNER.name()));
+    odkTablesExclusions.add(new SimpleGrantedAuthority(
+  	      GrantedAuthorityName.ROLE_DATA_VIEWER.name()));
+    odkTablesExclusions.add(new SimpleGrantedAuthority(
+  	      GrantedAuthorityName.ROLE_DATA_COLLECTOR.name()));
+    tablesExclusions = Collections.unmodifiableSet(odkTablesExclusions);
   }
 
   private static final class UserIdFullName {
@@ -196,11 +212,12 @@ public class SecurityServiceUtil {
 
     }
   }
-  private static final ArrayList<String> processRoles(TreeSet<GrantedAuthorityName> grants) {
+  private static final ArrayList<String> processRoles(Set<GrantedAuthority> grants) {
     ArrayList<String> roleNames = new ArrayList<String>();
-    for ( GrantedAuthorityName grant : grants ) {
-      roleNames.add(grant.name());
+    for ( GrantedAuthority grant : grants ) {
+      roleNames.add(grant.getAuthority());
     }
+    Collections.sort(roleNames);
     return roleNames;
   }
 
@@ -209,11 +226,23 @@ public class SecurityServiceUtil {
    * 
    * @param userSecurityInfo
    */
-  public static final UserInfo createUserInfo(UserSecurityInfo userSecurityInfo) {
+  public static final UserInfo createUserInfo(CallingContext cc, UserSecurityInfo userSecurityInfo) {
     ArrayList<String> roles;
     
     UserIdFullName fields = new UserIdFullName(userSecurityInfo);
-    roles = processRoles(userSecurityInfo.getGrantedAuthorities());
+    RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
+    Set<GrantedAuthority> grants = new HashSet<GrantedAuthority>();
+    for ( GrantedAuthorityName grant : userSecurityInfo.getGrantedAuthorities()) {
+    	grants.add(new SimpleGrantedAuthority(grant.name()));
+    }
+    for ( GrantedAuthorityName grant : userSecurityInfo.getAssignedUserGroups()) {
+    	grants.add(new SimpleGrantedAuthority(grant.name()));
+    }
+    Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
+    grants.addAll(auths);
+    grants.removeAll(tablesExclusions);
+
+    roles = processRoles(grants);
     
     return new UserInfo(fields.user_id, fields.full_name, roles);
   }
@@ -223,6 +252,10 @@ public class SecurityServiceUtil {
     User user = cc.getCurrentUser();
     Set<GrantedAuthority> grants = new HashSet<GrantedAuthority>();
     grants.addAll(user.getAuthorities());
+    RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
+    Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(user.getDirectAuthorities());
+    grants.addAll(auths);
+    grants.removeAll(tablesExclusions);
     
     String defaultGroup = null;
     boolean matchesMembershipGroup = (defaultGroup == null);

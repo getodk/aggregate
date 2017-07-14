@@ -566,7 +566,8 @@ html {font-family:arial;}
                 </ruleGroup>
             </ruleList>
         </deleteFile>
-        <deleteFile> <!-- java8 file -->
+        <deleteFile>
+            <!-- java8 file -->
             <path>${temp_dir}/cfg-war/WEB-INF/lib/mssql-jdbc-6.1.5.jre8-preview.jar</path>
             <ruleList>
                 <ruleGroup>
@@ -591,7 +592,6 @@ html {font-family:arial;}
             <origin>${temp_dir}/guava-21.0.jar</origin>
             <ruleList>
                 <ruleGroup>
-                    <ruleEvaluationLogic>and</ruleEvaluationLogic>
                     <ruleList>
                         <compareText>
                             <logic>does_not_equal</logic>
