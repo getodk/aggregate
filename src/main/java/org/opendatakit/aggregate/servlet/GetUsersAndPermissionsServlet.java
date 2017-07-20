@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -137,11 +138,11 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
     }
     writer.close();
     // do not cache...
-    resp.setHeader("Cache-Control:", "no-cache, no-store, must-revalidate");
-    resp.setHeader("Pragma:", "no-cache");
-    resp.setHeader("Expires:", "0");
+    resp.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+    resp.setHeader(HttpHeaders.PRAGMA, "no-cache");
+    resp.setHeader(HttpHeaders.EXPIRES, "0");
 
-    resp.setHeader("Last-Modified:",
+    resp.setHeader(HttpHeaders.LAST_MODIFIED,
         WebUtils.rfc1123Date(new Date()));
     resp.setContentType(HtmlConsts.RESP_TYPE_CSV);
     resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; filename=\"UsersAndCapabilities.csv\"");

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -88,8 +89,8 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
     resp.setContentType("text/javascript; charset=UTF-8");
-    resp.setHeader("Cache-Control", "no-cache");
-    resp.setHeader("Pragma", "no-cache");
+    resp.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
+    resp.setHeader(HttpHeaders.PRAGMA, "no-cache");
     resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
 

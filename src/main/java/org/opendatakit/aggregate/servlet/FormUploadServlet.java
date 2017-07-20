@@ -28,6 +28,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -199,7 +200,7 @@ public class FormUploadServlet extends ServletUtilBase {
     addOpenRosaHeaders(resp);
     String serverUrl = cc.getServerURL();
     String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
-    resp.setHeader("Location", url);
+    resp.setHeader(HttpHeaders.LOCATION, url);
     resp.setStatus(204); // no content...
   }
 
@@ -259,7 +260,7 @@ public class FormUploadServlet extends ServletUtilBase {
         // accurately retrieved. Do not re-fetch the form after it has been
         // uploaded.
         resp.setStatus(HttpServletResponse.SC_CREATED);
-        resp.setHeader("Location", cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR);
+        resp.setHeader(HttpHeaders.LOCATION, cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR);
         if (openRosaVersion == null) {
           // web page -- show HTML response
           resp.setContentType(HtmlConsts.RESP_TYPE_HTML);

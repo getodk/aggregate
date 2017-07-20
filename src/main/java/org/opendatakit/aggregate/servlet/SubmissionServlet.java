@@ -31,6 +31,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -201,7 +202,7 @@ public class SubmissionServlet extends ServletUtilBase {
     addOpenRosaHeaders(resp);
     String serverUrl = cc.getServerURL();
     String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
-    resp.setHeader("Location", url);
+    resp.setHeader(HttpHeaders.LOCATION, url);
     resp.setStatus(204); // no content...
   }
 
@@ -267,7 +268,7 @@ public class SubmissionServlet extends ServletUtilBase {
       // form full url including scheme...
       String serverUrl = cc.getServerURL();
       String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
-      resp.setHeader("Location", url);
+      resp.setHeader(HttpHeaders.LOCATION, url);
 
       resp.setStatus(HttpServletResponse.SC_CREATED);
       if (openRosaVersion == null) {

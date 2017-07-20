@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -111,9 +112,9 @@ public class MultimodeLoginPageServlet extends ServletUtilBase {
     // Display page.
     resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
     resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-    resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-    resp.setHeader("Expires", "Mon, 26 Jul 1997 05:00:00 GMT");
-    resp.setHeader("Pragma", "no-cache");
+    resp.setHeader(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate");
+    resp.setHeader(HttpHeaders.EXPIRES, "Mon, 26 Jul 1997 05:00:00 GMT");
+    resp.setHeader(HttpHeaders.PRAGMA, "no-cache");
     resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
     PrintWriter out = resp.getWriter();
     out.print("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
