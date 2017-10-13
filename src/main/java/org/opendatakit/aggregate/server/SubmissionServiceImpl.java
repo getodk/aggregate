@@ -16,9 +16,9 @@
 
 package org.opendatakit.aggregate.server;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
@@ -32,16 +32,14 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
+import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.element.UiElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
-import org.opendatakit.aggregate.submission.Submission;
-import org.opendatakit.aggregate.submission.SubmissionElement;
-import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.aggregate.submission.SubmissionSet;
+import org.opendatakit.aggregate.submission.*;
+import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -49,7 +47,8 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public class SubmissionServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.submission.SubmissionService {
@@ -159,4 +158,116 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
     }
   }
 
+  @Override
+  public String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException{
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    URLCodec urlCodec = new URLCodec();
+    String decode = null;
+    try {
+      decode = urlCodec.decode(keyString);
+    } catch (DecoderException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+    SubmissionKey key = new SubmissionKey(decode);
+
+    List<SubmissionKeyPart> parts = key.splitSubmissionKey();
+    if (parts.get(0).getElementName().equals(PersistentResults.FORM_ID_PERSISTENT_RESULT))
+      return new String(getBytes(cc, key));
+
+    Submission sub = getSubmission(cc, parts);
+    BlobSubmissionType b = getBlobSubmissionType(parts, sub);
+    return new String(getBytes(cc, parts, b));
+  }
+
+  private byte[] getBytes(CallingContext cc, SubmissionKey key) throws RequestFailureException {
+    byte[] resultFileContents;
+    try {
+      PersistentResults p = new PersistentResults(key, cc);
+      PersistentResults.ResultFileInfo info = p.getResultFileInfo(cc);
+      if (info == null) {
+        throw new RequestFailureException("Unable to retrieve attachment");
+      }
+      resultFileContents = p.getResultFileContents(cc);
+
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Unable to retrieve attachment");
+    }
+    return resultFileContents;
+  }
+
+  private byte[] getBytes(CallingContext cc, List<SubmissionKeyPart> parts, BlobSubmissionType b) throws RequestFailureException {
+    byte[] blob;
+    try {
+      int ordinal = b.getAttachmentCount(cc);
+      if (ordinal != 1) {
+        SubmissionKeyPart p = parts.get(parts.size() - 1);
+        Long ord = p.getOrdinalNumber();
+        if (ord == null) {
+          throw new RequestFailureException("attachment request must be fully qualified");
+        }
+        ordinal = ord.intValue();
+      }
+      blob = b.getBlob(ordinal, cc);
+
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Unable to retrieve attachment");
+    }
+    return blob;
+  }
+
+  private BlobSubmissionType getBlobSubmissionType(List<SubmissionKeyPart> parts, Submission sub) throws RequestFailureException {
+    BlobSubmissionType b;
+
+    try {
+      SubmissionElement v;
+      v = sub.resolveSubmissionKey(parts);
+      if (v instanceof BlobSubmissionType) {
+        b = (BlobSubmissionType) v;
+      } else {
+        throw new RequestFailureException("Requested element is not a binary object");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      String path = getKeyPath(parts);
+      throw new RequestFailureException("Unable to retrieve part identified by path: " + path);
+    }
+    return b;
+  }
+
+  private Submission getSubmission(CallingContext cc, List<SubmissionKeyPart> parts) throws RequestFailureException {
+    Submission sub;
+    try {
+      sub = Submission.fetchSubmission(parts, cc);
+      assert sub != null;
+    } catch (ODKFormNotFoundException e1) {
+      throw new RequestFailureException(e1);
+    } catch (ODKOverQuotaException e) {
+      e.printStackTrace();
+      throw new RequestFailureException(e);
+    } catch (ODKDatastoreException e) {
+      e.printStackTrace();
+      throw new RequestFailureException("Unable to retrieve attachment");
+    }
+    return sub;
+  }
+
+  private final String getKeyPath(List<SubmissionKeyPart> parts) {
+    StringBuilder b = new StringBuilder();
+    for (SubmissionKeyPart p : parts) {
+      b.append("/");
+      b.append(p.toString());
+    }
+    return b.toString();
+  }
 }
