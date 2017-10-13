@@ -16,7 +16,8 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import java.util.ArrayList;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Image;
 
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
@@ -26,8 +27,7 @@ import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Image;
+import java.util.ArrayList;
 
 public class SubmissionTable extends FlexTable {
 
@@ -74,6 +74,11 @@ public class SubmissionTable extends FlexTable {
         case BINARY:
           if (value == null) {
             setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
+            } else if (tableHeaders.get(valueIndex - 1).getDisplayHeader().equals("meta:audit")) {
+              Image image = new Image(value + UIConsts.PREVIEW_SET);
+              image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);
+              image.addClickHandler(new AuditCSVPopupClickHandler(value));
+              setWidget(rowPosition, columnPosition, image);
           } else {
             Image image = new Image(value + UIConsts.PREVIEW_SET);
             image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);

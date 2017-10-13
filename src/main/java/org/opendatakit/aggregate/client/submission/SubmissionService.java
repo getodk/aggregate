@@ -32,4 +32,5 @@ public interface SubmissionService extends RemoteService {
   
   SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
   
+  String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }
