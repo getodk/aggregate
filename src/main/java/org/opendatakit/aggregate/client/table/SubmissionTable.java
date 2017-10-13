@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.table;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Image;
-
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -32,6 +31,7 @@ import java.util.ArrayList;
 public class SubmissionTable extends FlexTable {
 
   private static final String BLANK_VALUE = " ";
+  private static final String META_AUDIT_FIELD = "meta:audit";
   private ArrayList<Column> tableHeaders;
   private ArrayList<SubmissionUI> tableSubmissions;
 
@@ -41,7 +41,7 @@ public class SubmissionTable extends FlexTable {
 
     addStyleName("dataTable");
     getElement().setId("submission_table");
-    
+
     // setup header
     int headerIndex = 0;
     if (addDeleteButton) {
@@ -60,42 +60,42 @@ public class SubmissionTable extends FlexTable {
     for (SubmissionUI row : tableSubmissions) {
       int valueIndex = 0; // index matches to column headers
       int columnPosition = 0; // position matches to position in table
-   
+
       // if authorized add delete button
       if (addDeleteButton) {
         DeleteSubmissionButton delete = new DeleteSubmissionButton(row.getSubmissionKeyAsString());
         setWidget(rowPosition, columnPosition, delete);
         columnPosition++;
       }
-   
+
       // generate row
       for (final String value : row.getValues()) {
         switch (tableHeaders.get(valueIndex++).getUiDisplayType()) {
-        case BINARY:
-          if (value == null) {
-            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
-            } else if (tableHeaders.get(valueIndex - 1).getDisplayHeader().equals("meta:audit")) {
+          case BINARY:
+            if (value == null) {
+              setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
+            } else if (tableHeaders.get(valueIndex - 1).getDisplayHeader().equals(META_AUDIT_FIELD)) {
               Image image = new Image(value + UIConsts.PREVIEW_SET);
               image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);
               image.addClickHandler(new AuditCSVPopupClickHandler(value));
               setWidget(rowPosition, columnPosition, image);
-          } else {
-            Image image = new Image(value + UIConsts.PREVIEW_SET);
-            image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);
-            image.addClickHandler(new BinaryPopupClickHandler(value, false));
-            setWidget(rowPosition, columnPosition, image);
-          }
-          break;
-        case REPEAT:
-          if (value == null) {
-            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
-          } else {
-            RepeatViewButton repeat = new RepeatViewButton(value);
-            setWidget(rowPosition, columnPosition, repeat);
-          }
-          break;
-        default:
-          setText(rowPosition, columnPosition, value);
+            } else {
+              Image image = new Image(value + UIConsts.PREVIEW_SET);
+              image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);
+              image.addClickHandler(new BinaryPopupClickHandler(value, false));
+              setWidget(rowPosition, columnPosition, image);
+            }
+            break;
+          case REPEAT:
+            if (value == null) {
+              setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
+            } else {
+              RepeatViewButton repeat = new RepeatViewButton(value);
+              setWidget(rowPosition, columnPosition, repeat);
+            }
+            break;
+          default:
+            setText(rowPosition, columnPosition, value);
         }
         columnPosition++;
       }
@@ -114,5 +114,5 @@ public class SubmissionTable extends FlexTable {
   public ArrayList<SubmissionUI> getSubmissions() {
     return tableSubmissions;
   }
-    
+
 }
