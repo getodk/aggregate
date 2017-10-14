@@ -1,5 +1,0 @@
-mvn install:install-file -Dfile=odk-httpclient-gae-4.5.2-1.jar -DgroupId=org.opendatakit -DartifactId=odk-httpclient-gae -Dversion=4.5.2-1 -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=odk-tomcatutil-1.0.1.jar -DgroupId=org.opendatakit -DartifactId=odk-tomcatutil -Dversion=1.0.1 -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=gwt-google-maps-v3-1.0.1.jar -DgroupId=com.googlecode.gwt-google-maps-v3 -DartifactId=gwt-google-maps-v3 -Dversion=1.0.1 -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=gwt-visualization-1.1.2.jar -DgroupId=com.google.gwt.google-apis -DartifactId=gwt-visualization -Dversion=1.1.2 -Dpackaging=jar -DupdateReleaseInfo=true
-mvn install:install-file -Dfile=sqljdbc41.jar -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc4 -Dversion=4.1 -Dpackaging=jar -DupdateReleaseInfo=true

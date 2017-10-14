@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="aggregate-sqlserver">
-        <wb-resource deploy-path="/" source-path="/target/aggregate-sqlserver-1.0"/>
-        <property name="context-root" value="aggregate-sqlserver"/>
-        <property name="java-output-path" value="/aggregate-sqlserver/build/classes"/>
-    </wb-module>
-</project-modules>

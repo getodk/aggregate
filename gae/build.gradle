@@ -1,0 +1,56 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'war'
+
+group = 'org.opendatakit'
+version = '1.0.1'
+
+description = ""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+
+  flatDir {
+    dirs '../libs'
+  }
+}
+
+def versions = [
+    junit: '4.12',
+    gae  : '1.9.54'
+]
+
+dependencies {
+  providedCompile project(':common')
+  compile group: 'com.google.appengine', name: 'appengine-api-1.0-sdk', version: versions.gae
+  compile group: 'com.google.appengine', name: 'appengine-api-labs', version: versions.gae
+  compile group: 'com.google.appengine', name: 'appengine-jsr107cache', version: versions.gae
+  testCompile group: 'junit', name: 'junit', version: versions.junit
+  testCompile project(path: ':common', configuration: 'testOutput')
+  testCompile group: 'com.google.appengine', name: 'appengine-api-stubs', version: versions.gae
+  testCompile group: 'com.google.appengine', name: 'appengine-testing', version: versions.gae
+}
+
+clean.dependsOn(':common:clean')
+
+war.dependsOn(':common:war')
+
+war {
+  archiveName = 'aggregate-gae.war'
+
+  from '../common/src/main/webapp'
+  from 'src/main/webapp'
+  from '../common/build/gwt/out'
+
+  into('WEB-INF/classes', {
+    from project(':common').sourceSets.main.output.classesDir
+    from project(':common').sourceSets.main.output.resourcesDir
+    from project(':gae').sourceSets.main.output.classesDir
+    from project(':gae').sourceSets.main.output.resourcesDir
+  })
+
+  classpath project(':common').configurations.compile, project(':gae').configurations.compile
+}
