@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="eclipse-tomcat8">
-        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
-        <wb-resource deploy-path="/" source-path="/war-base"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/java"/>
-        <property name="context-root" value="eclipse-tomcat8"/>
-        <property name="java-output-path" value="/eclipse-tomcat8/build/classes"/>
-    </wb-module>
-</project-modules>

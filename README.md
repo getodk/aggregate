@@ -1,4 +1,4 @@
-# aggregate
+# OpenDataKit Aggregate
 
 This project is __*actively maintained*__
 
@@ -14,8 +14,9 @@ The developer [wiki](https://github.com/opendatakit/opendatakit/wiki) (including
 the [**opendatakit**](https://github.com/opendatakit/opendatakit) project.
 
 The Slack channel for software engineering questions is: [#aggregate-code](https://opendatakit.slack.com/)
+
 -------
+
 License
 
 This software is licensed under the [**Apache 2.0 license**](http://www.apache.org/licenses/LICENSE-2.0)
-

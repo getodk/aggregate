@@ -1,0 +1,59 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'war'
+
+group = 'org.opendatakit'
+version = '1.0.1'
+
+description = ""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+// https://www.petrikainulainen.net/programming/gradle/getting-started-with-gradle-integration-testing/
+//sourceSets {
+//  integrationTest {
+//    java {
+//      compileClasspath += main.output + test.output
+//      runtimeClasspath += main.output + test.output
+//      srcDir file('src/integrationTest/java')
+//    }
+//    resources.srcDir file('src/integrationTest/resources')
+//  }
+//  performanceTest {
+//    java {
+//      compileClasspath += main.output + test.output + sourceSets.integrationTest.output
+//      runtimeClasspath += main.output + test.output + sourceSets.integrationTest.output
+//      srcDir file('src/performanceTest/java')
+//    }
+//    resources.srcDir file('src/performanceTest/resources')
+//  }
+//}
+
+//configurations {
+//  integrationTestCompile.extendsFrom testCompile
+//  integrationTestRuntime.extendsFrom testRuntime
+//  performanceTestCompile.extendsFrom testCompile
+//  performanceTestRuntime.extendsFrom testRuntime
+//}
+
+//task integrationTest(type: Test) {
+//  setTestClassesDirs sourceSets.integrationTest.output.getClassesDirs()
+//  classpath = sourceSets.integrationTest.runtimeClasspath
+//  outputs.upToDateWhen { false }
+//}
+
+//task performanceTest(type: Test) {
+//  setTestClassesDirs sourceSets.performanceTest.output.getClassesDirs()
+//  classpath = sourceSets.performanceTest.runtimeClasspath
+//  outputs.upToDateWhen { false }
+//}
+
+//tasks.withType(Test) {
+//  reports.html.setDestination file("${reporting.baseDir}/${name}")
+//}
+
+// Make check depend on integration and performance tests and define an execution order
+//check.dependsOn integrationTest, performanceTest
+//integrationTest.mustRunAfter test
+//performanceTest.mustRunAfter integrationTest

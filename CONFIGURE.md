@@ -1,44 +1,33 @@
 # Configuring your Build Environment
 
-The build tree relies on Maven 3 for executing unit tests and
-integration tests across the 4 platforms (GAE, MySQL, PostgreSQL, SQLServer).
+This is a multi-project Gradle project.
 
-Sources are located under
+## Common module
 
- - `src/`  -- main source code, configuration files, and libraries
- - `war-base/` -- static web content and libraries for Eclipse environment
+This module hols common basecode for Aggregate. It contains the GWT web client and server side APIs.
 
-Because GWT and AppEngine have not historically respected and worked
-with Maven projects inside Eclipse, the non-Maven directories of our
-Eclipse projects begin with "eclipse-" prefix.
+## Tomcat module
 
-There are two sets of these:
+This module produces a WAR artifact that can be deployed in a Tomcat 8.0 server
 
-For AppEngine:
+## Google App Engine (`gae`) module
 
-- eclipse-ear
-- eclipse-default
-- eclipse-n-background
+This module produces a WAR artifact that can be deployed in Google App Engine
 
-For MySQL or PostgreSQL or SQLServer:
+**Note:** This module probably needs some work yet 
 
-- eclipse-tomcat8
+## Functional tests (`functionalTests`) module
 
-Additionally, when using Eclipse, you must also import one of these projects
-into your environment:
+This module holds some functional tests that were once inside an `it` folder. They're selenium and `WebProxy` tests that use an actual running Aggregate instance. See [Functional tests module instructions][functional_tests_instructions] for more info.  
 
-- odk-gae-settings
-- odk-mysql-settings
-- odk-postgresql-settings
-- odk-sqlserver-settings
+# Individual Configuration Guides
 
-
-If you're a Maven expert and have suggestions about the Maven
-project tree, please contact mitchellsundt@gmail.com
+- [IntelliJ setup][intellij_setup]
+- [Supported database configurations][database_configurations]
 
 # Critically Important Configuration Notes!!!!
 
-### You MUST use Java 7.
+## You MUST use Java 7.
 
 Java 8 (and anything other than Servlet 2.5) are not supported by AppEngine.
 While the codebase now uses Tomcat8 (Servlet 3.1) for non-AppEngine deployments,
@@ -47,23 +36,14 @@ If you use Java 8, Springframework will use a blacklisted reflection API
 and you will NOT be able to run the server locally under AppEngine or
 deploy it remotely.
 
-### When running Google's AppEngine Eclipse plug-in and development server, the plug-in will scan files and delete any that contain Servlet-3.x functionality.
+## When running Google's AppEngine Eclipse plug-in and development server, the plug-in will scan files and delete any that contain Servlet-3.x functionality.
 
 Unfortunately, this includes the spring-web jar. To work around this, you must
 explode the jar, remove the overview.html and WEB-INF/web-fragment.xml files,
 and then re-construct the jar.  To work around this problem, there is a
 suitably modified jar here: war-base/WEB-INF/lib/spring-web-SEE-CONFIGURE-TXT-....jar
 
-# Individual Configuration Guides
 
-- [**Minimal Eclipse Installation Setup**][eclipse]
-  - [**Tomcat Installation Setup**][tomcat]
-  - [**AppEngine Installation Setup**][appengine]
-- [**GWT debugging with SuperDevMode**][gwt]
-- [**Full Maven Development Environment Configuration**][maven]
-
-[eclipse]: https://github.com/opendatakit/aggregate/blob/master/docs/eclipse.md
-[tomcat]: https://github.com/opendatakit/aggregate/blob/master/docs/tomcat.md
-[appengine]: https://github.com/opendatakit/aggregate/blob/master/docs/app-engine.md
-[gwt]: https://github.com/opendatakit/aggregate/blob/master/docs/gwt-debugging.md
-[maven]: https://github.com/opendatakit/aggregate/blob/master/docs/maven-full.md
+[intellij_setup]: https://github.com/opendatakit/aggregate/blob/master/docs/intellij_setup.md
+[database_configurations]: https://github.com/opendatakit/aggregate/blob/master/docs/database_configurations.md
+[functional_tests_instructions]: https://github.com/opendatakit/aggregate/blob/master/functionalTests/README.md

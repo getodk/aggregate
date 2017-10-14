@@ -1,0 +1,52 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'war'
+
+group = 'org.opendatakit'
+version = '1.0.1'
+
+description = ""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+
+  flatDir {
+    dirs '../libs'
+  }
+}
+
+def versions = [
+    junit        : '4.12',
+    odkTomcatUtil: '1.0.1'
+]
+
+dependencies {
+  providedCompile project(':common')
+  compile group: 'org.opendatakit', name: 'odk-tomcatutil', version: versions.odkTomcatUtil
+  testCompile group: 'junit', name: 'junit', version: versions.junit
+  testCompile project(path: ':common', configuration: 'testOutput')
+}
+
+clean.dependsOn(':common:clean')
+
+war.dependsOn(':common:war')
+
+war {
+  archiveName = 'aggregate-tomcat.war'
+
+  from '../common/src/main/webapp'
+  from 'src/main/webapp'
+  from '../common/build/gwt/out'
+
+  into('WEB-INF/classes', {
+    from project(':common').sourceSets.main.output.classesDir
+    from project(':common').sourceSets.main.output.resourcesDir
+    from project(':tomcat').sourceSets.main.output.classesDir
+    from project(':tomcat').sourceSets.main.output.resourcesDir
+  })
+
+  classpath project(':common').configurations.compile, project(':tomcat').configurations.compile
+}
