@@ -6,8 +6,7 @@ This submodule holds code that tests Aggregate through its web client and APIs.
 
 This submodule's tests should/will probably be replaced by:
 
- - Unit tests in `common` submodule
- - Integration tests in `dev` submodule
+ - Unit & integration tests in `common` submodule
  - An external [puppeteer](https://github.com/GoogleChrome/puppeteer) (or similar) suite.
  
 ## How to run these tests
