@@ -37,7 +37,7 @@
 	<bean id="datastore"
 		class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
 		<property name="dataSource" ref="dataSource" />
-		<!--		schemaName defaults to the database name.  Override this with: -->
+		<!-- schemaName defaults to the database name.  Override this with: -->
 		<property name="schemaName" value="${jdbc.schema}" />
 	</bean>
 
