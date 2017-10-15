@@ -1,0 +1,173 @@
+Release Information
+Microsoft JDBC Driver 6.0 for SQL Server
+Sept 2016
+
+------------
+INTRODUCTION
+------------
+This file contains late-breaking or other important information that supplements the Microsoft JDBC 
+Driver 6.0 for SQL Server documentation. You should read this file completely before installing 
+the JDBC driver.
+
+Your feedback is very important to us and we will strive to respond to your feedback in a timely 
+manner. For information about providing feedback by using the JDBC driver blogs and online forums, 
+see the Microsoft JDBC Driver 6.0 for SQL Server page at http://msdn.microsoft.com/data/jdbc.
+
+
+------------
+INSTALLATION
+------------
+Instructions for installing the JDBC driver are located in install.txt.  Refer to that file for 
+information about installing the JDBC driver on Windows and Unix operating systems.
+
+
+---------------------------
+SUPPORTED OPERATING SYSTEMS
+---------------------------
+Supported operating systems for Microsoft JDBC Driver 6.0 for SQL Server include:
+  Windows Server 2008 SP2
+  Windows Server 2008 R2 SP1
+  Windows Server 2012
+  Windows Server 2012 R2
+  Windows Vista SP2
+  Windows 7 SP1
+  Windows 8
+  Windows 8.1
+  Windows 10
+  Linux
+  Unix
+
+The list above is an example of some of the supported operating systems. The JDBC driver is designed 
+to work on any operating system that supports the use of a Java Virtual Machine (JVM). However, only 
+Oracle Solaris (x86), SUSE Linux, and Windows Vista Service Pack 2 or later operating systems have 
+been tested.
+
+
+----------------
+RELEASE CONTENTS
+----------------
+The Microsoft JDBC Driver 6.0 for SQL Server executable zip or tar file unpacks the following files 
+in the specified locations, relative to the selected installation directory:
+
+<installation directory>\sqljdbc_<version>\<language>\install.txt
+<installation directory>\sqljdbc_<version>\<language>\release.txt
+<installation directory>\sqljdbc_<version>\<language>\license.txt
+<installation directory>\sqljdbc_<version>\<language>\sqljdbc.jar
+<installation directory>\sqljdbc_<version>\<language>\sqljdbc4.jar
+<installation directory>\sqljdbc_<version>\<language>\sqljdbc41.jar
+<installation directory>\sqljdbc_<version>\<language>\sqljdbc42.jar
+<installation directory>\sqljdbc_<version>\<language>\auth\x86\sqljdbc_auth.dll
+<installation directory>\sqljdbc_<version>\<language>\auth\x64\sqljdbc_auth.dll
+<installation directory>\sqljdbc_<version>\<language>\samples\<sample files...>
+<installation directory>\sqljdbc_<version>\<language>\xa\xa_install.sql
+<installation directory>\sqljdbc_<version>\<language>\xa\x86\sqljdbc_xa.dll
+<installation directory>\sqljdbc_<version>\<language>\xa\x64\sqljdbc_xa.dll
+
+For detailed information about each component please refer to the online documentation,
+Microsoft JDBC Driver for SQL Server Documentation: 
+https://msdn.microsoft.com/en-us/library/dn197850(v=sql.10).aspx
+
+Documentation:
+-------------
+This release information, installation instructions, and license terms are included in this package. 
+All other documentation may be found online.
+
+Please note that the offline helpfiles have been discontinued. 
+
+
+JAR Files:
+---------
+To support backward compatibility and possible upgrade scenarios, the JDBC Driver 6.0 includes 
+four JAR class libraries in each installation package: sqljdbc.jar, sqljdbc4.jar, sqljdbc41.jar, 
+and sqljdbc42.jar.  
+
+Important Note: sqljdbc.jar and sqljdbc4.jar are provided only for backwards compatibility, and do 
+not contain the new features included with this release.  Only sqljdbc41.jar and sqljdbc42.jar 
+contain the new features.
+
+
+Feature Specific Files:
+---------
+Azure Active Directory and Integrated Authentication (on Windows) components are included in the auth directory.
+
+JDBC distributed transaction components are included in the xa directory.
+
+
+Samples:
+-------
+Sample applications that demonstrate various features of the JDBC driver are included in the samples
+directory. For more details about each sample and how to run them, please refer to the online 
+documentation.
+
+
+-----------
+CHANGE LIST
+-----------
+Changes from 6.0.7507.100 to 6.0.7728.100:
+
+Fixed an issue in sqljdbc_xa.dll where transactions may cause handle leak to occur in SQL Server.
+
+Changes from 4.2 to 6.0:
+
+New Feature: Always Encrypted - Application developers can now utilize the Always Encrypted (AE) feature that is 
+available since SQL Server 2016 CTP (or higher). The JDBC driver enables Always Encrypted feature by transparently 
+encrypting and decrypting sensitive data stored in encrypted database columns in the SQL Server. For more information 
+see the MSDN documentation on using Always Encrypted with JDBC driver. 
+
+New Feature: Internationalized Domain Name - The JDBC driver now supports Internationalized Domain Names (IDNs) for 
+server and instance names. For more information see MSDN documentation on using IDN with JDBC driver.
+
+New Feature: Table-Valued Parameters - Table-valued parameters provide an easy way to marshal multiple rows of data from 
+a client application to SQL Server without requiring multiple round trips or special server-side logic for processing the data. 
+You can use table-valued parameters to encapsulate rows of data in a client application and send the data to the server in a 
+single parameterized command. For more information see MSDN documentation on Table-Valued parameters.
+
+New Feature: Azure Active Directory (AAD) - AAD authentication is a mechanism of connecting to Azure SQL Database v12 using 
+identities in AAD. Use AAD authentication to centrally manage identities of database users and as an alternative to SQL 
+Server authentication. The JDBC Driver 6.0 allows you to specify your AAD credentials in the JDBC connection string 
+to connect to Azure SQL DB. For more information see MSDN documentation on Setting the Connection Properties for the JDBC driver.
+
+Improvement: AlwaysOn Availability Groups (AG) - The driver now supports transparent connections to AlwaysOn Availability 
+Groups. The driver quickly discovers the current AlwaysOn topology of your server infrastructure and connects to the 
+current active server transparently. For more information see MSDN documentation on Setting the Connection Properties for 
+the JDBC driver.
+
+Improvement: The JDBC driver can now support retrieving parameter metadata with prepared statements for complex queries 
+such as subqueries/joins. Note that this improvement is available only when using SQL Server 2012 and newer versions.
+
+
+------------
+KNOWN ISSUES
+------------
+The following are known issues with the Microsoft JDBC Driver 6.0 for SQL Server:
+
+1) PARAMETER METADATA LIMITATIONS WHEN USING SQL SERVER 2008 OR 2008 R2
+
+1.a) PreparedStatement.getParameterMetadata() throws an SQLException when used
+with a parametrized MERGE query
+1.b) Parameter metadata for prepared statements does not work with queries having subqueries/joins.
+
+
+2) JavaKerberos and IBM VMs
+
+If you are running under Windows environments you may have to specify the principalname in the 
+configuration file to get the Java Kerberos working. For example: 
+SQLJDBCDriver {
+  com.ibm.security.auth.module.Krb5LoginModule required
+  seDefaultCcache=true
+  credsType=initiator
+  principal=principalname@principaldomain;
+};
+
+
+3) CONNECTION DROPPING WITH SQL AZURE
+
+When connecting to SQL Azure, idle connections may be terminated by a network component (such as a 
+firewall) after a period of inactivity. To avoid dropping idle connections by a network component, 
+the following registry settings (or their non-Windows equivalents) should be set on the operating 
+system where the driver is loaded:
+           
+Registry Setting                                                                   Recommended value
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\KeepAliveTime            30000
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\KeepAliveInterval         1000
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\TcpMaxDataRetransmission  10
