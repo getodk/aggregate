@@ -37,9 +37,9 @@ If you use Java 8, Springframework will use a blacklisted reflection API
 and you will NOT be able to run the server locally under AppEngine or
 deploy it remotely.
 
-[intellij_setup]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/intellij_setup.md
-[aggregate_config]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/aggregate_config.md
-[database_configurations]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/database_configurations.md
-[functional_tests_instructions]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/functionalTests/README.md
+[intellij_setup]: ./intellij_setup.md
+[aggregate_config]: ./aggregate_config.md
+[database_configurations]: ./database_configurations.md
+[functional_tests_instructions]: ../functionalTests/README.md
 
 [old_it]: https://github.com/opendatakit/aggregate/tree/6f4b92e0ee64937c327fd5c862fe4da331ead69c/src/it
