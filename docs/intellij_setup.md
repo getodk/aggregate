@@ -72,15 +72,15 @@ Now, you should be able to Debug the server-side code using the Tomcat8 developm
 
 GWT Dev and SuperDev modes are not supported yet. Help and feedback is very welcome in this matter.  
 
-[database_configurations]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/database_configurations.md
-[functional_tests_instructions]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/functionalTests/README.md
-[aggregate_config]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/aggregate_config.md
+[database_configurations]: ./database_configurations.md
+[functional_tests_instructions]: ../functionalTests/README.md
+[aggregate_config]: ./aggregate_config.md
 
-[intellij_0_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_0.png
-[intellij_1_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_1.png
-[intellij_2_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_2.png
-[intellij_3_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_3.png
-[intellij_4_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_4.png
-[intellij_5_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_5.png
-[intellij_6_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_6.png
-[intellij_tomcat_png]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/images/intellij_tomcat.png
+[intellij_0_png]: ./images/intellij_0.png
+[intellij_1_png]: ./images/intellij_1.png
+[intellij_2_png]: ./images/intellij_2.png
+[intellij_3_png]: ./images/intellij_3.png
+[intellij_4_png]: ./images/intellij_4.png
+[intellij_5_png]: ./images/intellij_5.png
+[intellij_6_png]: ./images/intellij_6.png
+[intellij_tomcat_png]: ./images/intellij_tomcat.png

@@ -14,4 +14,4 @@ Aggregate uses a `security.properties file` to configure different security and 
 | security.server.port       | Port to be used for HTTP service |
 | security.server.securePort | Port to be used for HTTPS service |   
 
-[database_configurations]: https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/database_configurations.md
+[database_configurations]: ./database_configurations.md

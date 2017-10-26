@@ -38,9 +38,9 @@ TBD
 
 If you prefer not to use the command line, you can use IntelliJ to create a new project from version control using `https://github.com/YOUR-GITHUB-USERNAME/aggregate`. 
 
-1. Open the project in the folder of your clone from IntelliJ and follow the [IntelliJ setup instructions](https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/intellij_setup.md)
+1. Open the project in the folder of your clone from IntelliJ and follow the [IntelliJ setup instructions](./docs/intellij_setup.md)
 
-1. For more information about the project's structure read the [Project structure document](https://github.com/ggalmazor/aggregate/blob/gradle_submodules/docs/project_structure.md)
+1. For more information about the project's structure read the [Project structure document](./docs/project_structure.md)
  
 ## Contributing
 
