@@ -246,9 +246,8 @@
         <propertiesFileSet>
           <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
           <key>jdbc.help.about</key>
-          <value>auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname}
-            ${product_version}
-          </value>
+          <value>
+            <![CDATA[auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}]]></value>
         </propertiesFileSet>
       </actionList>
     </actionGroup>
@@ -356,23 +355,24 @@
       <progressText>Setting up security properties</progressText>
       <actionList>
         <actionGroup>
-          <!-- Sets the Authentication properties
-               secureChannelType, deviceAuthentication, and
-               channelType
+          <!--
+          Sets the Authentication properties
+          secureChannelType, deviceAuthentication, and
+          channelType
 
-               Actions are as follows:
+          Actions are as follows:
 
-                  If the checkbox ${tomcat_authentication_should_configure} was not checked
-    and ${platform} is not gae, then set:
+          If the checkbox ${tomcat_authentication_should_configure} was not checked and ${platform} is not gae, then set:
 
-                  security.server.deviceAuthentication=digest
-    security.server.channelType=ANY_CHANNEL
-    security.server.secureChannelType=ANY_CHANNEL
+          security.server.deviceAuthentication=digest
+          security.server.channelType=ANY_CHANNEL
+          security.server.secureChannelType=ANY_CHANNEL
 
-    else
-                  security.server.deviceAuthentication=digest
-    security.server.channelType=REQUIRES_SECURE_CHANNEL
-    security.server.secureChannelType=REQUIRES_SECURE_CHANNEL
+          else
+
+          security.server.deviceAuthentication=digest
+          security.server.channelType=REQUIRES_SECURE_CHANNEL
+          security.server.secureChannelType=REQUIRES_SECURE_CHANNEL
           -->
           <explanation>Authentication</explanation>
           <progressText>Setting authentication choices</progressText>
@@ -509,9 +509,8 @@
         <propertiesFileSet>
           <file>${temp_dir}/conf/common/security.properties</file>
           <key>security.help.about</key>
-          <value>auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname}
-            ${product_version}
-          </value>
+          <value>
+            <![CDATA[auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}]]></value>
         </propertiesFileSet>
       </actionList>
     </actionGroup>
