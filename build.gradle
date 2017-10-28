@@ -134,3 +134,15 @@ gwt {
   minHeapSize = "512M"
   maxHeapSize = "1024M"
 }
+
+war {
+  if (war_mode == "installer") {
+    println "Excluding config files from WAR"
+    war.rootSpec.exclude "jdbc.properties"
+    war.rootSpec.exclude "logging.properties"
+    war.rootSpec.exclude "odk-common-security-settings.xml"
+    war.rootSpec.exclude "odk-security-settings.xml"
+    war.rootSpec.exclude "odk-settings.xml"
+    war.rootSpec.exclude "security.properties"
+  }
+}
