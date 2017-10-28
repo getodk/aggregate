@@ -26,4 +26,5 @@ public interface SubmissionServiceAsync {
 
   void getRepeatSubmissions(String keyString, AsyncCallback<SubmissionUISummary> callback);
 
+  void getSubmissionAuditCSV(String keyString, AsyncCallback<String> async);
 }
