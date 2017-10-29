@@ -35,22 +35,6 @@
 		<property name="testOnReturn" value="true"/>
 	</bean>
 
-	<!-- <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close" >
-		<property name="driverClassName" value="${jdbc.driverClassName}" />
-		<property name="url" value="${jdbc.url}" />
-		<property name="initialSize" value="5"/>
-		<property name="maxIdle" value="10"/>
-		<property name="minIdle" value="5"/>
-		<property name="maxActive" value="100"/>
-		<property name="maxAge" value="590000"/>
-		<property name="maxWait" value="30000"/>
-		<property name="validationQuery" value="select count(*) from sys.schemas"/>
-		<property name="validationQueryTimeout" value="1"/>
-		<property name="timeBetweenEvictionRunsMillis" value="148000"/>
-		<property name="testWhileIdle" value="true"/>
-		<property name="testOnReturn" value="true"/>
-	</bean> -->
-
 	<bean id="datastore"
 		class="org.opendatakit.common.persistence.engine.sqlserver.DatastoreImpl">
 		<property name="dataSource" ref="dataSource" />
@@ -82,6 +66,7 @@
 		<property name="userService" ref="user_service"/>
 	</bean>
 
+	<!--  change the background scheduler to only have three worker threads. Tasks will be queued. -->
 	<task:scheduler id="task_scheduler" pool-size="3" />
 
 	<bean id="worksheet_creator"
