@@ -1,0 +1,128 @@
+<project>
+    <shortName>ODKAggregate</shortName>
+    <fullName>ODK Aggregate</fullName>
+    <version>1.4.15 Production</version>
+    <licenseFile>files/LICENSE.txt</licenseFile>
+    <leftImage>files/leftSide.png</leftImage>
+    <logoImage>files/logo.png</logoImage>
+    <splashImage>files/opendatakit.png</splashImage>
+    <componentList>
+        <include>
+            <file>components/params.xml</file>
+        </include>
+        <include>
+            <file>components/configure_war.xml</file>
+        </include>
+    </componentList>
+    <createUninstaller>0</createUninstaller>
+    <defaultUnixOwner>${system_username}</defaultUnixOwner>
+    <enableRollback>0</enableRollback>
+    <enableTimestamp>1</enableTimestamp>
+    <height>500</height>
+    <productUrlInfoAbout>http://www.opendatakit.org</productUrlInfoAbout>
+    <requestedExecutionLevel>asInvoker</requestedExecutionLevel>
+    <saveRelativePaths>1</saveRelativePaths>
+    <vendor>Open Data Kit</vendor>
+    <width>700</width>
+    <windowsExecutableIcon>files/opendatakit.ico</windowsExecutableIcon>
+    <windowsUninstallerExecutableIcon>files/opendatakit.ico</windowsUninstallerExecutableIcon>
+    <customLanguageFileList>
+        <language>
+            <code>en</code>
+            <file>tagfile-en.lng</file>
+        </language>
+    </customLanguageFileList>
+    <finalPageActionList>
+        <runProgram>
+            <program>java</program>
+            <programArguments>-jar .${platform_path_separator}ODKAggregateAppEngineUpdater.jar</programArguments>
+            <progressText>Launch upload tool (3-10 minutes).</progressText>
+            <useMSDOSPath>0</useMSDOSPath>
+            <workingDirectory>${installdir}</workingDirectory>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+            </ruleList>
+        </runProgram>
+        <runProgram>
+            <program>osascript</program>
+            <programArguments>'${installdir}/uploadAggregateToAppEngine.app'</programArguments>
+            <progressText>Launch upload tool (3-10 minutes).</progressText>
+            <workingDirectory>${installdir}</workingDirectory>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+        </runProgram>
+        <runProgram>
+            <program>bash</program>
+            <programArguments>-c '"${installdir}/uploadAggregateToAppEngine.sh"'</programArguments>
+            <progressText>Launch upload tool (3-10 minutes).</progressText>
+            <workingDirectory>${installdir}</workingDirectory>
+            <ruleList>
+                <compareText>
+                    <logic>equals</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>linux</type>
+                </platformTest>
+            </ruleList>
+        </runProgram>
+        <runProgram>
+            <program>cmd</program>
+            <programArguments>/S /C start /D "${installdir}" /B .${platform_path_separator}README.html
+            </programArguments>
+            <progressText>Show additional deployment and
+                configuration steps (5-10 minutes).
+            </progressText>
+            <useMSDOSPath>0</useMSDOSPath>
+            <workingDirectory>${installdir}</workingDirectory>
+            <ruleList>
+                <compareText>
+                    <logic>does_not_equal</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <type>windows</type>
+                </platformTest>
+            </ruleList>
+        </runProgram>
+        <actionGroup>
+            <progressText>Show additional deployment and
+                configuration steps (5-10 minutes).
+            </progressText>
+            <actionList>
+                <launchBrowser>
+                    <url>file:///${installdir}/README.html</url>
+                </launchBrowser>
+            </actionList>
+            <ruleList>
+                <compareText>
+                    <logic>does_not_equal</logic>
+                    <text>${platform}</text>
+                    <value>gae</value>
+                </compareText>
+                <platformTest>
+                    <negate>1</negate>
+                    <type>windows</type>
+                </platformTest>
+            </ruleList>
+        </actionGroup>
+    </finalPageActionList>
+</project>
+

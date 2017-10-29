@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task-4.1.xsd">
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+				<value>classpath:security.properties</value>
+				<value>classpath:logging.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!--Datasource configuration-->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close" >
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+		<property name="maxIdle" value="10"/>
+		<property name="minIdle" value="5"/>
+		<property name="maxTotal" value="100"/>
+		<property name="maxConnLifetimeMillis" value="590000"/>
+		<property name="maxWaitMillis" value="30000"/>
+		<property name="validationQuery" value="select schema_name from information_schema.schemata limit 1"/>
+		<property name="validationQueryTimeout" value="1"/>
+		<property name="testOnBorrow" value="true"/>
+	</bean>
+
+	<bean id="datastore"
+		class="org.opendatakit.common.persistence.engine.mysql.DatastoreImpl">
+		<property name="dataSource" ref="dataSource" />
+		<!--		schemaName defaults to the database name.  Override this with: -->
+		<property name="schemaName" value="${jdbc.schema}" />
+	</bean>
+
+	<!--	Website domain information	-->
+	<bean id="realm" class="org.opendatakit.common.security.Realm">
+		<property name="isGaeEnvironment" value="true" />
+		<property name="realmString" value="${security.server.realm.realmString}" />
+		<property name="hostname" value="${security.server.hostname}" />
+		<property name="port" value="${security.server.port}" />
+		<property name="securePort" value="${security.server.securePort}" />
+		<property name="channelType" value="${security.server.channelType}" />
+		<property name="secureChannelType" value="${security.server.secureChannelType}" />
+	</bean>
+
+	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
+		<property name="datastore" ref="datastore" />
+		<property name="realm" ref="realm" />
+        <property name="superUserEmail" value="${security.server.superUser}" />
+		<property name="superUserUsername" value="${security.server.superUserUsername}" />
+	</bean>
+
+	<!--  bean to get the siteKey value (which is defined the first time the app starts up) -->
+	<bean id="sitePreferencesBean" class="org.opendatakit.aggregate.server.SitePreferencesBean" >
+		<property name="datastore" ref="datastore"/>
+		<property name="userService" ref="user_service"/>
+	</bean>
+
+	<bean id="worksheet_creator"
+		class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" />
+	<bean id="form_delete" class="org.opendatakit.aggregate.task.gae.FormDeleteImpl" />
+	<bean id="purge_submissions" class="org.opendatakit.aggregate.task.gae.PurgeOlderSubmissionsImpl" />
+	<bean id="upload_task"
+		class="org.opendatakit.aggregate.task.gae.UploadSubmissionsImpl" />
+	<bean id="kml_task" class="org.opendatakit.aggregate.task.gae.KmlGeneratorImpl" />
+	<bean id="csv_task" class="org.opendatakit.aggregate.task.gae.CsvGeneratorImpl" />
+	<bean id="json_file_task" class="org.opendatakit.aggregate.task.gae.JsonFileGeneratorImpl" />
+    <bean id="http_client_factory" class="org.opendatakit.common.utils.gae.GaeHttpClientFactoryImpl" />
+    <bean id="image_util" class="org.opendatakit.aggregate.util.gae.ImageUtilImpl" />
+	<bean id="startup" class="org.opendatakit.aggregate.AggregateStartupImpl" />
+	<bean id="oob_user_fetcher" class="org.opendatakit.common.utils.gae.GaeOutOfBandUserFetcher" />
+
+	<bean id="watchdog" class="org.opendatakit.aggregate.task.gae.WatchdogImpl">
+		<property name="datastore" ref="datastore" />
+		<property name="userService" ref="user_service" />
+		<property name="worksheetCreator" ref="worksheet_creator" />
+		<property name="purgeSubmissions" ref="purge_submissions" />
+		<property name="formDelete" ref="form_delete" />
+		<property name="uploadSubmissions" ref="upload_task" />
+		<property name="kmlGenerator" ref="kml_task" />
+		<property name="csvGenerator" ref="csv_task" />
+		<property name="jsonFileGenerator" ref="json_file_task" />
+		<property name="httpClientFactory" ref="http_client_factory" />
+		<property name="imageUtil" ref="image_util" />
+	</bean>
+
+</beans>
