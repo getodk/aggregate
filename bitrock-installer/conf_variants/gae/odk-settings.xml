@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+           http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task-4.1.xsd">
 
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -42,9 +44,6 @@
 		<property name="userService" ref="user_service"/>
 	</bean>
 
-<!--	<bean id="user_service" class="org.opendatakit.common.security.gae.UserServiceImpl">-->
-<!--		<property name="realm" ref="realm" />-->
-<!--	</bean>-->
 	<bean id="worksheet_creator"
 		class="org.opendatakit.aggregate.task.gae.WorksheetCreatorImpl" />
 	<bean id="form_delete" class="org.opendatakit.aggregate.task.gae.FormDeleteImpl" />
