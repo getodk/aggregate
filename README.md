@@ -42,7 +42,6 @@ Now you can open the project in the folder of your clone from IntelliJ and follo
 
 Be sure to read other documents:
 
-- [Project structure document](./docs/project_structure.md)
 - [Installer generation document](./docs/installer_generation.md)
  
 ## Contributing
