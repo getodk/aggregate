@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
