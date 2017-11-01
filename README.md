@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Slack status](http://slack.opendatakit.org/badge.svg)](http://slack.opendatakit.org)
 
+(The previous Eclipse based version of this project is in [commit #f110aa](https://github.com/opendatakit/aggregate/commit/f110aa938099ef0e596868bec057b6a3fa9ddabe)) 
+ 
 ODK Aggregate provides a ready-to-deploy server and data repository to:
 
 - provide blank forms to ODK Collect (or other OpenRosa clients),
