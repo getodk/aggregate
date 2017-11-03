@@ -48,8 +48,8 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 				long attemptCount, 
 				String spreadsheetName, ExternalServicePublicationOption esType,
 				CallingContext cc) {
-			impl = new WorksheetCreatorWorkerImpl(form, miscTasksKey, 
-					attemptCount, 
+			impl = new WorksheetCreatorWorkerImpl(form, miscTasksKey,
+					attemptCount,
 					spreadsheetName, esType, cc);
 		}
 

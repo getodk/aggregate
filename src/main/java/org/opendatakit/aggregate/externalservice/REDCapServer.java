@@ -32,7 +32,6 @@ import java.util.TimeZone;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,6 +78,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+
 public class REDCapServer extends AbstractExternalService implements ExternalService {
   private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
 
@@ -88,14 +88,14 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
   private final REDCapServerParameterTable objectEntity;
 
   private REDCapServer(REDCapServerParameterTable entity, FormServiceCursor formServiceCursor,
-      IForm form, CallingContext cc) {
+                       IForm form, CallingContext cc) {
     super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
 
   private REDCapServer(REDCapServerParameterTable entity, IForm form,
-      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+                       ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
     this(entity, createFormServiceCursor(form, entity, externalServiceOption,
         ExternalServiceType.REDCAP_SERVER, cc), form, cc);
@@ -109,7 +109,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
   }
 
   public REDCapServer(IForm form, String apiKey, String url,
-      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+                      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
     this(newEntity(REDCapServerParameterTable.assertRelation(cc), cc), form, externalServiceOption,
         ownerEmail, cc);
@@ -149,7 +149,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
   }
 
   private void submitPost(String actionType, HttpEntity postentity, List<NameValuePair> qparam,
-      CallingContext cc) {
+                          CallingContext cc) {
 
     try {
       HttpResponse response = this.sendHttpRequest(POST, getUrl(), postentity, qparam, cc);
@@ -210,7 +210,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
   }
 
   public void submitFile(String recordID, String fileField, BlobSubmissionType blob_value,
-      CallingContext cc) throws MalformedURLException, IOException,
+                         CallingContext cc) throws MalformedURLException, IOException,
       ODKDatastoreException {
 
     String contentType = blob_value.getContentType(1, cc);
@@ -225,13 +225,13 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
     ContentType utf8Text = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), UTF_CHARSET);
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();
     builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-           .setCharset(UTF_CHARSET);
+        .setCharset(UTF_CHARSET);
     builder.addTextBody("token", getApiKey(), utf8Text)
-           .addTextBody("content", "file", utf8Text)
-           .addTextBody("action", "import", utf8Text)
-           .addTextBody("record", recordID, utf8Text)
-           .addTextBody("field", fileField, utf8Text)
-           .addBinaryBody("file", blob_value.getBlob(1,  cc), ContentType.create(contentType), filename);
+        .addTextBody("content", "file", utf8Text)
+        .addTextBody("action", "import", utf8Text)
+        .addTextBody("record", recordID, utf8Text)
+        .addTextBody("field", fileField, utf8Text)
+        .addBinaryBody("file", blob_value.getBlob(1, cc), ContentType.create(contentType), filename);
 
     submitPost("File import", builder.build(), null, cc);
   }
@@ -260,175 +260,175 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
           // handle metadata specially
         } else {
           switch (element.getElementType()) {
-          case METADATA: 
-            // This keeps lint warnings down...
-            break;
-          case GEOSHAPE:
-          case GEOTRACE:
-          case STRING: {
-            StringSubmissionType str = (StringSubmissionType) value;
-            String strValue = str.getValue();
-            if (element.getElementName().equals("study_id")) {
-              // Piece of crap parser in REDCap requires study id to be first
-              // element
-              study_id = strValue;
-            } else if (strValue != null) {
-              b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
-                  .append(element.getElementName()).append(">");
+            case METADATA:
+              // This keeps lint warnings down...
+              break;
+            case GEOSHAPE:
+            case GEOTRACE:
+            case STRING: {
+              StringSubmissionType str = (StringSubmissionType) value;
+              String strValue = str.getValue();
+              if (element.getElementName().equals("study_id")) {
+                // Piece of crap parser in REDCap requires study id to be first
+                // element
+                study_id = strValue;
+              } else if (strValue != null) {
+                b.append("<").append(element.getElementName()).append(">")
+                    .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
+                    .append(element.getElementName()).append(">");
+              }
             }
-          }
             break;
 
-          case JRDATETIME: {
-            JRDateTimeType dt = (JRDateTimeType) value;
-            Date dtValue = dt.getValue();
+            case JRDATETIME: {
+              JRDateTimeType dt = (JRDateTimeType) value;
+              Date dtValue = dt.getValue();
 
-            if (dtValue != null) {
-              GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-              g.setTime(dtValue);
+              if (dtValue != null) {
+                GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+                g.setTime(dtValue);
 
-              String strValue = String.format(FormatConsts.REDCAP_DATE_TIME_FORMAT_STRING,
-                  g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH),
-                  g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE), g.get(Calendar.SECOND));
+                String strValue = String.format(FormatConsts.REDCAP_DATE_TIME_FORMAT_STRING,
+                    g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH),
+                    g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE), g.get(Calendar.SECOND));
 
-              b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
-                  .append(element.getElementName()).append(">");
+                b.append("<").append(element.getElementName()).append(">")
+                    .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
+                    .append(element.getElementName()).append(">");
 
+              }
             }
-          }
             break;
 
-          case JRDATE: {
-            JRDateType dt = (JRDateType) value;
-            Date dtValue = dt.getValue();
+            case JRDATE: {
+              JRDateType dt = (JRDateType) value;
+              Date dtValue = dt.getValue();
 
-            if (dtValue != null) {
-              GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-              g.setTime(dtValue);
+              if (dtValue != null) {
+                GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+                g.setTime(dtValue);
 
-              String strValue = String.format(FormatConsts.REDCAP_DATE_ONLY_FORMAT_STRING,
-                  g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH));
+                String strValue = String.format(FormatConsts.REDCAP_DATE_ONLY_FORMAT_STRING,
+                    g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH));
 
-              b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
-                  .append(element.getElementName()).append(">");
+                b.append("<").append(element.getElementName()).append(">")
+                    .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
+                    .append(element.getElementName()).append(">");
+              }
             }
-          }
             break;
 
-          case JRTIME: {
-            JRTimeType dt = (JRTimeType) value;
-            Date dtValue = dt.getValue();
+            case JRTIME: {
+              JRTimeType dt = (JRTimeType) value;
+              Date dtValue = dt.getValue();
 
-            if (dtValue != null) {
-              GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-              g.setTime(dtValue);
+              if (dtValue != null) {
+                GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+                g.setTime(dtValue);
 
-              String strValue = String.format(FormatConsts.REDCAP_TIME_FORMAT_STRING,
-                  g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE));
+                String strValue = String.format(FormatConsts.REDCAP_TIME_FORMAT_STRING,
+                    g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE));
 
-              b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
-                  .append(element.getElementName()).append(">");
+                b.append("<").append(element.getElementName()).append(">")
+                    .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
+                    .append(element.getElementName()).append(">");
+              }
             }
-          }
             break;
 
-          case INTEGER: {
-            LongSubmissionType longVal = (LongSubmissionType) value;
-            if (longVal.getValue() != null) {
-              String strValue = longVal.getValue().toString();
+            case INTEGER: {
+              LongSubmissionType longVal = (LongSubmissionType) value;
+              if (longVal.getValue() != null) {
+                String strValue = longVal.getValue().toString();
 
-              b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
-                  .append(element.getElementName()).append(">");
+                b.append("<").append(element.getElementName()).append(">")
+                    .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
+                    .append(element.getElementName()).append(">");
+              }
             }
-          }
             break;
 
-          case DECIMAL: {
-            DecimalSubmissionType dec = (DecimalSubmissionType) value;
-            if (dec.getValue() != null) {
-              String strValue = dec.getValue().toString();
+            case DECIMAL: {
+              DecimalSubmissionType dec = (DecimalSubmissionType) value;
+              if (dec.getValue() != null) {
+                String strValue = dec.getValue().toString();
 
-              b.append("<").append(element.getElementName()).append(">")
-                  .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
-                  .append(element.getElementName()).append(">");
+                b.append("<").append(element.getElementName()).append(">")
+                    .append(StringEscapeUtils.escapeXml10(strValue)).append("</")
+                    .append(element.getElementName()).append(">");
+              }
             }
-          }
             break;
 
-          case GEOPOINT: {
-            // TODO: should not have gps_ prefix on tag...
-            String strippedElementName = element.getElementName().replace("gps_", "");
-            GeoPointSubmissionType submissionValue = (GeoPointSubmissionType) value;
-            GeoPoint coors = submissionValue.getValue();
-            if (coors.getLatitude() != null) {
-              b.append("<").append("gps_lat_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml10(coors.getLatitude().toString())).append("</")
-                  .append("gps_lat_" + strippedElementName).append(">");
+            case GEOPOINT: {
+              // TODO: should not have gps_ prefix on tag...
+              String strippedElementName = element.getElementName().replace("gps_", "");
+              GeoPointSubmissionType submissionValue = (GeoPointSubmissionType) value;
+              GeoPoint coors = submissionValue.getValue();
+              if (coors.getLatitude() != null) {
+                b.append("<").append("gps_lat_" + strippedElementName).append(">")
+                    .append(StringEscapeUtils.escapeXml10(coors.getLatitude().toString())).append("</")
+                    .append("gps_lat_" + strippedElementName).append(">");
 
-              b.append("<").append("gps_lon_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml10(coors.getLongitude().toString()))
-                  .append("</").append("gps_lon_" + strippedElementName).append(">");
+                b.append("<").append("gps_lon_" + strippedElementName).append(">")
+                    .append(StringEscapeUtils.escapeXml10(coors.getLongitude().toString()))
+                    .append("</").append("gps_lon_" + strippedElementName).append(">");
 
-              b.append("<").append("gps_alt_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml10(coors.getAltitude().toString())).append("</")
-                  .append("gps_alt_" + strippedElementName).append(">");
+                b.append("<").append("gps_alt_" + strippedElementName).append(">")
+                    .append(StringEscapeUtils.escapeXml10(coors.getAltitude().toString())).append("</")
+                    .append("gps_alt_" + strippedElementName).append(">");
 
-              b.append("<").append("gps_acc_" + strippedElementName).append(">")
-                  .append(StringEscapeUtils.escapeXml10(coors.getAccuracy().toString())).append("</")
-                  .append("gps_acc_" + strippedElementName).append(">");
+                b.append("<").append("gps_acc_" + strippedElementName).append(">")
+                    .append(StringEscapeUtils.escapeXml10(coors.getAccuracy().toString())).append("</")
+                    .append("gps_acc_" + strippedElementName).append(">");
+              }
             }
-          }
             break;
 
-          case BINARY: {
-            String file_field = element.getElementName();
-            BlobSubmissionType blob_value = (BlobSubmissionType) value;
-            if (blob_value.getAttachmentCount(cc) == 1) {
-              blobs.put(file_field, blob_value);
+            case BINARY: {
+              String file_field = element.getElementName();
+              BlobSubmissionType blob_value = (BlobSubmissionType) value;
+              if (blob_value.getAttachmentCount(cc) == 1) {
+                blobs.put(file_field, blob_value);
+              }
+              // upload these after we have successfully imported the record
             }
-            // upload these after we have successfully imported the record
-          }
             break;
 
-          case BOOLEAN: {
-            String strippedElementName = element.getElementName().replace("slct-", "");
-            BooleanSubmissionType bType = (BooleanSubmissionType) value;
-            if (bType.getValue() != null) {
-              b.append("<").append(strippedElementName + "___" + bType.getValue().toString())
-                  .append(">").append(StringEscapeUtils.escapeXml10("1")).append("</")
-                  .append(strippedElementName + "___" + bType.getValue().toString()).append(">");
+            case BOOLEAN: {
+              String strippedElementName = element.getElementName().replace("slct-", "");
+              BooleanSubmissionType bType = (BooleanSubmissionType) value;
+              if (bType.getValue() != null) {
+                b.append("<").append(strippedElementName + "___" + bType.getValue().toString())
+                    .append(">").append(StringEscapeUtils.escapeXml10("1")).append("</")
+                    .append(strippedElementName + "___" + bType.getValue().toString()).append(">");
+              }
             }
-          }
             break;
 
-          case SELECT1:
-          case SELECTN: {
-            // TODO: it's not necessary to add (or remove) 'slct-' from
-            // the field name anymore
-            String formatElementName = element.getElementName().replace("slct-", "");
-            ChoiceSubmissionType choice = (ChoiceSubmissionType) value;
-            for (String choiceVal : choice.getValue()) {
-              b.append("<").append(formatElementName + "___" + choiceVal).append(">")
-                  .append(StringEscapeUtils.escapeXml10("1")).append("</")
-                  .append(formatElementName + "___" + choiceVal).append(">");
+            case SELECT1:
+            case SELECTN: {
+              // TODO: it's not necessary to add (or remove) 'slct-' from
+              // the field name anymore
+              String formatElementName = element.getElementName().replace("slct-", "");
+              ChoiceSubmissionType choice = (ChoiceSubmissionType) value;
+              for (String choiceVal : choice.getValue()) {
+                b.append("<").append(formatElementName + "___" + choiceVal).append(">")
+                    .append(StringEscapeUtils.escapeXml10("1")).append("</")
+                    .append(formatElementName + "___" + choiceVal).append(">");
+              }
             }
-          }
             break;
 
-          case REPEAT: {
-            logger.warn("Unable to publish repeat groups to REDCap");
-            // REDCap does not handle repeat groups.
-          }
+            case REPEAT: {
+              logger.warn("Unable to publish repeat groups to REDCap");
+              // REDCap does not handle repeat groups.
+            }
             break;
 
-          case GROUP:
-            logger.warn("The GROUP submission type is not implemented");
-            break;
+            case GROUP:
+              logger.warn("The GROUP submission type is not implemented");
+              break;
 
           }
         }

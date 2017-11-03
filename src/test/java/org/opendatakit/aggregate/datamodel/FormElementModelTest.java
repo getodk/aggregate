@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 
-@RunWith(org.junit.runners.JUnit4.class)
+
 public class FormElementModelTest {
 
 	@Test

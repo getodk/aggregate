@@ -28,7 +28,7 @@ import org.opendatakit.common.web.TestContextFactory;
  * @author mitchellsundt@gmail.com
  *
  */
-@RunWith(org.junit.runners.JUnit4.class)
+
 public class BlobRelationSetTest {
 
 	@Before
