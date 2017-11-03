@@ -34,7 +34,7 @@ import org.opendatakit.common.persistence.WrappedBigDecimal;
  * 
  */
 
-@RunWith(org.junit.runners.JUnit4.class)
+
 public class KmlGeoTraceParsingTest {
 
   @Test

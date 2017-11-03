@@ -12,7 +12,6 @@
  * the License.
  */
 package org.opendatakit.aggregate.externalservice;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -65,13 +64,14 @@ import org.opendatakit.common.utils.HttpClientFactory;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
+
 /**
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  *
  */
-public abstract class AbstractExternalService implements ExternalService{
+public abstract class AbstractExternalService implements ExternalService {
 
   private static final String NO_BATCH_FUNCTIONALITY_ERROR = "ERROR! External Service does NOT implement a BATCH function to upload multiple submissions - AbstractExternalService";
 
@@ -127,7 +127,7 @@ public abstract class AbstractExternalService implements ExternalService{
   public boolean canBatchSubmissions() {
     return false;
   }
-  
+
   @Override
   public void sendSubmissions(List<Submission> submissions, boolean streaming, CallingContext cc) throws ODKExternalServiceException {
     throw new ODKExternalServiceException(NO_BATCH_FUNCTIONALITY_ERROR);
@@ -155,7 +155,7 @@ public abstract class AbstractExternalService implements ExternalService{
 
     // setup client
     HttpClientFactory factory = (HttpClientFactory) cc.getBean(BeanDefs.HTTP_CLIENT_FACTORY);
-    
+
     SocketConfig socketConfig = SocketConfig.copy(SocketConfig.DEFAULT)
         .setSoTimeout(SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS)
         .build();
@@ -177,9 +177,9 @@ public abstract class AbstractExternalService implements ExternalService{
     localContext.setAttribute(HttpClientContext.CREDS_PROVIDER, credsProvider);
 
     HttpUriRequest request = null;
-    if ( entity == null && (POST.equals(method) || PATCH.equals(method) || PUT.equals(method)) ) {
+    if (entity == null && (POST.equals(method) || PATCH.equals(method) || PUT.equals(method))) {
       throw new IllegalStateException("No body supplied for POST, PATCH or PUT request");
-    } else if ( entity != null && !(POST.equals(method) || PATCH.equals(method) || PUT.equals(method)) ) {
+    } else if (entity != null && !(POST.equals(method) || PATCH.equals(method) || PUT.equals(method))) {
       throw new IllegalStateException("Body was supplied for GET or DELETE request");
     }
 
@@ -191,12 +191,12 @@ public abstract class AbstractExternalService implements ExternalService{
       throw new IllegalStateException(e);
     }
 
-    if ( qparams == null ) {
+    if (qparams == null) {
       qparams = new ArrayList<NameValuePair>();
     }
     URI uri;
     try {
-      uri = new URI( nakedUri.getScheme(), nakedUri.getUserInfo(), nakedUri.getHost(),
+      uri = new URI(nakedUri.getScheme(), nakedUri.getUserInfo(), nakedUri.getHost(),
           nakedUri.getPort(), nakedUri.getPath(), URLEncodedUtils.format(qparams, HtmlConsts.UTF8_ENCODE), null);
     } catch (URISyntaxException e1) {
       e1.printStackTrace();
@@ -204,21 +204,21 @@ public abstract class AbstractExternalService implements ExternalService{
     }
     System.out.println(uri.toString());
 
-    if ( GET.equals(method) ) {
+    if (GET.equals(method)) {
       HttpGet get = new HttpGet(uri);
       request = get;
-    } else if ( DELETE.equals(method) ) {
+    } else if (DELETE.equals(method)) {
       HttpDelete delete = new HttpDelete(uri);
       request = delete;
-    } else if ( PATCH.equals(method) ) {
+    } else if (PATCH.equals(method)) {
       HttpPatch patch = new HttpPatch(uri);
       patch.setEntity(entity);
       request = patch;
-    } else if ( POST.equals(method) ) {
+    } else if (POST.equals(method)) {
       HttpPost post = new HttpPost(uri);
       post.setEntity(entity);
       request = post;
-    } else if ( PUT.equals(method) ) {
+    } else if (PUT.equals(method)) {
       HttpPut put = new HttpPut(uri);
       put.setEntity(entity);
       request = put;
@@ -267,7 +267,7 @@ public abstract class AbstractExternalService implements ExternalService{
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
     List<? extends CommonFieldsBase> repeats = retrieveRepeatElementEntities();
 
-    if(repeats != null) {
+    if (repeats != null) {
       ds.putEntities(repeats, user);
     }
     ds.putEntity(serviceEntity, user);
@@ -311,7 +311,7 @@ public abstract class AbstractExternalService implements ExternalService{
     // upload data to external service
     if (!fsc.getExternalServicePublicationOption().equals(
         ExternalServicePublicationOption.STREAM_ONLY)) {
-  
+
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
       CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
       ccDaemon.setAsDaemon(true);
@@ -361,5 +361,5 @@ public abstract class AbstractExternalService implements ExternalService{
     User user = cc.getCurrentUser();
     return ds.getEntity(parameterTableRelation, fsc.getAuriService(), user);
   }
-  
+
 }

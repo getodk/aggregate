@@ -42,7 +42,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -108,7 +107,7 @@ public class TableServiceImpl implements TableService {
   private final CallingContext cc;
 
   public TableServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers,
-      UriInfo info, String appId, CallingContext cc) throws ODKEntityNotFoundException,
+                          UriInfo info, String appId, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
     this.sc = sc;
     this.req = req;
@@ -120,7 +119,7 @@ public class TableServiceImpl implements TableService {
   }
 
   public TableServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers,
-      UriInfo info, String appId, String tableId, CallingContext cc)
+                          UriInfo info, String appId, String tableId, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     this.sc = sc;
     this.req = req;
@@ -133,7 +132,7 @@ public class TableServiceImpl implements TableService {
 
   @Override
   public Response getTables(@QueryParam(CURSOR_PARAMETER) String cursor,
-      @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
+                            @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException {
 
     TablesUserPermissions userPermissions = new TablesUserPermissionsImpl(cc);
@@ -141,7 +140,7 @@ public class TableServiceImpl implements TableService {
     TableManager tm = new TableManager(appId, userPermissions, cc);
 
     int limit = (fetchLimit == null || fetchLimit.length() == 0) ?
-    		2000 : Integer.valueOf(fetchLimit);
+        2000 : Integer.valueOf(fetchLimit);
     WebsafeTables websafeResult = tm.getTables(
         QueryResumePoint.fromWebsafeCursor(WebUtils.safeDecode(cursor)), limit);
     ArrayList<TableResource> resources = new ArrayList<TableResource>();
@@ -312,7 +311,7 @@ public class TableServiceImpl implements TableService {
   }
 
   @Override
-  public Response getTableProperties(@PathParam("odkClientVersion") String odkClientVersion) 
+  public Response getTableProperties(@PathParam("odkClientVersion") String odkClientVersion)
       throws ODKDatastoreException, PermissionDeniedException,
       ODKTaskLockException, TableNotFoundException, FileNotFoundException {
 

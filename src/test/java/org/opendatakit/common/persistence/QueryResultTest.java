@@ -37,10 +37,10 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.TestContextFactory;
 
-@RunWith(org.junit.runners.JUnit4.class)
+
 public class QueryResultTest {
 
-	static int SET_SIZE = 2000;
+	static int SET_SIZE = 10; // This used to be 2000
 	
 	@BeforeClass
 	public static void oneTimeSetUp() throws Exception {

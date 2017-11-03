@@ -1,4 +1,0 @@
-# need to prevent cl/lf on this file since Linux hates that
-#
-bitrock-installer/files/gae_scripts/uploadAggregateToAppEngine.sh   text eol=lf
-

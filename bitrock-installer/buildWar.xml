@@ -84,9 +84,11 @@
         </runProgram>
         <runProgram>
             <program>cmd</program>
-            <programArguments>/S /C start /D "${installdir}" /B .${platform_path_separator}README.html</programArguments>
+            <programArguments>/S /C start /D "${installdir}" /B .${platform_path_separator}README.html
+            </programArguments>
             <progressText>Show additional deployment and
-configuration steps (5-10 minutes).</progressText>
+                configuration steps (5-10 minutes).
+            </progressText>
             <useMSDOSPath>0</useMSDOSPath>
             <workingDirectory>${installdir}</workingDirectory>
             <ruleList>
@@ -102,7 +104,8 @@ configuration steps (5-10 minutes).</progressText>
         </runProgram>
         <actionGroup>
             <progressText>Show additional deployment and
-configuration steps (5-10 minutes).</progressText>
+                configuration steps (5-10 minutes).
+            </progressText>
             <actionList>
                 <launchBrowser>
                     <url>file:///${installdir}/README.html</url>

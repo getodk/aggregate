@@ -16,12 +16,7 @@
 
 package org.opendatakit.aggregate.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
@@ -42,20 +37,22 @@ import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.persistence.engine.gae.DatastoreImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class ServerTableServiceImpl extends RemoteServiceServlet implements ServerTableService {
 
   /**
-	 *
-	 */
+   *
+   */
   private static final long serialVersionUID = 329170770895918034L;
   private static final Log logger = LogFactory.getLog(ServerTableServiceImpl.class);
 
@@ -174,9 +171,6 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
       tm.deleteTable(tableId);
       logger.info("tableId: " + tableId);
       Datastore ds = cc.getDatastore();
-      if ( ds instanceof DatastoreImpl ) {
-        ((DatastoreImpl) ds).getDam().logUsage();
-      }
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);

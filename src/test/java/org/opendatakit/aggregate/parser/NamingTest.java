@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
  * @author wbrunette@gmail.com
  *
  */
-@RunWith(org.junit.runners.JUnit4.class)
+
 public class NamingTest {
 
   @Test

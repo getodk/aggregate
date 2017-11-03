@@ -1,260 +1,255 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.opendatakit</groupId>
-		<artifactId>aggregate</artifactId>
-		<version>1.0.1</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
-	<groupId>org.opendatakit</groupId>
-	<artifactId>ODKAggregateInstaller</artifactId>
-	<version>1.0.1</version>
-	<name>ODK_Aggregate</name>
-	<description>Generate an installer for ODKAggregate.</description>
-	<organization>
-		<name>Open Data Kit</name>
-		<url>http://opendatakit.org/</url>
-	</organization>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<conf.directory>${project.basedir}/files/conf</conf.directory>
-	</properties>
-	<build>
-		<resources>
-			<resource>
-				<targetPath>${conf.directory}/common</targetPath>
-				<filtering>false</filtering>
-				<directory>${toplevel.directory}/src/main/resources/common/</directory>
-				<includes>
-				  <include>**/*</include>
-				</includes>
-			</resource>
-			<resource>
-				<targetPath>${conf.directory}/mysql</targetPath>
-				<filtering>false</filtering>
-				<directory>${toplevel.directory}/src/main/resources/mysql/</directory>
-				<includes>
-				  <include>**/*</include>
-				</includes>
-			</resource>
-			<resource>
-				<targetPath>${conf.directory}/postgresql</targetPath> <!-- name changes to postgresql -->
-				<filtering>false</filtering>
-				<directory>${toplevel.directory}/src/main/resources/postgres/</directory>
-				<includes>
-				  <include>**/*</include>
-				</includes>
-			</resource>
-			<resource>
-				<targetPath>${conf.directory}/sqlserver</targetPath>
-				<filtering>false</filtering>
-				<directory>${toplevel.directory}/src/main/resources/sqlserver/</directory>
-				<includes>
-				  <include>**/*</include>
-				</includes>
-			</resource>
-			<resource>
-				<targetPath>${conf.directory}/gae</targetPath>
-				<filtering>false</filtering>
-				<directory>${toplevel.directory}/src/main/resources/gae/</directory>
-				<includes>
-				  <include>**/*</include>
-				</includes>
-			</resource>
-			<resource>
-				<targetPath>${conf.directory}/gae_mysql</targetPath>
-				<filtering>false</filtering>
-				<directory>${toplevel.directory}/src/main/resources/gae_mysql/</directory>
-				<includes>
-				  <include>**/*</include>
-				</includes>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.6</version>
-				<executions>
-					<execution>
-						<id>remove-copies</id>
-						<phase>clean</phase>
-						<configuration>
-							<target>
-								<!-- delete the files/conf directory -->
-								<mkdir dir="${conf.directory}" />
-								<delete includeemptydirs="true">
-									<fileset dir="${conf.directory}" includes="**/*" />
-								</delete>
-								<!-- delete the reconstructed WAR file -->
-								<touch file="${project.basedir}/files/ODKAggregate.war" />
-								<delete file="${project.basedir}/files/ODKAggregate.war" />
-								<!-- delete the exploded war directory -->
-								<mkdir dir="${project.build.directory}" />
-								<delete includeemptydirs="true">
-									<fileset dir="${project.build.directory}" includes="**/*" />
-								</delete>
-								<!-- delete all but the most recent war file -->
-								<resources id="mostRecent">
-									<first>
-										<sort>
-										  <fileset dir="${project.basedir}" includes="*.war" />
-										  <reverse xmlns="antlib:org.apache.tools.ant.types.resources.comparators">
-											<date />
-										  </reverse>
-										</sort>
-									</first>
-								</resources>
-								<delete>
-								  <difference>
-									<fileset dir="${project.basedir}" includes="*.war" />
-									<resources refid="mostRecent"/>
-								  </difference>
-								</delete>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>gen-copies</id>
-						<phase>package</phase>
-						<configuration>
-							<target>
-							    <!-- copy Google AppEngine config -->
-								<mkdir dir="${conf.directory}/ear" />
-								<mkdir dir="${conf.directory}/ear/META-INF" />
-								<mkdir dir="${conf.directory}/ear/background" />
-								<mkdir dir="${conf.directory}/ear/background/WEB-INF" />
-								<mkdir dir="${conf.directory}/ear/default" />
-								<mkdir dir="${conf.directory}/ear/default/WEB-INF" />
-								<!-- touch the files, then delete them, then copy them -->
-								<!-- background server -->
-								<touch file="${conf.directory}/ear/background/WEB-INF/appengine-web.xml" />
-								<delete file="${conf.directory}/ear/background/WEB-INF/appengine-web.xml" />
-								<copy file="${toplevel.directory}/eclipse-n-background/WebContent/WEB-INF/appengine-web.xml"
-									tofile="${conf.directory}/ear/background/WEB-INF/appengine-web.xml" />
-								<!-- default server -->
-								<touch file="${conf.directory}/ear/default/WEB-INF/appengine-web.xml" />
-								<delete file="${conf.directory}/ear/default/WEB-INF/appengine-web.xml" />
-								<copy file="${toplevel.directory}/eclipse-default/WebContent/WEB-INF/appengine-web.xml"
-									tofile="${conf.directory}/ear/default/WEB-INF/appengine-web.xml" />
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opendatakit</groupId>
+    <artifactId>ODKAggregateInstaller</artifactId>
+    <version>1.0.1</version>
+    <name>ODK_Aggregate</name>
+    <description>Generate an installer for ODKAggregate.</description>
+    <organization>
+        <name>Open Data Kit</name>
+        <url>http://opendatakit.org/</url>
+    </organization>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <conf.target>${project.basedir}/files/conf</conf.target>
+        <conf.source>${project.basedir}/conf_variants</conf.source>
+    </properties>
+    <build>
+        <resources>
+            <resource>
+                <targetPath>${conf.target}/common</targetPath>
+                <filtering>false</filtering>
+                <directory>${conf.source}/common/</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <targetPath>${conf.target}/mysql</targetPath>
+                <filtering>false</filtering>
+                <directory>${conf.source}/mysql/</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <targetPath>${conf.target}/postgresql</targetPath>
+                <filtering>false</filtering>
+                <directory>${conf.source}/postgresql/</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <targetPath>${conf.target}/sqlserver</targetPath>
+                <filtering>false</filtering>
+                <directory>${conf.source}/sqlserver/</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <targetPath>${conf.target}/gae</targetPath>
+                <filtering>false</filtering>
+                <directory>${conf.source}/gae/</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <targetPath>${conf.target}/gae_mysql</targetPath>
+                <filtering>false</filtering>
+                <directory>${conf.source}/gae_mysql/</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>remove-copies</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <target>
+                                <!-- delete the files/conf directory -->
+                                <mkdir dir="${conf.target}"/>
+                                <delete includeemptydirs="true">
+                                    <fileset dir="${conf.target}" includes="**/*"/>
+                                </delete>
+                                <!-- delete the reconstructed WAR file -->
+                                <touch file="${project.basedir}/files/ODKAggregate.war"/>
+                                <delete file="${project.basedir}/files/ODKAggregate.war"/>
+                                <!-- delete the exploded war directory -->
+                                <mkdir dir="${project.build.directory}"/>
+                                <delete includeemptydirs="true">
+                                    <fileset dir="${project.build.directory}" includes="**/*"/>
+                                </delete>
+                                <!-- delete all but the most recent war file -->
+                                <resources id="mostRecent">
+                                    <first>
+                                        <sort>
+                                            <fileset dir="${project.basedir}" includes="*.war"/>
+                                            <reverse xmlns="antlib:org.apache.tools.ant.types.resources.comparators">
+                                                <date/>
+                                            </reverse>
+                                        </sort>
+                                    </first>
+                                </resources>
+                                <delete>
+                                    <difference>
+                                        <fileset dir="${project.basedir}" includes="*.war"/>
+                                        <resources refid="mostRecent"/>
+                                    </difference>
+                                </delete>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>gen-copies</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <!-- copy Google AppEngine config -->
+                                <mkdir dir="${conf.target}/ear"/>
+                                <mkdir dir="${conf.target}/ear/META-INF"/>
+                                <mkdir dir="${conf.target}/ear/background"/>
+                                <mkdir dir="${conf.target}/ear/background/WEB-INF"/>
+                                <mkdir dir="${conf.target}/ear/default"/>
+                                <mkdir dir="${conf.target}/ear/default/WEB-INF"/>
 
-								<touch file="${conf.directory}/ear/default/WEB-INF/cron.xml" />
-								<delete file="${conf.directory}/ear/default/WEB-INF/cron.xml" />
-								<copy file="${toplevel.directory}/eclipse-default/WebContent/WEB-INF/cron.xml"
-									tofile="${conf.directory}/ear/default/WEB-INF/cron.xml" />
+                                <!-- background server -->
+                                <touch file="${conf.target}/ear/background/WEB-INF/appengine-web.xml"/>
+                                <delete file="${conf.target}/ear/background/WEB-INF/appengine-web.xml"/>
+                                <copy file="${conf.source}/gae_runtime/background/appengine-web.xml"
+                                      tofile="${conf.target}/ear/background/WEB-INF/appengine-web.xml"/>
 
-								<touch file="${conf.directory}/ear/default/WEB-INF/queue.xml" />
-								<delete file="${conf.directory}/ear/default/WEB-INF/queue.xml" />
-								<copy file="${toplevel.directory}/eclipse-default/WebContent/WEB-INF/queue.xml"
-									tofile="${conf.directory}/ear/default/WEB-INF/queue.xml" />
+                                <!-- default server -->
+                                <touch file="${conf.target}/ear/default/WEB-INF/appengine-web.xml"/>
+                                <delete file="${conf.target}/ear/default/WEB-INF/appengine-web.xml"/>
+                                <copy file="${conf.source}/gae_runtime/default/appengine-web.xml"
+                                      tofile="${conf.target}/ear/default/WEB-INF/appengine-web.xml"/>
 
-								<!-- ear/META-INF/ - only appengine-application.xml moves over -->
-									
-								<touch file="${conf.directory}/ear/META-INF/appengine-application.xml" />
-								<delete file="${conf.directory}/ear/META-INF/appengine-application.xml" />
-								<copy file="${toplevel.directory}/eclipse-ear/EarContent/META-INF/appengine-application.xml"
-									tofile="${conf.directory}/ear/META-INF/appengine-application.xml" />
-								
-								<!-- the ear/META-INF/application.xml has directory paths in it -->
-								<!-- use the one that is within this bitrock installer project -->
-								<touch file="${conf.directory}/ear/META-INF/application.xml" />
-								<delete file="${conf.directory}/ear/META-INF/application.xml" />
-								<copy file="${project.basedir}/files/ear/META-INF/application.xml"
-									tofile="${conf.directory}/ear/META-INF/application.xml" />
+                                <touch file="${conf.target}/ear/default/WEB-INF/cron.xml"/>
+                                <delete file="${conf.target}/ear/default/WEB-INF/cron.xml"/>
+                                <copy file="${conf.source}/gae_runtime/default/cron.xml"
+                                      tofile="${conf.target}/ear/default/WEB-INF/cron.xml"/>
 
-								<!-- explode the MySQL WAR file and remove various files -->
-								<mkdir dir="${project.build.directory}/exploded-war" />
-								<delete includeemptydirs="true">
-									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
-								</delete>
-								<mkdir dir="${project.build.directory}/exploded-war" />
-								<unjar dest="${project.build.directory}/exploded-war">
-									<fileset dir="${project.basedir}" includes="*.war"/>
-								</unjar>
-								<delete quiet="true">
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
-										includes="odk*setting*.jar" />
-									<!-- GAE requires guava 19.0; use 21.0 for everything else -->
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
-										includes="guava*.jar" />
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
-										includes="appengine-web.xml" />
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
-										includes="backends.xml" />
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
-										includes="cron.xml" />
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
-										includes="datastore-indexes.xml" />
-									<fileset dir="${project.build.directory}/exploded-war/WEB-INF"
-										includes="queue.xml" />
-								</delete>
-								<mkdir dir="${project.build.directory}/repackaged-war" />
-								<delete includeemptydirs="true">
-									<fileset dir="${project.build.directory}/repackaged-war" includes="**/*" />
-								</delete>
-								<mkdir dir="${project.build.directory}/repackaged-war" />
-								<war destfile="${project.build.directory}/repackaged-war/ODKAggregate.war"
-									webxml="${project.build.directory}/exploded-war/WEB-INF/web.xml">
-									<fileset dir="${project.build.directory}/exploded-war" includes="**/*" />
-								</war>
-								<touch file="${project.basedir}/files/ODKAggregate.war" />
-								<delete file="${project.basedir}/files/ODKAggregate.war" />
-								<copy file="${project.build.directory}/repackaged-war/ODKAggregate.war"
-									tofile="${project.basedir}/files/ODKAggregate.war" />
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<id>windows-installer</id>
-						<phase>package</phase>
-						<configuration>
-							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
-							<arguments>
-								<argument>build</argument>
-								<argument>${project.basedir}/buildWar.xml</argument>
-								<argument>windows</argument>
-							</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>linux-installer</id>
-						<phase>package</phase>
-						<configuration>
-							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
-							<arguments>
-								<argument>build</argument>
-								<argument>${project.basedir}/buildWar.xml</argument>
-								<argument>linux</argument>
-							</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>osx-installer</id>
-						<phase>package</phase>
-						<configuration>
-							<executable>${bitrock.home}/bin/builder-cli.exe</executable>
-							<arguments>
-								<argument>build</argument>
-								<argument>${project.basedir}/buildWar.xml</argument>
-								<argument>osx</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+                                <touch file="${conf.target}/ear/default/WEB-INF/queue.xml"/>
+                                <delete file="${conf.target}/ear/default/WEB-INF/queue.xml"/>
+                                <copy file="${conf.source}/gae_runtime/default/queue.xml"
+                                      tofile="${conf.target}/ear/default/WEB-INF/queue.xml"/>
+                                <!-- end: default server -->
+
+                                <touch file="${conf.target}/ear/META-INF/appengine-application.xml"/>
+                                <delete file="${conf.target}/ear/META-INF/appengine-application.xml"/>
+                                <copy file="${conf.source}/gae_runtime/appengine-application.xml"
+                                      tofile="${conf.target}/ear/META-INF/appengine-application.xml"/>
+
+                                <!-- the ear/META-INF/application.xml has directory paths in it -->
+                                <!-- use the one that is within this bitrock installer project -->
+                                <touch file="${conf.target}/ear/META-INF/application.xml"/>
+                                <delete file="${conf.target}/ear/META-INF/application.xml"/>
+                                <copy file="${project.basedir}/files/ear/META-INF/application.xml"
+                                      tofile="${conf.target}/ear/META-INF/application.xml"/>
+
+                                <!-- explode the MySQL WAR file and remove various files -->
+                                <mkdir dir="${project.build.directory}/exploded-war"/>
+                                <delete includeemptydirs="true">
+                                    <fileset dir="${project.build.directory}/exploded-war" includes="**/*"/>
+                                </delete>
+                                <mkdir dir="${project.build.directory}/exploded-war"/>
+                                <unjar dest="${project.build.directory}/exploded-war">
+                                    <fileset dir="${project.basedir}" includes="*.war"/>
+                                </unjar>
+                                <delete quiet="true">
+                                    <fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
+                                             includes="odk*setting*.jar"/>
+                                    <!-- GAE requires guava 19.0; use 21.0 for everything else -->
+                                    <fileset dir="${project.build.directory}/exploded-war/WEB-INF/lib"
+                                             includes="guava*.jar"/>
+                                    <fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+                                             includes="appengine-web.xml"/>
+                                    <fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+                                             includes="backends.xml"/>
+                                    <fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+                                             includes="cron.xml"/>
+                                    <fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+                                             includes="datastore-indexes.xml"/>
+                                    <fileset dir="${project.build.directory}/exploded-war/WEB-INF"
+                                             includes="queue.xml"/>
+                                </delete>
+                                <mkdir dir="${project.build.directory}/repackaged-war"/>
+                                <delete includeemptydirs="true">
+                                    <fileset dir="${project.build.directory}/repackaged-war" includes="**/*"/>
+                                </delete>
+                                <mkdir dir="${project.build.directory}/repackaged-war"/>
+                                <war destfile="${project.build.directory}/repackaged-war/ODKAggregate.war"
+                                     webxml="${project.build.directory}/exploded-war/WEB-INF/web.xml">
+                                    <fileset dir="${project.build.directory}/exploded-war" includes="**/*"/>
+                                </war>
+                                <touch file="${project.basedir}/files/ODKAggregate.war"/>
+                                <delete file="${project.basedir}/files/ODKAggregate.war"/>
+                                <copy file="${project.build.directory}/repackaged-war/ODKAggregate.war"
+                                      tofile="${project.basedir}/files/ODKAggregate.war"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <id>windows-installer</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <executable>${bitrock.home}/bin/builder-cli.exe</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>${project.basedir}/buildWar.xml</argument>
+                                <argument>windows</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>linux-installer</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <executable>${bitrock.home}/bin/builder-cli.exe</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>${project.basedir}/buildWar.xml</argument>
+                                <argument>linux</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>osx-installer</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <executable>${bitrock.home}/bin/builder-cli.exe</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>${project.basedir}/buildWar.xml</argument>
+                                <argument>osx</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

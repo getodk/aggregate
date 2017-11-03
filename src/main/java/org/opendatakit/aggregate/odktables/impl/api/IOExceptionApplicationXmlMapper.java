@@ -34,5 +34,4 @@ public class IOExceptionApplicationXmlMapper implements ExceptionMapper<IOExcept
   public Response toResponse(IOException e) {
     return mapper.toResponse(e);
   }
-
 }
