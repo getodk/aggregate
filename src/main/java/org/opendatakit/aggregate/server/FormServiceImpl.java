@@ -26,6 +26,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -62,6 +64,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class FormServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.form.FormService {
+  private static final Log logger = LogFactory.getLog(FormServiceImpl.class);
 
   /**
    * Serial number for serialization
@@ -122,11 +125,14 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       return formSummaries;
 
     } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
+      logger.error(e);
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKDatastoreException e) {
-      e.printStackTrace();
+      logger.error(e);
       throw new DatastoreFailureException();
+    } catch (Throwable t) {
+      logger.error("Possible corruption", t);
+      throw new RequestFailureException(ErrorConsts.POSSIBLE_CORRUPTION);
     }
   }
 
@@ -402,7 +408,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 //        }
 //      }
 
-      
+
       // encode all the settings form the selections
       StringBuilder encodedKmlSettings = new StringBuilder();
       boolean firstItem = true;
@@ -416,7 +422,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         String tmpString = kmlSetting.generateEncodedString();
         encodedKmlSettings.append(tmpString );
       }
-      
+
       Map<String, String> params = new HashMap<String, String>();
       params.put(KmlGenerator.KML_SELECTIONS_KEY, encodedKmlSettings.toString());
 

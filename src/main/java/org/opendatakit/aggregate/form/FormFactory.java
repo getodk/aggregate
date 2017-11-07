@@ -122,6 +122,11 @@ public class FormFactory {
         }
       }
 
+      for (IForm form : cache)
+        if (!form.isValid())
+          logger.error("Possible corruption: Form with URI " + form.getUri() + " is not valid");
+      cache.removeIf(value -> !value.isValid());
+
       // sort by form title then by form id
       Collections.sort(forms, new Comparator<IForm>() {
 

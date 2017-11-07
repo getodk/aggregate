@@ -111,9 +111,10 @@ public class FormDefinition {
 		return null;
 	}
 
-	private static final SubmissionAssociationTable getSubmissionAssociation(String formId, boolean canBeIncomplete, CallingContext cc ) {
-		SubmissionAssociationTable sa = null;
-		{
+	private static final SubmissionAssociationTable getSubmissionAssociation(String formId, boolean canBeIncomplete, CallingContext cc) {
+		try {
+			SubmissionAssociationTable sa = null;
+			{
 		    List<SubmissionAssociationTable> saList = SubmissionAssociationTable.findSubmissionAssociationsForXForm(formId, cc);
 		    if ( saList.isEmpty() ) {
 		    	// may be in the process of being defined, or in a partially defined state.
@@ -135,9 +136,13 @@ public class FormDefinition {
 		    		sa = st;
 		    	}
 		    }
-		}
+			}
 	    return sa;
-	}
+		} catch (Throwable t) {
+      logger.error("Returning null SubmissionAssociationTable", t);
+      return null;
+    }
+  }
 
 	/**
 	 * Traverse the form data model and assertRelation() on all the backing objects.
