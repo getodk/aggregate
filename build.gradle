@@ -11,6 +11,8 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'war'
 apply plugin: 'gwt'
+apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
+
 
 group = 'org.opendatakit'
 version = '1.0.1'
@@ -145,4 +147,8 @@ war {
     war.rootSpec.exclude "odk-settings.xml"
     war.rootSpec.exclude "security.properties"
   }
+}
+
+gretty {
+  contextPath = '/'
 }
