@@ -17,23 +17,15 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.submission.SubmissionElement;
-import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.aggregate.submission.SubmissionRepeat;
-import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.SubmissionValue;
-import org.opendatakit.aggregate.submission.SubmissionVisitor;
+import org.opendatakit.aggregate.submission.*;
 import org.opendatakit.common.datamodel.DynamicBase;
-import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
@@ -44,16 +36,19 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Data Storage type for a repeat type. Store a list of datastore keys to
  * submission sets in an entity
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class RepeatSubmissionType implements SubmissionRepeat {
-
+  private static final Log LOGGER = LogFactory.getLog(RepeatSubmissionType.class);
   /**
    * ODK identifier that uniquely identifies the form
    */
@@ -88,7 +83,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   public final FormElementModel getFormElementModel() {
     return repeatGroup;
   }
-  
+
   public SubmissionSet getEnclosingSet() {
     return enclosingSet;
   }
@@ -120,7 +115,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
   /**
    * Format value for output
-   * 
+   *
    * @param elemFormatter
    *          the element formatter that will convert the value to the proper
    *          format for output
@@ -149,15 +144,12 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     for (CommonFieldsBase cb : repeatGroupList) {
       DynamicBase d = (DynamicBase) cb;
       Long ordinal = d.getOrdinalNumber();
-      if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
-        String errString = "SELECT * FROM " + d.getTableName()
-            + " WHERE _TOP_LEVEL_AURI = " + d.getTopLevelAuri()
-            + " AND _PARENT_AURI = " + d.getParentAuri() + " is missing a (repeat) group instance OR has an extra copies.";
-        throw new ODKEnumeratedElementException(errString);
-      }
-      ++expectedOrdinal;
-      SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
-      submissionSets.add(set);
+      if (ordinal == null || ordinal != expectedOrdinal) {
+        LOGGER.error("Repeat table " + d.getTableName() + " has dupes or missing rows for top level auri " + d.getTopLevelAuri() + " and parent auri " + d.getParentAuri());
+        SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
+        submissionSets.add(set);
+      } else
+        ++expectedOrdinal;
     }
   }
 
