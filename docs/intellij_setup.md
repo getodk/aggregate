@@ -46,7 +46,7 @@ If you haven't configured a Tomcat 8.0 server inside IntelliJ yet, click on `Con
 
 Remove any action in the `Before launch` section (below). 
 
-Then, add a `Run Grails task` task and fill in the dialog to run a `gradle build -x test` command:
+Then, add a `Run Gradle task` task and fill in the dialog to run a `gradle build -x test` command:
 
 ![Gradle task configuration][intellij_3_png]
 
