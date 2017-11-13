@@ -40,6 +40,22 @@ A debugger session will connect to the debugging listener port and Aggregate wil
 
 You should now be able to browse [http://localhost:8080](http://localhost:8080)
 
+### Running/Debugging in other host/ip address
+
+By default, Gretty will launch a server using `localhost` but while working on Aggregate it's often required to run it on a host/ip address accessible from your local area network or even from the Internet (e.g. to be able to send form submissions from an ODK Collect app).
+
+This is achieved by changing your configuration in two places:
+
+- `src/main/resources/security.properties`: change the key `security.server.hostname` to whatever you need
+- `build.gradle`: change the value for `host` inside the `gretty` block accordingly.
+
+Both values must be the same. 
+
+
+
+
+
+
 [database_configurations]: ./database_configurations.md
 [functional_tests_instructions]: ../functionalTest/README.md
 [aggregate_config]: ./aggregate_config.md

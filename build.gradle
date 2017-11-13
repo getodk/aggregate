@@ -151,4 +151,5 @@ war {
 
 gretty {
   contextPath = '/'
+  host = 'localhost'
 }
