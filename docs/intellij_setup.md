@@ -20,7 +20,7 @@ Be sure to read other guides before continuing:
 
 - You need to install and activate `Tomcat and TomEE integration` plugin in IntelliJ.
 
-- You have to build Aggregate to be able to choose an existing WAR file for deployment. You can do so with `gradle clean build -x test` command
+- You have to build Aggregate to be able to choose an existing WAR file for deployment. You can do so with `./gradlew clean build -x test` command
 
 **Instructions**
 
@@ -46,7 +46,7 @@ If you haven't configured a Tomcat 8.0 server inside IntelliJ yet, click on `Con
 
 Remove any action in the `Before launch` section (below). 
 
-Then, add a `Run Grails task` task and fill in the dialog to run a `gradle build -x test` command:
+Then, add a `Run Gradle task` task and fill in the dialog to run a `gradlew build -x test` command:
 
 ![Gradle task configuration][intellij_3_png]
 
@@ -58,7 +58,7 @@ This Gradle task will produce the WAR file that we want IntelliJ to deploy using
 
 ![Choosing an external source for deployment][intellij_5_png]
 
-In the `Deployment` tab, click on the green plus sign and select `External Source...` option. You need to select the WAR file located in `build/libs/aggregate-tomcat.war`. 
+In the `Deployment` tab, click on the green plus sign and select `External Source...` option. You need to select the WAR file located in `build/libs/aggregate-x.x.x.war`. 
 
 Now the tab should look like this:
 
