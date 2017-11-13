@@ -44,6 +44,7 @@ Now you can open the project in the folder of your clone from IntelliJ and follo
 
 Be sure to read other documents:
 
+- This projects uses a lot of Gradle tasks. Read the [Using the Gradle Command-Line](https://docs.gradle.org/current/userguide/tutorial_gradle_command_line.html) to learn how to work with them.
 - [Installer generation document](./docs/installer_generation.md)
  
 ## Contributing
