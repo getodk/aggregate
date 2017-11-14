@@ -13,6 +13,7 @@ apply plugin: 'maven'
 apply plugin: 'war'
 apply plugin: 'gwt'
 apply plugin: 'de.undercouch.download'
+apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
 
 group = 'org.opendatakit'
 version = '1.0.1'
@@ -150,6 +151,7 @@ war {
     war.rootSpec.exclude "security.properties"
   }
 }
+
 task download_appEngineSDK() {
   doLast {
     if (!file('installer/appEngineSDK.zip').exists()) {
@@ -198,4 +200,9 @@ task build_installer(dependsOn: [clean_installer, download_appEngineSDK], type: 
     file("build/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
     file("build/installer/files/appengine-java-sdk-1.9.54").renameTo(file("build/installer/files/appengine-java-sdk"))
   }
+}
+
+gretty {
+  contextPath = '/'
+  host = 'localhost'
 }
