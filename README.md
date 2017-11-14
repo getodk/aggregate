@@ -97,11 +97,9 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 1. You should now be able to browse [http://localhost:8080](http://localhost:8080) and debug
 
-### Run/debug outside of localhost
+### Connections from an external device
 
-By default, Gretty will launch a server using `localhost`, but while working on Aggregate it's often required to run on other hosts or IP addresses accessible from your local area network or even from the Internet (e.g., to be able to send form submissions from ODK Collect).
-
-This is achieved by changing your configuration in two places:
+By default, Gretty will launch a server using a `localhost` address which will not be accessible by external devices (e.g., ODK Collect in an emulator, ODK Briefcase on another computer). To set a non-localhost address, edit the following files:
 
 - In `src/main/resources/security.properties`, change `security.server.hostname` to the address
 - In `build.gradle`, inside the `gretty` block, change `host` to the same address
@@ -119,4 +117,4 @@ The best way to help us test is to build from source! We are currently focusing 
 
 * If you are having problems with hung Tomcat/Jetty processes, try running the `appStop` Gradle task to stop running all instances.	
 
-* If you're using Chrome, and are seeing blank pages or refreshing not working, access Aggregate with the dev tools window open. Then, in the Network tab, check `Disable cache`.
+* If you're using Chrome and are seeing blank pages or refreshing not working, connect to Aggregate with the dev tools window open. Then in the `Network` tab, check `Disable cache`.
