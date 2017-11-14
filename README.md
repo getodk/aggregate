@@ -104,7 +104,6 @@ By default, Gretty will launch a server using a `localhost` address which will n
 - In `src/main/resources/security.properties`, change `security.server.hostname` to the address
 - In `build.gradle`, inside the `gretty` block, change `host` to the same address
 
-
 ## Contributing
 
 Any and all contributions to the project are welcome. ODK Aggregate is used across the world primarily by organizations with a social purpose so you can have real impact!
