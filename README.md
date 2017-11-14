@@ -34,7 +34,7 @@ Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQ
 
 1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later
 
-1. Setup your database with `psql` with these commands. Use `psql` or the `\connect` command will not work.
+1. Setup your database with `psql` with these commands. You must use `psql` or the `\connect` command will not work.
 
     ```sql
     CREATE USER "odk_unit" WITH UNENCRYPTED PASSWORD 'test';
