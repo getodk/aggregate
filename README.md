@@ -30,11 +30,11 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 ## Setting up the database
 
-Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations][docs/database_configurations].
+Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database_configurations).
 
 1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later
 
-1. Setup your database with these commands
+1. Setup your database with `psql` with these commands. Use `psql` or the `\connect` command will not work.
 
     ```sql
     CREATE USER "odk_unit" WITH UNENCRYPTED PASSWORD 'test';
