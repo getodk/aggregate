@@ -36,8 +36,7 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Data Storage type for a repeat type. Store a list of datastore keys to
@@ -45,7 +44,6 @@ import java.util.List;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class RepeatSubmissionType implements SubmissionRepeat {
   private static final Log LOGGER = LogFactory.getLog(RepeatSubmissionType.class);
@@ -72,7 +70,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   private List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
   public RepeatSubmissionType(SubmissionSet enclosingSet, FormElementModel repeatGroup,
-      String uriAssociatedRow, IForm form) {
+                              String uriAssociatedRow, IForm form) {
     this.enclosingSet = enclosingSet;
     this.form = form;
     this.repeatGroup = repeatGroup;
@@ -107,7 +105,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
   /**
    * @return submissionKey that defines all the repeats for this particular
-   *         repeat group.
+   * repeat group.
    */
   public SubmissionKey constructSubmissionKey() {
     return enclosingSet.constructSubmissionKey(repeatGroup);
@@ -116,13 +114,12 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   /**
    * Format value for output
    *
-   * @param elemFormatter
-   *          the element formatter that will convert the value to the proper
-   *          format for output
+   * @param elemFormatter the element formatter that will convert the value to the proper
+   *                      format for output
    */
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue,
-      CallingContext cc) throws ODKDatastoreException {
+                          CallingContext cc) throws ODKDatastoreException {
     elemFormatter.formatRepeats(this, repeatGroup, row, cc);
   }
 
@@ -136,21 +133,33 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     q.addSort(rel.parentAuri, Direction.ASCENDING); // for GAE work-around
     q.addSort(rel.ordinalNumber, Direction.ASCENDING);
 
-    // reconstruct all the repeating groups from a single submission.
-    // This should be a small number. We don't have the logic to
-    // handle fractional returns of rows.
-    long expectedOrdinal = 1L;
-    List<? extends CommonFieldsBase> repeatGroupList = q.executeQuery();
-    for (CommonFieldsBase cb : repeatGroupList) {
-      DynamicBase d = (DynamicBase) cb;
-      Long ordinal = d.getOrdinalNumber();
-      if (ordinal == null || ordinal != expectedOrdinal) {
-        LOGGER.error("Repeat table " + d.getTableName() + " has dupes or missing rows for top level auri " + d.getTopLevelAuri() + " and parent auri " + d.getParentAuri());
-        SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
-        submissionSets.add(set);
-      } else
-        ++expectedOrdinal;
+    long maxOrdinalNumber = 0;
+    Map<Long, List<DynamicBase>> rowsPerOrdinalNumber = new HashMap<>();
+    for (CommonFieldsBase cb : q.executeQuery()) {
+      DynamicBase db = (DynamicBase) cb;
+      Long ordinalNumber = db.getOrdinalNumber();
+      maxOrdinalNumber = Math.max(maxOrdinalNumber, ordinalNumber);
+      if (!rowsPerOrdinalNumber.containsKey(ordinalNumber))
+        rowsPerOrdinalNumber.put(ordinalNumber, new ArrayList<DynamicBase>());
+      rowsPerOrdinalNumber.get(ordinalNumber).add(db);
     }
+    if (rowsPerOrdinalNumber.size() != maxOrdinalNumber)
+      LOGGER.error("Repeat table " + rel.getTableName() + " has dupes or missing rows for top level auri " + rel.getTopLevelAuri() + " and parent auri " + rel.getParentAuri());
+
+    for (List<DynamicBase> dbs : rowsPerOrdinalNumber.values())
+      submissionSets.add(new SubmissionSet(enclosingSet, chooseOne(dbs), repeatGroup, form, cc));
+  }
+
+  private DynamicBase chooseOne(List<DynamicBase> dbs) {
+    if (dbs.size() == 1)
+      return dbs.get(0);
+    Collections.sort(dbs, new Comparator<DynamicBase>() {
+      @Override
+      public int compare(DynamicBase o1, DynamicBase o2) {
+        return o2.getCreationDate().compareTo(o1.getCreationDate());
+      }
+    });
+    return dbs.get(0);
   }
 
   /**
