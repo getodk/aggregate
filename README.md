@@ -72,6 +72,29 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 1. You should now be able to browse [http://localhost:8080](http://localhost:8080)
 
+### Deploy to AppEngine
+
+1. Follow the first 11 points of the official instructions for [Installing on AppEngine (Cloud)](https://opendatakit.org/use/aggregate/#Installing_an_App_Engine_Instance)
+
+1. Press the + button to add a `Gradle` configuration
+
+    * Name: `gaeUpdate` (or whatever you'd like)
+    * Gradle project: `odk-aggregate`
+    * Tasks: `gaeUpdate`
+    * Arguments: `-PgaeAppName=%yourAppName% -PgaeAppId=%yourAppId% -PgaeEmail=%yourEmail%`
+    * (change `%yourAppName%`, `%yourAppId%` and `%yourEmail%` with what you used in step 1)
+    
+1. Press `OK`
+
+1. Authenticate yourself using one of the following methods described in [How the Application Default Credentials Work](https://developers.google.com/identity/protocols/application-default-credentials#howtheywork) guide of Google Cloud Platform.
+ 
+    * We recommend the second option of running the command `gcloud auth application-default login`.
+    * Any other option will require adjustments in the Run configuration for `gaeUpdate`
+
+1. To run Aggregate, go to the `Run` menu, then to `Run...` and `Run` the `gaeUpdate` configuration. This will compile Aggregate and upload it to AppEngine, replacing your running instance with the new version.
+
+This process can fail sometimes. If that happens, you will have to manually rollback the failed update launching the `gaeRollback` task. Just follow these same steps to create a new Run Configuration for it. 
+
 ### Debug
 
 1. In the `Run` menu, select `Edit Configurations...`
