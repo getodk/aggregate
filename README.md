@@ -32,9 +32,12 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database_configurations).
 
-1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later
+1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later. Windows users should make sure they have set up the [environment variables correctly](http://bobbyong.com/blog/installing-postgresql-on-windoes/). Installation instructions are given [here](https://www.tutorialspoint.com/postgresql/postgresql_environment.htm).
+> Make sure you don't change the deafult port number.
 
-1. Setup your database with `psql` with these commands. You must use `psql` or the `\connect` command will not work.
+1. In the command-line interface type `psql -U postgres -h localhost`. `psql` command provides an interactive terminal for working with PostgreSQL. Here postgres is the username and localhost is the hostname. `-U` and `-h` are the command-line flags which are used to represent the user to connect with and the host to connect to respectively.
+
+1. Setup your database with these commands. You must use `psql` or the `\connect` command will not work.
 
     ```sql
     CREATE USER "odk_unit" WITH UNENCRYPTED PASSWORD 'test';
@@ -50,7 +53,7 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 ### Import 
 
-1. On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file
+1. On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file. If you are setting up IntelliJ for the first time and you try to run the `Import Project` wizard directly, you may get an error message **Invalid Gradle JDK configuration found**, follow the instructions provided [here](https://stackoverflow.com/questions/32654016/invalid-jdk-configuration-found-while-importing-project-via-gradle#answer-36616990).
 
 1. Make sure you check `Use auto-import` option in the `Import Project from Gradle` dialog 
 
