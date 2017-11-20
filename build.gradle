@@ -139,7 +139,7 @@ gwt {
 }
 
 war {
-  if (war_mode == "installer") {
+  if (warMode == "installer") {
     println "Excluding Guava from WAR"
     war.rootSpec.exclude("**/guava*.jar")
     println "Excluding config files from WAR"
@@ -152,7 +152,7 @@ war {
   }
 }
 
-task download_appEngineSDK() {
+task downloadAppEngineSDK() {
   doLast {
     if (!file('installer/appEngineSDK.zip').exists()) {
       println("Downloading App Engine SDK 1.9.54")
@@ -165,11 +165,11 @@ task download_appEngineSDK() {
   }
 }
 
-task clean_installer() {
+task cleanInstaller() {
   delete 'build/installer'
 }
 
-task build_installer(dependsOn: [clean_installer, download_appEngineSDK], type: Copy) {
+task buildInstaller(dependsOn: [cleanInstaller, downloadAppEngineSDK], type: Copy) {
   into "${buildDir}/installer"
   from fileTree(dir: 'installer/installBuilder')
 
