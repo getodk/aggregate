@@ -8,9 +8,9 @@ Once IntelliJ opens your Aggregate project, you can optionally follow any on-scr
 
 Be sure to read other guides before continuing:
 
-- [Supported database configurations][database_configurations]
-- [Aggregate configurations][aggregate_config]
-- [Functional tests module instructions][functional_tests_instructions]
+- [Supported database configurations][database-configurations]
+- [Aggregate configurations][aggregate-config]
+- [Functional tests module instructions][functional-tests-instructions]
 
 ## Running and debugging Aggregate for development purposes
 
@@ -51,6 +51,6 @@ This is achieved by changing your configuration in two places:
 
 Both values must be the same. 
 
-[database_configurations]: ./database_configurations.md
-[functional_tests_instructions]: ../functionalTest/README.md
-[aggregate_config]: ./aggregate_config.md
+[database-configurations]: ./database-configurations.md
+[functional-tests-instructions]: ../functionalTest/README.md
+[aggregate-config]: ./aggregate-config.md

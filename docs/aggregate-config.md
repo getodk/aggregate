@@ -2,7 +2,7 @@
 
 ## Database configuration
 
-Please refer to [Database configurations][database_configurations] document where this is covered in detail.
+Please refer to [Database configurations][database-configurations] document where this is covered in detail.
 
 ## Other configurations
 
@@ -14,4 +14,4 @@ Aggregate uses a `security.properties file` to configure different security and 
 | security.server.port       | Port to be used for HTTP service |
 | security.server.securePort | Port to be used for HTTPS service |   
 
-[database_configurations]: ./database_configurations.md
+[database-configurations]: ./database-configurations.md
