@@ -13,7 +13,7 @@ For feature requests, please include the problem description (what problem do yo
 -->
 
 #### Software and hardware versions 
-Windows/Linux/OSx, Aggregate v1.x.x, Java vx.x.x, ...
+Windows/Linux/macOS, Aggregate v1.x.x, Java vx.x.x, ...
 
 #### Problem description
 
