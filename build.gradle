@@ -149,7 +149,9 @@ task explodedWar(type: Copy) {
 }
 
 war {
-  if (war_mode == "installer") {
+  if (warMode == "installer") {
+    println "Excluding Guava from WAR"
+    war.rootSpec.exclude("**/guava*.jar")
     println "Excluding config files from WAR"
     war.rootSpec.exclude "jdbc.properties"
     war.rootSpec.exclude "logging.properties"
@@ -157,6 +159,56 @@ war {
     war.rootSpec.exclude "odk-security-settings.xml"
     war.rootSpec.exclude "odk-settings.xml"
     war.rootSpec.exclude "security.properties"
+  }
+}
+
+task downloadAppEngineSDK() {
+  doLast {
+    if (!file('installer/appEngineSDK.zip').exists()) {
+      println("Downloading App Engine SDK 1.9.54")
+      download {
+        src 'https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.54.zip'
+        dest 'installer/appEngineSDK.zip'
+      }
+    } else
+      println("App Engine SDK is already present")
+  }
+}
+
+task cleanInstaller() {
+  delete 'build/installer'
+}
+
+task buildInstaller(dependsOn: [cleanInstaller, downloadAppEngineSDK], type: Copy) {
+  into "${buildDir}/installer"
+  from fileTree(dir: 'installer/installBuilder')
+
+  into('files') {
+    from zipTree('installer/appEngineSDK.zip')
+    from zipTree('installer/legacyremoval.zip')
+    from zipTree('installer/other.zip')
+    from zipTree('installer/gae.zip')
+    from zipTree('installer/sqljdbc_6.0.zip')
+    from "${buildDir}/libs/${archivesBaseName}-${version}.war"
+  }
+
+  into('files/conf') {
+    from fileTree(dir: 'installer/platforms')
+    from zipTree('installer/ear.zip')
+  }
+
+  into('files/conf/common') {
+    from files(
+        'src/main/resources/logging.properties',
+        'src/main/resources/odk-common-security-settings.xml',
+        'src/main/resources/odk-security-settings.xml',
+        'src/main/resources/security.properties'
+    )
+  }
+
+  doLast {
+    file("build/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
+    file("build/installer/files/appengine-java-sdk-1.9.54").renameTo(file("build/installer/files/appengine-java-sdk"))
   }
 }
 
