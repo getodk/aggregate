@@ -5,3 +5,5 @@ target
 build
 war
 .gradle
+installer/appEngineSDK.zip
+gradle.properties
