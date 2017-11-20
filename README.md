@@ -30,7 +30,7 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 ## Setting up the database
 
-Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database_configurations).
+Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database-configurations.md).
 
 1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later
 
@@ -72,6 +72,31 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 1. You should now be able to browse [http://localhost:8080](http://localhost:8080)
 
+### Debug
+
+1. In the `Run` menu, select `Edit Configurations...`
+
+1. Press the + button to add a `Gradle` configuration
+
+     * Name: `appStartWarDebug` (or whatever you'd like)
+     * Gradle project: `odk-aggregate`
+     * Tasks: `appStartWarDebug`
+
+1. Press `Apply` and then press the + button to add a `Remote` configuration
+
+     * Name: `appServer` (or whatever you'd like)
+     * Host: `localhost`
+     * Port: `5005`
+     * Search sources using module's classpath: `aggregate`
+
+1. Press `OK`
+
+1. To debug Aggregate, go to the `Run` menu, then to `Run...` and `Run` (not Debug!) the `appStartWarDebug` configuration. This will start Aggregate in debug mode and wait for a debugging session to be connected to the server's debugging listener.
+
+1. Now, go to the `Run` menu, then to `Run...` and `Debug` the `appServer`. This will connect the debugger. 
+
+1. You should now be able to browse [http://localhost:8080](http://localhost:8080) and debug
+
 ### Deploy to AppEngine
 
 1. Follow part of the official instructions for [Installing on AppEngine (Cloud)](http://docs.opendatakit.org/aggregate-install/#installing-on-app-engine). Stop after Google configures the server, and before the tutorial.
@@ -104,31 +129,6 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 1. To run Aggregate, go to the `Run` menu, then to `Run...` and `Run` the `gaeUpdate` configuration. This will compile Aggregate and upload it to AppEngine, replacing your running instance with the new version.
 
 This process can fail sometimes. If that happens, you will have to manually rollback the failed update launching the `gaeRollback` task. You can follow these same steps to create a new Run Configuration for it. 
-
-### Debug
-
-1. In the `Run` menu, select `Edit Configurations...`
-
-1. Press the + button to add a `Gradle` configuration
-
-     * Name: `appStartWarDebug` (or whatever you'd like)
-     * Gradle project: `odk-aggregate`
-     * Tasks: `appStartWarDebug`
-
-1. Press `Apply` and then press the + button to add a `Remote` configuration
-
-     * Name: `appServer` (or whatever you'd like)
-     * Host: `localhost`
-     * Port: `5005`
-     * Search sources using module's classpath: `aggregate`
-
-1. Press `OK`
-
-1. To debug Aggregate, go to the `Run` menu, then to `Run...` and `Run` (not Debug!) the `appStartWarDebug` configuration. This will start Aggregate in debug mode and wait for a debugging session to be connected to the server's debugging listener.
-
-1. Now, go to the `Run` menu, then to `Run...` and `Debug` the `appServer`. This will connect the debugger. 
-
-1. You should now be able to browse [http://localhost:8080](http://localhost:8080) and debug
 
 ### Connections from an external device
 

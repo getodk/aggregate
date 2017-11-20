@@ -167,8 +167,6 @@ gretty {
   host = 'localhost'
 }
 
-
-
 task gaeDownloadSDK() {
   doLast {
     if (!file('installer/appEngineSDK.zip').exists()) {
