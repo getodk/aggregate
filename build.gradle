@@ -224,9 +224,13 @@ task gaePrepare(dependsOn: [gaeCopyFiles, gaeCopySDK, gaeCopyDummyApp]) {
     setXmlValue("${buildDir}/gae/ear/default/WEB-INF/appengine-web.xml", "application", gaeAppId)
     setXmlValue("${buildDir}/gae/ear/background/WEB-INF/appengine-web.xml", "application", gaeAppId)
     setXmlValue("${buildDir}/gae/ear/META-INF/appengine-application.xml", "application", gaeAppId)
-    setXmlValue("${buildDir}/gae/ear/META-INF/application.xml", "display-name", gaeAppName)
+    setXmlValue("${buildDir}/gae/ear/META-INF/application.xml", "display-name", aggregateInstanceName)
     setPropertiesValue("${buildDir}/gae/ear/default/WEB-INF/classes/security.properties", "security.server.hostname", "${gaeAppId}.appspot.com")
+    setPropertiesValue("${buildDir}/gae/ear/default/WEB-INF/classes/security.properties", "security.server.realm.realmString", "${aggregateInstanceName} ODK Aggregate")
+    setPropertiesValue("${buildDir}/gae/ear/default/WEB-INF/classes/security.properties", "security.server.superUserUsername", "${aggregateUsername}")
     setPropertiesValue("${buildDir}/gae/ear/background/WEB-INF/classes/security.properties", "security.server.hostname", "${gaeAppId}.appspot.com")
+    setPropertiesValue("${buildDir}/gae/ear/background/WEB-INF/classes/security.properties", "security.server.realm.realmString", "${aggregateInstanceName} ODK Aggregate")
+    setPropertiesValue("${buildDir}/gae/ear/background/WEB-INF/classes/security.properties", "security.server.superUserUsername", "${aggregateUsername}")
     truncate("${buildDir}/gae/ear/default/WEB-INF/classes/jdbc.properties")
     truncate("${buildDir}/gae/ear/background/WEB-INF/classes/jdbc.properties")
   }
@@ -247,6 +251,11 @@ task gaeRollback(dependsOn: [gaePrepare, gaeRollbackModule("default"), gaeRollba
 task gaeUpdate(dependsOn: gaePrepare, type: Update) {
   email = "${-> gaeEmail}"
   workingDir = "${buildDir}/gae"
+
+  doLast {
+    println "Finished updating your Aggregate instance in AppEngine"
+    println "Now you should be able to access it at https://${gaeAppId}.appspot.com"
+  }
 }
 
 task cleanInstaller() {
