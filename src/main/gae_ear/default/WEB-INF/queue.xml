@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  To set up validation in Eclipse, add appengine-java-sdk/docs/queue.xsd to 
+      XML Catalog with a schema location of http://localhost/queue.xsd -->
+<queue-entries
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://localhost/queue.xsd">
+  <queue>
+    <name>default</name>
+    <rate>1/s</rate>
+    <max-concurrent-requests>5</max-concurrent-requests>
+    <retry-parameters> <!--  give GAE one retry - aggregate manages its own retries -->
+      <task-retry-limit>1</task-retry-limit>
+    </retry-parameters>
+  </queue>
+  <queue>
+    <name>frontend-queue</name>
+    <rate>1/s</rate>
+    <bucket-size>50</bucket-size>
+    <max-concurrent-requests>5</max-concurrent-requests>
+    <retry-parameters> <!--  give GAE one retry - aggregate manages its own retries -->
+      <task-retry-limit>1</task-retry-limit>
+    </retry-parameters>
+  </queue>
+</queue-entries>

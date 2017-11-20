@@ -1,3 +1,8 @@
+import org.opendatakit.aggregate.gradle.gae.Rollback
+import org.opendatakit.aggregate.gradle.gae.Update
+
+import static org.opendatakit.aggregate.gradle.Util.*
+
 buildscript {
   repositories {
     jcenter()
@@ -138,6 +143,11 @@ gwt {
   maxHeapSize = "1024M"
 }
 
+task explodedWar(type: Copy) {
+  into "$buildDir/exploded"
+  with war
+}
+
 war {
   if (warMode == "installer") {
     println "Excluding Guava from WAR"
@@ -152,7 +162,12 @@ war {
   }
 }
 
-task downloadAppEngineSDK() {
+gretty {
+  contextPath = '/'
+  host = 'localhost'
+}
+
+task gaeDownloadSDK() {
   doLast {
     if (!file('installer/appEngineSDK.zip').exists()) {
       println("Downloading App Engine SDK 1.9.54")
@@ -165,11 +180,87 @@ task downloadAppEngineSDK() {
   }
 }
 
+task gaeClean() {
+  delete "${buildDir}/gae"
+}
+
+task gaeCopyFiles(dependsOn: explodedWar, type: Copy) {
+  into "${buildDir}/gae/ear"
+  from fileTree(dir: 'src/main/gae_ear')
+
+  into("background") {
+    from fileTree(dir: "${buildDir}/exploded")
+    exclude "WEB-INF/classes/odk-settings.xml"
+    exclude "WEB-INF/classes/security.properties"
+  }
+
+  into("default") {
+    from fileTree(dir: "${buildDir}/exploded")
+    exclude "WEB-INF/classes/odk-settings.xml"
+    exclude "WEB-INF/classes/security.properties"
+  }
+
+  doLast {
+    delete "default/WEB-INF/lib/guava-jdk5-17.0.jar"
+    delete "background/WEB-INF/lib/guava-jdk5-17.0.jar"
+  }
+}
+
+task gaeCopySDK(dependsOn: gaeDownloadSDK, type: Copy) {
+  into "${buildDir}/gae"
+  from zipTree("${projectDir}/installer/appEngineSDK.zip")
+}
+
+task gaeCopyDummyApp(type: Copy) {
+  into "${buildDir}/gae/dummyApp"
+  from fileTree(dir: 'installer/dummyApp')
+}
+
+task gaePrepare(dependsOn: [gaeCopyFiles, gaeCopySDK, gaeCopyDummyApp]) {
+  doLast {
+    setXmlValue("${buildDir}/gae/dummyApp/WEB-INF/appengine-web.xml", "application", gaeAppId)
+    setXmlValue("${buildDir}/gae/ear/default/WEB-INF/appengine-web.xml", "application", gaeAppId)
+    setXmlValue("${buildDir}/gae/ear/background/WEB-INF/appengine-web.xml", "application", gaeAppId)
+    setXmlValue("${buildDir}/gae/ear/META-INF/appengine-application.xml", "application", gaeAppId)
+    setXmlValue("${buildDir}/gae/ear/META-INF/application.xml", "display-name", aggregateInstanceName)
+    setPropertiesValue("${buildDir}/gae/ear/default/WEB-INF/classes/security.properties", "security.server.hostname", "${gaeAppId}.appspot.com")
+    setPropertiesValue("${buildDir}/gae/ear/default/WEB-INF/classes/security.properties", "security.server.realm.realmString", "${aggregateInstanceName} ODK Aggregate")
+    setPropertiesValue("${buildDir}/gae/ear/default/WEB-INF/classes/security.properties", "security.server.superUserUsername", "${aggregateUsername}")
+    setPropertiesValue("${buildDir}/gae/ear/background/WEB-INF/classes/security.properties", "security.server.hostname", "${gaeAppId}.appspot.com")
+    setPropertiesValue("${buildDir}/gae/ear/background/WEB-INF/classes/security.properties", "security.server.realm.realmString", "${aggregateInstanceName} ODK Aggregate")
+    setPropertiesValue("${buildDir}/gae/ear/background/WEB-INF/classes/security.properties", "security.server.superUserUsername", "${aggregateUsername}")
+    truncate("${buildDir}/gae/ear/default/WEB-INF/classes/jdbc.properties")
+    truncate("${buildDir}/gae/ear/background/WEB-INF/classes/jdbc.properties")
+  }
+}
+
+Task gaeRollbackModule(String moduleName) {
+  task ("gaeRollback_${moduleName}", dependsOn: gaePrepare, type: Rollback) {
+    email = "${-> gaeEmail}"
+    workingDir = "${buildDir}/gae"
+    module = moduleName
+  }
+}
+
+task gaeRollback(dependsOn: [gaePrepare, gaeRollbackModule("default"), gaeRollbackModule("background")]) {
+
+}
+
+task gaeUpdate(dependsOn: gaePrepare, type: Update) {
+  email = "${-> gaeEmail}"
+  workingDir = "${buildDir}/gae"
+
+  doLast {
+    println "Finished updating your Aggregate instance in AppEngine"
+    println "Now you should be able to access it at https://${gaeAppId}.appspot.com"
+  }
+}
+
 task cleanInstaller() {
   delete 'build/installer'
 }
 
-task buildInstaller(dependsOn: [cleanInstaller, downloadAppEngineSDK], type: Copy) {
+task buildInstaller(dependsOn: [cleanInstaller, gaeDownloadSDK], type: Copy) {
   into "${buildDir}/installer"
   from fileTree(dir: 'installer/installBuilder')
 
@@ -200,9 +291,4 @@ task buildInstaller(dependsOn: [cleanInstaller, downloadAppEngineSDK], type: Cop
     file("build/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
     file("build/installer/files/appengine-java-sdk-1.9.54").renameTo(file("build/installer/files/appengine-java-sdk"))
   }
-}
-
-gretty {
-  contextPath = '/'
-  host = 'localhost'
 }
