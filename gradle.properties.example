@@ -1,0 +1,5 @@
+warMode=complete
+aggregateInstanceName=aggregate
+aggregateUsername=administrator
+gaeAppId=aggregate
+gaeEmail=some.email@example.org
