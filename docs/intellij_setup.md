@@ -51,11 +51,6 @@ This is achieved by changing your configuration in two places:
 
 Both values must be the same. 
 
-
-
-
-
-
 [database_configurations]: ./database_configurations.md
 [functional_tests_instructions]: ../functionalTest/README.md
 [aggregate_config]: ./aggregate_config.md

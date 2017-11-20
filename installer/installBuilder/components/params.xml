@@ -1,0 +1,1442 @@
+<component>
+  <name>gather_params</name>
+  <description>Gather Parameters</description>
+  <canBeEdited>1</canBeEdited>
+  <selected>1</selected>
+  <show>1</show>
+  <!--<folderList>-->
+    <!--<folder>-->
+      <!--<description>temp</description>-->
+      <!--<destination>${temp_param_dir}</destination>-->
+      <!--<name>temp_jars</name>-->
+      <!--<platforms>all</platforms>-->
+      <!--<distributionFileList>-->
+        <!--<distributionDirectory>-->
+          <!--<origin>files/qualified_hostname</origin>-->
+        <!--</distributionDirectory>-->
+      <!--</distributionFileList>-->
+    <!--</folder>-->
+  <!--</folderList>-->
+  <installationAbortedActionList>
+    <deleteFile>
+      <path>${temp_param_dir}</path>
+    </deleteFile>
+  </installationAbortedActionList>
+  <parameterList>
+    <booleanParameter>
+      <name>write_properties</name>
+      <description>Hidden value to hold whether or not to emit a .options file.</description>
+      <explanation>If the WRITE_OPTIONS environment variable is defined, we'll write option values to a .options file.
+      </explanation>
+      <value></value>
+      <default>${env(WRITE_OPTIONS)}</default>
+      <ask>0</ask>
+      <cliOptionText>Output a .options file that contains the configuration from running the installer.</cliOptionText>
+    </booleanParameter>
+    <stringParameter>
+      <name>hostname</name>
+      <description>Hidden value used to hold resolved fully-qualfied hostname.</description>
+      <explanation></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>1</allowEmptyValue>
+      <ask>0</ask>
+      <insertBefore>${parent_installdir}</insertBefore>
+      <width>40</width>
+    </stringParameter>
+    <stringParameter>
+      <name>http_port</name>
+      <description>Hidden value used to hold resolved http_port</description>
+      <explanation></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>1</allowEmptyValue>
+      <ask>0</ask>
+      <insertBefore>${parent_installdir}</insertBefore>
+      <width>40</width>
+    </stringParameter>
+    <stringParameter>
+      <name>https_port</name>
+      <description>Hidden value used to hold resolved https_port</description>
+      <explanation></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>1</allowEmptyValue>
+      <ask>0</ask>
+      <insertBefore>${parent_installdir}</insertBefore>
+      <width>40</width>
+    </stringParameter>
+    <stringParameter>
+      <name>default_database_port</name>
+      <description>Hidden value used to identify the default database port.</description>
+      <explanation></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>1</allowEmptyValue>
+      <ask>0</ask>
+      <insertAfter>${parent_installdir}</insertAfter>
+      <width>5</width>
+    </stringParameter>
+    <stringParameter>
+      <name>database_host_port</name>
+      <description>Hidden value used to form database url for jdbc connection.</description>
+      <explanation></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>1</allowEmptyValue>
+      <ask>0</ask>
+      <insertAfter>${parent_installdir}</insertAfter>
+      <width>50</width>
+    </stringParameter>
+    <stringParameter>
+      <name>aggregate_dir</name>
+      <description>Hidden value defining the subdirectory in which to install files.</description>
+      <explanation></explanation>
+      <value>ODK Aggregate</value>
+      <default></default>
+      <allowEmptyValue>0</allowEmptyValue>
+      <ask>0</ask>
+      <insertBefore>${parent_installdir}</insertBefore>
+      <width>50</width>
+    </stringParameter>
+    <directoryParameter>
+      <!--  parent_installdir -->
+      <name>parent_installdir</name>
+      <title>Select an output parent directory</title>
+      <description></description>
+      <explanation><![CDATA[This "installer" does not actually install anything. Instead, it guides you through configuring ODK Aggregate. As the last step of the installer, it will either launch the upload tool for uploading to Google's AppEngine cloud services or open a README.html containing the final installation instructions for MySQL or PostgreSQL deployments.
+
+Please select the parent directory under which an 'ODK Aggregate' directory will be created to contain the configured software.]]></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>0</allowEmptyValue>
+      <insertBefore>${installdir}</insertBefore>
+      <mustBeWritable>1</mustBeWritable>
+      <mustExist>0</mustExist>
+      <width>40</width>
+      <validationActionList>
+        <throwError>
+          <text>${parent_installdir}${platform_path_separator}${aggregate_dir} already exists.</text>
+          <ruleList>
+            <fileExists>
+              <path>${parent_installdir}${platform_path_separator}${aggregate_dir}</path>
+            </fileExists>
+          </ruleList>
+        </throwError>
+      </validationActionList>
+    </directoryParameter>
+    <directoryParameter>
+      <name>installdir</name>
+      <description>Hidden value defining the (parent_installdir + aggregate_dir) in which to install files.
+      </description>
+      <explanation></explanation>
+      <value>${parent_installdir}${platform_path_separator}${aggregate_dir}</value>
+      <default></default>
+      <allowEmptyValue>0</allowEmptyValue>
+      <ask>0</ask>
+      <insertAfter>${platform}</insertAfter>
+      <mustBeWritable>0</mustBeWritable>
+      <mustExist>0</mustExist>
+      <width>50</width>
+    </directoryParameter>
+    <choiceParameter>
+      <!--  platform -->
+      <name>platform</name>
+      <title>Choose Platform</title>
+      <description></description>
+      <explanation><![CDATA[Choose the data storage and execution environment on which you would like ODK Aggregate to run. If you choose MySQL, PostgreSQL or Microsoft SQL Server (or Microsoft Azure SQL Server), you will need to first install that database server and an Apache Tomcat 8 webserver.
+
+NOTE: If you want to use the Microsoft Azure SQL Server, you must configure Tomcat 8 to use Java 8.]]></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>0</allowEmptyValue>
+      <displayType>radiobuttons</displayType>
+      <ordering>default</ordering>
+      <width>30</width>
+      <optionList>
+        <option>
+          <description>Uses Google's cloud-based data storage and webserver services.</description>
+          <image></image>
+          <text>Google App Engine</text>
+          <value>gae</value>
+        </option>
+
+        <!-- <option>
+            <description>Uses Google's cloud-based MySQL storage and webserver services.</description>
+            <image></image>
+            <text>Google App Engine with Cloud MySQL</text>
+            <value>gae_mysql</value>
+        </option> -->
+        <option>
+          <description>Uses a MySQL database and an Apache Tomcat 8 webserver that you install.</description>
+          <image></image>
+          <text>MySQL</text>
+          <value>mysql</value>
+        </option>
+        <option>
+          <description>Uses a PostgreSQL database and an Apache Tomcat 8 webserver that you install.</description>
+          <image></image>
+          <text>PostgreSQL</text>
+          <value>postgresql</value>
+        </option>
+        <option>
+          <description>Uses a Microsoft SQL Server or Azure SQL Server database and an Apache Tomcat 8 webserver that
+            you install.
+          </description>
+          <image></image>
+          <text>SQL Server</text>
+          <value>sqlserver</value>
+        </option>
+      </optionList>
+    </choiceParameter>
+    <linkParameter>
+      <!-- infoTomcat -->
+      <name>infoTomcat</name>
+      <title>Pre-installation Requirements - Apache Tomcat</title>
+      <description>http://tomcat.apache.org/download-80.cgi</description>
+      <explanation><![CDATA[Before continuing, you should download and install an Apache Tomcat 8 webserver within which you will run ODK Aggregate (instructions on installing your chosen database will be presented later).
+
+Apache Tomcat 8 can be downloaded from the link below.
+
+If you modify any of the Apache Tomcat defaults, please make note of them.
+
+NOTE: If you want to use the Microsoft Azure SQL Server, you must configure Tomcat 8 to use Java 8.]]></explanation>
+      <insertAfter>${platform}</insertAfter>
+      <clickedActionList>
+        <launchBrowser>
+          <url>http://tomcat.apache.org/download-80.cgi</url>
+        </launchBrowser>
+      </clickedActionList>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </linkParameter>
+    <parameterGroup>
+      <name>tomcat_authentication_info</name>
+      <title>Apache Tomcat SSL configuration</title>
+      <explanation><![CDATA[SSL certificates allow a client to verify the identity of a webserver and to establish secured (encrypted) communications with that webserver (https:). SSL certificates are typically purchased from Verisign or another issuing authority; that process can take weeks to complete.
+
+If you do have an SSL certificate, please refer to the Apache Tomcat documentation for how to install the certificate on your system. Within the Tomcat 8.0 documentation, refer to the User Guide section 12: SSL.]]></explanation>
+      <value></value>
+      <default></default>
+      <parameterList>
+        <linkParameter>
+          <name>ssl_how_to</name>
+          <description>http://tomcat.apache.org/tomcat-8.0-doc/ssl-howto.html</description>
+          <explanation></explanation>
+          <clickedActionList>
+            <launchBrowser>
+              <url>http://tomcat.apache.org/tomcat-8.0-doc/ssl-howto.html</url>
+            </launchBrowser>
+          </clickedActionList>
+        </linkParameter>
+      </parameterList>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </parameterGroup>
+    <parameterGroup>
+      <name>tomcat_authentication_should_configure_group</name>
+      <title>Apache Tomcat SSL configuration</title>
+      <explanation>Do you have an SSL certificate?</explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${tomcat_authentication_info}</insertAfter>
+      <parameterList>
+        <choiceParameter>
+          <name>tomcat_authentication_should_configure</name>
+          <description></description>
+          <explanation></explanation>
+          <value></value>
+          <default>0</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <displayType>radiobuttons</displayType>
+          <ordering>default</ordering>
+          <width>40</width>
+          <optionList>
+            <option>
+              <description><![CDATA[- User logins ARE secure.
+- Submitting and/or viewing form data MAY NOT BE secure.
+- Changing passwords MAY NOT BE secure.
+Security breaches are particularly likely over unsecured WiFi hotspots.]]></description>
+              <image></image>
+              <text>No, I do not have an SSL certificate</text>
+              <value>0</value>
+            </option>
+            <option>
+              <description>- User logins ARE secure.
+                - Submitting and/or viewing form data IS secure.
+                - Changing passwords IS secure.
+              </description>
+              <image></image>
+              <text>Yes, I have an SSL certificate</text>
+              <value>1</value>
+            </option>
+          </optionList>
+        </choiceParameter>
+      </parameterList>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </parameterGroup>
+    <parameterGroup>
+      <name>tomcat_port_choice</name>
+      <title>Apache Tomcat Port Configuration</title>
+      <explanation><![CDATA[ODK Aggregate needs to know the port numbers and the Internet-visible IP address or DNS name through which it can be reached in order to construct links back to its content when publishing or exporting data files.
+
+Follow the ODK Aggregate Tomcat Install instructions (link below) to make your computer accessible on the web (using an Internet-visible IP address) and to establish a DNS name.]]>
+      </explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${tomcat_authentication_should_configure_group}</insertAfter>
+      <parameterList>
+        <linkParameter>
+          <name>hostname_how_to</name>
+          <description>http://opendatakit.org/use/aggregate/tomcat-install/#Configure_for_Network_Access</description>
+          <explanation></explanation>
+          <clickedActionList>
+            <launchBrowser>
+              <url>http://opendatakit.org/use/aggregate/tomcat-install/#Configure_for_Network_Access</url>
+            </launchBrowser>
+          </clickedActionList>
+        </linkParameter>
+        <stringParameter>
+          <name>tomcat_http_port</name>
+          <description>HTTP/1.1. Connector Port:</description>
+          <explanation></explanation>
+          <value>8080</value>
+          <default>8080</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>5</width>
+        </stringParameter>
+        <stringParameter>
+          <name>tomcat_https_port</name>
+          <description>HTTPS/1.1. Connector Port:</description>
+          <explanation></explanation>
+          <value>8443</value>
+          <default>8443</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>5</width>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${tomcat_authentication_should_configure}</text>
+              <value>1</value>
+            </compareText>
+          </ruleList>
+        </stringParameter>
+        <stringParameter>
+          <name>raw_hostname</name>
+          <description>Internet-visible IP address or DNS name:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>localhost</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>50</width>
+        </stringParameter>
+      </parameterList>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+      <validationActionList>
+        <throwError text="The HTTP/1.1 Connector Port is invalid">
+          <ruleList>
+            <regExMatch>
+              <logic>does_not_match</logic>
+              <pattern>^(|[1-9][0-9]{1,3})$</pattern>
+              <text>${tomcat_http_port}</text>
+            </regExMatch>
+          </ruleList>
+        </throwError>
+        <throwError text="The HTTPS/1.1 Connector Port is invalid">
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${tomcat_authentication_should_configure}</text>
+              <value>1</value>
+            </compareText>
+            <regExMatch>
+              <logic>does_not_match</logic>
+              <pattern>^(|[1-9][0-9]{1,3})$</pattern>
+              <text>${tomcat_https_port}</text>
+            </regExMatch>
+          </ruleList>
+        </throwError>
+        <throwError text="The Connector Ports must be different">
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${tomcat_authentication_should_configure}</text>
+              <value>1</value>
+            </compareText>
+            <compareText>
+              <logic>equals</logic>
+              <text>${tomcat_http_port}</text>
+              <value>${tomcat_https_port}</value>
+            </compareText>
+          </ruleList>
+        </throwError>
+      </validationActionList>
+    </parameterGroup>
+    <linkParameter>
+      <!-- infoDatabase -->
+      <name>infoDatabasePostgreSQL</name>
+      <title>Pre-installation Database Requirements - PostgreSQL</title>
+      <description>http://www.postgresql.org/</description>
+      <explanation><![CDATA[We have developed and tested against PostgreSQL 9.0
+
+Download and install PostgreSQL from the link below.
+
+Make note of any non-default values you've entered during the installation process.]]></explanation>
+      <insertAfter>${platform}</insertAfter>
+      <clickedActionList>
+        <launchBrowser>
+          <url>http://www.postgresql.org</url>
+        </launchBrowser>
+      </clickedActionList>
+      <postShowPageActionList>
+        <setInstallerVariable>
+          <name>default_database_port</name>
+          <value>5432</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+          <name>database_port</name>
+          <value>5432</value>
+        </setInstallerVariable>
+      </postShowPageActionList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>postgresql</value>
+        </compareText>
+      </ruleList>
+    </linkParameter>
+    <linkParameter>
+      <!-- infoDatabase -->
+      <name>infoDatabaseSQLServer</name>
+      <title>Pre-installation Database Requirements - Microsoft SQL Server</title>
+      <description>https://www.microsoft.com/en-us/sql-server/</description>
+      <explanation><![CDATA[We have developed and tested against Microsft SQL Server 2016 and Azure SQL Server.
+
+Download and install Microsft SQL Server 2016 from the link below or establish an Azure account, create an Azure SQL Server within it, and configure the Azure SQL Server firewall to allow access from your Tomcat server.
+
+NOTE: If you are using Azure SQL Server, you must install and use Java 8 when running Tomcat 8.
+
+It is assumed that Windows authentication will be used when accessing either database.]]></explanation>
+      <insertAfter>${platform}</insertAfter>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>sqlserver</value>
+        </compareText>
+      </ruleList>
+    </linkParameter>
+    <linkParameter>
+      <!-- infoDatabase -->
+      <name>infoDatabaseGaeMySQL</name>
+      <title>Pre-installation Database Requirements - Google Cloud MySQL</title>
+      <description>https://cloud.google.com/sql/</description>
+      <explanation><![CDATA[We have tested against 2nd generation Google Cloud SQL servers.
+
+Before continuing, you must create a project on Google Cloud Platform. Click the Google Cloud Platform installation instructions link (first link below) for how to do this.
+
+Within this project, click on the SQL tab and create a 2nd generation Google Clould SQL server. When configuring this server, under advanced options, be sure to set:
+
+character_set_server = utf8
+default_time_zone = +00:00
+max_allowed_packet = 1073741824
+
+It is assumed that the user "root" will be used to access the database. Set a password for this user before proceeding.]]></explanation>
+      <insertAfter>${platform}</insertAfter>
+      <clickedActionList>
+        <launchBrowser>
+          <url>https://opendatakit.org/use/aggregate/</url>
+        </launchBrowser>
+      </clickedActionList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>gae_mysql</value>
+        </compareText>
+      </ruleList>
+    </linkParameter>
+    <linkParameter>
+      <!-- infoDatabase -->
+      <name>infoDatabaseMySQL</name>
+      <title>Pre-installation Database Requirements - MySQL</title>
+      <description>http://www.mysql.com/downloads/</description>
+      <explanation><![CDATA[We have developed and tested against MySQL 5.1 and 5.5
+
+Please download, install and configure MySQL from the link below.
+
+Choose the Downloads (GA) tab, and select the MySQL Community Server edition. When running the MySQL Server Instance Configuration Wizard, please make note of your root password and any non-default values you have entered during the installation process.]]></explanation>
+      <insertAfter>${platform}</insertAfter>
+      <clickedActionList>
+        <launchBrowser>
+          <url>http://www.mysql.com/downloads/</url>
+        </launchBrowser>
+      </clickedActionList>
+      <postShowPageActionList>
+        <setInstallerVariable>
+          <name>default_database_port</name>
+          <value>3306</value>
+        </setInstallerVariable>
+        <setInstallerVariable>
+          <name>database_port</name>
+          <value>3306</value>
+        </setInstallerVariable>
+      </postShowPageActionList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>mysql</value>
+        </compareText>
+      </ruleList>
+    </linkParameter>
+    <linkParameter>
+      <!-- infoDatabase -->
+      <name>infoDatabaseMySQL2</name>
+      <title>Pre-installation Database Requirements - MySQL (concluded)</title>
+      <description>http://www.mysql.com/downloads/connector/j/5.1.html</description>
+      <explanation><![CDATA[You also must install a MySQL library on the Apache Tomcat instance.
+Please download the MySQL Connector/J zip file from the link below.
+
+Unzip or extract the contents of this file to a directory on your system.
+The top-level directory should contain a file named:
+
+mysql-connector-java-...-bin.jar
+
+Copy this file into the /lib directory of your Apache Tomcat 8 installation. On Windows, the default location for this is 'C:\Program Files\Apache Software Foundation\Tomcat 8.0\lib'
+
+Stop and restart your Apache webserver (so it can discover this new library).]]></explanation>
+      <insertAfter>${platform}</insertAfter>
+      <clickedActionList>
+        <launchBrowser>
+          <url>http://www.mysql.com/downloads/connector/j/5.1.html</url>
+        </launchBrowser>
+      </clickedActionList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>mysql</value>
+        </compareText>
+      </ruleList>
+    </linkParameter>
+    <parameterGroup>
+      <!-- database_server_config -->
+      <name>database_server_config</name>
+      <title>Database server settings</title>
+      <explanation><![CDATA[Specify the host and port number used to communicate with the database server.
+
+If the database server is on the same host as the webserver, enter '127.0.0.1']]></explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${platform}</insertAfter>
+      <parameterList>
+        <stringParameter>
+          <name>database_port</name>
+          <title>Configuration</title>
+          <description>Database port number:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>${default_database_port}</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>5</width>
+        </stringParameter>
+        <stringParameter>
+          <name>database_hostname</name>
+          <title>Configuration</title>
+          <description>Database server hostname:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>127.0.0.1</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>50</width>
+        </stringParameter>
+      </parameterList>
+      <postShowPageActionList>
+        <setInstallerVariable>
+          <name>database_host_port</name>
+          <value>${database_hostname}</value>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${database_port}</text>
+              <value>${default_database_port}</value>
+            </compareText>
+          </ruleList>
+        </setInstallerVariable>
+        <setInstallerVariable>
+          <name>database_host_port</name>
+          <value>${database_hostname}:${database_port}</value>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${database_port}</text>
+              <value>${default_database_port}</value>
+            </compareText>
+          </ruleList>
+        </setInstallerVariable>
+      </postShowPageActionList>
+      <ruleList>
+        <ruleGroup>
+          <ruleEvaluationLogic>or</ruleEvaluationLogic>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>mysql</value>
+            </compareText>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>postgresql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </parameterGroup>
+    <parameterGroup>
+      <!-- database_config -->
+      <name>database_config_part_1</name>
+      <title>ODK Aggregate database authentication settings</title>
+      <explanation><![CDATA[The database server must be configured with an account (username and password) that ODK Aggregate will employ for accessing the database server. This is not an account that you will give to anyone; it is only for use by the ODK Aggregate webserver. Username and password should be alphanumeric strings beginning with a letter (no spaces or punctuation please!).
+
+The installer will generate a script that can be run on the database server to establish the required configuration.]]></explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${database_server_config}</insertAfter>
+      <parameterList>
+        <stringParameter>
+          <name>jdbc_username</name>
+          <description>Database username:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>odk_user</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+        </stringParameter>
+        <passwordParameter>
+          <name>jdbc_password</name>
+          <description>Database password:</description>
+          <explanation></explanation>
+          <value></value>
+          <default></default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <descriptionRetype>Retype password:</descriptionRetype>
+          <width>30</width>
+        </passwordParameter>
+      </parameterList>
+      <ruleList>
+        <ruleGroup>
+          <ruleEvaluationLogic>or</ruleEvaluationLogic>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>mysql</value>
+            </compareText>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>postgresql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </parameterGroup>
+    <parameterGroup>
+      <!-- database_config -->
+      <name>database_config_part_2</name>
+      <title>ODK Aggregate database datastore settings</title>
+      <explanation><![CDATA[The database server must be configured with a workspace identified by a database name, and, if using Postgresql, a schema name. This workspace is where ODK Aggregate will store uploaded forms, submissions and other information. The database name (and schema name for Postgresql) can be any alphanumeric strings beginning with a letter; underscores (_) are OK (no spaces or punctuation please!).
+
+The installer will generate a script that can be run on the database server to create the workspace.]]></explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${database_config_part_1}</insertAfter>
+      <parameterList>
+        <stringParameter>
+          <name>jdbc_database</name>
+          <description>Database Name:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>odk_prod</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+        </stringParameter>
+        <stringParameter>
+          <name>jdbc_schema</name>
+          <description>Database Schema Name:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>odk_prod</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>postgresql</value>
+            </compareText>
+          </ruleList>
+        </stringParameter>
+      </parameterList>
+      <ruleList>
+        <ruleGroup>
+          <ruleEvaluationLogic>or</ruleEvaluationLogic>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>mysql</value>
+            </compareText>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>postgresql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </parameterGroup>
+    <parameterGroup>
+      <!-- database_config -->
+      <name>database_config_sqlserver_1</name>
+      <title>ODK Aggregate database datastore settings</title>
+      <explanation><![CDATA[A database and schema must be created on the Microsoft SQL Server database server. All uploaded forms, submissions and other information will be stored in this schema within this database. The database name (and schema name) can be any alphanumeric strings beginning with a letter; underscores (_) are OK (no spaces or punctuation please!). The installer will generate a script that can be run on the database server to create the database.
+
+The Windows user or group will be granted the permissions to manage and write into this schema.]]></explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${database_server_config}</insertAfter>
+      <parameterList>
+        <stringParameter>
+          <name>jdbc_sqlserver_database</name>
+          <description>Database Name:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>odk_prod</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+        </stringParameter>
+        <stringParameter>
+          <name>jdbc_sqlserver_schema</name>
+          <description>Database Schema Name:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>odk_prod</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+        </stringParameter>
+        <stringParameter>
+          <name>jdbc_sqlserver_username</name>
+          <description>Windows user or group with database access:</description>
+          <explanation>
+            <![CDATA[Enter the Domain\Username or group that the Tomcat 8 server will run as and use to access the database.]]></explanation>
+          <value></value>
+          <default>odk_prod</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+        </stringParameter>
+      </parameterList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>sqlserver</value>
+        </compareText>
+      </ruleList>
+    </parameterGroup>
+    <parameterGroup>
+      <!-- database_config -->
+      <name>database_config_sqlserver_2</name>
+      <title>ODK Aggregate database datastore settings</title>
+      <explanation>
+        <![CDATA[The Microsoft SQL Server and Azure SQL Server database driver requires that you specify the full JDBC URL for accessing this database. See Microsoft documentation for how to construct this URL.]]></explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${database_config_sqlserver_1}</insertAfter>
+      <parameterList>
+        <stringParameter>
+          <name>jdbc_sqlserver_url</name>
+          <description>JDBC URL:</description>
+          <explanation></explanation>
+          <value></value>
+          <default></default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>130</width>
+        </stringParameter>
+        <booleanParameter>
+          <name>is_azure_database_server</name>
+          <description>Using Azure SQL Server:</description>
+          <explanation></explanation>
+          <value></value>
+          <default>0</default>
+          <displayStyle>checkbox-right</displayStyle>
+        </booleanParameter>
+      </parameterList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>sqlserver</value>
+        </compareText>
+      </ruleList>
+    </parameterGroup>
+    <parameterGroup>
+      <!-- database_config -->
+      <name>database_config_gae_mysql_1</name>
+      <title>ODK Aggregate database datastore settings</title>
+      <explanation>
+        <![CDATA[A database must be created on the Google Cloud SQL database server. All uploaded forms, submissions and other information will be stored in this database. The database name can be any alphanumeric strings beginning with a letter; underscores (_) are OK (no spaces or punctuation please!).]]></explanation>
+      <value></value>
+      <default></default>
+      <insertAfter>${database_server_config}</insertAfter>
+      <parameterList>
+        <stringParameter>
+          <name>jdbc_gae_mysql_instance_name</name>
+          <description>Instance connection name:</description>
+          <explanation>Found on the Google SQL instance details page.</explanation>
+          <value></value>
+          <default></default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>60</width>
+        </stringParameter>
+        <stringParameter>
+          <name>jdbc_gae_mysql_database_name</name>
+          <description>Database Name:</description>
+          <explanation>Click on the Databases heading in the Google SQL instance details page to create your database.
+          </explanation>
+          <value></value>
+          <default>odk_prod</default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+        </stringParameter>
+        <passwordParameter>
+          <name>jdbc_gae_mysql_password</name>
+          <description>Password for the "root" user:</description>
+          <explanation>ODK Aggregate will access the database through the Google Cloud SQL "root" user.</explanation>
+          <value></value>
+          <default></default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <descriptionRetype>Retype password:</descriptionRetype>
+          <width>30</width>
+        </passwordParameter>
+      </parameterList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>gae_mysql</value>
+        </compareText>
+      </ruleList>
+    </parameterGroup>
+    <stringParameter>
+      <!-- instance_display_name -->
+      <name>instance_display_name</name>
+      <title>ODK Aggregate Instance Name</title>
+      <description>Please enter the name of your instance:</description>
+      <explanation><![CDATA[The ODK Aggregate instance name will be displayed to your users when they log into ODK Aggregate using their ODK Aggregate username and password. Including the name of your organization in the instance name can help users confirm that they have contacted the correct website.
+
+NOTE: During subsequent upgrades, any changes to this text will invalidate all the ODK Aggregate passwords configured on your webserver. To prevent disruptions during upgrades, please make a record of the name you have chosen.]]></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>0</allowEmptyValue>
+      <width>30</width>
+    </stringParameter>
+    <stringParameter>
+      <name>username</name>
+      <title>Super-user ODK Aggregate Username</title>
+      <description>Please enter an ODK Aggregate Username:</description>
+      <explanation><![CDATA[The user with this account will always have full permissions on the system.
+
+The first time ODK Aggregate runs, only this user is allowed to log onto the system. Upon first logging in, they should change their password and complete the configuration of ODK Aggregate by specifying additional users and what permissions those users have on the system. This user's password will be set to 'aggregate' upon initial install or upon changing the ODK Aggregate instance name.]]></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>0</allowEmptyValue>
+      <width>30</width>
+      <validationActionList>
+        <if>
+          <actionList>
+            <throwError>
+              <text><![CDATA[Bad username.
+Please enter a name starting with a letter and containing only letters and numbers.]]></text>
+            </throwError>
+          </actionList>
+          <conditionRuleList>
+            <regExMatch>
+              <logic>does_not_match</logic>
+              <pattern>[a-zA-Z][a-zA-Z0-9]*</pattern>
+              <text>${username}</text>
+            </regExMatch>
+          </conditionRuleList>
+        </if>
+      </validationActionList>
+    </stringParameter>
+    <parameterGroup>
+      <name>app_id_group</name>
+      <title>Google AppEngine application ID</title>
+      <explanation><![CDATA[Before continuing, you must create a project on Google Cloud Platform. Click the Google Cloud Platform installation instructions link (first link below) for how to do this.
+
+If you are updating an existing ODK Aggregate application, the application identifier is the leftmost portion of the appspot.com URL. For example, if your application is at 'https://opendatakit.appspot.com' you would enter 'opendatakit' below. When updating, please follow the upgrade steps in the Aggregate Release Notes (see second link below).]]></explanation>
+      <value></value>
+      <default></default>
+      <parameterList>
+        <linkParameter>
+          <name>appengine_link</name>
+          <description>Google Cloud Platform installation instructions</description>
+          <explanation></explanation>
+          <clickedActionList>
+            <launchBrowser>
+              <url>https://opendatakit.org/use/aggregate/</url>
+            </launchBrowser>
+          </clickedActionList>
+        </linkParameter>
+        <linkParameter>
+          <name>release_note_link</name>
+          <description>Upgrade steps</description>
+          <explanation></explanation>
+          <clickedActionList>
+            <launchBrowser>
+              <url>https://github.com/opendatakit/opendatakit/wiki/Aggregate-Release-Notes</url>
+            </launchBrowser>
+          </clickedActionList>
+        </linkParameter>
+        <stringParameter>
+          <name>app_id</name>
+          <description>Please enter your application id:</description>
+          <explanation></explanation>
+          <value></value>
+          <default></default>
+          <allowEmptyValue>0</allowEmptyValue>
+          <width>30</width>
+        </stringParameter>
+        <booleanParameter>
+          <name>is_migrated_app_id</name>
+          <description>Yes, a Master/Slave application id is being (was) migrated to this application id</description>
+          <explanation></explanation>
+          <value></value>
+          <default>0</default>
+          <displayStyle>checkbox-left</displayStyle>
+        </booleanParameter>
+      </parameterList>
+      <ruleList>
+        <ruleGroup>
+          <ruleEvaluationLogic>or</ruleEvaluationLogic>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>equals</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+      <validationActionList>
+        <throwError
+            text="Invalid application id. An application id is an 'Application' shown on the Google AppEngine dashboard.">
+          <ruleList>
+            <regExMatch>
+              <logic>does_not_match</logic>
+              <pattern>^[^ .:/[\]]*$</pattern>
+              <text>${app_id}</text>
+            </regExMatch>
+          </ruleList>
+        </throwError>
+      </validationActionList>
+    </parameterGroup>
+    <stringParameter>
+      <name>master_slave_app_id</name>
+      <title>Old Master/Slave Google AppEngine application ID</title>
+      <description>Please enter the old Master/Slave application id:</description>
+      <explanation>
+        <![CDATA[Once a migration is complete, the appengine dashboard for the old application id should state that this application is hidden by an alias and identify the application id entered on the previous page as receiving all traffic for the application id entered here.]]></explanation>
+      <value></value>
+      <default></default>
+      <allowEmptyValue>0</allowEmptyValue>
+      <width>30</width>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <ruleGroup>
+              <ruleEvaluationLogic>or</ruleEvaluationLogic>
+              <ruleList>
+                <compareText>
+                  <logic>equals</logic>
+                  <text>${platform}</text>
+                  <value>gae</value>
+                </compareText>
+                <compareText>
+                  <logic>equals</logic>
+                  <text>${platform}</text>
+                  <value>gae_mysql</value>
+                </compareText>
+              </ruleList>
+            </ruleGroup>
+            <isTrue>
+              <value>${is_migrated_app_id}</value>
+            </isTrue>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+      <validationActionList>
+        <throwError
+            text="Invalid application id. An application id is an 'Application' shown on the Google AppEngine dashboard.">
+          <ruleList>
+            <regExMatch>
+              <logic>does_not_match</logic>
+              <pattern>^[^ .:/[\]]*$</pattern>
+              <text>${master_slave_app_id}</text>
+            </regExMatch>
+          </ruleList>
+        </throwError>
+      </validationActionList>
+    </stringParameter>
+  </parameterList>
+  <postInstallationActionList>
+    <setInstallerVariable>
+      <name>hostname</name>
+      <value>${raw_hostname}</value>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>hostname</name>
+      <value>${app_id}.appspot.com</value>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <ruleGroup>
+              <ruleEvaluationLogic>or</ruleEvaluationLogic>
+              <ruleList>
+                <compareText>
+                  <logic>equals</logic>
+                  <text>${platform}</text>
+                  <value>gae</value>
+                </compareText>
+                <compareText>
+                  <logic>equals</logic>
+                  <text>${platform}</text>
+                  <value>gae_mysql</value>
+                </compareText>
+              </ruleList>
+            </ruleGroup>
+            <isFalse>
+              <value>${is_migrated_app_id}</value>
+            </isFalse>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>hostname</name>
+      <value>${master_slave_app_id}.appspot.com</value>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <ruleGroup>
+              <ruleEvaluationLogic>or</ruleEvaluationLogic>
+              <ruleList>
+                <compareText>
+                  <logic>equals</logic>
+                  <text>${platform}</text>
+                  <value>gae</value>
+                </compareText>
+                <compareText>
+                  <logic>equals</logic>
+                  <text>${platform}</text>
+                  <value>gae_mysql</value>
+                </compareText>
+              </ruleList>
+            </ruleGroup>
+            <isTrue>
+              <value>${is_migrated_app_id}</value>
+            </isTrue>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>http_port</name>
+      <value>80</value>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>http_port</name>
+      <value>${tomcat_http_port}</value>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>https_port</name>
+      <value>443</value>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>https_port</name>
+      <value>${tomcat_https_port}</value>
+      <ruleList>
+        <ruleGroup>
+          <ruleList>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae</value>
+            </compareText>
+            <compareText>
+              <logic>does_not_equal</logic>
+              <text>${platform}</text>
+              <value>gae_mysql</value>
+            </compareText>
+          </ruleList>
+        </ruleGroup>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_schema</name>
+      <value>${jdbc_database}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>mysql</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_database</name>
+      <value>${jdbc_sqlserver_database}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>sqlserver</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_schema</name>
+      <value>${jdbc_sqlserver_schema}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>sqlserver</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_username</name>
+      <value>${jdbc_sqlserver_username}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>sqlserver</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_url</name>
+      <value>${jdbc_sqlserver_url}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>sqlserver</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+
+    <!-- gae_mysql database configuration -->
+    <setInstallerVariable>
+      <name>jdbc_database</name>
+      <value>${jdbc_gae_mysql_database_name}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>gae_mysql</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_schema</name>
+      <value>${jdbc_gae_mysql_database_name}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>gae_mysql</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_username</name>
+      <value>root</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>gae_mysql</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_password</name>
+      <value>${jdbc_gae_mysql_password}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>gae_mysql</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <setInstallerVariable>
+      <name>jdbc_url</name>
+      <value>jdbc:google:mysql://${jdbc_gae_mysql_instance_name}/${jdbc_gae_mysql_database_name}</value>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>gae_mysql</value>
+        </compareText>
+      </ruleList>
+    </setInstallerVariable>
+    <createDirectory>
+      <path>${installdir}</path>
+    </createDirectory>
+    <if>
+      <actionList>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>platform</key>
+          <value>${platform}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>instance_display_name</key>
+          <value>${instance_display_name}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>username</key>
+          <value>${username}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>app_id</key>
+          <value>${app_id}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>jdbc_username</key>
+          <value>${jdbc_username}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>jdbc_password</key>
+          <value>${jdbc_password}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>jdbc_database</key>
+          <value>${jdbc_database}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>jdbc_schema</key>
+          <value>${jdbc_schema}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>jdbc_url</key>
+          <value>${jdbc_url}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>is_azure_database_server</key>
+          <value>${is_azure_database_server}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>database_port</key>
+          <value>${database_port}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>database_hostname</key>
+          <value>${database_hostname}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>database_host_port</key>
+          <value>${database_host_port}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>tomcat_authentication_should_configure</key>
+          <value>${tomcat_authentication_should_configure}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>hostname</key>
+          <value>${hostname}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>write_properties</key>
+          <value>${write_properties}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>installdir</key>
+          <value>${installdir}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>http_port</key>
+          <value>${http_port}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${installdir}/.options</file>
+          <key>https_port</key>
+          <value>${https_port}</value>
+        </propertiesFileSet>
+      </actionList>
+      <ruleList>
+        <isTrue>
+          <value>${write_properties}</value>
+        </isTrue>
+      </ruleList>
+    </if>
+    <deleteFile>
+      <path>${temp_param_dir}</path>
+    </deleteFile>
+  </postInstallationActionList>
+  <preInstallationActionList>
+    <!--<autodetectJava>-->
+    <!--<customErrorMessage>You must have a Java 1.7 JRE installed. Go to http://www.java.com/getjava/index.jsp-->
+    <!--</customErrorMessage>-->
+    <!--<promptUser>0</promptUser>-->
+    <!--<validVersionList>-->
+    <!--<validVersion>-->
+    <!--<bitness></bitness>-->
+    <!--<maxVersion></maxVersion>-->
+    <!--<minVersion>1.7</minVersion>-->
+    <!--<requireJDK>0</requireJDK>-->
+    <!--<vendor></vendor>-->
+    <!--</validVersion>-->
+    <!--</validVersionList>-->
+    <!--</autodetectJava>-->
+    <setInstallerVariable>
+      <name>temp_param_dir</name>
+      <value>${system_temp_directory}/ODK-${installation_guid}</value>
+    </setInstallerVariable>
+    <createDirectory>
+      <path>${temp_param_dir}</path>
+    </createDirectory>
+    <!--<unpackDirectory>-->
+    <!--<component>gather_params</component>-->
+    <!--<destination>${temp_param_dir}</destination>-->
+    <!--<folder>temp_jars</folder>-->
+    <!--<origin>qualified_hostname</origin>-->
+    <!--</unpackDirectory>-->
+    <!--<setInstallerVariableFromScriptOutput>-->
+    <!--<exec>${java_executable}</exec>-->
+    <!--<execArgs>QualifiedHostname</execArgs>-->
+    <!--<name>default_hostname</name>-->
+    <!--<workingDirectory>${temp_param_dir}/qualified_hostname</workingDirectory>-->
+    <!--</setInstallerVariableFromScriptOutput>-->
+  </preInstallationActionList>
+</component>

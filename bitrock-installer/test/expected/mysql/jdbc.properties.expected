@@ -1,6 +1,0 @@
-jdbc.driverClassName=com.mysql.jdbc.Driver
-jdbc.resourceName=jdbc/odk_aggregate
-jdbc.url=jdbc:mysql://127.0.0.1:3306/db_schema?autoDeserialize=true
-jdbc.username=db_username
-jdbc.password=db_password
-jdbc.schema=db_schema
