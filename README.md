@@ -100,9 +100,16 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 1. You should now be able to browse [http://localhost:8080](http://localhost:8080) and debug
 
-### Deploy to AppEngine
+### Connect from an external device
 
-1. Follow part of the official instructions for [Installing on AppEngine (Cloud)](http://docs.opendatakit.org/aggregate-install/#installing-on-app-engine). Stop after Google configures the server, and before the tutorial.
+By default, Gretty will launch a server using a `localhost` address which will not be accessible by external devices (e.g., ODK Collect in an emulator, ODK Briefcase on another computer). To set a non-localhost address, edit the following files:
+
+- In `src/main/resources/security.properties`, change `security.server.hostname` to the address
+- In `build.gradle`, inside the `gretty` block, change `host` to the same address
+
+### Deploy to Google App Engine
+
+1. Follow part of the official instructions for [Installing on App Engine (Cloud)](http://docs.opendatakit.org/aggregate-install/#installing-on-app-engine). Stop after Google configures the server, and before the tutorial.
 
 1. Press the + button to add a `Gradle` configuration
 
@@ -112,14 +119,14 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
     
 1. Press `OK`
 
-1. Edit `gradle.properties` file at the root of the project and set its values according to your Google AppEngine instance:
+1. Edit `gradle.properties` file at the root of the project and set its values according to your Google App Engine instance:
 
     | Key | Default | Description |
     | --- | ------- | ----------- |
-    | `warMode` | `complete` | WAR build mode. Leave it in `complete` for GAE operations |
-    | `aggregateInstanceName` | `aggregate` | The ODK Aggregate Instance name. It is important that you set this value with whatever is already set in the currently running Aggregate instance. Any changes to this test will invalidate all the ODK Aggregate passwords |
-    | `aggregateUsername` | `administrator` | The admin user's name |
-    | `gaeAppId` | `aggregate` | The AppEngine project ID |
+    | `warMode` | `complete` | WAR build mode. Leave set to `complete` for GAE deployments |
+    | `aggregateInstanceName` | `aggregate` | ODK Aggregate instance name. Set this value to whatever is already set in the currently running Aggregate instance. Any changes to this will invalidate all the ODK Aggregate passwords |
+    | `aggregateUsername` | `administrator` | ODK Aggregate administrator name |
+    | `gaeAppId` | `aggregate` | App Engine project ID |
     | `gaeEmail` | `some.email@example.org` | Your Google Cloud account's email address |
     
     - Alternatively, you can overwrite these properties by adding `-Pkey=value` arguments to your Gradle task invocations
@@ -129,16 +136,9 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
     * We recommend the option of [installing Google Cloud SDK](https://cloud.google.com/sdk/downloads) and running the command `gcloud auth application-default login`.
     * Any other option will require adjustments in the Run configuration for `gaeUpdate`
 
-1. To run Aggregate, go to the `Run` menu, then to `Run...` and `Run` the `gaeUpdate` configuration. This will compile Aggregate and upload it to AppEngine, replacing your running instance with the new version.
+1. To run Aggregate, go to the `Run` menu, then to `Run...` and `Run` the `gaeUpdate` configuration. This will compile Aggregate and upload it to App Engine, replacing your running instance with the new version.
 
 This process can fail sometimes. If that happens, you will have to manually rollback the failed update launching the `gaeRollback` task. You can follow these same steps to create a new Run Configuration for it. 
-
-### Connections from an external device
-
-By default, Gretty will launch a server using a `localhost` address which will not be accessible by external devices (e.g., ODK Collect in an emulator, ODK Briefcase on another computer). To set a non-localhost address, edit the following files:
-
-- In `src/main/resources/security.properties`, change `security.server.hostname` to the address
-- In `build.gradle`, inside the `gretty` block, change `host` to the same address
 
 ## Contributing
 
