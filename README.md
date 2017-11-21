@@ -32,9 +32,12 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database-configurations.md).
 
-1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later
+1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later.
+    * If you are a macOS user, we recommend [Postgres.app](http://postgresapp.com/). If you are a Windows user, we recommend [BigSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp).
 
-1. Setup your database with `psql` with these commands. You must use `psql` or the `\connect` command will not work.
+1. In the command-line interface connect to the database. Assuming the user is postgres and the server is installed on your local machine, the command will be: `psql -U postgres -h localhost`.
+
+1. Setup your database with these commands. You must use `psql` or the `\connect` command will not work.
 
     ```sql
     CREATE USER "odk_unit" WITH UNENCRYPTED PASSWORD 'test';
@@ -50,7 +53,7 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 ### Import 
 
-1. On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file
+1. On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file. 
 
 1. Make sure you check `Use auto-import` option in the `Import Project from Gradle` dialog 
 
@@ -147,6 +150,8 @@ The best way to help us test is to build from source! We are currently focusing 
 
 ## Troubleshooting
 
-* If you are having problems with hung Tomcat/Jetty processes, try running the `appStop` Gradle task to stop running all instances.	
+* If you get an **Invalid Gradle JDK configuration found** error importing the code, you might not have set the `JAVA_HOME` environment variable. Try [these solutions](https://stackoverflow.com/questions/32654016/).
+
+* If you are having problems with hung Tomcat/Jetty processes, try running the `appStop` Gradle task to stop running all instances. 
 
 * If you're using Chrome and are seeing blank pages or refreshing not working, connect to Aggregate with the dev tools window open. Then in the `Network` tab, check `Disable cache`.
