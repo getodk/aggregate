@@ -33,10 +33,9 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database_configurations).
 
 1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later.
-  * If you are a macOS user, we recommend [Postgres.app](http://postgresapp.com/). If you are a Windows user, we recommend [BigSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp).
+    * If you are a macOS user, we recommend [Postgres.app](http://postgresapp.com/). If you are a Windows user, we recommend [BigSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp).
 
-1. In the command-line interface connect to the database. Assuming the user is postgres and the server is installed on your local machine, the command will be:
-    `psql -U postgres -h localhost`
+1. In the command-line interface connect to the database. Assuming the user is postgres and the server is installed on your local machine, the command will be: `psql -U postgres -h localhost`.
 
 1. Setup your database with these commands. You must use `psql` or the `\connect` command will not work.
 
