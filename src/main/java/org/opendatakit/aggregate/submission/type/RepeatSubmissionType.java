@@ -17,23 +17,15 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.submission.SubmissionElement;
-import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.aggregate.submission.SubmissionKeyPart;
-import org.opendatakit.aggregate.submission.SubmissionRepeat;
-import org.opendatakit.aggregate.submission.SubmissionSet;
-import org.opendatakit.aggregate.submission.SubmissionValue;
-import org.opendatakit.aggregate.submission.SubmissionVisitor;
+import org.opendatakit.aggregate.submission.*;
 import org.opendatakit.common.datamodel.DynamicBase;
-import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
@@ -44,16 +36,17 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 
+import java.util.*;
+
 /**
  * Data Storage type for a repeat type. Store a list of datastore keys to
  * submission sets in an entity
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class RepeatSubmissionType implements SubmissionRepeat {
-
+  private static final Log LOGGER = LogFactory.getLog(RepeatSubmissionType.class);
   /**
    * ODK identifier that uniquely identifies the form
    */
@@ -77,7 +70,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   private List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
 
   public RepeatSubmissionType(SubmissionSet enclosingSet, FormElementModel repeatGroup,
-      String uriAssociatedRow, IForm form) {
+                              String uriAssociatedRow, IForm form) {
     this.enclosingSet = enclosingSet;
     this.form = form;
     this.repeatGroup = repeatGroup;
@@ -88,7 +81,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
   public final FormElementModel getFormElementModel() {
     return repeatGroup;
   }
-  
+
   public SubmissionSet getEnclosingSet() {
     return enclosingSet;
   }
@@ -112,7 +105,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
   /**
    * @return submissionKey that defines all the repeats for this particular
-   *         repeat group.
+   * repeat group.
    */
   public SubmissionKey constructSubmissionKey() {
     return enclosingSet.constructSubmissionKey(repeatGroup);
@@ -120,45 +113,62 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
   /**
    * Format value for output
-   * 
-   * @param elemFormatter
-   *          the element formatter that will convert the value to the proper
-   *          format for output
+   *
+   * @param elemFormatter the element formatter that will convert the value to the proper
+   *                      format for output
    */
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue,
-      CallingContext cc) throws ODKDatastoreException {
+                          CallingContext cc) throws ODKDatastoreException {
     elemFormatter.formatRepeats(this, repeatGroup, row, cc);
   }
 
   @Override
   public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
+    DynamicBase submission = (DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype();
 
-    DynamicBase rel = (DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype();
+    List<CommonFieldsBase> repeatRows = getRepeatRows(cc, submission);
 
-    Query q = cc.getDatastore().createQuery(rel, "RepeatSubmissionType.getValueFromEntity", cc.getCurrentUser());
-    q.addFilter(rel.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
-    q.addSort(rel.parentAuri, Direction.ASCENDING); // for GAE work-around
-    q.addSort(rel.ordinalNumber, Direction.ASCENDING);
+    for (List<DynamicBase> groupOfRepeatRows : groupPerOrdinalNumber(submission, repeatRows))
+      submissionSets.add(new SubmissionSet(enclosingSet, chooseOneFrom(groupOfRepeatRows), repeatGroup, form, cc));
+  }
 
-    // reconstruct all the repeating groups from a single submission.
-    // This should be a small number. We don't have the logic to
-    // handle fractional returns of rows.
-    long expectedOrdinal = 1L;
-    List<? extends CommonFieldsBase> repeatGroupList = q.executeQuery();
-    for (CommonFieldsBase cb : repeatGroupList) {
-      DynamicBase d = (DynamicBase) cb;
-      Long ordinal = d.getOrdinalNumber();
-      if ( ordinal == null || ordinal.longValue() != expectedOrdinal ) {
-        String errString = "SELECT * FROM " + d.getTableName()
-            + " WHERE _TOP_LEVEL_AURI = " + d.getTopLevelAuri()
-            + " AND _PARENT_AURI = " + d.getParentAuri() + " is missing a (repeat) group instance OR has an extra copies.";
-        throw new ODKEnumeratedElementException(errString);
-      }
-      ++expectedOrdinal;
-      SubmissionSet set = new SubmissionSet(enclosingSet, d, repeatGroup, form, cc);
-      submissionSets.add(set);
+  private Collection<List<DynamicBase>> groupPerOrdinalNumber(DynamicBase submission, List<CommonFieldsBase> repeatRows) {
+    // We don't have the logic to handle fractional returns of rows.
+    long maxOrdinalNumber = 0;
+    Map<Long, List<DynamicBase>> repeatRowsPerOrdinalNumber = new HashMap<>();
+    for (CommonFieldsBase _repeatRow : repeatRows) {
+      DynamicBase repeatRow = (DynamicBase) _repeatRow;
+      Long ordinalNumber = repeatRow.getOrdinalNumber();
+      maxOrdinalNumber = Math.max(maxOrdinalNumber, ordinalNumber);
+      if (!repeatRowsPerOrdinalNumber.containsKey(ordinalNumber))
+        repeatRowsPerOrdinalNumber.put(ordinalNumber, new ArrayList<DynamicBase>());
+      repeatRowsPerOrdinalNumber.get(ordinalNumber).add(repeatRow);
     }
+    if (repeatRowsPerOrdinalNumber.size() != maxOrdinalNumber)
+      LOGGER.error("Repeat table " + submission.getTableName() + " has dupes or missing rows for top level auri " + submission.getTopLevelAuri() + " and parent auri " + submission.getParentAuri());
+    return repeatRowsPerOrdinalNumber.values();
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<CommonFieldsBase> getRepeatRows(CallingContext cc, DynamicBase submission) throws ODKDatastoreException {
+    Query q = cc.getDatastore().createQuery(submission, "RepeatSubmissionType.getRepeatRows", cc.getCurrentUser());
+    q.addFilter(submission.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
+    q.addSort(submission.parentAuri, Direction.ASCENDING); // for GAE work-around
+    q.addSort(submission.ordinalNumber, Direction.ASCENDING);
+    return (List<CommonFieldsBase>) q.executeQuery();
+  }
+
+  private DynamicBase chooseOneFrom(List<DynamicBase> repeatRows) {
+    if (repeatRows.size() == 1)
+      return repeatRows.get(0);
+    Collections.sort(repeatRows, new Comparator<DynamicBase>() {
+      @Override
+      public int compare(DynamicBase o1, DynamicBase o2) {
+        return o2.getCreationDate().compareTo(o1.getCreationDate());
+      }
+    });
+    return repeatRows.get(0);
   }
 
   /**
