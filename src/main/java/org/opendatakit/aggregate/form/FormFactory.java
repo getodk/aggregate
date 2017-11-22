@@ -16,15 +16,6 @@
 
 package org.opendatakit.aggregate.form;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.exception.ODKConversionException;
@@ -41,6 +32,8 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+
+import java.util.*;
 
 /**
  * Factory class for managing Form objects.
@@ -121,6 +114,12 @@ public class FormFactory {
           cache.add(f);
         }
       }
+
+      for (IForm form : cache)
+        if (!form.isValid()) {
+          logger.error("Possible corruption: Form with URI " + form.getUri() + " is not valid");
+          cache.remove(form);
+        }
 
       // sort by form title then by form id
       Collections.sort(forms, new Comparator<IForm>() {

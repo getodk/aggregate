@@ -713,5 +713,8 @@ class Form implements IForm {
     return infoRow.getUri();
   }
 
-
+  @Override
+  public boolean isValid() {
+    return filesetRow.hasField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED);
+  }
 }
