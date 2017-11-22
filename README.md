@@ -59,6 +59,20 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 1. Once the project is imported, IntelliJ may ask you configure any detected GWT, Spring or web Facets, you can ignore these messages
 
+### Configure
+
+1. Copy `gradle.properties.example` to a `gradle.properties` file at the root of the project and fill in your setup configuration
+
+    | Key | Valid values | Description |
+    | --- | ------------ | ----------- |
+    | `warMode` | `complete` or `installer` | Use `installer` if you are going to produce an installer with the resulting WAR artifact and `complete` otherwise |
+    | `aggregateInstanceName`|  | Only required for GAE deployment. The name of your instance. It's important that this value doesn't change for an already existing Aggregate instance |
+    | `aggregateUsername` |  | Only required for GAE deployment. The username of the Aggregate superuser |
+    | `gaeAppId` |  | Only required for GAE deployment. The Google AppEngine project Id |
+    | `gaeEmail` |  | Only required for GAE deployment. The email account of the owner of the Google AppEngine instance |
+
+    - Any property can be overwritten by passing `-Pkey=value` arguments to any Gradle task. 
+
 ### Run
 
 1. In the `Run` menu, select `Edit Configurations...`
