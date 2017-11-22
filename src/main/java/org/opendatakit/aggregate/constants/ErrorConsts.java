@@ -26,7 +26,7 @@ package org.opendatakit.aggregate.constants;
  */
 public final class ErrorConsts {
 
-  public static final String POSSIBLE_CORRUPTION = "Encountered an unknown problem while reading the database. This often is a sign of database corruption. Please get the server logs and file an issue";
+  public static final String POSSIBLE_CORRUPTION = "Encountered an unknown problem while reading the database. This often is a sign of database corruption. Please get the server logs and file an issue at https://github.com/opendatakit/aggregate/issues";
   /**
    * Error message if the form with FORM ID is not found
    */
