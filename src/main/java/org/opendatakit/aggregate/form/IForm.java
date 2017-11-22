@@ -265,4 +265,6 @@ public interface IForm {
   public boolean setXFormMediaFile(MultiPartFormItem item, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException;
   
   public String getUri();
+
+  boolean isValid();
 }
