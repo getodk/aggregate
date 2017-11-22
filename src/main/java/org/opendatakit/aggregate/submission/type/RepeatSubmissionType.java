@@ -125,41 +125,50 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
   @Override
   public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
+    DynamicBase submission = (DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype();
 
-    DynamicBase rel = (DynamicBase) repeatGroup.getFormDataModel().getBackingObjectPrototype();
+    List<CommonFieldsBase> repeatRows = getRepeatRows(cc, submission);
 
-    Query q = cc.getDatastore().createQuery(rel, "RepeatSubmissionType.getValueFromEntity", cc.getCurrentUser());
-    q.addFilter(rel.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
-    q.addSort(rel.parentAuri, Direction.ASCENDING); // for GAE work-around
-    q.addSort(rel.ordinalNumber, Direction.ASCENDING);
-
-    long maxOrdinalNumber = 0;
-    Map<Long, List<DynamicBase>> rowsPerOrdinalNumber = new HashMap<>();
-    for (CommonFieldsBase cb : q.executeQuery()) {
-      DynamicBase db = (DynamicBase) cb;
-      Long ordinalNumber = db.getOrdinalNumber();
-      maxOrdinalNumber = Math.max(maxOrdinalNumber, ordinalNumber);
-      if (!rowsPerOrdinalNumber.containsKey(ordinalNumber))
-        rowsPerOrdinalNumber.put(ordinalNumber, new ArrayList<DynamicBase>());
-      rowsPerOrdinalNumber.get(ordinalNumber).add(db);
-    }
-    if (rowsPerOrdinalNumber.size() != maxOrdinalNumber)
-      LOGGER.error("Repeat table " + rel.getTableName() + " has dupes or missing rows for top level auri " + rel.getTopLevelAuri() + " and parent auri " + rel.getParentAuri());
-
-    for (List<DynamicBase> dbs : rowsPerOrdinalNumber.values())
-      submissionSets.add(new SubmissionSet(enclosingSet, chooseOne(dbs), repeatGroup, form, cc));
+    for (List<DynamicBase> groupOfRepeatRows : groupPerOrdinalNumber(submission, repeatRows))
+      submissionSets.add(new SubmissionSet(enclosingSet, chooseOneFrom(groupOfRepeatRows), repeatGroup, form, cc));
   }
 
-  private DynamicBase chooseOne(List<DynamicBase> dbs) {
-    if (dbs.size() == 1)
-      return dbs.get(0);
-    Collections.sort(dbs, new Comparator<DynamicBase>() {
+  private Collection<List<DynamicBase>> groupPerOrdinalNumber(DynamicBase submission, List<CommonFieldsBase> repeatRows) {
+    // We don't have the logic to handle fractional returns of rows.
+    long maxOrdinalNumber = 0;
+    Map<Long, List<DynamicBase>> repeatRowsPerOrdinalNumber = new HashMap<>();
+    for (CommonFieldsBase _repeatRow : repeatRows) {
+      DynamicBase repeatRow = (DynamicBase) _repeatRow;
+      Long ordinalNumber = repeatRow.getOrdinalNumber();
+      maxOrdinalNumber = Math.max(maxOrdinalNumber, ordinalNumber);
+      if (!repeatRowsPerOrdinalNumber.containsKey(ordinalNumber))
+        repeatRowsPerOrdinalNumber.put(ordinalNumber, new ArrayList<DynamicBase>());
+      repeatRowsPerOrdinalNumber.get(ordinalNumber).add(repeatRow);
+    }
+    if (repeatRowsPerOrdinalNumber.size() != maxOrdinalNumber)
+      LOGGER.error("Repeat table " + submission.getTableName() + " has dupes or missing rows for top level auri " + submission.getTopLevelAuri() + " and parent auri " + submission.getParentAuri());
+    return repeatRowsPerOrdinalNumber.values();
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<CommonFieldsBase> getRepeatRows(CallingContext cc, DynamicBase submission) throws ODKDatastoreException {
+    Query q = cc.getDatastore().createQuery(submission, "RepeatSubmissionType.getRepeatRows", cc.getCurrentUser());
+    q.addFilter(submission.parentAuri, FilterOperation.EQUAL, uriAssociatedRow);
+    q.addSort(submission.parentAuri, Direction.ASCENDING); // for GAE work-around
+    q.addSort(submission.ordinalNumber, Direction.ASCENDING);
+    return (List<CommonFieldsBase>) q.executeQuery();
+  }
+
+  private DynamicBase chooseOneFrom(List<DynamicBase> repeatRows) {
+    if (repeatRows.size() == 1)
+      return repeatRows.get(0);
+    Collections.sort(repeatRows, new Comparator<DynamicBase>() {
       @Override
       public int compare(DynamicBase o1, DynamicBase o2) {
         return o2.getCreationDate().compareTo(o1.getCreationDate());
       }
     });
-    return dbs.get(0);
+    return repeatRows.get(0);
   }
 
   /**
