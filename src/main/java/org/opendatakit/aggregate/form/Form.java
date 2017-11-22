@@ -500,7 +500,7 @@ class Form implements IForm {
   public Set<DynamicCommonFieldsBase> getAllBackingObjects() {
     Set<DynamicCommonFieldsBase> set = new TreeSet<DynamicCommonFieldsBase>(
         DynamicCommonFieldsBase.sameTableName);
-    
+
     getAllBackingObjectsHelper(getTopLevelGroupElement(), set);
     return set;
   }
@@ -511,7 +511,7 @@ class Form implements IForm {
       getAllBackingObjectsHelper(m, set);
     }
   }
-  
+
   public List<FormElementModel> getRepeatGroupsInModel() {
     List<FormElementModel> list = new ArrayList<FormElementModel>();
 
@@ -566,7 +566,7 @@ class Form implements IForm {
       viewableName = "<<Broken>> " + viewableName;
       String viewableURL = HtmlUtil.createHrefWithProperties(
           cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, viewableName, false);
-      
+
       int mediaFileCount = (getManifestFileset() == null) ? 0 : getManifestFileset().getAttachmentCount(cc);
       return new FormSummary(viewableName, getFormId(), getCreationDate(), getCreationUser(),
           false, false, viewableURL, mediaFileCount);
@@ -713,5 +713,8 @@ class Form implements IForm {
     return infoRow.getUri();
   }
 
-
+  @Override
+  public boolean isValid() {
+    return filesetRow.hasField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED);
+  }
 }

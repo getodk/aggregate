@@ -165,6 +165,17 @@ public abstract class CommonFieldsBase {
     return Collections.unmodifiableList(fieldList);
   }
 
+  public final boolean hasField(DataField f) {
+    if (f == null) {
+      throw new IllegalArgumentException("Field value is null!");
+    }
+    if (!fieldList.contains(f)) {
+      throw new IllegalArgumentException("Attempting to get a field " + f.getName()
+          + " not belonging to " + schemaName + "." + tableName);
+    }
+    return fieldValueMap.containsKey(f);
+  }
+
   public final String getStringField(DataField f) {
     if (f == null) {
       throw new IllegalArgumentException("Field value is null!");
