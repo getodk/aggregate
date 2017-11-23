@@ -17,15 +17,6 @@
 
 package org.opendatakit.aggregate.submission;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.DDRelationName;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -34,18 +25,7 @@ import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
-import org.opendatakit.aggregate.submission.type.BooleanMetadataType;
-import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
-import org.opendatakit.aggregate.submission.type.ChoiceSubmissionType;
-import org.opendatakit.aggregate.submission.type.DateTimeMetadataType;
-import org.opendatakit.aggregate.submission.type.DecimalSubmissionType;
-import org.opendatakit.aggregate.submission.type.GeoPointSubmissionType;
-import org.opendatakit.aggregate.submission.type.LongMetadataType;
-import org.opendatakit.aggregate.submission.type.LongSubmissionType;
-import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
-import org.opendatakit.aggregate.submission.type.StringMetadataType;
-import org.opendatakit.aggregate.submission.type.StringSubmissionType;
+import org.opendatakit.aggregate.submission.type.*;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
 import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
@@ -63,13 +43,15 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
+import java.io.PrintWriter;
+import java.util.*;
+
 /**
  * Groups a set of submission values together so they can be stored in a
  * databstore entity
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionElement {
 
@@ -113,7 +95,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
   /**
    * Identifier for the parent for persistence co-location.
-   *
+   * <p>
    * TODO: does this have special treatment if a repeat group?
    */
   private final EntityKey topLevelTableKey;
@@ -133,12 +115,11 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    * @param group
    * @param formDefinition
    * @param topLevelTableKey
-   * @param cc
-   *          - the CallingContext for this request
+   * @param cc               - the CallingContext for this request
    * @throws ODKDatastoreException
    */
   public SubmissionSet(SubmissionSet enclosingSet, Long ordinalNumber, FormElementModel group,
-      IForm form, EntityKey topLevelTableKey, CallingContext cc) throws ODKDatastoreException {
+                       IForm form, EntityKey topLevelTableKey, CallingContext cc) throws ODKDatastoreException {
     this.form = form;
     this.group = group;
     this.enclosingSet = enclosingSet;
@@ -164,7 +145,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, IForm form,
-      CallingContext cc) throws ODKDatastoreException {
+                       CallingContext cc) throws ODKDatastoreException {
     this.form = form;
     this.group = form.getTopLevelGroupElement();
     this.enclosingSet = null;
@@ -193,16 +174,16 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    *
    * @param m
    * @return true if this element may identify a new table or if its children
-   *         may have a new table within them.
+   * may have a new table within them.
    */
   private boolean isPhantomOfSubmissionSet(FormDataModel m) {
     return (m.getPersistAsColumn() == null)
         && ((m.getElementType() == ElementType.PHANTOM)
-            || (m.getElementType() == ElementType.GEOPOINT) || (m.getElementType() == ElementType.GROUP));
+        || (m.getElementType() == ElementType.GEOPOINT) || (m.getElementType() == ElementType.GROUP));
   }
 
   private void recursivelyCreateEntities(FormDataModel groupDataModel, Datastore datastore,
-      User user) {
+                                         User user) {
     DynamicCommonFieldsBase groupRelation = (DynamicCommonFieldsBase) groupDataModel
         .getBackingObjectPrototype();
     for (FormDataModel m : groupDataModel.getChildren()) {
@@ -237,21 +218,16 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
   /**
    * Construct a submission set from the datastore.
-   * 
-   * @param enclosingSet
-   *          - the enclosing submission set.
-   * @param row
-   *          - the base record for this submission set.
-   * @param group
-   *          - the form group mapped to the base record.
-   * @param formDefinition
-   *          - the definition of the form.
-   * @param cc
-   *          - the CallingContext of this request.
+   *
+   * @param enclosingSet   - the enclosing submission set.
+   * @param row            - the base record for this submission set.
+   * @param group          - the form group mapped to the base record.
+   * @param formDefinition - the definition of the form.
+   * @param cc             - the CallingContext of this request.
    * @throws ODKDatastoreException
    */
   public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
-      FormElementModel group, IForm form, CallingContext cc) throws ODKDatastoreException {
+                       FormElementModel group, IForm form, CallingContext cc) throws ODKDatastoreException {
     this.form = form;
     this.group = group;
     this.enclosingSet = enclosingSet;
@@ -280,7 +256,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   private void recursivelyGetEntities(String uriTopLevel, String uriParent,
-      FormDataModel groupDataModel, Datastore datastore, User user) throws ODKDatastoreException {
+                                      FormDataModel groupDataModel, Datastore datastore, User user) throws ODKDatastoreException {
     DynamicCommonFieldsBase groupRelation = (DynamicCommonFieldsBase) groupDataModel
         .getBackingObjectPrototype();
     for (FormDataModel m : groupDataModel.getChildren()) {
@@ -311,7 +287,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
                       + mBaseRelation.getTableName() + " WHERE _TOP_LEVEL_AURI = " + uriTopLevel
                       + " AND _PARENT_AURI = " + uriParent + " => expected 1 row but found "
                       + rows.size());
-            } else if ( rows.size() == 0 ) {
+            } else if (rows.size() == 0) {
               // This can occur if we were trying to delete this entry
               // and something went wrong. In this case, silently create
               // this phantom table record so as not to cause crashes.
@@ -323,7 +299,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
               // one-and-only record in the order, as this
               // is a phantom table...
               dbEntities.put(m.getDDRelationName(), row);
-              
+
               // and ensure that we create (in memory) any nested phantoms...
               // this prevents exceptions. Note that we don't write this entity
               // to the database. 
@@ -344,10 +320,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   /**
    * Recursively use form definition to recreate the submission
    *
-   * @param form
-   *          persistence manager used to retrieve form elements
-   * @param element
-   *          current element to recreate
+   * @param form    persistence manager used to retrieve form elements
+   * @param element current element to recreate
    * @throws ODKDatastoreException
    */
   private void buildSubmissionFields(FormElementModel group, CallingContext cc)
@@ -359,150 +333,150 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
         // all metadata is at the top-level (submission) level...
         TopLevelDynamicBase tl = (TopLevelDynamicBase) groupRowGroup;
         switch (m.getType()) {
-        case META_INSTANCE_ID:
-          submissionField = new StringMetadataType(groupRowGroup, m, tl.primaryKey);
-          elementsToValues.put(m, submissionField);
-          break;
-        case META_UI_VERSION:
-          submissionField = new LongMetadataType(groupRowGroup, m, tl.uiVersion);
-          elementsToValues.put(m, submissionField);
-          break;
-        case META_MODEL_VERSION:
-          submissionField = new LongMetadataType(groupRowGroup, m, tl.modelVersion);
-          elementsToValues.put(m, submissionField);
-          break;
-        case META_SUBMISSION_DATE:
-          submissionField = new DateTimeMetadataType(groupRowGroup, m, tl.submissionDate);
-          elementsToValues.put(m, submissionField);
-          break;
-        case META_IS_COMPLETE:
-          submissionField = new BooleanMetadataType(groupRowGroup, m, tl.isComplete);
-          elementsToValues.put(m, submissionField);
-          break;
-        case META_DATE_MARKED_AS_COMPLETE:
-          submissionField = new DateTimeMetadataType(groupRowGroup, m, tl.markedAsCompleteDate);
-          elementsToValues.put(m, submissionField);
-          break;
-        default:
-          throw new IllegalStateException("unhandled metadata type");
+          case META_INSTANCE_ID:
+            submissionField = new StringMetadataType(groupRowGroup, m, tl.primaryKey);
+            elementsToValues.put(m, submissionField);
+            break;
+          case META_UI_VERSION:
+            submissionField = new LongMetadataType(groupRowGroup, m, tl.uiVersion);
+            elementsToValues.put(m, submissionField);
+            break;
+          case META_MODEL_VERSION:
+            submissionField = new LongMetadataType(groupRowGroup, m, tl.modelVersion);
+            elementsToValues.put(m, submissionField);
+            break;
+          case META_SUBMISSION_DATE:
+            submissionField = new DateTimeMetadataType(groupRowGroup, m, tl.submissionDate);
+            elementsToValues.put(m, submissionField);
+            break;
+          case META_IS_COMPLETE:
+            submissionField = new BooleanMetadataType(groupRowGroup, m, tl.isComplete);
+            elementsToValues.put(m, submissionField);
+            break;
+          case META_DATE_MARKED_AS_COMPLETE:
+            submissionField = new DateTimeMetadataType(groupRowGroup, m, tl.markedAsCompleteDate);
+            elementsToValues.put(m, submissionField);
+            break;
+          default:
+            throw new IllegalStateException("unhandled metadata type");
         }
       } else {
         DynamicCommonFieldsBase rowGroup = getGroupBackingObject(m);
         switch (m.getFormDataModel().getElementType()) {
-        case GEOTRACE:
-        case GEOSHAPE:
-        case STRING:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new StringSubmissionType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case JRDATETIME:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new JRDateTimeType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case JRDATE:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new JRDateType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case JRTIME:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new JRTimeType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case INTEGER:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new LongSubmissionType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case DECIMAL:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new DecimalSubmissionType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case GEOPOINT:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new GeoPointSubmissionType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case BOOLEAN:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          submissionField = new BooleanSubmissionType(rowGroup, m);
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case GROUP:
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          // groups are not manifest unless they repeat...
-          // just recurse to build out the fields under them...
-          buildSubmissionFields(m, cc);
-          break;
-        // additional supporting tables
-        case PHANTOM: // if a relation needs to be divided in order to fit
-          if (rowGroup == null) {
-            throw new IllegalStateException("Unexpectedly null backingObject");
-          }
-          // phantoms are not manifest...
-          // just recurse to build out the fields under them...
-          buildSubmissionFields(m, cc);
-          break;
-        case BINARY: // identifies BinaryContent table
-          submissionField = new BlobSubmissionType(m, groupRowGroup.getUri(), topLevelTableKey,
-              constructSubmissionKey(m));
-          // pass in row we occur under (to access parentAuri)
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case SELECT1: // identifies SelectChoice table
-          submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(), topLevelTableKey); // pass
-          // in row we occur under to access parentAuri
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case SELECTN: // identifies SelectChoice table
-          submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(), topLevelTableKey); // pass
-          // in row we occur under to access parentAuri
-          submissionField.getValueFromEntity(cc);
-          elementsToValues.put(m, submissionField);
-          break;
-        case REPEAT:
-          RepeatSubmissionType repeatNode = new RepeatSubmissionType(this, m,
-              groupRowGroup.getUri(), form);
-          repeatNode.getValueFromEntity(cc);
-          elementsToValues.put(m, repeatNode);
-          break;
-        case BINARY_CONTENT_REF_BLOB: // association between
-          // BINARY and REF_BLOB
-        case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
-        default:
-          throw new IllegalStateException("Traversed element type is unexpected: "
-              + m.getElementType().toString());
+          case GEOTRACE:
+          case GEOSHAPE:
+          case STRING:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new StringSubmissionType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case JRDATETIME:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new JRDateTimeType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case JRDATE:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new JRDateType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case JRTIME:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new JRTimeType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case INTEGER:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new LongSubmissionType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case DECIMAL:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new DecimalSubmissionType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case GEOPOINT:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new GeoPointSubmissionType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case BOOLEAN:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            submissionField = new BooleanSubmissionType(rowGroup, m);
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case GROUP:
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            // groups are not manifest unless they repeat...
+            // just recurse to build out the fields under them...
+            buildSubmissionFields(m, cc);
+            break;
+          // additional supporting tables
+          case PHANTOM: // if a relation needs to be divided in order to fit
+            if (rowGroup == null) {
+              throw new IllegalStateException("Unexpectedly null backingObject");
+            }
+            // phantoms are not manifest...
+            // just recurse to build out the fields under them...
+            buildSubmissionFields(m, cc);
+            break;
+          case BINARY: // identifies BinaryContent table
+            submissionField = new BlobSubmissionType(m, groupRowGroup.getUri(), topLevelTableKey,
+                constructSubmissionKey(m));
+            // pass in row we occur under (to access parentAuri)
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case SELECT1: // identifies SelectChoice table
+            submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(), topLevelTableKey); // pass
+            // in row we occur under to access parentAuri
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case SELECTN: // identifies SelectChoice table
+            submissionField = new ChoiceSubmissionType(m, groupRowGroup.getUri(), topLevelTableKey); // pass
+            // in row we occur under to access parentAuri
+            submissionField.getValueFromEntity(cc);
+            elementsToValues.put(m, submissionField);
+            break;
+          case REPEAT:
+            RepeatSubmissionType repeatNode = new RepeatSubmissionType(this, m,
+                groupRowGroup.getUri(), form);
+            repeatNode.getValueFromEntity(cc);
+            elementsToValues.put(m, repeatNode);
+            break;
+          case BINARY_CONTENT_REF_BLOB: // association between
+            // BINARY and REF_BLOB
+          case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
+          default:
+            throw new IllegalStateException("Traversed element type is unexpected: "
+                + m.getElementType().toString());
         }
       }
     }
@@ -546,11 +520,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    * Keys are of the form
    * <code>formId/topLevelGroupName[@key=PK]/repeatGroupA/.../thisGroup[@key=PK]/element</code>
    *
-   * @param element
-   *          may be null; must be in this SubmissionSet
+   * @param element may be null; must be in this SubmissionSet
    * @return submissionKey specifying the key to the top-level submission, the
-   *         key for this submissionSet, and the name of the element (if not
-   *         null)
+   * key for this submissionSet, and the name of the element (if not
+   * null)
    */
   public SubmissionKey constructSubmissionKey(FormElementModel element) {
     return new SubmissionKey(getFullyQualifiedElementName(element));
@@ -678,7 +651,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   private void recursivelyGetSubmissionValues(FormElementModel group,
-      List<SubmissionValue> valueList) {
+                                              List<SubmissionValue> valueList) {
     for (FormElementModel m : group.getChildren()) {
       if (m.isMetadata()) {
         SubmissionValue v = elementsToValues.get(m);
@@ -770,7 +743,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   protected void populateFormattedValueInRow(Row row, FormElementModel propertyName,
-      ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
+                                             ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
     SubmissionValue value = elementsToValues.get(propertyName);
     if (value != null) {
       value.formatValue(elemFormatter, row, getOrdinalNumAsStr(), cc);
@@ -778,7 +751,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   protected void populateFormattedValuesInRow(Row row, List<FormElementModel> propertyNames,
-      ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
+                                              ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
     if (propertyNames == null) {
       List<SubmissionValue> values = getSubmissionValues();
       for (SubmissionValue value : values) {
@@ -794,17 +767,15 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   /**
    * Format this submission's properties into a Row object.
    *
-   * @param propertyNames
-   *          - if null, all properties are emitted. Otherwise, a list of those
-   *          to emit.
+   * @param propertyNames    - if null, all properties are emitted. Otherwise, a list of those
+   *                         to emit.
    * @param elemFormatter
-   * @param includeParentUid
-   *          - true if the parentUid should be included
+   * @param includeParentUid - true if the parentUid should be included
    * @return
    * @throws ODKDatastoreException
    */
   public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames,
-      ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc)
+                                     ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc)
       throws ODKDatastoreException {
     Row row = new Row(constructSubmissionKey(null));
     if (includeParentUid && !(this instanceof Submission)) {
@@ -833,14 +804,14 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     // Add the primary record for this submission set first
     DDRelationName primaryRelation = group.getFormDataModel().getDDRelationName();
     keyList.add(dbEntities.get(primaryRelation).getEntityKey());
-    
+
     // Next, add all the phantom rows.
     for (DDRelationName r : dbEntities.keySet()) {
-      if ( !r.equals(primaryRelation) ) {
+      if (!r.equals(primaryRelation)) {
         keyList.add(dbEntities.get(r).getEntityKey());
       }
     }
-    
+
     // Finally, add all the select choices and binary 
     // content records. We will delete those first, 
     // then delete the phantom rows.
@@ -892,26 +863,26 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
       // string -- in case they are long strings
       // repeat -- nesting abstraction for a list of submission sets
       switch (m.getElementType()) {
-      case BOOLEAN:
-      case DECIMAL:
-      case GEOPOINT:
-      case GROUP:
-      case INTEGER:
-      case JRDATE:
-      case JRDATETIME:
-      case JRTIME:
-      case METADATA:
-        // This case keeps lint warnings down.
-        break;
-      case SELECT1:
-      case SELECTN:
-      case BINARY:
-      case GEOTRACE: // since based on string
-      case GEOSHAPE: // since based on string
-      case STRING:
-      case REPEAT:
-        entry.getValue().persist(cc);
-        break;
+        case BOOLEAN:
+        case DECIMAL:
+        case GEOPOINT:
+        case GROUP:
+        case INTEGER:
+        case JRDATE:
+        case JRDATETIME:
+        case JRTIME:
+        case METADATA:
+          // This case keeps lint warnings down.
+          break;
+        case SELECT1:
+        case SELECTN:
+        case BINARY:
+        case GEOTRACE: // since based on string
+        case GEOSHAPE: // since based on string
+        case STRING:
+        case REPEAT:
+          entry.getValue().persist(cc);
+          break;
       }
     }
 
@@ -952,6 +923,15 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
   public FormElementModel getFormElementModel() {
     return group;
+  }
+
+  public Long getOrdinalNumber() {
+    if (group.getElementType() == FormElementModel.ElementType.REPEAT) {
+      DynamicBase entity = (DynamicBase) getGroupBackingObject();
+      return entity.getOrdinalNumber();
+    } else {
+      return null;
+    }
   }
 
   private String getOrdinalNumAsStr() {
