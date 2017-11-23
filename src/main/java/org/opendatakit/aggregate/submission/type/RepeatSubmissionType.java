@@ -67,7 +67,8 @@ public class RepeatSubmissionType implements SubmissionRepeat {
    * List of submission sets that are a part of this submission set Ordered by
    * OrdinalNumber...
    */
-  private List<SubmissionSet> submissionSets = new ArrayList<SubmissionSet>();
+  private List<SubmissionSet> submissionSets = new ArrayList<>();
+  private Map<Long, SubmissionSet> submissionSetIndex = new HashMap<>();
 
   public RepeatSubmissionType(SubmissionSet enclosingSet, FormElementModel repeatGroup,
                               String uriAssociatedRow, IForm form) {
@@ -93,6 +94,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
   public void addSubmissionSet(SubmissionSet submissionSet) {
     submissionSets.add(submissionSet);
+    submissionSetIndex.put(submissionSet.getOrdinalNumber(), submissionSet);
   }
 
   public List<SubmissionSet> getSubmissionSets() {
@@ -129,8 +131,13 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
     List<CommonFieldsBase> repeatRows = getRepeatRows(cc, submission);
 
-    for (List<DynamicBase> groupOfRepeatRows : groupPerOrdinalNumber(submission, repeatRows))
-      submissionSets.add(new SubmissionSet(enclosingSet, chooseOneFrom(groupOfRepeatRows), repeatGroup, form, cc));
+    for (List<DynamicBase> groupOfRepeatRows : groupPerOrdinalNumber(submission, repeatRows)) {
+      DynamicBase row = chooseOneFrom(groupOfRepeatRows);
+      SubmissionSet submissionSet = new SubmissionSet(enclosingSet, row, repeatGroup, form, cc);
+      submissionSets.add(submissionSet);
+      submissionSetIndex.put(row.getOrdinalNumber(), submissionSet);
+    }
+
   }
 
   private Collection<List<DynamicBase>> groupPerOrdinalNumber(DynamicBase submission, List<CommonFieldsBase> repeatRows) {
@@ -268,8 +275,7 @@ public class RepeatSubmissionType implements SubmissionRepeat {
 
     Long ordinalNumber = p.getOrdinalNumber();
     if (ordinalNumber != null) {
-      return submissionSets.get(ordinalNumber.intValue() - 1).resolveSubmissionKeyBeginningAt(i,
-          parts);
+      return submissionSetIndex.get(ordinalNumber).resolveSubmissionKeyBeginningAt(i, parts);
     }
 
     String auri = p.getAuri();
