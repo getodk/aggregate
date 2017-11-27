@@ -432,6 +432,8 @@ public final class VisualizationPopup extends AbstractPopupBase {
     options.setMapTypeControl(true);
     options.setNavigationControl(true);
     options.setScaleControl(true);
+    options.setScrollwheel(true);
+    options.setDraggable(true);
     final MapWidget mapWidget = new MapWidget(options);
     mapWidget.setSize("100%", "100%");
 
@@ -552,7 +554,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
         Window.alert("Modules are not loaded yet, please try again!");
         return;
       }
-      
+
       String chartTypeString = chartType.getSelectedValue();
       ChartType selected = (chartTypeString == null) ? null : ChartType.valueOf(chartTypeString);
 
