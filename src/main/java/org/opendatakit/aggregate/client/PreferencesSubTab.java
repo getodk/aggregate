@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client;
 
+import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 import org.opendatakit.aggregate.client.widgets.ChangeAppNameButton;
@@ -114,7 +115,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     add(labelVersion);
     Label version = new Label();
     version.setStylePrimaryName(VERSION_STRING_STYLE);
-    version.setText(UIConsts.VERSION_STRING);
+    version.setText(BuildConfig.VERSION);
     add(version);
 
     HTML labelCredentialsSection = new HTML(GOOGLE_API_CREDENTIALS_LABEL);

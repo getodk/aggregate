@@ -1,3 +1,4 @@
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.opendatakit.aggregate.gradle.gae.Rollback
 import org.opendatakit.aggregate.gradle.gae.Update
 
@@ -13,16 +14,31 @@ buildscript {
   }
 }
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'war'
+plugins {
+  id 'java'
+  id 'maven'
+  id 'war'
+  id 'idea'
+  id 'de.fuerstenau.buildconfig' version '1.1.8'
+}
 apply plugin: 'gwt'
 apply plugin: 'de.undercouch.download'
 apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
 
-group = 'org.opendatakit'
-version = '1.0.1'
+String getVersionName() {
+  def stdout = new ByteArrayOutputStream()
+  def args = ['git', 'describe', '--tags', '--dirty', '--always']
+  if (Os.isFamily(Os.FAMILY_WINDOWS))
+    args = ['cmd', '/c'] + args
+  exec {
+    setCommandLine(args)
+    setStandardOutput(stdout)
+  }
+  stdout.toString().trim()
+}
 
+group = 'org.opendatakit'
+version = getVersionName()
 description = ""
 
 sourceCompatibility = 1.7
@@ -164,7 +180,7 @@ war {
 
 gretty {
   contextPath = '/'
-  host = 'localhost'
+  host = '192.168.1.161'
 }
 
 task gaeDownloadSDK() {
@@ -235,7 +251,7 @@ task gaePrepare(dependsOn: [gaeCopyFiles, gaeCopySDK, gaeCopyDummyApp]) {
 }
 
 Task gaeRollbackModule(String moduleName) {
-  task ("gaeRollback_${moduleName}", dependsOn: gaePrepare, type: Rollback) {
+  task("gaeRollback_${moduleName}", dependsOn: gaePrepare, type: Rollback) {
     email = "${-> gaeEmail}"
     workingDir = "${buildDir}/gae"
     module = moduleName
@@ -288,7 +304,16 @@ task buildInstaller(dependsOn: [cleanInstaller, gaeDownloadSDK], type: Copy) {
   }
 
   doLast {
-    file("build/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
-    file("build/installer/files/appengine-java-sdk-1.9.54").renameTo(file("build/installer/files/appengine-java-sdk"))
+    setXmlValue("${buildDir}/installer/buildWar.xml", "version", version)
+    file("${buildDir}/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
+    file("${buildDir}/installer/files/appengine-java-sdk-1.9.54").renameTo(file("build/installer/files/appengine-java-sdk"))
   }
 }
+
+buildConfig {
+  appName = 'ODK Aggregate'
+  version = getVersionName()
+  clsName = 'BuildConfig'
+  packageName = 'org.opendatakit.aggregate.buildconfig'
+}
+
