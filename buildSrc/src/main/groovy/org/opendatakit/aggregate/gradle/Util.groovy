@@ -17,7 +17,7 @@ class Util {
     def xml = new XmlParser().parse(path.toString())
     xml[tag][0].setValue(value.toString())
     def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(path.toString())))
-    printer.setPreserveWhitespace(false)
+    printer.setPreserveWhitespace(true)
     printer.print(xml)
     println("Set ${path}:<${tag}> to \"${value}\"")
   }
