@@ -16,17 +16,17 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.table.BinaryPopupClickHandler;
-import org.opendatakit.aggregate.client.widgets.AggregateButton;
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.constants.common.BookHelpConsts;
-import org.opendatakit.aggregate.constants.common.UIConsts;
-
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import org.opendatakit.aggregate.buildconfig.BuildConfig;
+import org.opendatakit.aggregate.client.table.BinaryPopupClickHandler;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.constants.common.BookHelpConsts;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 public class HelpBookPopup extends PopupPanel {
 
@@ -39,6 +39,7 @@ public class HelpBookPopup extends PopupPanel {
 
     // populate the panel
     panel.add(new ClosePopupButton(this));
+    panel.add(new HTML("<small>Aggregate v." + BuildConfig.VERSION + "</small>"));
 
     BookHelpConsts[] consts = BookHelpConsts.values();
 
