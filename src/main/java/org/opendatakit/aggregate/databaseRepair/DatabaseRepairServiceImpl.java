@@ -1,7 +1,7 @@
 package org.opendatakit.aggregate.databaseRepair;
 
+import static org.javarosa.core.model.utils.DateUtils.FORMAT_HUMAN_READABLE_SHORT;
 import static org.opendatakit.aggregate.form.FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED;
-import static org.opendatakit.aggregate.form.FormInfoFilesetTable.IS_ENCRYPTED_FORM;
 import static org.opendatakit.aggregate.form.FormInfoTable.FORM_ID;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.javarosa.core.model.utils.DateUtils;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.form.FormInfoFilesetTable;
 import org.opendatakit.aggregate.form.FormInfoTable;
@@ -63,8 +64,8 @@ public class DatabaseRepairServiceImpl extends RemoteServiceServlet implements D
         if (row.getParentAuri().equals(theRow.getParentUri()) && !row.getUri().equals(theRow.getURI()))
           ds.deleteEntity(row.getEntityKey(), user);
         else {
-          row.setBooleanField(IS_ENCRYPTED_FORM, theRow.isEncryptedForm());
-          row.setBooleanField(IS_DOWNLOAD_ALLOWED, theRow.isDownloadAllowed());
+          if (row.getBooleanField(IS_DOWNLOAD_ALLOWED) == null)
+            row.setBooleanField(IS_DOWNLOAD_ALLOWED, false);
           ds.putEntity(row, user);
         }
     } catch (ODKDatastoreException e) {
@@ -92,11 +93,16 @@ public class DatabaseRepairServiceImpl extends RemoteServiceServlet implements D
       String parentAuri = fit.getParentAuri();
       if (!filesets.containsKey(parentAuri))
         filesets.put(parentAuri, FilesetReport.empty());
+      String lastUpdateUriUser = fit.getLastUpdateUriUser();
+      String username = lastUpdateUriUser != null
+          ? lastUpdateUriUser.substring(lastUpdateUriUser.indexOf(":")+1, lastUpdateUriUser.indexOf("|"))
+          : null;
       filesets.put(parentAuri, filesets.get(parentAuri).add(
           fit.getUri(),
           fit.getParentAuri(),
-          fit.getBooleanField(IS_ENCRYPTED_FORM),
-          fit.getBooleanField(IS_DOWNLOAD_ALLOWED)
+          fit.getBooleanField(IS_DOWNLOAD_ALLOWED),
+          DateUtils.formatDate(fit.getLastUpdateDate(), FORMAT_HUMAN_READABLE_SHORT),
+          username
       ));
     }
     return filesets;

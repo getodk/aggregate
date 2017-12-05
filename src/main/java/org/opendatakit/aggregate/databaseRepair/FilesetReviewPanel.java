@@ -10,12 +10,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import org.opendatakit.aggregate.client.SecureGWT;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.opendatakit.aggregate.client.SecureGWT;
 
 class FilesetReviewPanel {
   private List<CheckBox> markForDeletionCheckBoxes;
@@ -47,29 +46,16 @@ class FilesetReviewPanel {
       final FilesetReport.Row row = rows.get(i);
       rowsToDelete.put(row, false);
       table.setText(i + 1, 0, row.getURI());
-      table.setWidget(i + 1, 1, buildIsEncryptedButton(row));
-      table.setWidget(i + 1, 2, buildIsDownloadAllowedButton(row));
+      table.setWidget(i + 1, 1, buildIsDownloadAllowedButton(row));
+      table.setText(i + 1, 2, buildLastUpdatedText(row));
       table.setWidget(i + 1, 3, buildMarkForDeletionButton(row, fileset.hasDupes()));
     }
   }
 
-  private CheckBox buildIsEncryptedButton(final FilesetReport.Row row) {
-    CheckBox isEncryptedForm = new CheckBox();
-
-    if (row.nullIsEncryptedForm())
-      ((InputElement) isEncryptedForm.getElement().getChild(0)).setPropertyBoolean("indeterminate", true);
-    else
-      isEncryptedForm.setValue(row.isEncryptedForm(), false);
-
-    isEncryptedForm.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<Boolean> event) {
-        row.setIsEncryptedForm(event.getValue());
-        refreshSaveButton();
-      }
-    });
-
-    return isEncryptedForm;
+  private String buildLastUpdatedText(FilesetReport.Row row) {
+    return row.getLastUpdateUser() != null
+        ? row.getLastUpdateDate() + " by " + row.getLastUpdateUser()
+        : row.getLastUpdateDate();
   }
 
   private CheckBox buildIsDownloadAllowedButton(final FilesetReport.Row row) {
@@ -80,13 +66,7 @@ class FilesetReviewPanel {
     else
       isDownloadAllowed.setValue(row.isDownloadAllowed(), false);
 
-    isDownloadAllowed.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<Boolean> event) {
-        row.setIsDownloadAllowed(event.getValue());
-        refreshSaveButton();
-      }
-    });
+    isDownloadAllowed.setEnabled(false);
 
     return isDownloadAllowed;
   }
@@ -111,9 +91,9 @@ class FilesetReviewPanel {
     FlexTable table = new FlexTable();
     table.addStyleName("dataTable");
     table.setText(0, 0, "URI");
-    table.setText(0, 1, "Is encrypted?");
-    table.setText(0, 2, "Is download allowed?");
-    table.setText(0, 3, "Mark for deletion");
+    table.setText(0, 1, "Is download allowed?");
+    table.setText(0, 2, "Last update");
+    table.setText(0, 3, "Delete on save");
     table.getRowFormatter().addStyleName(0, "titleBar");
     return table;
   }
