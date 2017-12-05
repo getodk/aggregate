@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FilesetReport implements Serializable {
+  private static final String NULLS = "Nulls";
   private static final String MISSING = "Missing";
   private static final String DUPES = "Dupes";
   private List<FilesetReport.Row> rows = new ArrayList<>();
@@ -42,8 +43,8 @@ public class FilesetReport implements Serializable {
     return DUPES;
   }
 
-  public FilesetReport add(String uri, String parentUri) {
-    rows.add(new Row(uri, parentUri));
+  public FilesetReport add(String uri, String parentUri, Boolean isEncryptedForm, Boolean isDownloadAllowed) {
+    rows.add(new Row(uri, parentUri, isEncryptedForm, isDownloadAllowed));
     return this;
   }
 
@@ -58,22 +59,26 @@ public class FilesetReport implements Serializable {
   public static class Row implements Serializable {
     private String uri;
     private String parentUri;
+    private Boolean isEncryptedForm;
+    private Boolean isDownloadAllowed;
 
     private Row() {
 
     }
 
-    public Row(String uri, String parentUri) {
+    public Row(String uri, String parentUri, Boolean isEncryptedForm, Boolean isDownloadAllowed) {
       this.uri = uri;
       this.parentUri = parentUri;
+      this.isEncryptedForm = isEncryptedForm;
+      this.isDownloadAllowed = isDownloadAllowed;
     }
 
     boolean isOk() {
-      return true;
+      return isEncryptedForm != null && isDownloadAllowed != null;
     }
 
     boolean isCorrupted() {
-      return false;
+      return isEncryptedForm == null || isDownloadAllowed == null;
     }
 
     boolean canBeFixed() {
@@ -82,6 +87,8 @@ public class FilesetReport implements Serializable {
     }
 
     String getCorruptionCause() {
+      if (isEncryptedForm == null || isDownloadAllowed == null)
+        return NULLS;
       return null;
     }
 
@@ -91,6 +98,30 @@ public class FilesetReport implements Serializable {
 
     String getParentUri() {
       return parentUri;
+    }
+
+    boolean nullIsEncryptedForm() {
+      return isEncryptedForm == null;
+    }
+
+    public Boolean isEncryptedForm() {
+      return isEncryptedForm;
+    }
+
+    public void setIsEncryptedForm(boolean value) {
+      isEncryptedForm = value;
+    }
+
+    boolean nullIsDownloadAllowed() {
+      return isDownloadAllowed == null;
+    }
+
+    Boolean isDownloadAllowed() {
+      return isDownloadAllowed;
+    }
+
+    void setIsDownloadAllowed(boolean value) {
+      isDownloadAllowed = value;
     }
   }
 

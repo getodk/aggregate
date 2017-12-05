@@ -47,8 +47,48 @@ class FilesetReviewPanel {
       final FilesetReport.Row row = rows.get(i);
       rowsToDelete.put(row, false);
       table.setText(i + 1, 0, row.getURI());
-      table.setWidget(i + 1, 1, buildMarkForDeletionButton(row, fileset.hasDupes()));
+      table.setWidget(i + 1, 1, buildIsEncryptedButton(row));
+      table.setWidget(i + 1, 2, buildIsDownloadAllowedButton(row));
+      table.setWidget(i + 1, 3, buildMarkForDeletionButton(row, fileset.hasDupes()));
     }
+  }
+
+  private CheckBox buildIsEncryptedButton(final FilesetReport.Row row) {
+    CheckBox isEncryptedForm = new CheckBox();
+
+    if (row.nullIsEncryptedForm())
+      ((InputElement) isEncryptedForm.getElement().getChild(0)).setPropertyBoolean("indeterminate", true);
+    else
+      isEncryptedForm.setValue(row.isEncryptedForm(), false);
+
+    isEncryptedForm.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Boolean> event) {
+        row.setIsEncryptedForm(event.getValue());
+        refreshSaveButton();
+      }
+    });
+
+    return isEncryptedForm;
+  }
+
+  private CheckBox buildIsDownloadAllowedButton(final FilesetReport.Row row) {
+    CheckBox isDownloadAllowed = new CheckBox();
+
+    if (row.nullIsDownloadAllowed())
+      ((InputElement) isDownloadAllowed.getElement().getChild(0)).setPropertyBoolean("indeterminate", true);
+    else
+      isDownloadAllowed.setValue(row.isDownloadAllowed(), false);
+
+    isDownloadAllowed.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Boolean> event) {
+        row.setIsDownloadAllowed(event.getValue());
+        refreshSaveButton();
+      }
+    });
+
+    return isDownloadAllowed;
   }
 
   private CheckBox buildMarkForDeletionButton(final FilesetReport.Row row, boolean hasDupes) {
@@ -71,7 +111,9 @@ class FilesetReviewPanel {
     FlexTable table = new FlexTable();
     table.addStyleName("dataTable");
     table.setText(0, 0, "URI");
-    table.setText(0, 1, "Mark for deletion");
+    table.setText(0, 1, "Is encrypted?");
+    table.setText(0, 2, "Is download allowed?");
+    table.setText(0, 3, "Mark for deletion");
     table.getRowFormatter().addStyleName(0, "titleBar");
     return table;
   }
