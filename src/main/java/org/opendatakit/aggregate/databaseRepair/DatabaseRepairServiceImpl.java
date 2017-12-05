@@ -34,11 +34,13 @@ public class DatabaseRepairServiceImpl extends RemoteServiceServlet implements D
 
     List<FormCorruptionReport> incompleteForms = new ArrayList<>();
     for (FormInfoTable fi : fetchFormInfos(cc)) {
-      incompleteForms.add(new FormCorruptionReport(
+      FormCorruptionReport formCorruptionReport = new FormCorruptionReport(
           fi.getUri(),
           fi.getStringField(FORM_ID),
           filesetsPerForm.containsKey(fi.getUri()) ? filesetsPerForm.get(fi.getUri()) : FilesetReport.empty()
-      ));
+      );
+      if (!formCorruptionReport.isOk())
+        incompleteForms.add(formCorruptionReport);
     }
 
     return incompleteForms;
