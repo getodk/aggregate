@@ -2,6 +2,7 @@ package org.opendatakit.aggregate.databaseRepair;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class FilesetReport implements Serializable {
@@ -42,7 +43,7 @@ public class FilesetReport implements Serializable {
     return DUPES;
   }
 
-  public FilesetReport add(String uri, String parentUri, Boolean isDownloadAllowed, String lastUpdateDate, String lastUpdateUser) {
+  public FilesetReport add(String uri, String parentUri, Boolean isDownloadAllowed, Date lastUpdateDate, String lastUpdateUser) {
     rows.add(new Row(uri, parentUri, isDownloadAllowed, lastUpdateDate, lastUpdateUser));
     return this;
   }
@@ -59,14 +60,14 @@ public class FilesetReport implements Serializable {
     private String uri;
     private String parentUri;
     private Boolean isDownloadAllowed;
-    private String lastUpdateDate;
+    private Date lastUpdateDate;
     private String lastUpdateUser;
 
     private Row() {
 
     }
 
-    public Row(String uri, String parentUri, Boolean isDownloadAllowed, String lastUpdateDate, String lastUpdateUser) {
+    public Row(String uri, String parentUri, Boolean isDownloadAllowed, Date lastUpdateDate, String lastUpdateUser) {
       this.uri = uri;
       this.parentUri = parentUri;
       this.isDownloadAllowed = isDownloadAllowed;
@@ -111,7 +112,7 @@ public class FilesetReport implements Serializable {
       isDownloadAllowed = value;
     }
 
-    String getLastUpdateDate() {
+    Date getLastUpdateDate() {
       return lastUpdateDate;
     }
 

@@ -1,6 +1,7 @@
 package org.opendatakit.aggregate.databaseRepair;
 
 import static org.javarosa.core.model.utils.DateUtils.FORMAT_HUMAN_READABLE_SHORT;
+import static org.javarosa.core.model.utils.DateUtils.FORMAT_ISO8601;
 import static org.opendatakit.aggregate.form.FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED;
 import static org.opendatakit.aggregate.form.FormInfoTable.FORM_ID;
 
@@ -101,7 +102,7 @@ public class DatabaseRepairServiceImpl extends RemoteServiceServlet implements D
           fit.getUri(),
           fit.getParentAuri(),
           fit.getBooleanField(IS_DOWNLOAD_ALLOWED),
-          DateUtils.formatDate(fit.getLastUpdateDate(), FORMAT_HUMAN_READABLE_SHORT),
+          fit.getLastUpdateDate(),
           username
       ));
     }

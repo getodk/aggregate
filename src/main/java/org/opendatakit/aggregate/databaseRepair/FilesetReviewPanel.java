@@ -48,17 +48,11 @@ class FilesetReviewPanel {
       final FilesetReport.Row row = rows.get(i);
       rowsToDelete.put(row, false);
       table.setText(i + 1, 0, row.getURI());
-      table.setText(i + 1, 1, row.getLastUpdateDate());
+      table.setText(i + 1, 1, row.getLastUpdateDate().toString());
       table.setText(i + 1, 2, row.getLastUpdateUser());
       table.setWidget(i + 1, 3, buildIsDownloadAllowedButton(row));
       table.setWidget(i + 1, 4, buildMarkForDeletionButton(row, fileset.hasDupes()));
     }
-  }
-
-  private String buildLastUpdatedText(FilesetReport.Row row) {
-    return row.getLastUpdateUser() != null
-        ? row.getLastUpdateDate() + " by " + row.getLastUpdateUser()
-        : row.getLastUpdateDate();
   }
 
   private CheckBox buildIsDownloadAllowedButton(final FilesetReport.Row row) {
