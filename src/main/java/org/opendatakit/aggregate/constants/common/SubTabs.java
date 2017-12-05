@@ -32,6 +32,7 @@ public enum SubTabs implements Serializable {
    TABLES("ODK Tables Admin", "tablesadmin"),
 	PUBLISH("Published Data", "publish"),
 	SUBMISSION_ADMIN("Submission Admin", "subadmin"),
+	DATABASE_REPAIR("Database Repair", "databaseRepair"),
 	// These fall under the ODKTables Tab
 	CURRENTTABLES("Current Tables", "viewCurrentTables"),
 	VIEWTABLE("View Table", "viewTable"),

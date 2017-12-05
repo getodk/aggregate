@@ -120,7 +120,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 	private static BinaryContentRefBlob manifestBinaryRefBlobRelation = null;
 	private static RefBlob manifestRefBlobRelation = null;
 	
-	static synchronized final FormInfoFilesetTable assertRelation(CallingContext cc) throws ODKDatastoreException {
+	public static synchronized final FormInfoFilesetTable assertRelation(CallingContext cc) throws ODKDatastoreException {
 		if ( relation == null ) {
 			FormInfoFilesetTable relationPrototype;
 			Datastore ds = cc.getDatastore();

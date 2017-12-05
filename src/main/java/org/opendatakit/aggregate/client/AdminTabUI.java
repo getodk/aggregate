@@ -21,6 +21,7 @@ import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
 import com.google.gwt.user.client.ui.Widget;
+import org.opendatakit.aggregate.databaseRepair.DatabaseRepairSubTab;
 
 public class AdminTabUI extends AggregateTabBase {
 
@@ -37,6 +38,8 @@ public class AdminTabUI extends AggregateTabBase {
 
     odkTablesAdminTab = new OdkTablesAdminSubTab();
     addSubTab(odkTablesAdminTab, SubTabs.TABLES);
+
+    addSubTab(new DatabaseRepairSubTab(), SubTabs.DATABASE_REPAIR);
 
     // show panel by default, so need to hide it
     if(!Preferences.getOdkTablesEnabled()) {
