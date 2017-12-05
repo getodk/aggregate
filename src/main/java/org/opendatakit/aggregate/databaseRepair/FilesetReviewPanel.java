@@ -140,6 +140,7 @@ class FilesetReviewPanel {
       public void onClick(ClickEvent event) {
         ConfirmPopup popup = new ConfirmPopup(
             "Execute this fix?",
+            "Check the downloadable status of the form after applying this check",
             new Runnable() {
               @Override
               public void run() {
