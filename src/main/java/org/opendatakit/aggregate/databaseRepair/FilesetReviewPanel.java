@@ -48,9 +48,10 @@ class FilesetReviewPanel {
       final FilesetReport.Row row = rows.get(i);
       rowsToDelete.put(row, false);
       table.setText(i + 1, 0, row.getURI());
-      table.setWidget(i + 1, 1, buildIsDownloadAllowedButton(row));
-      table.setText(i + 1, 2, buildLastUpdatedText(row));
-      table.setWidget(i + 1, 3, buildMarkForDeletionButton(row, fileset.hasDupes()));
+      table.setText(i + 1, 1, row.getLastUpdateDate());
+      table.setText(i + 1, 2, row.getLastUpdateUser());
+      table.setWidget(i + 1, 3, buildIsDownloadAllowedButton(row));
+      table.setWidget(i + 1, 4, buildMarkForDeletionButton(row, fileset.hasDupes()));
     }
   }
 
@@ -93,9 +94,10 @@ class FilesetReviewPanel {
     FlexTable table = new FlexTable();
     table.addStyleName("dataTable");
     table.setText(0, 0, "URI");
-    table.setText(0, 1, "Is download allowed?");
-    table.setText(0, 2, "Last update");
-    table.setText(0, 3, "Delete on save");
+    table.setText(0, 1, "Last update date");
+    table.setText(0, 2, "Last update user");
+    table.setText(0, 3, "Is download allowed?");
+    table.setText(0, 4, "Delete on save");
     table.getRowFormatter().addStyleName(0, "titleBar");
     return table;
   }
