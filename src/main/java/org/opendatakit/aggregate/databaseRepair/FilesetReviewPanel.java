@@ -90,7 +90,7 @@ class FilesetReviewPanel {
     table.setText(0, 0, "URI");
     table.setText(0, 1, "Last update date");
     table.setText(0, 2, "Last update user");
-    table.setText(0, 3, "Is download allowed?");
+    table.setText(0, 3, "Downloadable");
     table.setText(0, 4, "Delete on save");
     table.getRowFormatter().addStyleName(0, "titleBar");
     return table;
