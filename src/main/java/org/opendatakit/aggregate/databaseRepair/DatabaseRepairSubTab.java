@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.List;
@@ -34,16 +35,24 @@ import org.opendatakit.aggregate.client.widgets.AggregateButton;
 public class DatabaseRepairSubTab extends AggregateSubTabBase {
 
   private final FlexTable reportsTable;
+  private final HTMLPanel noProblemsNotice;
   final FlowPanel reviewPanel;
+  final HTML reviewPanelTitle;
 
   public DatabaseRepairSubTab() {
+    add(new HTML("<h3>Form corruption report</h3>"));
+
     reportsTable = new FlexTable();
     reportsTable.addStyleName("dataTable");
-    add(new HTML("<h3>Form corruption report</h3>"));
     add(reportsTable);
 
+    noProblemsNotice = new HTMLPanel("div", "No problems to report");
+    add(noProblemsNotice);
+
+    reviewPanelTitle = new HTML("<h3>Review panel</h3>");
+    add(reviewPanelTitle);
+
     reviewPanel = new FlowPanel("div");
-    add(new HTML("<h3>Review panel</h3>"));
     add(reviewPanel);
 
     update();
@@ -58,6 +67,8 @@ public class DatabaseRepairSubTab extends AggregateSubTabBase {
   @Override
   public void update() {
     reviewPanel.clear();
+    reviewPanel.setVisible(false);
+    reviewPanelTitle.setVisible(false);
     SecureGWT.getDatabaseRepairService().formsMissingFileset(new AsyncCallback<List<FormCorruptionReport>>() {
       public void onFailure(Throwable caught) {
         AggregateUI.getUI().reportError(caught);
@@ -66,14 +77,21 @@ public class DatabaseRepairSubTab extends AggregateSubTabBase {
       public void onSuccess(List<FormCorruptionReport> reports) {
         AggregateUI.getUI().clearError();
 
-        reportsTable.removeAllRows();
-        setReportsTableHeader();
-        for (int i = 0; i < reports.size(); i++) {
-          FormCorruptionReport form = reports.get(i);
-          reportsTable.setText(i + 1, 0, form.getFormId());
-          reportsTable.setWidget(i + 1, 1, buildFilesetCell(form.getFileset()));
-          if (i % 2 == 0)
-            reportsTable.getRowFormatter().addStyleName(i, "evenTableRow");
+        if (reports.size() > 0) {
+          reportsTable.removeAllRows();
+          setReportsTableHeader();
+          for (int i = 0; i < reports.size(); i++) {
+            FormCorruptionReport form = reports.get(i);
+            reportsTable.setText(i + 1, 0, form.getFormId());
+            reportsTable.setWidget(i + 1, 1, buildFilesetCell(form.getFileset()));
+            if (i % 2 == 0)
+              reportsTable.getRowFormatter().addStyleName(i, "evenTableRow");
+          }
+          noProblemsNotice.setVisible(false);
+          reportsTable.setVisible(true);
+        } else {
+          noProblemsNotice.setVisible(true);
+          reportsTable.setVisible(false);
         }
       }
     });

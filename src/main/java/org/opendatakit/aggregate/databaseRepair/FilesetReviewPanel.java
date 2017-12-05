@@ -36,6 +36,8 @@ class FilesetReviewPanel {
     parent.reviewPanel.add(table);
     parent.reviewPanel.add(saveButton);
     parent.reviewPanel.add(cancelButton);
+    parent.reviewPanel.setVisible(true);
+    parent.reviewPanelTitle.setVisible(true);
   }
 
   private void fillTable(FlexTable table, FilesetReport fileset) {
@@ -105,6 +107,8 @@ class FilesetReviewPanel {
       @Override
       public void onClick(ClickEvent event) {
         parent.reviewPanel.clear();
+        parent.reviewPanel.setVisible(false);
+        parent.reviewPanelTitle.setVisible(false);
       }
     });
     return cancelButton;
