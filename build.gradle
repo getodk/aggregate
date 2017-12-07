@@ -19,6 +19,7 @@ plugins {
   id 'maven'
   id 'war'
   id 'idea'
+  id 'checkstyle'
   id 'de.fuerstenau.buildconfig' version '1.1.8'
 }
 apply plugin: 'gwt'
@@ -317,3 +318,7 @@ buildConfig {
   packageName = 'org.opendatakit.aggregate.buildconfig'
 }
 
+// Required to use fileExtensions property in checkstyle file
+checkstyle {
+  toolVersion = '7.6.1'
+}
