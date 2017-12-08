@@ -37,83 +37,83 @@ import org.opendatakit.common.security.User;
  * 
  */
 public abstract class DynamicAssociationBase extends DynamicCommonFieldsBase {
-	
-	/** association
-	 * <p>
-	 * The tables to which the DOM (dominant) and SUB (subordinate) AURIs point
-	 * can be determined by the model information for this table (what is the 
-	 * enclosing form element for this table name; what is the nested element).
-	 * If types are ambiguous, then the table should include information to
-	 * resolve the ambiguity. 
-	 */
-	public static final int ADDITIONAL_COLUMN_COUNT = 3 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
+    
+    /** association
+     * <p>
+     * The tables to which the DOM (dominant) and SUB (subordinate) AURIs point
+     * can be determined by the model information for this table (what is the 
+     * enclosing form element for this table name; what is the nested element).
+     * If types are ambiguous, then the table should include information to
+     * resolve the ambiguity. 
+     */
+    public static final int ADDITIONAL_COLUMN_COUNT = 3 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
 
-	/** key into the dynamic table for the dominant relation */
-	private static final DataField DOM_AURI = new DataField("_DOM_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN ).setIndexable(IndexType.HASH);
-	/** key into the dynamic table for the subordinate relation */
-	private static final DataField SUB_AURI = new DataField("_SUB_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN );
-	/** key into the top level dynamic table that is our ancestor */
-	private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
+    /** key into the dynamic table for the dominant relation */
+    private static final DataField DOM_AURI = new DataField("_DOM_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN ).setIndexable(IndexType.HASH);
+    /** key into the dynamic table for the subordinate relation */
+    private static final DataField SUB_AURI = new DataField("_SUB_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN );
+    /** key into the top level dynamic table that is our ancestor */
+    private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 
-	public final DataField domAuri;
-	public final DataField subAuri;
-	public final DataField topLevelAuri;
+    public final DataField domAuri;
+    public final DataField subAuri;
+    public final DataField topLevelAuri;
 
-	/**
-	 * Construct a relation prototype.
-	 * 
-	 * @param databaseSchema
-	 * @param tableName
-	 */
-	protected DynamicAssociationBase(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName);
-		fieldList.add(domAuri=new DataField(DOM_AURI));
-		fieldList.add(subAuri=new DataField(SUB_AURI));
-		fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
-	}
+    /**
+     * Construct a relation prototype.
+     * 
+     * @param databaseSchema
+     * @param tableName
+     */
+    protected DynamicAssociationBase(String databaseSchema, String tableName) {
+        super(databaseSchema, tableName);
+        fieldList.add(domAuri=new DataField(DOM_AURI));
+        fieldList.add(subAuri=new DataField(SUB_AURI));
+        fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
+    }
 
-	/**
-	 * Construct an empty entity.
-	 * 
-	 * @param ref
-	 * @param user
-	 */
-	protected DynamicAssociationBase(DynamicAssociationBase ref, User user) {
-		super(ref, user);
-		domAuri = ref.domAuri;
-		subAuri = ref.subAuri;
-		topLevelAuri = ref.topLevelAuri;
-	}
+    /**
+     * Construct an empty entity.
+     * 
+     * @param ref
+     * @param user
+     */
+    protected DynamicAssociationBase(DynamicAssociationBase ref, User user) {
+        super(ref, user);
+        domAuri = ref.domAuri;
+        subAuri = ref.subAuri;
+        topLevelAuri = ref.topLevelAuri;
+    }
 
-	
-	public final String getTopLevelAuri() {
-		return getStringField(topLevelAuri);
-	}
-	
-	public final void setTopLevelAuri(String value) {
-		if ( ! setStringField(topLevelAuri, value) ) {
-			throw new IllegalStateException("overflow on topLevelAuri");
-		}
-	}
-	
-	
-	public final String getDomAuri() {
-		return getStringField(domAuri);
-	}
-	
-	public final void setDomAuri(String value) {
-		if ( !setStringField(domAuri, value) ) {
-			throw new IllegalStateException("overflow on domAuri");
-		}
-	}
+    
+    public final String getTopLevelAuri() {
+        return getStringField(topLevelAuri);
+    }
+    
+    public final void setTopLevelAuri(String value) {
+        if ( ! setStringField(topLevelAuri, value) ) {
+            throw new IllegalStateException("overflow on topLevelAuri");
+        }
+    }
+    
+    
+    public final String getDomAuri() {
+        return getStringField(domAuri);
+    }
+    
+    public final void setDomAuri(String value) {
+        if ( !setStringField(domAuri, value) ) {
+            throw new IllegalStateException("overflow on domAuri");
+        }
+    }
 
-	public final String getSubAuri() {
-		return getStringField(subAuri);
-	}
+    public final String getSubAuri() {
+        return getStringField(subAuri);
+    }
 
-	public final void setSubAuri(String value) {
-		if ( !setStringField(subAuri, value) ) {
-			throw new IllegalStateException("overflow on subAuri");
-		}
-	}
+    public final void setSubAuri(String value) {
+        if ( !setStringField(subAuri, value) ) {
+            throw new IllegalStateException("overflow on subAuri");
+        }
+    }
 }

@@ -79,7 +79,7 @@ public class HtmlUtil extends HtmlStrUtil{
    * @throws UnsupportedEncodingException
    */
   public static final String createHtmlButtonToHttpMethodServlet(String httpMethod,
-   	  String servletAddr, String label,
+      String servletAddr, String label,
          Map<String, String> properties) throws UnsupportedEncodingException {
     StringBuilder html = new StringBuilder();
     html.append(HtmlStrUtil.createFormBeginTag(servletAddr, null, httpMethod));
@@ -146,13 +146,13 @@ public class HtmlUtil extends HtmlStrUtil{
   public static final String createHtmlButtonToGetServlet(String servletAddr, String label,
       Map<String, String> properties) throws UnsupportedEncodingException {
    return createHtmlButtonToHttpMethodServlet(HtmlConsts.GET,
-   		  servletAddr, label, properties);
+          servletAddr, label, properties);
   }
 
   public static final String createHtmlButtonToPostServlet(String servletAddr, String label,
          Map<String, String> properties) throws UnsupportedEncodingException {
-   	return createHtmlButtonToHttpMethodServlet(HtmlConsts.POST,
-   			  servletAddr, label, properties);
+    return createHtmlButtonToHttpMethodServlet(HtmlConsts.POST,
+              servletAddr, label, properties);
   }
 
   public static final String createRadio(String name, String value, String desc, boolean checked) {

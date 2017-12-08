@@ -23,8 +23,8 @@ import java.io.Serializable;
  */
 public class UIQueryResumePoint implements Serializable {
   /**
-	 * 
-	 */
+     * 
+     */
   private static final long serialVersionUID = 7500161085826059616L;
   private String attributeName;
   private String value;

@@ -59,59 +59,59 @@ public class XFormsManifestXmlTable {
   }
 
   public void generateXmlManifestList(PrintWriter output, CallingContext cc) throws IOException, ODKDatastoreException {
-	Document d = new Document();
-	d.setStandalone(true);
-	d.setEncoding(HtmlConsts.UTF8_ENCODE);
-	Element e = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MANIFEST_TAG);
-	e.setPrefix(null, XML_TAG_NAMESPACE);
-	d.addChild(0, Node.ELEMENT, e);
-	int idx = 0;
-	e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+    Document d = new Document();
+    d.setStandalone(true);
+    d.setEncoding(HtmlConsts.UTF8_ENCODE);
+    Element e = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MANIFEST_TAG);
+    e.setPrefix(null, XML_TAG_NAMESPACE);
+    d.addChild(0, Node.ELEMENT, e);
+    int idx = 0;
+    e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
 
     // build XML table of form information
     BinaryContentManipulator manifest = form.getManifestFileset();
     if ( manifest != null ) {
-    	int fileCount = manifest.getAttachmentCount(cc);
-    	for ( int i = 1 ; i <= fileCount ; ++i ) {
-	      idx = generateManifestXmlEntry(d, e, idx, form.getUri(), manifest, i, cc);
-    	}
+        int fileCount = manifest.getAttachmentCount(cc);
+        for ( int i = 1 ; i <= fileCount ; ++i ) {
+          idx = generateManifestXmlEntry(d, e, idx, form.getUri(), manifest, i, cc);
+        }
     }
 
-	KXmlSerializer serializer = new KXmlSerializer();
-	serializer.setOutput(output);
-	// setting the response content type emits the xml header.
-	// just write the body here...
-	d.writeChildren(serializer); 
-	serializer.flush();
+    KXmlSerializer serializer = new KXmlSerializer();
+    serializer.setOutput(output);
+    // setting the response content type emits the xml header.
+    // just write the body here...
+    d.writeChildren(serializer); 
+    serializer.flush();
   }
 
   private int generateManifestXmlEntry(Document d, Element e, int idx, String uri, BinaryContentManipulator m, int i, CallingContext cc) throws ODKDatastoreException {
-	  String filename = m.getUnrootedFilename(i, cc);
-	  String hash = m.getContentHash(i, cc);
+      String filename = m.getUnrootedFilename(i, cc);
+      String hash = m.getContentHash(i, cc);
 
-	  // if we don't have the file (hash==null), then don't emit anything.
-	  if ( hash == null ) return idx;
-	  
-	  int feIdx = 0;
-	  Element fileEntryElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MEDIA_FILE_TAG);
-	  e.addChild(idx++, Node.ELEMENT, fileEntryElement);
-	  Element fileNameElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.FILE_NAME_TAG);
-	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, fileNameElement);
-	  fileNameElement.addChild(0, Node.TEXT, filename);
-	  Element hashElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.HASH_TAG);
-	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, hashElement);
-	  hashElement.addChild(0, Node.TEXT, hash);
-	  Element downloadElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.DOWNLOAD_URL_TAG);
-	  fileEntryElement.addChild(feIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
-	  fileEntryElement.addChild(feIdx++, Node.ELEMENT, downloadElement);
-	  {
-		Map<String, String> properties = new HashMap<String, String>();
-		SubmissionKey k = FormInfo.getManifestSubmissionKey(uri, i);
-	    properties.put(ServletConsts.BLOB_KEY, k.toString());
-	    properties.put(ServletConsts.AS_ATTACHMENT, "true");
-	    String urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
-	    downloadElement.addChild(0, Node.TEXT, urlLink);
-	  }
+      // if we don't have the file (hash==null), then don't emit anything.
+      if ( hash == null ) return idx;
+      
+      int feIdx = 0;
+      Element fileEntryElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.MEDIA_FILE_TAG);
+      e.addChild(idx++, Node.ELEMENT, fileEntryElement);
+      Element fileNameElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.FILE_NAME_TAG);
+      fileEntryElement.addChild(feIdx++, Node.ELEMENT, fileNameElement);
+      fileNameElement.addChild(0, Node.TEXT, filename);
+      Element hashElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.HASH_TAG);
+      fileEntryElement.addChild(feIdx++, Node.ELEMENT, hashElement);
+      hashElement.addChild(0, Node.TEXT, hash);
+      Element downloadElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.DOWNLOAD_URL_TAG);
+      fileEntryElement.addChild(feIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
+      fileEntryElement.addChild(feIdx++, Node.ELEMENT, downloadElement);
+      {
+        Map<String, String> properties = new HashMap<String, String>();
+        SubmissionKey k = FormInfo.getManifestSubmissionKey(uri, i);
+        properties.put(ServletConsts.BLOB_KEY, k.toString());
+        properties.put(ServletConsts.AS_ATTACHMENT, "true");
+        String urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
+        downloadElement.addChild(0, Node.TEXT, urlLink);
+      }
       e.addChild(idx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
       return idx;
   }

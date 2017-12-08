@@ -37,14 +37,14 @@ import com.google.api.client.http.HttpTransport;
  */
 public interface HttpClientFactory {
 
-	/**
-	 * All arguments can be null. Updated to Apache 4.5.2 active usage.
-	 * 
-	 * @param socketConfig
-	 * @param connectionConfig
-	 * @param requestConfig
-	 * @return
-	 */
+    /**
+     * All arguments can be null. Updated to Apache 4.5.2 active usage.
+     * 
+     * @param socketConfig
+     * @param connectionConfig
+     * @param requestConfig
+     * @return
+     */
   public CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig);
 
   public HttpTransport getGoogleOAuth2Transport() throws GeneralSecurityException, IOException;

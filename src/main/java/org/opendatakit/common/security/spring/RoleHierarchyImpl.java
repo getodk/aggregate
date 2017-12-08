@@ -63,22 +63,22 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 
-	private static final Log logger = LogFactory.getLog(RoleHierarchyImpl.class);
-	// look for flagged changes every CHECK_INTERVAL.
-	private static final long CHECK_INTERVAL = 1000L; // 1 seconds
-	// refresh everything every UPDATE_INTERVAL.
-	private static final long UPDATE_INTERVAL = 2*60*1000L; // 2 minutes
-	/** bean to the datastore */
-	private Datastore datastore = null;
-	/** bean to the userService */
-	private UserService userService = null;
-	/** bean to password hash algorithm */
-	private MessageDigestPasswordEncoder passwordEncoder = null;
-	/** bean to the startup action */
-	private WebStartup startupAction = null;
-	
-	private long lastCheckTimestamp = System.currentTimeMillis();
-	private long lastUpdateTimestamp = System.currentTimeMillis();
+    private static final Log logger = LogFactory.getLog(RoleHierarchyImpl.class);
+    // look for flagged changes every CHECK_INTERVAL.
+    private static final long CHECK_INTERVAL = 1000L; // 1 seconds
+    // refresh everything every UPDATE_INTERVAL.
+    private static final long UPDATE_INTERVAL = 2*60*1000L; // 2 minutes
+    /** bean to the datastore */
+    private Datastore datastore = null;
+    /** bean to the userService */
+    private UserService userService = null;
+    /** bean to password hash algorithm */
+    private MessageDigestPasswordEncoder passwordEncoder = null;
+    /** bean to the startup action */
+    private WebStartup startupAction = null;
+    
+    private long lastCheckTimestamp = System.currentTimeMillis();
+    private long lastUpdateTimestamp = System.currentTimeMillis();
 
     /**
      * rolesReachableInOneOrMoreStepsMap is a Map that under the key of a specific role 
@@ -87,229 +87,229 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
      * NOTE: should only be set/accessed with updateRolesMap()/getRolesMap()
      */
     private Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneOrMoreStepsMap = null;
-	
-	public Datastore getDatastore() {
-		return datastore;
-	}
+    
+    public Datastore getDatastore() {
+        return datastore;
+    }
 
-	public void setDatastore(Datastore datastore) {
-		this.datastore = datastore;
-	}
+    public void setDatastore(Datastore datastore) {
+        this.datastore = datastore;
+    }
 
-	public UserService getUserService() {
-		return userService;
-	}
+    public UserService getUserService() {
+        return userService;
+    }
 
-	public void setUserService(UserService userService) {
-		this.userService = userService;
-	}
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
 
-	public MessageDigestPasswordEncoder getPasswordEncoder() {
-		return passwordEncoder;
-	}
+    public MessageDigestPasswordEncoder getPasswordEncoder() {
+        return passwordEncoder;
+    }
 
-	public void setPasswordEncoder(MessageDigestPasswordEncoder passwordEncoder) {
-		this.passwordEncoder = passwordEncoder;
-	}
+    public void setPasswordEncoder(MessageDigestPasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
-	public WebStartup getStartupAction() {
-		return startupAction;
-	}
+    public WebStartup getStartupAction() {
+        return startupAction;
+    }
 
-	public void setStartupAction(WebStartup startupAction) {
-		this.startupAction = startupAction;
-	}
+    public void setStartupAction(WebStartup startupAction) {
+        this.startupAction = startupAction;
+    }
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if ( datastore == null ) {
-			throw new IllegalStateException("datastore cannot be unspecified");
-		}
-		if ( userService == null ) {
-			throw new IllegalStateException("userService cannot be unspecified");
-		}
-		
-		refreshReachableGrantedAuthorities();
-		
-		CallingContext bootstrapCc = new CallingContext() {
-			@Override
-			public Object getBean(String beanName) {
-				if ( beanName.equals(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER)) {
-					return RoleHierarchyImpl.this;
-				} else if ( beanName.equals(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER) ) {
-					return RoleHierarchyImpl.this.passwordEncoder;
-				} else {
-					throw new IllegalStateException("Undefined");
-				}
-			}
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if ( datastore == null ) {
+            throw new IllegalStateException("datastore cannot be unspecified");
+        }
+        if ( userService == null ) {
+            throw new IllegalStateException("userService cannot be unspecified");
+        }
+        
+        refreshReachableGrantedAuthorities();
+        
+        CallingContext bootstrapCc = new CallingContext() {
+            @Override
+            public Object getBean(String beanName) {
+                if ( beanName.equals(SecurityBeanDefs.ROLE_HIERARCHY_MANAGER)) {
+                    return RoleHierarchyImpl.this;
+                } else if ( beanName.equals(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER) ) {
+                    return RoleHierarchyImpl.this.passwordEncoder;
+                } else {
+                    throw new IllegalStateException("Undefined");
+                }
+            }
 
-			@Override
-			public Datastore getDatastore() {
-				return datastore;
-			}
+            @Override
+            public Datastore getDatastore() {
+                return datastore;
+            }
 
-			@Override
-			public UserService getUserService() {
-				return userService;
-			}
+            @Override
+            public UserService getUserService() {
+                return userService;
+            }
 
-			@Override
-			public void setAsDaemon(boolean asDaemon) {
-				if ( asDaemon != true ) {
-					throw new IllegalStateException("Invalid context");
-				}
-			}
+            @Override
+            public void setAsDaemon(boolean asDaemon) {
+                if ( asDaemon != true ) {
+                    throw new IllegalStateException("Invalid context");
+                }
+            }
 
-			@Override
-			public boolean getAsDeamon() {
-				return true;
-			}
+            @Override
+            public boolean getAsDeamon() {
+                return true;
+            }
 
-			@Override
-			public User getCurrentUser() {
-				return userService.getDaemonAccountUser();
-			}
+            @Override
+            public User getCurrentUser() {
+                return userService.getDaemonAccountUser();
+            }
 
-			@Override
-			public ServletContext getServletContext() {
-				throw new IllegalStateException("Undefined");
-			}
+            @Override
+            public ServletContext getServletContext() {
+                throw new IllegalStateException("Undefined");
+            }
 
-			@Override
-			public String getWebApplicationURL() {
-				throw new IllegalStateException("Undefined");
-			}
+            @Override
+            public String getWebApplicationURL() {
+                throw new IllegalStateException("Undefined");
+            }
 
-			@Override
-			public String getWebApplicationURL(String servletAddr) {
-				throw new IllegalStateException("Undefined");
-			}
+            @Override
+            public String getWebApplicationURL(String servletAddr) {
+                throw new IllegalStateException("Undefined");
+            }
 
-			@Override
-			public String getServerURL() {
-				throw new IllegalStateException("Undefined");
-			}
+            @Override
+            public String getServerURL() {
+                throw new IllegalStateException("Undefined");
+            }
 
-			@Override
-			public String getSecureServerURL() {
-				throw new IllegalStateException("Undefined");
-			}
-		};
-		
-		Datastore ds = bootstrapCc.getDatastore();
-		User user = bootstrapCc.getCurrentUser();
-		
-		// gain single-access lock record in database...
-		String lockedResourceName = "---startup-serialization-lock---";
-		String startupLockId = UUID.randomUUID().toString();
-		
-		int i = 0;
-		boolean locked = false;
-		while ( !locked ) {
-			if ( (++i) % 10 == 0 ) {
-			  logger.warn("excessive wait count for startup serialization lock. Count: " + i);
-	          try {
-	            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-	          } catch (InterruptedException e) {
-	            // we remain in the loop even if we get kicked out.
-	          }
-			} else if ( i != 1 ) {
-	          try {
-	            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-	          } catch (InterruptedException e) {
-	            // we remain in the loop even if we get kicked out.
-	          }
-			}
-			try {
-				TaskLock startupTaskLock = ds.createTaskLock(user);
-				if (startupTaskLock.obtainLock(startupLockId, lockedResourceName,
-						TaskLockType.STARTUP_SERIALIZATION)) {
-					locked = true;
-				}
-				startupTaskLock = null;
-			} catch (ODKTaskLockException e) {
-			  e.printStackTrace();
-			}
-		}
-		
-		// we hold the lock while we initialize stuff here...
-		try {
-			if  ( !userService.isAccessManagementConfigured() ) {
-				logger.warn("Configuring with default role name and role hierarchy"); 
-				SecurityServiceUtil.setDefaultRoleNamesAndHierarchy(bootstrapCc);
-			}
-	
-			// ensure that the superuser has admin privileges
-			SecurityServiceUtil.superUserBootstrap(bootstrapCc);
-	
-			refreshReachableGrantedAuthorities();
-			
-			if ( startupAction != null ) {
-				startupAction.doStartupAction(bootstrapCc);
-			}
-		} finally {
-		  // release the startup serialization lock
-	      try {
-	        for (i = 0; i < 10; i++) {
-	          TaskLock startupTaskLock = ds.createTaskLock(user);
-	          if (startupTaskLock.releaseLock(startupLockId, lockedResourceName,
-	              TaskLockType.STARTUP_SERIALIZATION)) {
-	            break;
-	          }
-	          startupTaskLock = null;
-	          try {
-	            Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
-	          } catch (InterruptedException e) {
-	            // just move on, this retry mechanism
-	            // is to make things nice
-	          }
-	        }
-	      } catch (ODKTaskLockException e) {
-	        e.printStackTrace();
-	      }
-		}
-	}
+            @Override
+            public String getSecureServerURL() {
+                throw new IllegalStateException("Undefined");
+            }
+        };
+        
+        Datastore ds = bootstrapCc.getDatastore();
+        User user = bootstrapCc.getCurrentUser();
+        
+        // gain single-access lock record in database...
+        String lockedResourceName = "---startup-serialization-lock---";
+        String startupLockId = UUID.randomUUID().toString();
+        
+        int i = 0;
+        boolean locked = false;
+        while ( !locked ) {
+            if ( (++i) % 10 == 0 ) {
+              logger.warn("excessive wait count for startup serialization lock. Count: " + i);
+              try {
+                Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+              } catch (InterruptedException e) {
+                // we remain in the loop even if we get kicked out.
+              }
+            } else if ( i != 1 ) {
+              try {
+                Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+              } catch (InterruptedException e) {
+                // we remain in the loop even if we get kicked out.
+              }
+            }
+            try {
+                TaskLock startupTaskLock = ds.createTaskLock(user);
+                if (startupTaskLock.obtainLock(startupLockId, lockedResourceName,
+                        TaskLockType.STARTUP_SERIALIZATION)) {
+                    locked = true;
+                }
+                startupTaskLock = null;
+            } catch (ODKTaskLockException e) {
+              e.printStackTrace();
+            }
+        }
+        
+        // we hold the lock while we initialize stuff here...
+        try {
+            if  ( !userService.isAccessManagementConfigured() ) {
+                logger.warn("Configuring with default role name and role hierarchy"); 
+                SecurityServiceUtil.setDefaultRoleNamesAndHierarchy(bootstrapCc);
+            }
+    
+            // ensure that the superuser has admin privileges
+            SecurityServiceUtil.superUserBootstrap(bootstrapCc);
+    
+            refreshReachableGrantedAuthorities();
+            
+            if ( startupAction != null ) {
+                startupAction.doStartupAction(bootstrapCc);
+            }
+        } finally {
+          // release the startup serialization lock
+          try {
+            for (i = 0; i < 10; i++) {
+              TaskLock startupTaskLock = ds.createTaskLock(user);
+              if (startupTaskLock.releaseLock(startupLockId, lockedResourceName,
+                  TaskLockType.STARTUP_SERIALIZATION)) {
+                break;
+              }
+              startupTaskLock = null;
+              try {
+                Thread.sleep(PersistConsts.MIN_SETTLE_MILLISECONDS);
+              } catch (InterruptedException e) {
+                // just move on, this retry mechanism
+                // is to make things nice
+              }
+            }
+          } catch (ODKTaskLockException e) {
+            e.printStackTrace();
+          }
+        }
+    }
 
-	/**
-	 * Update the rolesReachableInOneOrMoreStepsMap with a clean fetch from the database.
-	 * 
-	 * @throws ODKDatastoreException
-	 */
-	public void refreshReachableGrantedAuthorities() throws ODKDatastoreException {
-		logger.info("Executing: refreshReachableGrantedAuthorities");
-		try {
-			Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap =
-				buildRolesReachableInOneOrMoreStepsMap(buildRolesReachableInOneStepMap());
-			updateRolesMap(localRolesReachableInOneOrMoreStepsMap);
-			// and wipe the user service, since permissions may have changed...
-			userService.reloadPermissions();
-			lastCheckTimestamp = lastUpdateTimestamp = System.currentTimeMillis();
-		} catch ( ODKDatastoreException e) {
-			logger.warn("Datastore failure: refreshReachableGrantedAuthorities -- adjusting retry time");
-			// set ourselves up to hit the database again after half a check interval
-			lastCheckTimestamp = System.currentTimeMillis()-CHECK_INTERVAL/2L;
-			throw e;
-		}
-	}
-	
-	/**
-	 * Atomically swap out the rolesReachableInOneOrMoreStepsMap.
-	 * 
-	 * @param localRolesReachableInOneOrMoreStepsMap
-	 */
-	private synchronized void updateRolesMap(Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap) {
-		rolesReachableInOneOrMoreStepsMap = localRolesReachableInOneOrMoreStepsMap;
-	}
+    /**
+     * Update the rolesReachableInOneOrMoreStepsMap with a clean fetch from the database.
+     * 
+     * @throws ODKDatastoreException
+     */
+    public void refreshReachableGrantedAuthorities() throws ODKDatastoreException {
+        logger.info("Executing: refreshReachableGrantedAuthorities");
+        try {
+            Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap =
+                buildRolesReachableInOneOrMoreStepsMap(buildRolesReachableInOneStepMap());
+            updateRolesMap(localRolesReachableInOneOrMoreStepsMap);
+            // and wipe the user service, since permissions may have changed...
+            userService.reloadPermissions();
+            lastCheckTimestamp = lastUpdateTimestamp = System.currentTimeMillis();
+        } catch ( ODKDatastoreException e) {
+            logger.warn("Datastore failure: refreshReachableGrantedAuthorities -- adjusting retry time");
+            // set ourselves up to hit the database again after half a check interval
+            lastCheckTimestamp = System.currentTimeMillis()-CHECK_INTERVAL/2L;
+            throw e;
+        }
+    }
+    
+    /**
+     * Atomically swap out the rolesReachableInOneOrMoreStepsMap.
+     * 
+     * @param localRolesReachableInOneOrMoreStepsMap
+     */
+    private synchronized void updateRolesMap(Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap) {
+        rolesReachableInOneOrMoreStepsMap = localRolesReachableInOneOrMoreStepsMap;
+    }
 
-	/**
-	 * Atomically fetch the rolesReachableInOneOrMoreStepsMap.
-	 * @return
-	 */
-	private synchronized Map<GrantedAuthority, Set<GrantedAuthority>> getRolesMap() {
-		return rolesReachableInOneOrMoreStepsMap;
-	}
+    /**
+     * Atomically fetch the rolesReachableInOneOrMoreStepsMap.
+     * @return
+     */
+    private synchronized Map<GrantedAuthority, Set<GrantedAuthority>> getRolesMap() {
+        return rolesReachableInOneOrMoreStepsMap;
+    }
 
-	@Override
+    @Override
     public Collection<? extends GrantedAuthority> getReachableGrantedAuthorities(Collection<? extends GrantedAuthority> authorities) {
         if (authorities == null || authorities.isEmpty()) {
             return AuthorityUtils.NO_AUTHORITIES;
@@ -317,41 +317,41 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
         long timeRequestStarts = System.currentTimeMillis();
         if ( timeRequestStarts > lastUpdateTimestamp + UPDATE_INTERVAL ) {
             // update the security configuration entirely every UPDATE_INTERVAL...
-        	try {
-				refreshReachableGrantedAuthorities();
-			} catch (ODKDatastoreException e) {
-				e.printStackTrace();
-			}
+            try {
+                refreshReachableGrantedAuthorities();
+            } catch (ODKDatastoreException e) {
+                e.printStackTrace();
+            }
         } else if ( timeRequestStarts > lastCheckTimestamp + CHECK_INTERVAL ) {
-        	// check for updates to the security configuration every CHECK_INTERVAL...
-	    	try {
-	    		User daemon = userService.getDaemonAccountUser();
-	    		long lastUsersChange = SecurityRevisionsTable.getLastRegisteredUsersRevisionDate(datastore, daemon);
-	    		long lastGrantsChange = SecurityRevisionsTable.getLastRoleHierarchyRevisionDate(datastore, daemon);
-	    		if ( lastGrantsChange > lastCheckTimestamp ) {
-	    			refreshReachableGrantedAuthorities();
-	    			// NOTE: Timestamps updated and user permissions have been reloaded.
-	    		} else if ( lastUsersChange > lastCheckTimestamp ) {
-	    			lastCheckTimestamp = System.currentTimeMillis();
-	    			userService.reloadPermissions();
-	    		} else {
-	    			lastCheckTimestamp = System.currentTimeMillis();
-	    			logger.debug("getReachableGrantedAuthorities -- interval check");
-	    		}
-	    	} catch (ODKDatastoreException e) {
-	    		// log it, but assume we are OK...
-	    		e.printStackTrace();
-	    	}
-    	}
+            // check for updates to the security configuration every CHECK_INTERVAL...
+            try {
+                User daemon = userService.getDaemonAccountUser();
+                long lastUsersChange = SecurityRevisionsTable.getLastRegisteredUsersRevisionDate(datastore, daemon);
+                long lastGrantsChange = SecurityRevisionsTable.getLastRoleHierarchyRevisionDate(datastore, daemon);
+                if ( lastGrantsChange > lastCheckTimestamp ) {
+                    refreshReachableGrantedAuthorities();
+                    // NOTE: Timestamps updated and user permissions have been reloaded.
+                } else if ( lastUsersChange > lastCheckTimestamp ) {
+                    lastCheckTimestamp = System.currentTimeMillis();
+                    userService.reloadPermissions();
+                } else {
+                    lastCheckTimestamp = System.currentTimeMillis();
+                    logger.debug("getReachableGrantedAuthorities -- interval check");
+                }
+            } catch (ODKDatastoreException e) {
+                // log it, but assume we are OK...
+                e.printStackTrace();
+            }
+        }
 
-    	Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap = getRolesMap();
+        Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap = getRolesMap();
         
         Set<GrantedAuthority> reachableRoles = new HashSet<GrantedAuthority>();
 
         for (GrantedAuthority authority : authorities) {
             addReachableRoles(reachableRoles, authority);
             Set<GrantedAuthority> additionalReachableRoles = 
-            		getRolesReachableInOneOrMoreSteps(localRolesReachableInOneOrMoreStepsMap, authority);
+                    getRolesReachableInOneOrMoreSteps(localRolesReachableInOneOrMoreStepsMap, authority);
             if (additionalReachableRoles != null) {
                 reachableRoles.addAll(additionalReachableRoles);
             }
@@ -385,7 +385,7 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 
     // SEC-863
     private Set<GrantedAuthority> getRolesReachableInOneOrMoreSteps(
-    		Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap,
+            Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap,
             GrantedAuthority authority) {
 
         if (authority.getAuthority() == null) {
@@ -409,9 +409,9 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
      * hierarchy definition is detected)
      */
     private Map<GrantedAuthority, Set<GrantedAuthority>> buildRolesReachableInOneOrMoreStepsMap(
-    		Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap) {
-    	Map<GrantedAuthority, Set<GrantedAuthority>> localCopyRolesReachableInOneOrMoreStepsMap =
-    		new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
+            Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap) {
+        Map<GrantedAuthority, Set<GrantedAuthority>> localCopyRolesReachableInOneOrMoreStepsMap =
+            new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
         // iterate over all higher roles from rolesReachableInOneStepMap
 
         for(GrantedAuthority role : rolesReachableInOneStepMap.keySet()) {
@@ -458,14 +458,14 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
      * @throws ODKDatastoreException 
      */
     private synchronized Map<GrantedAuthority, Set<GrantedAuthority>> buildRolesReachableInOneStepMap() throws ODKDatastoreException {
-    	Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap = new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
+        Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap = new HashMap<GrantedAuthority, Set<GrantedAuthority>>();
 
         User user = userService.getDaemonAccountUser();
         TreeMap<String, TreeSet<String>> oneStepRelations = 
-        	GrantedAuthorityHierarchyTable.getEntireGrantedAuthorityHierarchy(datastore, user);
+            GrantedAuthorityHierarchyTable.getEntireGrantedAuthorityHierarchy(datastore, user);
         
         for ( Map.Entry<String, TreeSet<String>> e : oneStepRelations.entrySet() ) {
-        	GrantedAuthority higherRole = new SimpleGrantedAuthority(e.getKey());
+            GrantedAuthority higherRole = new SimpleGrantedAuthority(e.getKey());
             Set<GrantedAuthority> rolesReachableInOneStepSet = null;
 
             if (!rolesReachableInOneStepMap.containsKey(higherRole)) {
@@ -476,13 +476,13 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
             }
 
             for ( String s : e.getValue() ) {
-        		GrantedAuthority lowerRole = new SimpleGrantedAuthority(s);
-        		
+                GrantedAuthority lowerRole = new SimpleGrantedAuthority(s);
+                
                 addReachableRoles(rolesReachableInOneStepSet, lowerRole);
 
                 logger.debug("buildRolesReachableInOneStepMap() - From role "
                         + higherRole + " one can reach role " + lowerRole + " in one step.");
-        	}
+            }
         }
         
         return rolesReachableInOneStepMap;

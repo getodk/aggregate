@@ -71,19 +71,19 @@ public class FormListServlet extends ServletUtilBase {
       String verboseStr = req.getParameter("verbose");
       boolean verbose = false;
       if ( verboseStr != null && verboseStr.equalsIgnoreCase("true")) {
-    	  verbose = true;
+          verbose = true;
       }
       
       try {
         List<IForm> formsList = FormFactory.getForms(false, cc);
         if ( formId != null && formId.length() != 0 ) {
-        	List<IForm> newList = new ArrayList<IForm>();
-        	for ( IForm f : formsList ) {
-        		if ( f.getFormId().equals(formId) ) {
-        			newList.add(f);
-        		}
-        	}
-        	formsList = newList;
+            List<IForm> newList = new ArrayList<IForm>();
+            for ( IForm f : formsList ) {
+                if ( f.getFormId().equals(formId) ) {
+                    newList.add(f);
+                }
+            }
+            formsList = newList;
         }
         XFormsXmlTable formFormatter = new XFormsXmlTable(formsList, verbose, cc.getServerURL());
 

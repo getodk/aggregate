@@ -37,40 +37,40 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class JRTimeType extends DateSubmissionType {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param propertyName
-	 *            Name of submission element
-	 */
-	public JRTimeType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
-		super(backingObject, element);
-	}
+    /**
+     * Constructor
+     * 
+     * @param propertyName
+     *            Name of submission element
+     */
+    public JRTimeType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
+        super(backingObject, element);
+    }
 
-	/**
-	 * Convert string value to date format
-	 */
-	@Override
-	public void setValueFromString(String value) {
-		if (value == null) {
-			setValue(null);
-		} else {
-			Date newDate = DateUtils.parseTime(value);
-			setValue(newDate);
-		}
-	}
+    /**
+     * Convert string value to date format
+     */
+    @Override
+    public void setValueFromString(String value) {
+        if (value == null) {
+            setValue(null);
+        } else {
+            Date newDate = DateUtils.parseTime(value);
+            setValue(newDate);
+        }
+    }
 
-	/**
-	 * Format value for output
-	 * 
-	 * @param elemFormatter
-	 *            the element formatter that will convert the value to the
-	 *            proper format for output
-	 */
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatTime(getValue(), element, ordinalValue, row);
-	}
+    /**
+     * Format value for output
+     * 
+     * @param elemFormatter
+     *            the element formatter that will convert the value to the
+     *            proper format for output
+     */
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatTime(getValue(), element, ordinalValue, row);
+    }
 
 }

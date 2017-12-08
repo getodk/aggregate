@@ -51,7 +51,7 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
    *
    */
   public XmlMediaAttachmentFormatter(XmlAttachmentFormatter xmlAttachmentFormatter) {
-	  this.xmlAttachmentFormatter = xmlAttachmentFormatter;
+      this.xmlAttachmentFormatter = xmlAttachmentFormatter;
   }
 
   @Override
@@ -63,26 +63,26 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
       Row row, CallingContext cc) throws ODKDatastoreException {
 
     if( blobSubmission == null ||
-    	(blobSubmission.getAttachmentCount(cc) == 0) ||
-    	(blobSubmission.getContentHash(1, cc) == null) ) {
-    	return;
+        (blobSubmission.getAttachmentCount(cc) == 0) ||
+        (blobSubmission.getContentHash(1, cc) == null) ) {
+        return;
     }
 
-	String urlLink;
-	{
-		Map<String, String> properties = new HashMap<String, String>();
-		SubmissionKey k = blobSubmission.generateSubmissionKey(1);
-	    properties.put(ServletConsts.BLOB_KEY, k.toString());
-	    properties.put(ServletConsts.AS_ATTACHMENT, "true");
-	    String downloadRequestURL = cc.getServerURL() + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
-	    urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
-	}
-	// parallel to XFormsManifestXmlTable
+    String urlLink;
+    {
+        Map<String, String> properties = new HashMap<String, String>();
+        SubmissionKey k = blobSubmission.generateSubmissionKey(1);
+        properties.put(ServletConsts.BLOB_KEY, k.toString());
+        properties.put(ServletConsts.AS_ATTACHMENT, "true");
+        String downloadRequestURL = cc.getServerURL() + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
+        urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
+    }
+    // parallel to XFormsManifestXmlTable
     String xmlString = "<mediaFile>" +
-    		"<filename>" + StringEscapeUtils.escapeXml10(blobSubmission.getUnrootedFilename(1, cc)) + "</filename>" +
-    		"<hash>"	+ StringEscapeUtils.escapeXml10(blobSubmission.getContentHash(1, cc)) + "</hash>" +
-    		"<downloadUrl>"	+ StringEscapeUtils.escapeXml10(urlLink) + "</downloadUrl>" +
-    	"</mediaFile>\n";
+            "<filename>" + StringEscapeUtils.escapeXml10(blobSubmission.getUnrootedFilename(1, cc)) + "</filename>" +
+            "<hash>"    + StringEscapeUtils.escapeXml10(blobSubmission.getContentHash(1, cc)) + "</hash>" +
+            "<downloadUrl>" + StringEscapeUtils.escapeXml10(urlLink) + "</downloadUrl>" +
+        "</mediaFile>\n";
 
     row.addFormattedValue(xmlString);
   }
@@ -122,7 +122,7 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
       CallingContext cc) throws ODKDatastoreException {
-	  xmlAttachmentFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
+      xmlAttachmentFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
   }
 
   @Override

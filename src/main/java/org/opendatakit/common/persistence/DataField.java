@@ -31,151 +31,151 @@ package org.opendatakit.common.persistence;
  * 
  */
 public final class DataField {
-	
-	public static enum DataType {
-		BINARY /** blobs -- see BinaryContentManipulator */,
-		LONG_STRING /** text -- i.e., utf-8 blob */,
-		STRING, INTEGER, DECIMAL, BOOLEAN, DATETIME,
-		URI /** URI is a string of length 80 characters */
-	}
-	public static enum IndexType {
-		NONE, ORDERED, HASH
-	}
-	
-	private String name;
-	private DataType dataType;
-	private boolean nullable;
-	private Long maxCharLen;
-	private Integer numericScale;
-	private Integer numericPrecision;
-	private IndexType indexable = IndexType.NONE; // clue for persistence layer to define index.
-	private boolean isDoublePrecision = false;
-	
-	/**
-	 * Constructor for most uses.
-	 * <ul>
-	 * <li>Strings default to 250 characters.</li>
-	 * <li>Integers to 32-bit values.</li>
-	 * <li>Decimals to double-precision values.</li></ul>
-	 *  If you are looking for blobs or long text, see the BinaryContentManipulator class.
-	 * 
-	 * @param name The standard naming convention for database persistence layers 
-	 * 			is underscore-delimited all-upper-case names.  E.g., 
-	 * 			in Java, you might name a variable "descriptiveDataValue".
-	 * 			in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
-	 * @param dataType
-	 * @param nullable
-	 */
-	public DataField(String name, DataType dataType, boolean nullable) {
-		this(name, dataType, nullable, null, null, null);
-	}
-	
-	/**
-	 * Constructor for string fields that are longer than 250 characters.
-	 * The underlying datastore does not allow any one entity to be larger than
-	 * about 65000 bytes.  Documents should use binary content tables.
-	 * 
-	 * @param name The standard naming convention for database persistence layers 
-	 * 			is underscore-delimited all-upper-case names.  E.g., 
-	 * 			in Java, you might name a variable "descriptiveDataValue".
-	 * 			in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
-	 * @param dataType
-	 * @param nullable
-	 * @param maxCharLen
-	 */
-	public DataField(String name, DataType dataType, boolean nullable, Long maxCharLen ) {
-		this(name, dataType, nullable, maxCharLen, null, null);
-	}
-	
-	/**
-	 * Constructor for extended-precision integer or numeric fields.
-	 * The default corresponds to 32-bit integers and double-precision 
-	 * floating point.  It is not useful to shorten these, as this 
-	 * generally slows down your code.
-	 * 
-	 * @param name The standard naming convention for database persistence layers 
-	 * 			is underscore-delimited all-upper-case names.  E.g., 
-	 * 			in Java, you might name a variable "descriptiveDataValue".
-	 * 			in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
-	 * @param dataType
-	 * @param nullable
-	 * @param maxCharLen
-	 */
-	public DataField(String name, DataType dataType, boolean nullable, Integer numericScale, Integer numericPrecision ) {
-		this(name, dataType, nullable, null, numericScale, numericPrecision);
-	}
-	
-	private DataField(String name, DataType dataType, boolean nullable, Long maxCharLen, Integer numericScale, Integer numericPrecision ) {
-		this.name = name;
-		this.dataType = dataType;
-		this.nullable = nullable;
-		this.maxCharLen = maxCharLen;
-		this.numericScale = numericScale;
-		this.numericPrecision = numericPrecision;
-	}
-	
-	public DataField(final DataField src) {
-		this.name = src.name;
-		this.dataType = src.dataType;
-		this.nullable = src.nullable;
-		this.maxCharLen = src.maxCharLen;
-		this.numericScale = src.numericScale;
-		this.numericPrecision = src.numericPrecision;
-		this.isDoublePrecision = src.isDoublePrecision;
-		this.indexable = src.indexable;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public DataType getDataType() {
-		return dataType;
-	}
-	
-	public boolean getNullable() {
-		return nullable;
-	}
+    
+    public static enum DataType {
+        BINARY /** blobs -- see BinaryContentManipulator */,
+        LONG_STRING /** text -- i.e., utf-8 blob */,
+        STRING, INTEGER, DECIMAL, BOOLEAN, DATETIME,
+        URI /** URI is a string of length 80 characters */
+    }
+    public static enum IndexType {
+        NONE, ORDERED, HASH
+    }
+    
+    private String name;
+    private DataType dataType;
+    private boolean nullable;
+    private Long maxCharLen;
+    private Integer numericScale;
+    private Integer numericPrecision;
+    private IndexType indexable = IndexType.NONE; // clue for persistence layer to define index.
+    private boolean isDoublePrecision = false;
+    
+    /**
+     * Constructor for most uses.
+     * <ul>
+     * <li>Strings default to 250 characters.</li>
+     * <li>Integers to 32-bit values.</li>
+     * <li>Decimals to double-precision values.</li></ul>
+     *  If you are looking for blobs or long text, see the BinaryContentManipulator class.
+     * 
+     * @param name The standard naming convention for database persistence layers 
+     *          is underscore-delimited all-upper-case names.  E.g., 
+     *          in Java, you might name a variable "descriptiveDataValue".
+     *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
+     * @param dataType
+     * @param nullable
+     */
+    public DataField(String name, DataType dataType, boolean nullable) {
+        this(name, dataType, nullable, null, null, null);
+    }
+    
+    /**
+     * Constructor for string fields that are longer than 250 characters.
+     * The underlying datastore does not allow any one entity to be larger than
+     * about 65000 bytes.  Documents should use binary content tables.
+     * 
+     * @param name The standard naming convention for database persistence layers 
+     *          is underscore-delimited all-upper-case names.  E.g., 
+     *          in Java, you might name a variable "descriptiveDataValue".
+     *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
+     * @param dataType
+     * @param nullable
+     * @param maxCharLen
+     */
+    public DataField(String name, DataType dataType, boolean nullable, Long maxCharLen ) {
+        this(name, dataType, nullable, maxCharLen, null, null);
+    }
+    
+    /**
+     * Constructor for extended-precision integer or numeric fields.
+     * The default corresponds to 32-bit integers and double-precision 
+     * floating point.  It is not useful to shorten these, as this 
+     * generally slows down your code.
+     * 
+     * @param name The standard naming convention for database persistence layers 
+     *          is underscore-delimited all-upper-case names.  E.g., 
+     *          in Java, you might name a variable "descriptiveDataValue".
+     *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
+     * @param dataType
+     * @param nullable
+     * @param maxCharLen
+     */
+    public DataField(String name, DataType dataType, boolean nullable, Integer numericScale, Integer numericPrecision ) {
+        this(name, dataType, nullable, null, numericScale, numericPrecision);
+    }
+    
+    private DataField(String name, DataType dataType, boolean nullable, Long maxCharLen, Integer numericScale, Integer numericPrecision ) {
+        this.name = name;
+        this.dataType = dataType;
+        this.nullable = nullable;
+        this.maxCharLen = maxCharLen;
+        this.numericScale = numericScale;
+        this.numericPrecision = numericPrecision;
+    }
+    
+    public DataField(final DataField src) {
+        this.name = src.name;
+        this.dataType = src.dataType;
+        this.nullable = src.nullable;
+        this.maxCharLen = src.maxCharLen;
+        this.numericScale = src.numericScale;
+        this.numericPrecision = src.numericPrecision;
+        this.isDoublePrecision = src.isDoublePrecision;
+        this.indexable = src.indexable;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public DataType getDataType() {
+        return dataType;
+    }
+    
+    public boolean getNullable() {
+        return nullable;
+    }
 
-	public boolean isDoublePrecision() {
-		return isDoublePrecision;
-	}
+    public boolean isDoublePrecision() {
+        return isDoublePrecision;
+    }
 
-	public DataField asDoublePrecision(boolean isDoublePrecision) {
-		this.isDoublePrecision = isDoublePrecision;
-		return this;
-	}
+    public DataField asDoublePrecision(boolean isDoublePrecision) {
+        this.isDoublePrecision = isDoublePrecision;
+        return this;
+    }
 
-	public Long getMaxCharLen() {
-		return maxCharLen;
-	}
+    public Long getMaxCharLen() {
+        return maxCharLen;
+    }
 
-	public void setMaxCharLen(Long maxCharLen) {
-		this.maxCharLen = maxCharLen;
-	}
-	
-	public Integer getNumericScale() {
-		return numericScale;
-	}
+    public void setMaxCharLen(Long maxCharLen) {
+        this.maxCharLen = maxCharLen;
+    }
+    
+    public Integer getNumericScale() {
+        return numericScale;
+    }
 
-	public void setNumericScale(Integer numericScale) {
-		this.numericScale = numericScale;
-	}
+    public void setNumericScale(Integer numericScale) {
+        this.numericScale = numericScale;
+    }
 
-	public Integer getNumericPrecision() {
-		return numericPrecision;
-	}
+    public Integer getNumericPrecision() {
+        return numericPrecision;
+    }
 
-	public void setNumericPrecision(Integer numericPrecision) {
-		this.numericPrecision = numericPrecision;
-	}
-	
-	public DataField setIndexable(IndexType type) {
-		this.indexable = type;
-		return this;
-	}
-	
-	public IndexType getIndexable() {
-		return indexable;
-	}
+    public void setNumericPrecision(Integer numericPrecision) {
+        this.numericPrecision = numericPrecision;
+    }
+    
+    public DataField setIndexable(IndexType type) {
+        this.indexable = type;
+        return this;
+    }
+    
+    public IndexType getIndexable() {
+        return indexable;
+    }
 }

@@ -24,19 +24,19 @@ public enum SubTabs implements Serializable {
    * org.opendatakit.aggregate.client.RefreshTimer 's run method, or the
    * subtab's update method will never get called.
    */
-	EXPORT("Exported Submissions", "export"),
-	FILTER("Filter Submissions", "filter"),
-	FORMS("Forms List", "forms"),
-	PERMISSIONS("Permissions", "permission"),
-	PREFERENCES("Preferences", "preferences"),
+    EXPORT("Exported Submissions", "export"),
+    FILTER("Filter Submissions", "filter"),
+    FORMS("Forms List", "forms"),
+    PERMISSIONS("Permissions", "permission"),
+    PREFERENCES("Preferences", "preferences"),
    TABLES("ODK Tables Admin", "tablesadmin"),
-	PUBLISH("Published Data", "publish"),
-	SUBMISSION_ADMIN("Submission Admin", "subadmin"),
-	// These fall under the ODKTables Tab
-	CURRENTTABLES("Current Tables", "viewCurrentTables"),
-	VIEWTABLE("View Table", "viewTable"),
+    PUBLISH("Published Data", "publish"),
+    SUBMISSION_ADMIN("Submission Admin", "subadmin"),
+    // These fall under the ODKTables Tab
+    CURRENTTABLES("Current Tables", "viewCurrentTables"),
+    VIEWTABLE("View Table", "viewTable"),
    MANAGE_INSTANCE_FILES("Manage Instance Files", "manageInstanceFiles"),
-	MANAGE_TABLE_ID_FILES("Manage Table Files", "manageTableFiles"),
+    MANAGE_TABLE_ID_FILES("Manage Table Files", "manageTableFiles"),
    MANAGE_APP_LEVEL_FILES("Manage App Level Files", "manageAppLevelFiles");
 
    private String tabLabel;

@@ -26,10 +26,10 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public class AggregateUserSaltSource implements SaltSource {
 
-	@Override
-	public Object getSalt(UserDetails userDetail) {
-		AggregateUser user = (AggregateUser) userDetail;
-		return user.getSalt();
-	}
+    @Override
+    public Object getSalt(UserDetails userDetail) {
+        AggregateUser user = (AggregateUser) userDetail;
+        return user.getSalt();
+    }
 
 }

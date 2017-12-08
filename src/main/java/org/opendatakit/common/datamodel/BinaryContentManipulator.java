@@ -429,7 +429,7 @@ public class BinaryContentManipulator {
       String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
       throws ODKDatastoreException {
 
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
   Long contentLength = (byteArray == null) ? null : Long.valueOf(byteArray.length);
     // search for a matching entry for unrootedFilePath
     BinaryContent matchedBc = null;

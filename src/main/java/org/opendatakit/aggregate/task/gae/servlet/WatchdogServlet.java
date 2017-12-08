@@ -58,8 +58,8 @@ public class WatchdogServlet extends ServletUtilBase{
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
-	cc.setAsDaemon(true);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    cc.setAsDaemon(true);
 
     logger.info("Beginning servlet processing");
     WatchdogWorkerImpl worker = new WatchdogWorkerImpl();

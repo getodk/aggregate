@@ -61,9 +61,9 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
       + "<p>See <a href=\"https://accounts.enketo.org/support/aggregate/\" target=\"_blank\">instructions</a> on how to obtain the Enketo API URL and Token</p>"
       + "<h2>Enketo API URL</h2>"
       + "<p>The URL of the Enketo service's API</p>"
-      + "	  <table id=\"uploadTableEnketo\">"
-      + "	  	<tr>"
-      + "	  		<td><input id=\"enketo_api_url\" type=\"text\" size=\"80\" name=\"enketo_api_url\" value=\"";
+      + "     <table id=\"uploadTableEnketo\">"
+      + "       <tr>"
+      + "           <td><input id=\"enketo_api_url\" type=\"text\" size=\"80\" name=\"enketo_api_url\" value=\"";
   private static final String UPLOAD_PAGE_BODY_MIDDLE_URL_TO_TOKEN = "\"/></td>"
       + "      </tr>\n"
       + "<tr>\n   <td colspan=\"2\"><h2>Enketo API token</h2></td></tr>"

@@ -46,7 +46,7 @@ public class OdkTablesShowTableButton extends AggregateButton
       "<img src=\"images/green_right_arrow.png\" /> Table Data";
   private static final String TOOLTIP_TXT = "Display Table Contents";
   private static final String HELP_BALLOON_TXT = "View the contents of this" +
-  		" table.";
+        " table.";
 
   /**
    * This is the parent table to which this button belongs.

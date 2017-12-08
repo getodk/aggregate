@@ -30,30 +30,30 @@ import org.springframework.security.core.userdetails.User;
  */
 public class AggregateUser extends User {
 
-	private static final long serialVersionUID = 7141261836301276256L;
+    private static final long serialVersionUID = 7141261836301276256L;
 
-	private final String salt;
-	
-	private final String mailtoDomain;
-	
-	public String getMailtoDomain() {
-		return mailtoDomain;
-	}
-	
-	public String getSalt() {
-		return salt;
-	}
+    private final String salt;
+    
+    private final String mailtoDomain;
+    
+    public String getMailtoDomain() {
+        return mailtoDomain;
+    }
+    
+    public String getSalt() {
+        return salt;
+    }
 
-	public AggregateUser(String username, String password, String salt,
-			String mailToDomain,
-			boolean enabled,
-			boolean accountNonExpired, boolean credentialsNonExpired,
-			boolean accountNonLocked,
-			Collection<? extends GrantedAuthority> authorities) {
-		super(username, password, enabled, accountNonExpired, credentialsNonExpired,
-				accountNonLocked, authorities);
-		this.salt = salt;
-		this.mailtoDomain = mailToDomain;
-	}
+    public AggregateUser(String username, String password, String salt,
+            String mailToDomain,
+            boolean enabled,
+            boolean accountNonExpired, boolean credentialsNonExpired,
+            boolean accountNonLocked,
+            Collection<? extends GrantedAuthority> authorities) {
+        super(username, password, enabled, accountNonExpired, credentialsNonExpired,
+                accountNonLocked, authorities);
+        this.salt = salt;
+        this.mailtoDomain = mailToDomain;
+    }
 
 }

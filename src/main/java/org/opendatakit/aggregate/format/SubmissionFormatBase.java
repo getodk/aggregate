@@ -48,7 +48,7 @@ public abstract class SubmissionFormatBase {
   /**
    * Constructs a submission result base
    * @param xform 
-   * 	 the form being formatted
+   *     the form being formatted
    * @param webServerURL 
    *     url of aggregate instance, the base that appends to the servlet address
    * @param separateGeopoint 
@@ -63,7 +63,7 @@ public abstract class SubmissionFormatBase {
   /**
    * Constructs a submission result base
    * @param xform 
-   * 	 the form being formatted
+   *     the form being formatted
    * @param webServerURL 
    *     url of aggregate instance, the base that appends to the servlet address
    */

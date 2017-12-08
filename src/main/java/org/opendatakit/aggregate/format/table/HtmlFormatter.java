@@ -79,8 +79,8 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
 
 
   public void processSubmissionSetPublic(Collection<? extends SubmissionSet> submissions,
-	FormElementModel formElementModel, CallingContext cc) throws ODKDatastoreException {
-	processSubmissionSet(submissions, formElementModel, cc);
+    FormElementModel formElementModel, CallingContext cc) throws ODKDatastoreException {
+    processSubmissionSet(submissions, formElementModel, cc);
   }
 
 }

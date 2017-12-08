@@ -16,9 +16,9 @@
 
     <property name="fileExtensions" value="java, properties, xml"/>
 
-    <!--<module name="FileTabCharacter">-->
-        <!--<property name="eachLine" value="true"/>-->
-    <!--</module>-->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
 
     <!-- ODK-specific additions -->
     <!--<module name="RegexpMultiline">-->

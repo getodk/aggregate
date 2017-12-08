@@ -46,9 +46,9 @@ import org.opendatakit.common.web.constants.BasicConsts;
  *
  */
 public class XmlElementFormatter implements ElementFormatter {
-	XmlFormatter xmlFormatter;
+    XmlFormatter xmlFormatter;
 
-	String prefix = "";
+    String prefix = "";
 
   /**
    * Construct a XML Element Formatter
@@ -56,7 +56,7 @@ public class XmlElementFormatter implements ElementFormatter {
    *
    */
   public XmlElementFormatter(XmlFormatter xmlFormatter) {
-	  this.xmlFormatter = xmlFormatter;
+      this.xmlFormatter = xmlFormatter;
   }
 
   public void setPrefix(String prefix) {
@@ -72,12 +72,12 @@ public class XmlElementFormatter implements ElementFormatter {
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
     if( blobSubmission == null ||
-    	(blobSubmission.getAttachmentCount(cc) == 0) ||
-    	(blobSubmission.getContentHash(1, cc) == null) ) {
-   	    addToXmlValueToRow(null, element.getElementName(), row);
-	} else {
-		addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), element.getElementName(), row);
-	}
+        (blobSubmission.getAttachmentCount(cc) == 0) ||
+        (blobSubmission.getContentHash(1, cc) == null) ) {
+        addToXmlValueToRow(null, element.getElementName(), row);
+    } else {
+        addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), element.getElementName(), row);
+    }
   }
 
   @Override
@@ -100,9 +100,9 @@ public class XmlElementFormatter implements ElementFormatter {
     }
     String str = b.toString();
     if ( str.length() > 0 ) {
-    	addToXmlValueToRow(str, element.getElementName(), row);
+        addToXmlValueToRow(str, element.getElementName(), row);
     } else {
-    	addToXmlValueToRow(null, element.getElementName(), row);
+        addToXmlValueToRow(null, element.getElementName(), row);
     }
   }
 

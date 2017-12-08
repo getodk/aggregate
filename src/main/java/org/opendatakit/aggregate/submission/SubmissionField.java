@@ -35,7 +35,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface SubmissionField<T> extends SubmissionValue{
   
-	/**
+    /**
    * Returns whether submission type is constructed from a binary object
    * 
    * @return

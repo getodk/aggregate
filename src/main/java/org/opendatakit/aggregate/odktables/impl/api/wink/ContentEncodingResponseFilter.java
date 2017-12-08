@@ -188,8 +188,8 @@ public class ContentEncodingResponseFilter implements Filter {
 
     static abstract class EncodedOutputStream extends ServletOutputStream {
 
-    	private boolean  isReady = false;
-		private boolean              isWritten = false;
+        private boolean  isReady = false;
+        private boolean              isWritten = false;
 
         private DeflaterOutputStream outputStream = null;
         private ByteArrayOutputStream byteStream = null;
@@ -205,13 +205,13 @@ public class ContentEncodingResponseFilter implements Filter {
             isReady = true;
         }
 
-		public boolean isReady() {
-			return isReady;
-		}
+        public boolean isReady() {
+            return isReady;
+        }
 
-		public void setWriteListener(WriteListener arg0) {
-			throw new IllegalStateException("WriteListener functionality is not implemented!");
-		}
+        public void setWriteListener(WriteListener arg0) {
+            throw new IllegalStateException("WriteListener functionality is not implemented!");
+        }
 
         @Override
         public void write(int b) throws IOException {

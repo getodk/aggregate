@@ -25,26 +25,26 @@ import java.io.Serializable;
  *
  */
 public class BadColumnNameExceptionClient extends RequestFailureException
-		implements Serializable {
+        implements Serializable {
 
-	  /**
-	 *
-	 */
-	private static final long serialVersionUID = -8226079661579405847L;
+      /**
+     *
+     */
+    private static final long serialVersionUID = -8226079661579405847L;
 
-	public BadColumnNameExceptionClient() {
-		    super();
-		  }
+    public BadColumnNameExceptionClient() {
+            super();
+          }
 
-		  public BadColumnNameExceptionClient(String message) {
-		    super(message);
-		  }
+          public BadColumnNameExceptionClient(String message) {
+            super(message);
+          }
 
-		  public BadColumnNameExceptionClient(Throwable cause) {
-		    super(cause);
-		  }
+          public BadColumnNameExceptionClient(Throwable cause) {
+            super(cause);
+          }
 
-		  public BadColumnNameExceptionClient(String message, Throwable cause) {
-		    super(message, cause);
-		  }
+          public BadColumnNameExceptionClient(String message, Throwable cause) {
+            super(message, cause);
+          }
 }

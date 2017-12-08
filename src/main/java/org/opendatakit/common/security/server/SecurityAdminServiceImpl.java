@@ -38,35 +38,35 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class SecurityAdminServiceImpl extends RemoteServiceServlet implements
 org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5028277386314314356L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5028277386314314356L;
 
-	@Override
-	public ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities ) throws AccessDeniedException, DatastoreFailureException {
+    @Override
+    public ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities ) throws AccessDeniedException, DatastoreFailureException {
 
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+        HttpServletRequest req = this.getThreadLocalRequest();
+        CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	    return SecurityServiceUtil.getAllUsers(withAuthorities, cc);
-	}
-	
-	@Override
-	public void setUsersAndGrantedAuthorities( String xsrfString, 
-							ArrayList<UserSecurityInfo> users,  
-							ArrayList<GrantedAuthorityName> allGroups)
-			throws AccessDeniedException, DatastoreFailureException {
+        return SecurityServiceUtil.getAllUsers(withAuthorities, cc);
+    }
+    
+    @Override
+    public void setUsersAndGrantedAuthorities( String xsrfString, 
+                            ArrayList<UserSecurityInfo> users,  
+                            ArrayList<GrantedAuthorityName> allGroups)
+            throws AccessDeniedException, DatastoreFailureException {
 
-	    HttpServletRequest req = this.getThreadLocalRequest();
-	    CallingContext cc = ContextFactory.getCallingContext(this, req);
+        HttpServletRequest req = this.getThreadLocalRequest();
+        CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-	    if ( !req.getSession().getId().equals(xsrfString) ) {
-			throw new AccessDeniedException("Invalid request");
-		}
+        if ( !req.getSession().getId().equals(xsrfString) ) {
+            throw new AccessDeniedException("Invalid request");
+        }
 
-	    SecurityServiceUtil.setStandardSiteAccessConfiguration( users, allGroups, cc ); 
-	    // clear the cache of saved user identities as we don't know what has changed...
-	    cc.getUserService().reloadPermissions();
-	}
+        SecurityServiceUtil.setStandardSiteAccessConfiguration( users, allGroups, cc ); 
+        // clear the cache of saved user identities as we don't know what has changed...
+        cc.getUserService().reloadPermissions();
+    }
 }

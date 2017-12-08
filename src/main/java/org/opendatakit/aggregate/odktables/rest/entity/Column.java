@@ -35,8 +35,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Column implements Serializable {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -6624997293167731653L;
 
   /**

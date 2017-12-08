@@ -41,54 +41,54 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class WorksheetCreatorImpl implements WorksheetCreator {
 
-	static class WorksheetCreatorRunner implements Runnable {
-		final WorksheetCreatorWorkerImpl impl;
+    static class WorksheetCreatorRunner implements Runnable {
+        final WorksheetCreatorWorkerImpl impl;
 
-		public WorksheetCreatorRunner(IForm form, SubmissionKey miscTasksKey,
-				long attemptCount, 
-				String spreadsheetName, ExternalServicePublicationOption esType,
-				CallingContext cc) {
-			impl = new WorksheetCreatorWorkerImpl(form, miscTasksKey,
-					attemptCount,
-					spreadsheetName, esType, cc);
-		}
+        public WorksheetCreatorRunner(IForm form, SubmissionKey miscTasksKey,
+                long attemptCount, 
+                String spreadsheetName, ExternalServicePublicationOption esType,
+                CallingContext cc) {
+            impl = new WorksheetCreatorWorkerImpl(form, miscTasksKey,
+                    attemptCount,
+                    spreadsheetName, esType, cc);
+        }
 
-		@Override
-		public void run() {
-			try {
-				impl.worksheetCreator();
-			} catch (Exception e) {
-				e.printStackTrace();
-				// TODO: Problem - decide what to do if an exception occurs
-			}
-		}
-	}
+        @Override
+        public void run() {
+            try {
+                impl.worksheetCreator();
+            } catch (Exception e) {
+                e.printStackTrace();
+                // TODO: Problem - decide what to do if an exception occurs
+            }
+        }
+    }
 
-	@Override
-	public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
-			CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
-	    Map<String,String> params = miscTasks.getRequestParameters();
-	    String esTypeString = params.get(ServletConsts.EXTERNAL_SERVICE_TYPE);
-	    if (esTypeString == null) {
-	        throw new IllegalStateException("no external service type specified on create worksheet task");
-	    }
-	    ExternalServicePublicationOption esType = ExternalServicePublicationOption.valueOf(esTypeString);
-	    if (esType == null) {
-	    	throw new IllegalStateException("external service type not recognized in create worksheet task");
-	    }
-	    String spreadsheetName = params.get(ExternalServiceConsts.EXT_SERV_ADDRESS);
-	    if (spreadsheetName == null) {
-	    	throw new IllegalStateException("spreadsheet name is null in create worksheet task");
-	    }
-	    WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
-		// use watchdog's calling context in runner...
-	    WorksheetCreatorRunner wr = new WorksheetCreatorRunner( form, miscTasks.getSubmissionKey(),
-	    		attemptCount, 
-				spreadsheetName, esType,
-				wd.getCallingContext() );
-		System.out.println("THIS IS CREATE WORKSHEET IN TOMCAT");
-		AggregrateThreadExecutor exec = AggregrateThreadExecutor
-				.getAggregateThreadExecutor();
-		exec.execute(wr);
-	}
+    @Override
+    public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
+            CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+        Map<String,String> params = miscTasks.getRequestParameters();
+        String esTypeString = params.get(ServletConsts.EXTERNAL_SERVICE_TYPE);
+        if (esTypeString == null) {
+            throw new IllegalStateException("no external service type specified on create worksheet task");
+        }
+        ExternalServicePublicationOption esType = ExternalServicePublicationOption.valueOf(esTypeString);
+        if (esType == null) {
+            throw new IllegalStateException("external service type not recognized in create worksheet task");
+        }
+        String spreadsheetName = params.get(ExternalServiceConsts.EXT_SERV_ADDRESS);
+        if (spreadsheetName == null) {
+            throw new IllegalStateException("spreadsheet name is null in create worksheet task");
+        }
+        WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
+        // use watchdog's calling context in runner...
+        WorksheetCreatorRunner wr = new WorksheetCreatorRunner( form, miscTasks.getSubmissionKey(),
+                attemptCount, 
+                spreadsheetName, esType,
+                wd.getCallingContext() );
+        System.out.println("THIS IS CREATE WORKSHEET IN TOMCAT");
+        AggregrateThreadExecutor exec = AggregrateThreadExecutor
+                .getAggregateThreadExecutor();
+        exec.execute(wr);
+    }
 }

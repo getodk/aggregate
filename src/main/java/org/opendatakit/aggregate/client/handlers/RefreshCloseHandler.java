@@ -22,9 +22,9 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 
 public class RefreshCloseHandler<T> implements CloseHandler<T> {
-	@Override
-	public void onClose(CloseEvent<T> event) {
-		AggregateUI.resize();
-	}
+    @Override
+    public void onClose(CloseEvent<T> event) {
+        AggregateUI.resize();
+    }
 
 }

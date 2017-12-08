@@ -26,5 +26,5 @@ package org.opendatakit.common.web.client;
  * @param <T> type of the backing object for the row containing the cell.
  */
 public interface UIEnabledPredicate<T> {
-	boolean isEnabled(T info);
+    boolean isEnabled(T info);
 }

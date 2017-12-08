@@ -29,102 +29,102 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 @Ignore("not a test")
 public class TestContextFactory {
 
-	  public static final String USER_BEAN = "user_service";
-	  public static final String DATASTORE_BEAN = "datastore";
+      public static final String USER_BEAN = "user_service";
+      public static final String DATASTORE_BEAN = "datastore";
 
-	    /**
-	     * Singleton of the application context
-	     */
-	    private static final String APP_CONTEXT_PATH = "odk-settings.xml";
-	    private static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(APP_CONTEXT_PATH);
+        /**
+         * Singleton of the application context
+         */
+        private static final String APP_CONTEXT_PATH = "odk-settings.xml";
+        private static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(APP_CONTEXT_PATH);
 
-	    @Ignore("not a test")
-	    public static final class CallingContextImpl implements CallingContext {
-	    	final String serverUrl;
-	    	final String secureServerUrl;
-	    	final String webApplicationBase;
-	    	final Datastore datastore;
-	    	final UserService userService;
-	    	boolean asDaemon = true; // otherwise there isn't a current user...
+        @Ignore("not a test")
+        public static final class CallingContextImpl implements CallingContext {
+            final String serverUrl;
+            final String secureServerUrl;
+            final String webApplicationBase;
+            final Datastore datastore;
+            final UserService userService;
+            boolean asDaemon = true; // otherwise there isn't a current user...
 
-	    	CallingContextImpl() {
-	    	    String baseUrl = System.getProperty("test.server.baseUrl","");
-	    	    if ( baseUrl.length() > 0 && !baseUrl.startsWith(BasicConsts.FORWARDSLASH)) {
-	    	    	baseUrl = BasicConsts.FORWARDSLASH + baseUrl;
-	    	    }
-	    	    webApplicationBase = baseUrl;
-	    	    String hostname = System.getProperty("test.server.hostname", "localhost");
-	    	    String port = System.getProperty("test.server.port","8888");
-	    	    String secureport = System.getProperty("test.server.secure.port","8443");
-	    		serverUrl = "http://" + hostname + ":" + port + webApplicationBase;
-	    		secureServerUrl = "https://" + hostname + ":" + secureport + webApplicationBase;
-	    		datastore = (Datastore) applicationContext.getBean(DATASTORE_BEAN);
-	    		userService = (UserService) applicationContext.getBean(USER_BEAN);
-	    	}
+            CallingContextImpl() {
+                String baseUrl = System.getProperty("test.server.baseUrl","");
+                if ( baseUrl.length() > 0 && !baseUrl.startsWith(BasicConsts.FORWARDSLASH)) {
+                    baseUrl = BasicConsts.FORWARDSLASH + baseUrl;
+                }
+                webApplicationBase = baseUrl;
+                String hostname = System.getProperty("test.server.hostname", "localhost");
+                String port = System.getProperty("test.server.port","8888");
+                String secureport = System.getProperty("test.server.secure.port","8443");
+                serverUrl = "http://" + hostname + ":" + port + webApplicationBase;
+                secureServerUrl = "https://" + hostname + ":" + secureport + webApplicationBase;
+                datastore = (Datastore) applicationContext.getBean(DATASTORE_BEAN);
+                userService = (UserService) applicationContext.getBean(USER_BEAN);
+            }
 
-			@Override
-	    	public Object getBean(String beanName) {
-				return applicationContext.getBean(beanName);
-	    	}
+            @Override
+            public Object getBean(String beanName) {
+                return applicationContext.getBean(beanName);
+            }
 
-			@Override
-	    	public Datastore getDatastore() {
-	    		return datastore;
-	    	}
+            @Override
+            public Datastore getDatastore() {
+                return datastore;
+            }
 
-			@Override
-	    	public UserService getUserService() {
-	    		return userService;
-	    	}
+            @Override
+            public UserService getUserService() {
+                return userService;
+            }
 
-			@Override
-			public ServletContext getServletContext() {
-				return null;
-			}
+            @Override
+            public ServletContext getServletContext() {
+                return null;
+            }
 
-			@Override
-	    	public String getWebApplicationURL() {
-	    		return webApplicationBase + BasicConsts.FORWARDSLASH;
-	    	}
+            @Override
+            public String getWebApplicationURL() {
+                return webApplicationBase + BasicConsts.FORWARDSLASH;
+            }
 
-			@Override
-	    	public String getWebApplicationURL(String servletAddr) {
-	    		return webApplicationBase + BasicConsts.FORWARDSLASH + servletAddr;
-	    	}
+            @Override
+            public String getWebApplicationURL(String servletAddr) {
+                return webApplicationBase + BasicConsts.FORWARDSLASH + servletAddr;
+            }
 
-			@Override
-	    	public String getServerURL() {
-	    		return serverUrl;
-	    	}
+            @Override
+            public String getServerURL() {
+                return serverUrl;
+            }
 
-			@Override
-			public String getSecureServerURL() {
-				return secureServerUrl;
-			}
+            @Override
+            public String getSecureServerURL() {
+                return secureServerUrl;
+            }
 
-			@Override
-	    	public void setAsDaemon(boolean asDaemon ) {
-	    		this.asDaemon = asDaemon;
-	    	}
+            @Override
+            public void setAsDaemon(boolean asDaemon ) {
+                this.asDaemon = asDaemon;
+            }
 
-			@Override
-	    	public boolean getAsDeamon() {
-	    		return asDaemon;
-	    	}
+            @Override
+            public boolean getAsDeamon() {
+                return asDaemon;
+            }
 
-			@Override
-	    	public User getCurrentUser() {
-	    		return asDaemon ? userService.getDaemonAccountUser() : userService.getCurrentUser();
-	    	}
-	    }
+            @Override
+            public User getCurrentUser() {
+                return asDaemon ? userService.getDaemonAccountUser() : userService.getCurrentUser();
+            }
+        }
 
-	    /**
-	     * Private constructor
-	     */
-	    private TestContextFactory() {}
+        /**
+         * Private constructor
+         */
+        private TestContextFactory() {}
 
-	    public static CallingContext getCallingContext() {
-	    	return new CallingContextImpl();
-	    }
+        public static CallingContext getCallingContext() {
+            return new CallingContextImpl();
+        }
 
 }

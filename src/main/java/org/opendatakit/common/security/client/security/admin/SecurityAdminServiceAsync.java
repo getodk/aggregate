@@ -25,10 +25,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface SecurityAdminServiceAsync {
 
-	void getAllUsers(boolean withAuthorities, AsyncCallback<ArrayList<UserSecurityInfo>> callback);
+    void getAllUsers(boolean withAuthorities, AsyncCallback<ArrayList<UserSecurityInfo>> callback);
 
-	void setUsersAndGrantedAuthorities(String xsrfString,
-			ArrayList<UserSecurityInfo> users,
-			ArrayList<GrantedAuthorityName> allGroups,
-			AsyncCallback<Void> callback);
+    void setUsersAndGrantedAuthorities(String xsrfString,
+            ArrayList<UserSecurityInfo> users,
+            ArrayList<GrantedAuthorityName> allGroups,
+            AsyncCallback<Void> callback);
 }

@@ -29,6 +29,6 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface CsvGenerator {
 
-	public void createCsvTask(IForm form, SubmissionKey persistentResultsKey,
-			long attemptCount, CallingContext cc) throws ODKDatastoreException;
+    public void createCsvTask(IForm form, SubmissionKey persistentResultsKey,
+            long attemptCount, CallingContext cc) throws ODKDatastoreException;
 }
