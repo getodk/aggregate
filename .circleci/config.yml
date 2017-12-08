@@ -8,6 +8,9 @@ jobs:
       - checkout
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
+      - run:
+          name: Configure build
+          command: cp gradle.properties.example gradle.properties
       - run: ./gradlew check -x test
       - save_cache:
           paths:
