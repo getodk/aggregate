@@ -29,10 +29,10 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
  */
 public interface Query {
   
-	/**
-	 * This enum defines the directions which the Query can be sorted on.
-	 *
-	 */
+    /**
+     * This enum defines the directions which the Query can be sorted on.
+     *
+     */
   public enum Direction {
     ASCENDING,
     DESCENDING;
@@ -108,7 +108,7 @@ public interface Query {
    * @throws ODKOverQuotaException if the usage quota was exceeded
    */
   public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable, DataField foreignKeyField )
-  							throws ODKDatastoreException, ODKOverQuotaException;
+                            throws ODKDatastoreException, ODKOverQuotaException;
 
 
   /**

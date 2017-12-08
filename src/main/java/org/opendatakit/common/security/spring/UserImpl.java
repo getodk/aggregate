@@ -29,40 +29,40 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class UserImpl implements org.opendatakit.common.security.User {
 
-	final String nickName;
-	final String email;
-	final String uriUser;
-	final Set<GrantedAuthority> groups = new HashSet<GrantedAuthority>();
-	final Set<GrantedAuthority> directAuthorities = new HashSet<GrantedAuthority>();
-	final Datastore datastore;
-	Map<String, Set<GrantedAuthority> > formIdGrantedAuthorities = null;
-	
-	
-	UserImpl(String uriUser, String email, String nickName,
-			Collection<? extends GrantedAuthority> groupsAndGrantedAuthorities,
-			Datastore datastore) {
-		this.uriUser = uriUser;
-		this.email = email;
-		this.nickName = nickName;
-		this.datastore = datastore;
-		for ( GrantedAuthority g : groupsAndGrantedAuthorities ) {
-			if ( GrantedAuthorityName.permissionsCanBeAssigned(g.getAuthority()) ) {
-				groups.add(g);
-			}
-		}
-		this.directAuthorities.addAll(groupsAndGrantedAuthorities);
-	}
-	
-	@Override
-	public String getNickname() {
-		return nickName;
-	}
+    final String nickName;
+    final String email;
+    final String uriUser;
+    final Set<GrantedAuthority> groups = new HashSet<GrantedAuthority>();
+    final Set<GrantedAuthority> directAuthorities = new HashSet<GrantedAuthority>();
+    final Datastore datastore;
+    Map<String, Set<GrantedAuthority> > formIdGrantedAuthorities = null;
+    
+    
+    UserImpl(String uriUser, String email, String nickName,
+            Collection<? extends GrantedAuthority> groupsAndGrantedAuthorities,
+            Datastore datastore) {
+        this.uriUser = uriUser;
+        this.email = email;
+        this.nickName = nickName;
+        this.datastore = datastore;
+        for ( GrantedAuthority g : groupsAndGrantedAuthorities ) {
+            if ( GrantedAuthorityName.permissionsCanBeAssigned(g.getAuthority()) ) {
+                groups.add(g);
+            }
+        }
+        this.directAuthorities.addAll(groupsAndGrantedAuthorities);
+    }
+    
+    @Override
+    public String getNickname() {
+        return nickName;
+    }
 
-	@Override
-	public String getEmail() {
-		return email;
-	}
-	  
+    @Override
+    public String getEmail() {
+        return email;
+    }
+      
    public Set<GrantedAuthority> getAuthorities() {
      HashSet<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
      auths.addAll(groups);
@@ -70,41 +70,41 @@ public class UserImpl implements org.opendatakit.common.security.User {
      return Collections.unmodifiableSet(auths);
    }
 
-	public Set<GrantedAuthority> getGroups() {
-		return Collections.unmodifiableSet(groups);
-	}
+    public Set<GrantedAuthority> getGroups() {
+        return Collections.unmodifiableSet(groups);
+    }
 
-	public Set<GrantedAuthority> getDirectAuthorities() {
-		return Collections.unmodifiableSet(directAuthorities);
-	}
+    public Set<GrantedAuthority> getDirectAuthorities() {
+        return Collections.unmodifiableSet(directAuthorities);
+    }
 
-	@Override
-	public String getUriUser() {
-		return uriUser;
-	}
+    @Override
+    public String getUriUser() {
+        return uriUser;
+    }
 
-	@Override
-	public boolean isAnonymous() {
-		return uriUser.equals(User.ANONYMOUS_USER);
-	}
-	
-	@Override
-	public boolean isRegistered() {
-		return groups.contains(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_REGISTERED.name()));
-	}
+    @Override
+    public boolean isAnonymous() {
+        return uriUser.equals(User.ANONYMOUS_USER);
+    }
+    
+    @Override
+    public boolean isRegistered() {
+        return groups.contains(new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_REGISTERED.name()));
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if ( obj == null || !(obj instanceof org.opendatakit.common.security.User)) {
-			return false;
-		}
-		
-		org.opendatakit.common.security.User u = (org.opendatakit.common.security.User) obj;
-		return u.getUriUser().equals(getUriUser());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if ( obj == null || !(obj instanceof org.opendatakit.common.security.User)) {
+            return false;
+        }
+        
+        org.opendatakit.common.security.User u = (org.opendatakit.common.security.User) obj;
+        return u.getUriUser().equals(getUriUser());
+    }
 
-	@Override
-	public int hashCode() {
-		return getUriUser().hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return getUriUser().hashCode();
+    }
 }

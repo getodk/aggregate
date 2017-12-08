@@ -134,7 +134,7 @@ public final class FilterGroup implements Serializable {
    *          the filter to be removed
    */
   public void removeFilter(Filter filter) {
-	  filters.remove(filter);
+      filters.remove(filter);
   }
 
   public int getQueryFetchLimit() {

@@ -27,5 +27,5 @@ package org.opendatakit.common.web.client;
  * @param <T> type of the backing object for the row containing the cell.
  */
 public interface BooleanValidationPredicate<T> {
-	public boolean isValid(boolean prospectiveValue, T key);
+    public boolean isValid(boolean prospectiveValue, T key);
 }

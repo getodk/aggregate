@@ -23,32 +23,32 @@ import com.google.gwt.event.dom.client.ClickEvent;
 public class OdkTablesDeleteTableFileButton extends AggregateButton {
 
 
-	  private static final String BUTTON_TXT = "<img src=\"images/red_x.png\" />";
-	  private static final String TOOLTIP_TXT = "Delete File";
-	  private static final String HELP_BALLOON_TXT = "Completely delete this file.";
+      private static final String BUTTON_TXT = "<img src=\"images/red_x.png\" />";
+      private static final String TOOLTIP_TXT = "Delete File";
+      private static final String HELP_BALLOON_TXT = "Completely delete this file.";
 
      private final String odkClientApiVersion;
-	  private final String tableId;
+      private final String tableId;
      private final String filePath;
 
-	  private AggregateSubTabBase basePanel;
+      private AggregateSubTabBase basePanel;
 
-	  public OdkTablesDeleteTableFileButton(AggregateSubTabBase basePanel,
-	      String odkClientApiVersion, String tableId, String filePath) {
-	    super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
-	    this.basePanel = basePanel;
-	    this.odkClientApiVersion = odkClientApiVersion;
-	    this.tableId = tableId;
-	    this.filePath = filePath;
-	  }
+      public OdkTablesDeleteTableFileButton(AggregateSubTabBase basePanel,
+          String odkClientApiVersion, String tableId, String filePath) {
+        super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+        this.basePanel = basePanel;
+        this.odkClientApiVersion = odkClientApiVersion;
+        this.tableId = tableId;
+        this.filePath = filePath;
+      }
 
-	  @Override
-	  public void onClick(ClickEvent event) {
-	    super.onClick(event);
+      @Override
+      public void onClick(ClickEvent event) {
+        super.onClick(event);
 
-	    OdkTablesConfirmDeleteTableFilePopup popup =
-	        new OdkTablesConfirmDeleteTableFilePopup(basePanel, odkClientApiVersion, tableId, filePath);
-	    popup.setPopupPositionAndShow(popup.getPositionCallBack());
-	  }
+        OdkTablesConfirmDeleteTableFilePopup popup =
+            new OdkTablesConfirmDeleteTableFilePopup(basePanel, odkClientApiVersion, tableId, filePath);
+        popup.setPopupPositionAndShow(popup.getPositionCallBack());
+      }
 
 }

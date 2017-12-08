@@ -25,7 +25,7 @@ package org.opendatakit.aggregate.constants.format;
  */
 public final class XFormsTableConsts {
 
-	// OpenRosa Compliant xforms list (discovery)
+    // OpenRosa Compliant xforms list (discovery)
   public static final String XFORMS_TAG = "xforms";
   public static final String XFORM_TAG = "xform";
   public static final String FORM_ID_TAG = "formID";

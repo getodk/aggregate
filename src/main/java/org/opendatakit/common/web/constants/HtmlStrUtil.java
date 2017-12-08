@@ -89,29 +89,29 @@ public class HtmlStrUtil {
     html.append(createAttribute(ATTR_SIZE, Integer.toString(size)));
 
     if ( extras != null) {
-    	html.append(BasicConsts.SPACE);
-    	html.append(extras);
+        html.append(BasicConsts.SPACE);
+        html.append(extras);
     }
 
     if ( isChecked ) {
-    	html.append(BasicConsts.SPACE);
-    	html.append(ATTR_CHECKED);
+        html.append(BasicConsts.SPACE);
+        html.append(ATTR_CHECKED);
     }
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
     return html.toString();
   }
 
   public static final String createInput(String type, String name, String value, int size) {
-	  return createInput(type, name, value, false, size, null);
+      return createInput(type, name, value, false, size, null);
   }
 
   public static final String createInput(String type, String name, String value) {
-	  return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT, null);
+      return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT, null);
   }
 
   public static final String createNonSavingPasswordInput(String name) {
-	  return createInput(HtmlConsts.INPUT_TYPE_PASSWORD, name, "",
-			  				false, INPUT_WIDGET_SIZE_LIMIT, "autocomplete=\"off\"");
+      return createInput(HtmlConsts.INPUT_TYPE_PASSWORD, name, "",
+                            false, INPUT_WIDGET_SIZE_LIMIT, "autocomplete=\"off\"");
   }
 
   public static final String createInput(String type, String name, String value, boolean checked) {

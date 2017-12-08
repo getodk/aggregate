@@ -28,9 +28,9 @@ import org.opendatakit.common.web.CallingContext;
  *
  */
 public interface PurgeOlderSubmissions {
-	
-	public static final String PURGE_DATE = "purgeBefore";
+    
+    public static final String PURGE_DATE = "purgeBefore";
 
-	public void createPurgeOlderSubmissionsTask(IForm form, SubmissionKey miscTasksKey,
-				long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
+    public void createPurgeOlderSubmissionsTask(IForm form, SubmissionKey miscTasksKey,
+                long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
 }

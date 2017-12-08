@@ -26,21 +26,21 @@ import org.opendatakit.common.web.CallingContext;
 
 public class BooleanMetadataType extends MetadataBaseType<Boolean> {
 
-	public BooleanMetadataType(DynamicCommonFieldsBase backingObject,
-			FormElementModel metadataType, DataField field) {
-		super(backingObject, metadataType, field);
-	}
+    public BooleanMetadataType(DynamicCommonFieldsBase backingObject,
+            FormElementModel metadataType, DataField field) {
+        super(backingObject, metadataType, field);
+    }
 
-	@Override
-	public Boolean getValue() {
-		return backingObject.getBooleanField(field);
-	}
+    @Override
+    public Boolean getValue() {
+        return backingObject.getBooleanField(field);
+    }
 
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row,
-			String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-	    elemFormatter.formatBoolean(getValue(), metadataType, ordinalValue, row);
-	}
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row,
+            String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatBoolean(getValue(), metadataType, ordinalValue, row);
+    }
 
 }

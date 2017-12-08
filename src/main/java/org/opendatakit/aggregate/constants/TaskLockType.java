@@ -47,7 +47,7 @@ public enum TaskLockType implements ITaskLockType {
 
   @Override
   public String getName() {
-	return name();
+    return name();
   }
   
   @Override

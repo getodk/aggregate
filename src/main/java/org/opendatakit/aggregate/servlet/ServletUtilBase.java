@@ -95,7 +95,7 @@ public class ServletUtilBase extends CommonServletBase {
   }
 
   protected void errorMissingParam(HttpServletResponse resp) throws IOException {
-	    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_PARAMS);
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_PARAMS);
   }
   /**
    * Generate error response for invalid parameters
@@ -161,23 +161,23 @@ public class ServletUtilBase extends CommonServletBase {
 
   @Override
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
-	      CallingContext cc) throws IOException {
+          CallingContext cc) throws IOException {
 
-	StringBuilder headerString = new StringBuilder();
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	headerString.append(cc.getWebApplicationURL(AGGREGATEUI_STYLE_RESOURCE));
-	headerString.append("\" />");
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	headerString.append(cc.getWebApplicationURL(BUTTON_STYLE_RESOURCE));
-	headerString.append("\" />");
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	headerString.append(cc.getWebApplicationURL(TABLE_STYLE_RESOURCE));
-	headerString.append("\" />");
-	headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
-	headerString.append(cc.getWebApplicationURL(UPLOAD_STYLE_RESOURCE));
-	headerString.append("\" />");
+    StringBuilder headerString = new StringBuilder();
+    headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+    headerString.append(cc.getWebApplicationURL(AGGREGATEUI_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+    headerString.append(cc.getWebApplicationURL(BUTTON_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+    headerString.append(cc.getWebApplicationURL(TABLE_STYLE_RESOURCE));
+    headerString.append("\" />");
+    headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");
+    headerString.append(cc.getWebApplicationURL(UPLOAD_STYLE_RESOURCE));
+    headerString.append("\" />");
 
-	PrintWriter out = beginBasicHtmlResponsePreamble( headerString.toString(), resp, cc );
+    PrintWriter out = beginBasicHtmlResponsePreamble( headerString.toString(), resp, cc );
     out.write(HtmlUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     out.write(HtmlUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
     out.write(HtmlUtil.createEndTag(HtmlConsts.DIV));

@@ -158,19 +158,19 @@ public class SecureGWT {
   // odk tables stuff:
 
   public ServerDataServiceAsync getServerDataServiceAsync() {
-	  return serverDataServiceAsync;
+      return serverDataServiceAsync;
   }
 
   public ServerDiffServiceAsync getServerDiffServiceAsync() {
-	  return serverDiffServiceAsync;
+      return serverDiffServiceAsync;
   }
 
   public ServerTableACLServiceAsync getTableACLServiceAsync() {
-	  return serverTableACLServiceAsync;
+      return serverTableACLServiceAsync;
   }
 
   public ServerTableServiceAsync getTableServiceAsync() {
-	  return serverTableServiceAsync;
+      return serverTableServiceAsync;
   }
 
   public static synchronized final SecureGWT get() {
@@ -211,17 +211,17 @@ public class SecureGWT {
       obj = GWT.create(OdkTablesAdminService.class);
       break;
     case ODK_TABLES_DATA:
-    	obj = GWT.create(ServerDataService.class);
-    	break;
+        obj = GWT.create(ServerDataService.class);
+        break;
     case ODK_TABLES_DIFF:
-    	obj = GWT.create(ServerDiffService.class);
-    	break;
+        obj = GWT.create(ServerDiffService.class);
+        break;
     case ODK_TABLES_ACL:
-    	obj = GWT.create(ServerTableACLService.class);
-    	break;
+        obj = GWT.create(ServerTableACLService.class);
+        break;
     case ODK_TABLES_TABLE:
-    	obj = GWT.create(ServerTableService.class);
-    	break;
+        obj = GWT.create(ServerTableService.class);
+        break;
     default:
       throw new IllegalStateException("Unrecognized type " + type.toString());
     }
@@ -279,18 +279,18 @@ public class SecureGWT {
    * by the tables code itself, to account for the more refined control levels.
    */
   public static ServerDataServiceAsync getServerDataService() {
-	  return get().serverDataServiceAsync;
+      return get().serverDataServiceAsync;
   }
 
   public static ServerDiffServiceAsync getServerDiffService() {
-	  return get().serverDiffServiceAsync;
+      return get().serverDiffServiceAsync;
   }
 
   public static ServerTableACLServiceAsync getServerTableACLServiceAsync() {
-	  return get().serverTableACLServiceAsync;
+      return get().serverTableACLServiceAsync;
   }
 
   public static ServerTableServiceAsync getServerTableService() {
-	  return get().serverTableServiceAsync;
+      return get().serverTableServiceAsync;
   }
 }

@@ -118,9 +118,9 @@ class Form implements IForm {
     formDefinition = FormDefinition.getFormDefinition(infoRow.getStringField(FormInfoTable.FORM_ID), cc);
 
     repeatElementMap = new HashMap<String, FormElementModel>();
-	if ( formDefinition != null ) {
-		populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
-	}
+    if ( formDefinition != null ) {
+        populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+    }
   }
 
   Form(XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled,
@@ -166,9 +166,9 @@ class Form implements IForm {
     formDefinition = FormDefinition.getFormDefinition(rootElementDefn.formId, cc);
 
     repeatElementMap = new HashMap<String, FormElementModel>();
-	 if ( formDefinition != null ) {
-		populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
-	 }
+     if ( formDefinition != null ) {
+        populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+     }
   }
 
   public synchronized void persist(CallingContext cc) throws ODKDatastoreException {
@@ -297,9 +297,9 @@ class Form implements IForm {
   }
 
   public XFormParameters getRootElementDefn() {
-	XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
-			filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION));
-	return p;
+    XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
+            filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION));
+    return p;
   }
 
   public String getDescription() {

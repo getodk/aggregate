@@ -28,20 +28,20 @@ import org.opendatakit.common.web.CallingContext;
 
 public class DateTimeMetadataType extends MetadataBaseType<Date> {
 
-	public DateTimeMetadataType(DynamicCommonFieldsBase backingObject,
-			FormElementModel metadataType, DataField field) {
-		super(backingObject, metadataType, field);
-	}
+    public DateTimeMetadataType(DynamicCommonFieldsBase backingObject,
+            FormElementModel metadataType, DataField field) {
+        super(backingObject, metadataType, field);
+    }
 
-	@Override
-	public Date getValue() {
-		return backingObject.getDateField(field);
-	}
+    @Override
+    public Date getValue() {
+        return backingObject.getDateField(field);
+    }
 
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row,
-			String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatDateTime(getValue(), metadataType, ordinalValue, row);
-	}
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row,
+            String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatDateTime(getValue(), metadataType, ordinalValue, row);
+    }
 }

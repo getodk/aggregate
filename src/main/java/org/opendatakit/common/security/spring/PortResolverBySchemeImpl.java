@@ -28,36 +28,36 @@ import org.springframework.security.web.PortResolver;
  */
 public class PortResolverBySchemeImpl implements PortResolver {
 
-	int port = 80;
-	int securePort = 443;
-	
-	public PortResolverBySchemeImpl() {
-	}
-	
-	public int getPort() {
-		return port;
-	}
+    int port = 80;
+    int securePort = 443;
+    
+    public PortResolverBySchemeImpl() {
+    }
+    
+    public int getPort() {
+        return port;
+    }
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-	public int getSecurePort() {
-		return securePort;
-	}
+    public int getSecurePort() {
+        return securePort;
+    }
 
-	public void setSecurePort(int securePort) {
-		this.securePort = securePort;
-	}
+    public void setSecurePort(int securePort) {
+        this.securePort = securePort;
+    }
 
-	@Override
-	public int getServerPort(ServletRequest request) {
-		String scheme = request.getScheme();
-		if ( scheme.equals("https") ) {
-			return securePort;
-		} else {
-			return port;
-		}
-	}
+    @Override
+    public int getServerPort(ServletRequest request) {
+        String scheme = request.getScheme();
+        if ( scheme.equals("https") ) {
+            return securePort;
+        } else {
+            return port;
+        }
+    }
 
 }

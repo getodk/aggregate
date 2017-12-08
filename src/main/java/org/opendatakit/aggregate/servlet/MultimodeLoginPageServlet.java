@@ -43,8 +43,8 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 public class MultimodeLoginPageServlet extends ServletUtilBase {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -1036419513113652548L;
   private static final Log logger = LogFactory.getLog(MultimodeLoginPageServlet.class);
 

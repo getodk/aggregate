@@ -23,8 +23,8 @@ package org.opendatakit.common.security;
  *
  */
 public final class SecurityBeanDefs {
-	public static final String BASIC_AUTH_PASSWORD_ENCODER = "basicAuthenticationMessageDigestPasswordEncoder";
-	public static final String ROLE_HIERARCHY_MANAGER = "hierarchicalRoleRelationships";
-	
-	private SecurityBeanDefs() {};
+    public static final String BASIC_AUTH_PASSWORD_ENCODER = "basicAuthenticationMessageDigestPasswordEncoder";
+    public static final String ROLE_HIERARCHY_MANAGER = "hierarchicalRoleRelationships";
+    
+    private SecurityBeanDefs() {};
 }

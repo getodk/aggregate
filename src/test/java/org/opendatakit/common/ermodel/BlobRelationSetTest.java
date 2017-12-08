@@ -31,52 +31,52 @@ import org.opendatakit.common.web.TestContextFactory;
 
 public class BlobRelationSetTest {
 
-	@Before
-	public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
 
-		CallingContext cc = TestContextFactory.getCallingContext();
+        CallingContext cc = TestContextFactory.getCallingContext();
 
-		// ensure that blobset tables are not present...
-		MyBlobRelationSet set = new MyBlobRelationSet(cc);
-		set.dropBlobRelationSet(cc);
-	}
-	
-	static class MyBlobRelationSet extends AbstractBlobRelationSet {
-		
-		MyBlobRelationSet(CallingContext cc) throws ODKDatastoreException {
-			super("TEST_BLOB", cc);
-		}
-	}
-	
-	@Test
-	public void testCase1() throws ODKDatastoreException {
-		CallingContext cc = TestContextFactory.getCallingContext();
-		
-		MyBlobRelationSet rel = new MyBlobRelationSet(cc);
-		
-		BlobEntitySet instance = rel.newBlobEntitySet(cc);
-		assertEquals( 0, instance.getAttachmentCount(cc));
-		
-		String s = "this is a string";
-		instance.addBlob(s.getBytes(), "text/plain", null, false, cc);
-		String t = "another string";
-		instance.addBlob(t.getBytes(), "text/xml", "different", false, cc);
-		instance.persist(cc);
-		BlobEntitySet alt = rel.getBlobEntitySet(instance.getUri(), cc);
-		assertEquals(2, alt.getAttachmentCount(cc));
-		String name = alt.getUnrootedFilename(1, cc);
-		String otherType = null;
-		if ( name == null ) {
-			assertEquals("text/plain", alt.getContentType(1, cc));
-			assertEquals(s.getBytes().length, alt.getContentLength(1, cc).intValue());
-			otherType = "text/xml";
-		} else {
-			assertEquals("text/xml", alt.getContentType(1, cc));
-			assertEquals(t.getBytes().length, alt.getContentLength(1, cc).intValue());
-			otherType = "text/plain";
-		}
-		assertEquals(otherType, alt.getContentType(2, cc));
-		
-		rel.dropBlobRelationSet(cc);
-	}
+        // ensure that blobset tables are not present...
+        MyBlobRelationSet set = new MyBlobRelationSet(cc);
+        set.dropBlobRelationSet(cc);
+    }
+    
+    static class MyBlobRelationSet extends AbstractBlobRelationSet {
+        
+        MyBlobRelationSet(CallingContext cc) throws ODKDatastoreException {
+            super("TEST_BLOB", cc);
+        }
+    }
+    
+    @Test
+    public void testCase1() throws ODKDatastoreException {
+        CallingContext cc = TestContextFactory.getCallingContext();
+        
+        MyBlobRelationSet rel = new MyBlobRelationSet(cc);
+        
+        BlobEntitySet instance = rel.newBlobEntitySet(cc);
+        assertEquals( 0, instance.getAttachmentCount(cc));
+        
+        String s = "this is a string";
+        instance.addBlob(s.getBytes(), "text/plain", null, false, cc);
+        String t = "another string";
+        instance.addBlob(t.getBytes(), "text/xml", "different", false, cc);
+        instance.persist(cc);
+        BlobEntitySet alt = rel.getBlobEntitySet(instance.getUri(), cc);
+        assertEquals(2, alt.getAttachmentCount(cc));
+        String name = alt.getUnrootedFilename(1, cc);
+        String otherType = null;
+        if ( name == null ) {
+            assertEquals("text/plain", alt.getContentType(1, cc));
+            assertEquals(s.getBytes().length, alt.getContentLength(1, cc).intValue());
+            otherType = "text/xml";
+        } else {
+            assertEquals("text/xml", alt.getContentType(1, cc));
+            assertEquals(t.getBytes().length, alt.getContentLength(1, cc).intValue());
+            otherType = "text/plain";
+        }
+        assertEquals(otherType, alt.getContentType(2, cc));
+        
+        rel.dropBlobRelationSet(cc);
+    }
 }

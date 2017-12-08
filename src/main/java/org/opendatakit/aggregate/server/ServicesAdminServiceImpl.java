@@ -58,8 +58,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.externalserv.ServicesAdminService {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = 51251316598366231L;
 
   @Override

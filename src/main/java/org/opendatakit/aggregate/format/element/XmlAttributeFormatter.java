@@ -49,26 +49,26 @@ public class XmlAttributeFormatter implements ElementFormatter {
   }
 
   private String asAttributeName(FormElementModel m) {
-	if ( m.isMetadata() ) {
-		switch( m.getType()) {
-		case META_MODEL_VERSION:
-			return ParserConsts.MODEL_VERSION_ATTRIBUTE_NAME;
-		case META_UI_VERSION:
-			return ParserConsts.UI_VERSION_ATTRIBUTE_NAME;
-		case META_INSTANCE_ID:
-			return ParserConsts.INSTANCE_ID_ATTRIBUTE_NAME;
-		case META_SUBMISSION_DATE:
-			return ParserConsts.SUBMISSION_DATE_ATTRIBUTE_NAME;
-		case META_IS_COMPLETE:
-			return ParserConsts.IS_COMPLETE_ATTRIBUTE_NAME;
-		case META_DATE_MARKED_AS_COMPLETE:
-			return ParserConsts.MARKED_AS_COMPLETE_DATE_ATTRIBUTE_NAME;
-		default:
-			throw new IllegalStateException("Unrecognized metadata");
-		}
-	} else {
-		return m.getElementName();
-	}
+    if ( m.isMetadata() ) {
+        switch( m.getType()) {
+        case META_MODEL_VERSION:
+            return ParserConsts.MODEL_VERSION_ATTRIBUTE_NAME;
+        case META_UI_VERSION:
+            return ParserConsts.UI_VERSION_ATTRIBUTE_NAME;
+        case META_INSTANCE_ID:
+            return ParserConsts.INSTANCE_ID_ATTRIBUTE_NAME;
+        case META_SUBMISSION_DATE:
+            return ParserConsts.SUBMISSION_DATE_ATTRIBUTE_NAME;
+        case META_IS_COMPLETE:
+            return ParserConsts.IS_COMPLETE_ATTRIBUTE_NAME;
+        case META_DATE_MARKED_AS_COMPLETE:
+            return ParserConsts.MARKED_AS_COMPLETE_DATE_ATTRIBUTE_NAME;
+        default:
+            throw new IllegalStateException("Unrecognized metadata");
+        }
+    } else {
+        return m.getElementName();
+    }
   }
 
   @Override
@@ -80,11 +80,11 @@ public class XmlAttributeFormatter implements ElementFormatter {
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
       Row row, CallingContext cc) throws ODKDatastoreException {
     if( blobSubmission == null ||
-    	(blobSubmission.getAttachmentCount(cc) == 0) ||
-    	(blobSubmission.getContentHash(1, cc) == null) ) {
-    	addToXmlValueToRow(null, asAttributeName(element), row);
+        (blobSubmission.getAttachmentCount(cc) == 0) ||
+        (blobSubmission.getContentHash(1, cc) == null) ) {
+        addToXmlValueToRow(null, asAttributeName(element), row);
     } else {
-    	addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), asAttributeName(element), row);
+        addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), asAttributeName(element), row);
     }
   }
 
