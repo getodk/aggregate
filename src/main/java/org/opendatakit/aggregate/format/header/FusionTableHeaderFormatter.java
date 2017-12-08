@@ -52,7 +52,7 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
       List<FormElementModel> propertyNamesArg) {
 
-	propertyNames = propertyNamesArg;
+    propertyNames = propertyNamesArg;
     headers = new ArrayList<String>();
     types = new ArrayList<ElementType>();
 
@@ -81,7 +81,7 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
   }
 
   protected void processGeoPoint(FormElementModel node, String nodeName) {
-	if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
     headers.add(node.getElementName());
     types.add(ElementType.GEOPOINT);
     headers.add(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY);

@@ -85,8 +85,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class ServerDataServiceImpl extends RemoteServiceServlet implements ServerDataService {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -5051558217315955180L;
 
   private WebsafeRows getRows(String tableId, QueryResumePoint resumePoint) throws AccessDeniedException,
@@ -333,7 +333,7 @@ public class ServerDataServiceImpl extends RemoteServiceServlet implements Serve
     TableContentsClient tcc = new TableContentsClient();
     
     WebsafeRows websafeResult = getRows(tableId, 
-    		QueryResumePoint.fromWebsafeCursor(resumeCursor));
+            QueryResumePoint.fromWebsafeCursor(resumeCursor));
     List<Row> rows = websafeResult.rows;
     tcc.rows = transformRows(rows);
     tcc.columnNames = getColumnNames(tableId);

@@ -52,8 +52,8 @@ public class AggregateHtmlServlet extends ServletUtilBase {
 
   private static final Log logger = LogFactory.getLog(AggregateHtmlServlet.class);
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = 5811797423869654357L;
 
   public static final String ADDR = UIConsts.HOST_PAGE_BASE_ADDR;
@@ -67,12 +67,12 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + ""
       + "<html>"
       + "  <head>"
-      + "	<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">"
+      + "   <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">"
       + "  <link rel=\"shortcut icon\" href=\"favicon.ico\"/>"
-      + "	<title>ODK Aggregate</title>"
-      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.11.1.min.js\"></script>"
-      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/resize.js\"></script>"
-      + "	<script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
+      + "   <title>ODK Aggregate</title>"
+      + "   <script type=\"text/javascript\" language=\"javascript\" src=\"javascript/jquery-1.11.1.min.js\"></script>"
+      + "   <script type=\"text/javascript\" language=\"javascript\" src=\"javascript/resize.js\"></script>"
+      + "   <script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"https://maps.googleapis.com/maps/api/js?";
       public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
@@ -88,8 +88,8 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "        Your web browser must have JavaScript enabled"
       + "        in order for this application to display correctly."
       + "      </div>"
-      + "    </noscript>" + "	<div id=\"not_secure_content\"></div><br><div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
- 	  + "  </body>"
+      + "    </noscript>" + "   <div id=\"not_secure_content\"></div><br><div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
+      + "  </body>"
       + "</html>";
 
   @Override

@@ -36,15 +36,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  */
 public class EmptyUserDetailsService implements UserDetailsService {
 
-	public EmptyUserDetailsService() {
-	}
+    public EmptyUserDetailsService() {
+    }
 
-	@Override
-	public UserDetails loadUserByUsername(String username)
-			throws UsernameNotFoundException, DataAccessException {
-		UserDetails user = new User(username, UUID.randomUUID().toString(), 
-							true, true, true, true, new ArrayList<GrantedAuthority>() );
-		return user;
-	}
+    @Override
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException, DataAccessException {
+        UserDetails user = new User(username, UUID.randomUUID().toString(), 
+                            true, true, true, true, new ArrayList<GrantedAuthority>() );
+        return user;
+    }
 
 }

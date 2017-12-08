@@ -26,21 +26,21 @@ import org.opendatakit.common.web.CallingContext;
 
 public class LongMetadataType extends MetadataBaseType<Long> {
 
-	public LongMetadataType(DynamicCommonFieldsBase backingObject,
-			FormElementModel metadataType, DataField field) {
-		super(backingObject, metadataType, field);
-	}
+    public LongMetadataType(DynamicCommonFieldsBase backingObject,
+            FormElementModel metadataType, DataField field) {
+        super(backingObject, metadataType, field);
+    }
 
-	@Override
-	public Long getValue() {
-		return backingObject.getLongField(field);
-	}
+    @Override
+    public Long getValue() {
+        return backingObject.getLongField(field);
+    }
 
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row,
-			String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatLong(getValue(), metadataType, ordinalValue, row);
-	}
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row,
+            String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatLong(getValue(), metadataType, ordinalValue, row);
+    }
 
 }

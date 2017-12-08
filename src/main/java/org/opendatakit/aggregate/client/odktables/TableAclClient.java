@@ -32,8 +32,8 @@ import java.io.Serializable;
 public class TableAclClient implements Serializable {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = 3563986876354300986L;
 
   private ScopeClient scope;

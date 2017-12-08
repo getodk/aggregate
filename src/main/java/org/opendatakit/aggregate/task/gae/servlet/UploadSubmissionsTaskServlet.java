@@ -100,7 +100,7 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
     }
 
     // determine whether we are running on a backend or not...
-	ModulesService modulesApi = ModulesServiceFactory.getModulesService();
+    ModulesService modulesApi = ModulesServiceFactory.getModulesService();
     boolean isBackend = modulesApi.getCurrentModule().equals(ServletConsts.BACKEND_GAE_SERVICE);
     logger.info("Request is running on " + (isBackend ? "backend" : "frontend"));
 

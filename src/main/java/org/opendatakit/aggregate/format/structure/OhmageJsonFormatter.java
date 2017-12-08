@@ -33,38 +33,38 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class OhmageJsonFormatter implements SubmissionFormatter {
 
-	private List<FormElementModel> propertyNames;
+    private List<FormElementModel> propertyNames;
 
-	public OhmageJsonFormatter(List<FormElementModel> selectedColumnNames,
-			CallingContext cc) {
-		this.propertyNames = selectedColumnNames;
-	}
+    public OhmageJsonFormatter(List<FormElementModel> selectedColumnNames,
+            CallingContext cc) {
+        this.propertyNames = selectedColumnNames;
+    }
 
-	@Override
-	public void beforeProcessSubmissions(CallingContext cc)
-			throws ODKDatastoreException {
-	}
+    @Override
+    public void beforeProcessSubmissions(CallingContext cc)
+            throws ODKDatastoreException {
+    }
 
-	@Override
-	public void processSubmissionSegment(List<Submission> submissions,
-			CallingContext cc) throws ODKDatastoreException {
-		for (Submission sub : submissions) {
-			OhmageJsonElementFormatter formatter = new OhmageJsonElementFormatter();
-			// use this method purely for its side effects
-			sub.getFormattedValuesAsRow(propertyNames, formatter, false, cc);
-		}
-	}
+    @Override
+    public void processSubmissionSegment(List<Submission> submissions,
+            CallingContext cc) throws ODKDatastoreException {
+        for (Submission sub : submissions) {
+            OhmageJsonElementFormatter formatter = new OhmageJsonElementFormatter();
+            // use this method purely for its side effects
+            sub.getFormattedValuesAsRow(propertyNames, formatter, false, cc);
+        }
+    }
 
-	@Override
-	public void afterProcessSubmissions(CallingContext cc)
-			throws ODKDatastoreException {
-	}
+    @Override
+    public void afterProcessSubmissions(CallingContext cc)
+            throws ODKDatastoreException {
+    }
 
-	@Override
-	public void processSubmissions(List<Submission> submissions,
-			CallingContext cc) throws ODKDatastoreException {
-		beforeProcessSubmissions(cc);
-		processSubmissionSegment(submissions, cc);
-		afterProcessSubmissions(cc);
-	}
+    @Override
+    public void processSubmissions(List<Submission> submissions,
+            CallingContext cc) throws ODKDatastoreException {
+        beforeProcessSubmissions(cc);
+        processSubmissionSegment(submissions, cc);
+        afterProcessSubmissions(cc);
+    }
 }

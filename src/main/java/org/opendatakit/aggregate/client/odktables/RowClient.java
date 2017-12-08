@@ -33,8 +33,8 @@ import java.util.HashMap;
 public class RowClient implements Serializable {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -339683962551463L;
 
   private String rowId;

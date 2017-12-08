@@ -45,7 +45,7 @@ public final class FormSummary implements Serializable {
   }
 
   public FormSummary(String formTitle, String formId, Date creationDate, String formCreateUser,
-		  boolean download, boolean receiveSubmissions, String viewableURL, int mediaFileCount) {
+          boolean download, boolean receiveSubmissions, String viewableURL, int mediaFileCount) {
     this.title = formTitle;
     this.id = formId;
     this.creationDate = creationDate;
@@ -65,7 +65,7 @@ public final class FormSummary implements Serializable {
   }
 
   public Date getCreationDate() {
-	  return creationDate;
+      return creationDate;
   }
   
   public String getCreatedUser() {
@@ -85,25 +85,25 @@ public final class FormSummary implements Serializable {
   }
   
   public int getMediaFileCount() {
-	return mediaFileCount;
+    return mediaFileCount;
 }
 
 public FormActionStatusTimestamp getMostRecentDeletionRequestStatus() {
-	return mostRecentDeletionRequestStatus;
+    return mostRecentDeletionRequestStatus;
 }
 
 public void setMostRecentDeletionRequestStatus(
-		FormActionStatusTimestamp mostRecentDeletionRequestStatus) {
-	this.mostRecentDeletionRequestStatus = mostRecentDeletionRequestStatus;
+        FormActionStatusTimestamp mostRecentDeletionRequestStatus) {
+    this.mostRecentDeletionRequestStatus = mostRecentDeletionRequestStatus;
 }
 
 public FormActionStatusTimestamp getMostRecentPurgeSubmissionsRequestStatus() {
-	return mostRecentPurgeSubmissionsRequestStatus;
+    return mostRecentPurgeSubmissionsRequestStatus;
 }
 
 public void setMostRecentPurgeSubmissionsRequestStatus(
-		FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus) {
-	this.mostRecentPurgeSubmissionsRequestStatus = mostRecentPurgeSubmissionsRequestStatus;
+        FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus) {
+    this.mostRecentPurgeSubmissionsRequestStatus = mostRecentPurgeSubmissionsRequestStatus;
 }
 
 /**

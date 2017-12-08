@@ -49,7 +49,7 @@ public interface SubmissionValue extends SubmissionElement {
  * @throws ODKDatastoreException 
    */
   public void getValueFromEntity(CallingContext cc)
-  		throws ODKDatastoreException;
+        throws ODKDatastoreException;
 
   /**
    * Gather the entity keys for this and all subordinate elements.

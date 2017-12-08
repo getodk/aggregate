@@ -38,72 +38,72 @@ import org.opendatakit.common.security.User;
  */
 public abstract class DynamicBase extends DynamicCommonFieldsBase {
 
-	/* dynamic */
-	public static final int ADDITIONAL_COLUMN_COUNT = 3 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
-	
-	/** key into the dynamic table that is our parent container */
-	private static final DataField PARENT_AURI = new DataField("_PARENT_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-	/** ordinal (1st, 2nd, ... ) of this item in the form element */
-	private static final DataField ORDINAL_NUMBER = new DataField("_ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
-	/** key into the top level dynamic table that is our ancestor */
-	private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
+    /* dynamic */
+    public static final int ADDITIONAL_COLUMN_COUNT = 3 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
+    
+    /** key into the dynamic table that is our parent container */
+    private static final DataField PARENT_AURI = new DataField("_PARENT_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+    /** ordinal (1st, 2nd, ... ) of this item in the form element */
+    private static final DataField ORDINAL_NUMBER = new DataField("_ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
+    /** key into the top level dynamic table that is our ancestor */
+    private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 
-	public final DataField parentAuri;
-	public final DataField ordinalNumber;
-	public final DataField topLevelAuri;
+    public final DataField parentAuri;
+    public final DataField ordinalNumber;
+    public final DataField topLevelAuri;
 
-	/**
-	 * Construct a relation prototype.
-	 * 
-	 * @param databaseSchema
-	 * @param tableName
-	 */
-	protected DynamicBase(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName);
-		fieldList.add(parentAuri=new DataField(PARENT_AURI));
-		fieldList.add(ordinalNumber=new DataField(ORDINAL_NUMBER));
-		fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
-	}
+    /**
+     * Construct a relation prototype.
+     * 
+     * @param databaseSchema
+     * @param tableName
+     */
+    protected DynamicBase(String databaseSchema, String tableName) {
+        super(databaseSchema, tableName);
+        fieldList.add(parentAuri=new DataField(PARENT_AURI));
+        fieldList.add(ordinalNumber=new DataField(ORDINAL_NUMBER));
+        fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
+    }
 
-	/**
-	 * Construct an empty entity.
-	 * 
-	 * @param ref
-	 * @param user
-	 */
-	protected DynamicBase(DynamicBase ref, User user) {
-		super(ref, user);
-		parentAuri = ref.parentAuri;
-		ordinalNumber = ref.ordinalNumber;
-		topLevelAuri = ref.topLevelAuri;
-	}
-	
-	public final String getTopLevelAuri() {
-		return getStringField(topLevelAuri);
-	}
-	
-	public final void setTopLevelAuri(String value) {
-		if ( ! setStringField(topLevelAuri, value) ) {
-			throw new IllegalStateException("overflow on topLevelAuri");
-		}
-	}
-	
-	public final String getParentAuri() {
-		return getStringField(parentAuri);
-	}
-	
-	public final void setParentAuri(String value) {
-		if ( ! setStringField(parentAuri, value) ) {
-			throw new IllegalStateException("overflow on parentAuri");
-		}
-	}
+    /**
+     * Construct an empty entity.
+     * 
+     * @param ref
+     * @param user
+     */
+    protected DynamicBase(DynamicBase ref, User user) {
+        super(ref, user);
+        parentAuri = ref.parentAuri;
+        ordinalNumber = ref.ordinalNumber;
+        topLevelAuri = ref.topLevelAuri;
+    }
+    
+    public final String getTopLevelAuri() {
+        return getStringField(topLevelAuri);
+    }
+    
+    public final void setTopLevelAuri(String value) {
+        if ( ! setStringField(topLevelAuri, value) ) {
+            throw new IllegalStateException("overflow on topLevelAuri");
+        }
+    }
+    
+    public final String getParentAuri() {
+        return getStringField(parentAuri);
+    }
+    
+    public final void setParentAuri(String value) {
+        if ( ! setStringField(parentAuri, value) ) {
+            throw new IllegalStateException("overflow on parentAuri");
+        }
+    }
 
-	public final Long getOrdinalNumber() {
-		return getLongField(ordinalNumber);
-	}
+    public final Long getOrdinalNumber() {
+        return getLongField(ordinalNumber);
+    }
 
-	public final void setOrdinalNumber(Long value) {
-		setLongField(ordinalNumber, value);
-	}
+    public final void setOrdinalNumber(Long value) {
+        setLongField(ordinalNumber, value);
+    }
 
 }

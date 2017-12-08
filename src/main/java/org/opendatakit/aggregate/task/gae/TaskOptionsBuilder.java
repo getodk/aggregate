@@ -52,8 +52,8 @@ public class TaskOptionsBuilder {
 
   public void enqueue() {
     // these tasks run on the background thread...
-	ModulesService modulesApi = ModulesServiceFactory.getModulesService();
-	String hostname = modulesApi.getVersionHostname(ServletConsts.BACKEND_GAE_SERVICE, null);
+    ModulesService modulesApi = ModulesServiceFactory.getModulesService();
+    String hostname = modulesApi.getVersionHostname(ServletConsts.BACKEND_GAE_SERVICE, null);
     task.header(ServletConsts.HOST, hostname);
 
     Queue queue = QueueFactory.getDefaultQueue();

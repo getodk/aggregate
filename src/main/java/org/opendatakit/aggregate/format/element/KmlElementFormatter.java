@@ -79,8 +79,8 @@ public class KmlElementFormatter implements ElementFormatter {
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
     if( blobSubmission == null ||
-    	(blobSubmission.getAttachmentCount(cc) == 0) ||
-    	(blobSubmission.getContentHash(1, cc) == null) ) {
+        (blobSubmission.getAttachmentCount(cc) == 0) ||
+        (blobSubmission.getContentHash(1, cc) == null) ) {
           row.addFormattedValue(null);
           return;
     }
@@ -99,15 +99,15 @@ public class KmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue, Row row) {
-	StringBuilder b = new StringBuilder();
-	boolean first = true;
-	for ( String s : choices ) {
-		if ( !first ) {
-			b.append(" ");
-		}
-		first = false;
-		b.append(s);
-	}
+    StringBuilder b = new StringBuilder();
+    boolean first = true;
+    for ( String s : choices ) {
+        if ( !first ) {
+            b.append(" ");
+        }
+        first = false;
+        b.append(s);
+    }
     generateDataElement(b.toString(), element.getGroupQualifiedElementName() + ordinalValue, row);
   }
 
@@ -123,16 +123,16 @@ public class KmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-	if ( date != null ) {
-	  GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-	  g.setTime(date);
-	  generateDataElement(String.format(FormatConsts.TIME_FORMAT_STRING,
-			  				g.get(Calendar.HOUR_OF_DAY),
-			  				g.get(Calendar.MINUTE),
-			  				g.get(Calendar.SECOND)), element.getGroupQualifiedElementName() + ordinalValue, row);
-	} else {
+    if ( date != null ) {
+      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+      g.setTime(date);
+      generateDataElement(String.format(FormatConsts.TIME_FORMAT_STRING,
+                            g.get(Calendar.HOUR_OF_DAY),
+                            g.get(Calendar.MINUTE),
+                            g.get(Calendar.SECOND)), element.getGroupQualifiedElementName() + ordinalValue, row);
+    } else {
       generateDataElement(null, element.getGroupQualifiedElementName() + ordinalValue, row);
-	}
+    }
   }
 
   @Override

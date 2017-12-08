@@ -21,21 +21,21 @@ package org.opendatakit.aggregate.parser;
  * 
  */
 final class Name {
-	final String schema;
-	final String prefix;
-	final String qualifier;
-	final String itemName;
-	
-	String mungedPrefix = "";
-	String mungedQualifier = "";
-	String mungedItemName = "";
+    final String schema;
+    final String prefix;
+    final String qualifier;
+    final String itemName;
+    
+    String mungedPrefix = "";
+    String mungedQualifier = "";
+    String mungedItemName = "";
 
-	String resolvedName = null;
+    String resolvedName = null;
 
-	Name( String schema, String prefix, String qualifier, String itemName ) {
-		this.schema = schema;
-		this.prefix = Naming.toPersistenceNaming(prefix);
-		this.qualifier = Naming.toPersistenceNaming(qualifier);
-		this.itemName = Naming.toPersistenceNaming(itemName);
-	}
+    Name( String schema, String prefix, String qualifier, String itemName ) {
+        this.schema = schema;
+        this.prefix = Naming.toPersistenceNaming(prefix);
+        this.qualifier = Naming.toPersistenceNaming(qualifier);
+        this.itemName = Naming.toPersistenceNaming(itemName);
+    }
 }

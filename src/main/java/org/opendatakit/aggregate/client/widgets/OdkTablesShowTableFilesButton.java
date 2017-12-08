@@ -30,7 +30,7 @@ public class OdkTablesShowTableFilesButton extends AggregateButton implements Cl
       "<img src=\"images/green_right_arrow.png\" /> Data Files Associated with Table";
   private static final String TOOLTIP_TXT = "Display Data Files for this Table";
   private static final String HELP_BALLOON_TXT = "View the data files that have " +
-  		"been uploaded for this table.";
+        "been uploaded for this table.";
 
   // the table id of the button this table is tied to.
   private String tableId;

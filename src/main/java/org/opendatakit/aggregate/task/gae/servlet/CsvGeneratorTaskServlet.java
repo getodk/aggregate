@@ -61,10 +61,10 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-	CallingContext cc = ContextFactory.getCallingContext(this, req);
-	cc.setAsDaemon(true);
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+    cc.setAsDaemon(true);
 
-	logger.info("GAE servlet for CSV generation begins");
+    logger.info("GAE servlet for CSV generation begins");
 
     // get parameter
     final String formId = getParameter(req, ServletConsts.FORM_ID);
@@ -76,15 +76,15 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
     final String persistentResultsString = getParameter(req, ServletConsts.PERSISTENT_RESULTS_KEY);
     if ( persistentResultsString == null ) {
       logger.error("Missing " + ServletConsts.PERSISTENT_RESULTS_KEY + " key");
-    	errorBadParam(resp);
-    	return;
+        errorBadParam(resp);
+        return;
     }
     SubmissionKey persistentResultsKey = new SubmissionKey(persistentResultsString);
     final String attemptCountString = getParameter(req, ServletConsts.ATTEMPT_COUNT);
     if ( attemptCountString == null ) {
       logger.error("Missing " + ServletConsts.ATTEMPT_COUNT + " key");
-    	errorBadParam(resp);
-    	return;
+        errorBadParam(resp);
+        return;
     }
     Long attemptCount = 1L;
     try {
@@ -118,8 +118,8 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
 
     if ( !form.hasValidFormDefinition() ) {
       logger.error("Unable to retrieve formId: " + formId + " invalid form definition");
-	  errorRetreivingData(resp);
-	  return; // ill-formed definition
+      errorRetreivingData(resp);
+      return; // ill-formed definition
     }
 
     CsvWorkerImpl impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc);

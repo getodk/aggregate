@@ -29,110 +29,110 @@ import org.opendatakit.aggregate.submission.SubmissionKeyPart;
  * 
  */
 public class FormInfo {
-	// special values for bootstrapping
-	private static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
+    // special values for bootstrapping
+    private static final String URI_FORM_ID_VALUE_FORM_INFO = "aggregate.opendatakit.org:FormInfo";
 
-	// Additional DataField -- the xformDefinition (binary content)
+    // Additional DataField -- the xformDefinition (binary content)
 
-	private static final String ELEMENT_NAME_XFORM_DEFINITION = "xformDefinition";
+    private static final String ELEMENT_NAME_XFORM_DEFINITION = "xformDefinition";
 
-	// Additional DataField -- the manifest fileset (multivalued binary content)
+    // Additional DataField -- the manifest fileset (multivalued binary content)
 
-	private static final String ELEMENT_NAME_MANIFEST_FILESET = "manifestFileset";
+    private static final String ELEMENT_NAME_MANIFEST_FILESET = "manifestFileset";
 
-	public static final String FORM_ID = FormInfo.URI_FORM_ID_VALUE_FORM_INFO;
-	
-	public static final boolean isFormInfoForm(String formId) {
-		  return URI_FORM_ID_VALUE_FORM_INFO.equals(formId);
-	  }
+    public static final String FORM_ID = FormInfo.URI_FORM_ID_VALUE_FORM_INFO;
+    
+    public static final boolean isFormInfoForm(String formId) {
+          return URI_FORM_ID_VALUE_FORM_INFO.equals(formId);
+      }
 
-	public static SubmissionKey getSubmissionKey(String uri) {
-		return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" + FormInfoTable.TABLE_NAME + "[@key=" + uri + "]");
-	}
+    public static SubmissionKey getSubmissionKey(String uri) {
+        return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" + FormInfoTable.TABLE_NAME + "[@key=" + uri + "]");
+    }
 
-	public static boolean validFormKey(List<SubmissionKeyPart> parts) {
+    public static boolean validFormKey(List<SubmissionKeyPart> parts) {
 
-	      // only allow retrieval of binary data from within the FormInfo definition.
-	      // I.e., only files related to the definition of an XForm.
-	      if ( !isFormInfoForm(parts.get(0).getElementName()) ) {
-	         return false;
-	      }
+          // only allow retrieval of binary data from within the FormInfo definition.
+          // I.e., only files related to the definition of an XForm.
+          if ( !isFormInfoForm(parts.get(0).getElementName()) ) {
+             return false;
+          }
 
-	      if ( parts.size() < 2) {
-	    	  return false;
-	      }
-	      
-	      SubmissionKeyPart part;
-	      
-	      // verify 2nd part is form info table
-	      part = parts.get(1);
-	      if ( !part.getElementName().equals(FormInfoTable.TABLE_NAME) ) {
-	    	  return false;
-	      }
-	      return true;
-	}
+          if ( parts.size() < 2) {
+              return false;
+          }
+          
+          SubmissionKeyPart part;
+          
+          // verify 2nd part is form info table
+          part = parts.get(1);
+          if ( !part.getElementName().equals(FormInfoTable.TABLE_NAME) ) {
+              return false;
+          }
+          return true;
+    }
 
-	private static boolean validFormFilesetKey(List<SubmissionKeyPart> parts) {
+    private static boolean validFormFilesetKey(List<SubmissionKeyPart> parts) {
 
-		  if ( !validFormKey( parts ) ) {
-			  return false;
-		  }
+          if ( !validFormKey( parts ) ) {
+              return false;
+          }
 
-	      if ( parts.size() != 4) {
-	    	  return false;
-	      }
-	      
-	      SubmissionKeyPart part;
-	      
-	      // verify 3rd part is fileset table, ordinal 1
-	      part = parts.get(2);
-	      if ( !part.getElementName().equals(FormInfoFilesetTable.TABLE_NAME) || 
-	    		  part.getOrdinalNumber().compareTo(1L) != 0 ) {
-	    	  return false;
-	      }
-	      return true;
-	}
+          if ( parts.size() != 4) {
+              return false;
+          }
+          
+          SubmissionKeyPart part;
+          
+          // verify 3rd part is fileset table, ordinal 1
+          part = parts.get(2);
+          if ( !part.getElementName().equals(FormInfoFilesetTable.TABLE_NAME) || 
+                  part.getOrdinalNumber().compareTo(1L) != 0 ) {
+              return false;
+          }
+          return true;
+    }
 
-	public static boolean validFormManifestKey(List<SubmissionKeyPart> parts) {
+    public static boolean validFormManifestKey(List<SubmissionKeyPart> parts) {
 
-		  if ( !validFormFilesetKey(parts) ) {
-			  return false;
-		  }
-	      
-	      SubmissionKeyPart part = parts.get(3);
-	      if ( !part.getElementName().equals(ELEMENT_NAME_MANIFEST_FILESET) ) {
-	    	  return false;
-	      }
-	      
-	      return true;
-	}
+          if ( !validFormFilesetKey(parts) ) {
+              return false;
+          }
+          
+          SubmissionKeyPart part = parts.get(3);
+          if ( !part.getElementName().equals(ELEMENT_NAME_MANIFEST_FILESET) ) {
+              return false;
+          }
+          
+          return true;
+    }
 
-	public static boolean validFormXformDefinitionKey(List<SubmissionKeyPart> parts) {
+    public static boolean validFormXformDefinitionKey(List<SubmissionKeyPart> parts) {
 
-		  if ( !validFormFilesetKey(parts) ) {
-			  return false;
-		  }
-	      
-	      SubmissionKeyPart part = parts.get(3);
-	      if ( !part.getElementName().equals(ELEMENT_NAME_XFORM_DEFINITION) ||
-	    		part.getOrdinalNumber().compareTo(1L) != 0) {
-	    	  return false;
-	      }
-	      
-	      return true;
-	}
-	
-	public static SubmissionKey getManifestSubmissionKey(String uri, int i) {
-		return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" + 
-								FormInfoTable.TABLE_NAME + "[@key=" + uri + "]/" +
-								FormInfoFilesetTable.TABLE_NAME + "[@ordinal=1]/" +
-								ELEMENT_NAME_MANIFEST_FILESET + "[@ordinal=" + i + "]");
-	}
+          if ( !validFormFilesetKey(parts) ) {
+              return false;
+          }
+          
+          SubmissionKeyPart part = parts.get(3);
+          if ( !part.getElementName().equals(ELEMENT_NAME_XFORM_DEFINITION) ||
+                part.getOrdinalNumber().compareTo(1L) != 0) {
+              return false;
+          }
+          
+          return true;
+    }
+    
+    public static SubmissionKey getManifestSubmissionKey(String uri, int i) {
+        return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" + 
+                                FormInfoTable.TABLE_NAME + "[@key=" + uri + "]/" +
+                                FormInfoFilesetTable.TABLE_NAME + "[@ordinal=1]/" +
+                                ELEMENT_NAME_MANIFEST_FILESET + "[@ordinal=" + i + "]");
+    }
 
-	public static SubmissionKey getXformSubmissionKey(String uri, int i) {
-		return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" + 
-								FormInfoTable.TABLE_NAME + "[@key=" + uri + "]/" + 
-								FormInfoFilesetTable.TABLE_NAME + "[@ordinal=1]/" +
-								ELEMENT_NAME_XFORM_DEFINITION + "[@ordinal=" + i + "]");
-	}
+    public static SubmissionKey getXformSubmissionKey(String uri, int i) {
+        return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" + 
+                                FormInfoTable.TABLE_NAME + "[@key=" + uri + "]/" + 
+                                FormInfoFilesetTable.TABLE_NAME + "[@ordinal=1]/" +
+                                ELEMENT_NAME_XFORM_DEFINITION + "[@ordinal=" + i + "]");
+    }
 }

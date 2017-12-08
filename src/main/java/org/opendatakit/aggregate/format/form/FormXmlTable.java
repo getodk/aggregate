@@ -52,7 +52,7 @@ public class FormXmlTable {
 
     // build XML table of form information
     for (IForm form : forms) {
-    	if ( !form.getDownloadEnabled() ) continue;
+        if ( !form.getDownloadEnabled() ) continue;
 
       xml += generateFormXmlEntry(form.getFormId(), form.getViewableName()) + BasicConsts.NEW_LINE;
     }

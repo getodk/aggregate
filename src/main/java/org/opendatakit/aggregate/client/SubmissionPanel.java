@@ -77,10 +77,10 @@ public class SubmissionPanel extends FlowPanel {
     };
 
     if(filterGroup.getFormId() != null && filterGroup.getFormId().length() > 0) {
-    	SecureGWT.getSubmissionService().getSubmissions(filterGroup, callback);
+        SecureGWT.getSubmissionService().getSubmissions(filterGroup, callback);
     } else {
-    	submissionTable = null;
-    	submissionPanel.setWidget(submissionTable);
+        submissionTable = null;
+        submissionPanel.setWidget(submissionTable);
     }
   }
   

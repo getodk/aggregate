@@ -38,44 +38,44 @@ import org.opendatakit.common.security.User;
  * 
  */
 public final class SelectChoice extends DynamicBase {
-	private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, false);
-	public final DataField value;
-	
-	/**
-	 * Construct a relation prototype.
-	 * 
-	 * @param databaseSchema
-	 * @param tableName
-	 */
-	public SelectChoice(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName);
-		fieldList.add(value = new DataField(VALUE));
-	}
-	
-	/**
-	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 * 
-	 * @param ref
-	 * @param user
-	 */
-	private SelectChoice(SelectChoice ref, User user) {
-		super(ref, user);
-		value = ref.value;
-	}
+    private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, false);
+    public final DataField value;
+    
+    /**
+     * Construct a relation prototype.
+     * 
+     * @param databaseSchema
+     * @param tableName
+     */
+    public SelectChoice(String databaseSchema, String tableName) {
+        super(databaseSchema, tableName);
+        fieldList.add(value = new DataField(VALUE));
+    }
+    
+    /**
+     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+     * 
+     * @param ref
+     * @param user
+     */
+    private SelectChoice(SelectChoice ref, User user) {
+        super(ref, user);
+        value = ref.value;
+    }
 
-	// Only called from within the persistence layer.
-	@Override
-	public SelectChoice getEmptyRow(User user) {
-		return new SelectChoice(this, user);
-	}
+    // Only called from within the persistence layer.
+    @Override
+    public SelectChoice getEmptyRow(User user) {
+        return new SelectChoice(this, user);
+    }
 
-	public String getValue() {
-		return getStringField(value);
-	}
+    public String getValue() {
+        return getStringField(value);
+    }
 
-	public void setValue(String v) {
-		if ( !setStringField(value, v)) {
-			throw new IllegalArgumentException("overflow choice value");
-		}
-	}
+    public void setValue(String v) {
+        if ( !setStringField(value, v)) {
+            throw new IllegalArgumentException("overflow choice value");
+        }
+    }
 }

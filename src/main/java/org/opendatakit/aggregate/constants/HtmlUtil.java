@@ -80,7 +80,7 @@ public final class HtmlUtil extends org.opendatakit.common.utils.HtmlUtil {
       if (addCheckboxes) {
         html.append(wrapWithHtmlTags(HtmlConsts.TABLE_DATA, createInput(
             HtmlConsts.INPUT_TYPE_CHECKBOX, checkboxName, 
-            		row.getSubmissionKey().toString())));
+                    row.getSubmissionKey().toString())));
       }
       for (Object item : row.getFormattedValues()) {
         if(item != null) {

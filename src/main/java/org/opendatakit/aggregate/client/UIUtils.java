@@ -70,7 +70,7 @@ public class UIUtils {
 
   public static final String CONFIRM_OWNER_EMAIL_TXT = "Please confirm that this e-mail address: ";
   public static final String CONFIRM_OWNER_EMAIL_TXT2 = " is accurate and contains no mispellings. " +
-  		"This account will become the owner of the published tables.";
+        "This account will become the owner of the published tables.";
 
   public static String promptForEmailAddress() throws Exception{
     String newEmailName = Window.prompt(UIConsts.PROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);

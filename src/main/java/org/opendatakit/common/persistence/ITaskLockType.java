@@ -23,9 +23,9 @@ package org.opendatakit.common.persistence;
  */
 public interface ITaskLockType {
 
-	public String getName();
-	
-	public long getLockExpirationTimeout();
-	
-	public long getMinSettleTime();
+    public String getName();
+    
+    public long getLockExpirationTimeout();
+    
+    public long getMinSettleTime();
 }

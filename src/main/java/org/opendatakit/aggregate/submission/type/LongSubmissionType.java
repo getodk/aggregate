@@ -32,76 +32,76 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class LongSubmissionType extends SubmissionSingleValueBase<Long> {
-	/**
-	 * Constructor
-	 * 
-	 * @param propertyName
-	 *            Name of submission element
-	 */
-	public LongSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
-		super(backingObject, element);
-	}
+    /**
+     * Constructor
+     * 
+     * @param propertyName
+     *            Name of submission element
+     */
+    public LongSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
+        super(backingObject, element);
+    }
 
-	/**
-	 * Parse the value from string format and convert to Integer
-	 * 
-	 * @param value
-	 *            string form of the value
-	 */
-	@Override
-	public void setValueFromString(String value) {
-		if ( value == null ) {
-			setValue(null);
-		} else {
-			setValue(new Long(value));
-		}
-	}
+    /**
+     * Parse the value from string format and convert to Integer
+     * 
+     * @param value
+     *            string form of the value
+     */
+    @Override
+    public void setValueFromString(String value) {
+        if ( value == null ) {
+            setValue(null);
+        } else {
+            setValue(new Long(value));
+        }
+    }
 
-	public void getValueFromEntity(CallingContext cc) {
-		Long value = backingObject.getLongField(element.getFormDataModel().getBackingKey());
-		setValue(value);
-	}
+    public void getValueFromEntity(CallingContext cc) {
+        Long value = backingObject.getLongField(element.getFormDataModel().getBackingKey());
+        setValue(value);
+    }
 
-	/**
-	 * Format value for output
-	 * 
-	 * @param elemFormatter
-	 *            the element formatter that will convert the value to the
-	 *            proper format for output
-	 */
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatLong(getValue(), element, ordinalValue, row);
-	}
+    /**
+     * Format value for output
+     * 
+     * @param elemFormatter
+     *            the element formatter that will convert the value to the
+     *            proper format for output
+     */
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatLong(getValue(), element, ordinalValue, row);
+    }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof LongSubmissionType)) {
-			return false;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		return true;
-	}
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof LongSubmissionType)) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public Long getValue() {
-		return backingObject.getLongField(element.getFormDataModel().getBackingKey());
-	}
+    @Override
+    public Long getValue() {
+        return backingObject.getLongField(element.getFormDataModel().getBackingKey());
+    }
 
-	/**
-	 * Set the value of submission field
-	 * 
-	 * @param value
-	 *            value to set
-	 */
-	public void setValue(Long value) {
-		backingObject.setLongField(element.getFormDataModel().getBackingKey(), (Long) value);
-	}
+    /**
+     * Set the value of submission field
+     * 
+     * @param value
+     *            value to set
+     */
+    public void setValue(Long value) {
+        backingObject.setLongField(element.getFormDataModel().getBackingKey(), (Long) value);
+    }
 
 }

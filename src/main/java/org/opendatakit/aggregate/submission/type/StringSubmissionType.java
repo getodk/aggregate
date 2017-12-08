@@ -34,85 +34,85 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class StringSubmissionType extends SubmissionSingleValueBase<String> {
-	/**
-	 * Constructor
-	 * 
-	 * @param propertyName
-	 *            Name of submission element
-	 */
-	public StringSubmissionType(DynamicCommonFieldsBase backingObject,
-			FormElementModel element) {
-		super(backingObject, element);
-	}
+    /**
+     * Constructor
+     * 
+     * @param propertyName
+     *            Name of submission element
+     */
+    public StringSubmissionType(DynamicCommonFieldsBase backingObject,
+            FormElementModel element) {
+        super(backingObject, element);
+    }
 
-	/**
-	 * Save the string value.
-	 * 
-	 * @param value
-	 *            string form of the value
-	 * @throws ODKConversionException 
-	 */
-	@Override
-	public void setValueFromString(String value) throws ODKConversionException {
-		setValue(value);
-	}
+    /**
+     * Save the string value.
+     * 
+     * @param value
+     *            string form of the value
+     * @throws ODKConversionException 
+     */
+    @Override
+    public void setValueFromString(String value) throws ODKConversionException {
+        setValue(value);
+    }
 
-	public void setStringValue(String value) throws ODKConversionException {
-		setValue(value);
-	}
+    public void setStringValue(String value) throws ODKConversionException {
+        setValue(value);
+    }
 
-	@Override
-	public void getValueFromEntity(CallingContext cc) {
-		String value = backingObject.getStringField(element.getFormDataModel().getBackingKey());
-		setValue(value);
-	}
+    @Override
+    public void getValueFromEntity(CallingContext cc) {
+        String value = backingObject.getStringField(element.getFormDataModel().getBackingKey());
+        setValue(value);
+    }
 
-	/**
-	 * Format value for output
-	 * 
-	 * @param elemFormatter
-	 *            the element formatter that will convert the value to the
-	 *            proper format for output
-	 */
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatString(getValue(), element, ordinalValue, row);
-	}
+    /**
+     * Format value for output
+     * 
+     * @param elemFormatter
+     *            the element formatter that will convert the value to the
+     *            proper format for output
+     */
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatString(getValue(), element, ordinalValue, row);
+    }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof StringSubmissionType)) {
-			return false;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		return true;
-	}
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof StringSubmissionType)) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public String getValue() {
-		return backingObject.getStringField(element.getFormDataModel().getBackingKey());
-	}
+    @Override
+    public String getValue() {
+        return backingObject.getStringField(element.getFormDataModel().getBackingKey());
+    }
 
-	/**
-	 * Set the value of submission field.  Silently truncate longer strings.
-	 * 
-	 * @param value
-	 *            value to set
-	 */
-	protected void setValue(String value) {
-		DataField f = element.getFormDataModel().getBackingKey();
-		if ( value != null && value.length() > f.getMaxCharLen().intValue() ) {
-			value = value.substring(0, f.getMaxCharLen().intValue());
-		}
-		if ( !backingObject.setStringField(f, value) ) {
-			throw new IllegalStateException("this should already be truncated");
-		}
-	}
+    /**
+     * Set the value of submission field.  Silently truncate longer strings.
+     * 
+     * @param value
+     *            value to set
+     */
+    protected void setValue(String value) {
+        DataField f = element.getFormDataModel().getBackingKey();
+        if ( value != null && value.length() > f.getMaxCharLen().intValue() ) {
+            value = value.substring(0, f.getMaxCharLen().intValue());
+        }
+        if ( !backingObject.setStringField(f, value) ) {
+            throw new IllegalStateException("this should already be truncated");
+        }
+    }
 
 }

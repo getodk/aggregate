@@ -84,7 +84,7 @@ public class GeoPoint {
    * Constructs a GeoPoint with all null values.
    */
   public GeoPoint() {
-	  this(null, null, null, null);
+      this(null, null, null, null);
   }
   
   /**
