@@ -182,6 +182,7 @@ war {
 gretty {
   contextPath = '/'
   host = 'localhost'
+  logDir = 'logs'
 }
 
 task gaeDownloadSDK() {
