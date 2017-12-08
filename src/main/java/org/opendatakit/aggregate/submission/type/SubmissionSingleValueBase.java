@@ -80,7 +80,7 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
    */
   @Override
   public String toString() {
-	T value = getValue();
+    T value = getValue();
     return super.toString() + FormatConsts.TO_STRING_DELIMITER 
       + (value != null ? value.toString() : BasicConsts.EMPTY_STRING);
   }

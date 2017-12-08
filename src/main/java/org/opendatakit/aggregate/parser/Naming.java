@@ -68,40 +68,40 @@ import java.util.regex.Pattern;
  */
 class Naming {
 
-	// what a legal persistence naming should be...
-	private static final String utf8String = "^[\\p{Lu}\\p{Lo}_][0-9\\p{Lu}\\p{Lo}_]*$";
-	private static final Pattern p = Pattern.compile(utf8String);
+    // what a legal persistence naming should be...
+    private static final String utf8String = "^[\\p{Lu}\\p{Lo}_][0-9\\p{Lu}\\p{Lo}_]*$";
+    private static final Pattern p = Pattern.compile(utf8String);
 
-	public static final boolean isValidString(final String xmlString) {
-		Matcher m = p.matcher(xmlString);
-		return m.matches();
-	}
+    public static final boolean isValidString(final String xmlString) {
+        Matcher m = p.matcher(xmlString);
+        return m.matches();
+    }
 
-	/**
-	 * Converts the string to a SQL naming
-	 * 
-	 * @param xmlString
-	 *            the xml tag name
-	 */
-	public static final String toPersistenceNaming(final String xmlString) {
-		final StringBuilder sb = new StringBuilder();
-		boolean priorUnderscoreOrCap = true;
-		for (int i = 0; i < xmlString.length(); ++i) {
-			final char ch = xmlString.charAt(i);
-			if (Character.isUpperCase(ch)) {
-				if (!priorUnderscoreOrCap)
-					sb.append('_');
-				sb.append(ch);
-				priorUnderscoreOrCap = true;
-			} else if (ch == '-' || ch == '.' || ch == '_') {
-				sb.append('_');
-				priorUnderscoreOrCap = true;
-			} else {
-				sb.append(Character.toUpperCase(ch));
-				priorUnderscoreOrCap = false;
-			}
-		}
-		assert isValidString(sb.toString());
-		return sb.toString();
-	}
+    /**
+     * Converts the string to a SQL naming
+     * 
+     * @param xmlString
+     *            the xml tag name
+     */
+    public static final String toPersistenceNaming(final String xmlString) {
+        final StringBuilder sb = new StringBuilder();
+        boolean priorUnderscoreOrCap = true;
+        for (int i = 0; i < xmlString.length(); ++i) {
+            final char ch = xmlString.charAt(i);
+            if (Character.isUpperCase(ch)) {
+                if (!priorUnderscoreOrCap)
+                    sb.append('_');
+                sb.append(ch);
+                priorUnderscoreOrCap = true;
+            } else if (ch == '-' || ch == '.' || ch == '_') {
+                sb.append('_');
+                priorUnderscoreOrCap = true;
+            } else {
+                sb.append(Character.toUpperCase(ch));
+                priorUnderscoreOrCap = false;
+            }
+        }
+        assert isValidString(sb.toString());
+        return sb.toString();
+    }
 }

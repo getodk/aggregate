@@ -33,78 +33,78 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class DecimalSubmissionType extends
-		SubmissionSingleValueBase<WrappedBigDecimal> {
-	/**
-	 * Constructor
-	 * 
-	 * @param propertyName
-	 *            Name of submission element
-	 */
-	public DecimalSubmissionType(DynamicCommonFieldsBase backingObject,
-			FormElementModel element) {
-		super(backingObject, element);
-	}
+        SubmissionSingleValueBase<WrappedBigDecimal> {
+    /**
+     * Constructor
+     * 
+     * @param propertyName
+     *            Name of submission element
+     */
+    public DecimalSubmissionType(DynamicCommonFieldsBase backingObject,
+            FormElementModel element) {
+        super(backingObject, element);
+    }
 
-	/**
-	 * Parse the value from string format and convert to Double/Decimal
-	 * 
-	 * @param value
-	 *            string form of the value
-	 */
-	@Override
-	public void setValueFromString(String value) {
-		if ( value == null ) {
-			setValue(null);
-		} else {
-			setValue(new WrappedBigDecimal(value));
-		}
-	}
+    /**
+     * Parse the value from string format and convert to Double/Decimal
+     * 
+     * @param value
+     *            string form of the value
+     */
+    @Override
+    public void setValueFromString(String value) {
+        if ( value == null ) {
+            setValue(null);
+        } else {
+            setValue(new WrappedBigDecimal(value));
+        }
+    }
 
-	@Override
-	public void getValueFromEntity(CallingContext cc) {
-		WrappedBigDecimal value = backingObject.getNumericField(element.getFormDataModel().getBackingKey());
-		setValue(value);
-	}
+    @Override
+    public void getValueFromEntity(CallingContext cc) {
+        WrappedBigDecimal value = backingObject.getNumericField(element.getFormDataModel().getBackingKey());
+        setValue(value);
+    }
 
-	/**
-	 * Format value for output
-	 * 
-	 * @param elemFormatter
-	 *            the element formatter that will convert the value to the
-	 *            proper format for output
-	 */
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatDecimal(getValue(), element, ordinalValue, row);
-	}
+    /**
+     * Format value for output
+     * 
+     * @param elemFormatter
+     *            the element formatter that will convert the value to the
+     *            proper format for output
+     */
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatDecimal(getValue(), element, ordinalValue, row);
+    }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof DecimalSubmissionType)) {
-			return false;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		return true;
-	}
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DecimalSubmissionType)) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public WrappedBigDecimal getValue() {
-		return backingObject.getNumericField(element.getFormDataModel().getBackingKey());
-	}
+    @Override
+    public WrappedBigDecimal getValue() {
+        return backingObject.getNumericField(element.getFormDataModel().getBackingKey());
+    }
 
-	/**
-	 * Set the value of submission field
-	 * 
-	 * @param value
-	 *            value to set
-	 */
-	protected void setValue(WrappedBigDecimal value) {
-		backingObject.setNumericField(element.getFormDataModel().getBackingKey(), value);
-	}
+    /**
+     * Set the value of submission field
+     * 
+     * @param value
+     *            value to set
+     */
+    protected void setValue(WrappedBigDecimal value) {
+        backingObject.setNumericField(element.getFormDataModel().getBackingKey(), value);
+    }
 }

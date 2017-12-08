@@ -70,20 +70,20 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
         }
       } else {
         // we are processing this as a table element
-    	  if ( (propertyNames == null) || propertyNames.contains(node)) {
-    		  headers.add(nodeName);
-    		  types.add(ElementType.REPEAT);
-    	  }
+          if ( (propertyNames == null) || propertyNames.contains(node)) {
+              headers.add(nodeName);
+              types.add(ElementType.REPEAT);
+          }
       }
       return;
     case GEOPOINT:
       processGeoPoint(node, nodeName);
       break;
     default:
-  	  if ( (propertyNames == null) || propertyNames.contains(node)) {
-	      headers.add(node.getElementName());
-	      types.add(node.getElementType());
-	  }
+      if ( (propertyNames == null) || propertyNames.contains(node)) {
+          headers.add(node.getElementName());
+          types.add(node.getElementType());
+      }
     }
 
     // only recurse into the elements that are not binary, geopoint,

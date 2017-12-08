@@ -32,8 +32,8 @@ import java.io.Serializable;
 public class RowFilterScopeClient implements Serializable {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -76035214486037194L;
 
   public static final RowFilterScopeClient EMPTY_ROW_FILTER_SCOPE;

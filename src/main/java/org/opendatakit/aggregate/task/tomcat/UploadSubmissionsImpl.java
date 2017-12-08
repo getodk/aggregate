@@ -33,30 +33,30 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
-	static class UploadSubmissionsRunner implements Runnable {
-		final UploadSubmissionsWorkerImpl impl;
+    static class UploadSubmissionsRunner implements Runnable {
+        final UploadSubmissionsWorkerImpl impl;
 
-		public UploadSubmissionsRunner(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
-			impl = new UploadSubmissionsWorkerImpl(fsc, useLargerBatchSize, cc);
-		}
+        public UploadSubmissionsRunner(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
+            impl = new UploadSubmissionsWorkerImpl(fsc, useLargerBatchSize, cc);
+        }
 
-		@Override
-		public void run() {
-			try {
-				impl.uploadAllSubmissions();
-			} catch (Exception e) {
-				e.printStackTrace();
-				// TODO: Problem - decide what to do if an exception occurs
-			}
-		}
-	}
+        @Override
+        public void run() {
+            try {
+                impl.uploadAllSubmissions();
+            } catch (Exception e) {
+                e.printStackTrace();
+                // TODO: Problem - decide what to do if an exception occurs
+            }
+        }
+    }
 
   @Override
   public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
       throws ODKExternalServiceException {
-	WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
-	// use watchdog's calling context in runner...
-	UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getFasterWatchdogCycleEnabled(), wd.getCallingContext());
+    WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
+    // use watchdog's calling context in runner...
+    UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getFasterWatchdogCycleEnabled(), wd.getCallingContext());
     System.out.println("UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(ur);

@@ -34,19 +34,19 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("securityservice")
 public interface SecurityService extends RemoteService {
-	
-	/**
-	 * @return information about the logged-in user, including the full set of groups and grants it has.
-	 * @throws AccessDeniedException
-	 * @throws DatastoreFailureException
-	 */
-	UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException;
+    
+    /**
+     * @return information about the logged-in user, including the full set of groups and grants it has.
+     * @throws AccessDeniedException
+     * @throws DatastoreFailureException
+     */
+    UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException;
 
-	/**
-	 * @param xsrfString
-	 * @return information needed for building CredentialsInfo records and URLs.
-	 * @throws AccessDeniedException
-	 * @throws DatastoreFailureException 
-	 */
-	RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException, DatastoreFailureException;
+    /**
+     * @param xsrfString
+     * @return information needed for building CredentialsInfo records and URLs.
+     * @throws AccessDeniedException
+     * @throws DatastoreFailureException 
+     */
+    RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException, DatastoreFailureException;
 }

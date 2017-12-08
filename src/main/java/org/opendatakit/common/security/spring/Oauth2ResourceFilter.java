@@ -256,7 +256,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
              try {
                reader = new BufferedReader(isr = new InputStreamReader(entity.getContent(), CharEncoding.UTF_8));
                @SuppressWarnings("unchecked")
-			   Map<String,Object> userData = mapper.readValue(reader, Map.class);
+               Map<String,Object> userData = mapper.readValue(reader, Map.class);
                return userData;
              } finally {
                if ( reader != null ) {

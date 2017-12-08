@@ -59,30 +59,30 @@ import org.opendatakit.common.security.User;
  * 
  */
 public final class TopLevelInstanceData extends TopLevelDynamicBase {
-	
-	/**
-	 * Construct a relation prototype.
-	 * 
-	 * @param databaseSchema
-	 * @param tableName
-	 */
-	public TopLevelInstanceData(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName);
-	}
+    
+    /**
+     * Construct a relation prototype.
+     * 
+     * @param databaseSchema
+     * @param tableName
+     */
+    public TopLevelInstanceData(String databaseSchema, String tableName) {
+        super(databaseSchema, tableName);
+    }
 
-	/**
-	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 * 
-	 * @param ref
-	 * @param user
-	 */
-	private TopLevelInstanceData(TopLevelInstanceData ref, User user) {
-		super(ref, user);
-	}
+    /**
+     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+     * 
+     * @param ref
+     * @param user
+     */
+    private TopLevelInstanceData(TopLevelInstanceData ref, User user) {
+        super(ref, user);
+    }
 
-	// Only called from within the persistence layer.
-	@Override
-	public TopLevelInstanceData getEmptyRow(User user) {
-		return new TopLevelInstanceData(this, user);
-	}
+    // Only called from within the persistence layer.
+    @Override
+    public TopLevelInstanceData getEmptyRow(User user) {
+        return new TopLevelInstanceData(this, user);
+    }
 }

@@ -41,12 +41,12 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
   private static final DataField FUSION_TABLE_VIEW_ID_PROPERTY = new DataField("FUSION_TABLE_VIEW_ID",
       DataField.DataType.STRING, true, 4096L);
 
-	/**
-	 * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-	 *
-	 * @param databaseSchema
-	 * @param tableName
-	 */
+    /**
+     * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
+     *
+     * @param databaseSchema
+     * @param tableName
+     */
   FusionTable2ParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(FUSION_TABLE_ID_PROPERTY);
@@ -54,12 +54,12 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
     fieldList.add(FUSION_TABLE_VIEW_ID_PROPERTY);
   }
 
-	/**
-	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 *
-	 * @param ref
-	 * @param user
-	 */
+    /**
+     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+     *
+     * @param ref
+     * @param user
+     */
   private FusionTable2ParameterTable(FusionTable2ParameterTable ref, User user) {
     super(ref, user);
   }
@@ -67,7 +67,7 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
   // Only called from within the persistence layer.
   @Override
   public FusionTable2ParameterTable getEmptyRow(User user) {
-	return new FusionTable2ParameterTable(this, user);
+    return new FusionTable2ParameterTable(this, user);
   }
 
   public String getFusionTableId() {
@@ -91,13 +91,13 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
   }
 
   public String getFusionTableViewId() {
-	  return getStringField(FUSION_TABLE_VIEW_ID_PROPERTY);
+      return getStringField(FUSION_TABLE_VIEW_ID_PROPERTY);
   }
 
   public void setFusionTableViewId(String value) {
-	  if (!setStringField(FUSION_TABLE_VIEW_ID_PROPERTY, value)) {
-		  throw new IllegalArgumentException("overflow fusionTableViewId");
-	  }
+      if (!setStringField(FUSION_TABLE_VIEW_ID_PROPERTY, value)) {
+          throw new IllegalArgumentException("overflow fusionTableViewId");
+      }
   }
 
   private static FusionTable2ParameterTable relation = null;

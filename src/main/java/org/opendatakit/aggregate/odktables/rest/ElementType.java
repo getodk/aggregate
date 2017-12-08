@@ -116,19 +116,19 @@ public class ElementType {
       // NOTE: throws IllegaArgumentException if unrecognized type
       dataType = ElementDataType.valueOf(databaseType);
     } else {
-	  dataType = elementDataType;
-	  if (dataType == null) {
+      dataType = elementDataType;
+      if (dataType == null) {
         dataType = (hasChildren ? ElementDataType.object : ElementDataType.string);
-	  }
-	}
+      }
+    }
 
     if (hasChildren && !(dataType == ElementDataType.object || dataType == ElementDataType.array)) {
       throw new IllegalArgumentException(
           "malformed ElementType - invalid primitive datatype for elementType with children: " + type);
     }
-	
+    
     if (!hasChildren && (dataType == ElementDataType.object || dataType == ElementDataType.array)) {
-	  throw new IllegalArgumentException("malformed elementType -- cannot declare an object or array having no children: " + type);
+      throw new IllegalArgumentException("malformed elementType -- cannot declare an object or array having no children: " + type);
     }
 
     if (elementDataType != null && elementDataType != dataType) {

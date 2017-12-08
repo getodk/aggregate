@@ -31,17 +31,17 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
  */
 public interface SubmissionRepeat extends SubmissionValue {
 
-	public FormElementModel getElement();
+    public FormElementModel getElement();
 
-	public SubmissionKey constructSubmissionKey();
+    public SubmissionKey constructSubmissionKey();
 
-	public List<SubmissionSet> getSubmissionSets();
+    public List<SubmissionSet> getSubmissionSets();
 
-	public void addSubmissionSet(SubmissionSet submissionSet);
+    public void addSubmissionSet(SubmissionSet submissionSet);
 
-	public SubmissionElement resolveSubmissionKeyBeginningAt(int i,
-			List<SubmissionKeyPart> parts);
-	
-	public String getUniqueKeyStr();
+    public SubmissionElement resolveSubmissionKeyBeginningAt(int i,
+            List<SubmissionKeyPart> parts);
+    
+    public String getUniqueKeyStr();
 
 }

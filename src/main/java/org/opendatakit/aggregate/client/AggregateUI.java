@@ -389,10 +389,10 @@ public class AggregateUI implements EntryPoint {
 
     if (userInfo != null) {
       if (authorizedForTab(Tabs.SUBMISSIONS)) {
-	    mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
+        mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
        // If this is visible, mark it as the tab to use to size the screen
-	    mainNav.getElement().getFirstChildElement().getFirstChildElement()
-	        .addClassName("tab_measure_1");
+        mainNav.getElement().getFirstChildElement().getFirstChildElement()
+            .addClassName("tab_measure_1");
       }
 
       if (authorizedForTab(Tabs.MANAGEMENT)) {
@@ -401,12 +401,12 @@ public class AggregateUI implements EntryPoint {
       }
 
       if (authorizedForTab(Tabs.ODKTABLES)) {
-    	  mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
-    	  if ( !authorizedForTab(Tabs.SUBMISSIONS) ) {
+          mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
+          if ( !authorizedForTab(Tabs.SUBMISSIONS) ) {
           // If submissions is not visible, mark it as the tab to use to size the screen
-  		    mainNav.getElement().getFirstChildElement().getFirstChildElement()
-    	        .addClassName("tab_measure_1");
-    	  }
+            mainNav.getElement().getFirstChildElement().getFirstChildElement()
+                .addClassName("tab_measure_1");
+          }
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
@@ -449,7 +449,7 @@ public class AggregateUI implements EntryPoint {
   // Currently calls into javascript/resize.js, if we add more JavaScript
   // then that should be changed.
   public native void contentLoaded() /*-{
-		$wnd.gwtContentLoaded();
+        $wnd.gwtContentLoaded();
   }-*/;
 
   public native void beforeContentLoaded() /*-{
@@ -580,8 +580,8 @@ public class AggregateUI implements EntryPoint {
     case ADMIN:
       return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
     case ODKTABLES:
-    	return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) ||
-    		   userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SUPER_USER_TABLES) ||
+        return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) ||
+               userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SUPER_USER_TABLES) ||
                userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES);
     default:
       return false;

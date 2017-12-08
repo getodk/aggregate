@@ -48,23 +48,23 @@ public class OutOfBandAuthenticationProvider implements AuthenticationProvider, 
 
   //~ Instance fields ================================================================================================
 
-	UserDetailsService wrappingUserDetailsService;
-	
-	public UserDetailsService getWrappingUserDetailsService() {
-		return wrappingUserDetailsService;
-	}
+    UserDetailsService wrappingUserDetailsService;
+    
+    public UserDetailsService getWrappingUserDetailsService() {
+        return wrappingUserDetailsService;
+    }
 
-	public void setWrappingUserDetailsService(
-			UserDetailsService wrappingUserDetailsService) {
-		this.wrappingUserDetailsService = wrappingUserDetailsService;
-	}
+    public void setWrappingUserDetailsService(
+            UserDetailsService wrappingUserDetailsService) {
+        this.wrappingUserDetailsService = wrappingUserDetailsService;
+    }
 
-	public void afterPropertiesSet() throws Exception {
-		if ( wrappingUserDetailsService == null ) {
-			throw new IllegalStateException("wrappingUserDetailsService must be defined");
-		}
-	}
-	
+    public void afterPropertiesSet() throws Exception {
+        if ( wrappingUserDetailsService == null ) {
+            throw new IllegalStateException("wrappingUserDetailsService must be defined");
+        }
+    }
+    
    /* (non-Javadoc)
     * @see org.springframework.security.authentication.AuthenticationProvider#supports(java.lang.Class)
     */
@@ -103,77 +103,77 @@ public class OutOfBandAuthenticationProvider implements AuthenticationProvider, 
     * @param auth the token passed to the authenticate method, containing
     * @return the token which will represent the authenticated user.
     */
-	protected Authentication createSuccessfulAuthentication(
-			UserDetails rawUserDetails, OutOfBandAuthenticationToken auth) {
-		String eMail = auth.getEmail();
-		if ( eMail == null ) {
-		   logger.warn("OutOfBand attributes did not include an e-mail address! ");
-			throw new UsernameNotFoundException("email address not supplied in OutOfBand attributes");
-		}
-		eMail = OutOfBandAuthenticationProvider.normalizeMailtoAddress(eMail);
-		String mailtoDomain = OutOfBandAuthenticationProvider.getMailtoDomain(eMail);
-		
-		UserDetails userDetails = rawUserDetails;
-		
-		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-		
-		authorities.addAll(userDetails.getAuthorities());
-		// add the AUTH_OUT_OF_BAND granted authority,
-		authorities.add(new SimpleGrantedAuthority(GrantedAuthorityName.AUTH_OUT_OF_BAND.toString()));
+    protected Authentication createSuccessfulAuthentication(
+            UserDetails rawUserDetails, OutOfBandAuthenticationToken auth) {
+        String eMail = auth.getEmail();
+        if ( eMail == null ) {
+           logger.warn("OutOfBand attributes did not include an e-mail address! ");
+            throw new UsernameNotFoundException("email address not supplied in OutOfBand attributes");
+        }
+        eMail = OutOfBandAuthenticationProvider.normalizeMailtoAddress(eMail);
+        String mailtoDomain = OutOfBandAuthenticationProvider.getMailtoDomain(eMail);
+        
+        UserDetails userDetails = rawUserDetails;
+        
+        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        
+        authorities.addAll(userDetails.getAuthorities());
+        // add the AUTH_OUT_OF_BAND granted authority,
+        authorities.add(new SimpleGrantedAuthority(GrantedAuthorityName.AUTH_OUT_OF_BAND.toString()));
 
-		// attempt to look user up in registered users table...
-		String username = null;
-		UserDetails partialDetails = null;
-		boolean noRights = false;
-		try {
-			partialDetails = wrappingUserDetailsService.loadUserByUsername(eMail);
-			// found the user in the table -- fold in authorizations and get uriUser.
-			authorities.addAll(partialDetails.getAuthorities());
-			// users are blacklisted by registering them and giving them no rights.
-			noRights = partialDetails.getAuthorities().isEmpty();
-			username = partialDetails.getUsername();
-		} catch (Exception e) {
-		  logger.warn("OutOfBand attribute e-mail: " + eMail + " did not match any known e-mail addresses! " + e.getMessage());
+        // attempt to look user up in registered users table...
+        String username = null;
+        UserDetails partialDetails = null;
+        boolean noRights = false;
+        try {
+            partialDetails = wrappingUserDetailsService.loadUserByUsername(eMail);
+            // found the user in the table -- fold in authorizations and get uriUser.
+            authorities.addAll(partialDetails.getAuthorities());
+            // users are blacklisted by registering them and giving them no rights.
+            noRights = partialDetails.getAuthorities().isEmpty();
+            username = partialDetails.getUsername();
+        } catch (Exception e) {
+          logger.warn("OutOfBand attribute e-mail: " + eMail + " did not match any known e-mail addresses! " + e.getMessage());
         throw new UsernameNotFoundException("account not recognized");
-		}
+        }
 
-		AggregateUser trueUser = new AggregateUser(username, 
-													partialDetails.getPassword(),
-													UUID.randomUUID().toString(), // junk...
-													mailtoDomain,
-													partialDetails.isEnabled(),
-													partialDetails.isAccountNonExpired(),
-													partialDetails.isCredentialsNonExpired(),
-													partialDetails.isAccountNonLocked(),
-													authorities);
-		if ( noRights || !( trueUser.isEnabled() && trueUser.isAccountNonExpired() &&
-				trueUser.isAccountNonLocked() ) ) {
+        AggregateUser trueUser = new AggregateUser(username, 
+                                                    partialDetails.getPassword(),
+                                                    UUID.randomUUID().toString(), // junk...
+                                                    mailtoDomain,
+                                                    partialDetails.isEnabled(),
+                                                    partialDetails.isAccountNonExpired(),
+                                                    partialDetails.isCredentialsNonExpired(),
+                                                    partialDetails.isAccountNonLocked(),
+                                                    authorities);
+        if ( noRights || !( trueUser.isEnabled() && trueUser.isAccountNonExpired() &&
+                trueUser.isAccountNonLocked() ) ) {
          logger.warn("OutOfBand attribute e-mail: " + eMail + " account is blocked! ");
-			throw new UsernameNotFoundException("account is blocked");
-		}
-		
+            throw new UsernameNotFoundException("account is blocked");
+        }
+        
         return new OutOfBandAuthenticationToken(trueUser, trueUser.getAuthorities(),
                                                  auth.getEmail());
     }
 
-	public static final String getMailtoDomain( String uriUser ) {
-		if ( uriUser == null ||
-			 !uriUser.startsWith(SecurityUtils.MAILTO_COLON) ||
-			 !uriUser.contains(SecurityUtils.AT_SIGN) )
-			return null;
-		return uriUser.substring(uriUser.indexOf(SecurityUtils.AT_SIGN)+1);
-	}
+    public static final String getMailtoDomain( String uriUser ) {
+        if ( uriUser == null ||
+             !uriUser.startsWith(SecurityUtils.MAILTO_COLON) ||
+             !uriUser.contains(SecurityUtils.AT_SIGN) )
+            return null;
+        return uriUser.substring(uriUser.indexOf(SecurityUtils.AT_SIGN)+1);
+    }
 
-	public static final String normalizeMailtoAddress(String emailAddress) {
-		String mailtoUsername = emailAddress;
-		if ( !emailAddress.startsWith(SecurityUtils.MAILTO_COLON) ) {
-			if ( emailAddress.contains(SecurityUtils.AT_SIGN) ) {
-				mailtoUsername = SecurityUtils.MAILTO_COLON + emailAddress;
-			} else {
-			   logger.warn("OutOfBand attribute e-mail: " + emailAddress + " does not specify a domain! ");
-	         throw new IllegalStateException("e-mail address is incomplete - it does not specify a domain!");
-			}
-		}
-		return mailtoUsername;
-	}
+    public static final String normalizeMailtoAddress(String emailAddress) {
+        String mailtoUsername = emailAddress;
+        if ( !emailAddress.startsWith(SecurityUtils.MAILTO_COLON) ) {
+            if ( emailAddress.contains(SecurityUtils.AT_SIGN) ) {
+                mailtoUsername = SecurityUtils.MAILTO_COLON + emailAddress;
+            } else {
+               logger.warn("OutOfBand attribute e-mail: " + emailAddress + " does not specify a domain! ");
+             throw new IllegalStateException("e-mail address is incomplete - it does not specify a domain!");
+            }
+        }
+        return mailtoUsername;
+    }
 }

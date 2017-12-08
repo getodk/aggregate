@@ -71,11 +71,11 @@ public class SubmissionUISummary implements Serializable {
   }
   
   public void addBinarySubmissionHeader(String displayHeader, String columnName) {
-	    headers.add(new Column(displayHeader, columnName, UIDisplayType.BINARY));
+        headers.add(new Column(displayHeader, columnName, UIDisplayType.BINARY));
   }
   
   public void addRepeatSubmissionHeader(String displayHeader, String columnName) {
-	    headers.add(new Column(displayHeader, columnName, UIDisplayType.REPEAT));
+        headers.add(new Column(displayHeader, columnName, UIDisplayType.REPEAT));
 }
   
   public void addGeopointHeader(String displayHeader, String columnName, Long geopointColumnCode) {

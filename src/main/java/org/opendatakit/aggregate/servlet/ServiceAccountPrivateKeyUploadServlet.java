@@ -75,14 +75,14 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
       + " action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY = "\" >"
-	  + "<div style=\"overflow: auto;\"><h2>Google API Credentials</h2>"
-	  + "<p>Please refer to the documentation at <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">Service Account Configuration</a>.</p>"
+      + "<div style=\"overflow: auto;\"><h2>Google API Credentials</h2>"
+      + "<p>Please refer to the documentation at <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">Service Account Configuration</a>.</p>"
       + "<h2>Google Simple API Key</h2>"
       + "<p>Specifying a Simple API Key is recommended but not required for Google Maps visualizations.</p>"
-      + "	  <table id=\"uploadTable\">"
-      + "	  	<tr>"
-      + "	  		<td><label for=\"simple_api_key\">Simple API Key:</label></td>"
-      + "	  		<td><input id=\"simple_api_key\" type=\"text\" size=\"80\" name=\"simple_api_key\" value=\"";
+      + "     <table id=\"uploadTable\">"
+      + "       <tr>"
+      + "           <td><label for=\"simple_api_key\">Simple API Key:</label></td>"
+      + "           <td><input id=\"simple_api_key\" type=\"text\" size=\"80\" name=\"simple_api_key\" value=\"";
   private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_ID = "\" /></td>"
        + "      </tr>\n"
        + "<tr><td colspan=\"2\"><h2>Google API Service Account information</h2></td></tr>"
@@ -201,24 +201,24 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
 
       String simpleApiKey = uploadedFormItems.getSimpleFormField(SIMPLE_API_KEY_PARAM);
       if ( simpleApiKey != null ) {
-    	  simpleApiKey = simpleApiKey.trim();
-      	  if ( simpleApiKey.trim().length() == 0 ) {
-      		  simpleApiKey = null;
-      	  }
+          simpleApiKey = simpleApiKey.trim();
+          if ( simpleApiKey.trim().length() == 0 ) {
+              simpleApiKey = null;
+          }
       }
       String clientId = uploadedFormItems.getSimpleFormField(CLIENT_ID_PARAM);
       if ( clientId != null ) {
-    	  clientId = clientId.trim();
-      	  if ( clientId.trim().length() == 0 ) {
-      		clientId = null;
-      	  }
+          clientId = clientId.trim();
+          if ( clientId.trim().length() == 0 ) {
+            clientId = null;
+          }
       }
       String serviceAccountEmail = uploadedFormItems.getSimpleFormField(SERVICE_ACCOUNT_EMAIL_PARAM);
       if ( serviceAccountEmail != null ) {
-    	  serviceAccountEmail = serviceAccountEmail.trim();
-      	  if ( serviceAccountEmail.trim().length() == 0 ) {
-      		serviceAccountEmail = null;
-      	  }
+          serviceAccountEmail = serviceAccountEmail.trim();
+          if ( serviceAccountEmail.trim().length() == 0 ) {
+            serviceAccountEmail = null;
+          }
       }
       MultiPartFormItem privateKeyFileData = uploadedFormItems
           .getFormDataByFieldName(PRIVATE_KEY_FILE_PARAM);

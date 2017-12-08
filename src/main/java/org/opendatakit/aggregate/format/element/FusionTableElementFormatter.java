@@ -46,7 +46,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
       if (gp.getLatitude() == null && gp.getLongitude() == null && gp.getAltitude() == null) {
         basicStringConversion(null, row);
       } else {
-    	  WrappedBigDecimal latitude = WrappedBigDecimal.fromDouble(0.0);
+          WrappedBigDecimal latitude = WrappedBigDecimal.fromDouble(0.0);
         if (gp.getLatitude() != null) {
           latitude = gp.getLatitude();
         }

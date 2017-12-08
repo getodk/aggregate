@@ -67,7 +67,7 @@ public class PublishTable extends FlexTable {
     while (this.getRowCount() > STARTING_ROW)
       this.removeRow(STARTING_ROW);
     if (eSS == null) {
-    	// this happens if there is no publishing set up for this form
+        // this happens if there is no publishing set up for this form
         return;
     }
     for (int i = 0; i < eSS.length; i++) {

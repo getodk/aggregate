@@ -35,43 +35,43 @@ import org.opendatakit.common.security.User;
  */
 public final class BinaryContentRefBlob extends DynamicAssociationBase {
 
-	private static final DataField PART = new DataField("PART",DataField.DataType.INTEGER, false);
-	
-	public final DataField part;
-	
-	/**
-	 * Construct a relation prototype.
-	 * 
-	 * @param databaseSchema
-	 * @param tableName
-	 */
-	public BinaryContentRefBlob(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName);
-		fieldList.add(part = new DataField(PART));
-	}
+    private static final DataField PART = new DataField("PART",DataField.DataType.INTEGER, false);
+    
+    public final DataField part;
+    
+    /**
+     * Construct a relation prototype.
+     * 
+     * @param databaseSchema
+     * @param tableName
+     */
+    public BinaryContentRefBlob(String databaseSchema, String tableName) {
+        super(databaseSchema, tableName);
+        fieldList.add(part = new DataField(PART));
+    }
 
-	/**
-	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 * 
-	 * @param ref
-	 * @param user
-	 */
-	private BinaryContentRefBlob(BinaryContentRefBlob ref, User user) {
-		super(ref, user);
-		part = ref.part;
-	}
+    /**
+     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+     * 
+     * @param ref
+     * @param user
+     */
+    private BinaryContentRefBlob(BinaryContentRefBlob ref, User user) {
+        super(ref, user);
+        part = ref.part;
+    }
 
-	// Only called from within the persistence layer.
-	@Override
-	public BinaryContentRefBlob getEmptyRow(User user) {
-		return new BinaryContentRefBlob(this, user);
-	}
+    // Only called from within the persistence layer.
+    @Override
+    public BinaryContentRefBlob getEmptyRow(User user) {
+        return new BinaryContentRefBlob(this, user);
+    }
 
-	public Long getPart() {
-		return getLongField(part);
-	}
-	
-	public void setPart(Long value) {
-		setLongField(part,value);
-	}
+    public Long getPart() {
+        return getLongField(part);
+    }
+    
+    public void setPart(Long value) {
+        setLongField(part,value);
+    }
 }

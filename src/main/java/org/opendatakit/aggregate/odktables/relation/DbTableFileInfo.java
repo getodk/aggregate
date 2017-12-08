@@ -276,7 +276,7 @@ public class DbTableFileInfo extends Relation {
     Query query = getRelation(cc).query("DbTableFileInfo.queryForAllOdkClientVersions()", cc);
     query.addSort(ODK_CLIENT_VERSION, Direction.ASCENDING);
     @SuppressWarnings("unchecked")
-	List<String> results = (List<String>) query.getDistinct(ODK_CLIENT_VERSION);
+    List<String> results = (List<String>) query.getDistinct(ODK_CLIENT_VERSION);
     return results;
   }
 
