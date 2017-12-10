@@ -226,8 +226,8 @@ public class SecureGWT {
         obj = GWT.create(ServerTableACLService.class);
         break;
     case ODK_TABLES_TABLE:
-    	obj = GWT.create(ServerTableService.class);
-    	break;
+      obj = GWT.create(ServerTableService.class);
+      break;
     case DATABASE_REPAIR:
       obj = GWT.create(DatabaseRepairService.class);
       break;
