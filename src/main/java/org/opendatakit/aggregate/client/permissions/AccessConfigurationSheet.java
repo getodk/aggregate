@@ -212,7 +212,7 @@ public class AccessConfigurationSheet extends Composite {
         return true;
       case GROUP_SUPER_USER_TABLES:
         if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-        	|| assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
           return false;
         }
         return true;

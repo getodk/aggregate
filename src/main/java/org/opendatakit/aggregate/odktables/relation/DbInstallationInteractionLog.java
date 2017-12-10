@@ -52,7 +52,7 @@ public class DbInstallationInteractionLog extends Relation {
    * The installation id from the header.
    */
   private static final DataField INSTALLATION_ID = new DataField("INSTALLATION_ID",
-	      DataType.STRING, false);
+          DataType.STRING, false);
   
   /**
    * The timestamp is the time of the authentication request.
@@ -64,7 +64,7 @@ public class DbInstallationInteractionLog extends Relation {
    * The user participating in the interaction
    */
   private static final DataField AUTHORIZED_USER = new DataField("AUTHORIZED_USER",
-		  DataType.STRING, false);
+          DataType.STRING, false);
 
   public enum InteractionType {
     VerifyUser,

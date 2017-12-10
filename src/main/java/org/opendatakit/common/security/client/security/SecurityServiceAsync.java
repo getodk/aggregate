@@ -23,8 +23,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface SecurityServiceAsync {
 
-	void getUserInfo(AsyncCallback<UserSecurityInfo> callback);
+    void getUserInfo(AsyncCallback<UserSecurityInfo> callback);
 
-	void getRealmInfo(String xsrfString,
-			AsyncCallback<RealmSecurityInfo> callback);
+    void getRealmInfo(String xsrfString,
+            AsyncCallback<RealmSecurityInfo> callback);
 }

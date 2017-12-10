@@ -62,7 +62,7 @@ public class PublishSubTab extends AggregateSubTabBase {
 
   @Override
   public boolean canLeave() {
-	  return true;
+      return true;
   }
 
   private class UpdateAction implements AsyncCallback<ArrayList<FormSummary>> {
@@ -88,15 +88,15 @@ public class PublishSubTab extends AggregateSubTabBase {
   public void update() {
 
     if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER)) {
-    	formsBox.setVisible(true);
-    	publishTable.setVisible(true);
-	    FormServiceAsync formSvc = SecureGWT.getFormService();
-	
-	    // Make the call to the form service.
-	    formSvc.getForms(new UpdateAction());
+        formsBox.setVisible(true);
+        publishTable.setVisible(true);
+        FormServiceAsync formSvc = SecureGWT.getFormService();
+    
+        // Make the call to the form service.
+        formSvc.getForms(new UpdateAction());
     } else {
-    	formsBox.setVisible(false);
-    	publishTable.setVisible(false);
+        formsBox.setVisible(false);
+        publishTable.setVisible(false);
     }
   }
 
@@ -119,7 +119,7 @@ public class PublishSubTab extends AggregateSubTabBase {
     
     // request the update if form is not the "none" form (ie id will equal null)
     if (selectedForm.getId() != null) {
-    	SecureGWT.getServicesAdminService().getExternalServices(selectedForm.getId(), callback);
+        SecureGWT.getServicesAdminService().getExternalServices(selectedForm.getId(), callback);
     }
 
   }

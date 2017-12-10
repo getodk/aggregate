@@ -420,7 +420,7 @@ public class Relation {
 
     @Override
     public Double getDouble(DataField field) {
-    	WrappedBigDecimal d = backingObject.getNumericField(verify(field));
+        WrappedBigDecimal d = backingObject.getNumericField(verify(field));
       return (d == null) ? null : d.doubleValue();
     }
 

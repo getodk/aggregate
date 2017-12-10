@@ -1210,9 +1210,9 @@ public class DataManager {
 
           if (nullIncomingScope) {
             // preserve the scope of the existing entity if the incoming Row didn't specify one.
-        	  rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
-        	  // and update the value
-        	  row.setRowFilterScope(rowFilterScope);
+              rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
+              // and update the value
+              row.setRowFilterScope(rowFilterScope);
           }
 
           // confirm that the user has the ability to read the row

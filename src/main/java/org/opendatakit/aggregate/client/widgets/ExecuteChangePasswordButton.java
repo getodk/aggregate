@@ -113,30 +113,30 @@ public final class ExecuteChangePasswordButton extends AggregateButton implement
   }
 
   public native static void getJson(int requestId, String url, ExecuteChangePasswordButton handler) /*-{
-		var callback = "callback" + requestId;
+        var callback = "callback" + requestId;
 
-		var script = document.createElement("script");
-		script.setAttribute("src", url + callback);
-		script.setAttribute("type", "text/javascript");
+        var script = document.createElement("script");
+        script.setAttribute("src", url + callback);
+        script.setAttribute("type", "text/javascript");
 
-		window[callback] = function(jsonObj) {
-			window[callback + "done"] = true;
-			handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(jsonObj.username, jsonObj.status);
-		}
+        window[callback] = function(jsonObj) {
+            window[callback + "done"] = true;
+            handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(jsonObj.username, jsonObj.status);
+        }
 
-		// JSON change password has 15-second timeout
-		setTimeout(
-				function() {
-					if (!window[callback + "done"]) {
-						handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(null, null);
-					}
+        // JSON change password has 15-second timeout
+        setTimeout(
+                function() {
+                    if (!window[callback + "done"]) {
+                        handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(null, null);
+                    }
 
-					// cleanup
-					document.body.removeChild(script);
-					delete window[callback];
-					delete window[callback + "done"];
-				}, 15000);
+                    // cleanup
+                    document.body.removeChild(script);
+                    delete window[callback];
+                    delete window[callback + "done"];
+                }, 15000);
 
-		document.body.appendChild(script);
+        document.body.appendChild(script);
   }-*/;
 }

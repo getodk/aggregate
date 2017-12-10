@@ -50,7 +50,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
    * @param baseWebServerUrl
    *          base url for the web app (e.g., http://localhost:8080/ODKAggregatePlatform)
    * @param repeatServlet
-   * 		  name of the repeat servlet for repeat data.
+   *          name of the repeat servlet for repeat data.
    * @param separateGpsCoordinates
    *          separate the GPS coordinates of latitude and longitude into
    *          columns
@@ -60,7 +60,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
    *          include GPS accuracy data
    */
   public LinkElementFormatter(String baseWebServerUrl, String repeatServlet,
-		  boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean googleDocsDate) {
+          boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean googleDocsDate) {
     super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, googleDocsDate);
     this.baseWebServerUrl = baseWebServerUrl;
     this.repeatServlet = repeatServlet;
@@ -77,14 +77,14 @@ public class LinkElementFormatter extends BasicElementFormatter {
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
     if( blobSubmission == null || 
-    	(blobSubmission.getAttachmentCount(cc) == 0) ||
-    	(blobSubmission.getContentHash(1, cc) == null) ) {
+        (blobSubmission.getAttachmentCount(cc) == 0) ||
+        (blobSubmission.getContentHash(1, cc) == null) ) {
           row.addFormattedValue(null);
           return;
     }
 
     addFormattedLink( blobSubmission.getValue(), BinaryDataServlet.ADDR,
-			    		ServletConsts.BLOB_KEY,	row );
+                        ServletConsts.BLOB_KEY, row );
   }
 
   @Override
@@ -102,6 +102,6 @@ public class LinkElementFormatter extends BasicElementFormatter {
     }
 
     addFormattedLink( repeat.constructSubmissionKey(), repeatServlet, 
-    					ServletConsts.FORM_ID, row );
+                        ServletConsts.FORM_ID, row );
   }
 }

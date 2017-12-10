@@ -48,8 +48,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.common.security.client.security.SecurityService {
 
   /**
-	 * 
-	 */
+     * 
+     */
   private static final long serialVersionUID = -7360632450727200941L;
 
   @Override

@@ -52,25 +52,25 @@ public class JRDateType extends DateSubmissionType {
    */
   @Override
   public void setValueFromString(String value) {
-	  if ( value == null ) {
-		  setValue(null);
-	  } else {
-		  Date newDate = DateUtils.parseDate(value);
-		  setValue(newDate);
-	  }
+      if ( value == null ) {
+          setValue(null);
+      } else {
+          Date newDate = DateUtils.parseDate(value);
+          setValue(newDate);
+      }
   }
 
-	/**
-	 * Format value for output
-	 * 
-	 * @param elemFormatter
-	 *            the element formatter that will convert the value to the
-	 *            proper format for output
-	 */
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-		elemFormatter.formatDate(getValue(), element, ordinalValue, row);
-	}
+    /**
+     * Format value for output
+     * 
+     * @param elemFormatter
+     *            the element formatter that will convert the value to the
+     *            proper format for output
+     */
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatDate(getValue(), element, ordinalValue, row);
+    }
 
 }

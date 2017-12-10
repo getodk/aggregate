@@ -43,90 +43,90 @@ import org.opendatakit.common.security.User;
  * 
  */
 public final class BinaryContent extends DynamicBase {
-	private static final DataField UNROOTED_FILE_PATH = new DataField(
-			"UNROOTED_FILE_PATH", DataField.DataType.STRING, true, 4096L);
-	private static final DataField CONTENT_TYPE = new DataField("CONTENT_TYPE",
-			DataField.DataType.STRING, true, 80L);
-	private static final DataField CONTENT_LENGTH = new DataField("CONTENT_LENGTH",
-			DataField.DataType.INTEGER, true);
-	private static final DataField CONTENT_HASH = new DataField("CONTENT_HASH", 
-			DataField.DataType.STRING, true);
+    private static final DataField UNROOTED_FILE_PATH = new DataField(
+            "UNROOTED_FILE_PATH", DataField.DataType.STRING, true, 4096L);
+    private static final DataField CONTENT_TYPE = new DataField("CONTENT_TYPE",
+            DataField.DataType.STRING, true, 80L);
+    private static final DataField CONTENT_LENGTH = new DataField("CONTENT_LENGTH",
+            DataField.DataType.INTEGER, true);
+    private static final DataField CONTENT_HASH = new DataField("CONTENT_HASH", 
+            DataField.DataType.STRING, true);
 
-	public final DataField unrootedFilePath;
-	public final DataField contentType;
-	public final DataField contentLength;
-	public final DataField contentHash;
+    public final DataField unrootedFilePath;
+    public final DataField contentType;
+    public final DataField contentLength;
+    public final DataField contentHash;
 
-	/**
-	 * Construct a relation prototype.
-	 * 
-	 * @param databaseSchema
-	 * @param tableName
-	 */
-	public BinaryContent(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName);
-		fieldList.add(unrootedFilePath = new DataField(UNROOTED_FILE_PATH));
-		fieldList.add(contentType = new DataField(CONTENT_TYPE));
-		fieldList.add(contentLength = new DataField(CONTENT_LENGTH));
-		fieldList.add(contentHash = new DataField(CONTENT_HASH));
-	}
+    /**
+     * Construct a relation prototype.
+     * 
+     * @param databaseSchema
+     * @param tableName
+     */
+    public BinaryContent(String databaseSchema, String tableName) {
+        super(databaseSchema, tableName);
+        fieldList.add(unrootedFilePath = new DataField(UNROOTED_FILE_PATH));
+        fieldList.add(contentType = new DataField(CONTENT_TYPE));
+        fieldList.add(contentLength = new DataField(CONTENT_LENGTH));
+        fieldList.add(contentHash = new DataField(CONTENT_HASH));
+    }
 
-	/**
-	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 * 
-	 * @param ref
-	 * @param user
-	 */
-	private BinaryContent(BinaryContent ref, User user) {
-		super(ref, user);
-		unrootedFilePath = ref.unrootedFilePath;
-		contentType = ref.contentType;
-		contentLength = ref.contentLength;
-		contentHash = ref.contentHash;
-	}
+    /**
+     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+     * 
+     * @param ref
+     * @param user
+     */
+    private BinaryContent(BinaryContent ref, User user) {
+        super(ref, user);
+        unrootedFilePath = ref.unrootedFilePath;
+        contentType = ref.contentType;
+        contentLength = ref.contentLength;
+        contentHash = ref.contentHash;
+    }
 
-	// Only called from within the persistence layer.
-	@Override
-	public BinaryContent getEmptyRow(User user) {
-		return new BinaryContent(this, user);
-	}
+    // Only called from within the persistence layer.
+    @Override
+    public BinaryContent getEmptyRow(User user) {
+        return new BinaryContent(this, user);
+    }
 
-	public String getUnrootedFilePath() {
-		return getStringField(unrootedFilePath);
-	}
+    public String getUnrootedFilePath() {
+        return getStringField(unrootedFilePath);
+    }
 
-	public void setUnrootedFilePath(String value) {
-		// allow this to overflow
-		if (!setStringField(unrootedFilePath, value)) {
-			throw new IllegalStateException("overflow on unrootedFilePath");
-		}
-	}
+    public void setUnrootedFilePath(String value) {
+        // allow this to overflow
+        if (!setStringField(unrootedFilePath, value)) {
+            throw new IllegalStateException("overflow on unrootedFilePath");
+        }
+    }
 
-	public String getContentType() {
-		return getStringField(contentType);
-	}
+    public String getContentType() {
+        return getStringField(contentType);
+    }
 
-	public void setContentType(String value) {
-		if (!setStringField(contentType, value)) {
-			throw new IllegalStateException("overflow on contentType");
-		}
-	}
+    public void setContentType(String value) {
+        if (!setStringField(contentType, value)) {
+            throw new IllegalStateException("overflow on contentType");
+        }
+    }
 
-	public Long getContentLength() {
-		return getLongField(contentLength);
-	}
+    public Long getContentLength() {
+        return getLongField(contentLength);
+    }
 
-	public void setContentLength(Long value) {
-		setLongField(contentLength, value);
-	}
+    public void setContentLength(Long value) {
+        setLongField(contentLength, value);
+    }
 
-	public String getContentHash() {
-		return getStringField(contentHash);
-	}
+    public String getContentHash() {
+        return getStringField(contentHash);
+    }
 
-	public void setContentHash(String value) {
-		if ( !setStringField(contentHash, value)) {
-			throw new IllegalStateException("overflow on contentHash");
-		}
-	}
+    public void setContentHash(String value) {
+        if ( !setStringField(contentHash, value)) {
+            throw new IllegalStateException("overflow on contentHash");
+        }
+    }
 }

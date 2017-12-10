@@ -25,37 +25,37 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public final class AcceptSubmissionCheckBox extends AggregateCheckBox implements ValueChangeHandler<Boolean> {
-	
-	private static final String TOOLTIP_TXT = "Allow or disallow form to accept submissions";
-	private static final String HELP_BALLOON_TXT = "Check this box if you want your form to accept " +
-			"submissions.  Otherwise leave unchecked.";
+    
+    private static final String TOOLTIP_TXT = "Allow or disallow form to accept submissions";
+    private static final String HELP_BALLOON_TXT = "Check this box if you want your form to accept " +
+            "submissions.  Otherwise leave unchecked.";
 
-	private final String formId;
-	
-	public AcceptSubmissionCheckBox(String formId, Boolean accept) {
-		super(null, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
-		this.formId = formId;
-		setValue(accept);
-		boolean enabled = AggregateUI.getUI().getUserInfo()
-		.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-		setEnabled(enabled);
-	}
+    private final String formId;
+    
+    public AcceptSubmissionCheckBox(String formId, Boolean accept) {
+        super(null, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
+        this.formId = formId;
+        setValue(accept);
+        boolean enabled = AggregateUI.getUI().getUserInfo()
+        .getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+        setEnabled(enabled);
+    }
 
-	@Override
-	public void onValueChange(ValueChangeEvent<Boolean> event) {
-		super.onValueChange(event);
-		
-		SecureGWT.getFormAdminService().setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Void>() {
-			@Override
-			public void onFailure(Throwable caught) {
-				AggregateUI.getUI().reportError(caught);
-			}
+    @Override
+    public void onValueChange(ValueChangeEvent<Boolean> event) {
+        super.onValueChange(event);
+        
+        SecureGWT.getFormAdminService().setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                AggregateUI.getUI().reportError(caught);
+            }
 
-			@Override
-			public void onSuccess(Void v) {
-				AggregateUI.getUI().clearError();
-			}
-		});
-	}
+            @Override
+            public void onSuccess(Void v) {
+                AggregateUI.getUI().clearError();
+            }
+        });
+    }
 
 }

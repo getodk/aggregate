@@ -31,9 +31,9 @@ public class AggregrateThreadExecutor {
   private static AggregrateThreadExecutor classInstance = null;
 
   public synchronized static void initialize( TaskScheduler taskScheduler ) {
-	  if ( classInstance != null ) throw new IllegalStateException("called after having set the task scheduler");
+      if ( classInstance != null ) throw new IllegalStateException("called after having set the task scheduler");
 
-	  classInstance = new AggregrateThreadExecutor(taskScheduler);
+      classInstance = new AggregrateThreadExecutor(taskScheduler);
   }
 
   public synchronized static AggregrateThreadExecutor getAggregateThreadExecutor() {
@@ -49,7 +49,7 @@ public class AggregrateThreadExecutor {
   }
 
   public void execute(Runnable task) {
-	  exec.schedule(task, new Date(System.currentTimeMillis() + 100));
+      exec.schedule(task, new Date(System.currentTimeMillis() + 100));
   }
 
   /**

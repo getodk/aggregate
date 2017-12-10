@@ -24,49 +24,49 @@ package org.opendatakit.common.persistence;
  */
 public class EntityKey {
 
-	/**
-	 * The relation to which the Entity belongs.
-	 */
-	private CommonFieldsBase relation;
+    /**
+     * The relation to which the Entity belongs.
+     */
+    private CommonFieldsBase relation;
 
-	/**
-	 * The key which corresponds to the Entity the EntityKey refers to.
-	 */
-	private String key;
+    /**
+     * The key which corresponds to the Entity the EntityKey refers to.
+     */
+    private String key;
 
-	/**
-	 * Construct an EntityKey using the given relation name and key.
-	 * 
-	 * @param relationName
-	 *            the name of the relation to which the Entity belongs
-	 * @param key
-	 *            the key which corresponds to the Entity
-	 */
-	public EntityKey(CommonFieldsBase b, String key) {
-		this.relation = b;
-		this.key = key;
-	}
+    /**
+     * Construct an EntityKey using the given relation name and key.
+     * 
+     * @param relationName
+     *            the name of the relation to which the Entity belongs
+     * @param key
+     *            the key which corresponds to the Entity
+     */
+    public EntityKey(CommonFieldsBase b, String key) {
+        this.relation = b;
+        this.key = key;
+    }
 
-	/**
-	 * Returns the relation which this EntityKey refers to.
-	 * 
-	 * @return a String representing the relation name which this EntityKey
-	 *         refers to
-	 */
-	public CommonFieldsBase getRelation() {
-		return relation;
-	}
-	/**
-	 * Returns the key which this EntityKey refers to.
-	 * 
-	 * @return a String representing the key which this EntityKey refers to
-	 */
-	public String getKey() {
-		return key;
-	}
+    /**
+     * Returns the relation which this EntityKey refers to.
+     * 
+     * @return a String representing the relation name which this EntityKey
+     *         refers to
+     */
+    public CommonFieldsBase getRelation() {
+        return relation;
+    }
+    /**
+     * Returns the key which this EntityKey refers to.
+     * 
+     * @return a String representing the key which this EntityKey refers to
+     */
+    public String getKey() {
+        return key;
+    }
 
-	public int compareTo(EntityKey key2) {
-		return key.compareTo(key2.key);
-	}
+    public int compareTo(EntityKey key2) {
+        return key.compareTo(key2.key);
+    }
 
 }

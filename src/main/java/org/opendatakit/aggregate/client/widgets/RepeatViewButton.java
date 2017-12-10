@@ -26,7 +26,7 @@ public final class RepeatViewButton extends AggregateButton implements ClickHand
   private static final String BUTTON_TXT = "View";
   private static final String TOOLTIP_TXT = "View the items";
   private static final String HELP_BALLOON_TXT = "This will open up a smaller popup table with the items" +
-		"you are requesting to view.";
+        "you are requesting to view.";
 
   private final String url;
 

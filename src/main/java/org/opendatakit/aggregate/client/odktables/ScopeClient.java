@@ -31,8 +31,8 @@ import java.io.Serializable;
 public class ScopeClient implements Serializable {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -7603521544860371942L;
 
   public static final ScopeClient EMPTY_SCOPE;

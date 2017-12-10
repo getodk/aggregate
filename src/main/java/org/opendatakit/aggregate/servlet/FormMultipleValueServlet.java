@@ -46,71 +46,71 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class FormMultipleValueServlet extends ServletUtilBase {
-	/**
-	 * Serial number for serialization
-	 */
-	private static final long serialVersionUID = -5870882843863177371L;
+    /**
+     * Serial number for serialization
+     */
+    private static final long serialVersionUID = -5870882843863177371L;
 
-	/**
-	 * URI from base
-	 */
-	public static final String ADDR = "view/formMultipleValue";
+    /**
+     * URI from base
+     */
+    public static final String ADDR = "view/formMultipleValue";
 
-	/**
-	 * Title for generated webpage
-	 */
-	private static final String TITLE_INFO = "Submissions Results: ";
+    /**
+     * Title for generated webpage
+     */
+    private static final String TITLE_INFO = "Submissions Results: ";
 
-	/**
-	 * Handler for HTTP Get request that responds with list of values from a
-	 * repeat
-	 * 
-	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-		CallingContext cc = ContextFactory.getCallingContext(this, req);
+    /**
+     * Handler for HTTP Get request that responds with list of values from a
+     * repeat
+     * 
+     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
+     *      javax.servlet.http.HttpServletResponse)
+     */
+    @Override
+    public void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-		// verify parameters are present
-		String keyString = getParameter(req, ServletConsts.FORM_ID);
-		if (keyString == null) {
-			sendErrorNotEnoughParams(resp);
-			return;
-		}
-		SubmissionKey key = new SubmissionKey(keyString);
+        // verify parameters are present
+        String keyString = getParameter(req, ServletConsts.FORM_ID);
+        if (keyString == null) {
+            sendErrorNotEnoughParams(resp);
+            return;
+        }
+        SubmissionKey key = new SubmissionKey(keyString);
 
-		List<SubmissionKeyPart> parts = key.splitSubmissionKey();
-		Submission sub = null;
-		try {
-			IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-		    if ( !form.hasValidFormDefinition() ) {
-				errorRetreivingData(resp);
-				return; // ill-formed definition
-		    }
-			sub = Submission.fetchSubmission(parts, cc);
+        List<SubmissionKeyPart> parts = key.splitSubmissionKey();
+        Submission sub = null;
+        try {
+            IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+            if ( !form.hasValidFormDefinition() ) {
+                errorRetreivingData(resp);
+                return; // ill-formed definition
+            }
+            sub = Submission.fetchSubmission(parts, cc);
 
-			if (sub != null) {
-				SubmissionElement v = sub.resolveSubmissionKey(parts);
-				RepeatSubmissionType b = (RepeatSubmissionType) v;
+            if (sub != null) {
+                SubmissionElement v = sub.resolveSubmissionKey(parts);
+                RepeatSubmissionType b = (RepeatSubmissionType) v;
 
-				// header info
-				beginBasicHtmlResponse(TITLE_INFO + b.getPropertyName(), resp, cc);
+                // header info
+                beginBasicHtmlResponse(TITLE_INFO + b.getPropertyName(), resp, cc);
 
-				HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp
-						.getWriter(), null, false);
-				formatter.processSubmissionSetPublic(b.getSubmissionSets(), b
-						.getElement(), cc);
+                HtmlFormatter formatter = new HtmlFormatter(form, cc.getServerURL(), resp
+                        .getWriter(), null, false);
+                formatter.processSubmissionSetPublic(b.getSubmissionSets(), b
+                        .getElement(), cc);
 
-				// footer info
-				finishBasicHtmlResponse(resp);
-			}
-		} catch (ODKFormNotFoundException e1) {
-			odkIdNotFoundError(resp);
-		} catch (ODKDatastoreException e) {
-			e.printStackTrace();
-			errorRetreivingData(resp);
-		}
-	}
+                // footer info
+                finishBasicHtmlResponse(resp);
+            }
+        } catch (ODKFormNotFoundException e1) {
+            odkIdNotFoundError(resp);
+        } catch (ODKDatastoreException e) {
+            e.printStackTrace();
+            errorRetreivingData(resp);
+        }
+    }
 }

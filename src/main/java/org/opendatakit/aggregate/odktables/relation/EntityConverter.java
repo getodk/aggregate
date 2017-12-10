@@ -232,7 +232,7 @@ public class EntityConverter {
     String groupReadOnly = entity.getString(DbTable.GROUP_READ_ONLY);
     String groupModify = entity.getString(DbTable.GROUP_MODIFY);
     String groupPrivileged = entity.getString(DbTable.GROUP_PRIVILEGED);
-		
+        
     return new RowFilterScope(defaultAccess, rowOwner, groupReadOnly, groupModify, groupPrivileged);
   }
 

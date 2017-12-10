@@ -54,9 +54,9 @@ public final class FormServiceCursor extends CommonFieldsBase {
   private static final String TABLE_NAME = "_form_service_cursor_2";
 
   private static final DataField URI_MD5_FORM_ID_PROPERTY = new DataField("URI_MD5_FORM_ID",
-	      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+          DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   private static final DataField AURI_SERVICE_PROPERTY = new DataField("AURI_SERVICE",
-	      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+          DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 
   private static final DataField EXT_SERVICE_TYPE_PROPERTY = new DataField("EXT_SERVICE_TYPE",
       DataField.DataType.STRING, false, 200L);
@@ -64,9 +64,9 @@ public final class FormServiceCursor extends CommonFieldsBase {
       DataField.DataType.STRING, false, 80L);
   // some external services need to be prepared before they can receive data...
   private static final DataField IS_EXTERNAL_SERVICE_PREPARED = new DataField("IS_EXTERNAL_SERVICE_PREPARED",
-		  DataField.DataType.BOOLEAN, true);
+          DataField.DataType.BOOLEAN, true);
   private static final DataField OPERATIONAL_STATUS = new DataField("OPERATIONAL_STATUS",
-		  DataField.DataType.STRING, true, 80L);
+          DataField.DataType.STRING, true, 80L);
   private static final DataField RETRY_STATUS = new DataField("RETRY_STATUS",
       DataField.DataType.STRING, true, 80L);
   private static final DataField ESTABLISHMENT_DATETIME = new DataField("ESTABLISHMENT_DATETIME",
@@ -84,12 +84,12 @@ public final class FormServiceCursor extends CommonFieldsBase {
   private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
       DataField.DataType.STRING, true, 4096L);
 
-	/**
-	 * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
-	 *
-	 * @param databaseSchema
-	 * @param tableName
-	 */
+    /**
+     * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
+     *
+     * @param databaseSchema
+     * @param tableName
+     */
   private FormServiceCursor(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(URI_MD5_FORM_ID_PROPERTY);
@@ -108,12 +108,12 @@ public final class FormServiceCursor extends CommonFieldsBase {
     fieldList.add(FORM_ID_PROPERTY);
   }
 
-	/**
-	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 *
-	 * @param ref
-	 * @param user
-	 */
+    /**
+     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+     *
+     * @param ref
+     * @param user
+     */
   private FormServiceCursor(FormServiceCursor ref, User user) {
     super(ref, user);
   }
@@ -121,7 +121,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
   // Only called from within the persistence layer.
   @Override
   public FormServiceCursor getEmptyRow(User user) {
-	return new FormServiceCursor(this, user);
+    return new FormServiceCursor(this, user);
   }
 
   public ExternalServiceType getExternalServiceType() {
@@ -146,17 +146,17 @@ public final class FormServiceCursor extends CommonFieldsBase {
   }
 
   public Boolean isExternalServicePrepared() {
-	  return getBooleanField(IS_EXTERNAL_SERVICE_PREPARED);
+      return getBooleanField(IS_EXTERNAL_SERVICE_PREPARED);
   }
 
   public void setIsExternalServicePrepared(Boolean value) {
-	  setBooleanField(IS_EXTERNAL_SERVICE_PREPARED, value);
+      setBooleanField(IS_EXTERNAL_SERVICE_PREPARED, value);
   }
 
   public OperationalStatus getOperationalStatus() {
-	  String value = getStringField(OPERATIONAL_STATUS);
-	  if ( value == null ) return null;
-	  return OperationalStatus.valueOf(value);
+      String value = getStringField(OPERATIONAL_STATUS);
+      if ( value == null ) return null;
+      return OperationalStatus.valueOf(value);
   }
 
   public void setOperationalStatus(OperationalStatus value) {
@@ -366,7 +366,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
 
       ExternalService obj = constructExternalService(c, form, cc);
       if ( obj != null ) {
-    	  esList.add(obj);
+          esList.add(obj);
       }
 
     }
@@ -435,13 +435,13 @@ public final class FormServiceCursor extends CommonFieldsBase {
          return new REDCapServer(fsc, form, cc);
        case GOOGLE_MAPS_ENGINE:
        {
-    	   // obsolete -- remove the fsc. The parameter table is left as cruft.
-    	    Datastore ds = cc.getDatastore();
-    	    User user = cc.getCurrentUser();
+           // obsolete -- remove the fsc. The parameter table is left as cruft.
+            Datastore ds = cc.getDatastore();
+            User user = cc.getCurrentUser();
 
-    	    ds.deleteEntity(fsc.getEntityKey(), user);
+            ds.deleteEntity(fsc.getEntityKey(), user);
        }
-    	 return null;
+         return null;
        default:
          return null;
        }

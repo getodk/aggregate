@@ -56,35 +56,35 @@ public abstract class QueryBase {
    * @param value
    */
   public void addFilter(FormElementModel attribute, FilterOperation op,
-  						Object value) {
-	if ( attribute.isMetadata() ) {
-		DataField metaField;
-		TopLevelDynamicBase tlb = ((TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
-		switch ( attribute.getType() ) {
-		case META_INSTANCE_ID:
-			metaField = tlb.primaryKey;
-			break;
-		case META_IS_COMPLETE:
-			metaField = tlb.isComplete;
-			break;
-		case META_MODEL_VERSION:
-			metaField = tlb.modelVersion;
-			break;
-		case META_SUBMISSION_DATE:
-			metaField = tlb.submissionDate;
-			break;
-		case META_UI_VERSION:
-			metaField = tlb.uiVersion;
-			break;
-		case META_DATE_MARKED_AS_COMPLETE:
-			metaField = tlb.markedAsCompleteDate;
-		default:
-			throw new IllegalStateException("unknown Metadata type");
-		}
-		query.addFilter(metaField, op, value);
-	} else {
-		query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
-	}
+                        Object value) {
+    if ( attribute.isMetadata() ) {
+        DataField metaField;
+        TopLevelDynamicBase tlb = ((TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
+        switch ( attribute.getType() ) {
+        case META_INSTANCE_ID:
+            metaField = tlb.primaryKey;
+            break;
+        case META_IS_COMPLETE:
+            metaField = tlb.isComplete;
+            break;
+        case META_MODEL_VERSION:
+            metaField = tlb.modelVersion;
+            break;
+        case META_SUBMISSION_DATE:
+            metaField = tlb.submissionDate;
+            break;
+        case META_UI_VERSION:
+            metaField = tlb.uiVersion;
+            break;
+        case META_DATE_MARKED_AS_COMPLETE:
+            metaField = tlb.markedAsCompleteDate;
+        default:
+            throw new IllegalStateException("unknown Metadata type");
+        }
+        query.addFilter(metaField, op, value);
+    } else {
+        query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
+    }
   }
   
   public void addFilterGeoPoint(FormElementModel attr, Long ordinal, FilterOperation op,

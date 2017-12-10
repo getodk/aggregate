@@ -153,11 +153,11 @@ public class SecurityServiceUtil {
     odkTablesExclusions.add(superUserTablesAuth);
     odkTablesExclusions.add(synchronizeTablesAuth);
     odkTablesExclusions.add(new SimpleGrantedAuthority(
-    	      GrantedAuthorityName.ROLE_DATA_OWNER.name()));
+              GrantedAuthorityName.ROLE_DATA_OWNER.name()));
     odkTablesExclusions.add(new SimpleGrantedAuthority(
-  	      GrantedAuthorityName.ROLE_DATA_VIEWER.name()));
+          GrantedAuthorityName.ROLE_DATA_VIEWER.name()));
     odkTablesExclusions.add(new SimpleGrantedAuthority(
-  	      GrantedAuthorityName.ROLE_DATA_COLLECTOR.name()));
+          GrantedAuthorityName.ROLE_DATA_COLLECTOR.name()));
     tablesExclusions = Collections.unmodifiableSet(odkTablesExclusions);
   }
 
@@ -233,10 +233,10 @@ public class SecurityServiceUtil {
     RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
     Set<GrantedAuthority> grants = new HashSet<GrantedAuthority>();
     for ( GrantedAuthorityName grant : userSecurityInfo.getGrantedAuthorities()) {
-    	grants.add(new SimpleGrantedAuthority(grant.name()));
+        grants.add(new SimpleGrantedAuthority(grant.name()));
     }
     for ( GrantedAuthorityName grant : userSecurityInfo.getAssignedUserGroups()) {
-    	grants.add(new SimpleGrantedAuthority(grant.name()));
+        grants.add(new SimpleGrantedAuthority(grant.name()));
     }
     Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
     grants.addAll(auths);

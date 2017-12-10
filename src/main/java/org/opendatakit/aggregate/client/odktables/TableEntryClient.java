@@ -31,8 +31,8 @@ import java.io.Serializable;
 public class TableEntryClient implements Serializable {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -70945438534365403L;
 
   private String tableId;

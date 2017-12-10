@@ -47,8 +47,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class ServerDiffServiceImpl extends RemoteServiceServlet implements ServerDiffService {
 
   /**
-	 *
-	 */
+     *
+     */
   private static final long serialVersionUID = -5472352346806984818L;
 
   @Override

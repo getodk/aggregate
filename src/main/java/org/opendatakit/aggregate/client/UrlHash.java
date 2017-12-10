@@ -124,14 +124,14 @@ public class UrlHash {
   private native static void redirectTo(String url)
   /*-{
       console.error("redirect to " + url);
-		$wnd.location.replace(url);
+        $wnd.location.replace(url);
   }-*/;
 
   private native String getHashFromUrlBar() /*-{
-		return $wnd.location.hash;
+        return $wnd.location.hash;
   }-*/;
 
   private native void putHashToUrlBar(String hash) /*-{
-		$wnd.location.hash = hash;
-	}-*/;
+        $wnd.location.hash = hash;
+    }-*/;
 }

@@ -33,76 +33,76 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date> {
-	/**
-	 * Constructor
-	 * 
-	 * @param propertyName
-	 *            Name of submission element
-	 */
-	protected DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
-		super(backingObject, element);
-	}
+    /**
+     * Constructor
+     * 
+     * @param propertyName
+     *            Name of submission element
+     */
+    protected DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
+        super(backingObject, element);
+    }
 
-	/**
-	 * Parse the value from string format and convert to Date
-	 * 
-	 * @param value
-	 *            string form of the value
-	 * @throws ODKConversionException
-	 */
-	@Override
-	public void setValueFromString(String value) throws ODKConversionException {
-		Date d;
-		try {
-			d = WebUtils.parseDate(value);
-		} catch( IllegalArgumentException e ) {
-			throw new ODKConversionException(e);
-		}
-		setValue(d);
-	}
-	
-	/**
-	 * Helper for updating dates in predefined forms...
-	 * 
-	 * @param date
-	 */
-	public void setValueFromDate(Date date) {
-		setValue(date);
-	}
-	
-	@Override
-	public void getValueFromEntity(CallingContext cc) {
-		Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
-		setValue(value);
-	}
+    /**
+     * Parse the value from string format and convert to Date
+     * 
+     * @param value
+     *            string form of the value
+     * @throws ODKConversionException
+     */
+    @Override
+    public void setValueFromString(String value) throws ODKConversionException {
+        Date d;
+        try {
+            d = WebUtils.parseDate(value);
+        } catch( IllegalArgumentException e ) {
+            throw new ODKConversionException(e);
+        }
+        setValue(d);
+    }
+    
+    /**
+     * Helper for updating dates in predefined forms...
+     * 
+     * @param date
+     */
+    public void setValueFromDate(Date date) {
+        setValue(date);
+    }
+    
+    @Override
+    public void getValueFromEntity(CallingContext cc) {
+        Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
+        setValue(value);
+    }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof DateSubmissionType)) {
-			return false;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		return true;
-	}
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DateSubmissionType)) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public Date getValue() {
-		return backingObject.getDateField(element.getFormDataModel().getBackingKey());
-	}
+    @Override
+    public Date getValue() {
+        return backingObject.getDateField(element.getFormDataModel().getBackingKey());
+    }
 
-	/**
-	 * Set the value of submission field
-	 * 
-	 * @param value
-	 *            value to set
-	 */
-	protected void setValue(Date value) {
-		backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
-	}
+    /**
+     * Set the value of submission field
+     * 
+     * @param value
+     *            value to set
+     */
+    protected void setValue(Date value) {
+        backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
+    }
 
 }

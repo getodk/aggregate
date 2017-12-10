@@ -26,21 +26,21 @@ import org.opendatakit.common.web.CallingContext;
 
 public class StringMetadataType extends MetadataBaseType<String> {
 
-	public StringMetadataType(DynamicCommonFieldsBase backingObject,
-			FormElementModel metadataType, DataField field) {
-		super(backingObject, metadataType, field);
-	}
+    public StringMetadataType(DynamicCommonFieldsBase backingObject,
+            FormElementModel metadataType, DataField field) {
+        super(backingObject, metadataType, field);
+    }
 
-	@Override
-	public String getValue() {
-		return backingObject.getStringField(field);
-	}
+    @Override
+    public String getValue() {
+        return backingObject.getStringField(field);
+    }
 
-	@Override
-	public void formatValue(ElementFormatter elemFormatter, Row row,
-			String ordinalValue, CallingContext cc)
-			throws ODKDatastoreException {
-	    elemFormatter.formatString(getValue(), metadataType, ordinalValue, row);
-	}
+    @Override
+    public void formatValue(ElementFormatter elemFormatter, Row row,
+            String ordinalValue, CallingContext cc)
+            throws ODKDatastoreException {
+        elemFormatter.formatString(getValue(), metadataType, ordinalValue, row);
+    }
 
 }

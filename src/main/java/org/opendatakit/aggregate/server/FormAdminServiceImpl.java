@@ -73,8 +73,8 @@ public class FormAdminServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.form.FormAdminService {
 
   /**
-	 * 
-	 */
+     * 
+     */
   private static final long serialVersionUID = -2513124088714784947L;
 
   @Override

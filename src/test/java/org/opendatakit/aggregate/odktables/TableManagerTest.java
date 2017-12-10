@@ -211,7 +211,7 @@ public class TableManagerTest {
     TableEntry entry = tm.createTable(tableId, T.columns);
     TableEntry one = tm.getTable(tableId);
 
-	 TableEntry entry2 = tm.createTable(tableId2, T.columns);
+     TableEntry entry2 = tm.createTable(tableId2, T.columns);
     tm.createTable(tableId2, T.columns);
     TableEntry two = tm.getTable(tableId2);
 

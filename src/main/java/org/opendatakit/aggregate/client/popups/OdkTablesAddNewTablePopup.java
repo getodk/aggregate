@@ -42,62 +42,62 @@ import com.google.gwt.user.client.ui.HTML;
  */
 public class OdkTablesAddNewTablePopup extends AbstractPopupBase {
 
-	  private TableDefinitionClient tableDef;
+      private TableDefinitionClient tableDef;
 
-	  // textbox for the tableid
-	  private OdkTablesTableIdBox idBox;
+      // textbox for the tableid
+      private OdkTablesTableIdBox idBox;
 
-	  public OdkTablesAddNewTablePopup() {
-	    super();
+      public OdkTablesAddNewTablePopup() {
+        super();
 
-	    AggregateButton addTableButton = new OdkTablesAddTableButton();
-	    addTableButton.addClickHandler(new ExecuteAdd());
+        AggregateButton addTableButton = new OdkTablesAddTableButton();
+        addTableButton.addClickHandler(new ExecuteAdd());
 
-	    idBox = new OdkTablesTableIdBox(this);
+        idBox = new OdkTablesTableIdBox(this);
 
-	    FlexTable layout = new FlexTable();
+        FlexTable layout = new FlexTable();
 
-	    HTML message = new HTML("You are adding a new table.");
-	    layout.setWidget(0, 0, message);
-	    layout.setWidget(1, 0, new HTML("TableId:"));
+        HTML message = new HTML("You are adding a new table.");
+        layout.setWidget(0, 0, message);
+        layout.setWidget(1, 0, new HTML("TableId:"));
        layout.setWidget(1, 1, idBox);
-	    layout.setWidget(2, 1, addTableButton);
-	    layout.setWidget(2, 2, new ClosePopupButton(this));
+        layout.setWidget(2, 1, addTableButton);
+        layout.setWidget(2, 2, new ClosePopupButton(this));
 
-	    setWidget(layout);
-	  }
+        setWidget(layout);
+      }
 
-	  private class ExecuteAdd implements ClickHandler {
+      private class ExecuteAdd implements ClickHandler {
 
-	    @Override
-	    public void onClick(ClickEvent event) {
+        @Override
+        public void onClick(ClickEvent event) {
 
-	      String tableId = idBox.getValue();
+          String tableId = idBox.getValue();
 
          ArrayList<ColumnClient> columns = new ArrayList<ColumnClient>(0);
          tableDef = new TableDefinitionClient(tableId, columns);
 
-	      // Set up the callback object.
-	      AsyncCallback<TableEntryClient> callback = new AsyncCallback<TableEntryClient>() {
-	        @Override
-	        public void onFailure(Throwable caught) {
-	          AggregateUI.getUI().reportError(caught);
-	        }
+          // Set up the callback object.
+          AsyncCallback<TableEntryClient> callback = new AsyncCallback<TableEntryClient>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              AggregateUI.getUI().reportError(caught);
+            }
 
-	        @Override
-	        public void onSuccess(TableEntryClient table) {
-	          AggregateUI.getUI().clearError();
+            @Override
+            public void onSuccess(TableEntryClient table) {
+              AggregateUI.getUI().clearError();
 
 
-	          AggregateUI.getUI().getTimer().refreshNow();
-	        }
-	      };
-	      Window.alert("before call");
-	      // Make the call to the form service. null tableId so that the
-	      // server knows to generate a random UUID.
-	      SecureGWT.getServerTableService().createTable(null,
-	    		  tableDef, callback);
-	      hide();
-	    }
-	  }
+              AggregateUI.getUI().getTimer().refreshNow();
+            }
+          };
+          Window.alert("before call");
+          // Make the call to the form service. null tableId so that the
+          // server knows to generate a random UUID.
+          SecureGWT.getServerTableService().createTable(null,
+                  tableDef, callback);
+          hide();
+        }
+      }
 }

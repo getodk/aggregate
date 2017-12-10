@@ -33,42 +33,42 @@ import org.opendatakit.common.security.User;
  */
 public final class RefBlob extends DynamicDocumentBase {
 
-	private static final DataField VALUE = new DataField("VALUE",DataField.DataType.BINARY, false);
-	public final DataField value;
-	
-	/**
-	 * Construct a relation prototype.
-	 * 
-	 * @param databaseSchema
-	 * @param tableName
-	 */
-	public RefBlob(String databaseSchema, String tableName) {
-		super(databaseSchema, tableName);
-		fieldList.add(value = new DataField(VALUE));
-	}
+    private static final DataField VALUE = new DataField("VALUE",DataField.DataType.BINARY, false);
+    public final DataField value;
+    
+    /**
+     * Construct a relation prototype.
+     * 
+     * @param databaseSchema
+     * @param tableName
+     */
+    public RefBlob(String databaseSchema, String tableName) {
+        super(databaseSchema, tableName);
+        fieldList.add(value = new DataField(VALUE));
+    }
 
-	/**
-	 * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-	 * 
-	 * @param ref
-	 * @param user
-	 */
-	private RefBlob(RefBlob ref, User user) {
-		super(ref, user);
-		value = ref.value;
-	}
+    /**
+     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+     * 
+     * @param ref
+     * @param user
+     */
+    private RefBlob(RefBlob ref, User user) {
+        super(ref, user);
+        value = ref.value;
+    }
 
-	// Only called from within the persistence layer.
-	@Override
-	public RefBlob getEmptyRow(User user) {
-		return new RefBlob(this, user);
-	}
+    // Only called from within the persistence layer.
+    @Override
+    public RefBlob getEmptyRow(User user) {
+        return new RefBlob(this, user);
+    }
 
-	public byte[] getValue() {
-		return getBlobField(value);
-	}
-	
-	public void setValue(byte[] blob) {
-		setBlobField(value, blob);
-	}
+    public byte[] getValue() {
+        return getBlobField(value);
+    }
+    
+    public void setValue(byte[] blob) {
+        setBlobField(value, blob);
+    }
 }

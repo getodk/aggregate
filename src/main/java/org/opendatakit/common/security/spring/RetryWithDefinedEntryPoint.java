@@ -26,9 +26,9 @@ import org.springframework.security.web.access.channel.AbstractRetryEntryPoint;
  */
 public class RetryWithDefinedEntryPoint extends AbstractRetryEntryPoint {
 
-	String scheme;
-	int port;
-	
+    String scheme;
+    int port;
+    
     public RetryWithDefinedEntryPoint(String scheme, int port) {
         super(scheme, (scheme.contains("s") ? 443 : 80)); // standard port...
         this.scheme = scheme;
@@ -36,7 +36,7 @@ public class RetryWithDefinedEntryPoint extends AbstractRetryEntryPoint {
     }
 
     protected Integer getMappedPort(Integer mapFromPort) {
-    	// don't care about the origin port -- we only have one port pair.
+        // don't care about the origin port -- we only have one port pair.
         return port;
     }
 }

@@ -91,7 +91,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
  * @throws ODKDatastoreException 
    */
   public abstract void getValueFromEntity(CallingContext cc)
-  					throws ODKDatastoreException;
+                    throws ODKDatastoreException;
   
   /**
    * Add submission field value to JsonObject
@@ -101,7 +101,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
   
   @Override
   public final boolean isBinary() {
-	  return (element.getFormDataModel().getElementType() == ElementType.REF_BLOB);
+      return (element.getFormDataModel().getElementType() == ElementType.REF_BLOB);
   }
   
   /**
@@ -148,7 +148,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T>{
     
     SubmissionFieldBase<?> other = (SubmissionFieldBase<?>) obj;
     return (element == null ? (other.element == null) :
-    	(other.element != null && element.equals(other.element)));    
+        (other.element != null && element.equals(other.element)));    
   }
 
   /**

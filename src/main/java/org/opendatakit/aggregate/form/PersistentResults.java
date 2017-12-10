@@ -300,13 +300,13 @@ public class PersistentResults {
   public void deleteFilterGroup(CallingContext cc) throws ODKDatastoreException {
     if(getFilterGroupUri() != null) {
       try {
-   	    SubmissionFilterGroup subFilterGroup = 
-   		  SubmissionFilterGroup.getFilterGroup(getFilterGroupUri(), cc);
+        SubmissionFilterGroup subFilterGroup = 
+          SubmissionFilterGroup.getFilterGroup(getFilterGroupUri(), cc);
         subFilterGroup.delete(cc);
       } catch ( ODKEntityNotFoundException e ) {
-    	  // this should be fine to ignore 
-    	  // -- it likely means the filter group was already deleted.
-    	  e.printStackTrace();
+          // this should be fine to ignore 
+          // -- it likely means the filter group was already deleted.
+          e.printStackTrace();
       }
     }
   }

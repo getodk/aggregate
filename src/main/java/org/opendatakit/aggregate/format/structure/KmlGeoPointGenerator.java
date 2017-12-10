@@ -219,7 +219,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
     String geopoint = BasicConsts.EMPTY_STRING;
     if (gp != null) {
       if (gp.getLatitude() != null && gp.getLongitude() != null) {
-    	  WrappedBigDecimal altitude;
+          WrappedBigDecimal altitude;
         if (gp.getAltitude() == null) {
           altitude = WrappedBigDecimal.fromDouble(0.0);
         } else {

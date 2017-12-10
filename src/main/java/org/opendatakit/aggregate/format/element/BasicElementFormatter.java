@@ -86,8 +86,8 @@ public class BasicElementFormatter implements ElementFormatter {
   }
   
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-	  SubmissionKey key = blobSubmission.getValue();
-	  basicStringConversion(key.toString(), row);
+      SubmissionKey key = blobSubmission.getValue();
+      basicStringConversion(key.toString(), row);
   }
 
   public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row) {
@@ -95,17 +95,17 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue, Row row) {
-	StringBuilder b = new StringBuilder();
+    StringBuilder b = new StringBuilder();
 
-	boolean first = true;
-	for ( String s : choices ) {
-		if ( !first ) {
-			b.append(BasicConsts.SPACE);
-		}
-		first = false;
-		b.append(s);
-	}
-	basicStringConversion(b.toString(), row);
+    boolean first = true;
+    for ( String s : choices ) {
+        if ( !first ) {
+            b.append(BasicConsts.SPACE);
+        }
+        first = false;
+        b.append(s);
+    }
+    basicStringConversion(b.toString(), row);
   }
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
@@ -126,12 +126,12 @@ public class BasicElementFormatter implements ElementFormatter {
 
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     if (date != null) {
-    	GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-    	g.setTime(date);
+        GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+        g.setTime(date);
         row.addFormattedValue(String.format(FormatConsts.TIME_FORMAT_STRING, 
-							        		g.get(Calendar.HOUR_OF_DAY), 
-							        		g.get(Calendar.MINUTE),
-							        		g.get(Calendar.SECOND)));
+                                            g.get(Calendar.HOUR_OF_DAY), 
+                                            g.get(Calendar.MINUTE),
+                                            g.get(Calendar.SECOND)));
     } else {
         row.addFormattedValue(null);
     }
@@ -158,11 +158,11 @@ public class BasicElementFormatter implements ElementFormatter {
         String coordVal = coordinate.getLatitude().toString() + BasicConsts.COMMA
             + BasicConsts.SPACE + coordinate.getLongitude().toString();
         if (includeAltitude) {
-        	coordVal += BasicConsts.COMMA
+            coordVal += BasicConsts.COMMA
             + BasicConsts.SPACE + coordinate.getAltitude().toString();
         }
         if (includeAccuracy) {
-        	coordVal += BasicConsts.COMMA
+            coordVal += BasicConsts.COMMA
             + BasicConsts.SPACE + coordinate.getAccuracy().toString();
         }
         row.addFormattedValue(coordVal);

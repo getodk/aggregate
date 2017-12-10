@@ -78,7 +78,7 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
   protected abstract void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
   
   protected abstract void processSubmissionSetSegment(Collection<? extends SubmissionSet> submissions,
-		  FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
+          FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
   
   protected abstract void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
    

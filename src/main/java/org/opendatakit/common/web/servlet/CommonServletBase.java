@@ -164,19 +164,19 @@ public abstract class CommonServletBase extends HttpServlet {
   }
 
   protected PrintWriter beginBasicHtmlResponsePreamble(String headContent, HttpServletResponse resp, CallingContext cc) throws IOException {
-	    resp.addHeader(HOST_HEADER, cc.getServerURL());
-	    resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
+        resp.addHeader(HOST_HEADER, cc.getServerURL());
+        resp.addHeader(HtmlConsts.X_FRAME_OPTIONS, HtmlConsts.X_FRAME_SAMEORIGIN);
 
-	    resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
-	    resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
-	    PrintWriter out = resp.getWriter();
-	    out.write(HtmlConsts.HTML_OPEN);
-	    out.write("<link rel=\"icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
+        resp.setContentType(HtmlConsts.RESP_TYPE_HTML);
+        resp.setCharacterEncoding(HtmlConsts.UTF8_ENCODE);
+        PrintWriter out = resp.getWriter();
+        out.write(HtmlConsts.HTML_OPEN);
+        out.write("<link rel=\"icon\" href=\"" + cc.getWebApplicationURL("favicon.ico") + "\">");
 
-	    out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlStrUtil.wrapWithHtmlTags(
-	        HtmlConsts.TITLE, applicationName)));
-	    out.write(HtmlConsts.BODY_OPEN);
-	    return out;
+        out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.HEAD, headContent + HtmlStrUtil.wrapWithHtmlTags(
+            HtmlConsts.TITLE, applicationName)));
+        out.write(HtmlConsts.BODY_OPEN);
+        return out;
   }
   /**
    * Generate HTML header string for web responses. NOTE: beginBasicHtmlResponse
@@ -193,7 +193,7 @@ public abstract class CommonServletBase extends HttpServlet {
    */
   protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
               CallingContext cc) throws IOException {
-	PrintWriter out = beginBasicHtmlResponsePreamble(headContent, resp, cc);
+    PrintWriter out = beginBasicHtmlResponsePreamble(headContent, resp, cc);
     out.write(HtmlStrUtil.createBeginTag(HtmlConsts.CENTERING_DIV));
     out.write(HtmlStrUtil.wrapWithHtmlTags(HtmlConsts.H1, pageName));
     out.write(HtmlStrUtil.createEndTag(HtmlConsts.DIV));

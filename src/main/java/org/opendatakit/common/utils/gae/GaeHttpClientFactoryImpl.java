@@ -40,8 +40,8 @@ public class GaeHttpClientFactoryImpl implements HttpClientFactory {
 
   @Override
   public CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig) {
-	  
-	  return HttpClientBuilder.create().setConnectionManager(new GaeHttpClientConnectionManager(socketConfig, connectionConfig, requestConfig)).build();
+      
+      return HttpClientBuilder.create().setConnectionManager(new GaeHttpClientConnectionManager(socketConfig, connectionConfig, requestConfig)).build();
   }
 
   @Override
