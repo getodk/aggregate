@@ -4,6 +4,9 @@ jobs:
     working_directory: ~/src
     docker:
       - image: circleci/openjdk:latest
+    environment:
+        # Least invasive change to resolve finished with non-zero exit value 137 error
+        _JAVA_OPTIONS: "-Xmx1024m"
     steps:
       - checkout
       - restore_cache:
