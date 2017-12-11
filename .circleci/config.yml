@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/src
+    docker:
+      - image: circleci/openjdk:latest
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}
+      - run:
+          name: Configure build
+          command: cp gradle.properties.example gradle.properties
+      - run: ./gradlew check -x test war
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/src/.gradle
+          key: jars-{{ checksum "build.gradle" }}
+      - store_artifacts:
+          path: build/reports
+          destination: reports
+      - store_artifacts:
+          path: build/libs
+          destination: libs
