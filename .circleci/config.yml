@@ -11,7 +11,8 @@ jobs:
       - run:
           name: Configure build
           command: cp gradle.properties.example gradle.properties
-      - run: ./gradlew check -x test war --stacktrace --info --no-daemon
+      - run: ./gradlew check -x test
+      - run: ./gradlew war -x test 
       - save_cache:
           paths:
             - ~/.gradle
