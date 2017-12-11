@@ -38,6 +38,8 @@ import org.opendatakit.aggregate.client.preferences.PreferenceService;
 import org.opendatakit.aggregate.client.preferences.PreferenceServiceAsync;
 import org.opendatakit.aggregate.client.submission.SubmissionService;
 import org.opendatakit.aggregate.client.submission.SubmissionServiceAsync;
+import org.opendatakit.aggregate.databaseRepair.DatabaseRepairService;
+import org.opendatakit.aggregate.databaseRepair.DatabaseRepairServiceAsync;
 import org.opendatakit.common.security.client.security.SecurityService;
 import org.opendatakit.common.security.client.security.SecurityServiceAsync;
 import org.opendatakit.common.security.client.security.admin.SecurityAdminService;
@@ -63,7 +65,8 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 public class SecureGWT {
   public enum ServiceType {
     FILTER, FORM, FORM_ADMIN, PREFERENCE, SECURITY, SECURITY_ADMIN, SERVICES_ADMIN, SUBMISSION,
-    ODK_TABLES_ADMIN, ODK_TABLES_DATA, ODK_TABLES_DIFF, ODK_TABLES_ACL, ODK_TABLES_TABLE;
+    ODK_TABLES_ADMIN, ODK_TABLES_DATA, ODK_TABLES_DIFF, ODK_TABLES_ACL, ODK_TABLES_TABLE,
+    DATABASE_REPAIR;
   }
 
   private static SecureGWT singleton = null;
@@ -102,6 +105,8 @@ public class SecureGWT {
   private ServerTableACLServiceAsync serverTableACLServiceAsync = null;
   private ServerTableServiceAsync serverTableServiceAsync = null;
 
+  private DatabaseRepairServiceAsync databaseRepairServiceAsync = null;
+
   private SecureGWT() {
     preferenceServiceAsync = (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
     securityServiceAsync = (SecurityServiceAsync) create(ServiceType.SECURITY);
@@ -117,7 +122,8 @@ public class SecureGWT {
     serverDiffServiceAsync = (ServerDiffServiceAsync) create(ServiceType.ODK_TABLES_DIFF);
     serverTableACLServiceAsync = (ServerTableACLServiceAsync) create(ServiceType.ODK_TABLES_ACL);
     serverTableServiceAsync = (ServerTableServiceAsync) create(ServiceType.ODK_TABLES_TABLE);
-  };
+    databaseRepairServiceAsync = (DatabaseRepairServiceAsync) create(ServiceType.DATABASE_REPAIR);
+  }
 
   public PreferenceServiceAsync getPreferenceServiceAsync() {
     return preferenceServiceAsync;
@@ -220,8 +226,11 @@ public class SecureGWT {
         obj = GWT.create(ServerTableACLService.class);
         break;
     case ODK_TABLES_TABLE:
-        obj = GWT.create(ServerTableService.class);
-        break;
+      obj = GWT.create(ServerTableService.class);
+      break;
+    case DATABASE_REPAIR:
+      obj = GWT.create(DatabaseRepairService.class);
+      break;
     default:
       throw new IllegalStateException("Unrecognized type " + type.toString());
     }
@@ -292,5 +301,12 @@ public class SecureGWT {
 
   public static ServerTableServiceAsync getServerTableService() {
       return get().serverTableServiceAsync;
+  }
+  public static DatabaseRepairServiceAsync getDatabaseRepairService() {
+    return get().getDatabaseRepairServiceAsync();
+  }
+
+  public DatabaseRepairServiceAsync getDatabaseRepairServiceAsync() {
+    return databaseRepairServiceAsync;
   }
 }

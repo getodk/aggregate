@@ -65,7 +65,7 @@ public class FormInfoTable extends TopLevelDynamicBase {
     
     private static FormInfoTable relation = null;
     
-    static synchronized final FormInfoTable assertRelation(CallingContext cc) throws ODKDatastoreException {
+    public static synchronized final FormInfoTable assertRelation(CallingContext cc) throws ODKDatastoreException {
         if ( relation == null ) {
             FormInfoTable relationPrototype;
             Datastore ds = cc.getDatastore();

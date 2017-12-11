@@ -537,6 +537,16 @@
 	    <url-pattern>/remote_api</url-pattern>
 	</servlet-mapping>
 
+  <servlet>
+    <servlet-name>databaseRepairServiceImpl</servlet-name>
+    <servlet-class>org.opendatakit.aggregate.databaseRepair.DatabaseRepairServiceImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>databaseRepairServiceImpl</servlet-name>
+    <url-pattern>/aggregateui/databaserepair</url-pattern>
+  </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>

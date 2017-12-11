@@ -28,6 +28,7 @@
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.opendatakit.aggregate.client.AggregateUI'/>
    
+  <source path='databaseRepair'/>
   <source path='client'/>
   <source path='client/exception'/>
   <source path='client/filter'/>

@@ -37,7 +37,8 @@ public enum SubTabs implements Serializable {
     VIEWTABLE("View Table", "viewTable"),
    MANAGE_INSTANCE_FILES("Manage Instance Files", "manageInstanceFiles"),
     MANAGE_TABLE_ID_FILES("Manage Table Files", "manageTableFiles"),
-   MANAGE_APP_LEVEL_FILES("Manage App Level Files", "manageAppLevelFiles");
+   MANAGE_APP_LEVEL_FILES("Manage App Level Files", "manageAppLevelFiles"),
+  DATABASE_REPAIR("Database Repair", "databaseRepair");
 
    private String tabLabel;
    private String hashString;
