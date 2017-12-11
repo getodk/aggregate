@@ -4,6 +4,9 @@ jobs:
     working_directory: ~/src
     docker:
       - image: circleci/openjdk:latest
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx512m -XX:+HeapDumpOnOutOfMemoryError"'
+      _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
     steps:
       - checkout
       - restore_cache:
@@ -11,8 +14,7 @@ jobs:
       - run:
           name: Configure build
           command: cp gradle.properties.example gradle.properties
-      - run: ./gradlew check -x test
-      - run: ./gradlew war -x test 
+      - run: ./gradlew check war -x test
       - save_cache:
           paths:
             - ~/.gradle
