@@ -6,12 +6,23 @@ jobs:
       - image: circleci/openjdk:latest
     steps:
       - checkout
+      - run:
+          name: Install checkout requirements
+          command: |
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get install git-lfs
+            git lfs install
+      - run:
+          name: Checkout binaries
+          command: git lfs pull
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
       - run:
           name: Configure build
           command: cp gradle.properties.example gradle.properties
-      - run: ./gradlew check -x test war
+      # breaking up the commands prevents out of memory errors on CircleCI
+      - run: ./gradlew check -x test
+      - run: ./gradlew war -x test
       - save_cache:
           paths:
             - ~/.gradle

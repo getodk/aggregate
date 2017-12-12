@@ -25,6 +25,8 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 1. Fork the Aggregate project ([why and how to fork](https://help.github.com/articles/fork-a-repo/))
 
+1. Install [Git LFS](https://git-lfs.github.com/)
+
 1. Clone your fork of the project locally. At the command line:
 
         git clone https://github.com/YOUR-GITHUB-USERNAME/aggregate
@@ -164,6 +166,8 @@ If you're ready to contribute code, see [the contribution guide](CONTRIBUTING.md
 The best way to help us test is to build from source! We are currently focusing on stabilizing the build process.
 
 ## Troubleshooting
+
+* We enabled Git LFS on the Aggregate codebase and reduced the repo size from 700 MB to 34 MB. No code was changed, but if you cloned before December 11th, 2017, you'll need to reclone the project.
 
 * If you get an **Invalid Gradle JDK configuration found** error importing the code, you might not have set the `JAVA_HOME` environment variable. Try [these solutions](https://stackoverflow.com/questions/32654016/).
 
