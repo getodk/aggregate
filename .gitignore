@@ -8,3 +8,5 @@ war
 installer/appEngineSDK.zip
 gradle.properties
 logs
+pg_data
+

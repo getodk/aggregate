@@ -35,6 +35,19 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database-configurations.md).
 
+### PostgreSQL with Docker using Docker Compose
+
+1. Install [Docker](https://www.docker.com) and [Docker Compose](https://docs.docker.com/compose)
+
+1. To start the development server run the gradle task `postgresqlComposeUp` with the command: `./gradlew postgresqlComposeUp`
+    * Make sure port **5432** is not used by any other service in your computer. You can change this editing the `ports` section of the `dev_db/postgresql/docker-compose-yml` configuration file. Be sure to check the documentation: [Compose file version 3 reference - Ports section](https://docs.docker.com/compose/compose-file/#ports).
+
+1. To stop the server run the gradle task `postgresqlComposeDown` with the command: `./gradlew postgresqlComposeDown`.
+
+Alternatively, you can use the `docker-compose` command line tool to start & stop the development server. All configuration files regarding the development server are at `dev_db/postgresql` path. Check the [online documentation](https://docs.docker.com/compose).   
+
+### Local PostgreSQL server
+
 1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later.
     * If you are a macOS user, we recommend [Postgres.app](http://postgresapp.com/). If you are a Windows user, we recommend [BigSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp).
 
