@@ -8,3 +8,4 @@ war
 installer/appEngineSDK.zip
 gradle.properties
 logs
+.settings
