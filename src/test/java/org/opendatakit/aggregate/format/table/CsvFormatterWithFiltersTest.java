@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -26,23 +27,20 @@ public class CsvFormatterWithFiltersTest {
 
   private IForm form = mock(IForm.class);
   private StringWriter actual;
-  private PrintWriter pr;
-  private Submission s;
-  private Row row;
-  private ArrayList<String> testList = new ArrayList<String>();
-  private ArrayList<Submission> subs = new ArrayList<Submission>();
-  CsvFormatterWithFilters csv;
+  private ArrayList<String> testList = new ArrayList<>();
+  private ArrayList<Submission> subs = new ArrayList<>();
+  private CsvFormatterWithFilters csv;
 
   @SuppressWarnings("unchecked")
   @Before
   public void setup() throws ODKDatastoreException {
     actual = new StringWriter();
-    pr = new PrintWriter(actual);
+    PrintWriter pr = new PrintWriter(actual);
     testList.clear();
     
     subs.clear();
-    s = mock(Submission.class);
-    row = mock(Row.class);
+    Submission s = mock(Submission.class);
+    Row row = mock(Row.class);
     when(row.getFormattedValues()).thenReturn(testList);
     when(s.getFormattedValuesAsRow((List<FormElementNamespace>)any(), 
         (List<FormElementModel>)any(), 
@@ -65,9 +63,7 @@ public class CsvFormatterWithFiltersTest {
   }
 
   private void assertRowCSVOutput(String expected, String ... values) throws ODKDatastoreException {
-    for (String value: values) {
-      testList.add(value);
-    }
+    Collections.addAll(testList, values);
     csv.processSubmissionSegment(subs, null);
     Assert.assertEquals(expected, actual.toString());
   }
