@@ -11,6 +11,7 @@ buildscript {
   dependencies {
     classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.6'
     classpath 'de.undercouch:gradle-download-task:3.3.0'
+    classpath "com.avast.gradle:gradle-docker-compose-plugin:0.6.8"
   }
 }
 
@@ -25,6 +26,7 @@ plugins {
 apply plugin: 'gwt'
 apply plugin: 'de.undercouch.download'
 apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
+apply plugin: 'docker-compose'
 
 String getVersionName() {
   def stdout = new ByteArrayOutputStream()
@@ -324,4 +326,10 @@ buildConfig {
 // Required to use fileExtensions property in checkstyle file
 checkstyle {
   toolVersion = '7.6.1'
+}
+
+dockerCompose {
+  postgresql {
+    useComposeFiles = ['db/postgresql/docker-compose.yml']
+  }
 }
