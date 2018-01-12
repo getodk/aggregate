@@ -35,7 +35,7 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database-configurations.md).
 
-### PostgreSQL with Docker using Docker Compose
+### PostgreSQL with Docker
 
 1. Install [Docker](https://www.docker.com) and [Docker Compose](https://docs.docker.com/compose)
 
