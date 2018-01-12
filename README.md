@@ -40,11 +40,11 @@ Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQ
 1. Install [Docker](https://www.docker.com) and [Docker Compose](https://docs.docker.com/compose)
 
 1. To start the development server run the gradle task `postgresqlComposeUp` with the command: `./gradlew postgresqlComposeUp`
-    * Make sure port **5432** is not used by any other service in your computer. You can change this editing the `ports` section of the `dev_db/postgresql/docker-compose-yml` configuration file. Be sure to check the documentation: [Compose file version 3 reference - Ports section](https://docs.docker.com/compose/compose-file/#ports).
+    * Make sure port **5432** is not used by any other service in your computer. You can change this editing the `ports` section of the `db/postgresql/docker-compose.yml` configuration file. Be sure to check the documentation: [Compose file version 3 reference - Ports section](https://docs.docker.com/compose/compose-file/#ports).
 
 1. To stop the server run the gradle task `postgresqlComposeDown` with the command: `./gradlew postgresqlComposeDown`.
 
-Alternatively, you can use the `docker-compose` command line tool to start & stop the development server. All configuration files regarding the development server are at `dev_db/postgresql` path. Check the [online documentation](https://docs.docker.com/compose).   
+Alternatively, you can use the `docker-compose` command line tool to start & stop the development server. All configuration files regarding the development server are at `db/postgresql` path. Check the [online documentation](https://docs.docker.com/compose).   
 
 ### Local PostgreSQL server
 
