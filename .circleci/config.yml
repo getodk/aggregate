@@ -4,13 +4,17 @@ jobs:
     working_directory: ~/src
     docker:
       - image: circleci/openjdk:latest
+      - image: circleci/postgres:9.6
+        environment:
+        - POSTGRES_USER=circleci
+        - POSTGRES_DB=circleci
     steps:
       - checkout
       - run:
-          name: Install checkout requirements
+          name: Install requirements
           command: |
             curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get install git-lfs
+            sudo apt-get install postgresql-client git-lfs
             git lfs install
       - run:
           name: Checkout binaries
@@ -18,11 +22,14 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
       - run:
+          name: Setup database
+          command: psql --host localhost --file db/test/postgresql/init.sql
+      - run:
           name: Configure build
           command: cp gradle.properties.example gradle.properties
       # breaking up the commands prevents out of memory errors on CircleCI
-      - run: ./gradlew check -x test
-      - run: ./gradlew war -x test
+      - run: ./gradlew check
+      - run: ./gradlew war
       - save_cache:
           paths:
             - ~/.gradle
@@ -34,3 +41,5 @@ jobs:
       - store_artifacts:
           path: build/libs
           destination: libs
+      - store_test_results:
+          path: build/test-results
