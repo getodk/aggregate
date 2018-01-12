@@ -328,6 +328,6 @@ checkstyle {
 
 dockerCompose {
   postgresql {
-    useComposeFiles = ['dev_db/postgresql/docker-compose.yml']
+    useComposeFiles = ['db/postgresql/docker-compose.yml']
   }
 }
