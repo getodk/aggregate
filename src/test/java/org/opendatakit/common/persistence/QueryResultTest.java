@@ -14,6 +14,9 @@
 package org.opendatakit.common.persistence;
 
 import static org.junit.Assert.assertEquals;
+import static org.opendatakit.common.persistence.Query.Direction.*;
+import static org.opendatakit.common.persistence.Query.FilterOperation.*;
+import static org.opendatakit.common.persistence.QueryResultTest.MyRelation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -47,12 +50,12 @@ public class QueryResultTest {
 
         CallingContext cc = TestContextFactory.getCallingContext();
         
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         
         System.out.println("dropping the large dataset");
         cc.getDatastore().dropRelation(rel, cc.getCurrentUser());// drop it, in case prior test was messed up...
         
-        rel = MyRelation.assertRelation(cc);
+        rel = assertRelation(cc);
         
         System.out.println("writing the large dataset");
         
@@ -75,7 +78,7 @@ public class QueryResultTest {
 
         CallingContext cc = TestContextFactory.getCallingContext();
         
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         
         System.out.println("dropping the large dataset");
         cc.getDatastore().dropRelation(rel, cc.getCurrentUser());// drop it, in case prior test was messed up...
@@ -103,22 +106,22 @@ public class QueryResultTest {
             
             for ( int i = 0 ; i < SET_SIZE ; ++i ) {
                 MyRelation element = ds.createEntityUsingRelation(rel, user);
-                element.setStringField(MyRelation.fieldStr, str);
-                element.setLongField(MyRelation.fieldInt, Long.valueOf(i));
-                element.setNumericField(MyRelation.fieldDbl, bd);
-                element.setDateField(MyRelation.fieldDate, d);
-                element.setBooleanField(MyRelation.fieldBool, b);
+                element.setStringField(fieldStr, str);
+                element.setLongField(fieldInt, Long.valueOf(i));
+                element.setNumericField(fieldDbl, bd);
+                element.setDateField(fieldDate, d);
+                element.setBooleanField(fieldBool, b);
                 
                 ds.putEntity(element, user);
             }
             
             for ( int i = 0 ; i < SET_SIZE ; ++i ) {
                 MyRelation element = ds.createEntityUsingRelation(rel, user);
-                element.setStringField(MyRelation.fieldStr, str);
-                element.setLongField(MyRelation.fieldInt, Long.valueOf(i));
-                element.setNumericField(MyRelation.fieldDbl, new WrappedBigDecimal(Integer.toString(i)));
-                element.setDateField(MyRelation.fieldDate, d);
-                element.setBooleanField(MyRelation.fieldBool, b);
+                element.setStringField(fieldStr, str);
+                element.setLongField(fieldInt, Long.valueOf(i));
+                element.setNumericField(fieldDbl, new WrappedBigDecimal(Integer.toString(i)));
+                element.setDateField(fieldDate, d);
+                element.setBooleanField(fieldBool, b);
                 
                 ds.putEntity(element, user);
             }
@@ -169,7 +172,6 @@ public class QueryResultTest {
             new DataValue("B", 1, 3.9, "2009-06-30", false), 
     };
     
-    @Ignore
     static class MyRelation extends CommonFieldsBase {
 
         static final DataField fieldStr = new DataField("THIS_IS_IT", DataField.DataType.STRING, true, 90L );
@@ -234,11 +236,11 @@ public class QueryResultTest {
         CallingContext cc = TestContextFactory.getCallingContext();
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         
         Query query = ds.createQuery(rel, "QueryResultTest.testCase1str", user);
         
-        List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldStr);
+        List<?> values = query.executeDistinctValueForDataField(fieldStr);
         assertEquals(6, values.size());
     }
 
@@ -248,11 +250,11 @@ public class QueryResultTest {
         CallingContext cc = TestContextFactory.getCallingContext();
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         
         Query query = ds.createQuery(rel, "QueryResultTest.testCase1dbl", user);
         
-        List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldDbl);
+        List<?> values = query.executeDistinctValueForDataField(fieldDbl);
         assertEquals(SET_SIZE + 7, values.size());
     }
     
@@ -262,11 +264,11 @@ public class QueryResultTest {
         CallingContext cc = TestContextFactory.getCallingContext();
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         
         Query query = ds.createQuery(rel, "QueryResultTest.testCase1bool", user);
         
-        List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldBool);
+        List<?> values = query.executeDistinctValueForDataField(fieldBool);
         // true, false, null
         assertEquals(3, values.size());
     }
@@ -277,11 +279,11 @@ public class QueryResultTest {
         CallingContext cc = TestContextFactory.getCallingContext();
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         
         Query query = ds.createQuery(rel, "QueryResultTest.testCase1int", user);
         
-        List<?> values = query.executeDistinctValueForDataField(MyRelation.fieldInt);
+        List<?> values = query.executeDistinctValueForDataField(fieldInt);
         assertEquals(SET_SIZE, values.size());
     }
     
@@ -291,12 +293,12 @@ public class QueryResultTest {
         CallingContext cc = TestContextFactory.getCallingContext();
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         
         Query query = ds.createQuery(rel, "QueryResultTest.testCase2", user);
-        query.addFilter(MyRelation.fieldInt, FilterOperation.GREATER_THAN, SET_SIZE - 2);
-        query.addSort(MyRelation.fieldDate, Direction.ASCENDING);
-        query.addSort(MyRelation.fieldDbl, Direction.DESCENDING);
+        query.addFilter(fieldInt, GREATER_THAN, SET_SIZE - 2);
+        query.addSort(fieldDate, ASCENDING);
+        query.addSort(fieldDbl, DESCENDING);
         
         Set<String> pkSet = new HashSet<String>();
         
@@ -338,20 +340,20 @@ public class QueryResultTest {
         CallingContext cc = TestContextFactory.getCallingContext();
         Datastore ds = cc.getDatastore();
         User user = cc.getCurrentUser();
-        MyRelation rel = MyRelation.assertRelation(cc);
+        MyRelation rel = assertRelation(cc);
         System.out.println("start testCase3");
         
         Query query = ds.createQuery(rel, "QueryResultTest.testCase3(1st)", user);
-        query.addFilter(MyRelation.fieldDbl, FilterOperation.EQUAL, new BigDecimal("0.9"));
-        query.addFilter(MyRelation.fieldBool, FilterOperation.EQUAL, true);
-        query.addSort(MyRelation.fieldInt, Direction.ASCENDING);
-        query.addSort(MyRelation.fieldDate, Direction.DESCENDING);
+        query.addFilter(fieldDbl, EQUAL, new BigDecimal("0.9"));
+        query.addFilter(fieldBool, EQUAL, true);
+        query.addSort(fieldInt, ASCENDING);
+        query.addSort(fieldDate, DESCENDING);
 
         Query backquery = ds.createQuery(rel, "QueryResultTest.testCase3(2nd)", user);
-        backquery.addFilter(MyRelation.fieldDbl, FilterOperation.EQUAL, new BigDecimal("0.9"));
-        backquery.addFilter(MyRelation.fieldBool, FilterOperation.EQUAL, true);
-        backquery.addSort(MyRelation.fieldInt, Direction.DESCENDING);
-        backquery.addSort(MyRelation.fieldDate, Direction.ASCENDING);
+        backquery.addFilter(fieldDbl, EQUAL, new BigDecimal("0.9"));
+        backquery.addFilter(fieldBool, EQUAL, true);
+        backquery.addSort(fieldInt, DESCENDING);
+        backquery.addSort(fieldDate, ASCENDING);
 
         Set<String> pkTotalSet = new HashSet<String>();
         
@@ -361,10 +363,21 @@ public class QueryResultTest {
         int fetchSizes[] = {1, 2, 1021, 303, 101, 2831 };
         int idxFetch = 4;
         int len = 0;
-        QueryResult result = query.executeQuery(null, fetchSizes[idxFetch]);
+        // It seems that the following two asserts try to test if the results
+        // are marks as having more rows on the database than the ones retrieved
+        // by the query
+        // This was the original query:
+        // QueryResult result = query.executeQuery(null, fetchSizes[idxFetch]);
+        // This is the modified query ensuring that the page size is inferior to
+        // the number of rows on the database
+        QueryResult result = query.executeQuery(null, 10);
         len += result.getResultList().size();
         assertEquals( true, result.hasMoreResults());
-        assertEquals( fetchSizes[idxFetch], result.getResultList().size());
+        // This was the original assertion, which dependened on some fixed
+        // values having sense in relation to what's inserted as test fixtures
+        // assertEquals( fetchSizes[idxFetch], result.getResultList().size());
+        // This is the new assertion which uses a safer value.
+        assertEquals( 10, result.getResultList().size());
         
         System.out.println("Accumulating forward query results");
         for ( CommonFieldsBase cb : result.getResultList() ) {
