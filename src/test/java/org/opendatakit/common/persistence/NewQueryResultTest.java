@@ -16,7 +16,6 @@ package org.opendatakit.common.persistence;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.opendatakit.common.persistence.Query.Direction.ASCENDING;
-import static org.opendatakit.common.persistence.Query.Direction.DESCENDING;
 import static org.opendatakit.common.persistence.TestTable.booleanField;
 import static org.opendatakit.common.persistence.TestTable.dateField;
 import static org.opendatakit.common.persistence.TestTable.doubleField;
@@ -53,7 +52,6 @@ public class NewQueryResultTest {
           for (String someDate : DATES)
             for (Boolean someBoolean : BOOLEANS)
               TEST_ROWS[i++] = new TestRow(someString, someInteger, someDouble, someDate, someBoolean);
-
   }
 
   private static TestTable table;
@@ -61,15 +59,16 @@ public class NewQueryResultTest {
   private static Datastore ds;
   private static User user;
 
-
   @BeforeClass
   public static void oneTimeSetUp() throws Exception {
     cc = TestContextFactory.getCallingContext();
     ds = cc.getDatastore();
     user = cc.getCurrentUser();
+    // Make sure that the table is empty before running any test on this class
     dropTable();
+    // Create the table and insert some fixtures
     table = createTestTable();
-    writeLargeDataset();
+    insertTestFixtures();
   }
 
   @AfterClass
@@ -106,8 +105,15 @@ public class NewQueryResultTest {
   }
 
   @Test
+  public void query_executeDistinctValueForDataField_date_field() throws ODKDatastoreException {
+    Query query = ds.createQuery(table, "query_executeDistinctValueForDataField_date_field", user);
+
+    assertEquals(DATES.length, query.executeDistinctValueForDataField(dateField).size());
+  }
+
+  @Test
   public void query_executeQuery_unique_pks() throws ODKDatastoreException {
-    // This test focuses on the insertions... it should be here
+    // This test focuses on the insertions... it shouldn't be here
     Query query = ds.createQuery(table, "query_executeQuery_unique_pks", user);
 
     List<? extends CommonFieldsBase> result = query.executeQuery();
@@ -123,7 +129,7 @@ public class NewQueryResultTest {
   public void query_executeQuery_forward_cursor_first_page() throws ODKDatastoreException {
     Query query = ds.createQuery(table, "query_executeQuery_forward_cursor_first_page", user);
     // We need to sort in order to execute a "cursor-style query"
-    addSort(query, ASCENDING);
+    addSort(query);
 
     QueryResult result = query.executeQuery(null, TEST_ROWS.length / 2);
 
@@ -133,9 +139,9 @@ public class NewQueryResultTest {
 
   @Test
   public void query_executeQuery_forward_cursor_last_page() throws ODKDatastoreException {
-    Query query = ds.createQuery(table, "query_executeQuery_fetchSize", user);
+    Query query = ds.createQuery(table, "query_executeQuery_forward_cursor_last_page", user);
     // We need to sort in order to execute a "cursor-style query"
-    addSort(query, ASCENDING);
+    addSort(query);
 
     int firstPageSize = TEST_ROWS.length / 2;
     int lastPageSize = TEST_ROWS.length - firstPageSize;
@@ -150,9 +156,9 @@ public class NewQueryResultTest {
 
   @Test
   public void query_executeQuery_backward_cursor_first_page() throws ODKDatastoreException {
-    Query query = ds.createQuery(table, "query_executeQuery_fetchSize", user);
+    Query query = ds.createQuery(table, "query_executeQuery_backward_cursor_first_page", user);
     // We need to sort in order to execute a "cursor-style query"
-    addSort(query, DESCENDING);
+    addSort(query);
 
     QueryResult result = query.executeQuery(null, TEST_ROWS.length / 2);
 
@@ -162,11 +168,14 @@ public class NewQueryResultTest {
 
   @Test
   public void query_executeQuery_backward_cursor_last_page() throws ODKDatastoreException {
-    Query query = ds.createQuery(table, "query_executeQuery_fetchSize", user);
+    Query query = ds.createQuery(table, "query_executeQuery_backward_cursor_last_page", user);
     // We need to sort in order to execute a "cursor-style query"
-    addSort(query, DESCENDING);
+    addSort(query);
 
     int firstPageSize = TEST_ROWS.length / 2;
+    // The backward cursor pivots on the first row, therefore,
+    // pending rows amount is the total of rows minus the one
+    // row we're pivoting on
     int lastPageSize = TEST_ROWS.length - 1;
 
     QueryResult firstPage = query.executeQuery(null, firstPageSize);
@@ -178,21 +187,15 @@ public class NewQueryResultTest {
   }
 
   private static synchronized TestTable createTestTable() throws ODKDatastoreException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getUserService().getDaemonAccountUser();
+    System.out.println("Creating the test table");
     TestTable tablePrototype = new TestTable(ds.getDefaultSchemaName());
-    ds.assertRelation(tablePrototype, user); // may throw exception...
-    // at this point, the prototype has become fully populated
-    return tablePrototype; // set static variable only upon success...
+    ds.assertRelation(tablePrototype, user);
+    return tablePrototype;
   }
 
-  private static void insertRowSets(TestTable table, TestRow row, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
+  private static void insertRowSets(TestTable table, TestRow row) throws ODKEntityPersistException, ODKOverQuotaException {
     TestTable element = ds.createEntityUsingRelation(table, user);
     element.setStringField(TestTable.stringField, row.stringField);
-    // This field will change for each loop iteration
     element.setLongField(TestTable.integerField, row.integerField.longValue());
     element.setNumericField(TestTable.doubleField, row.doubleField);
     element.setDateField(TestTable.dateField, row.dateField);
@@ -201,31 +204,28 @@ public class NewQueryResultTest {
     ds.putEntity(element, user);
   }
 
-  private static void writeLargeDataset() throws ODKEntityPersistException, ODKOverQuotaException {
-    System.out.println("writing the large dataset");
-
-    // write a lot of data...
+  private static void insertTestFixtures() throws ODKEntityPersistException, ODKOverQuotaException {
     System.out.println("Inserting " + TEST_ROWS.length + " test rows");
     int n = 0;
     for (TestRow row : TEST_ROWS) {
-      insertRowSets(table, row, cc);
+      insertRowSets(table, row);
       if (++n % 100 == 0)
         System.out.println("Inserted " + n + " rows");
     }
-    System.out.println("done writing the large dataset");
+    System.out.println("Done writing the large dataset");
   }
 
   private static void dropTable() throws ODKDatastoreException {
+    System.out.println("Dropping the test table");
     TestTable table = createTestTable();
-    System.out.println("dropping the large dataset");
-    cc.getDatastore().dropRelation(table, cc.getCurrentUser());// drop it, in case prior test was messed up...
+    cc.getDatastore().dropRelation(table, cc.getCurrentUser());
   }
 
-  private void addSort(Query query, Query.Direction direction) {
-    query.addSort(stringField, direction);
-    query.addSort(integerField, direction);
-    query.addSort(doubleField, direction);
-    query.addSort(dateField, direction);
-    query.addSort(booleanField, direction);
+  private void addSort(Query query) {
+    query.addSort(stringField, ASCENDING);
+    query.addSort(integerField, ASCENDING);
+    query.addSort(doubleField, ASCENDING);
+    query.addSort(dateField, ASCENDING);
+    query.addSort(booleanField, ASCENDING);
   }
 }
