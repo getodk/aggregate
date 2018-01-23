@@ -77,6 +77,8 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 ### Configure
 
+1. If you are running Java 9, make sure you also have Java 8 installed. Aggregate will not compile with Java 9.
+
 1. Copy `gradle.properties.example` to a `gradle.properties` file at the root of the project and fill in your setup configuration
 
     | Key | Valid values | Description |
@@ -86,6 +88,7 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
     | `aggregateUsername` |  | Only required for GAE deployment. The username of the Aggregate superuser |
     | `gaeAppId` |  | Only required for GAE deployment. The Google AppEngine project Id |
     | `gaeEmail` |  | Only required for GAE deployment. The email account of the owner of the Google AppEngine instance |
+    | `org.gradle.java.home` |  | Set path to a Java 8 install. This is only required if you have Java 9 installed.  |
 
     - Any property can be overwritten by passing `-Pkey=value` arguments to any Gradle task. 
     
