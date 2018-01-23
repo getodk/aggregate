@@ -364,17 +364,16 @@ public class QueryResultTest {
         int idxFetch = 4;
         int len = 0;
         // It seems that the following two asserts try to test if the results
-        // are marks as having more rows on the database than the ones retrieved
-        // by the query
+        // have less rows than the ones retrieved from the database by the query
         // This was the original query:
         // QueryResult result = query.executeQuery(null, fetchSizes[idxFetch]);
-        // This is the modified query ensuring that the page size is inferior to
-        // the number of rows on the database
+        // This is the modified query ensuring that the page size is less than
+        // the number of rows in the database
         QueryResult result = query.executeQuery(null, 10);
         len += result.getResultList().size();
         assertEquals( true, result.hasMoreResults());
-        // This was the original assertion, which dependened on some fixed
-        // values having sense in relation to what's inserted as test fixtures
+        // This was the original assertion, which depends on fetching less
+        // rows than those that have been inserted at the @BeforeClass setup method
         // assertEquals( fetchSizes[idxFetch], result.getResultList().size());
         // This is the new assertion which uses a safer value.
         assertEquals( 10, result.getResultList().size());
