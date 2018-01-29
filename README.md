@@ -108,6 +108,14 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
 
 1. You should now be able to browse [http://localhost:8080](http://localhost:8080)
 
+### Run the tests
+
+1. Copy one of the example `jdbc.properties.example_*` and `odk-settings.xml.example_*` files on `src/test/resources/` into the same place removing the `.example_*` extension. Choose the variant corresponding to your test database engine.
+
+1. Make sure your jdbc settings are correct. The examples use the default database name, user and password settings.
+
+1. Right click on the `src/test/java` folder on IntelliJ and select `Run all Tests` option.
+
 ### Debug
 
 1. In the `Run` menu, select `Edit Configurations...`

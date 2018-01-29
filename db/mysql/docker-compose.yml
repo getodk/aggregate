@@ -1,0 +1,9 @@
+db:
+  build: image
+  volumes:
+    - ./datadir:/var/lib/mysql
+  ports:
+    - 3306:3306
+  restart: always
+  environment:
+    MYSQL_ROOT_PASSWORD: odk
