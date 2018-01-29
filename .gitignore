@@ -9,3 +9,5 @@ installer/appEngineSDK.zip
 gradle.properties
 logs
 .settings
+jdbc.properties
+odk-settings.xml
