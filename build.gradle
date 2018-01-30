@@ -332,4 +332,7 @@ dockerCompose {
   postgresql {
     useComposeFiles = ['db/postgresql/docker-compose.yml']
   }
+  mysql {
+    useComposeFiles = ['db/mysql/docker-compose.yml']
+  }
 }
