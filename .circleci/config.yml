@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/src
+    working_directory: ~/work
     docker:
       - image: circleci/openjdk:latest
       - image: circleci/postgres:9.6
@@ -33,7 +33,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-            - ~/src/.gradle
+            - ~/work/.gradle
           key: jars-{{ checksum "build.gradle" }}
       - store_artifacts:
           path: build/reports
