@@ -3,9 +3,6 @@
 TOMCAT_PORT=`cat /etc/tomcat8/server.xml | grep "<Connector" | grep "HTTP" | awk '{print $2}' | awk -F'"' '{print $2}'`
 IPS=`ip address | grep "inet " | awk  '{print $2}' | awk -F'/' '{print $1}'`
 
-echo "Running services:"
-echo "  - Tomcat 8.0 on port ${TOMCAT_PORT}"
-echo ""
 echo "You can browse Aggregate at:"
 if [ ${TOMCAT_PORT} -eq 80 ]; then
   echo "$IPS" | while IFS= read -r line ; do echo "  - http://${line}"; done
