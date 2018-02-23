@@ -1,0 +1,73 @@
+---
+
+- name: install packages
+  apt: 
+    pkg: '{{ item }}'
+    install_recommends: no
+  with_items:
+    - fastjar
+    - unzip
+
+- name: set facts
+  set_fact:
+    aggregate_installer: ODK-Aggregate-Linux-v1.4.15.run
+    aggregate_install_dir: /tmp/ODK Aggregate
+    tomcat_root_dir: /var/lib/tomcat8/webapps/ROOT
+    motd_dir: /etc/update-motd.d
+
+- name: copy installer
+  copy: 
+    src: '{{ aggregate_installer }}'
+    dest: '/tmp/{{ aggregate_installer }}'
+    mode: 0744
+
+- name: run installer
+  command: "/tmp/{{ aggregate_installer }} --mode unattended --parent_installdir /tmp --platform postgresql --tomcat_http_port 80 --tomcat_https_port 443 --raw_hostname 127.0.0.1 --database_port 3306 --database_hostname 127.0.0.1 --jdbc_username aggregate --jdbc_password aggregate --jdbc_database aggregate  --jdbc_schema aggregate --instance_display_name '' --username aggregate --app_id '' --master_slave_app_id '' --jdbc_sqlserver_url '' --jdbc_gae_mysql_instance_name '' --jdbc_gae_mysql_password ''"
+
+- name: unzip war into ROOT
+  unarchive:
+    src: '{{ aggregate_install_dir }}/ODKAggregate.war'
+    dest: '{{ tomcat_root_dir }}'
+    remote_src: yes
+
+- name: setup database
+  command: 'psql --file create_db_and_user.sql'
+  args:
+    chdir: '{{ aggregate_install_dir }}' 
+  become_user: postgres
+
+- name: copy properties
+  copy: 
+    src: '{{ item }}'
+    dest: '{{ tomcat_root_dir }}/WEB-INF/lib'
+    mode: 0744
+  with_items:
+    - security.properties
+    - jdbc.properties
+
+- name: update properties
+  command: 'jar -uf ODKAggregate-settings.jar {{ item }}'
+  args:
+    chdir: '{{ tomcat_root_dir }}/WEB-INF/lib' 
+  with_items:
+    - security.properties
+    - jdbc.properties
+
+- name: remove properties
+  file:
+    path: '{{ tomcat_root_dir }}/WEB-INF/lib/{{ item }}' 
+    state: absent
+  with_items:
+    - security.properties
+    - jdbc.properties
+
+- name: Clean existing motd scripts
+  file:
+    state: absent
+    path: "{{ motd_dir }}/"
+
+- name: copy motd scripts
+  copy:
+    src: 'motd/'
+    dest: '{{ motd_dir }}'
+    mode: 0755
