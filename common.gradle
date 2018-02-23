@@ -1,0 +1,4 @@
+task explodedWar(type: Copy) {
+  into "$buildDir/exploded"
+  with war
+}
