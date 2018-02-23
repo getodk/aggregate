@@ -1,10 +1,10 @@
 import static org.opendatakit.aggregate.gradle.Util.setXmlValue
 
-task cleanInstaller() {
+task installerClean() {
   delete 'build/installer'
 }
 
-task buildInstaller(dependsOn: [cleanInstaller, gaeDownloadSDK], type: Copy) {
+task installerBuild(dependsOn: [installerClean, gaeDownloadSDK], type: Copy) {
   into "${buildDir}/installer"
   from fileTree(dir: 'installer/installBuilder')
 

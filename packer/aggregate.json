@@ -166,7 +166,7 @@
         "scripts/sudoers.sh",
         "scripts/vagrant.sh",
         "scripts/systemd.sh",
-        "scripts/aggregate/ansible.sh"
+        "scripts/ansible.sh"
       ],
       "type": "shell"
     },
@@ -187,7 +187,7 @@
       "scripts": [
         "scripts/virtualbox.sh",
         "scripts/vmware.sh",
-        "scripts/aggregate/cleanup.sh",
+        "scripts/cleanup.sh",
         "scripts/minimize.sh"
       ],
       "type": "shell"
@@ -211,7 +211,7 @@
     "name": "aggregate",
     "networking": "bridged",
     "no_proxy": "{{env `no_proxy`}}",
-    "preseed_path": "aggregate/preseed.cfg",
+    "preseed_path": "preseed.cfg",
     "template": "aggregate",
     "version": "TIMESTAMP"
   }

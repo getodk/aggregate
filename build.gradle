@@ -202,3 +202,4 @@ dockerCompose {
 apply from: 'common.gradle'
 apply from: 'gae.gradle'
 apply from: 'installer.gradle'
+apply from: 'packer.gradle'
