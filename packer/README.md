@@ -1,3 +1,0 @@
-- You'll have to place the Aggregate installer at exactly: `./ansible/roles/aggregate/files/ODK-Aggregate-Linux-v1.4.15.run`
-- You'll need to download an old packer binary from https://releases.hashicorp.com/packer/1.1.3/
-- To build the VM run: `./packer build -force -only=virtualbox-iso aggregate.json` 
