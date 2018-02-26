@@ -11,24 +11,24 @@
     tomcat_webapps_dir: /var/lib/tomcat8/webapps
     motd_dir: /etc/update-motd.d
 
-- name: setup database - create user odk
-  command: psql -c "CREATE USER odk WITH UNENCRYPTED PASSWORD 'odk';"
+- name: setup database - create user aggregate
+  command: psql -c "CREATE USER aggregate WITH UNENCRYPTED PASSWORD 'aggregate';"
   become_user: postgres
 
-- name: setup database - create database odk
-  command: psql -c "CREATE DATABASE odk WITH OWNER odk;"
+- name: setup database - create database aggregate
+  command: psql -c "CREATE DATABASE aggregate WITH OWNER aggregate;"
   become_user: postgres
 
-- name: setup database - grant on database odk
-  command: psql -c "GRANT ALL PRIVILEGES ON DATABASE odk TO odk;"
+- name: setup database - grant on database aggregate
+  command: psql -c "GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;"
   become_user: postgres
 
-- name: setup database - create schema odk
-  command: psql -c "CREATE SCHEMA odk;" odk
+- name: setup database - create schema aggregate
+  command: psql -c "CREATE SCHEMA aggregate;" aggregate
   become_user: postgres
 
-- name: setup database - grant on schema odk.odk
-  command: psql -c "GRANT ALL PRIVILEGES ON SCHEMA odk TO odk;" odk
+- name: setup database - grant on schema aggregate.aggregate
+  command: psql -c "GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk;" aggregate
   become_user: postgres
 
 - name: Clean webapps dir
