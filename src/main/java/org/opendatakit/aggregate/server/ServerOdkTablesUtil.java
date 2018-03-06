@@ -19,8 +19,8 @@ package org.opendatakit.aggregate.server;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -77,7 +77,7 @@ public class ServerOdkTablesUtil {
   public static TableEntryClient createTable(String appId, String tableId, TableDefinitionClient definition,
       TablesUserPermissions userPermissions, CallingContext cc) throws DatastoreFailureException,
       TableAlreadyExistsExceptionClient, PermissionDeniedExceptionClient, ETagMismatchException {
-    Log logger = LogFactory.getLog(ServerOdkTablesUtil.class);
+    Logger logger = LoggerFactory.getLogger(ServerOdkTablesUtil.class);
     // TODO: add access control stuff
     // Have to be careful of all the transforms going on here.
     // Make sure they actually work as expected!

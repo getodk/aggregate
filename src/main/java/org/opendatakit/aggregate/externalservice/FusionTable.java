@@ -27,8 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -77,7 +77,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class FusionTable extends GoogleOauth2ExternalService implements ExternalService {
   private static final int MAX_INSERT_STRING_LEN = 30000;
 
-  private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FusionTable.class.getName());
 
   private static ObjectMapper mapper = new ObjectMapper();
 

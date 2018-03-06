@@ -20,8 +20,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
@@ -50,7 +50,7 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = 4295412985320942608L;
 
-  private static final Log logger = LogFactory.getLog(UploadSubmissionsTaskServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(UploadSubmissionsTaskServlet.class);
 
   /**
    * URI from base

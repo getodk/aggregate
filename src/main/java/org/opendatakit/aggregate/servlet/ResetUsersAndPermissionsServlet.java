@@ -32,8 +32,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -136,7 +136,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
       + " actions, such as deleting the super-user, or granting Site Administrator privileges to the anonymousUser</p>"
       + "</td></tr></tbody></table></div>\n";
   
-  private static final Log logger = LogFactory.getLog(ResetUsersAndPermissionsServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(ResetUsersAndPermissionsServlet.class);
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,

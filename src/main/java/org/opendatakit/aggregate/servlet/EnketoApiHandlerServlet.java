@@ -28,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.CallingContext;
@@ -37,7 +37,7 @@ import org.opendatakit.common.web.CallingContext;
 public class EnketoApiHandlerServlet extends ServletUtilBase {
 
   private static final long serialVersionUID = 5811797423869654357L;
-  private static final Log logger = LogFactory.getLog(AggregateHtmlServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(AggregateHtmlServlet.class);
 
   public static final String ADDR = UIConsts.ENKETO_API_HANDLER_ADDR;
   private final String USER_AGENT = "Mozilla/5.0";

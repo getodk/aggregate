@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -358,7 +358,7 @@ public class TaskLockImpl implements TaskLock {
           } finally {
             if ( !success ) {
               Statement stmt = conn.createStatement();
-              LogFactory.getLog(TaskLockImpl.class).info("UNLOCK TABLES");
+              LoggerFactory.getLogger(TaskLockImpl.class).info("UNLOCK TABLES");
               stmt.execute("UNLOCK TABLES");
               conn.commit();
             }
@@ -442,7 +442,7 @@ public class TaskLockImpl implements TaskLock {
       result = true;
     } catch (ODKDatastoreException e) {
       // if we see a lot of these, we are running too long between renewals
-      LogFactory.getLog(TaskLockImpl.class).info("delete of taskLock threw exception!");
+      LoggerFactory.getLogger(TaskLockImpl.class).info("delete of taskLock threw exception!");
       e.printStackTrace();
     }
     return result;

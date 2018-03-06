@@ -33,8 +33,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -80,7 +80,7 @@ import org.xml.sax.SAXException;
 
 
 public class REDCapServer extends AbstractExternalService implements ExternalService {
-  private static final Log logger = LogFactory.getLog(FusionTable.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FusionTable.class.getName());
 
   /**
    * Datastore entity specific to this type of external service

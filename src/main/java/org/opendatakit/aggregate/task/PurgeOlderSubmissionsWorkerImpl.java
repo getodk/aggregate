@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
@@ -78,7 +78,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
   public final void purgeOlderSubmissions() throws ODKDatastoreException, ODKFormNotFoundException,
       ODKExternalServiceDependencyException {
 
-    Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+    Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsWorkerImpl.class);
     logger.info("Beginning Submissions Purge: " + miscTasksKey.toString() + " form "
         + form.getFormId());
 
@@ -159,7 +159,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
   private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException,
       ODKOverQuotaException {
 
-    Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+    Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsWorkerImpl.class);
     logger.info("Submissions Purge: " + miscTasksKey.toString() + " form "
         + form.getFormId() + " doMarkAsComplete");
 
@@ -183,7 +183,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
-    Log logger = LogFactory.getLog(PurgeOlderSubmissionsWorkerImpl.class);
+    Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsWorkerImpl.class);
 
     Map<String, String> rp = t.getRequestParameters();
     String purgeBeforeDateString = rp.get(PurgeOlderSubmissions.PURGE_DATE);

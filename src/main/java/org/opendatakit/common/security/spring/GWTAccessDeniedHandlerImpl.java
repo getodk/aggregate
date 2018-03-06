@@ -23,7 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -93,7 +93,7 @@ public class GWTAccessDeniedHandlerImpl implements AccessDeniedHandler, ServletC
                 RPCRequest rpcRequest = RPC.decodeRequest(payload);
                 onAfterRequestDeserialized(rpcRequest);
                 // ******* CHANGED GWT 2.4 CODE STARTS
-                LogFactory.getLog(GWTAccessDeniedHandlerImpl.class).warn("GWT Method: " 
+                LoggerFactory.getLogger(GWTAccessDeniedHandlerImpl.class).warn("GWT Method: " 
                             + rpcRequest.getMethod().getName() + " Exception: " + e.getMessage());
                 return RPC
                         .encodeResponseForFailure(
@@ -102,7 +102,7 @@ public class GWTAccessDeniedHandlerImpl implements AccessDeniedHandler, ServletC
                                         e));
                 // ******** CHANGED GWT 2.4 CODE ENDS
             } catch (IncompatibleRemoteServiceException ex) {
-                LogFactory.getLog(GWTAccessDeniedHandlerImpl.class).warn("An IncompatibleRemoteServiceException was thrown while processing this call.",
+                LoggerFactory.getLogger(GWTAccessDeniedHandlerImpl.class).warn("An IncompatibleRemoteServiceException was thrown while processing this call.",
                         ex);
                 return RPC.encodeResponseForFailure(null, ex);
             }

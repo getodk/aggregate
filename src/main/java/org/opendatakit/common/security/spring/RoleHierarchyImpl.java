@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -63,7 +63,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
 
-    private static final Log logger = LogFactory.getLog(RoleHierarchyImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(RoleHierarchyImpl.class);
     // look for flagged changes every CHECK_INTERVAL.
     private static final long CHECK_INTERVAL = 1000L; // 1 seconds
     // refresh everything every UPDATE_INTERVAL.

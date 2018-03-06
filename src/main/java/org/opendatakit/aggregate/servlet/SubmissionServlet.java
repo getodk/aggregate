@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -72,7 +72,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  */
 public class SubmissionServlet extends ServletUtilBase {
 
-  private static final Log logger = LogFactory.getLog(SubmissionServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(SubmissionServlet.class);
   /**
    * Serial number for serialization
    */

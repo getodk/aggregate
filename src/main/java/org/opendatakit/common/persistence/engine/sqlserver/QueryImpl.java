@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.EntityKey;
@@ -85,11 +85,11 @@ public class QueryImpl implements Query {
   private final StringBuilder queryBindBuilder = new StringBuilder();
   private final List<Object> bindValues = new ArrayList<Object>();
   private final StringBuilder querySortBuilder = new StringBuilder();
-  private final Log queryStringLogger;
+  private final Logger queryStringLogger;
 
   public QueryImpl(CommonFieldsBase relation, String loggingContextTag,
       DatastoreImpl dataStoreImpl, User user) {
-    this.queryStringLogger = LogFactory.getLog("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
+    this.queryStringLogger = LoggerFactory.getLogger("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
     this.relation = relation;
     this.dataStoreImpl = dataStoreImpl;
     this.user = user;

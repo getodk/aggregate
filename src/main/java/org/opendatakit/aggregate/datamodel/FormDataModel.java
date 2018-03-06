@@ -18,8 +18,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -76,7 +76,7 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 public final class FormDataModel extends CommonFieldsBase {
 
-  private static final Log logger = LogFactory.getLog(FormDataModel.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(FormDataModel.class.getName());
 
   public static final Long MAX_ELEMENT_NAME_LENGTH = PersistConsts.GUARANTEED_SEARCHABLE_LEN;
 

@@ -32,8 +32,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.javarosa.core.model.utils.DateUtils;
@@ -53,7 +53,7 @@ public class WebUtils {
   static final String ATTRIBUTE_VALUE_TAG = "attributeValue";
   static final String ATTRIBUTE_NAME_TAG = "attributeName";
   static final String CURSOR_TAG = "cursor";
-  static final Log logger = LogFactory.getLog(WebUtils.class);
+  static final Logger logger = LoggerFactory.getLogger(WebUtils.class);
   /**
    * Date format pattern used to parse HTTP date headers in RFC 1123 format.
    * copied from apache.commons.lang.DateUtils

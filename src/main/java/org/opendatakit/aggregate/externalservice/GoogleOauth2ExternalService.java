@@ -31,7 +31,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.apache.http.NameValuePair;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
@@ -81,13 +81,13 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
   protected GoogleCredential credential;
   protected HttpTransport httpTransport;
 
-  protected final Log oauth2logger;
+  protected final Logger oauth2logger;
 
   protected HttpRequestFactory requestFactory;
 
   protected GoogleOauth2ExternalService(String credentialScope, IForm form,
       FormServiceCursor formServiceCursor, ElementFormatter formatter,
-      HeaderFormatter headerFormatter, Log logger, CallingContext cc)
+      HeaderFormatter headerFormatter, Logger logger, CallingContext cc)
       throws ODKExternalServiceCredentialsException, ODKExternalServiceException {
     super(form, formServiceCursor, formatter, headerFormatter, cc);
 

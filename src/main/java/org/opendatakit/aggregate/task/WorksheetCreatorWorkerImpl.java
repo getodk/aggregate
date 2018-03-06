@@ -19,8 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -49,6 +49,7 @@ import org.opendatakit.common.web.CallingContext;
  *
  */
 public class WorksheetCreatorWorkerImpl {
+    private static final Logger logger = LoggerFactory.getLogger(WorksheetCreatorWorkerImpl.class);
 
     private final IForm form;
     private final SubmissionKey miscTasksKey;
@@ -96,7 +97,7 @@ public class WorksheetCreatorWorkerImpl {
 
     public final void worksheetCreator() {
 
-     Log logger = LogFactory.getLog(WorksheetCreatorWorkerImpl.class);
+     Logger logger = LoggerFactory.getLogger(WorksheetCreatorWorkerImpl.class);
      logger.info("Beginning Worksheet Creator: " + miscTasksKey.toString() +
                    " form " + form.getFormId());
 
@@ -139,7 +140,7 @@ public class WorksheetCreatorWorkerImpl {
               doMarkAsComplete(t);
           } else {
               // worksheet creation request should have been created after the form...
-              doWorksheetCreator(logger);
+              doWorksheetCreator();
           }
         } catch (Exception e2) {
           // some other unexpected exception...
@@ -173,7 +174,7 @@ public class WorksheetCreatorWorkerImpl {
         t.persist(cc);
     }
 
-    public final void doWorksheetCreator(Log logger) {
+    public final void doWorksheetCreator() {
       try {
         // get spreadsheet
         GoogleSpreadsheet spreadsheet = getGoogleSpreadsheetWithName();
@@ -229,7 +230,7 @@ public class WorksheetCreatorWorkerImpl {
             r.persist(cc);
         }
     } catch (Exception ex) {
-     Log logger = LogFactory.getLog(WorksheetCreatorWorkerImpl.class);
+     Logger logger = LoggerFactory.getLogger(WorksheetCreatorWorkerImpl.class);
      logger.error("failureRecovery: " + miscTasksKey.toString() +
          " form " + form.getFormId() + " Exception during failure recovery: " + ex.toString());
         // something is hosed -- don't attempt to continue.

@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -81,7 +81,7 @@ public class DatastoreImpl implements Datastore {
     ds = DatastoreServiceFactory.getDatastoreService();
     schemaName = "opendatakit";
     
-    LogFactory.getLog(DatastoreImpl.class).info("Running on " + 
+    LoggerFactory.getLogger(DatastoreImpl.class).info("Running on " + 
           ds.getDatastoreAttributes().getDatastoreType().toString() + " datastore");
     
     try {
@@ -89,7 +89,7 @@ public class DatastoreImpl implements Datastore {
     } catch (Throwable t) {
       // if we can't get a syncCache, that is OK
       syncCache = null;
-      LogFactory.getLog(DatastoreImpl.class).info("MemcacheService could not be created");
+      LoggerFactory.getLogger(DatastoreImpl.class).info("MemcacheService could not be created");
     }
   }
 
@@ -442,7 +442,7 @@ public class DatastoreImpl implements Datastore {
     Key dsKey = constructGaeKey(key.getRelation(), key.getKey());
     dam.recordDeleteUsage(key);
     try {
-      LogFactory.getLog(DatastoreImpl.class).info(
+      LoggerFactory.getLogger(DatastoreImpl.class).info(
           "Executing delete " + constructGaeKind(key.getRelation()) + " with key " + key.getKey()
               + " by user " + user.getUriUser());
       ds.delete(dsKey);
@@ -464,7 +464,7 @@ public class DatastoreImpl implements Datastore {
     for (EntityKey entityKey : keys) {
       dam.recordDeleteUsage(entityKey);
       datastoreKeys.add(constructGaeKey(entityKey.getRelation(), entityKey.getKey()));
-      LogFactory.getLog(DatastoreImpl.class).info(
+      LoggerFactory.getLogger(DatastoreImpl.class).info(
           "Executing delete " + constructGaeKind(entityKey.getRelation()) + " with key "
               + entityKey.getKey() + " by user " + user.getUriUser());
     }

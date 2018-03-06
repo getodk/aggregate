@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -259,7 +259,7 @@ public class Submission extends SubmissionSet {
     try {
       return new Submission(tle, form, cc);
     } catch (ODKDatastoreException e) {
-      Log logger = LogFactory.getLog(Submission.class);
+      Logger logger = LoggerFactory.getLogger(Submission.class);
       e.printStackTrace();
       logger.error("Unable to reconstruct submission for " + tle.getSchemaName() + "."
           + tle.getTableName() + " uri " + tle.getUri());

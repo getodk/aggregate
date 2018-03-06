@@ -35,8 +35,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wink.common.model.multipart.BufferedOutMultiPart;
 import org.apache.wink.common.model.multipart.InMultiPart;
 import org.apache.wink.common.model.multipart.OutPart;
@@ -176,7 +176,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);
       } else if (!newETag.equals(eTagEntity.getManifestETag())) {
-        Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+        Logger log = LoggerFactory.getLogger(FileManifestServiceImpl.class);
         log.error("TableInstance (" + tableId + "," + rowId
             + ") Manifest ETag does not match computed value!");
         eTagEntity.setManifestETag(newETag);

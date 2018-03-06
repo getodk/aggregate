@@ -27,8 +27,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -107,7 +107,7 @@ import com.google.api.services.sheets.v4.model.UpdateCellsRequest;
  * 
  */
 public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements ExternalService {
-  private static final Log logger = LogFactory.getLog(GoogleSpreadsheet.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(GoogleSpreadsheet.class.getName());
 
   private static final String GOOGLE_DRIVE_FILES_API = "https://www.googleapis.com/drive/v2/files";
 

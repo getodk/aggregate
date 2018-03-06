@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -64,7 +64,7 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
   public static final String ADDR = UIConsts.GET_USERS_AND_PERMS_CSV_SERVLET_ADDR;
 
   
-  private static final Log logger = LogFactory.getLog(GetUsersAndPermissionsServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetUsersAndPermissionsServlet.class);
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,

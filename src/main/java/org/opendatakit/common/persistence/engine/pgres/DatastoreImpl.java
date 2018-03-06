@@ -26,7 +26,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -624,10 +624,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         }
 
         String createTableStmt = b.toString();
-        LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + createTableStmt);
+        LoggerFactory.getLogger(DatastoreImpl.class).info("Attempting: " + createTableStmt);
 
         jc.execute(createTableStmt);
-        LogFactory.getLog(DatastoreImpl.class)
+        LoggerFactory.getLogger(DatastoreImpl.class)
             .info("create table success (before updateRelation): " + relation.getTableName());
 
         String idx;
@@ -720,11 +720,11 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       b.append(relation.getTableName());
       b.append(K_BQ);
 
-      LogFactory.getLog(DatastoreImpl.class)
+      LoggerFactory.getLogger(DatastoreImpl.class)
           .info("Executing " + b.toString() + " by user " + user.getUriUser());
       getJdbcConnection().execute(b.toString());
     } catch (Exception e) {
-      LogFactory.getLog(DatastoreImpl.class)
+      LoggerFactory.getLogger(DatastoreImpl.class)
           .warn(relation.getTableName() + " exception: " + e.toString());
       throw new ODKDatastoreException(e);
     }
@@ -837,7 +837,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           SqlParameterValue arg = argList.get(i);
           createLogContent(b, i+1, arg);
         }
-        LogFactory.getLog(DatastoreImpl.class).info(b.toString());
+        LoggerFactory.getLogger(DatastoreImpl.class).info(b.toString());
       }
       for (int i = 0; i < argList.size(); ++i) {
         SqlParameterValue arg = argList.get(i);
@@ -1178,7 +1178,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       b.append(K_EQ);
       b.append(K_BIND_VALUE);
 
-      LogFactory.getLog(DatastoreImpl.class).info("Executing " + b.toString() + " with key "
+      LoggerFactory.getLogger(DatastoreImpl.class).info("Executing " + b.toString() + " with key "
           + key.getKey() + " by user " + user.getUriUser());
       getJdbcConnection().update(b.toString(), new Object[] { key.getKey() });
     } catch (Exception e) {

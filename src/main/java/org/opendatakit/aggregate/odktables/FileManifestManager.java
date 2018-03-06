@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.impl.api.FileServiceImpl;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;
@@ -46,7 +46,7 @@ public class FileManifestManager {
   private String appId;
   private String odkClientVersion;
   private CallingContext cc;
-  private Log log;
+  private Logger log;
 
   public FileManifestManager(String appId, String odkClientVersion, CallingContext cc) {
     Validate.notEmpty(appId);
@@ -55,7 +55,7 @@ public class FileManifestManager {
     // TODO: verify that appId matches what stored in
     // ServerPreferencesProperties...
     this.cc = cc;
-    this.log = LogFactory.getLog(FileManifestManager.class);
+    this.log = LoggerFactory.getLogger(FileManifestManager.class);
   }
 
   /**

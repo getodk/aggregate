@@ -18,8 +18,8 @@ package org.opendatakit.aggregate.server;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
@@ -37,7 +37,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class PreferenceServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.preferences.PreferenceService {
 
-  private static final Log log = LogFactory.getLog(PreferenceServiceImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(PreferenceServiceImpl.class);
   /**
    * Serialization Identifier
    */

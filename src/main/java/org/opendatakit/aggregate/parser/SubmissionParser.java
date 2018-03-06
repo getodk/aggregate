@@ -31,8 +31,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -392,7 +392,7 @@ public class SubmissionParser {
         try {
           submission = new Submission(fi, form, cc);
         } catch (ODKDatastoreException e) {
-          Log logger = LogFactory.getLog(Submission.class);
+          Logger logger = LoggerFactory.getLogger(Submission.class);
           e.printStackTrace();
           logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
               + fi.getTableName() + " uri " + fi.getUri());

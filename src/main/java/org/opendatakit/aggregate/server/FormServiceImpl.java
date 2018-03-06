@@ -26,8 +26,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -64,7 +64,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class FormServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.form.FormService {
-  private static final Log logger = LogFactory.getLog(FormServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(FormServiceImpl.class);
 
   /**
    * Serial number for serialization
@@ -125,10 +125,10 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       return formSummaries;
 
     } catch (ODKOverQuotaException e) {
-      logger.error(e);
+      logger.error("Over quota failure", e);
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     } catch (ODKDatastoreException e) {
-      logger.error(e);
+      logger.error("Datastore failure", e);
       throw new DatastoreFailureException();
     } catch (Throwable t) {
       logger.error("Possible corruption", t);

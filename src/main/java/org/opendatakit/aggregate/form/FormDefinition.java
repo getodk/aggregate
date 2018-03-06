@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -63,7 +63,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormDefinition {
 
-    private static final Log logger = LogFactory.getLog(FormDefinition.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(FormDefinition.class.getName());
 
     /**
      * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.

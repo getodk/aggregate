@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -76,7 +76,7 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 public class DataManager {
 
-  private static final Log logger = LogFactory.getLog(DataManager.class);
+  private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
 
   public static class WebsafeRows {
     public final List<Row> rows;
@@ -163,7 +163,7 @@ public class DataManager {
     List<Entity> logEntries = query.execute();
 
     for (Entity logEntity : logEntries) {
-      // Log entries maintain the history of previous rowETags
+      // Logger entries maintain the history of previous rowETags
       // Chain back through that to get the previous log record.
       // If the previous rowETag is null, it means that the rowId
       // did not exist prior to this log entry.

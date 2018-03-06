@@ -59,8 +59,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.RuntimeDelegate;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.wink.common.internal.http.AcceptEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContentEncodingResponseFilter implements Filter {
 
-  private static final Log log = LogFactory.getLog(ContentEncodingResponseFilter.class);
+  private static final Logger log = LoggerFactory.getLogger(ContentEncodingResponseFilter.class);
 
     private final static Logger                         logger                       =
                                                                                          LoggerFactory

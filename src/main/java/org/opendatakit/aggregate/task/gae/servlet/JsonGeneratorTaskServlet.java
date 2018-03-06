@@ -5,8 +5,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -26,7 +26,7 @@ public class JsonGeneratorTaskServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = -2571463127331034693L;
 
-  private static final Log logger = LogFactory.getLog(JsonGeneratorTaskServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(JsonGeneratorTaskServlet.class);
 
   /**
    * URI from base

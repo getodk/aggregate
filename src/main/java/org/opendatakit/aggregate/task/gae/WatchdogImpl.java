@@ -20,8 +20,8 @@ import java.net.UnknownHostException;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.CsvGenerator;
@@ -56,7 +56,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class WatchdogImpl implements Watchdog, InitializingBean {
 
-  private Log logger = LogFactory.getLog(WatchdogImpl.class);
+  private Logger logger = LoggerFactory.getLogger(WatchdogImpl.class);
 
   /** cached value of the faster-watchdog-cycle flag */
   private boolean lastFasterWatchdogCycleEnabledFlag = false;

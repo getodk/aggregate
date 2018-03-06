@@ -16,8 +16,8 @@ package org.opendatakit.common.persistence.engine.gae;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -50,7 +50,7 @@ public class StringFieldLengthMapping {
   private static final String TABLE_NAME = "_STRING_FIELD_LENGTHS_";
   private static final String LENGTH_MAPPING = "LENGTH_MAPPING";
 
-  private Log logger = LogFactory.getLog(StringFieldLengthMapping.class);
+  private Logger logger = LoggerFactory.getLogger(StringFieldLengthMapping.class);
   
   public StringFieldLengthMapping() {
   }

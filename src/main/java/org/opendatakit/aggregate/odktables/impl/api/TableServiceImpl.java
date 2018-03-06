@@ -43,8 +43,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.ConfigFileChangeDetail;
 import org.opendatakit.aggregate.odktables.FileContentInfo;
 import org.opendatakit.aggregate.odktables.FileManager;
@@ -91,7 +91,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TableServiceImpl implements TableService {
-  private static final Log logger = LogFactory.getLog(TableServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(TableServiceImpl.class);
 
   private static final ObjectMapper mapper = new ObjectMapper();
 

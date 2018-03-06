@@ -20,8 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -65,7 +65,7 @@ public class FormDeleteWorkerImpl {
   private final SubmissionKey miscTasksKey;
   private final CallingContext cc;
   private final String pFormIdLockId;
-  private final Log logger = LogFactory.getLog(FormDeleteWorkerImpl.class);
+  private final Logger logger = LoggerFactory.getLogger(FormDeleteWorkerImpl.class);
 
   public FormDeleteWorkerImpl(IForm form, SubmissionKey miscTasksKey, long attemptCount,
       CallingContext cc) {

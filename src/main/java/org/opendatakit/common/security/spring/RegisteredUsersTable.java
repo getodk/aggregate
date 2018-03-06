@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -75,7 +75,7 @@ import org.springframework.security.authentication.encoding.MessageDigestPasswor
  */
 public final class RegisteredUsersTable extends CommonFieldsBase {
 
-  private static final Log logger = LogFactory.getLog(RegisteredUsersTable.class);
+  private static final Logger logger = LoggerFactory.getLogger(RegisteredUsersTable.class);
 
   // prefix that identifies a user id
   // user ids are of the form uid:username|yyyyMMddTHHmmSS

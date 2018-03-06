@@ -57,7 +57,7 @@ public class ClearSessionThenLoginServlet extends ServletUtilBase {
     if (s != null) {
       s.invalidate();
       // insert delay to let this propagate out?
-      // attempt to fix non-responsiveness of the Log In
+      // attempt to fix non-responsiveness of the Logger In
       // button upon initial page load...
       try {
         Thread.sleep(1000L);

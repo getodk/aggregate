@@ -21,8 +21,8 @@ import java.util.concurrent.ScheduledFuture;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.CsvGenerator;
@@ -61,7 +61,7 @@ import org.springframework.web.context.ServletContextAware;
 public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     ServletContextAware {
 
-  private Log logger = LogFactory.getLog(WatchdogImpl.class);
+  private Logger logger = LoggerFactory.getLogger(WatchdogImpl.class);
 
   /** cached value of the faster-watchdog-cycle flag */
   private boolean lastFasterWatchdogCycleEnabledFlag = false;

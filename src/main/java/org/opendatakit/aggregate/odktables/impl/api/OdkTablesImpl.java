@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
@@ -93,7 +93,7 @@ public class OdkTablesImpl implements OdkTables {
             .header("Access-Control-Allow-Credentials", "true").build();
       }
     } catch (ODKDatastoreException e) {
-      Log log = LogFactory.getLog(OdkTablesImpl.class);
+      Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
       log.error("Datastore exception in getting the file manifest");
       e.printStackTrace();
     }
@@ -140,7 +140,7 @@ public class OdkTablesImpl implements OdkTables {
           DbInstallationInteractionLog.recordVerificationEntry(installationId, cc);
         }
       } catch ( Exception e ) {
-        LogFactory.getLog(OdkTablesImpl.class).warn("Unable to write verification log entry for " +
+        LoggerFactory.getLogger(OdkTablesImpl.class).warn("Unable to write verification log entry for " +
                     installationId + " user " + cc.getCurrentUser().getUriUser(), e);
       }
 
@@ -149,7 +149,7 @@ public class OdkTablesImpl implements OdkTables {
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
     } catch ( Exception e ) {
-      Log log = LogFactory.getLog(OdkTablesImpl.class);
+      Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
       log.error("Exception retrieving user privileges");
       e.printStackTrace();
 
@@ -200,7 +200,7 @@ public class OdkTablesImpl implements OdkTables {
           try {
             allUsers = SecurityServiceUtil.getAllUsers(true, cc);
           } catch (AccessDeniedException e) {
-            Log log = LogFactory.getLog(OdkTablesImpl.class);
+            Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
             log.error("AccessDeniedException retrieving user list");
             e.printStackTrace();
 
@@ -210,7 +210,7 @@ public class OdkTablesImpl implements OdkTables {
                 .header("Access-Control-Allow-Origin", "*")
                 .header("Access-Control-Allow-Credentials", "true").build();
           } catch (DatastoreFailureException e) {
-            Log log = LogFactory.getLog(OdkTablesImpl.class);
+            Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
             log.error("DatastoreFailureException retrieving user list");
             e.printStackTrace();
 
@@ -261,7 +261,7 @@ public class OdkTablesImpl implements OdkTables {
               mapper.writeValueAsString(body), cc);
         }
       } catch ( Exception e ) {
-        LogFactory.getLog(OdkTablesImpl.class).error("(ignored) Unable to recordChangeConfigurationEntry", e);
+        LoggerFactory.getLogger(OdkTablesImpl.class).error("(ignored) Unable to recordChangeConfigurationEntry", e);
       }
     }
     

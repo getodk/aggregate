@@ -21,8 +21,8 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -50,7 +50,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  */
 public class KmlWorkerImpl {
 
-  private final Log logger = LogFactory.getLog(KmlWorkerImpl.class);
+  private final Logger logger = LoggerFactory.getLogger(KmlWorkerImpl.class);
   private final IForm form;
   private final SubmissionKey persistentResultsKey;
   private final Long attemptCount;

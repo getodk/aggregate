@@ -22,8 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -77,7 +77,7 @@ public class UploadSubmissionsWorkerImpl {
   private static final int DELAY_BETWEEN_RELEASE_RETRIES = 1000;
   private static final int MAX_NUMBER_OF_RELEASE_RETRIES = 10;
 
-  private final Log logger = LogFactory.getLog(UploadSubmissionsWorkerImpl.class);
+  private final Logger logger = LoggerFactory.getLogger(UploadSubmissionsWorkerImpl.class);
   private final String lockId;
   private final CallingContext cc;
   private final boolean useLargerBatchSize;
@@ -336,7 +336,7 @@ public class UploadSubmissionsWorkerImpl {
       // the PAUSED state.
       if (pFsc.getOperationalStatus() != OperationalStatus.BAD_CREDENTIALS) {
         // An authorization failure should have set
-        // the BAD_CREDENTIALS state. Log warning and do it now.
+        // the BAD_CREDENTIALS state. Logger warning and do it now.
         logger.warn("ODKExternalServiceCredentialsException but not yet in BAD_CREDENTIALS state!");
         pFsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
         try {
