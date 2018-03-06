@@ -99,7 +99,16 @@ def versions = [
     mockito       : '2.+'
 ]
 
+configurations.all {
+  exclude group: 'commons-logging', module: 'commons-logging'
+}
+
 dependencies {
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25' // JCL over SLF4J
+  compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
+  compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.25'
+
   compile group: 'org.opendatakit', name: 'odk-tomcatutil', version: versions.odk.tomcatUtil
   compile group: 'org.springframework', name: 'spring-aop', version: versions.spring
   compile group: 'org.springframework', name: 'spring-aspects', version: versions.spring
