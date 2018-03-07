@@ -47,18 +47,11 @@ import org.opendatakit.common.web.CallingContext;
  * 
  */
 public class Submission extends SubmissionSet {
+  private static final Logger logger = LoggerFactory.getLogger(Submission.class);
 
   /**
    * Construct an empty submission for the given form definition.
    * 
-   * @param modelVersion
-   * @param uiVersion
-   * @param uriTopLevelGroup
-   *          -- override the primary key for the top level table.
-   * @param formDefinition
-   * @param submissionDate
-   * @param cc
-   * @throws ODKDatastoreException
    */
   public Submission(Long modelVersion, Long uiVersion, String uriTopLevelGroup, IForm form,
       Date submissionDate, CallingContext cc) throws ODKDatastoreException {
@@ -69,20 +62,13 @@ public class Submission extends SubmissionSet {
   /**
    * Construct a submission from an entity from the data store
    * 
-   * @param submission
-   *          - top level entity of the submission to restore
-   * @param formDefinition
-   *          - the definition of the form
-   * @param cc
-   *          - the CallingContext for this request
-   * @throws ODKDatastoreException
    */
   public Submission(TopLevelDynamicBase submission, IForm form, CallingContext cc)
       throws ODKDatastoreException {
     super(null, submission, form.getTopLevelGroupElement(), form, cc);
   }
 
-  public Submission(String uri, IForm form, CallingContext cc) throws ODKEntityNotFoundException,
+  public Submission(String uri, IForm form, CallingContext cc) throws
       ODKDatastoreException {
     super(null, (TopLevelDynamicBase) cc.getDatastore().getEntity(
         form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), uri,
@@ -91,7 +77,7 @@ public class Submission extends SubmissionSet {
 
   /**
    * Get the time that the submission was created/received
-   * 
+   *
    * @return date of submission
    */
   public Date getSubmissionDate() {
@@ -132,15 +118,6 @@ public class Submission extends SubmissionSet {
    * list. The resulting subset is then rendered (and the resulting row might
    * have no columns).
    * 
-   * @param types
-   *          -- list of e.g., (METADATA, VALUES) to be rendered.
-   * @param propertyNames
-   *          -- joint subset of property names to be rendered.
-   * @param elemFormatter
-   * @param includeParentUid
-   * @param cc
-   * @return rendered Row object
-   * @throws ODKDatastoreException
    */
   public Row getFormattedValuesAsRow(List<FormElementNamespace> types,
       List<FormElementModel> propertyNames, ElementFormatter elemFormatter,
@@ -165,7 +142,7 @@ public class Submission extends SubmissionSet {
       }
     }
 
-    List<FormElementModel> reducedProperties = new ArrayList<FormElementModel>();
+    List<FormElementModel> reducedProperties = new ArrayList<>();
     for (FormElementModel m : propertyNames) {
       if (m.isMetadata() && hasMeta) {
         reducedProperties.add(m);
@@ -181,17 +158,11 @@ public class Submission extends SubmissionSet {
    * Given the list of FormElementNamespaces to render, this renders the
    * namespaces in the order given.
    * 
-   * @param row
-   * @param types
-   * @param elemFormatter
-   * @param includeParentUid
-   * @param cc
-   * @throws ODKDatastoreException
    */
   public void getFormattedNamespaceValuesForRow(Row row, List<FormElementNamespace> types,
       ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc)
       throws ODKDatastoreException {
-    List<FormElementModel> elementList = new ArrayList<FormElementModel>();
+    List<FormElementModel> elementList = new ArrayList<>();
     // get the in-order list of all flattened elements within this submission
     // set...
     List<FormElementModel> allElements = getFormElements();
@@ -228,7 +199,7 @@ public class Submission extends SubmissionSet {
     return resolveSubmissionKeyBeginningAt(1, parts);
   }
 
-  public static final Submission fetchSubmission(List<SubmissionKeyPart> parts, CallingContext cc)
+  public static Submission fetchSubmission(List<SubmissionKeyPart> parts, CallingContext cc)
       throws ODKFormNotFoundException, ODKDatastoreException {
     if (parts == null || parts.size() == 0) {
       throw new IllegalArgumentException("submission key is empty");
@@ -259,10 +230,8 @@ public class Submission extends SubmissionSet {
     try {
       return new Submission(tle, form, cc);
     } catch (ODKDatastoreException e) {
-      Logger logger = LoggerFactory.getLogger(Submission.class);
-      e.printStackTrace();
       logger.error("Unable to reconstruct submission for " + tle.getSchemaName() + "."
-          + tle.getTableName() + " uri " + tle.getUri());
+          + tle.getTableName() + " uri " + tle.getUri(), e);
       
       if ( (e instanceof ODKEntityNotFoundException) ||
            (e instanceof ODKEnumeratedElementException) ) {
@@ -280,7 +249,7 @@ public class Submission extends SubmissionSet {
 
   }
 
-  public static final TopLevelDynamicBase fetchTopLevelSubmissionObject(List<SubmissionKeyPart> parts, CallingContext cc)
+  public static TopLevelDynamicBase fetchTopLevelSubmissionObject(List<SubmissionKeyPart> parts, CallingContext cc)
       throws ODKFormNotFoundException, ODKDatastoreException {
     if (parts == null || parts.size() == 0) {
       throw new IllegalArgumentException("submission key is empty");
@@ -305,9 +274,8 @@ public class Submission extends SubmissionSet {
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
-    TopLevelDynamicBase tle = (TopLevelDynamicBase) ds.getEntity(form.getTopLevelGroupElement()
-        .getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
 
-    return tle;
+    return (TopLevelDynamicBase) ds.getEntity(form.getTopLevelGroupElement()
+        .getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
   }
 }
