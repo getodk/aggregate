@@ -15,9 +15,6 @@
  */
 package org.opendatakit.aggregate.task;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -57,6 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author mitchellsundt@gmail.com
  */
 public class UploadSubmissionsWorkerImpl {
+  private static final Logger logger = LoggerFactory.getLogger(UploadSubmissionsWorkerImpl.class);
 
   // UploadSubmissions are run in the frontend (website) thread on GAE
   // unless fast publishing is enabled, in which case they are thrown
@@ -74,7 +72,6 @@ public class UploadSubmissionsWorkerImpl {
   private static final int DELAY_BETWEEN_RELEASE_RETRIES = 1000;
   private static final int MAX_NUMBER_OF_RELEASE_RETRIES = 10;
 
-  private final Logger logger = LoggerFactory.getLogger(UploadSubmissionsWorkerImpl.class);
   private final String lockId;
   private final CallingContext cc;
   private final boolean useLargerBatchSize;
@@ -94,14 +91,14 @@ public class UploadSubmissionsWorkerImpl {
   }
 
   public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
-    pFsc = fsc;
+    this.pFsc = fsc;
     this.useLargerBatchSize = useLargerBatchSize;
     this.cc = cc;
-    pEsOption = fsc.getExternalServicePublicationOption();
-    lockId = UUID.randomUUID().toString();
+    this.pEsOption = fsc.getExternalServicePublicationOption();
+    this.lockId = UUID.randomUUID().toString();
   }
 
-  public String getUploadSubmissionsTaskLockName() {
+  private String getUploadSubmissionsTaskLockName() {
     return pFsc.getUri();
   }
 
@@ -124,13 +121,13 @@ public class UploadSubmissionsWorkerImpl {
         return;
       }
     } catch (ODKOverQuotaException e) {
-      logger.warn("Quota exceeded.");
+      logger.warn("Quota exceeded.", e);
       return;
     } catch (ODKDatastoreException e) {
-      logger.error("Persistence layer problem: " + e.getMessage());
+      logger.error("Persistence layer problem", e);
       return;
     } catch (Exception e) {
-      logger.error("Unexpected exception: " + e.getMessage());
+      logger.error("Unexpected exception", e);
       throw new ODKExternalServiceException(e);
     }
 
@@ -138,19 +135,10 @@ public class UploadSubmissionsWorkerImpl {
     User user = cc.getCurrentUser();
     TaskLock taskLock = ds.createTaskLock(user);
 
-    boolean locked = false;
     try {
-      if (taskLock.obtainLock(lockId, getUploadSubmissionsTaskLockName(),
-          TaskLockType.UPLOAD_SUBMISSION)) {
-        locked = true;
-      }
-      taskLock = null;
+      taskLock.obtainLock(lockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION);
     } catch (ODKTaskLockException e) {
-      e.printStackTrace();
-    }
-
-    if (!locked) {
-      logger.warn("Unable to acquire lock");
+      logger.warn("Error while trying to obtain a task lock", e);
       return;
     }
 
@@ -161,11 +149,10 @@ public class UploadSubmissionsWorkerImpl {
       }
 
       OperationalStatus opStatus = pFsc.getOperationalStatus();
-      if (opStatus == OperationalStatus.ACTIVE_RETRY ||
-          opStatus == OperationalStatus.ACTIVE) {
+      if (opStatus == OperationalStatus.ACTIVE_RETRY || opStatus == OperationalStatus.ACTIVE) {
         logger.info("Upload invoked when operational status is " + opStatus.name());
       } else {
-        logger.warn("Upload IGNORED when operational status is " + opStatus.name());
+        logger.warn("Upload IGNORED when operational status is " + (opStatus != null ? opStatus.name() : "<null>"));
         return;
       }
 
@@ -196,15 +183,10 @@ public class UploadSubmissionsWorkerImpl {
           throw new IllegalStateException("Unexpected ExternalServiceOption: " + pEsOption.name());
       }
     } catch (ODKExternalServiceException e) {
-      Writer writer = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(writer);
-      e.printStackTrace(printWriter);
-      logger.error(writer.toString());
-      e.printStackTrace();
+      logger.error("External service error", e);
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
-      logger.error("Unexpected exception: " + e.getMessage());
+      logger.error("Unexpected exception", e);
       throw new ODKExternalServiceException(e);
     } finally {
       taskLock = ds.createTaskLock(user);
@@ -221,8 +203,7 @@ public class UploadSubmissionsWorkerImpl {
         }
       } catch (ODKTaskLockException e) {
         // if release fails, it will eventually be cleared...
-        e.printStackTrace();
-        logger.error("Failed trying to release lock");
+        logger.error("Failed trying to release lock", e);
       }
     }
 
@@ -236,7 +217,7 @@ public class UploadSubmissionsWorkerImpl {
       try {
         disableFasterProcessing = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
       } catch (ODKOverQuotaException e) {
-        e.printStackTrace();
+        logger.warn("Quota exceeded.", e);
       }
       uploadSubmissionsBean.createFormUploadTask(pFsc, useLargerBatchSize && !disableFasterProcessing, cc);
     }
@@ -266,7 +247,7 @@ public class UploadSubmissionsWorkerImpl {
       // there are no submissions so uploading is complete
       // this persists pFsc
       pExtService.setUploadCompleted(cc);
-      return (pEsOption == ExternalServicePublicationOption.UPLOAD_N_STREAM);
+      return pEsOption == ExternalServicePublicationOption.UPLOAD_N_STREAM;
     } else {
       logger.info("There are " + submissions.size() + " submissions available for upload");
       // this persists pFsc
@@ -319,7 +300,7 @@ public class UploadSubmissionsWorkerImpl {
         }
       }
     } catch (ODKExternalServiceCredentialsException e) {
-      e.printStackTrace();
+      logger.error("External service credentials error", e);
       // The main goal of this catch is to avoid
       // silently transitioning BAD_CREDENTIALS into
       // the PAUSED state.
@@ -328,45 +309,30 @@ public class UploadSubmissionsWorkerImpl {
         // the BAD_CREDENTIALS state. Logger warning and do it now.
         logger.warn("ODKExternalServiceCredentialsException but not yet in BAD_CREDENTIALS state!");
         pFsc.setOperationalStatus(OperationalStatus.BAD_CREDENTIALS);
-        try {
-          ds.putEntity(pFsc, user);
-        } catch (ODKEntityPersistException ex) {
-          // ignore -- important exception is the external service exception
-          ex.printStackTrace();
-        } catch (ODKOverQuotaException ex) {
-          // ignore -- important exception is the external service exception
-          ex.printStackTrace();
-        }
+        updateOperationalStatus(ds, user);
       }
       throw e;
     } catch (ODKExternalServiceException e) {
-      e.printStackTrace();
+      logger.error("Error", e);
       ExternalServiceUtils.pauseFscOperationalStatus(pFsc);
-      try {
-        ds.putEntity(pFsc, user);
-      } catch (ODKEntityPersistException ex) {
-        // ignore -- important exception is the external service exception
-        ex.printStackTrace();
-      } catch (ODKOverQuotaException ex) {
-        // ignore -- important exception is the external service exception
-        ex.printStackTrace();
-      }
+      updateOperationalStatus(ds, user);
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Error", e);
       ExternalServiceUtils.pauseFscOperationalStatus(pFsc);
-      try {
-        ds.putEntity(pFsc, user);
-      } catch (ODKEntityPersistException ex) {
-        // ignore -- important exception is the external service exception
-        ex.printStackTrace();
-      } catch (ODKOverQuotaException ex) {
-        // ignore -- important exception is the external service exception
-        ex.printStackTrace();
-      }
+      updateOperationalStatus(ds, user);
       throw new ODKExternalServiceException(e);
     }
 
+  }
+
+  private void updateOperationalStatus(Datastore ds, User user) {
+    try {
+      ds.putEntity(pFsc, user);
+    } catch (ODKEntityPersistException | ODKOverQuotaException ex) {
+      // ignore -- important exception is the external service exception
+      logger.warn("Error putting entity into datastore", ex);
+    }
   }
 
   private int renewTaskLock(int counter) throws ODKTaskLockException, ODKExternalServiceException {
@@ -385,7 +351,6 @@ public class UploadSubmissionsWorkerImpl {
         logger.error("UploadSubmission task lock -- FAILED renewal -- records transmitted: " + counter);
         throw new ODKExternalServiceException("UploadSubmission TaskLock renewal failed");
       } else {
-        taskLock = null;
         logger.info("UploadSubmission task lock renewed -- records transmitted: " + counter);
         counter = 0;
         lastUpdateTimestamp = System.currentTimeMillis();
@@ -397,15 +362,13 @@ public class UploadSubmissionsWorkerImpl {
   private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate, String uriLast) throws ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
     QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, endDate, uriLast, cc);
-    List<Submission> submissions = query.getResultSubmissions(cc);
-    return submissions;
+    return query.getResultSubmissions(cc);
   }
 
   private List<Submission> querySubmissionsStartDate(Date startDate, String uriLast) throws ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
     // (excluding the very recent submissions that haven't settled yet).
     QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, uriLast, cc);
-    List<Submission> submissions = query.getResultSubmissions(cc);
-    return submissions;
+    return query.getResultSubmissions(cc);
   }
 }
