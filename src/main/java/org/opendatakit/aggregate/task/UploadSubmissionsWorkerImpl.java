@@ -21,16 +21,12 @@ import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.ExternalServiceUtils;
@@ -50,6 +46,8 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common worker implementation for the publishing of data to an external
@@ -57,7 +55,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class UploadSubmissionsWorkerImpl {
 
@@ -96,8 +93,7 @@ public class UploadSubmissionsWorkerImpl {
     }
   }
 
-  public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, boolean useLargerBatchSize,
-      CallingContext cc) {
+  public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
     pFsc = fsc;
     this.useLargerBatchSize = useLargerBatchSize;
     this.cc = cc;
@@ -109,8 +105,7 @@ public class UploadSubmissionsWorkerImpl {
     return pFsc.getUri();
   }
 
-  public void uploadAllSubmissions() throws ODKEntityNotFoundException,
-      ODKExternalServiceException, ODKFormNotFoundException {
+  public void uploadAllSubmissions() throws ODKEntityNotFoundException, ODKExternalServiceException {
     // by default, don't requeue the request on failures or exceptions.
     // In those cases, let the watchdog restart the activity because
     // the remedy will likely take longer than the requeue delay.
@@ -120,8 +115,8 @@ public class UploadSubmissionsWorkerImpl {
     try {
       pExtService = pFsc.getExternalService(cc);
       if (pExtService == null) {
-          logger.error("Upload not performed -- obsolete external service publisher.");
-          return;
+        logger.error("Upload not performed -- obsolete external service publisher.");
+        return;
       }
       form = FormFactory.retrieveFormByFormId(pFsc.getFormId(), cc);
       if (!form.hasValidFormDefinition()) {
@@ -176,30 +171,29 @@ public class UploadSubmissionsWorkerImpl {
 
       // opStatus is one of ACTIVE, ACTIVE_RETRY
       switch (pEsOption) {
-      case UPLOAD_ONLY:
-        if (pFsc.getUploadCompleted()) {
-          // leave the record so we know action has occurred.
-          logger
-              .warn("Upload completed for UPLOAD_ONLY but formServiceCursor operational status slow to be revised");
-          // update this value here, but it should have already been set...
-          pFsc.setOperationalStatus(OperationalStatus.COMPLETED);
-          ds.putEntity(pFsc, user);
-        } else {
-          reQueue = uploadSubmissions();
-        }
-        break;
-      case STREAM_ONLY:
-        reQueue = streamSubmissions();
-        break;
-      case UPLOAD_N_STREAM:
-        if (!pFsc.getUploadCompleted()) {
-          reQueue = uploadSubmissions();
-        } else {
+        case UPLOAD_ONLY:
+          if (pFsc.getUploadCompleted()) {
+            // leave the record so we know action has occurred.
+            logger.warn("Upload completed for UPLOAD_ONLY but formServiceCursor operational status slow to be revised");
+            // update this value here, but it should have already been set...
+            pFsc.setOperationalStatus(OperationalStatus.COMPLETED);
+            ds.putEntity(pFsc, user);
+          } else {
+            reQueue = uploadSubmissions();
+          }
+          break;
+        case STREAM_ONLY:
           reQueue = streamSubmissions();
-        }
-        break;
-      default:
-        throw new IllegalStateException("Unexpected ExternalServiceOption: " + pEsOption.name());
+          break;
+        case UPLOAD_N_STREAM:
+          if (!pFsc.getUploadCompleted()) {
+            reQueue = uploadSubmissions();
+          } else {
+            reQueue = streamSubmissions();
+          }
+          break;
+        default:
+          throw new IllegalStateException("Unexpected ExternalServiceOption: " + pEsOption.name());
       }
     } catch (ODKExternalServiceException e) {
       Writer writer = new StringWriter();
@@ -232,22 +226,19 @@ public class UploadSubmissionsWorkerImpl {
       }
     }
 
-   
+
     if (reQueue) {
       // create another task to continue upload
-      UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc
-          .getBean(BeanDefs.UPLOAD_TASK_BEAN);
+      UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
       // schedule it on the background thread only if we are not disabling
       // background activities and it started on the background thread.
       boolean disableFasterProcessing = true;
       try {
-        disableFasterProcessing = ServerPreferencesProperties
-            .getFasterBackgroundActionsDisabled(cc);
+        disableFasterProcessing = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
       } catch (ODKOverQuotaException e) {
         e.printStackTrace();
       }
-      uploadSubmissionsBean.createFormUploadTask(pFsc, useLargerBatchSize
-          && !disableFasterProcessing, cc);
+      uploadSubmissionsBean.createFormUploadTask(pFsc, useLargerBatchSize && !disableFasterProcessing, cc);
     }
   }
 
@@ -285,8 +276,7 @@ public class UploadSubmissionsWorkerImpl {
     return true;
   }
 
-  private boolean streamSubmissions() throws ODKFormNotFoundException, ODKIncompleteSubmissionData,
-      ODKDatastoreException, ODKExternalServiceException {
+  private boolean streamSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException, ODKExternalServiceException {
 
     Date startDate = pFsc.getLastStreamingCursorDate();
     if (startDate == null) {
@@ -307,8 +297,7 @@ public class UploadSubmissionsWorkerImpl {
     return false;
   }
 
-  private void sendSubmissions(List<Submission> submissionsToSend, boolean streaming)
-      throws ODKExternalServiceException {
+  private void sendSubmissions(List<Submission> submissionsToSend, boolean streaming) throws ODKExternalServiceException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     try {
@@ -388,15 +377,12 @@ public class UploadSubmissionsWorkerImpl {
     // budget for the lock. This adjusts for very slow external service
     // response times, though if the response time is more than the lock
     // expiration timeout, we can still get into trouble.
-    if ((System.currentTimeMillis() - lastUpdateTimestamp + 1) > (TaskLockType.UPLOAD_SUBMISSION
-        .getLockExpirationTimeout() / 3)) {
+    if ((System.currentTimeMillis() - lastUpdateTimestamp + 1) > (TaskLockType.UPLOAD_SUBMISSION.getLockExpirationTimeout() / 3)) {
       // renew lock
       TaskLock taskLock = ds.createTaskLock(user);
       // TODO: figure out what to do if this returns false
-      if (!taskLock.renewLock(lockId, getUploadSubmissionsTaskLockName(),
-          TaskLockType.UPLOAD_SUBMISSION)) {
-        logger.error("UploadSubmission task lock -- FAILED renewal -- records transmitted: "
-            + counter);
+      if (!taskLock.renewLock(lockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION)) {
+        logger.error("UploadSubmission task lock -- FAILED renewal -- records transmitted: " + counter);
         throw new ODKExternalServiceException("UploadSubmission TaskLock renewal failed");
       } else {
         taskLock = null;
@@ -408,17 +394,14 @@ public class UploadSubmissionsWorkerImpl {
     return counter;
   }
 
-  private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate, String uriLast)
-      throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
+  private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate, String uriLast) throws ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
-    QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, endDate,
-        uriLast, cc);
+    QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, endDate, uriLast, cc);
     List<Submission> submissions = query.getResultSubmissions(cc);
     return submissions;
   }
 
-  private List<Submission> querySubmissionsStartDate(Date startDate, String uriLast)
-      throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
+  private List<Submission> querySubmissionsStartDate(Date startDate, String uriLast) throws ODKIncompleteSubmissionData, ODKDatastoreException {
     // query for next set of submissions
     // (excluding the very recent submissions that haven't settled yet).
     QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, uriLast, cc);
