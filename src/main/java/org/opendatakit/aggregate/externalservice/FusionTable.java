@@ -110,7 +110,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   private FusionTable(FusionTable2ParameterTable entity, FormServiceCursor formServiceCursor,
       IForm form, CallingContext cc) throws ODKExternalServiceException {
     super(FUSION_TABLE_OAUTH2_SCOPE, form, formServiceCursor, new FusionTableElementFormatter(
-        cc.getServerURL()), new FusionTableHeaderFormatter(), logger, cc);
+        cc.getServerURL()), new FusionTableHeaderFormatter(), cc);
     this.objectEntity = entity;
   }
 
