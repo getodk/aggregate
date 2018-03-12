@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
 import org.opendatakit.aggregate.odktables.OdkTablesLockTemplate;
 import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;

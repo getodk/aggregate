@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.odktables.impl.api.FileServiceImpl;
 import org.opendatakit.aggregate.odktables.relation.DbTableFileInfo;

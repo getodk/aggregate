@@ -23,7 +23,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;

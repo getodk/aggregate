@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;

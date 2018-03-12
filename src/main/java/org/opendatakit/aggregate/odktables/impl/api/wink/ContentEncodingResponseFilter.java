@@ -60,10 +60,8 @@ import javax.ws.rs.ext.RuntimeDelegate;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.apache.wink.common.internal.http.AcceptEncoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Copied mostly verbatim from org.apache.wink.server.internal.servlet.contentencode

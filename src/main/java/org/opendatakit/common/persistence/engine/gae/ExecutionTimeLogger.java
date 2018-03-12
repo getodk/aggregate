@@ -14,7 +14,7 @@
 package org.opendatakit.common.persistence.engine.gae;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 
 /**

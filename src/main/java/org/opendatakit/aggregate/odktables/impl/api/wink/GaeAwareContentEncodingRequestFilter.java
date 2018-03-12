@@ -25,7 +25,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.apache.wink.server.internal.servlet.contentencode.ContentEncodingRequestFilter;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.security.Realm;
