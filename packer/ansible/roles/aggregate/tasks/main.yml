@@ -11,25 +11,20 @@
     tomcat_webapps_dir: /var/lib/tomcat8/webapps
     motd_dir: /etc/update-motd.d
 
-- name: setup database - create user aggregate
-  command: psql -c "CREATE USER aggregate WITH UNENCRYPTED PASSWORD 'aggregate';"
+- name: copy db init script
+  copy:
+    src: 'init.sql'
+    dest: '/tmp/init.sql'
+    mode: 0644
+
+- name: setup database
+  command: psql -f /tmp/init.sql
   become_user: postgres
 
-- name: setup database - create database aggregate
-  command: psql -c "CREATE DATABASE aggregate WITH OWNER aggregate;"
-  become_user: postgres
-
-- name: setup database - grant on database aggregate
-  command: psql -c "GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;"
-  become_user: postgres
-
-- name: setup database - create schema aggregate
-  command: psql -c "CREATE SCHEMA aggregate;" aggregate
-  become_user: postgres
-
-- name: setup database - grant on schema aggregate.aggregate
-  command: psql -c "GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk;" aggregate
-  become_user: postgres
+- name: clean db init script
+  file:
+      state: absent
+      path: "/tmp/init.sql"
 
 - name: Clean webapps dir
   file:

@@ -9,13 +9,13 @@ task packerDownloadPacker() {
     if (!file('packer/packer').exists()) {
       println("Downloading Packer binary")
       download {
-        src packerZip
+        src packer
         dest 'packer/packer.zip'
       }
       "unzip packer/packer.zip -d packer".execute()
       "rm packer/packer.zip".execute()
     } else
-      println("Packer 1.1.3 linux x64 binary is already present")
+      println("Packer binary is already present")
   }
 }
 
@@ -54,7 +54,7 @@ task packerCreateWAR(dependsOn: [packerPrepareProject], type: Zip) {
   destinationDir file("${buildDir}/packer/ansible/roles/aggregate/files/")
 }
 
-task packerBuild(dependsOn: [packerCreateWAR], type: Exec) {
+task packerBuild(dependsOn: [build, packerCreateWAR], type: Exec) {
   workingDir "${buildDir}/packer"
 
   commandLine "./packer", "build", "-force", "-only=virtualbox-iso", "aggregate.json"
