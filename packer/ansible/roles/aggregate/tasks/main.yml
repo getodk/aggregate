@@ -51,3 +51,12 @@
     src: 'motd/'
     dest: '{{ motd_dir }}'
     mode: 0755
+
+- name: install config tool
+  copy:
+    src: 'aggregate-config.sh'
+    dest: '/usr/local/bin/aggregate-config'
+    mode: 0755
+
+- name: enable ssh access for root
+  command: echo "PermitRootLogin yes"

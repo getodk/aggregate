@@ -1,12 +1,22 @@
 #!/bin/sh
 
-TOMCAT_PORT=`cat /etc/tomcat8/server.xml | grep "<Connector" | grep "HTTP" | awk '{print $2}' | awk -F'"' '{print $2}'`
-IPS=`ip address | grep "inet " | awk  '{print $2}' | awk -F'/' '{print $1}'`
+PROPS_FILE=/var/lib/tomcat8/webapps/ROOT/WEB-INF/classes/security.properties
 
-echo "You can browse Aggregate at:"
-if [ ${TOMCAT_PORT} -eq 80 ]; then
-  echo "$IPS" | while IFS= read -r line ; do echo "  - http://${line}"; done
+rawHostname=$(grep hostname ${PROPS_FILE} | awk '{split($0,a,"="); print a[2]}')
+hostname=${rawHostname:-localhost}
+httpPort=$(grep port ${PROPS_FILE} | awk '{split($0,a,"="); print a[2]}')
+httpsPort=$(grep securePort ${PROPS_FILE} | awk '{split($0,a,"="); print a[2]}')
+
+
+echo "ODK Aggregate is running at"
+if [ ${httpPort} = "80" ]; then
+  echo "  - http://${hostname}"
 else
-  echo "$IPS" | while IFS= read -r line ; do echo "  - http://${line}:${TOMCAT_PORT}"; done
+  echo "  - http://${hostname}:${httpPort}"
+fi
+if [ ${httpsPort} = "443" ]; then
+  echo "  - https://${hostname}"
+else
+  echo "  - https://${hostname}:${httpsPort}"
 fi
 echo ""
