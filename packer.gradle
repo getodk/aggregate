@@ -9,7 +9,7 @@ task packerDownloadPacker() {
     if (!file('packer/packer').exists()) {
       println("Downloading Packer binary")
       download {
-        src packer
+        src packerZip
         dest 'packer/packer.zip'
       }
       "unzip packer/packer.zip -d packer".execute()
