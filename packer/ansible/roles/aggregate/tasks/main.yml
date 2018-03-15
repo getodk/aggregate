@@ -13,8 +13,8 @@
 
 - name: copy db init script
   copy:
-    src: 'init.sql'
-    dest: '/tmp/init.sql'
+    src: init.sql
+    dest: /tmp/init.sql
     mode: 0644
 
 - name: setup database
@@ -24,38 +24,38 @@
 - name: clean db init script
   file:
       state: absent
-      path: "/tmp/init.sql"
+      path: /tmp/init.sql
 
 - name: Clean webapps dir
   file:
     state: absent
-    path: "{{ tomcat_webapps_dir }}/"
+    path: '{{ tomcat_webapps_dir }}/'
 
 - name: Create webapps dir
   file:
     state: directory
-    path: "{{ tomcat_webapps_dir }}/ROOT"
+    path: '{{ tomcat_webapps_dir }}/ROOT'
 
 - name: Deploy Aggregate
   unarchive:
-    src: 'ROOT.war'
+    src: ROOT.war
     dest: '{{ tomcat_webapps_dir }}/ROOT'
 
 - name: Clean existing motd scripts
   file:
     state: absent
-    path: "{{ motd_dir }}/"
+    path: '{{ motd_dir }}/'
 
 - name: copy motd scripts
   copy:
-    src: 'motd/'
+    src: motd/
     dest: '{{ motd_dir }}'
     mode: 0755
 
 - name: install config tool
   copy:
-    src: 'aggregate-config.sh'
-    dest: '/usr/local/bin/aggregate-config'
+    src: aggregate-config.sh
+    dest: /usr/local/bin/aggregate-config
     mode: 0755
 
 - name: enable ssh access for root
