@@ -1,4 +1,5 @@
 import static org.opendatakit.aggregate.gradle.Util.setPropertiesValue
+import static org.opendatakit.aggregate.gradle.Util.getVersionName
 
 task packerClean() {
   delete 'build/packer'
@@ -29,6 +30,7 @@ task packerPrepareProject(dependsOn: [packerClean, packerDownloadPacker], type: 
   }
 
   doLast {
+    new File("${buildDir}/packer/ansible/roles/aggregate/files/aggregate-version").text = getVersionName()
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.url", "jdbc:postgresql:///aggregate?autoDeserialize=true")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.username", "aggregate")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.password", "aggregate")
