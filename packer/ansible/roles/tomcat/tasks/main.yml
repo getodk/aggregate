@@ -1,0 +1,33 @@
+---
+
+- name: install packages
+  apt: 
+    pkg: '{{ item }}'
+    install_recommends: no
+  with_items:
+    - tomcat8
+    - authbind
+    - libservlet3.1-java
+
+- name: copy server.xml
+  copy: 
+    src: server.xml
+    dest: /etc/tomcat8/server.xml
+    group: tomcat8
+    mode: 0640
+
+- name: copy tomcat8
+  copy: 
+    src: tomcat8
+    dest: /etc/default/tomcat8
+    mode: 0644
+
+- name: configure authbind
+  file: 
+    path: '/etc/authbind/byport/{{ item }}'
+    state: touch
+    owner: tomcat8
+    mode: 0744
+  with_items:
+    - 80
+    - 443

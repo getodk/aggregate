@@ -1,0 +1,60 @@
+---
+- name: install packages
+  apt:
+    pkg: '{{ item }}'
+    install_recommends: no
+  with_items:
+    - unzip
+
+- name: set facts
+  set_fact:
+    tomcat_webapps_dir: /var/lib/tomcat8/webapps
+    motd_dir: /etc/update-motd.d
+
+- name: copy db init script
+  copy:
+    src: init.sql
+    dest: /tmp/init.sql
+    mode: 0644
+
+- name: setup database
+  command: psql -f /tmp/init.sql
+  become_user: postgres
+
+- name: clean db init script
+  file:
+      state: absent
+      path: /tmp/init.sql
+
+- name: Clean webapps dir
+  file:
+    state: absent
+    path: '{{ tomcat_webapps_dir }}/'
+
+- name: Create webapps dir
+  file:
+    state: directory
+    path: '{{ tomcat_webapps_dir }}/ROOT'
+
+- name: Deploy Aggregate
+  unarchive:
+    src: ROOT.war
+    dest: '{{ tomcat_webapps_dir }}/ROOT'
+
+- name: install config tool
+  copy:
+    src: aggregate-config.sh
+    dest: /usr/local/bin/aggregate-config
+    mode: 0755
+
+- name: install report ips script
+  copy:
+    src: aggregate-report-ips.sh
+    dest: /usr/local/bin/aggregate-report-ips
+    mode: 0755
+
+- name: install update issue script
+  copy:
+    src: aggregate-update-issue.sh
+    dest: /usr/local/bin/aggregate-update-issue
+    mode: 0755

@@ -1,0 +1,61 @@
+import static org.opendatakit.aggregate.gradle.Util.setPropertiesValue
+
+task packerClean() {
+  delete 'build/packer'
+}
+
+task packerDownloadPacker() {
+  doLast {
+    if (!file('packer/packer').exists()) {
+      println("Downloading Packer binary")
+      download {
+        src packer
+        dest 'packer/packer.zip'
+      }
+      "unzip packer/packer.zip -d packer".execute()
+      "rm packer/packer.zip".execute()
+    } else
+      println("Packer binary is already present")
+  }
+}
+
+
+task packerPrepareProject(dependsOn: [packerClean, packerDownloadPacker], type: Copy) {
+  into "${buildDir}/packer"
+  from fileTree(dir: 'packer')
+
+  into('ansible/roles/aggregate/files/ROOT') {
+    from zipTree("${buildDir}/libs/${archivesBaseName}-${version}.war")
+  }
+
+  doLast {
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.url", "jdbc:postgresql:///aggregate?autoDeserialize=true")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.username", "aggregate")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.password", "aggregate")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.schema", "aggregate")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.realm.realmString", "ODK Aggregate VM")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.channelType", "ANY_CHANNEL")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "wink.handlersFactoryClass", "org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.superUserUsername", "aggregate")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.superUser", "")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.port", "10080")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.securePort", "10443")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.deviceAuthentication", "digest")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.hostname", "")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.secureChannelType", "ANY_CHANNEL")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.help.about", "auto-generated on 1970-01-01T00:00:00+0000 for ODK Aggregate VM")
+  }
+}
+
+task packerCreateWAR(dependsOn: [packerPrepareProject], type: Zip) {
+  from "${buildDir}/packer/ansible/roles/aggregate/files/ROOT/"
+  include '**/*'
+  archiveName "ROOT.war"
+  destinationDir file("${buildDir}/packer/ansible/roles/aggregate/files/")
+}
+
+task packerBuild(dependsOn: [build, packerCreateWAR], type: Exec) {
+  workingDir "${buildDir}/packer"
+
+  commandLine "./packer", "build", "-force", "-only=virtualbox-iso", "aggregate.json"
+}

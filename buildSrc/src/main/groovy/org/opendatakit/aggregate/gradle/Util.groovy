@@ -1,5 +1,7 @@
 package org.opendatakit.aggregate.gradle
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -30,5 +32,12 @@ class Util {
     props.setProperty(key, value.toString())
     props.store(propsFile.newWriter(), null)
     println("Set ${path}:${key} to \"${value}\"")
+  }
+
+  static String getVersionName() {
+    if (Os.isFamily(Os.FAMILY_WINDOWS))
+      "cmd /c git describe --tags --dirty --always".execute().text.trim()
+    else
+      "git describe --tags --dirty --always".execute().text.trim()
   }
 }

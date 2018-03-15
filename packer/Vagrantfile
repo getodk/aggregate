@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "debian/stretch64"  
+  config.vm.network "private_network", ip: "192.168.255.11"
+
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  config.nfs.functional = false
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "ansible/playbook.yml"
+    ansible.config_file = "ansible/ansible.cfg"
+  end
+
+end
