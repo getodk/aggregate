@@ -56,9 +56,7 @@ echo "root:aggregate" | chpasswd
 chage -d 0 root
 systemctl disable rc-local.service
 rm /etc/sudoers.d/99_vagrant;
-echo '#!/usr/bin/env bash' > /etc/rc.local
-echo 'aggregate-update-issue' >> /etc/rc.local
-aggregate-update-issue
+rm /etc/rc.local
 EOL
 
 # Install script

@@ -58,3 +58,15 @@
     src: aggregate-update-issue.sh
     dest: /usr/local/bin/aggregate-update-issue
     mode: 0755
+
+- name: install version file
+  copy:
+    src: aggregate-version
+    dest: /usr/local/bin/aggregate-version
+    mode: 0644
+
+- name: Link update issue script on dhcp exit hook
+  file:
+    state: link
+    src: /usr/local/bin/aggregate-update-issue
+    dest: /etc/dhcp/dhclient-exit-hooks.d/aggregate-update-issue
