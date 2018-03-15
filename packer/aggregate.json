@@ -76,12 +76,6 @@
           "{{.Name}}",
           "--natpf1",
           "guest_https,tcp,,10443,,443"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--natpf1",
-          "guest_ssh,tcp,,10022,,22"
         ]
       ],
       "virtualbox_version_file": ".vbox_version",
