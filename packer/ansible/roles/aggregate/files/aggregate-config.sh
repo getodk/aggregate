@@ -37,7 +37,7 @@ esac
 done
 set -- "${POSITIONAL[@]}"
 
-help() {
+showHelp() {
   echo "Usage: aggregate-config <flags> [<arguments>...]"
   echo ""
   echo "Flags:"
@@ -52,14 +52,14 @@ help() {
 }
 
 if [ ${HELP} = YES ]; then
-  help
+  showHelp
   exit 0
 fi
 
 if [ ${HELP} = NO ] && [ -z ${FQDN} ] && [ -z ${HTTP_PORT} ] && [ -z ${HTTPS_PORT} ]; then
   echo "Error: You need to set at least one argument"
   echo ""
-  help
+  showHelp
   exit 1
 fi
 
