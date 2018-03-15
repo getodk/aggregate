@@ -9,4 +9,4 @@ gaeEmail=some.email@example.org
 
 # Packer binary comes in a ZIP and can be downloaded from https://releases.hashicorp.com/packer
 # You need to set this variable to the corresponding version of your OS
-packer=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_linux_amd64.zip
+packerZip=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_linux_amd64.zip

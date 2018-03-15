@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-
-aggregate-report-ips > /etc/issue
+/usr/local/bin/aggregate-report-ips > /etc/issue
