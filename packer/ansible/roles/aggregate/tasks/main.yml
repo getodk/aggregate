@@ -58,9 +58,3 @@
     src: aggregate-update-issue.sh
     dest: /usr/local/bin/aggregate-update-issue
     mode: 0755
-
-- name: install rc.local.sh script
-  copy:
-    src: rc.local.sh
-    dest: /etc/rc.local
-    mode: 0755

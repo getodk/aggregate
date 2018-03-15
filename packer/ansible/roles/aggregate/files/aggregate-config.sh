@@ -99,6 +99,7 @@ echo "Starting Tomcat. Please wait..."
 echo ""
 service tomcat8 start
 echo "Done"
+echo ""
 
 aggregate-update-issue
 aggregate-report-ips
