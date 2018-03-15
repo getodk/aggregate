@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.odktables.importexport;
 import java.io.BufferedReader;
 import java.util.List;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -62,7 +62,7 @@ public class CsvUtil {
   public boolean importNewTable(BufferedReader buffReader, String tableName, CallingContext cc)
       throws ImportFromCSVExceptionClient, ETagMismatchExceptionClient,
       PermissionDeniedExceptionClient, EntityNotFoundExceptionClient, BadColumnNameExceptionClient {
-    LogFactory.getLog(getClass()).error("importNewTable out of date and is unimplemented!");
+    LoggerFactory.getLogger(getClass()).error("importNewTable out of date and is unimplemented!");
     return false;
     // List<ColumnClient> columns = new ArrayList<ColumnClient>();
     // try {

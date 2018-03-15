@@ -31,7 +31,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.apache.http.NameValuePair;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
@@ -63,6 +63,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Permission;
+import org.slf4j.LoggerFactory;
 
 /**
  * Refactoring and base implementation using the new gdata APIs for accessing
@@ -72,6 +73,7 @@ import com.google.api.services.drive.model.Permission;
  *
  */
 public abstract class GoogleOauth2ExternalService extends AbstractExternalService {
+  private static final Logger oauth2logger = LoggerFactory.getLogger(GoogleOauth2ExternalService.class);
 
   private static final String NO_EMAIL_SPECIFIED_ERROR = "No email specified to add file permission to";
   private static final String NO_PERM_RETURNED = "GOT No permssion returned in the response";
@@ -81,17 +83,13 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
   protected GoogleCredential credential;
   protected HttpTransport httpTransport;
 
-  protected final Log oauth2logger;
-
   protected HttpRequestFactory requestFactory;
 
   protected GoogleOauth2ExternalService(String credentialScope, IForm form,
       FormServiceCursor formServiceCursor, ElementFormatter formatter,
-      HeaderFormatter headerFormatter, Log logger, CallingContext cc)
+      HeaderFormatter headerFormatter, CallingContext cc)
       throws ODKExternalServiceCredentialsException, ODKExternalServiceException {
     super(form, formServiceCursor, formatter, headerFormatter, cc);
-
-    this.oauth2logger = logger;
 
     try {
       this.credential = getCredential(credentialScope, cc);
@@ -117,7 +115,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
           User user = cc.getCurrentUser();
           ds.putEntity(fsc, user);
         } catch (Exception e1) {
-          oauth2logger.error("Unable to persist bad credentials status" + e1.toString());
+          oauth2logger.error("Unable to persist bad credentials status", e1);
           throw new ODKExternalServiceException("unable to persist bad credentials status", e1);
         }
       }
@@ -165,7 +163,6 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
       credential.refreshToken();
       return credential;
     } catch (Exception e) {
-      e.printStackTrace();
       throw new ODKExternalServiceCredentialsException(e);
     }
   }

@@ -30,8 +30,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.javarosa.core.model.instance.TreeElement;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -75,7 +75,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
 
-  private static final Log log = LogFactory.getLog(FormParserForJavaRosa.class.getName());
+  private static final Logger log = LoggerFactory.getLogger(FormParserForJavaRosa.class.getName());
 
   private static final long FIFTEEN_MINUTES_IN_MILLISECONDS = 15 * 60 * 1000L;
 

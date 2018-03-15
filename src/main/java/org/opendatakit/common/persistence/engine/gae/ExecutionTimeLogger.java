@@ -13,8 +13,8 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 
 /**
@@ -29,16 +29,16 @@ final class ExecutionTimeLogger {
   private final String loggingContextTag;
   private final CommonFieldsBase relation;
   private final long startApiTime;
-  private final Log logger;
-  private final Log queryStringLogger;
+  private final Logger logger;
+  private final Logger queryStringLogger;
   private long istartApiTime;
   String queryString = null;
 
   ExecutionTimeLogger(DatastoreImpl datastore, String loggingContextTag, CommonFieldsBase relation) {
     this.loggingContextTag = loggingContextTag;
     this.relation = relation;
-    this.logger = LogFactory.getLog(ExecutionTimeLogger.class);
-    this.queryStringLogger = LogFactory.getLog("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
+    this.logger = LoggerFactory.getLogger(ExecutionTimeLogger.class);
+    this.queryStringLogger = LoggerFactory.getLogger("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
     QueryImpl.updateCostLoggingThreshold(datastore);
 
     istartApiTime = startApiTime = System.currentTimeMillis();

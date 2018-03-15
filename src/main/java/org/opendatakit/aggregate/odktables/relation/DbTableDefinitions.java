@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Relation;
@@ -151,7 +151,7 @@ public class DbTableDefinitions extends Relation {
     }
 
     if (list.size() != 1) {
-      LogFactory.getLog(DbTableDefinitions.class.getName()).warn(
+      LoggerFactory.getLogger(DbTableDefinitions.class.getName()).warn(
           "Multiple DbTableDefinitions records for table id " + tableId + " and schemaETag "
               + schemaETag);
     }

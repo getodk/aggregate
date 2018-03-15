@@ -24,8 +24,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.utils.OutOfBandUserFetcher;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -50,7 +50,7 @@ import org.springframework.web.filter.GenericFilterBean;
  */
 public class OutOfBandUserFilter extends GenericFilterBean {
 
-  Log logger = LogFactory.getLog(OutOfBandUserFilter.class);
+  Logger logger = LoggerFactory.getLogger(OutOfBandUserFilter.class);
   
   AuthenticationProvider authenticationProvider = null;
   OutOfBandUserFetcher outOfBandUserFetcher = null;

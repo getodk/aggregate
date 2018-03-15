@@ -15,18 +15,15 @@
  */
 package org.opendatakit.aggregate.task.gae.servlet;
 
+import com.google.appengine.api.modules.ModulesService;
+import com.google.appengine.api.modules.ModulesServiceFactory;
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
@@ -34,15 +31,12 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
-
-import com.google.appengine.api.modules.ModulesService;
-import com.google.appengine.api.modules.ModulesServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class UploadSubmissionsTaskServlet extends ServletUtilBase {
   /**
@@ -50,7 +44,7 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = 4295412985320942608L;
 
-  private static final Log logger = LogFactory.getLog(UploadSubmissionsTaskServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(UploadSubmissionsTaskServlet.class);
 
   /**
    * URI from base
@@ -61,7 +55,7 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
    * Handler for HTTP Get request to create xform upload page
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -81,20 +75,12 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
     try {
       fsc = FormServiceCursor.getFormServiceCursor(fscUri, cc);
     } catch (ODKEntityNotFoundException e) {
-      // TODO: fix bug we should not be generating tasks for fsc that don't
-      // exist
-      // however not critical bug as execution path dies with this try/catch
-      logger.error("BUG: we generated an task for a form service cursor that didn't exist"
-          + e.toString());
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    } catch (ODKOverQuotaException e) {
-      logger.error("Over quota." + e.toString());
+      // TODO: fix bug we should not be generating tasks for fsc that don't exist however not critical bug as execution path dies with this try/catch
+      logger.error("BUG: we generated an task for a form service cursor that didn't exist", e);
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      logger.error("Datastore failure." + e.toString());
+      logger.error("Upload submission error", e);
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
     }
@@ -109,24 +95,9 @@ public class UploadSubmissionsTaskServlet extends ServletUtilBase {
       worker.uploadAllSubmissions();
       logger.info("ending successful servlet processing");
       resp.setStatus(HttpServletResponse.SC_ACCEPTED);
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      logger.error(e.toString());
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    } catch (ODKExternalServiceException e) {
-      logger.error(e.toString());
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    } catch (ODKFormNotFoundException e) {
-      logger.error(e.toString());
-      odkIdNotFoundError(resp);
-      return;
     } catch (Exception e) {
-      e.printStackTrace();
-      logger.error(e.toString());
+      logger.error("Upload submission error", e);
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
     }
   }
 }

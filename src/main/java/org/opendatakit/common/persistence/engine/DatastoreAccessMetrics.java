@@ -16,8 +16,8 @@ package org.opendatakit.common.persistence.engine;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.utils.WebUtils;
@@ -35,7 +35,7 @@ import org.opendatakit.common.utils.WebUtils;
  */
 public final class DatastoreAccessMetrics {
 
-  private static final Log logger = LogFactory.getLog(DatastoreAccessMetrics.class);
+  private static final Logger logger = LoggerFactory.getLogger(DatastoreAccessMetrics.class);
 
   // map of fully qualified table name to index in counter array.
   private final Map<String, Short> tableMap = new TreeMap<String, Short>();

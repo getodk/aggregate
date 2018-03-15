@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
@@ -60,7 +60,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class WatchdogWorkerImpl {
 
-  private Log logger = LogFactory.getLog(WatchdogWorkerImpl.class);
+  private Logger logger = LoggerFactory.getLogger(WatchdogWorkerImpl.class);
 
   private static class SubmissionMetadata {
     public final String uri;

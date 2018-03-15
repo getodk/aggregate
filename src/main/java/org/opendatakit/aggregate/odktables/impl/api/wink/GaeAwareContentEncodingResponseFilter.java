@@ -24,8 +24,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.UserService;
@@ -33,7 +33,7 @@ import org.opendatakit.common.web.CallingContext;
 
 public class GaeAwareContentEncodingResponseFilter extends ContentEncodingResponseFilter {
 
-  private static final Log logger = LogFactory.getLog(GaeAwareContentEncodingResponseFilter.class);
+  private static final Logger logger = LoggerFactory.getLogger(GaeAwareContentEncodingResponseFilter.class);
 
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,

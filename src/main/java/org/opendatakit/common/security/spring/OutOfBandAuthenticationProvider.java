@@ -20,8 +20,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.springframework.beans.factory.InitializingBean;
@@ -44,7 +44,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  */
 public class OutOfBandAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
-  private static final Log logger = LogFactory.getLog(OutOfBandAuthenticationProvider.class);
+  private static final Logger logger = LoggerFactory.getLogger(OutOfBandAuthenticationProvider.class);
 
   //~ Instance fields ================================================================================================
 

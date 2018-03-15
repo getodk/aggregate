@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.opendatakit.common.security.spring.SpringInternals;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -58,7 +58,7 @@ public abstract class CommonServletBase extends HttpServlet {
      this.applicationName = applicationName;
   }
 
-  protected Map<String,String> parseParameterMap(HttpServletRequest request, Log logger) {
+  protected Map<String,String> parseParameterMap(HttpServletRequest request, Logger logger) {
 
     Map<String, String> parameters = new HashMap<String,String>();
     @SuppressWarnings("rawtypes")

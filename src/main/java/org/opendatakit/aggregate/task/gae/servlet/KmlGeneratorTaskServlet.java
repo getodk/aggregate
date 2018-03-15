@@ -22,8 +22,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -50,7 +50,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = 8647919526257827291L;
 
-  private static final Log logger = LogFactory.getLog(KmlGeneratorTaskServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(KmlGeneratorTaskServlet.class);
 
   /**
    * URI from base

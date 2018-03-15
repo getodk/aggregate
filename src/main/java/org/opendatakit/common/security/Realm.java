@@ -15,8 +15,8 @@
  */
 package org.opendatakit.common.security;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -47,7 +47,7 @@ public class Realm implements InitializingBean {
         if ( realmString == null ) {
             throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
         }
-        Log log = LogFactory.getLog(Realm.class);
+        Logger log = LoggerFactory.getLogger(Realm.class);
         log.info("Version: " + UIConsts.VERSION_STRING);
         log.info("Hostname: " + hostname);
         log.info("Port: " + Integer.toString(port));

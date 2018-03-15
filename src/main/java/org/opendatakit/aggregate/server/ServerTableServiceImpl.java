@@ -17,8 +17,8 @@
 package org.opendatakit.aggregate.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -54,7 +54,7 @@ public class ServerTableServiceImpl extends RemoteServiceServlet implements Serv
    *
    */
   private static final long serialVersionUID = 329170770895918034L;
-  private static final Log logger = LogFactory.getLog(ServerTableServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ServerTableServiceImpl.class);
 
   @Override
   public ArrayList<TableEntryClient> getTables() throws AccessDeniedException, RequestFailureException,

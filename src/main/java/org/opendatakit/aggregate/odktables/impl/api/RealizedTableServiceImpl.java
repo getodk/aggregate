@@ -28,8 +28,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
@@ -57,7 +57,7 @@ import org.opendatakit.common.web.CallingContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RealizedTableServiceImpl implements RealizedTableService {
-  private static final Log logger = LogFactory.getLog(RealizedTableServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(RealizedTableServiceImpl.class);
   
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -112,7 +112,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
           DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
         }
       } catch ( Exception e ) {
-        LogFactory.getLog(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
+        LoggerFactory.getLogger(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
       }
     }
 
@@ -205,7 +205,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
           DbInstallationInteractionLog.recordSyncStatusEntry(installationId, tableId, mapper.writeValueAsString(syncDetails), cc);
         }
       } catch ( Exception e ) {
-        LogFactory.getLog(RealizedTableServiceImpl.class).error("Unable to recordSyncStatusEntry", e);
+        LoggerFactory.getLogger(RealizedTableServiceImpl.class).error("Unable to recordSyncStatusEntry", e);
       }
     }
 

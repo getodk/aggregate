@@ -25,7 +25,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -83,13 +83,13 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       Class.forName("com.mysql.jdbc.Driver");
     } catch ( Exception e ) {
       // ignore this but log a brief info message
-      LogFactory.getLog(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.Driver (did you download and install/copy MySQL Connector/J ?) Exception: " + e.toString());
+      LoggerFactory.getLogger(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.Driver (did you download and install/copy MySQL Connector/J ?) Exception: " + e.toString());
     }
     try {
       Class.forName("com.mysql.jdbc.GoogleDriver");
     } catch ( Exception e ) {
       // ignore this but log a brief info message
-      LogFactory.getLog(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.GoogleDriver Exception: " + e.toString());
+      LoggerFactory.getLogger(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.GoogleDriver Exception: " + e.toString());
     }
     this.tm = new DataSourceTransactionManager(dataSource);
   }
@@ -733,9 +733,9 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         b.append(K_CLOSE_PAREN);
 
         String createTableStmt = b.toString();
-        LogFactory.getLog(DatastoreImpl.class).info("Attempting: " + createTableStmt);
+        LoggerFactory.getLogger(DatastoreImpl.class).info("Attempting: " + createTableStmt);
         jc.execute(createTableStmt);
-        LogFactory.getLog(DatastoreImpl.class)
+        LoggerFactory.getLogger(DatastoreImpl.class)
             .info("create table success (before updateRelation): " + relation.getTableName());
 
         // and update the relation with actual dimensions...
@@ -746,7 +746,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       if (status != null) {
         tm.rollback(status);
       }
-      LogFactory.getLog(DatastoreImpl.class)
+      LoggerFactory.getLogger(DatastoreImpl.class)
           .warn("Failure: " + relation.getTableName() + " exception: " + e.toString());
       throw new ODKDatastoreException(e);
     }
@@ -773,10 +773,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     } catch (BadSqlGrammarException e) {
       dam.recordQueryUsage("SHOW CREATE TABLE", 0);
       // we expect this if the table does not exist...
-      LogFactory.getLog(DatastoreImpl.class).info(tableName + " does not exist!");
+      LoggerFactory.getLogger(DatastoreImpl.class).info(tableName + " does not exist!");
       return false;
     }
-    LogFactory.getLog(DatastoreImpl.class).info(tableName + " exists!");
+    LoggerFactory.getLogger(DatastoreImpl.class).info(tableName + " exists!");
     return true;
   }
 
@@ -793,11 +793,11 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       b.append(relation.getTableName());
       b.append(K_BQ);
 
-      LogFactory.getLog(DatastoreImpl.class)
+      LoggerFactory.getLogger(DatastoreImpl.class)
           .info("Executing " + b.toString() + " by user " + user.getUriUser());
       getJdbcConnection().execute(b.toString());
     } catch (Exception e) {
-      LogFactory.getLog(DatastoreImpl.class)
+      LoggerFactory.getLogger(DatastoreImpl.class)
           .warn(relation.getTableName() + " exception: " + e.toString());
       throw new ODKDatastoreException(e);
     }
@@ -910,7 +910,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           SqlParameterValue arg = argList.get(i);
           createLogContent(b, i+1, arg);
         }
-        LogFactory.getLog(DatastoreImpl.class).info(b.toString());
+        LoggerFactory.getLogger(DatastoreImpl.class).info(b.toString());
       }
       for (int i = 0; i < argList.size(); ++i) {
         SqlParameterValue arg = argList.get(i);
@@ -1251,7 +1251,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       b.append(K_EQ);
       b.append(K_BIND_VALUE);
 
-      LogFactory.getLog(DatastoreImpl.class).info("Executing " + b.toString() + " with key "
+      LoggerFactory.getLogger(DatastoreImpl.class).info("Executing " + b.toString() + " with key "
           + key.getKey() + " by user " + user.getUriUser());
       getJdbcConnection().update(b.toString(), new Object[] { key.getKey() });
     } catch (Exception e) {

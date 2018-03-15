@@ -21,8 +21,8 @@ import java.net.URLEncoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.RedirectUrlBuilder;
@@ -37,7 +37,7 @@ import org.springframework.security.web.util.UrlUtils;
  */
 public class RedirectingLoginUrlAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
   
-  private Log logger = LogFactory.getLog(RedirectingLoginUrlAuthenticationEntryPoint.class);
+  private Logger logger = LoggerFactory.getLogger(RedirectingLoginUrlAuthenticationEntryPoint.class);
   
   public RedirectingLoginUrlAuthenticationEntryPoint(String loginFormUrl) {
     super(loginFormUrl);

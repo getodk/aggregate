@@ -17,8 +17,8 @@
 
 package org.opendatakit.aggregate.submission.type;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
@@ -46,7 +46,7 @@ import java.util.*;
  * @author mitchellsundt@gmail.com
  */
 public class RepeatSubmissionType implements SubmissionRepeat {
-  private static final Log LOGGER = LogFactory.getLog(RepeatSubmissionType.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RepeatSubmissionType.class);
   /**
    * ODK identifier that uniquely identifies the form
    */

@@ -35,8 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -82,7 +82,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
   private static final String ACCESS_TOKEN = "access_token";
   private static final String BEARER_TYPE = "Bearer";
 
-  private Log logger = LogFactory.getLog(Oauth2ResourceFilter.class);
+  private Logger logger = LoggerFactory.getLogger(Oauth2ResourceFilter.class);
   private static final ObjectMapper mapper = new ObjectMapper();
 
   private AuthenticationProvider authenticationProvider = null;

@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
@@ -33,6 +33,9 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DeleteHelper {
+
+  public static final Logger logger = LoggerFactory
+      .getLogger(DeleteHelper.class);
 
   private DeleteHelper() {
   }
@@ -57,10 +60,7 @@ public class DeleteHelper {
       // try to do it the fast way...
       cc.getDatastore().deleteEntities(keys, cc.getCurrentUser());
     } catch (Exception e) {
-      LogFactory
-          .getLog(DeleteHelper.class)
-          .warn(
-              "Datastore failure while performing straight-forward delete of entities - attempting them individually");
+      logger.warn("Datastore failure while performing straight-forward delete of entities - attempting them individually");
       // we have a failure. Go through, deleting each in turn. If
       // the object does not exist, ignore the error. Otherwise,
       // abort at the first error found. This ensures that we are
@@ -98,14 +98,14 @@ public class DeleteHelper {
           // ignore this... if we are retrying we expect these...
         } catch (ODKDatastoreException ex) {
           // and log this... these are things to clean up manually...
-          LogFactory.getLog(DeleteHelper.class).warn(
+          LoggerFactory.getLogger(DeleteHelper.class).warn(
               "Datastore failure while deleting " + key.getRelation().getSchemaName() + "."
                   + key.getRelation().getTableName() + " " + CommonFieldsBase.URI_COLUMN_NAME
                   + " = " + key.getKey());
           ex.printStackTrace();
           throw ex;
         } catch (Exception ex) {
-          LogFactory.getLog(DeleteHelper.class).warn(
+          LoggerFactory.getLogger(DeleteHelper.class).warn(
               "Unexpected exception while deleting " + key.getRelation().getSchemaName() + "."
                   + key.getRelation().getTableName() + " " + CommonFieldsBase.URI_COLUMN_NAME
                   + " = " + key.getKey());
@@ -119,7 +119,7 @@ public class DeleteHelper {
   public static void deleteDamagedSubmission(TopLevelDynamicBase tle,
       Set<DynamicCommonFieldsBase> backingObjects, CallingContext cc) throws ODKDatastoreException {
     
-    Log logger = LogFactory.getLog(DeleteHelper.class);
+    Logger logger = LoggerFactory.getLogger(DeleteHelper.class);
 
     Set<DynamicDocumentBase> documents = new TreeSet<DynamicDocumentBase>(
         DynamicCommonFieldsBase.sameTableName);

@@ -26,8 +26,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
 import org.opendatakit.aggregate.odktables.api.FileManifestService;
@@ -107,7 +107,7 @@ public class FileManifestServiceImpl implements FileManifestService {
       manifest = manifestManager.getManifestForAppLevelFiles();
 
     } catch (ODKDatastoreException e) {
-      Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+      Logger log = LoggerFactory.getLogger(FileManifestServiceImpl.class);
       log.error("Datastore exception in getting the file manifest");
       e.printStackTrace();
     }
@@ -124,7 +124,7 @@ public class FileManifestServiceImpl implements FileManifestService {
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);
       } else if (!newETag.equals(eTagEntity.getManifestETag())) {
-        Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+        Logger log = LoggerFactory.getLogger(FileManifestServiceImpl.class);
         log.error("App-level Manifest ETag does not match computed value!");
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);
@@ -180,7 +180,7 @@ public class FileManifestServiceImpl implements FileManifestService {
       // we want just the files for the table.
       manifest = manifestManager.getManifestForTable(tableId);
     } catch (ODKDatastoreException e) {
-      Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+      Logger log = LoggerFactory.getLogger(FileManifestServiceImpl.class);
       log.error("Datastore exception in getting the file manifest");
       e.printStackTrace();
     }
@@ -197,7 +197,7 @@ public class FileManifestServiceImpl implements FileManifestService {
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);
       } else if (!newETag.equals(eTagEntity.getManifestETag())) {
-        Log log = LogFactory.getLog(FileManifestServiceImpl.class);
+        Logger log = LoggerFactory.getLogger(FileManifestServiceImpl.class);
         log.error("Table-level (" + tableId + ") Manifest ETag does not match computed value!");
         eTagEntity.setManifestETag(newETag);
         eTagEntity.put(cc);

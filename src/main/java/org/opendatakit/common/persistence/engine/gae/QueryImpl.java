@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -74,7 +74,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   private final CommonFieldsBase relation;
   private final DatastoreImpl datastore;
   private final User user;
-  private final Log logger;
+  private final Logger logger;
   private final ExecutionTimeLogger gaeCostLogger;
 
   private static final long ACTIVE_COST_LOGGING_CHECK_INTERVAL = 10 * 1000; // 10
@@ -84,7 +84,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   private static long milliLastCheck = 0L;
 
   final static synchronized void updateCostLoggingThreshold(DatastoreImpl datastore) {
-    Log logger = LogFactory.getLog(QueryImpl.class);
+    Logger logger = LoggerFactory.getLogger(QueryImpl.class);
 
     long currentTime = System.currentTimeMillis();
     if (milliLastCheck + ACTIVE_COST_LOGGING_CHECK_INTERVAL < currentTime) {
@@ -174,7 +174,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     this.loggingContextTag = loggingContextTag;
     this.datastore = datastore;
     this.user = user;
-    this.logger = LogFactory.getLog(QueryImpl.class);
+    this.logger = LoggerFactory.getLogger(QueryImpl.class);
     this.gaeCostLogger = new ExecutionTimeLogger(datastore, loggingContextTag, relation);
   }
 

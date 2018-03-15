@@ -23,8 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
@@ -36,7 +36,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  */
 public class LocalLoginPageServlet extends ServletUtilBase {
 
-  private static final Log logger = LogFactory.getLog(LocalLoginPageServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(LocalLoginPageServlet.class);
 
   /*
    * Standard fields

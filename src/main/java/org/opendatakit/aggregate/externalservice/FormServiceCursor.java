@@ -18,8 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
@@ -327,7 +327,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
       e1.printStackTrace();
     } finally {
       if (!deleted) {
-        Log logger =LogFactory.getLog(FormServiceCursor.class);
+        Logger logger =LoggerFactory.getLogger(FormServiceCursor.class);
         logger.error("Unable to delete FormServiceCursor: " + service.getFormServiceCursor().getUri());
       }
     }

@@ -19,8 +19,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.Watchdog;
@@ -63,7 +63,7 @@ public class BackendActionsTable extends CommonFieldsBase {
   private static final DataField LAST_REVISION_DATE = new DataField("LAST_REVISION",
       DataField.DataType.DATETIME, true);
 
-  private static final Log logger = LogFactory.getLog(BackendActionsTable.class);
+  private static final Logger logger = LoggerFactory.getLogger(BackendActionsTable.class);
 
   /** delay between re-loads of the lastPublisherRevision HashMap. 30 seconds. */
   public static final long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;

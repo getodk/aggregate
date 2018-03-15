@@ -21,8 +21,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
@@ -46,7 +46,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 final class NamingSet {
   private static final String DROP_CHARS = "AEIOUY";
-  private static final Log logger = LogFactory.getLog(NamingSet.class);
+  private static final Logger logger = LoggerFactory.getLogger(NamingSet.class);
 
   private StringBuilder dbg = null;
   private int idxResolveNames = 0;

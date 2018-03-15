@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -46,7 +46,7 @@ public class MultimodeLoginPageServlet extends ServletUtilBase {
      *
      */
   private static final long serialVersionUID = -1036419513113652548L;
-  private static final Log logger = LogFactory.getLog(MultimodeLoginPageServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(MultimodeLoginPageServlet.class);
 
   public static final String ADDR = "multimode_login.html";
 

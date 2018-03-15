@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
@@ -72,13 +72,13 @@ public class TaskLockImpl implements TaskLock {
   private final DatastoreAccessMetrics dam;
   private final MemcacheService syncCache;
   private final DatastoreService ds;
-  private final Log log;
+  private final Logger log;
 
   public TaskLockImpl(DatastoreAccessMetrics dam, MemcacheService syncCache) {
     this.dam = dam;
     this.syncCache = syncCache;
     ds = DatastoreServiceFactory.getDatastoreService();
-    log = LogFactory.getLog(TaskLockImpl.class);
+    log = LoggerFactory.getLogger(TaskLockImpl.class);
   }
 
   /**

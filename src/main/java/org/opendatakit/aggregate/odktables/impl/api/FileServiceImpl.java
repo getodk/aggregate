@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.ConfigFileChangeDetail;
 import org.opendatakit.aggregate.odktables.FileContentInfo;
@@ -193,7 +193,7 @@ public class FileServiceImpl implements FileService {
           DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
         }
       } catch ( Exception e ) {
-        LogFactory.getLog(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
+        LoggerFactory.getLogger(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
       }
     }
 
@@ -249,7 +249,7 @@ public class FileServiceImpl implements FileService {
           DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
         }
       } catch ( Exception e ) {
-        LogFactory.getLog(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
+        LoggerFactory.getLogger(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
       }
     }
 

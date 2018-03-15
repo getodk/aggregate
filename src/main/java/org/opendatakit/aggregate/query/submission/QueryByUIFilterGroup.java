@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
@@ -225,7 +225,7 @@ public class QueryByUIFilterGroup extends QueryBase {
         Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
         retrievedSubmissions.add(sub);
       } catch (ODKDatastoreException e ) {
-        Log logger = LogFactory.getLog(QueryByUIFilterGroup.class);
+        Logger logger = LoggerFactory.getLogger(QueryByUIFilterGroup.class);
         e.printStackTrace();
         logger.error("Unable to reconstruct submission for " + 
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
@@ -367,7 +367,7 @@ public class QueryByUIFilterGroup extends QueryBase {
         SubmissionKey subKey = sub.constructSubmissionKey(fem);
         submissionList.add(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
       } catch ( ODKDatastoreException e ) {
-        Log logger = LogFactory.getLog(QueryByUIFilterGroup.class);
+        Logger logger = LoggerFactory.getLogger(QueryByUIFilterGroup.class);
         e.printStackTrace();
         logger.error("Unable to reconstruct submission for " + 
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());

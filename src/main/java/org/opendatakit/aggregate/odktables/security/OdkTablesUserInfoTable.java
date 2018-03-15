@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
 import org.opendatakit.aggregate.odktables.OdkTablesLockTemplate;
 import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;
@@ -221,7 +221,7 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
 
     OdkTablesUserInfoTable prototype = OdkTablesUserInfoTable.assertRelation(cc);
 
-    Log log = LogFactory.getLog(FileManifestManager.class);
+    Logger log = LoggerFactory.getLogger(FileManifestManager.class);
 
     log.info("TablesUserPermissionsImpl: " + uriUser);
 

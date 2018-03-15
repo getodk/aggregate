@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -47,7 +47,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class UserServiceImpl implements org.opendatakit.common.security.UserService,
     InitializingBean {
 
-  private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
   // configured by bean definition...
   Datastore datastore;
@@ -81,7 +81,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
       throw new IllegalStateException("superUserEmail is malformed. "
           + "Must be of the form 'mailto:user@gmail.com' or other supported OAuth2 provider.");
     }
-    Log log = LogFactory.getLog(UserServiceImpl.class);
+    Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     log.info("superUserEmail: " + superUserEmail);
     log.info("superUserUsername: " + superUserUsername);
 

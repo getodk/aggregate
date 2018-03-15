@@ -20,8 +20,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -46,7 +46,7 @@ public class CsvGeneratorTaskServlet extends ServletUtilBase {
    */
   private static final long serialVersionUID = 5552217246831515463L;
 
-  private static final Log logger = LogFactory.getLog(CsvGeneratorTaskServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(CsvGeneratorTaskServlet.class);
 
   /**
    * URI from base

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
@@ -55,7 +55,7 @@ import org.opendatakit.common.web.CallingContext;
  */
 
 public class EntityCreator {
-  public static final Log log = LogFactory.getLog(EntityCreator.class);
+  public static final Logger log = LoggerFactory.getLogger(EntityCreator.class);
 
   public static final int INITIAL_MODIFICATION_NUMBER = 1;
 

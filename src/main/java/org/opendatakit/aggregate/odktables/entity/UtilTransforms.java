@@ -19,8 +19,8 @@ package org.opendatakit.aggregate.odktables.entity;
 import java.util.Date;
 import java.util.HashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.RowFilterScopeClient;
@@ -51,7 +51,7 @@ import org.opendatakit.common.utils.WebUtils;
  *
  */
 public class UtilTransforms {
-  private static final Log log = LogFactory.getLog(UtilTransforms.class);
+  private static final Logger log = LoggerFactory.getLogger(UtilTransforms.class);
 
   /**
    * Transform the object into a server-side Column object.

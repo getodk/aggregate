@@ -22,7 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -83,7 +83,7 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
       IOException {
     if (req.getScheme().equals("http")) {
-      LogFactory.getLog(UserManagePasswordsServlet.class).warn("Setting user passwords over http");
+      LoggerFactory.getLogger(UserManagePasswordsServlet.class).warn("Setting user passwords over http");
     }
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

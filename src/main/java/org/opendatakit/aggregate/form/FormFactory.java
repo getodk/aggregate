@@ -16,8 +16,8 @@
 
 package org.opendatakit.aggregate.form;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
@@ -44,7 +44,7 @@ import java.util.*;
  */
 public class FormFactory {
 
-  private static final Log logger = LogFactory.getLog(FormFactory.class);
+  private static final Logger logger = LoggerFactory.getLogger(FormFactory.class);
 
   private static long cacheTimestamp = 0L;
   private static final List<IForm> cache = new LinkedList<IForm>();

@@ -24,8 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -76,7 +76,7 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
       + "         <td><input type=\"submit\" name=\"button\" class=\"gwt-Button\" value=\"Save\" /></td>"
       + "         <td />" + "    </tr>" + "    </table>\n" + "   </form>" + "<br></div>\n";
 
-  private static final Log logger = LogFactory.getLog(ServiceAccountPrivateKeyUploadServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(ServiceAccountPrivateKeyUploadServlet.class);
 
   /**
    * Handler for HTTP Get request to create xform upload page

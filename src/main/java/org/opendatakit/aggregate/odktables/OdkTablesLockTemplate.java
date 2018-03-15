@@ -19,8 +19,8 @@ package org.opendatakit.aggregate.odktables;
 import java.util.Random;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
@@ -62,7 +62,7 @@ public class OdkTablesLockTemplate {
   private DelayStrategy delay;
   private long maxBackoffMs;
   private Random rand;
-  private Log log;
+  private Logger log;
 
   /**
    * File-manager-specific lock for accessing app-level, table-level and
@@ -109,7 +109,7 @@ public class OdkTablesLockTemplate {
     this.delay = delay;
     this.maxBackoffMs = delay.getBaseBackOffTime();
     this.rand = new Random();
-    this.log = LogFactory.getLog(FileManifestManager.class);
+    this.log = LoggerFactory.getLogger(FileManifestManager.class);
   }
 
   /**
