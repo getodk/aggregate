@@ -41,21 +41,28 @@
     src: ROOT.war
     dest: '{{ tomcat_webapps_dir }}/ROOT'
 
-- name: Clean existing motd scripts
-  file:
-    state: absent
-    path: '{{ motd_dir }}/'
-
-- name: copy motd scripts
-  copy:
-    src: motd/
-    dest: '{{ motd_dir }}'
-    mode: 0755
-
 - name: install config tool
   copy:
     src: aggregate-config.sh
     dest: /usr/local/bin/aggregate-config
+    mode: 0755
+
+- name: install report ips script
+  copy:
+    src: aggregate-report-ips.sh
+    dest: /usr/local/bin/aggregate-report-ips
+    mode: 0755
+
+- name: install update issue script
+  copy:
+    src: aggregate-update-issue.sh
+    dest: /usr/local/bin/aggregate-update-issue
+    mode: 0755
+
+- name: install rc.local.sh script
+  copy:
+    src: rc.local.sh
+    dest: /etc/rc.local
     mode: 0755
 
 - name: enable ssh access for root
