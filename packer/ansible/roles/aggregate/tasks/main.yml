@@ -64,6 +64,3 @@
     src: rc.local.sh
     dest: /etc/rc.local
     mode: 0755
-
-- name: enable ssh access for root
-  command: echo PermitRootLogin yes >> /etc/ssh/sshd_config
