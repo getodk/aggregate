@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.constants.common;
 public enum BookHelpConsts {
 
     XFORM("Forms",
-          "http://www.youtube.com/embed/Zsa-4pUzULo" ,
+          "https://www.youtube.com/embed/Zsa-4pUzULo" ,
             "Forms are tables which organize your data into rows and columns.  You can view your " +
             "forms on \"Submissions\" -> \"Filter Submissions\".<br><br>" +
             "What is \"Downloadable\"? (\"Form Management\" -> \"Forms List\")<br>" +
@@ -37,7 +37,7 @@ public enum BookHelpConsts {
     "&nbsp;2.  Media File(s) - optional.  Choose the appropriate media files for the form."),
 
     FILTER("Filters",
-          "http://www.youtube.com/embed/d4RquOGfcI0",
+          "https://www.youtube.com/embed/d4RquOGfcI0",
             "Filters give you the ability to see a subset of your data.  For example, if you wanted to " +
             "only look at males over the age of 35, you would include 2 filters: <br>" +
             "&nbsp;1.  Display Rows where column Gender EQUAL male <br>" +
@@ -69,7 +69,7 @@ public enum BookHelpConsts {
     "checkbox on \"Submissions\" -> \"Filter Submissions\"."),
 
     VISUALIZE("Visualize",
-            "http://www.youtube.com/embed/WyJD2vDc5Cg",
+            "https://www.youtube.com/embed/WyJD2vDc5Cg",
             "Aggregate provides a simple web interface for basic data " +
             "visualization.  <br>You can view your data in a bar graph, pie chart," +
             " or on a map.  <br>This Visualize functionality is meant to provide a" +
@@ -113,7 +113,7 @@ public enum BookHelpConsts {
     " other information supplied in the table."),
 
     EXPORT("Export",
-            "http://www.youtube.com/embed/2VzgWVnM8lM",
+            "https://www.youtube.com/embed/2VzgWVnM8lM",
             "Exporting your data allows you to view the information in another software tool.  This" +
             "can allow you to do more comprehensive work with your data.  You can export your file to" +
             "a CSV file (Excel) or a KML file (Google Maps).", "How do I export a file? (Press \"Export\" on \"Submissions\" -> \"Filter Submissions\" " +
@@ -127,7 +127,7 @@ public enum BookHelpConsts {
     "&nbsp;&nbsp;d.  Press \"Export\"."),
 
     PUBLISH("Publish",
-            "http://www.youtube.com/embed/Vfl0WxR-xcw",
+            "https://www.youtube.com/embed/Vfl0WxR-xcw",
             "When you publish your data, it will be uploaded to a software tool: Google Fusion Tables or " +
             "Google Spreadsheets.  You can display data before a certain time, after a certain time, or " +
             "stream all of the data.  This will allow others to work with the data to do analysis.",
@@ -152,7 +152,7 @@ public enum BookHelpConsts {
             "&nbsp;&nbsp;d.  Press \"Grant Access\" so that ODK Aggregate is allowed to make the file.<br>" +
     "&nbsp;&nbsp;e.  You can view your published document in Google Docs."),
    HELP("Help",
-       "http://www.youtube.com/embed/Y9kmJeMpY38",
+       "https://www.youtube.com/embed/Y9kmJeMpY38",
        "Aggregate provides three kinds of help accessible by pressing one of three buttons in the upper righthand corner.",
        "&nbsp;1.  The red question mark will give you instructions for the tab you are currently viewing. When you click the button, a help panel will appear at the bottom of the screen. To hide the help panel, simply click the red question mark again. <br>" +
        "&nbsp;2.  The green book will give you the most comprehensive help.  When you click the button, a popup will appear providing detailed information as well as video instruction.<br>" +
