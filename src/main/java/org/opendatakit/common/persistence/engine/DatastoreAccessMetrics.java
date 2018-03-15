@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.utils.WebUtils;

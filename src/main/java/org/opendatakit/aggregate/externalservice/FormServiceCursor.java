@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;

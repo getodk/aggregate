@@ -36,7 +36,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.apache.wink.common.model.multipart.BufferedOutMultiPart;
 import org.apache.wink.common.model.multipart.InMultiPart;
 import org.apache.wink.common.model.multipart.OutPart;

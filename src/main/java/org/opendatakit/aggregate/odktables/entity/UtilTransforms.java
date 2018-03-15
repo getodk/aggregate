@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.RowFilterScopeClient;

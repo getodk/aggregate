@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.odktables.importexport;
 import java.io.BufferedReader;
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
+import org.opendatakit.common.logging.LoggerFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;

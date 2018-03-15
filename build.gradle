@@ -108,6 +108,8 @@ dependencies {
   compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25' // JCL over SLF4J
   compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
   compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.25'
+  compile group: 'io.sentry', name: 'sentry', version: '1.7.1'
+  compile group: 'io.sentry', name: 'sentry-appengine', version: '1.7.1'
 
   compile group: 'org.opendatakit', name: 'odk-tomcatutil', version: versions.odk.tomcatUtil
   compile group: 'org.springframework', name: 'spring-aop', version: versions.spring
@@ -192,7 +194,16 @@ war {
   }
 }
 
+def debugArgs = []
+if (gradle.startParameter.initScripts) {
+  def line = file(gradle.startParameter.initScripts[0]).readLines().findAll({ x -> x ==~ /.*-agentlib:jdwp=.*/})[0]
+  if (line) {
+    debugArgs = ((line =~ /.*'(.*)'.*/)[0][1] as String).split(' ')
+  }
+}
+
 gretty {
+  jvmArgs = [*debugArgs]
   contextPath = '/'
   host = 'localhost'
   logDir = 'logs'
@@ -325,11 +336,20 @@ task buildInstaller(dependsOn: [cleanInstaller, gaeDownloadSDK], type: Copy) {
   }
 }
 
+String getValue(String key, String defaultValue) {
+  if (this.hasProperty(key))
+    return this.getProperty(key)
+  else
+    return defaultValue
+}
+
 buildConfig {
   appName = 'ODK Aggregate'
   version = getVersionName()
   clsName = 'BuildConfig'
   packageName = 'org.opendatakit.aggregate.buildconfig'
+  buildConfigField 'Boolean', 'SENTRY_ENABLED', getValue("sentry.enabled", "false")
+  buildConfigField 'String', 'SENTRY_DSN', getValue("sentry.dsn", "https://aae391567d7f4f11a2f61942d1d81cf3:b7185497e42f4b54a7c60f91f0653eef@sentry.io/302314")
 }
 
 // Required to use fileExtensions property in checkstyle file
