@@ -16,10 +16,10 @@ else
 fi
 echo "> 3. Sign in with the Aggregate password"
 echo "> Need the password? Read the readme.txt file."
-echo ">"
+echo ""
 
 if [ ! -z ${ips} ]; then
   echo "> If the above URL does not work, try connecting to these IP addresses instead"
-  echo "${ips}" | while IFS= read -r line ; do echo "> ${line}"; done
-  echo ">"
+  echo "${ips}" | while IFS= read -r line ; do echo "> - ${line}"; done
+  echo ""
 fi
