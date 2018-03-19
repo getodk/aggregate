@@ -35,5 +35,15 @@ task installerBuild(dependsOn: [installerClean, gaeDownloadSDK], type: Copy) {
     setXmlValue("${buildDir}/installer/buildWar.xml", "version", version)
     file("${buildDir}/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
     file("${buildDir}/installer/files/appengine-java-sdk-1.9.63").renameTo(file("build/installer/files/appengine-java-sdk"))
+    delete "${buildDir}/installer/files/appengine-java-sdk/demos"
+    delete "${buildDir}/installer/files/appengine-java-sdk/docs/endpoints"
+    delete "${buildDir}/installer/files/appengine-java-sdk/docs/javadoc"
+    delete "${buildDir}/installer/files/appengine-java-sdk/docs/remoteapi"
+    delete "${buildDir}/installer/files/appengine-java-sdk/docs/spi"
+    delete "${buildDir}/installer/files/appengine-java-sdk/docs/testing"
+    delete "${buildDir}/installer/files/appengine-java-sdk/docs/tools"
+    delete "${buildDir}/installer/files/appengine-java-sdk/jetty93"
+    delete "${buildDir}/installer/files/appengine-java-sdk/jetty93-base"
+    delete "${buildDir}/installer/files/appengine-java-sdk/src"
   }
 }
