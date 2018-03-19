@@ -34,6 +34,6 @@ task installerBuild(dependsOn: [installerClean, gaeDownloadSDK], type: Copy) {
   doLast {
     setXmlValue("${buildDir}/installer/buildWar.xml", "version", version)
     file("${buildDir}/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
-    file("${buildDir}/installer/files/appengine-java-sdk-1.9.54").renameTo(file("build/installer/files/appengine-java-sdk"))
+    file("${buildDir}/installer/files/appengine-java-sdk-1.9.63").renameTo(file("build/installer/files/appengine-java-sdk"))
   }
 }
