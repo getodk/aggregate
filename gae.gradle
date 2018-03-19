@@ -8,9 +8,9 @@ import static org.opendatakit.aggregate.gradle.Util.truncate
 task gaeDownloadSDK() {
   doLast {
     if (!file('installer/appEngineSDK.zip').exists()) {
-      println("Downloading App Engine SDK 1.9.54")
+      println("Downloading App Engine SDK 1.9.63")
       download {
-        src 'https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.54.zip'
+        src 'https://storage.googleapis.com/appengine-sdks/featured/appengine-java-sdk-1.9.63.zip'
         dest 'installer/appEngineSDK.zip'
       }
     } else
