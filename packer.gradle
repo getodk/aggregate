@@ -38,7 +38,7 @@ task packerPrepareProject(dependsOn: [packerClean, packerDownloadPacker], type: 
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.realm.realmString", "ODK Aggregate VM")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.channelType", "ANY_CHANNEL")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "wink.handlersFactoryClass", "org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory")
-    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.superUserUsername", "aggregate")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.superUserUsername", "administrator")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.superUser", "")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.port", "10080")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.securePort", "10443")
