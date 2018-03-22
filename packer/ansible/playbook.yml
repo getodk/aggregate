@@ -8,3 +8,4 @@
     - tomcat
     - postgresql
     - aggregate
+    - unattended-upgrades
