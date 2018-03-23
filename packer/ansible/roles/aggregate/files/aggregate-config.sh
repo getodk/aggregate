@@ -44,7 +44,7 @@ showHelp() {
   echo "--help               Show this help message"
   echo ""
   echo "Arguments:"
-  echo "--fqdn       <value> Set a new FQDN (fully qualified name)"
+  echo "--fqdn       <value> Set a new FQDN (fully qualified domain name)"
   echo "--fqdn       auto    Enable automatic detection of FQDN"
   echo "                     (not recommended if your IP address changes)"
   echo "--http-port  <value> Set a new HTTP port"
