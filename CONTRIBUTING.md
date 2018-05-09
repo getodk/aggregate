@@ -42,6 +42,8 @@ To contribute code to ODK Aggregate, you will need to open a [pull request](http
 
 1. Document your reasoning. Your commit messages should make it clear why each change has been made.
 
+1. If your pull request makes user-facing changes, we likely need to update documentation. [File an issue on the docs repo](https://github.com/opendatakit/docs/issues/new) describing the changes.
+
 1. Follow the guidelines below.
 
 ## The review process
@@ -55,6 +57,7 @@ We try to have at least two people review every pull request and we encourage ev
 - What other functionality could this PR affect? Does that functionality still work as intended?
 - Was the change verified with several different devices and Android versions?
 - Is the code easy to understand and to maintain?
+- Is there sufficient detail to inform any changes to documentation?
 
 Pull requests that need more [black-box testing](https://en.wikipedia.org/wiki/Black-box_testing) are tagged with `needs testing`. Pull requests that need more complete reviews including black-box testing but also review of approach and/or appropriateness are tagged with `reviews wanted`. Any contributor is encouraged to participate in both kinds of reviews!
 
