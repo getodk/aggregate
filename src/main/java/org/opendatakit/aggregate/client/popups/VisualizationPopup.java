@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -248,7 +249,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     String chartTypeString = chartType.getSelectedValue();
     ChartType selected = (chartTypeString == null) ? null : ChartType.valueOf(chartTypeString);
 
-    executeButton.setHTML(selected.getButtonText());
+    executeButton.setHTML(new SafeHtmlBuilder().appendHtmlConstant(selected.getButtonText()).toSafeHtml());
     if (selected.equals(ChartType.MAP)) {
       typeControlBar.setHTML(0, COLUMN_TEXT, GPS_TXT);
       typeControlBar.setWidget(0, COLUMN_LIST, geoPoints);

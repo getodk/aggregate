@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
@@ -212,8 +213,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
       tableData.updateDisplay(currentTable);
 
       selectTablePanel.setHTML(1, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
-      selectTablePanel.setHTML(1, 1, "<h2 id=\table_name\"> " + currentTable.getTableId()
-          + " </h2>");
+      selectTablePanel.setHTML(1, 1, new SafeHtmlBuilder().appendHtmlConstant("<h2 id=\table_name\">").appendEscaped(" " + currentTable.getTableId() + " ").appendHtmlConstant("</h2>").toSafeHtml());
       selectTablePanel.setWidget(1,  2, tableAdvanceButton);
       add(tableData);
     }
