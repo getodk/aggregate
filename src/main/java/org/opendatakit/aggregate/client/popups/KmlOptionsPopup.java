@@ -15,6 +15,7 @@
  */
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -73,9 +74,9 @@ public final class KmlOptionsPopup extends AbstractPopupBase {
     topBar = new FlexTable();
     topBar.addStyleName("stretch_header");
     topBar.setWidget(0, 0, new HTML("<h2> Form:</h2>"));
-    topBar.setWidget(0, 1, new HTML(formId));
+    topBar.setWidget(0, 1, new HTML(new SafeHtmlBuilder().appendEscaped(formId).toSafeHtml()));
     topBar.setWidget(0, 2, new HTML("<h2>Filter:</h2>"));
-    topBar.setWidget(0, 3, new HTML(selectedFilterGroup.getName()));
+    topBar.setWidget(0, 3, new HTML(new SafeHtmlBuilder().appendEscaped(selectedFilterGroup.getName()).toSafeHtml()));
     topBar.setWidget(0, 6, exportButton);
     topBar.setWidget(0, 7, new ClosePopupButton(this));
 

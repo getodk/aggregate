@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UIUtils;
@@ -116,7 +117,7 @@ public final class PublishPopup extends AbstractPopupBase {
     topBar = new FlexTable();
     topBar.addStyleName("stretch_header");
     topBar.setWidget(0, 0, new HTML("<h2>Form: </h2>"));
-    topBar.setWidget(0, 1, new HTML(formId));
+    topBar.setWidget(0, 1, new HTML(new SafeHtmlBuilder().appendEscaped(formId).toSafeHtml()));
     topBar.setWidget(0, 2, new HTML("<h2>Publish to: </h2>"));
     topBar.setWidget(0, 3, serviceType);
     topBar.setWidget(0, 4, publishButton);

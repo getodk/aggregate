@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.Date;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
@@ -94,8 +95,8 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());
-      this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(e.getOwnership()));
-      this.setWidget(i + STARTING_ROW, NAME, new HTML(e.getName()));
+      this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(new SafeHtmlBuilder().appendEscaped(e.getOwnership()).toSafeHtml()));
+      this.setWidget(i + STARTING_ROW, NAME, new HTML(new SafeHtmlBuilder().appendEscaped(e.getName()).toSafeHtml()));
       this.setWidget(i + STARTING_ROW, DELETE,  new DeletePublishButton(e));
     }
   }

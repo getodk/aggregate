@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -83,7 +84,7 @@ public final class ExportPopup extends AbstractPopupBase {
     optionsBar = new FlexTable();
     optionsBar.addStyleName("stretch_header");
     optionsBar.setWidget(0, 0, new HTML("<h2> Form:</h2>"));
-    optionsBar.setWidget(0, 1, new HTML(formId));
+    optionsBar.setWidget(0, 1, new HTML(new SafeHtmlBuilder().appendEscaped(formId).toSafeHtml()));
     optionsBar.setWidget(0, 2, new HTML("<h2>Type:</h2>"));
     optionsBar.setWidget(0, 3, fileType);
     optionsBar.setWidget(0, 4, new HTML("<h2>Filter:</h2>"));

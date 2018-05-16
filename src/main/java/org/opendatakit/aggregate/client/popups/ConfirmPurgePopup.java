@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
 import java.util.Date;
 
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -40,7 +41,7 @@ public class ConfirmPurgePopup extends AbstractPopupBase {
   private String uri;
   private Date earliest;
 
-  public ConfirmPurgePopup(ExternServSummary e, Date earliest, String bodyText) {
+  public ConfirmPurgePopup(ExternServSummary e, Date earliest, SafeHtml bodyText) {
     super();
 
     this.uri = e.getUri();

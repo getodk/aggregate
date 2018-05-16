@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.form.KmlGeopointOption;
 import org.opendatakit.aggregate.client.form.KmlOptionSetting;
 import org.opendatakit.aggregate.client.form.KmlSelection;
@@ -42,7 +43,7 @@ public class KmlGeoPointSettingsSelectionRow extends FlexTable implements KmlSel
     addStyleName("dataTable");
     setWidget(0, 0, include);
     setWidget(0, 1, new HTML("<h2>Geopoint:<h2>"));
-    setWidget(0, 2, new HTML(geoPoint.getDisplayName()));
+    setWidget(0, 2, new HTML(new SafeHtmlBuilder().appendEscaped(geoPoint.getDisplayName()).toSafeHtml()));
     setWidget(0, 3, new HTML("<h4>Title:<h4>"));
     setWidget(0, 4, titleFieldsDropDown);
     setWidget(0, 5, new HTML("<h4>Picture:<h4>"));
