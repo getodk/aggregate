@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.form.KmlGeoTraceNShapeOption;
 import org.opendatakit.aggregate.client.form.KmlOptionSetting;
 import org.opendatakit.aggregate.client.form.KmlSelection;
@@ -40,7 +41,7 @@ public class KmlGeoTraceNShapeSelectionRow extends FlexTable implements KmlSelec
     } else {
       setWidget(0, 1, new HTML("<h2>Geoshape:<h2>"));
     }
-    setWidget(0, 2, new HTML(geoNode.getDisplayName()));
+    setWidget(0, 2, new HTML(new SafeHtmlBuilder().appendEscaped(geoNode.getDisplayName()).toSafeHtml()));
     setWidget(0, 3, new HTML("<h4>Name:<h4>"));
     setWidget(0, 4, nameDropDown);
   }

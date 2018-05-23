@@ -26,6 +26,8 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -51,15 +53,16 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
     confirm.addClickHandler(new PurgeHandler());
 
     FlexTable layout = new FlexTable();
-    StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append("Delete submissions data of ");
-    stringBuilder.append(summary.getTitle());
-    stringBuilder.append(" [");
-    stringBuilder.append(summary.getId());
-    stringBuilder.append("] up through ");
-    stringBuilder.append(earliest.toGMTString());
-    stringBuilder.append(". Incomplete submissions will not be deleted.");
-    layout.setWidget(0, 0, new HTML(stringBuilder.toString()));
+    SafeHtml content = new SafeHtmlBuilder()
+        .appendEscaped("Delete submissions data of ")
+        .appendEscaped(summary.getTitle())
+        .appendEscaped(" [")
+        .appendEscaped(summary.getId())
+        .appendEscaped("] up through ")
+        .appendEscaped(earliest.toGMTString())
+        .appendEscaped(". Incomplete submissions will not be deleted.")
+        .toSafeHtml();
+    layout.setWidget(0, 0, new HTML(content));
     layout.setWidget(0, 1, confirm);
     layout.setWidget(0, 2, new ClosePopupButton(this));
     setWidget(layout);

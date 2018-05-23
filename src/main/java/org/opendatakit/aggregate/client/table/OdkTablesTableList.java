@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateUI;
@@ -96,7 +97,7 @@ public class OdkTablesTableList extends FlexTable {
         // this will maintain the row you're adding to, always +1
         // because of the title row
         int j = i + 1;
-        setWidget(j, TABLE_ID_COLUMN, new HTML("<b>" + table.getTableId() + "</b>"));
+        setWidget(j, TABLE_ID_COLUMN, new HTML(new SafeHtmlBuilder().appendHtmlConstant("<b>").appendEscaped(table.getTableId()).appendHtmlConstant("</b>").toSafeHtml()));
         OdkTablesDeleteTableButton deleteButton = new OdkTablesDeleteTableButton(this,
             table.getTableId());
         if (!AggregateUI.getUI().getUserInfo().getGrantedAuthorities()

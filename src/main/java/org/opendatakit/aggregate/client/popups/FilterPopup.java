@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
@@ -126,7 +127,7 @@ public final class FilterPopup extends AbstractPopupBase {
         
         formDisplay = new FlexTable();
         formDisplay.setWidget(0, 0, new HTML("<h2>Form:</h2>"));
-        formDisplay.setWidget(0, 1, new HTML(filterGroup.getFormId()));
+        formDisplay.setWidget(0, 1, new HTML(new SafeHtmlBuilder().appendEscaped(filterGroup.getFormId()).toSafeHtml()));
         topBar.setWidget(0, 0, formDisplay);
         topBar.getFlexCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT);
 

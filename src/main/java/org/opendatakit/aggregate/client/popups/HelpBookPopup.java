@@ -44,6 +44,8 @@ public class HelpBookPopup extends PopupPanel {
     FlowPanel content = new FlowPanel(); // vertical
     content.setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
     for (int i = 0; i < consts.length; i++) {
+      // We won't escape these HTML strings using SafeHtmlBuilder because
+      // they don't come from user input (BookHelpConsts class)
       content.add(new HTML("<h2 id=\"form_name\">" + consts[i].getTitle() + "</h2>"));
 
       if (consts[i].getVideoUrl() != null) {

@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.ExportSummary;
@@ -68,7 +69,7 @@ public class ExportTable extends FlexTable {
       if (e.getStatus() != null) {
         this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
         if (e.getResultFile() != null && e.getStatus() == ExportStatus.AVAILABLE) {
-          this.setWidget(i + STARTING_ROW, DOWNLOAD_FILE, new HTML(e.getResultFile()));
+          this.setWidget(i + STARTING_ROW, DOWNLOAD_FILE, new HTML(new SafeHtmlBuilder().appendEscaped(e.getResultFile()).toSafeHtml()));
         }
       }
       this.setWidget(i + STARTING_ROW, DELETE, new DeleteExportButton(e));

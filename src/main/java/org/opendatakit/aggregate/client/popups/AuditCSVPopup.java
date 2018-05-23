@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -57,18 +59,19 @@ public class AuditCSVPopup extends AbstractPopupBase {
       public void onSuccess(String csvContents) {
         String[] allLines = csvContents.split("\n");
 
-        StringBuilder html = new StringBuilder("<table class=\"dataTable\">");
+        SafeHtmlBuilder builder = new SafeHtmlBuilder();
+        builder.appendHtmlConstant("<table class=\"dataTable\">")
+            .appendHtmlConstant("<tr class=\"titleBar\">")
+            .appendHtmlConstant("<td>Event</td><td>Node</td><td>Start</td><td>End</td>")
+            .appendHtmlConstant("</tr>");
 
-        html.append("<tr class=\"titleBar\">")
-            .append("<td>Event</td><td>Node</td><td>Start</td><td>End</td>")
-            .append("</tr>");
         for (int i = 1, max = allLines.length; i < max; i++) {
-          html.append(Row.from(allLines[i]).asTr());
+          builder.append(Row.from(allLines[i]).asTr());
         }
-        html.append("</table>");
+        builder.appendHtmlConstant("</table>");
 
         AggregateUI.getUI().clearError();
-        panel.add(new HTML(html.toString()));
+        panel.add(new HTML(builder.toSafeHtml()));
         AggregateUI.resize();
       }
     };
@@ -99,13 +102,15 @@ public class AuditCSVPopup extends AbstractPopupBase {
       );
     }
 
-    String asTr() {
-      return "<tr>" +
-          "<td>" + this.event + "</td>" +
-          "<td>" + this.node + "</td>" +
-          "<td>" + this.start.toString() + "</td>" +
-          "<td>" + this.getEnd() + "</td>" +
-          "</tr>";
+    SafeHtml asTr() {
+      return new SafeHtmlBuilder()
+          .appendHtmlConstant("<tr>")
+          .appendHtmlConstant("<td>").appendEscaped(this.event).appendHtmlConstant("</td>")
+          .appendHtmlConstant("<td>").appendEscaped(this.node).appendHtmlConstant("</td>")
+          .appendHtmlConstant("<td>").appendEscaped(this.start.toString()).appendHtmlConstant("</td>")
+          .appendHtmlConstant("<td>").appendEscaped(this.getEnd()).appendHtmlConstant("</td>")
+          .appendHtmlConstant("</tr>")
+          .toSafeHtml();
     }
 
     String getEnd() {

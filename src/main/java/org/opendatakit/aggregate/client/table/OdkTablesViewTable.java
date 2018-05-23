@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
@@ -347,24 +348,24 @@ public class OdkTablesViewTable extends FlexTable {
           setWidget(currentRow, 0, deleteButton);
           int j = 1;
           for (String column : columnNames) {
-            setWidget(currentRow, j, new HTML(row.getValues().get(column)));
+            setWidget(currentRow, j, new HTML(new SafeHtmlBuilder().appendEscaped(row.getValues().get(column)).toSafeHtml()));
             j++;
           }
-          setWidget(currentRow, j++, new HTML(row.getSavepointType()));
-          setWidget(currentRow, j++, new HTML(row.getFormId()));
-          setWidget(currentRow, j++, new HTML(row.getLocale()));
-          setWidget(currentRow, j++, new HTML(row.getSavepointTimestampIso8601Date()));
-          setWidget(currentRow, j++, new HTML(row.getSavepointCreator()));
-          setWidget(currentRow, j++, new HTML(row.getRowId()));
-          setWidget(currentRow, j++, new HTML(row.getRowETag()));
-          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getAccess().name()));
-          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getRowOwner()));
-          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getGroupReadOnly()));
-          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getGroupModify()));
-          setWidget(currentRow, j++, new HTML(row.getRowFilterScope().getGroupPrivileged()));
-          setWidget(currentRow, j++, new HTML(row.getLastUpdateUser()));
-          setWidget(currentRow, j++, new HTML(row.getCreateUser()));
-          setWidget(currentRow, j++, new HTML(row.getDataETagAtModification()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getSavepointType()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getFormId()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getLocale()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getSavepointTimestampIso8601Date()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getSavepointCreator()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getRowId()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getRowETag()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getRowFilterScope().getAccess().name()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getRowFilterScope().getRowOwner()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getRowFilterScope().getGroupReadOnly()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getRowFilterScope().getGroupModify()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getRowFilterScope().getGroupPrivileged()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getLastUpdateUser()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getCreateUser()).toSafeHtml()));
+          setWidget(currentRow, j++, new HTML(new SafeHtmlBuilder().appendEscaped(row.getDataETagAtModification()).toSafeHtml()));
 
           if (currentRow % 2 == 0) {
             getRowFormatter().addStyleName(currentRow, "evenTableRow");

@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.Date;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -66,8 +67,9 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
       }});
 
     FlexTable layout = new FlexTable();
-    layout.setWidget(0, 0, new HTML("Purge submissions data for:<br>"
-        + formSummary.getTitle() + " [" + formSummary.getId() + "]<br>up to the chosen GMT date.<br>Incomplete submissions will<br>not be deleted."));
+    layout.setWidget(0, 0, new HTML(new SafeHtmlBuilder().appendEscaped(
+        "Purge submissions data for:<br>"
+        + formSummary.getTitle() + " [" + formSummary.getId() + "]<br>up to the chosen GMT date.<br>Incomplete submissions will<br>not be deleted.").toSafeHtml()));
     layout.setWidget(0, 1, picker);
     layout.setWidget(0, 2, confirm);
     layout.setWidget(0, 3, new ClosePopupButton(this));

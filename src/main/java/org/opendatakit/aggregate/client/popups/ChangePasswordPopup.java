@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -40,7 +41,7 @@ public class ChangePasswordPopup extends PopupPanel {
 
         FlexTable layout = new FlexTable();
         layout.setWidget(0, 0,
-                new HTML("Change Password for " + user.getUsername()));
+                new HTML(new SafeHtmlBuilder().appendEscaped("Change Password for " + user.getUsername()).toSafeHtml()));
         layout.setWidget(1, 0, new HTML("Password:"));
         layout.setWidget(1, 1, password1);
         layout.setWidget(2, 0, new HTML("Password (again):"));

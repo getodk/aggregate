@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.form.ExportSummary;
@@ -59,8 +60,8 @@ public final class ConfirmExportDeletePopup extends AbstractPopupBase {
 
     FlexTable layout = new FlexTable();
 
-    HTML message = new HTML("Delete this exported datafile?" + "<br/>Do you wish to " + action
-        + " this exported datafile?");
+    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped("Delete this exported datafile?" + "<br/>Do you wish to " + action
+        + " this exported datafile?").toSafeHtml());
     layout.setWidget(0, 0, message);
     layout.setWidget(0, 1, deleteButton);
     layout.setWidget(0, 2, new ClosePopupButton(this));

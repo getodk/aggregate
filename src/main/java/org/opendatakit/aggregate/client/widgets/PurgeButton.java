@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.Date;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
@@ -72,20 +73,24 @@ public final class PurgeButton extends AggregateButton implements ClickHandler {
       break;
     }
 
-    StringBuilder b = new StringBuilder();
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
     if (earliest == null) {
       Window.alert("Data has not yet been published -- no data will be purged");
     } else {
       if (externServ.getPublicationOption() != ExternalServicePublicationOption.UPLOAD_ONLY) {
-        b.append("<p><b>Note:</b> Even though the chosen publishing action involves an ongoing streaming"
-            + " of data to the external service, this purge action is a one-time event and is "
-            + "not automatically ongoing.  You will need to periodically repeat this process.</p>");
+        b.appendHtmlConstant("<p>")
+            .appendHtmlConstant("<b>Note:</b>")
+            .appendEscaped("Even though the chosen publishing action involves an ongoing streaming ")
+            .appendEscaped("of data to the external service, this purge action is a one-time event and is ")
+            .appendEscaped("not automatically ongoing.  You will need to periodically repeat this process.")
+            .appendHtmlConstant("</p>");
       }
-      b.append("Click to confirm purge of <b>" + formId + "</b> submissions older than "
-          + earliest.toString());
+      b.appendEscaped("Click to confirm purge of ")
+          .appendHtmlConstant("<b>").appendEscaped(formId).appendHtmlConstant("</b>")
+          .appendEscaped(" submissions older than " + earliest.toString());
 
       // TODO: display pop-up with text from b...
-      final ConfirmPurgePopup popup = new ConfirmPurgePopup(externServ, earliest, b.toString());
+      final ConfirmPurgePopup popup = new ConfirmPurgePopup(externServ, earliest, b.toSafeHtml());
       popup.setPopupPositionAndShow(popup.getPositionCallBack());
     }
   }

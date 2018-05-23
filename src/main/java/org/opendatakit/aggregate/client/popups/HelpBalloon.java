@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -38,7 +39,7 @@ public class HelpBalloon extends PopupPanel {
     this.widget = sender;
     this.offsetX = offsetX;
     this.offsetY = offsetY;
-    add(new HTML(text));
+    add(new HTML(new SafeHtmlBuilder().appendEscaped(text).toSafeHtml()));
   }
 
   public void display() {

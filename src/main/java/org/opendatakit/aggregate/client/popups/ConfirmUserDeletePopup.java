@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
@@ -53,16 +54,17 @@ public final class ConfirmUserDeletePopup extends AbstractPopupBase {
 
     HTML message;
     if (sheet.isUiOutOfSyncWithServer()) {
-      message = new HTML(
+      message = new HTML(new SafeHtmlBuilder().appendEscaped(
           "Unsaved changes exist.<br/>"
               + "<p>Proceeding will save all pending changes and<br/>permanently delete user <b>"
               + userToDelete.getCanonicalName()
               + "</b> on the server.</p>"
-              + "<p>Do you wish to apply all pending changes and <br/>permanently delete this user?</p>");
+              + "<p>Do you wish to apply all pending changes and <br/>permanently delete this user?</p>").toSafeHtml());
     } else {
-      message = new HTML("<p>Proceeding will permanently delete user <b>"
+      message = new HTML(new SafeHtmlBuilder().appendEscaped(
+          "<p>Proceeding will permanently delete user <b>"
           + userToDelete.getCanonicalName()
-          + "</b> on the server.</p><p>Do you wish to permanently delete this user?</p>");
+          + "</b> on the server.</p><p>Do you wish to permanently delete this user?</p>").toSafeHtml());
     }
     layout.setWidget(0, 0, message);
     layout.setWidget(2, 0, deleteButton);

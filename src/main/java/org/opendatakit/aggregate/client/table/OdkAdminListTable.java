@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.widgets.TablesAdminDeleteButton;
 
@@ -58,8 +59,8 @@ public class OdkAdminListTable extends FlexTable {
       OdkTablesAdmin admin = adminList[i];
       int j = i + 1;
       setWidget(j, DELETE_COLUMN, new TablesAdminDeleteButton(admin.getUriUser()));
-      setWidget(j, USER_COLUMN, new HTML(admin.getName()));
-      setWidget(j, ODK_TABLES_USER_ID_COLUMN, new HTML(admin.getOdkTablesUserId()));
+      setWidget(j, USER_COLUMN, new HTML(new SafeHtmlBuilder().appendEscaped(admin.getName()).toSafeHtml()));
+      setWidget(j, ODK_TABLES_USER_ID_COLUMN, new HTML(new SafeHtmlBuilder().appendEscaped(admin.getOdkTablesUserId()).toSafeHtml()));
 
       if (j % 2 == 0)
         getRowFormatter().addStyleName(j, "evenTableRow");

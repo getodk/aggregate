@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -98,8 +99,8 @@ public class FormTable extends FlexTable {
       }
       // ok -- we should show this form...
       ++i;
-      setWidget(i, TITLE_COLUMN, new HTML(form.getViewableURL()));
-      setWidget(i, FORM_ID_COLUMN, new HTML(form.getId()));
+      setWidget(i, TITLE_COLUMN, new HTML(new SafeHtmlBuilder().appendHtmlConstant(form.getViewableURL()).toSafeHtml()));
+      setWidget(i, FORM_ID_COLUMN, new HTML(new SafeHtmlBuilder().appendEscaped(form.getId()).toSafeHtml()));
 
       Widget mediaCount;
       if (form.getMediaFileCount() > 0) {
@@ -107,7 +108,7 @@ public class FormTable extends FlexTable {
         mediaCountLink.addClickHandler(new MediaFileListClickHandler(form.getId()));
         mediaCount = mediaCountLink;
       } else {
-        mediaCount = new HTML(Integer.toString(form.getMediaFileCount()));
+        mediaCount = new HTML(new SafeHtmlBuilder().appendEscaped(Integer.toString(form.getMediaFileCount())).toSafeHtml());
       }
       setWidget(i, MEDIA_COUNT_COLUMN, mediaCount);
 
