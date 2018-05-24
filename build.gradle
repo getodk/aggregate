@@ -29,8 +29,8 @@ group = 'org.opendatakit'
 version = getVersionName()
 description = ""
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
   mavenCentral()
@@ -77,7 +77,7 @@ def versions = [
         mysql     : '5.1.44',
         postgresql: '42.1.4.jre7'
     ],
-    gae           : '1.9.54',
+    gae           : '1.9.63',
     odkTomcatUtil : '1.0.1',
     servletApi    : '3.1.0',
     junit         : '4.12',
@@ -172,7 +172,21 @@ war {
   }
 }
 
+// Enable debugging of gretty started webapp in IDEA
+// For debuging a gradle task, IDEA creates a gradle init script (in /tmp/ijinit#.gradle), that sets JVM arguments
+// to enable remote debugging.
+// Unfortunately by default that only works for gradle tasks that implement JavaForkOptions - which gretty doesn't do.
+// So parse the JVM args that IDEA uses from that init script and set them as JVM args to be used by gretty:
+def debugArgs = []
+if (gradle.startParameter.initScripts) {
+  def line = file(gradle.startParameter.initScripts[0]).readLines().findAll({x -> x ==~ /.*-agentlib:jdwp=.*/ })[0]
+  if (line) {
+    debugArgs = ((line =~ /.*'(.*)'.*/)[0][1] as String).split(' ')
+  }
+}
+
 gretty {
+  jvmArgs = [*debugArgs]
   contextPath = '/'
   host = 'localhost'
   logDir = 'logs'

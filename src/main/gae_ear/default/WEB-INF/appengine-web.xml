@@ -3,6 +3,7 @@
   <application>test</application>
   <module>default</module>
   <version>1</version>
+	<runtime>java8</runtime>
   <use-google-connector-j>false</use-google-connector-j>
   
   	<instance-class>F2</instance-class>
