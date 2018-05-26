@@ -17,6 +17,8 @@
 
 package org.opendatakit.aggregate.parser;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -26,11 +28,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Stream;
 import org.javarosa.core.model.CoreModelModule;
-import org.javarosa.core.model.DataBinding;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.IDataReference;
 import org.javarosa.core.model.SubmissionProfile;
@@ -42,7 +41,6 @@ import org.javarosa.core.services.PrototypeManager;
 import org.javarosa.core.util.JavaRosaCoreModule;
 import org.javarosa.model.xform.XFormsModule;
 import org.javarosa.xform.parse.XFormParser;
-import org.javarosa.xform.util.XFormUtils;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
 import org.opendatakit.aggregate.constants.ParserConsts;
@@ -51,6 +49,8 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.form.XFormParameters;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types
@@ -222,53 +222,14 @@ public class BaseFormParserForJavaRosa {
         + xmlWithoutTimestampComment.substring(idx);
   }
 
-  private static class XFormParserWithBindEnhancements extends XFormParser {
-    @SuppressWarnings("unused")
-    private Document xmldoc;
-    private BaseFormParserForJavaRosa parser;
-
-    public XFormParserWithBindEnhancements(BaseFormParserForJavaRosa parser, Document form) {
-      super(form);
-      this.xmldoc = form;
-      this.parser = parser;
-    }
-
-    protected void parseBind(Element e) {
-      // remember raw bindings in case we want to compare parsed XForms later
-      parser.bindElements.add(copyBindingElement(e));
-      List<String> usedAtts = new ArrayList<String>();
-
-      DataBinding binding = processStandardBindAttributes(usedAtts, e);
-
-      String value = e.getAttributeValue(ParserConsts.NAMESPACE_ODK, "length");
-      if (value != null) {
-        e.setAttribute(ParserConsts.NAMESPACE_ODK, "length", null);
-      }
-
-      log.info("Calling handle found value " + ((value == null) ? "null" : value));
-
-      if (value != null) {
-        Integer iValue = Integer.valueOf(value);
-        parser.setNodesetStringLength(e.getAttributeValue(null, "nodeset"), iValue);
-      }
-
-      // print unused attribute warning message for parent element
-      if (XFormUtils.showUnusedAttributeWarning(e, usedAtts)) {
-        System.out.println(XFormUtils.unusedAttWarning(e, usedAtts));
-      }
-
-      addBinding(binding);
-    }
-  }
-
-  private static synchronized final XFormParserWithBindEnhancements parseFormDefinition(String xml,
-      BaseFormParserForJavaRosa parser) throws ODKIncompleteSubmissionData {
+  private static synchronized final XFormParser parseFormDefinition(String xml,
+                                                                                        BaseFormParserForJavaRosa parser) throws ODKIncompleteSubmissionData {
 
     StringReader isr = null;
     try {
       isr = new StringReader(xml);
       Document doc = XFormParser.getXMLDocument(isr);
-      return new XFormParserWithBindEnhancements(parser, doc);
+      return new XFormParser(doc);
     } catch (Exception e) {
       throw new ODKIncompleteSubmissionData(e, Reason.BAD_JR_PARSE);
     } finally {
@@ -456,7 +417,7 @@ public class BaseFormParserForJavaRosa {
 
     initializeJavaRosa();
 
-    XFormParserWithBindEnhancements xfp = parseFormDefinition(xml, this);
+    XFormParser xfp = parseFormDefinition(xml, this);
     try {
       rootJavaRosaFormDef = xfp.parse();
     } catch (Exception e) {
@@ -464,6 +425,28 @@ public class BaseFormParserForJavaRosa {
           "Javarosa failed to construct a FormDef. Is this an XForm definition?", e,
           Reason.BAD_JR_PARSE);
     }
+
+    // Parse any odk:length in bindings
+    TreeElement modelRoot = rootJavaRosaFormDef.getMainInstance().getRoot();
+    List<TreeElement> allBindings = flatten(modelRoot);
+
+    // Copy binding for later use
+    allBindings.forEach(e -> bindElements.add(copyBindingElement(e)));
+
+    // Set lengths of fields if odk:length has been defined
+    allBindings.forEach(e -> {
+      String value = e.getAttributeValue(ParserConsts.NAMESPACE_ODK, "length");
+      if (value != null) {
+        e.setAttribute(ParserConsts.NAMESPACE_ODK, "length", null);
+      }
+
+      log.info("Calling handle found value " + ((value == null) ? "null" : value));
+
+      if (value != null) {
+        Integer iValue = Integer.valueOf(value);
+        setNodesetStringLength(e.getAttributeValue(null, "nodeset"), iValue);
+      }
+    });
 
     if (rootJavaRosaFormDef == null) {
       throw new ODKIncompleteSubmissionData(
@@ -591,7 +574,7 @@ public class BaseFormParserForJavaRosa {
       // encrypted -- use the encrypted form template (above) to define
       // the
       // storage for this form.
-      XFormParserWithBindEnhancements exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION, this);
+      XFormParser exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION, this);
       try {
         formDef = exfp.parse();
       } catch (IOException e) {
@@ -623,6 +606,20 @@ public class BaseFormParserForJavaRosa {
     }
     // clean illegal characters from title
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
+  }
+
+  private static List<TreeElement> flatten(TreeElement element) {
+    return childrenOf(element).stream().flatMap(e -> e.getNumChildren() == 0
+        ? Stream.of(e)
+        : childrenOf(e).stream()
+    ).collect(toList());
+  }
+
+  private static List<TreeElement> childrenOf(TreeElement element) {
+    List<TreeElement> children = new ArrayList<>();
+    for (int i = 0, max = element.getNumChildren(); i < max; i++)
+      children.add(element.getChildAt(i));
+    return children;
   }
 
   @SuppressWarnings("unused")
@@ -1080,7 +1077,7 @@ public class BaseFormParserForJavaRosa {
 
   // copy binding and associated attributes to a new binding element (to help
   // with maintaining list of original bindings)
-  private static Element copyBindingElement(Element element) {
+  private static Element copyBindingElement(TreeElement element) {
     Element retval = new Element();
     retval.createElement(element.getNamespace(), element.getName());
     for (int i = 0; i < element.getAttributeCount(); i++) {
