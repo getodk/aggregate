@@ -32,6 +32,7 @@ public class Realm implements InitializingBean {
 
   private boolean sslIsRequired = false;
   private boolean sslIsAvailable = false;
+  private boolean forceHttpsLinks = false;
   private Integer port;
   private Integer securePort;
   private String hostname;
@@ -53,6 +54,7 @@ public class Realm implements InitializingBean {
     log.info("SecurePort: " + Integer.toString(securePort));
     log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no"));
     log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no"));
+    log.info("ForceHttpsLinks: " + (forceHttpsLinks ? "yes" : "no"));
     log.info("RealmString: " + realmString);
     log.info("isGaeEnvironment: " + (isGaeEnvironment ? "yes" : "no"));
     log.info("java.library.path: " + System.getProperty("java.library.path"));
@@ -116,6 +118,10 @@ public class Realm implements InitializingBean {
 
   public void setIsGaeEnvironment(boolean isGaeEnvironment) {
     this.isGaeEnvironment = isGaeEnvironment;
+  }
+
+  public void setForceHttpsLinks(boolean forceHttpsLinks) {
+    this.forceHttpsLinks = forceHttpsLinks;
   }
 
 }
