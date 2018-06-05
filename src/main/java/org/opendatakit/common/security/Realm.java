@@ -124,4 +124,8 @@ public class Realm implements InitializingBean {
     this.forceHttpsLinks = forceHttpsLinks;
   }
 
+  public boolean isForceHttpsLinks() {
+    return forceHttpsLinks;
+  }
+
 }
