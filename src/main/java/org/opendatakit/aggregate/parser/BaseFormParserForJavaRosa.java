@@ -435,7 +435,9 @@ public class BaseFormParserForJavaRosa {
     }
 
     // Parse any odk:length in bindings
-    List<Element> allBindings = findElements(doc.getRootElement(), "bind");
+    Element head = getChild(doc.getRootElement(), "head");
+    Element model = getChild(head, "model");
+    List<Element> allBindings = getChildren(model, "bind");
 
     // Copy binding for later use
     allBindings.forEach(e -> bindElements.add(copyBindingElement(e)));
@@ -615,10 +617,30 @@ public class BaseFormParserForJavaRosa {
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
   }
 
-  private List<Element> findElements(Element element, String name) {
-    return flatten(element).stream()
-        .filter(e -> e.getName().equalsIgnoreCase(name))
-        .collect(Collectors.toList());
+  private List<Element> getChildren(Element element, String name) {
+    List<Element> selectedChildren = new ArrayList<>();
+    for (int i = 0, max = element.getChildCount(); i < max; i++)
+      if (element.getType(i) == Node.ELEMENT) {
+        Element child = (Element) element.getChild(i);
+        if (getCleanName(child).equals(name))
+          selectedChildren.add(child);
+      }
+    return selectedChildren;
+  }
+
+  private Element getChild(Element element, String name) throws ODKIncompleteSubmissionData {
+    for (int i = 0, max = element.getChildCount(); i < max; i++)
+      if (element.getType(i) == Node.ELEMENT) {
+        Element child = (Element) element.getChild(i);
+        if (getCleanName(child).equals(name))
+          return child;
+      }
+    throw new ODKIncompleteSubmissionData("Missing " + name + " child element in " + element.getName(), Reason.BAD_JR_PARSE);
+  }
+
+  private String getCleanName(Element child) {
+    String name = child.getName();
+    return name.contains(":") ? name.substring(name.indexOf(":") + 1) : name;
   }
 
   private String getNodeset(Element e) {
@@ -629,22 +651,6 @@ public class BaseFormParserForJavaRosa {
       current = (Element) current.getParent();
     }
     return "/" + nodeset;
-  }
-
-
-  private static List<Element> flatten(Element element) {
-    return Stream.concat(
-        Stream.of(element),
-        childrenOf(element).stream().flatMap(e -> flatten(e).stream())
-    ).collect(toList());
-  }
-
-  private static List<Element> childrenOf(Element element) {
-    List<Element> children = new ArrayList<>();
-    for (int i = 0, max = element.getChildCount(); i < max; i++)
-      if (element.getType(i) == Node.ELEMENT)
-        children.add((Element) element.getChild(i));
-    return children;
   }
 
   @SuppressWarnings("unused")
