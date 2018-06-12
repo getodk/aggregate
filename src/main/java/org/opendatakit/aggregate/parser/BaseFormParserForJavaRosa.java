@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.javarosa.core.model.CoreModelModule;
 import org.javarosa.core.model.FormDef;
@@ -46,8 +47,10 @@ import org.javarosa.core.services.PrototypeManager;
 import org.javarosa.core.util.JavaRosaCoreModule;
 import org.javarosa.model.xform.XFormsModule;
 import org.javarosa.xform.parse.XFormParser;
+import org.kxml2.io.KXmlParser;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
+import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.form.XFormParameters;
@@ -55,6 +58,7 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Parses an XML definition of an XForm based on java rosa types
@@ -419,6 +423,29 @@ public class BaseFormParserForJavaRosa {
 
     initializeJavaRosa();
 
+    Document doc = new Document();
+    try (StringReader isr = new StringReader(xml)) {
+      KXmlParser parser = new KXmlParser();
+      parser.setInput(isr);
+      doc.parse(parser);
+    } catch (IOException | XmlPullParserException e) {
+      throw new ODKIncompleteSubmissionData(
+          "Javarosa failed parse the XForm definition. Is this an XForm definition?", e,
+          Reason.BAD_JR_PARSE);
+    }
+
+    // Parse any odk:length in bindings
+    List<Element> allBindings = findElements(doc.getRootElement(), "bind");
+
+    // Copy binding for later use
+    allBindings.forEach(e -> bindElements.add(copyBindingElement(e)));
+
+    // Set lengths of fields if odk:length has been defined
+    allBindings.forEach(e -> Optional
+        .ofNullable(e.getAttributeValue(NAMESPACE_ODK, "length"))
+        .map(Integer::valueOf)
+        .ifPresent(length -> setNodesetStringLength(getNodeset(e), length)));
+
     XFormParser xfp = parseFormDefinition(xml, this);
     try {
       rootJavaRosaFormDef = xfp.parse();
@@ -427,19 +454,6 @@ public class BaseFormParserForJavaRosa {
           "Javarosa failed to construct a FormDef. Is this an XForm definition?", e,
           Reason.BAD_JR_PARSE);
     }
-
-    // Parse any odk:length in bindings
-    TreeElement modelRoot = rootJavaRosaFormDef.getMainInstance().getRoot();
-    List<TreeElement> allBindings = flatten(modelRoot);
-
-    // Copy binding for later use
-    allBindings.forEach(e -> bindElements.add(copyBindingElement(e)));
-
-    // Set lengths of fields if odk:length has been defined
-    allBindings.forEach(e -> Optional
-        .ofNullable(e.getBindAttributeValue(NAMESPACE_ODK, "length"))
-        .map(Integer::valueOf)
-        .ifPresent(length -> setNodesetStringLength(getNodeset(e), length)));
 
     if (rootJavaRosaFormDef == null) {
       throw new ODKIncompleteSubmissionData(
@@ -601,27 +615,35 @@ public class BaseFormParserForJavaRosa {
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
   }
 
-  private String getNodeset(TreeElement e) {
+  private List<Element> findElements(Element element, String name) {
+    return flatten(element).stream()
+        .filter(e -> e.getName().equalsIgnoreCase(name))
+        .collect(Collectors.toList());
+  }
+
+  private String getNodeset(Element e) {
     String nodeset = e.getName();
-    TreeElement current = (TreeElement) e.getParent();
+    Element current = (Element) e.getParent();
     while (current != null && current.getName() != null) {
       nodeset = current.getName() + "/" + nodeset;
-      current = (TreeElement) current.getParent();
+      current = (Element) current.getParent();
     }
     return "/" + nodeset;
   }
 
-  private static List<TreeElement> flatten(TreeElement element) {
-    return childrenOf(element).stream().flatMap(e -> e.getNumChildren() == 0
-        ? Stream.of(e)
-        : childrenOf(e).stream()
+
+  private static List<Element> flatten(Element element) {
+    return Stream.concat(
+        Stream.of(element),
+        childrenOf(element).stream().flatMap(e -> flatten(e).stream())
     ).collect(toList());
   }
 
-  private static List<TreeElement> childrenOf(TreeElement element) {
-    List<TreeElement> children = new ArrayList<>();
-    for (int i = 0, max = element.getNumChildren(); i < max; i++)
-      children.add(element.getChildAt(i));
+  private static List<Element> childrenOf(Element element) {
+    List<Element> children = new ArrayList<>();
+    for (int i = 0, max = element.getChildCount(); i < max; i++)
+      if (element.getType(i) == Node.ELEMENT)
+        children.add((Element) element.getChild(i));
     return children;
   }
 
@@ -1078,7 +1100,7 @@ public class BaseFormParserForJavaRosa {
 
   // copy binding and associated attributes to a new binding element (to help
   // with maintaining list of original bindings)
-  private static Element copyBindingElement(TreeElement element) {
+  private static Element copyBindingElement(Element element) {
     Element retval = new Element();
     retval.createElement(element.getNamespace(), element.getName());
     for (int i = 0; i < element.getAttributeCount(); i++) {
