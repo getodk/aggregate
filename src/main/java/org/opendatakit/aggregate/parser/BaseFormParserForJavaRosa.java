@@ -524,7 +524,7 @@ public class BaseFormParserForJavaRosa {
     if (p != null) {
       String altUrl = p.getAction();
       isNotUploadableForm = (altUrl == null || !altUrl.startsWith("http") || p.getMethod() == null || !p
-          .getMethod().equals("form-data-post"));
+          .getMethod().equals("form-data-post") || !p.getMethod().equalsIgnoreCase("post"));
     }
 
     this.isNotUploadableForm = isNotUploadableForm;
@@ -532,7 +532,7 @@ public class BaseFormParserForJavaRosa {
     if (isNotUploadableForm) {
       log.info("Form "
           + submissionElementDefn.formId
-          + " is not uploadable (submission method is not form-data-post or does not have an http: or https: url. ");
+          + " is not uploadable (submission method is not post or form-data-post, or does not have an http: or https: url. ");
     }
 
     // insist that the submission element and root element have the same
