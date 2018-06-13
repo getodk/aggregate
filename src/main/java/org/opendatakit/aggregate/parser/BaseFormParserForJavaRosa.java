@@ -228,16 +228,11 @@ public class BaseFormParserForJavaRosa {
   }
 
   private static synchronized XFormParser parseFormDefinition(String xml) throws ODKIncompleteSubmissionData {
-
-    StringReader isr = null;
-    try {
-      isr = new StringReader(xml);
+    try (StringReader isr = new StringReader(xml)) {
       Document doc = XFormParser.getXMLDocument(isr);
       return new XFormParser(doc);
     } catch (Exception e) {
       throw new ODKIncompleteSubmissionData(e, Reason.BAD_JR_PARSE);
-    } finally {
-      isr.close();
     }
   }
 
