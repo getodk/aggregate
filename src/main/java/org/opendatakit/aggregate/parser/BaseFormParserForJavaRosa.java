@@ -230,8 +230,7 @@ public class BaseFormParserForJavaRosa {
         + xmlWithoutTimestampComment.substring(idx);
   }
 
-  private static synchronized final XFormParser parseFormDefinition(String xml,
-                                                                    BaseFormParserForJavaRosa parser) throws ODKIncompleteSubmissionData {
+  private static synchronized final XFormParser parseFormDefinition(String xml) throws ODKIncompleteSubmissionData {
 
     StringReader isr = null;
     try {
@@ -448,7 +447,7 @@ public class BaseFormParserForJavaRosa {
         .map(Integer::valueOf)
         .ifPresent(length -> setNodesetStringLength(getNodeset(e), length)));
 
-    XFormParser xfp = parseFormDefinition(xml, this);
+    XFormParser xfp = parseFormDefinition(xml);
     try {
       rootJavaRosaFormDef = xfp.parse();
     } catch (Exception e) {
@@ -583,7 +582,7 @@ public class BaseFormParserForJavaRosa {
       // encrypted -- use the encrypted form template (above) to define
       // the
       // storage for this form.
-      XFormParser exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION, this);
+      XFormParser exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION);
       try {
         formDef = exfp.parse();
       } catch (IOException e) {
