@@ -17,7 +17,6 @@
 
 package org.opendatakit.aggregate.parser;
 
-import static java.util.stream.Collectors.toList;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORM_ID_ATTRIBUTE_NAME;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH_SUBSTITUTION;
@@ -33,8 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.javarosa.core.model.CoreModelModule;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.IDataReference;
