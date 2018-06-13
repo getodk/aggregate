@@ -227,7 +227,7 @@ public class BaseFormParserForJavaRosa {
         + xmlWithoutTimestampComment.substring(idx);
   }
 
-  private static synchronized final XFormParser parseFormDefinition(String xml) throws ODKIncompleteSubmissionData {
+  private static synchronized XFormParser parseFormDefinition(String xml) throws ODKIncompleteSubmissionData {
 
     StringReader isr = null;
     try {
