@@ -421,7 +421,7 @@ public class BaseFormParserForJavaRosa {
       doc.parse(parser);
     } catch (IOException | XmlPullParserException e) {
       throw new ODKIncompleteSubmissionData(
-          "Javarosa failed parse the XForm definition. Is this an XForm definition?", e,
+          "Javarosa failed to parse the XForm definition. Is this an XForm definition?", e,
           Reason.BAD_JR_PARSE);
     }
 
