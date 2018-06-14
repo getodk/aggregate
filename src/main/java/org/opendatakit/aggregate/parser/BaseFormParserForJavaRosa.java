@@ -263,10 +263,6 @@ public class BaseFormParserForJavaRosa {
   // original bindings from parse-time for later comparison
   private final List<Element> bindElements = new ArrayList<Element>();
 
-  private void setNodesetStringLength(String nodeset, Integer length) {
-    stringLengths.put(nodeset, length);
-  }
-
   protected Integer getNodesetStringLength(AbstractTreeElement<?> e) {
     List<String> path = new ArrayList<String>();
     while (e != null && e.getName() != null) {
@@ -419,12 +415,7 @@ public class BaseFormParserForJavaRosa {
 
     List<Element> allBindings = getBindings(doc);
     allBindings.forEach(this::storeCopyOfBinding);
-
-    // Set lengths of fields if odk:length has been defined
-    allBindings.forEach(e -> Optional
-        .ofNullable(e.getAttributeValue(NAMESPACE_ODK, "length"))
-        .map(Integer::valueOf)
-        .ifPresent(length -> setNodesetStringLength(getNodeset(e), length)));
+    allBindings.forEach(this::storeLengthOfBinding);
 
     XFormParser xfp = new XFormParser(doc);
     try {
@@ -593,6 +584,17 @@ public class BaseFormParserForJavaRosa {
     }
     // clean illegal characters from title
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
+  }
+
+  /**
+   * Reads an optional <code>odk:length</code> attribute and saves it to be used
+   * to size the corresponding storage field.
+   */
+  private void storeLengthOfBinding(Element binding) {
+    Optional
+        .ofNullable(binding.getAttributeValue(NAMESPACE_ODK, "length"))
+        .map(Integer::valueOf)
+        .ifPresent(length -> stringLengths.put(getNodeset(binding), length));
   }
 
   /**
