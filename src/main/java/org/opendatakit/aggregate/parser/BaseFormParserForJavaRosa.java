@@ -418,10 +418,7 @@ public class BaseFormParserForJavaRosa {
     Document doc = parseXmlToDocument(xml);
 
     List<Element> allBindings = getBindings(doc);
-
-
-    // Copy binding for later use
-    allBindings.forEach(e -> bindElements.add(copyBindingElement(e)));
+    allBindings.forEach(this::storeCopyOfBinding);
 
     // Set lengths of fields if odk:length has been defined
     allBindings.forEach(e -> Optional
@@ -596,6 +593,20 @@ public class BaseFormParserForJavaRosa {
     }
     // clean illegal characters from title
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
+  }
+
+  /**
+   * Gets a copy of the given {@link Element} and saves it to be used if
+   * we need to compute the diff between the parsed xml and another xml
+   */
+  private void storeCopyOfBinding(Element binding) {
+    Element copy = new Element();
+    copy.createElement(binding.getNamespace(), binding.getName());
+    for (int i = 0; i < binding.getAttributeCount(); i++) {
+      copy.setAttribute(binding.getAttributeNamespace(i), binding.getAttributeName(i),
+          binding.getAttributeValue(i));
+    }
+    bindElements.add(copy);
   }
 
   private static List<Element> getBindings(Document doc) throws ODKIncompleteSubmissionData {
@@ -1103,18 +1114,6 @@ public class BaseFormParserForJavaRosa {
       if ((retval = element.getAttributeValue(attributeNamespace, attributeName)) != null) {
         return (retval);
       }
-    }
-    return (retval);
-  }
-
-  // copy binding and associated attributes to a new binding element (to help
-  // with maintaining list of original bindings)
-  private static Element copyBindingElement(Element element) {
-    Element retval = new Element();
-    retval.createElement(element.getNamespace(), element.getName());
-    for (int i = 0; i < element.getAttributeCount(); i++) {
-      retval.setAttribute(element.getAttributeNamespace(i), element.getAttributeName(i),
-          element.getAttributeValue(i));
     }
     return (retval);
   }
