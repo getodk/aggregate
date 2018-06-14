@@ -417,14 +417,7 @@ public class BaseFormParserForJavaRosa {
     allBindings.forEach(this::storeCopyOfBinding);
     allBindings.forEach(this::storeLengthOfBinding);
 
-    XFormParser xfp = new XFormParser(doc);
-    try {
-      rootJavaRosaFormDef = xfp.parse();
-    } catch (Exception e) {
-      throw new ODKIncompleteSubmissionData(
-          "Javarosa failed to construct a FormDef. Is this an XForm definition?", e,
-          Reason.BAD_JR_PARSE);
-    }
+    rootJavaRosaFormDef = parseDocumentIntoFormDef(doc);
 
     if (rootJavaRosaFormDef == null) {
       throw new ODKIncompleteSubmissionData(
@@ -584,6 +577,16 @@ public class BaseFormParserForJavaRosa {
     }
     // clean illegal characters from title
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
+  }
+
+  private static FormDef parseDocumentIntoFormDef(Document doc) throws ODKIncompleteSubmissionData {
+    try {
+      return new XFormParser(doc).parse();
+    } catch (Exception e) {
+      throw new ODKIncompleteSubmissionData(
+          "Javarosa failed to construct a FormDef. Is this an XForm definition?", e,
+          Reason.BAD_JR_PARSE);
+    }
   }
 
   /**
