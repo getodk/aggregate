@@ -418,6 +418,7 @@ public class BaseFormParserForJavaRosa {
     try (StringReader isr = new StringReader(xml)) {
       KXmlParser parser = new KXmlParser();
       parser.setInput(isr);
+      parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
       doc.parse(parser);
     } catch (IOException | XmlPullParserException e) {
       throw new ODKIncompleteSubmissionData(
