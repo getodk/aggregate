@@ -417,10 +417,8 @@ public class BaseFormParserForJavaRosa {
 
     Document doc = parseXmlToDocument(xml);
 
-    // Parse any odk:length in bindings
-    Element head = getChild(doc.getRootElement(), "head");
-    Element model = getChild(head, "model");
-    List<Element> allBindings = getChildren(model, "bind");
+    List<Element> allBindings = getBindings(doc);
+
 
     // Copy binding for later use
     allBindings.forEach(e -> bindElements.add(copyBindingElement(e)));
@@ -600,6 +598,13 @@ public class BaseFormParserForJavaRosa {
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
   }
 
+  private static List<Element> getBindings(Document doc) throws ODKIncompleteSubmissionData {
+    // Parse any odk:length in bindings
+    Element head = getChild(doc.getRootElement(), "head");
+    Element model = getChild(head, "model");
+    return getChildren(model, "bind");
+  }
+
   private static Document parseXmlToDocument(String xml) throws ODKIncompleteSubmissionData {
     try (StringReader isr = new StringReader(xml)) {
       Document doc = new Document();
@@ -615,7 +620,7 @@ public class BaseFormParserForJavaRosa {
     }
   }
 
-  private List<Element> getChildren(Element element, String name) {
+  private static List<Element> getChildren(Element element, String name) {
     List<Element> selectedChildren = new ArrayList<>();
     for (int i = 0, max = element.getChildCount(); i < max; i++)
       if (element.getType(i) == Node.ELEMENT) {
@@ -626,7 +631,7 @@ public class BaseFormParserForJavaRosa {
     return selectedChildren;
   }
 
-  private Element getChild(Element element, String name) throws ODKIncompleteSubmissionData {
+  private static Element getChild(Element element, String name) throws ODKIncompleteSubmissionData {
     for (int i = 0, max = element.getChildCount(); i < max; i++)
       if (element.getType(i) == Node.ELEMENT) {
         Element child = (Element) element.getChild(i);
@@ -636,7 +641,7 @@ public class BaseFormParserForJavaRosa {
     throw new ODKIncompleteSubmissionData("Missing " + name + " child element in " + element.getName(), Reason.BAD_JR_PARSE);
   }
 
-  private String getCleanName(Element child) {
+  private static String getCleanName(Element child) {
     String name = child.getName();
     return name.contains(":") ? name.substring(name.indexOf(":") + 1) : name;
   }
