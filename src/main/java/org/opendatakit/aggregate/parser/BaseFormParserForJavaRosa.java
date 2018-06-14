@@ -415,17 +415,7 @@ public class BaseFormParserForJavaRosa {
 
     initializeJavaRosa();
 
-    Document doc = new Document();
-    try (StringReader isr = new StringReader(xml)) {
-      KXmlParser parser = new KXmlParser();
-      parser.setInput(isr);
-      parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-      doc.parse(parser);
-    } catch (IOException | XmlPullParserException e) {
-      throw new ODKIncompleteSubmissionData(
-          "Javarosa failed to parse the XForm definition. Is this an XForm definition?", e,
-          Reason.BAD_JR_PARSE);
-    }
+    Document doc = parseXmlToDocument(xml);
 
     // Parse any odk:length in bindings
     Element head = getChild(doc.getRootElement(), "head");
@@ -608,6 +598,21 @@ public class BaseFormParserForJavaRosa {
     }
     // clean illegal characters from title
     title = formTitle.replace(BasicConsts.FORWARDSLASH, BasicConsts.EMPTY_STRING);
+  }
+
+  private static Document parseXmlToDocument(String xml) throws ODKIncompleteSubmissionData {
+    try (StringReader isr = new StringReader(xml)) {
+      Document doc = new Document();
+      KXmlParser parser = new KXmlParser();
+      parser.setInput(isr);
+      parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+      doc.parse(parser);
+      return doc;
+    } catch (IOException | XmlPullParserException e) {
+      throw new ODKIncompleteSubmissionData(
+          "Javarosa failed to parse the XForm definition. Is this an XForm definition?", e,
+          Reason.BAD_JR_PARSE);
+    }
   }
 
   private List<Element> getChildren(Element element, String name) {
