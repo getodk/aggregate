@@ -55,6 +55,7 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
@@ -440,7 +441,7 @@ public class BaseFormParserForJavaRosa {
         .map(Integer::valueOf)
         .ifPresent(length -> setNodesetStringLength(getNodeset(e), length)));
 
-    XFormParser xfp = parseFormDefinition(xml);
+    XFormParser xfp = new XFormParser(doc);
     try {
       rootJavaRosaFormDef = xfp.parse();
     } catch (Exception e) {
