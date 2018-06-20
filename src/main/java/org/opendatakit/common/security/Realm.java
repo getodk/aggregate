@@ -15,9 +15,9 @@
  */
 package org.opendatakit.common.security;
 
+import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -27,96 +27,105 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class Realm implements InitializingBean {
 
-    private boolean sslIsRequired = false;
-    private boolean sslIsAvailable = false;
-    private Integer port;
-    private Integer securePort;
-    private String hostname;
-    private String realmString;
-    private boolean isGaeEnvironment = false;
+  private boolean sslIsRequired = false;
+  private boolean sslIsAvailable = false;
+  private boolean forceHttpsLinks = false;
+  private Integer port;
+  private Integer securePort;
+  private String hostname;
+  private String realmString;
+  private boolean isGaeEnvironment = false;
 
-    public Realm() {
-    }
+  public Realm() {
+  }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        if ( realmString == null ) {
-            throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
-        }
-        Logger log = LoggerFactory.getLogger(Realm.class);
-        log.info("Version: " + UIConsts.VERSION_STRING);
-        log.info("Hostname: " + hostname);
-        log.info("Port: " + Integer.toString(port));
-        log.info("SecurePort: " + Integer.toString(securePort));
-        log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no") );
-        log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no") );
-        log.info("RealmString: " + realmString);
-      log.info("isGaeEnvironment: " + (isGaeEnvironment ? "yes" : "no") );
-      log.info("java.library.path: " + System.getProperty("java.library.path"));
+  @Override
+  public void afterPropertiesSet() {
+    if (realmString == null) {
+      throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
     }
+    Logger log = LoggerFactory.getLogger(Realm.class);
+    log.info("Version: " + UIConsts.VERSION_STRING);
+    log.info("Hostname: " + hostname);
+    log.info("Port: " + Integer.toString(port));
+    log.info("SecurePort: " + Integer.toString(securePort));
+    log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no"));
+    log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no"));
+    log.info("ForceHttpsLinks: " + (forceHttpsLinks ? "yes" : "no"));
+    log.info("RealmString: " + realmString);
+    log.info("isGaeEnvironment: " + (isGaeEnvironment ? "yes" : "no"));
+    log.info("java.library.path: " + System.getProperty("java.library.path"));
+  }
 
-    public void setSecureChannelType(String type) {
-        if ( type != null && type.equals("REQUIRES_SECURE_CHANNEL") ) {
-            sslIsAvailable = true;
-        }
+  public void setSecureChannelType(String type) {
+    if (type != null && type.equals("REQUIRES_SECURE_CHANNEL")) {
+      sslIsAvailable = true;
     }
+  }
 
-    public boolean isSslAvailable() {
-        return sslIsAvailable;
-    }
+  public boolean isSslAvailable() {
+    return sslIsAvailable;
+  }
 
-    public void setChannelType(String type) {
-        if ( type != null && type.equals("REQUIRES_SECURE_CHANNEL") ) {
-            sslIsRequired = true;
-        }
+  public void setChannelType(String type) {
+    if (type != null && type.equals("REQUIRES_SECURE_CHANNEL")) {
+      sslIsRequired = true;
     }
+  }
 
-    public boolean isSslRequired() {
-        return sslIsRequired;
-    }
+  public boolean isSslRequired() {
+    return sslIsRequired;
+  }
 
-    public Integer getPort() {
-        return port;
-    }
+  public Integer getPort() {
+    return port;
+  }
 
-    public void setPort(Integer port) {
-        this.port = port;
-    }
+  public void setPort(Integer port) {
+    this.port = port;
+  }
 
-    public Integer getSecurePort() {
-        return securePort;
-    }
+  public Integer getSecurePort() {
+    return securePort;
+  }
 
-    public void setSecurePort(Integer securePort) {
-        this.securePort = securePort;
-    }
+  public void setSecurePort(Integer securePort) {
+    this.securePort = securePort;
+  }
 
-    public String getHostname() {
-        return hostname;
-    }
+  public String getHostname() {
+    return hostname;
+  }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
+  public void setHostname(String hostname) {
+    this.hostname = hostname;
+  }
 
-    public String getRealmString() {
-        return realmString;
-    }
+  public String getRealmString() {
+    return realmString;
+  }
 
-    public void setRealmString(String realmString) {
-        this.realmString = realmString;
-    }
+  public void setRealmString(String realmString) {
+    this.realmString = realmString;
+  }
 
-    public boolean getIsGaeEnvironment() {
-      return isGaeEnvironment;
-    }
+  public boolean getIsGaeEnvironment() {
+    return isGaeEnvironment;
+  }
 
-    public void setIsGaeEnvironment(boolean isGaeEnvironment) {
-      this.isGaeEnvironment = isGaeEnvironment;
-    }
+  public void setIsGaeEnvironment(boolean isGaeEnvironment) {
+    this.isGaeEnvironment = isGaeEnvironment;
+  }
+
+  public void setForceHttpsLinks(boolean forceHttpsLinks) {
+    this.forceHttpsLinks = forceHttpsLinks;
+  }
+
+  public boolean isForceHttpsLinks() {
+    return forceHttpsLinks;
+  }
 
 }

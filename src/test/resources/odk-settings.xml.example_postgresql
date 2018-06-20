@@ -50,6 +50,7 @@
 		<property name="securePort" value="${security.server.securePort}" />
 		<property name="channelType" value="${security.server.channelType}" />
 		<property name="secureChannelType" value="${security.server.secureChannelType}" />
+		<property name="forceHttpsLinks" value="${security.server.forceHttpsLinks:false}" />
 	</bean>
 
 	<bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">

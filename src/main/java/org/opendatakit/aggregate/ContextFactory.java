@@ -78,10 +78,9 @@ public class ContextFactory {
       this.userService = (UserService) getBean(BeanDefs.USER_BEAN);
 
       Realm realm = userService.getCurrentRealm();
-      Integer identifiedPort = realm.getPort();
-      Integer identifiedSecurePort = realm.getSecurePort();
-      String identifiedHostname = realm.getHostname();
 
+
+      String identifiedHostname = realm.getHostname();
       if (identifiedHostname == null || identifiedHostname.length() == 0) {
         identifiedHostname = req.getServerName();
         if (identifiedHostname == null || identifiedHostname.length() == 0
@@ -94,11 +93,9 @@ public class ContextFactory {
         }
       }
 
-      String identifiedScheme = "http";
-      if (realm.isSslRequired()) {
-        identifiedScheme = "https";
-        identifiedPort = identifiedSecurePort;
-      }
+      String identifiedScheme = realm.isSslRequired() || realm.isForceHttpsLinks() ? "https" : "http";
+      Integer identifiedSecurePort = realm.getSecurePort();
+      Integer identifiedPort = realm.isSslRequired() || realm.isForceHttpsLinks() ? identifiedSecurePort : realm.getPort();
 
       if (identifiedPort == null || identifiedPort == 0) {
         if (req.getScheme().equals(identifiedScheme)) {
