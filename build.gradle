@@ -34,6 +34,7 @@ targetCompatibility = 1.8
 
 repositories {
   mavenCentral()
+  maven { url = 'https://oss.sonatype.org/content/groups/public' }
 
   flatDir {
     dirs 'libs'
@@ -69,7 +70,7 @@ def versions = [
     gson          : '2.8.0',
     kxml2         : '2.3.0',
     odk           : [
-        javarosa     : '2.10.0',
+        javarosa     : '2.11.0-SNAPSHOT',
         httpclientGae: '4.5.2-1',
         tomcatUtil   : '1.0.1'
     ],
