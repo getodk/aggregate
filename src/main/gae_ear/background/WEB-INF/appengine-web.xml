@@ -29,4 +29,6 @@
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     <property name="com.google.gdata.DisableCookieHandler" value="true"/>
   </system-properties>
+
+  <url-stream-handler>urlfetch</url-stream-handler>
 </appengine-web-app>
