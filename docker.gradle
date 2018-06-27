@@ -1,0 +1,47 @@
+import static org.opendatakit.aggregate.gradle.Util.setPropertiesValue
+import static org.opendatakit.aggregate.gradle.Util.getVersionName
+
+String buildTarget = "${buildDir}/docker".toString()
+
+task dockerClean() {
+  delete "${buildTarget}"
+}
+
+task dockerPrepare(dependsOn: [dockerClean], type: Copy) {
+  into "${buildTarget}"
+  from fileTree(dir: 'docker')
+
+  into('webapps/ROOT') {
+    from zipTree("${buildDir}/libs/${archivesBaseName}-${version}.war")
+  }
+
+  doLast {
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.url", "jdbc:postgresql://127.0.0.1/odk_db?autoDeserialize=true")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.username", "odk_unit")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.password", "test")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.schema", "odk_db")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.realm.realmString", "ODK Aggregate")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.channelType", "ANY_CHANNEL")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "wink.handlersFactoryClass", "org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.superUserUsername", "administrator")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.superUser", "")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.port", "8080")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.securePort", "8443")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.deviceAuthentication", "digest")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.hostname", "")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.secureChannelType", "ANY_CHANNEL")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.help.about", "auto-generated on 1970-01-01T00:00:00+0000 for ODK Aggregate")
+  }
+}
+
+task dockerBuild(dependsOn: [build, dockerPrepare], type: Exec) {
+  workingDir "${buildTarget}"
+
+  commandLine 'docker', 'build', '-t', "aggregate:${getVersionName()}".toString(), '.'
+
+  doLast {
+    println ""
+    println "Your Aggregate Docker image is ready to run."
+    println "Please, refer to https://github.com/opendatakit/aggregate/tree/master/docs/running-aggregate-with-docker.md for instructions."
+  }
+}
