@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import static org.opendatakit.aggregate.constants.common.ExternalServiceType.JSON_SERVER;
+
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import java.util.Date;
 
@@ -96,7 +98,10 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());
       this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(new SafeHtmlBuilder().appendEscaped(e.getOwnership()).toSafeHtml()));
-      this.setWidget(i + STARTING_ROW, NAME, new HTML(new SafeHtmlBuilder().appendHtmlConstant(e.getName()).toSafeHtml()));
+      HTML link = e.getExternalServiceType() == JSON_SERVER
+          ? new HTML(new SafeHtmlBuilder().appendHtmlConstant("<a href=\"" + e.getName() + "\">").appendEscaped(e.getName()).appendHtmlConstant("</a>").toSafeHtml())
+          : new HTML(new SafeHtmlBuilder().appendHtmlConstant(e.getName()).toSafeHtml());
+      this.setWidget(i + STARTING_ROW, NAME, link);
       this.setWidget(i + STARTING_ROW, DELETE,  new DeletePublishButton(e));
     }
   }
