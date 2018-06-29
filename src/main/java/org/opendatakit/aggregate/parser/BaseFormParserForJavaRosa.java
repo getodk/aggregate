@@ -597,7 +597,7 @@ public class BaseFormParserForJavaRosa {
     Optional
         .ofNullable(binding.getAttributeValue(NAMESPACE_ODK, "length"))
         .map(Integer::valueOf)
-        .ifPresent(length -> stringLengths.put(getNodeset(binding), length));
+        .ifPresent(length -> stringLengths.put(binding.getAttributeValue(null, "nodeset"), length));
   }
 
   /**
