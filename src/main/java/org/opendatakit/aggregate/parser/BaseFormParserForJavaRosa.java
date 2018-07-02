@@ -597,7 +597,7 @@ public class BaseFormParserForJavaRosa {
     Optional
         .ofNullable(binding.getAttributeValue(NAMESPACE_ODK, "length"))
         .map(Integer::valueOf)
-        .ifPresent(length -> stringLengths.put(getNodeset(binding), length));
+        .ifPresent(length -> stringLengths.put(binding.getAttributeValue(null, "nodeset"), length));
   }
 
   /**
@@ -664,10 +664,10 @@ public class BaseFormParserForJavaRosa {
 
   private String getNodeset(Element e) {
     String nodeset = e.getName();
-    Element current = (Element) e.getParent();
-    while (current != null && current.getName() != null) {
-      nodeset = current.getName() + "/" + nodeset;
-      current = (Element) current.getParent();
+    Object current = e.getParent();
+    while (current instanceof Element && ((Element) current).getName() != null) {
+      nodeset = ((Element)current).getName() + "/" + nodeset;
+      current = ((Element)current).getParent();
     }
     return "/" + nodeset;
   }
