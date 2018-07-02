@@ -1,0 +1,24 @@
+version: "3"
+services:
+  db:
+    image: postgres:9.6-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - ./pgdata:/var/lib/postgresql/data
+
+  wait_for_db:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+    command: db:5432
+
+  tomcat8:
+    depends_on:
+      - wait_for_db
+    image: tomcat:alpine
+    ports:
+      - 8080:8080
+    volumes:
+      - ./webapps:/usr/local/tomcat/webapps
