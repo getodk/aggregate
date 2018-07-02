@@ -16,18 +16,18 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import java.util.Date;
+import static org.opendatakit.aggregate.constants.common.ExternalServiceType.JSON_SERVER;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import java.util.Date;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.DeletePublishButton;
 import org.opendatakit.aggregate.client.widgets.PurgeButton;
 import org.opendatakit.aggregate.client.widgets.RestartButton;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.common.security.client.UserSecurityInfo;
-
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 
 /**
  * List all the external services to which forms are published.
@@ -68,8 +68,8 @@ public class PublishTable extends FlexTable {
     while (this.getRowCount() > STARTING_ROW)
       this.removeRow(STARTING_ROW);
     if (eSS == null) {
-        // this happens if there is no publishing set up for this form
-        return;
+      // this happens if there is no publishing set up for this form
+      return;
     }
     for (int i = 0; i < eSS.length; i++) {
       ExternServSummary e = eSS[i];
@@ -78,17 +78,17 @@ public class PublishTable extends FlexTable {
       String user = e.getUser();
       String displayName = UserSecurityInfo.getDisplayName(user);
       this.setText(i + STARTING_ROW, CREATED_BY, displayName);
-      if ( e.getStatus() == OperationalStatus.BAD_CREDENTIALS)  {
+      if (e.getStatus() == OperationalStatus.BAD_CREDENTIALS) {
         this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, RestartButton.Circumstance.CREDENTIALS));
-      } else if (e.getStatus() == OperationalStatus.ABANDONED ) {
+      } else if (e.getStatus() == OperationalStatus.ABANDONED) {
         this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, RestartButton.Circumstance.ABANDONED));
-      } else if (e.getStatus() == OperationalStatus.PAUSED ) {
+      } else if (e.getStatus() == OperationalStatus.PAUSED) {
         this.setWidget(i + STARTING_ROW, STATUS, new RestartButton(e, RestartButton.Circumstance.PAUSED));
       } else {
         this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
       }
       Date d = e.getTimeLastStreamingCursor();
-      if ( d == null ) {
+      if (d == null) {
         d = e.getTimeLastUploadCursor();
       }
       this.setText(i + STARTING_ROW, LAST_PUBLISHED, (d == null) ? "" : d.toString());
@@ -96,8 +96,11 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());
       this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(new SafeHtmlBuilder().appendEscaped(e.getOwnership()).toSafeHtml()));
-      this.setWidget(i + STARTING_ROW, NAME, new HTML(new SafeHtmlBuilder().appendHtmlConstant(e.getName()).toSafeHtml()));
-      this.setWidget(i + STARTING_ROW, DELETE,  new DeletePublishButton(e));
+      HTML link = e.getExternalServiceType() == JSON_SERVER
+          ? new HTML(new SafeHtmlBuilder().appendHtmlConstant("<a href=\"" + e.getName() + "\">").appendEscaped(e.getName()).appendHtmlConstant("</a>").toSafeHtml())
+          : new HTML(new SafeHtmlBuilder().appendHtmlConstant(e.getName()).toSafeHtml());
+      this.setWidget(i + STARTING_ROW, NAME, link);
+      this.setWidget(i + STARTING_ROW, DELETE, new DeletePublishButton(e));
     }
   }
 
