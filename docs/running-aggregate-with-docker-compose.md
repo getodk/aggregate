@@ -1,13 +1,13 @@
 # Running Aggregate with Docker Compose
 
-## Requirememts
+## Requirements
 
 - Install [Docker](https://www.docker.com)
 - Install [Docker Compose](https://docs.docker.com/compose)
 
 ## Quick start
 
-- Build the setup with `./gradlew clean dockerComposeBuild -xtest -pwarMode=complete`.
+- Build the setup with `./gradlew clean dockerComposeBuild -xtest -PwarMode=complete`.
 - Copy the setup at `build/docker-compose` to some other location in your system. 
 
 Run the following commands where you have copied your built setup. **Don't run them directly in `build/docker-compose` because it will compromise Aggregate's build tasks**.
@@ -20,7 +20,7 @@ Run the following commands where you have copied your built setup. **Don't run t
 
   You will see the output from the containers. 
   
-  Aggregate is ready when you see a message containing `"Server startup in 2355 ms"` (the actual number may be other).
+  Aggregate is ready when you see a message containing `"Server startup in 2355 ms"` (the actual number may be different).
   
   Access Aggregate at [http:/localhost:8080](http:/localhost:8080)
 
