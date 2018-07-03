@@ -45,7 +45,7 @@ def versions = [
     spring        : '4.3.4.RELEASE',
     springSecurity: '4.2.0.RELEASE',
     gwt           : [
-        servlet      : '2.7.0',
+        servlet      : '2.8.2',
         googleMapsV3 : '1.0.1',
         visualization: '1.1.2'
     ],
