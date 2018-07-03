@@ -16,13 +16,33 @@
 
 package org.opendatakit.aggregate.client.permissions;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.PermissionsSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
@@ -46,28 +66,6 @@ import org.opendatakit.common.web.client.UIEnabledValidatingSelectionColumn;
 import org.opendatakit.common.web.client.UIEnabledValidatingTextInputColumn;
 import org.opendatakit.common.web.client.UIVisiblePredicate;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
-
 public class AccessConfigurationSheet extends Composite {
 
   private static final String NOT_VALID_EMAIL = "Username is not a valid Email address.\n\n"
@@ -82,7 +80,9 @@ public class AccessConfigurationSheet extends Composite {
     userType = new ArrayList<String>();
     userType.add(ACCOUNT_TYPE_ODK);
     userType.add(ACCOUNT_TYPE_GOOGLE);
-  };
+  }
+
+  ;
 
   private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
       .create(TemporaryAccessConfigurationSheetUiBinder.class);
@@ -192,54 +192,54 @@ public class AccessConfigurationSheet extends Composite {
       TreeSet<GrantedAuthorityName> assignedGroups = info.getAssignedUserGroups();
 
       switch (auth) {
-      case GROUP_DATA_COLLECTORS:
-        // data collectors must be anonymous
-        // or an ODK account type
-        return (info.getType() == UserType.ANONYMOUS) ||
-               (info.getUsername() != null);
-      case GROUP_DATA_VIEWERS:
-        if (assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
-            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+        case GROUP_DATA_COLLECTORS:
+          // data collectors must be anonymous
+          // or an ODK account type
+          return (info.getType() == UserType.ANONYMOUS) ||
+              (info.getUsername() != null);
+        case GROUP_DATA_VIEWERS:
+          if (assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+            return false;
+          }
+          return true;
+        case GROUP_SYNCHRONIZE_TABLES:
+          if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+            return false;
+          }
+          return true;
+        case GROUP_SUPER_USER_TABLES:
+          if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+            return false;
+          }
+          return true;
+        case GROUP_ADMINISTER_TABLES:
+          if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+            return false;
+          }
+          return true;
+        case GROUP_FORM_MANAGERS:
+          if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
+            return false;
+          }
+          return true;
+        case GROUP_SITE_ADMINS:
+          // don't let the designated super-user un-check their
+          // site admin privileges.
+          String email = info.getEmail();
+          String superUserEmail = AggregateUI.getUI().getRealmInfo().getSuperUserEmail();
+          String username = info.getUsername();
+          String superUsername = AggregateUI.getUI().getRealmInfo().getSuperUsername();
+          if ((email != null && superUserEmail != null && superUserEmail.equals(email)) ||
+              (username != null && superUsername != null && superUsername.equals(username))) {
+            return false;
+          }
+          return true;
+        default:
           return false;
-        }
-        return true;
-      case GROUP_SYNCHRONIZE_TABLES:
-        if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-            || assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
-         || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
-          return false;
-        }
-        return true;
-      case GROUP_SUPER_USER_TABLES:
-        if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
-          return false;
-        }
-        return true;
-      case GROUP_ADMINISTER_TABLES:
-        if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
-          return false;
-        }
-        return true;
-      case GROUP_FORM_MANAGERS:
-        if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
-          return false;
-        }
-        return true;
-      case GROUP_SITE_ADMINS:
-        // don't let the designated super-user un-check their
-        // site admin privileges.
-        String email = info.getEmail();
-        String superUserEmail = AggregateUI.getUI().getRealmInfo().getSuperUserEmail();
-        String username = info.getUsername();
-        String superUsername = AggregateUI.getUI().getRealmInfo().getSuperUsername();
-        if ( ( email != null && superUserEmail != null && superUserEmail.equals(email) ) ||
-             ( username != null && superUsername != null && superUsername.equals(username) ) ) {
-          return false;
-        }
-        return true;
-      default:
-        return false;
       }
     }
   }
@@ -316,31 +316,31 @@ public class AccessConfigurationSheet extends Composite {
 
       TreeSet<GrantedAuthorityName> assignedGroups = object.getAssignedUserGroups();
       switch (auth) {
-      case GROUP_DATA_COLLECTORS:
-        return assignedGroups.contains(auth);
-      case GROUP_DATA_VIEWERS:
-        return assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
-            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-            || assignedGroups.contains(auth);
-      case GROUP_FORM_MANAGERS:
-        return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-            || assignedGroups.contains(auth);
-      case GROUP_SYNCHRONIZE_TABLES:
-        return assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
-            || assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-            || assignedGroups.contains(auth);
-      case GROUP_SUPER_USER_TABLES:
-        return assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-            || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-            || assignedGroups.contains(auth);
-      case GROUP_ADMINISTER_TABLES:
-        return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-            || assignedGroups.contains(auth);
-      case GROUP_SITE_ADMINS:
-        return assignedGroups.contains(auth);
-      default:
-        return false;
+        case GROUP_DATA_COLLECTORS:
+          return assignedGroups.contains(auth);
+        case GROUP_DATA_VIEWERS:
+          return assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+              || assignedGroups.contains(auth);
+        case GROUP_FORM_MANAGERS:
+          return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+              || assignedGroups.contains(auth);
+        case GROUP_SYNCHRONIZE_TABLES:
+          return assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+              || assignedGroups.contains(auth);
+        case GROUP_SUPER_USER_TABLES:
+          return assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
+              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+              || assignedGroups.contains(auth);
+        case GROUP_ADMINISTER_TABLES:
+          return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
+              || assignedGroups.contains(auth);
+        case GROUP_SITE_ADMINS:
+          return assignedGroups.contains(auth);
+        default:
+          return false;
       }
     }
   }
@@ -371,7 +371,9 @@ public class AccessConfigurationSheet extends Composite {
       userTable.setPageSize(Math.max(15, result.size()));
       uiInSyncWithServer();
     }
-  };
+  }
+
+  ;
 
   public void deleteUser(UserSecurityInfo user) {
     dataProvider.getList().remove(user);
@@ -443,13 +445,15 @@ public class AccessConfigurationSheet extends Composite {
       String superUserEmail = AggregateUI.getUI().getRealmInfo().getSuperUserEmail();
       String username = info.getUsername();
       String superUsername = AggregateUI.getUI().getRealmInfo().getSuperUsername();
-      if ( ( email != null && superUserEmail != null && superUserEmail.equals(email) ) ||
-           ( username != null && superUsername != null && superUsername.equals(username) ) ) {
+      if ((email != null && superUserEmail != null && superUserEmail.equals(email)) ||
+          (username != null && superUsername != null && superUsername.equals(username))) {
         return false;
       }
       return true;
     }
-  };
+  }
+
+  ;
 
   private static final class EnableNotAnonymousPredicate implements
       UIEnabledPredicate<UserSecurityInfo> {
@@ -458,7 +462,9 @@ public class AccessConfigurationSheet extends Composite {
       // enable only if it is a registered user
       return (info.getType() == UserType.REGISTERED);
     }
-  };
+  }
+
+  ;
 
   private static final class EnableLocalAccountPredicate implements
       UIEnabledPredicate<UserSecurityInfo> {
@@ -466,7 +472,9 @@ public class AccessConfigurationSheet extends Composite {
     public boolean isEnabled(UserSecurityInfo info) {
       return (info.getType() == UserType.REGISTERED && info.getUsername() != null);
     }
-  };
+  }
+
+  ;
 
   /**
    * Username cannot be null or zero-length. If it is a Google account type (an
@@ -527,7 +535,9 @@ public class AccessConfigurationSheet extends Composite {
       }
       return -1;
     }
-  };
+  }
+
+  ;
 
   private final class UsernameTextColumn extends
       UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
@@ -570,7 +580,9 @@ public class AccessConfigurationSheet extends Composite {
       }
       return -1;
     }
-  };
+  }
+
+  ;
 
   private final class FullNameTextColumn extends
       UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
@@ -640,7 +652,9 @@ public class AccessConfigurationSheet extends Composite {
       }
       return -1;
     }
-  };
+  }
+
+  ;
 
   private class AccountTypeSelectionColumn extends
       UIEnabledValidatingSelectionColumn<UserSecurityInfo> {
@@ -692,7 +706,9 @@ public class AccessConfigurationSheet extends Composite {
           AccessConfigurationSheet.this);
       popup.setPopupPositionAndShow(popup.getPositionCallBack());
     }
-  };
+  }
+
+  ;
 
   private final class ChangePasswordActionCallback implements
       UIEnabledActionCell.Delegate<UserSecurityInfo> {
@@ -716,13 +732,15 @@ public class AccessConfigurationSheet extends Composite {
         }
       });
     }
-  };
+  }
+
+  ;
 
   public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
     this.permissionsTab = permissionsTab;
     initWidget(uiBinder.createAndBindUi(this));
     sinkEvents(Event.ONCHANGE | Event.ONCLICK);
-    
+
     downloadCsv.setHref(UIConsts.GET_USERS_AND_PERMS_CSV_SERVLET_ADDR);
 
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
@@ -766,17 +784,17 @@ public class AccessConfigurationSheet extends Composite {
     columnSortHandler.setComparator(formsAdmin, formsAdmin.getComparator());
 
     synchronizeTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
-    if ( Preferences.getOdkTablesEnabled() ) {
+    if (Preferences.getOdkTablesEnabled()) {
       userTable.addColumn(synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
     }
 
     superUserTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
-    if ( Preferences.getOdkTablesEnabled() ) {
+    if (Preferences.getOdkTablesEnabled()) {
       userTable.addColumn(superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
     }
 
     administerTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
-    if ( Preferences.getOdkTablesEnabled() ) {
+    if (Preferences.getOdkTablesEnabled()) {
       userTable.addColumn(administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
     }
 
@@ -798,37 +816,37 @@ public class AccessConfigurationSheet extends Composite {
 
     // insert or remove the synchronizeTables permissions
     idxNow = userTable.getColumnIndex(synchronizeTables);
-    if ( isVisible && idxNow == -1) {
+    if (isVisible && idxNow == -1) {
       idxNow = userTable.getColumnIndex(formsAdmin);
-      if ( idxNow != -1) {
-        userTable.insertColumn(idxNow+1, synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
+      if (idxNow != -1) {
+        userTable.insertColumn(idxNow + 1, synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
         // make idxNow point to the synchronizeTables column
-        ++idxNow; 
+        ++idxNow;
       }
-    } else if ( !isVisible && idxNow != -1) {
+    } else if (!isVisible && idxNow != -1) {
       userTable.removeColumn(idxNow);
     }
 
     // insert or remove the superUserTables permissions
     int idxPrior = idxNow;
     idxNow = userTable.getColumnIndex(superUserTables);
-    if ( isVisible && idxNow == -1) {
+    if (isVisible && idxNow == -1) {
       idxNow = idxPrior;
-      if ( idxNow != -1) {
-        userTable.insertColumn(idxNow+1, superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
+      if (idxNow != -1) {
+        userTable.insertColumn(idxNow + 1, superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
       }
-    } else if ( !isVisible && idxNow != -1) {
+    } else if (!isVisible && idxNow != -1) {
       userTable.removeColumn(idxNow);
     }
 
     // insert or remove the administerTables permissions
     idxNow = userTable.getColumnIndex(administerTables);
-    if ( isVisible && idxNow == -1) {
+    if (isVisible && idxNow == -1) {
       idxNow = userTable.getColumnIndex(siteAdmin);
-      if ( idxNow != -1) {
+      if (idxNow != -1) {
         userTable.insertColumn(idxNow, administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
       }
-    } else if ( !isVisible && idxNow != -1) {
+    } else if (!isVisible && idxNow != -1) {
       userTable.removeColumn(idxNow);
     }
   }
@@ -866,7 +884,7 @@ public class AccessConfigurationSheet extends Composite {
   void onUploadCsvClick(ClickEvent e) {
     uploadCsv.onClick(permissionsTab, e);
   }
-  
+
   @UiHandler("addNow")
   void onAddUsersClick(ClickEvent e) {
     String text = addedUsers.getText();
@@ -888,7 +906,7 @@ public class AccessConfigurationSheet extends Composite {
           .getEmail());
       if (u == null) {
         u = new UserSecurityInfo(email.getUsername(), email.getFullName(), email.getEmail(),
-                                 UserType.REGISTERED);
+            UserType.REGISTERED);
         list.add(u);
         if (localUser) {
           localUsers.put(u.getUsername(), u);
