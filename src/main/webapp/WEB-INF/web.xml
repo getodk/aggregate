@@ -69,6 +69,24 @@
         <url-pattern>/odktables/*</url-pattern>
     </filter-mapping>
 
+    <!--CSRF PROTECTION-->
+
+    <servlet>
+        <servlet-name>xsrf</servlet-name>
+        <servlet-class>
+            com.google.gwt.user.server.rpc.XsrfTokenServiceServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>xsrf</servlet-name>
+        <url-pattern>/aggregateui/xsrf</url-pattern>
+    </servlet-mapping>
+
+    <context-param>
+        <param-name>gwt.xsrf.session_cookie_name</param-name>
+        <param-value>JSESSIONID</param-value>
+    </context-param>
+
     <!-- Simple Servlets -->
     <servlet>
         <servlet-name>filterServiceImpl</servlet-name>
