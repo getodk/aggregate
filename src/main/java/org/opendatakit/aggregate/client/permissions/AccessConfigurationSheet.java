@@ -25,15 +25,9 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.HasRpcToken;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.rpc.XsrfToken;
-import com.google.gwt.user.client.rpc.XsrfTokenService;
-import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -54,11 +48,11 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
 import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.security.SecurityUtils;
 import org.opendatakit.aggregate.client.widgets.UploadUsersAndPermsServletPopupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
@@ -87,8 +81,6 @@ public class AccessConfigurationSheet extends Composite {
     userType.add(ACCOUNT_TYPE_ODK);
     userType.add(ACCOUNT_TYPE_GOOGLE);
   }
-
-  ;
 
   private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
       .create(TemporaryAccessConfigurationSheetUiBinder.class);
@@ -379,15 +371,13 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  ;
-
   public void deleteUser(UserSecurityInfo user) {
     dataProvider.getList().remove(user);
     updateUsersOnServer();
   }
 
   public void updateUsersOnServer() {
-    ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
+    final ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
     allGroups.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
     allGroups.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
     allGroups.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
@@ -414,35 +404,13 @@ public class AccessConfigurationSheet extends Composite {
         }
       }
     }
-    final ArrayList<UserSecurityInfo> us = users;
-    final ArrayList<GrantedAuthorityName> ags = allGroups;
-    XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
-    ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
-    xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError("Incomplete security update: ", caught);
-      }
+    SecurityUtils.secureRequest(
+        SecureGWT.getSecurityAdminService(),
+        (rpc, sessionCookie, callback) -> rpc.setUsersAndGrantedAuthorities(sessionCookie, users, allGroups, callback),
+        () -> SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay()),
+        cause -> AggregateUI.getUI().reportError("Incomplete security update: ", cause)
+    );
 
-      @Override
-      public void onSuccess(XsrfToken result) {
-        SecurityAdminServiceAsync rpc = SecureGWT.getSecurityAdminService();
-        ((HasRpcToken) rpc).setRpcToken(result);
-        rpc.setUsersAndGrantedAuthorities(
-            Cookies.getCookie("JSESSIONID"), us, ags, new AsyncCallback<Void>() {
-
-              @Override
-              public void onFailure(Throwable caught) {
-                AggregateUI.getUI().reportError("Incomplete security update: ", caught);
-              }
-
-              @Override
-              public void onSuccess(Void result) {
-                SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay());
-              }
-            });
-      }
-    });
   }
 
   private static final class VisibleNotAnonymousPredicate implements
@@ -475,8 +443,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  ;
-
   private static final class EnableNotAnonymousPredicate implements
       UIEnabledPredicate<UserSecurityInfo> {
     @Override
@@ -486,8 +452,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  ;
-
   private static final class EnableLocalAccountPredicate implements
       UIEnabledPredicate<UserSecurityInfo> {
     @Override
@@ -495,8 +459,6 @@ public class AccessConfigurationSheet extends Composite {
       return (info.getType() == UserType.REGISTERED && info.getUsername() != null);
     }
   }
-
-  ;
 
   /**
    * Username cannot be null or zero-length. If it is a Google account type (an
@@ -559,8 +521,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  ;
-
   private final class UsernameTextColumn extends
       UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
 
@@ -603,8 +563,6 @@ public class AccessConfigurationSheet extends Composite {
       return -1;
     }
   }
-
-  ;
 
   private final class FullNameTextColumn extends
       UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
@@ -676,8 +634,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  ;
-
   private class AccountTypeSelectionColumn extends
       UIEnabledValidatingSelectionColumn<UserSecurityInfo> {
 
@@ -730,8 +686,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  ;
-
   private final class ChangePasswordActionCallback implements
       UIEnabledActionCell.Delegate<UserSecurityInfo> {
 
@@ -755,8 +709,6 @@ public class AccessConfigurationSheet extends Composite {
       });
     }
   }
-
-  ;
 
   public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
     this.permissionsTab = permissionsTab;
