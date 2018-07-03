@@ -16,6 +16,7 @@
 
 package org.opendatakit.common.security.client.security.admin;
 
+import com.google.gwt.user.server.rpc.XsrfProtect;
 import java.util.ArrayList;
 
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -45,6 +46,7 @@ public interface SecurityAdminService extends RemoteService {
      * @throws DatastoreFailureException
      */
     ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws AccessDeniedException, DatastoreFailureException;
-    
+
+    @XsrfProtect
     void setUsersAndGrantedAuthorities( String xsrfString, ArrayList<UserSecurityInfo> users, ArrayList<GrantedAuthorityName> allGroups ) throws AccessDeniedException, DatastoreFailureException;
 }

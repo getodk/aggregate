@@ -29,6 +29,11 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.HasRpcToken;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.rpc.XsrfToken;
+import com.google.gwt.user.client.rpc.XsrfTokenService;
+import com.google.gwt.user.client.rpc.XsrfTokenServiceAsync;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -53,6 +58,7 @@ import org.opendatakit.aggregate.client.widgets.UploadUsersAndPermsServletPopupB
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
+import org.opendatakit.common.security.client.security.admin.SecurityAdminServiceAsync;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
@@ -408,19 +414,35 @@ public class AccessConfigurationSheet extends Composite {
         }
       }
     }
-    SecureGWT.getSecurityAdminService().setUsersAndGrantedAuthorities(
-        Cookies.getCookie("JSESSIONID"), users, allGroups, new AsyncCallback<Void>() {
+    final ArrayList<UserSecurityInfo> us = users;
+    final ArrayList<GrantedAuthorityName> ags = allGroups;
+    XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
+    ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
+    xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        AggregateUI.getUI().reportError("Incomplete security update: ", caught);
+      }
 
-          @Override
-          public void onFailure(Throwable caught) {
-            AggregateUI.getUI().reportError("Incomplete security update: ", caught);
-          }
+      @Override
+      public void onSuccess(XsrfToken result) {
+        SecurityAdminServiceAsync rpc = SecureGWT.getSecurityAdminService();
+        ((HasRpcToken) rpc).setRpcToken(result);
+        rpc.setUsersAndGrantedAuthorities(
+            Cookies.getCookie("JSESSIONID"), us, ags, new AsyncCallback<Void>() {
 
-          @Override
-          public void onSuccess(Void result) {
-            SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay());
-          }
-        });
+              @Override
+              public void onFailure(Throwable caught) {
+                AggregateUI.getUI().reportError("Incomplete security update: ", caught);
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay());
+              }
+            });
+      }
+    });
   }
 
   private static final class VisibleNotAnonymousPredicate implements
