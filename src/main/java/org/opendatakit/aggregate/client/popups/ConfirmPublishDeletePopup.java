@@ -33,10 +33,10 @@ import com.google.gwt.user.client.ui.HTML;
 
 /**
  * Popup asking for confirmation to delete an external service publisher
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class ConfirmPublishDeletePopup extends AbstractPopupBase {
 
@@ -61,7 +61,7 @@ public final class ConfirmPublishDeletePopup extends AbstractPopupBase {
 
     FlexTable layout = new FlexTable();
 
-    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped("Delete this publisher?" + "<br/>Do you wish to " + action
+    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped("Delete this publisher?").appendHtmlConstant("<br/>").appendEscaped("Do you wish to " + action
         + " this location?").toSafeHtml());
     layout.setWidget(0, 0, message);
     layout.setWidget(0, 1, deleteButton);

@@ -60,7 +60,7 @@ public final class ConfirmExportDeletePopup extends AbstractPopupBase {
 
     FlexTable layout = new FlexTable();
 
-    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped("Delete this exported datafile?" + "<br/>Do you wish to " + action
+    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped("Delete this exported datafile?").appendHtmlConstant("<br/>").appendEscaped("Do you wish to " + action
         + " this exported datafile?").toSafeHtml());
     layout.setWidget(0, 0, message);
     layout.setWidget(0, 1, deleteButton);
