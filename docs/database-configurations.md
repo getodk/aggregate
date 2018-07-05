@@ -59,7 +59,7 @@ Run the following SQL scripts to create and prepare a database to be used by Agg
 **PostgreSQL**
 
 ```sql
-CREATE USER "odk_unit" WITH UNENCRYPTED PASSWORD 'test';
+CREATE USER "odk_unit" WITH PASSWORD 'test';
 CREATE DATABASE odk_db WITH OWNER odk_unit;
 GRANT ALL PRIVILEGES ON DATABASE odk_db TO odk_unit;
 \connect odk_db;

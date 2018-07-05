@@ -56,7 +56,7 @@ Alternatively, you can use the `docker-compose` command line tool to start & sto
 1. Setup your database with these commands. You must use `psql` or the `\connect` command will not work.
 
     ```sql
-    CREATE USER "odk_unit" WITH UNENCRYPTED PASSWORD 'test';
+    CREATE USER "odk_unit" WITH PASSWORD 'test';
     CREATE DATABASE odk_db WITH OWNER odk_unit;
     GRANT ALL PRIVILEGES ON DATABASE odk_db TO odk_unit;
     \connect odk_db;
