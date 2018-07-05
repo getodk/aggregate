@@ -1012,7 +1012,7 @@
       <path>${installdir}/create_db_and_user.sql</path>
       <progressText>Write PostgreSQL database and user creation script</progressText>
       <text>create database "${jdbc_database}";
-        create user "${jdbc_username}" with unencrypted password '${jdbc_password}';
+        create user "${jdbc_username}" with password '${jdbc_password}';
         grant all privileges on database "${jdbc_database}" to "${jdbc_username}";
         alter database "${jdbc_database}" owner to "${jdbc_username}";
         \c "${jdbc_database}";
