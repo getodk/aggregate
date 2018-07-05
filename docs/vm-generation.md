@@ -8,19 +8,11 @@ The Gradle task `packerBuild` will produce an OVA file with:
 
 ## How to build the VM
 
-- Configure the correct Packer binary package by editing the `gradle.properties` file at the root of the project
-
-  Create it if it doesn't exist by copying the `gradle.properties.example` in its place.
-  
-  Set the value of the `packerZip` property according to your host's operating system. **Use version 1.2.1 or greater**
-  
-  The list of binary packages is available at https://releases.hashicorp.com/packer
-  
-  Example for Linux hosts: `packerZip=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_linux_amd64.zip`   
+- Configure the correct Packer binary package by editing the `gradle.properties` file at the root of the project. If it doesn't exist, create it by copying the `gradle.properties.example` in its place.
+- Set the value of the `packerZip` property according to your host's operating system. The list of binary packages is available at https://releases.hashicorp.com/packer. **Use version 1.2.1 or greater**. 
+  - Example for Linux hosts: `packerZip=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_linux_amd64.zip`   
     
-- Build the VM with `./gradlew clean build packerBuild -xtest -PwarMode=complete`
-
-- The VM OVA will be created in the `build/packer/build` directory.
+- Build the VM with `./gradlew clean build packerBuild -xtest -PwarMode=complete`. The VM OVA will be created in the `build/packer/build` directory.
 
 ## VM Networking
 
@@ -41,8 +33,5 @@ The VM is configured to use a NAT network device by default and will make the fo
 
 ## Network configuration
 
-- If you need to change the network configuration, log into your Aggregate VM using a terminal and run `aggregate-config`
-
-  This is a tool that lets you configure your VM to use different FQDN and ports.
-  
-  You can run the tool without arguments to get a help message.
+- If you need to change the network configuration, log into your Aggregate VM using a terminal and run `aggregate-config`. 
+  - This is a tool that lets you configure your VM to use different FQDN and ports. You can run the tool without arguments to get a help message.
