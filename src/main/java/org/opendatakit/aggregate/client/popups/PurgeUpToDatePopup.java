@@ -70,7 +70,7 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
     layout.setWidget(0, 0, new HTML(new SafeHtmlBuilder()
         .appendEscaped("Purge submissions data for:")
         .appendHtmlConstant("<br/>")
-        .appendEscaped(formSummary.getTitle() + " [" + formSummary.getId() + "]")
+        .appendHtmlConstant("<b>" + formSummary.getTitle() + " [" + formSummary.getId() + "]</b>")
         .appendHtmlConstant("<br>")
         .appendEscaped("up to the chosen GMT date.")
         .appendHtmlConstant("<br>")
