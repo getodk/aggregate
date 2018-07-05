@@ -2,7 +2,7 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-    CREATE USER "aggregate" WITH UNENCRYPTED PASSWORD 'aggregate';
+    CREATE USER "aggregate" WITH PASSWORD 'aggregate';
     CREATE DATABASE aggregate WITH OWNER aggregate;
     GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;
     \connect aggregate;
