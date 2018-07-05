@@ -27,9 +27,7 @@ The VM is configured to use a NAT network device by default and will make the fo
 
 ## Root password
 
-- The default password for the `root` user is `aggregate`
-
-- You will be asked to change the password for the `root` user after the first login.
+- The default password for the `root` user is `aggregate`. You will be asked to change the password for the `root` user after the first login.
 
 ## Network configuration
 
