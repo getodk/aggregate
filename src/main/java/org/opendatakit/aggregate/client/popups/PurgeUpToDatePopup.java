@@ -67,9 +67,17 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
       }});
 
     FlexTable layout = new FlexTable();
-    layout.setWidget(0, 0, new HTML(new SafeHtmlBuilder().appendEscaped(
-        "Purge submissions data for:<br>"
-        + formSummary.getTitle() + " [" + formSummary.getId() + "]<br>up to the chosen GMT date.<br>Incomplete submissions will<br>not be deleted.").toSafeHtml()));
+    layout.setWidget(0, 0, new HTML(new SafeHtmlBuilder()
+        .appendEscaped("Purge submissions data for:")
+        .appendHtmlConstant("<br/>")
+        .appendHtmlConstant("<b>" + formSummary.getTitle() + " [" + formSummary.getId() + "]</b>")
+        .appendHtmlConstant("<br>")
+        .appendEscaped("up to the chosen GMT date.")
+        .appendHtmlConstant("<br>")
+        .appendEscaped("Incomplete submissions will")
+        .appendHtmlConstant("<br>")
+        .appendEscaped("not be deleted.")
+        .toSafeHtml()));
     layout.setWidget(0, 1, picker);
     layout.setWidget(0, 2, confirm);
     layout.setWidget(0, 3, new ClosePopupButton(this));

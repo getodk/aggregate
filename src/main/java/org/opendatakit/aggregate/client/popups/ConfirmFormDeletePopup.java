@@ -48,10 +48,11 @@ public final class ConfirmFormDeletePopup extends AbstractPopupBase {
     
     FlexTable layout = new FlexTable();
 
-    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped(
-        "Delete all data and the form definition for <b>"
-            + formId
-            + "</b>?<br/>Do you wish to delete all uploaded data and the form definition for this form?").toSafeHtml());
+    HTML message = new HTML(new SafeHtmlBuilder()
+        .appendEscaped("Delete all data and the form definition for ")
+        .appendHtmlConstant("<b>"+formId+"</b><br/>")
+        .appendEscaped("Do you wish to delete all uploaded data and the form definition for this form?")
+        .toSafeHtml());
     layout.setWidget(0, 0, message);
     layout.setWidget(0, 1, deleteButton);
     layout.setWidget(0, 2, new ClosePopupButton(this));

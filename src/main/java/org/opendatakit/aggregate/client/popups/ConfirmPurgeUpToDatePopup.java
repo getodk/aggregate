@@ -55,10 +55,8 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
     FlexTable layout = new FlexTable();
     SafeHtml content = new SafeHtmlBuilder()
         .appendEscaped("Delete submissions data of ")
-        .appendEscaped(summary.getTitle())
-        .appendEscaped(" [")
-        .appendEscaped(summary.getId())
-        .appendEscaped("] up through ")
+        .appendHtmlConstant("<b>" + summary.getTitle() + " [" + summary.getId() + "]</b>")
+        .appendEscaped(" up through ")
         .appendEscaped(earliest.toGMTString())
         .appendEscaped(". Incomplete submissions will not be deleted.")
         .toSafeHtml();

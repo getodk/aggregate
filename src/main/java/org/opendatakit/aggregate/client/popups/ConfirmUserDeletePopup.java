@@ -54,17 +54,19 @@ public final class ConfirmUserDeletePopup extends AbstractPopupBase {
 
     HTML message;
     if (sheet.isUiOutOfSyncWithServer()) {
-      message = new HTML(new SafeHtmlBuilder().appendEscaped(
-          "Unsaved changes exist.<br/>"
-              + "<p>Proceeding will save all pending changes and<br/>permanently delete user <b>"
-              + userToDelete.getCanonicalName()
-              + "</b> on the server.</p>"
-              + "<p>Do you wish to apply all pending changes and <br/>permanently delete this user?</p>").toSafeHtml());
+      message = new HTML(new SafeHtmlBuilder()
+          .appendEscaped("Unsaved changes exist.")
+          .appendHtmlConstant("<br/>")
+          .appendHtmlConstant("<p>Proceeding will save all pending changes and<br/>permanently delete user <b>")
+          .appendEscaped(userToDelete.getCanonicalName())
+          .appendHtmlConstant("</b> on the server.</p><p>Do you wish to apply all pending changes and <br/>permanently delete this user?</p>")
+          .toSafeHtml());
     } else {
-      message = new HTML(new SafeHtmlBuilder().appendEscaped(
-          "<p>Proceeding will permanently delete user <b>"
-          + userToDelete.getCanonicalName()
-          + "</b> on the server.</p><p>Do you wish to permanently delete this user?</p>").toSafeHtml());
+      message = new HTML(new SafeHtmlBuilder()
+          .appendHtmlConstant("<p>Proceeding will permanently delete user <b>")
+          .appendEscaped(userToDelete.getCanonicalName())
+          .appendHtmlConstant("</b> on the server.</p><p>Do you wish to permanently delete this user?</p>")
+          .toSafeHtml());
     }
     layout.setWidget(0, 0, message);
     layout.setWidget(2, 0, deleteButton);
