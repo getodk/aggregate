@@ -9,12 +9,11 @@ task packerDownloadPacker() {
   doLast {
     if (!file('packer/packer').exists()) {
       println("Downloading Packer binary")
-      download {
-        src packerZip
-        dest 'packer/packer.zip'
-      }
-      "unzip packer/packer.zip -d packer".execute()
-      "rm packer/packer.zip".execute()
+      "curl -Lo packer/packer.zip ${packerZip}".execute().waitFor()
+      println("Unzipping Packer binary")
+      "unzip packer/packer.zip -d packer".execute().waitFor()
+      println("Cleaning Packer binary zip file")
+      "rm packer/packer.zip".execute().waitFor()
     } else
       println("Packer binary is already present")
   }

@@ -1,4 +1,4 @@
-CREATE USER aggregate WITH UNENCRYPTED PASSWORD 'aggregate';
+CREATE USER aggregate WITH PASSWORD 'aggregate';
 CREATE DATABASE aggregate WITH OWNER aggregate;
 GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;
 \c aggregate;
