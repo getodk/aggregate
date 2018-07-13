@@ -181,6 +181,18 @@ By default, Gretty will launch a server using a `localhost` address which will n
 
 This process can fail sometimes. If that happens, you will have to manually rollback the failed update launching the `gaeRollback` task. You can follow these same steps to create a new Run Configuration for it. 
 
+## Extended topics
+
+There is a [`/docs`](https://github.com/opendatakit/aggregate/tree/master/docs) directory in the repo with more documentation files that expand on certain topics:
+
+- [ODK Aggregate - Configuration files](./docs/aggregate-config.md)
+- [ODK Aggregate - Supported database configurations](./docs/database-configurations.md)
+- [ODK Aggregate - Installer generation](./docs/installer-generation.md)
+- [ODK Aggregate - IntelliJ Setup](./docs/intellij-setup.md)
+- [Running Aggregate with Docker](./docs/running-aggregate-with-docker.md)
+- [Running Aggregate with Docker Compose](./docs/running-aggregate-with-docker-compose.md)
+- [ODK Aggregate Virtual Machine generation](./docs/vm-generation.md)
+
 ## Contributing
 
 Any and all contributions to the project are welcome. ODK Aggregate is used across the world primarily by organizations with a social purpose so you can have real impact!
