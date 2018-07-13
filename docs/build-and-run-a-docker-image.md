@@ -1,4 +1,4 @@
-# Running Aggregate with Docker
+# ODK Aggregate - Build and run a Docker image
 
 ## Requirements
 

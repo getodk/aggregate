@@ -187,11 +187,11 @@ There is a [`/docs`](https://github.com/opendatakit/aggregate/tree/master/docs) 
 
 - [ODK Aggregate - Configuration files](./docs/aggregate-config.md)
 - [ODK Aggregate - Supported database configurations](./docs/database-configurations.md)
-- [ODK Aggregate - Installer generation](./docs/installer-generation.md)
 - [ODK Aggregate - IntelliJ Setup](./docs/intellij-setup.md)
-- [Running Aggregate with Docker](./docs/running-aggregate-with-docker.md)
-- [Running Aggregate with Docker Compose](./docs/running-aggregate-with-docker-compose.md)
-- [ODK Aggregate Virtual Machine generation](./docs/vm-generation.md)
+- [ODK Aggregate - Build the Installer app](docs/build-the-installer-app.md)
+- [ODK Aggregate - Build and run a Docker image](docs/build-and-run-a-docker-image.md)
+- [ODK Aggregate - Build and run with Docker Compose](docs/build-and-run-with-docker-compose.md)
+- [ODK Aggregate - Build and run a Virtual Machine](docs/build-and-run-a-virtual-machine.md)
 
 ## Contributing
 

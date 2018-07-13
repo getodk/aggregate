@@ -1,4 +1,4 @@
-# ODK Aggregate Virtual Machine generation
+# ODK Aggregate - Build and run a Virtual Machine
 
 The Gradle task `packerBuild` will produce an OVA file with:
 

@@ -42,6 +42,6 @@ task dockerBuild(dependsOn: [build, dockerPrepare], type: Exec) {
   doLast {
     println ""
     println "Your Aggregate Docker image is ready to run."
-    println "Please, refer to https://github.com/opendatakit/aggregate/tree/master/docs/running-aggregate-with-docker.md for instructions."
+    println "Please, refer to https://github.com/opendatakit/aggregate/tree/master/docs/build-and-run-a-docker-image.md for instructions."
   }
 }
