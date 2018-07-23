@@ -185,13 +185,13 @@ This process can fail sometimes. If that happens, you will have to manually roll
 
 There is a [`/docs`](https://github.com/opendatakit/aggregate/tree/master/docs) directory in the repo with more documentation files that expand on certain topics:
 
-- [ODK Aggregate - Configuration files](./docs/aggregate-config.md)
-- [ODK Aggregate - Supported database configurations](./docs/database-configurations.md)
-- [ODK Aggregate - IntelliJ Setup](./docs/intellij-setup.md)
-- [ODK Aggregate - Build the Installer app](docs/build-the-installer-app.md)
-- [ODK Aggregate - Build and run a Docker image](docs/build-and-run-a-docker-image.md)
-- [ODK Aggregate - Build and run with Docker Compose](docs/build-and-run-with-docker-compose.md)
-- [ODK Aggregate - Build and run a Virtual Machine](docs/build-and-run-a-virtual-machine.md)
+- [Configuration files](./docs/aggregate-config.md)
+- [Supported database configurations](./docs/database-configurations.md)
+- [IntelliJ Setup](./docs/intellij-setup.md)
+- [Build the Installer app](docs/build-the-installer-app.md)
+- [Build and run a Docker image](docs/build-and-run-a-docker-image.md)
+- [Build and run with Docker Compose](docs/build-and-run-with-docker-compose.md)
+- [Build and run a Virtual Machine](docs/build-and-run-a-virtual-machine.md)
 
 ## Contributing
 
