@@ -1,4 +1,4 @@
-# ODK Aggregate - Installer generation
+# ODK Aggregate - Build the Installer app
 
 ODK Aggregate uses BitRock InstallBuilder to generate installer apps for Windows, Linux and Mac hosts.
 

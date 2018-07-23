@@ -1,4 +1,4 @@
-# Running Aggregate with Docker Compose
+# ODK Aggregate - Build and run with Docker Compose
 
 ## Requirements
 
