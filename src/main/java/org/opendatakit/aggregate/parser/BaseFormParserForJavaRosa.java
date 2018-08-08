@@ -542,10 +542,24 @@ public class BaseFormParserForJavaRosa {
       isFieldEncryptedForm = (base64EncryptedFieldRsaPublicKey != null);
     } else {
       isFileEncryptedForm = true;
-      // encrypted -- use the encrypted form template (above) to define
-      // the
-      // storage for this form.
+      // When a form is encrypted, we don't use the actual form that the users sends
+      // because the submissions we will get for this form will only have three fields:
+      // - base64EncryptedKey
+      // - base64EncryptedElementSignature
+      // - encryptedXmlFile
+      //
+      // To address this, we will use the form defined in ENCRYPTED_FORM_DEFINITION instead
+      // which follows the structure described above.
+      // This is discussed in https://github.com/opendatakit/aggregate/issues/294
       XFormParser exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION);
+      // Reset bind element and string length maps since we won't be using the original
+      // form parsed and processed at the beginning of this constructor.
+      Document encryptedFormDoc = parseXmlToDocument(ENCRYPTED_FORM_DEFINITION);
+      stringLengths.clear();
+      bindElements.clear();
+      List<Element> encryptedFormBindings = getBindings(encryptedFormDoc);
+      encryptedFormBindings.forEach(this::storeCopyOfBinding);
+      encryptedFormBindings.forEach(this::storeLengthOfBinding);
       try {
         formDef = exfp.parse();
       } catch (IOException e) {
