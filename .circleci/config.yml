@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/work
     docker:
-      - image: circleci/openjdk:latest
+      - image: circleci/openjdk:8-jdk
       - image: circleci/postgres:9.6
         environment:
         - POSTGRES_USER=circleci
