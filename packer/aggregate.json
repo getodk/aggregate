@@ -218,7 +218,7 @@
     "iso_checksum_type": "sha256",
     "iso_name": "debian-9.4.0-amd64-netinst.iso",
     "memory": "1024",
-    "mirror": "http://cdimage.debian.org/cdimage/release",
+    "mirror": "http://cdimage.debian.org/cdimage/archive",
     "mirror_directory": "9.4.0/amd64/iso-cd",
     "name": "aggregate",
     "networking": "bridged",
