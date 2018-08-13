@@ -629,7 +629,6 @@ public class BaseFormParserForJavaRosa {
   }
 
   private static List<Element> getBindings(Document doc) throws ODKIncompleteSubmissionData {
-    // Parse any odk:length in bindings
     Element head = getChild(doc.getRootElement(), "head");
     Element model = getChild(head, "model");
     return getChildren(model, "bind");
