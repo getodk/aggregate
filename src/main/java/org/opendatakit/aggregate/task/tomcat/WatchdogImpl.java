@@ -259,7 +259,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
         logger.debug("Running watchdog task in Tomcat") ;
         impl.checkTasks(cc);
       } catch (Exception e) {
-	logger.error("Exception: {}", e.getMessage());
+        logger.error("Exception: {}", e.getMessage());
         e.printStackTrace();
         // TODO: Problem - decide what to do if an exception occurs
       }
