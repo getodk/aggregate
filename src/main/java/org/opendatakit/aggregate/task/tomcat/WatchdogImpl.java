@@ -241,6 +241,9 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   }
 
   static class WatchdogRunner implements Runnable {
+
+    private Logger logger = LoggerFactory.getLogger(WatchdogRunner.class);
+
     final WatchdogWorkerImpl impl;
 
     final CallingContext cc;
@@ -253,13 +256,14 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     @Override
     public void run() {
       try {
-        System.out.println("RUNNING WATCHDOG TASK IN TOMCAT") ;
+        logger.debug("Running watchdog task in Tomcat") ;
         impl.checkTasks(cc);
       } catch (Exception e) {
+        logger.error("Exception: {}", e.getMessage());
         e.printStackTrace();
         // TODO: Problem - decide what to do if an exception occurs
       }
-      System.out.println("EXITING WATCHDOG TASK IN TOMCAT") ;
+      logger.debug("Exiting watchdog task in Tomcat") ;
     }
   }
 
@@ -272,19 +276,19 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   public synchronized void createWatchdogTask(long newWatchdogPeriodInMilliseconds) {
     CallingContext cc = new CallingContextImpl();
 
-    logger.info("Changing WatchdogWorker Executor to " + Long.toString(newWatchdogPeriodInMilliseconds) + "ms intervals.");
+    logger.info("Changing WatchdogWorker Executor to {}ms intervals.", newWatchdogPeriodInMilliseconds);
 
     try {
       if ( (watchdogFuture != null) &&
            ((newWatchdogPeriodInMilliseconds != watchdogPeriodInMilliseconds ) ||
             watchdogFuture.isCancelled()) ) {
-        System.out.println("KILL EXISTING WATCHDOG TASK IN TOMCAT");
+        logger.debug("Kill existing watchdog task in Tomcat");
         watchdogFuture.cancel(false);
         watchdogFuture = null;
       }
     } finally {
       if ( watchdogFuture == null ) {
-        System.out.println("SCHEDULE NEW WATCHDOG TASK IN TOMCAT");
+        logger.debug("Schedule new watchdog task in Tomcat");
         AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
         WatchdogRunner wr = new WatchdogRunner(cc);
         watchdogFuture = exec.scheduleAtFixedRate(wr, newWatchdogPeriodInMilliseconds);
@@ -300,26 +304,26 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
   @Override
   public boolean isAutoStartup() {
-    System.out.println("isAutoStartup WATCHDOG TASK IN TOMCAT");
+    logger.trace("isAutoStartup()");
     return true;
   }
 
   @Override
   public void stop(Runnable signal) {
-    System.out.println("stop(runnable) WATCHDOG TASK IN TOMCAT");
+    logger.trace("stop()");
     isStarted = false;
     signal.run();
   }
 
   @Override
   public boolean isRunning() {
-    System.out.println("isRunning WATCHDOG TASK IN TOMCAT");
+    logger.trace("isRunning()");
     return isStarted;
   }
 
   @Override
   public void start() {
-    System.out.println("start WATCHDOG TASK IN TOMCAT");
+    logger.trace("start()");
     // initialize the cached value of the fast cycling flag
     CallingContext cc = getCallingContext();
     lastFasterWatchdogCycleEnabledFlag = false;
@@ -338,13 +342,13 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
   @Override
   public void stop() {
-    System.out.println("stop WATCHDOG TASK IN TOMCAT");
+    logger.trace("stop()");
     isStarted = false;
     return;
   }
 
   public int getPhase() {
-    System.out.println("getPhase WATCHDOG TASK IN TOMCAT");
+    logger.trace("getPhase()");
     return 10;
   }
 
@@ -446,7 +450,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    System.out.println("afterPropertiesSet WATCHDOG TASK IN TOMCAT");
+    logger.trace("afterPropertiesSet()");
     if (taskScheduler == null)
       throw new IllegalStateException("no task scheduler specified");
     if (datastore == null)
@@ -476,7 +480,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
 
   @Override
   public void setServletContext(ServletContext context) {
-    System.out.print("Inside setServletContext");
+    logger.trace("setServletContext");
     ctxt = context;
   }
 
