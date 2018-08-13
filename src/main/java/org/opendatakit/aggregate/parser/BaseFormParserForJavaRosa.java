@@ -414,7 +414,11 @@ public class BaseFormParserForJavaRosa {
     Document doc = parseXmlToDocument(xml);
 
     List<Element> allBindings = getBindings(doc);
+
+    bindElements.clear();
     allBindings.forEach(this::storeCopyOfBinding);
+
+    stringLengths.clear();
     allBindings.forEach(this::storeLengthOfBinding);
 
     rootJavaRosaFormDef = parseDocumentIntoFormDef(doc);
@@ -555,10 +559,12 @@ public class BaseFormParserForJavaRosa {
       // Reset bind element and string length maps since we won't be using the original
       // form parsed and processed at the beginning of this constructor.
       Document encryptedFormDoc = parseXmlToDocument(ENCRYPTED_FORM_DEFINITION);
-      stringLengths.clear();
-      bindElements.clear();
       List<Element> encryptedFormBindings = getBindings(encryptedFormDoc);
+
+      bindElements.clear();
       encryptedFormBindings.forEach(this::storeCopyOfBinding);
+
+      stringLengths.clear();
       encryptedFormBindings.forEach(this::storeLengthOfBinding);
       try {
         formDef = exfp.parse();
