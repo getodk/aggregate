@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.form;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 import java.util.ArrayList;
 import java.util.Date;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -43,6 +44,7 @@ public interface FormAdminService extends RemoteService {
 
   Date purgePublishedData(String uriExternalService, Date earliest) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
+  @XsrfProtect
   void deleteForm(String formId) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
   void deleteSubmission(String submissionKeyAsString) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
