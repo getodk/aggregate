@@ -47,6 +47,7 @@ public interface FormAdminService extends RemoteService {
   @XsrfProtect
   void deleteForm(String formId) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
+  @XsrfProtect
   void deleteSubmission(String submissionKeyAsString) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
   SubmissionUISummary getIncompleteSubmissions(FilterGroup filter) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
