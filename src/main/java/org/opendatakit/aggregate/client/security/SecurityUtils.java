@@ -13,11 +13,15 @@ import org.opendatakit.aggregate.client.AggregateUI;
 
 public class SecurityUtils {
   @FunctionalInterface
-  public interface SecureRpcRequest<T> {
-    void apply(T rpc, String sessionCookie, AsyncCallback<Void> callback);
+  public interface SecureRpcRequest<T, U> {
+    void apply(T rpc, String sessionCookie, AsyncCallback<U> callback);
   }
 
-  public static <T> void secureRequest(T rpc, SecureRpcRequest<T> request, Runnable onSuccess, Consumer<Throwable> onFailure) {
+  public static <T> void secureRequest(T rpc, SecureRpcRequest<T, Void> request, Runnable onSuccess, Consumer<Throwable> onFailure) {
+    secureRequest(rpc, request, __ -> onSuccess.run(), onFailure);
+  }
+
+  public static <T, U> void secureRequest(T rpc, SecureRpcRequest<T, U> request, Consumer<U> onSuccess, Consumer<Throwable> onFailure) {
     XsrfTokenServiceAsync xsrf = GWT.create(XsrfTokenService.class);
     ((ServiceDefTarget) xsrf).setServiceEntryPoint(GWT.getModuleBaseURL() + "xsrf");
     xsrf.getNewXsrfToken(new AsyncCallback<XsrfToken>() {
@@ -29,15 +33,15 @@ public class SecurityUtils {
       @Override
       public void onSuccess(XsrfToken result) {
         ((HasRpcToken) rpc).setRpcToken(result);
-        request.apply(rpc, Cookies.getCookie("JSESSIONID"), new AsyncCallback<Void>() {
+        request.apply(rpc, Cookies.getCookie("JSESSIONID"), new AsyncCallback<U>() {
           @Override
           public void onFailure(Throwable caught) {
             onFailure.accept(caught);
           }
 
           @Override
-          public void onSuccess(Void result) {
-            onSuccess.run();
+          public void onSuccess(U result) {
+            onSuccess.accept(result);
           }
         });
       }
