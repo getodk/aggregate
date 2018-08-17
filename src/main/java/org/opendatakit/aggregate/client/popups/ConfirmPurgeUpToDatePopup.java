@@ -16,22 +16,21 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import java.util.Date;
-
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.form.FormSummary;
-import org.opendatakit.aggregate.client.widgets.AggregateButton;
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import java.util.Date;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
 
@@ -69,28 +68,22 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
   private class PurgeHandler implements ClickHandler {
     @Override
     public void onClick(ClickEvent event) {
-
-      // OK -- we are to proceed.
-      SecureGWT.getFormAdminService().purgeSubmissionsData(summary.getId(), earliest, new AsyncCallback<Date>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError("Failed purge of submission data: ", caught);
-        }
-
-        @SuppressWarnings("deprecation")
-        @Override
-        public void onSuccess(Date result) {
-          StringBuilder stringBuilder = new StringBuilder();
-          stringBuilder.append("Successful commencement of the purge of:\n");
-          stringBuilder.append(summary.getTitle());
-          stringBuilder.append(" [");
-          stringBuilder.append(summary.getId());
-          stringBuilder.append("].\nDeleting all submission data through\n  ");
-          stringBuilder.append(result.toGMTString());
-          stringBuilder.append("\nIncomplete submissions will not be deleted.");
-          Window.alert(stringBuilder.toString());
-        }
-      });
+      secureRequest(
+          SecureGWT.getFormAdminService(),
+          (rpc, sessionCookie, cb) -> rpc.purgeSubmissionsData(summary.getId(), earliest, cb),
+          (Date result) -> {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("Successful commencement of the purge of:\n");
+            stringBuilder.append(summary.getTitle());
+            stringBuilder.append(" [");
+            stringBuilder.append(summary.getId());
+            stringBuilder.append("].\nDeleting all submission data through\n  ");
+            stringBuilder.append(result.toGMTString());
+            stringBuilder.append("\nIncomplete submissions will not be deleted.");
+            Window.alert(stringBuilder.toString());
+          },
+          cause -> AggregateUI.getUI().reportError("Failed purge of submission data: ", cause)
+      );
       hide();
     }
   }

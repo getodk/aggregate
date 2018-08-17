@@ -57,5 +57,6 @@ public interface FormAdminService extends RemoteService {
 
   ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
+  @XsrfProtect
   Date purgeSubmissionsData(String formId, Date value) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 }
