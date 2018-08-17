@@ -19,16 +19,12 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -40,13 +36,14 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Servlet to upload, parse, and save an XForm
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
 
@@ -72,8 +69,8 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
 
   private static final String UPLOAD_PAGE_BODY_START =
       "<form id=\"service_account_form\""
-      + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
-      + " action=\"";// emit the ADDR
+          + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
+          + " action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY = "\" >"
       + "<div style=\"overflow: auto;\"><h2>Google API Credentials</h2>"
       + "<p>Please refer to the documentation at <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">Service Account Configuration</a>.</p>"
@@ -84,23 +81,23 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       + "           <td><label for=\"simple_api_key\">Simple API Key:</label></td>"
       + "           <td><input id=\"simple_api_key\" type=\"text\" size=\"80\" name=\"simple_api_key\" value=\"";
   private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_ID = "\" /></td>"
-       + "      </tr>\n"
-       + "<tr><td colspan=\"2\"><h2>Google API Service Account information</h2></td></tr>"
-       + "<tr><td colspan=\"2\"><p>Google API Service accounts are required when "
-       +                  "publishing to Google Spreadsheets and Google FusionTables.</p></td></tr>"
-       + "      <tr>"
-       + "         <td><label for=\"private_key_file\">Private key file (.p12 file):</label></td>"
-       + "         <td><input id=\"private_key_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
-       + "            name=\"private_key_file\" /></td>"
-       + "      </tr>\n"
-       + "      <tr>"
-       + "         <td><label for=\"client_id\">ID (Key ID) or perhaps Client ID:</label></td>"
-       + "         <td><input id=\"client_id\" type=\"text\" size=\"80\" name=\"client_id\" value=\"";
+      + "      </tr>\n"
+      + "<tr><td colspan=\"2\"><h2>Google API Service Account information</h2></td></tr>"
+      + "<tr><td colspan=\"2\"><p>Google API Service accounts are required when "
+      + "publishing to Google Spreadsheets and Google FusionTables.</p></td></tr>"
+      + "      <tr>"
+      + "         <td><label for=\"private_key_file\">Private key file (.p12 file):</label></td>"
+      + "         <td><input id=\"private_key_file\" type=\"file\" size=\"80\" class=\"gwt-Button\""
+      + "            name=\"private_key_file\" /></td>"
+      + "      </tr>\n"
+      + "      <tr>"
+      + "         <td><label for=\"client_id\">ID (Key ID) or perhaps Client ID:</label></td>"
+      + "         <td><input id=\"client_id\" type=\"text\" size=\"80\" name=\"client_id\" value=\"";
   private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_EMAIL = "\" /></td>"
-       + "      </tr>"
-       + "      <tr>"
-       + "         <td><label for=\"service_account_email\">Service Account ID (looks like an Email address):</label></td>"
-       + "         <td><input id=\"service_account_email\" type=\"text\" size=\"80\" name=\"service_account_email\" value=\"";
+      + "      </tr>"
+      + "      <tr>"
+      + "         <td><label for=\"service_account_email\">Service Account ID (looks like an Email address):</label></td>"
+      + "         <td><input id=\"service_account_email\" type=\"text\" size=\"80\" name=\"service_account_email\" value=\"";
   private static final String UPLOAD_PAGE_BODY_END = "\" /></td>"
       + "      </tr>"
       + "      <tr>"
@@ -117,7 +114,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
    * Handler for HTTP Get request to create xform upload page
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -139,7 +136,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
 
     // header info
     beginBasicHtmlResponse(TITLE_INFO, headerString.toString(), resp, cc);
-    
+
     String simpleApiKey;
     String clientId;
     String clientEmail;
@@ -149,29 +146,29 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       clientEmail = ServerPreferencesProperties.getServerPreferencesProperty(cc, ServerPreferencesProperties.GOOGLE_API_SERVICE_ACCOUNT_EMAIL);
     } catch (ODKEntityNotFoundException e) {
       logger.warn("Get service account information error: " + e.getMessage());
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
-        return;
+      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+          ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
+      return;
     } catch (ODKOverQuotaException e) {
       logger.error("Get service account information error: " + e.getMessage());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.QUOTA_EXCEEDED + "\n" + e.getMessage());
       return;
     }
-    
+
     PrintWriter out = resp.getWriter();
     out.write(UPLOAD_PAGE_BODY_START);
     out.write(cc.getWebApplicationURL(ADDR));
     out.write(UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY);
-    if ( simpleApiKey != null ) {
+    if (simpleApiKey != null) {
       out.write(StringEscapeUtils.escapeHtml4(simpleApiKey));
     }
     out.write(UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_ID);
-    if ( clientId != null ) {
+    if (clientId != null) {
       out.write(StringEscapeUtils.escapeHtml4(clientId));
     }
     out.write(UPLOAD_PAGE_BODY_MIDDLE_B4_CLIENT_EMAIL);
-    if ( clientEmail != null ) {
+    if (clientEmail != null) {
       out.write(StringEscapeUtils.escapeHtml4(clientEmail));
     }
     out.write(UPLOAD_PAGE_BODY_END);
@@ -183,7 +180,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
    * parsed version in the datastore
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -200,25 +197,25 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
       MultiPartFormData uploadedFormItems = new MultiPartFormData(req);
 
       String simpleApiKey = uploadedFormItems.getSimpleFormField(SIMPLE_API_KEY_PARAM);
-      if ( simpleApiKey != null ) {
-          simpleApiKey = simpleApiKey.trim();
-          if ( simpleApiKey.trim().length() == 0 ) {
-              simpleApiKey = null;
-          }
+      if (simpleApiKey != null) {
+        simpleApiKey = simpleApiKey.trim();
+        if (simpleApiKey.trim().length() == 0) {
+          simpleApiKey = null;
+        }
       }
       String clientId = uploadedFormItems.getSimpleFormField(CLIENT_ID_PARAM);
-      if ( clientId != null ) {
-          clientId = clientId.trim();
-          if ( clientId.trim().length() == 0 ) {
-            clientId = null;
-          }
+      if (clientId != null) {
+        clientId = clientId.trim();
+        if (clientId.trim().length() == 0) {
+          clientId = null;
+        }
       }
       String serviceAccountEmail = uploadedFormItems.getSimpleFormField(SERVICE_ACCOUNT_EMAIL_PARAM);
-      if ( serviceAccountEmail != null ) {
-          serviceAccountEmail = serviceAccountEmail.trim();
-          if ( serviceAccountEmail.trim().length() == 0 ) {
-            serviceAccountEmail = null;
-          }
+      if (serviceAccountEmail != null) {
+        serviceAccountEmail = serviceAccountEmail.trim();
+        if (serviceAccountEmail.trim().length() == 0) {
+          serviceAccountEmail = null;
+        }
       }
       MultiPartFormItem privateKeyFileData = uploadedFormItems
           .getFormDataByFieldName(PRIVATE_KEY_FILE_PARAM);
@@ -229,8 +226,8 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
         p12FileContent = privateKeyFileData.getStream().toByteArray();
       }
 
-      if ( clientId == null || serviceAccountEmail == null || p12FileContent == null ||
-           clientId.length() == 0 || serviceAccountEmail.length() == 0 || p12FileContent.length == 0 ) {
+      if (clientId == null || serviceAccountEmail == null || p12FileContent == null ||
+          clientId.length() == 0 || serviceAccountEmail.length() == 0 || p12FileContent.length == 0) {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_PARAMS);
         return;
       }
@@ -251,8 +248,8 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
         out.write(HtmlConsts.HTML_CLOSE);
       } catch (ODKEntityNotFoundException e) {
         logger.warn("Set private key information error: " + e.getMessage());
-          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-              ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.getMessage());
       } catch (ODKOverQuotaException e) {
         logger.error("Set private key information error: " + e.getMessage());
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
