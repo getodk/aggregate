@@ -72,15 +72,12 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
           SecureGWT.getFormAdminService(),
           (rpc, sessionCookie, cb) -> rpc.purgeSubmissionsData(summary.getId(), earliest, cb),
           (Date result) -> {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Successful commencement of the purge of:\n");
-            stringBuilder.append(summary.getTitle());
-            stringBuilder.append(" [");
-            stringBuilder.append(summary.getId());
-            stringBuilder.append("].\nDeleting all submission data through\n  ");
-            stringBuilder.append(result.toGMTString());
-            stringBuilder.append("\nIncomplete submissions will not be deleted.");
-            Window.alert(stringBuilder.toString());
+            Window.alert("" +
+                "Successful commencement of the purge of:\n" +
+                summary.getTitle() + " [" + summary.getId() + "].\n" +
+                "Deleting all submission data through\n  " +
+                result.toGMTString() + "\n" +
+                "Incomplete submissions will not be deleted.");
           },
           cause -> AggregateUI.getUI().reportError("Failed purge of submission data: ", cause)
       );
