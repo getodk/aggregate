@@ -42,6 +42,7 @@ public interface FormAdminService extends RemoteService {
 
   void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   Date purgePublishedData(String uriExternalService, Date earliest) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
   @XsrfProtect
