@@ -244,6 +244,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
         out.write(HtmlConsts.HTML_OPEN);
         out.write(HtmlConsts.BODY_OPEN);
         out.write("<p>Successful private key information upload.</p>");
+        out.write("<p><strong>Note</strong>: If you have updated the Google Simple API Key, please reload/refresh this page.</p>");
         out.write(HtmlConsts.BODY_CLOSE);
         out.write(HtmlConsts.HTML_CLOSE);
       } catch (ODKEntityNotFoundException e) {
