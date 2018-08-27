@@ -174,7 +174,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
               return Boolean.parseBoolean(value);
             } catch (Throwable t) {
               // Optional.map() uses Optional.ofNullable() to wrap the
-              // mappers output. Returning null here will make this optional
+              // mapper's output. Returning null here will make this optional
               // instance to be empty
               log.warn("Can't parse incoming includeIncomplete query string arg", t);
               return null;
