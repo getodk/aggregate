@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
@@ -71,9 +69,8 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * <li>lastUpdateDate (ascending) and</li>
  * <li>URI (ascending).</li>
  * </ol>
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public class SubmissionDownloadListServlet extends ServletUtilBase {
 
@@ -101,9 +98,9 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
   /**
    * Handler for HTTP Get request that responds with an XML list of instanceIDs
    * on the system.
-   * 
+   *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -117,10 +114,10 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       errorMissingKeyParam(resp);
       return;
     }
-    if ( formId.contains(ParserConsts.FORWARD_SLASH) ) {
+    if (formId.contains(ParserConsts.FORWARD_SLASH)) {
       formId = formId.replaceAll(ParserConsts.FORWARD_SLASH, ParserConsts.FORWARD_SLASH_SUBSTITUTION);
     }
-    
+
     // the cursor string
     String websafeCursorString = getParameter(req, ServletConsts.CURSOR);
     QueryResumePoint cursor = WebCursorUtils.parseCursorParameter(websafeCursorString);
@@ -173,7 +170,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
         query.addFilter(tbl.isComplete, FilterOperation.EQUAL, true);
 
       QueryResult result = query.executeQuery(cursor, numEntries);
-      List<String> uriList = new ArrayList<String>();
+      List<String> uriList = new ArrayList<>();
       for (CommonFieldsBase cb : result.getResultList()) {
         uriList.add(cb.getUri());
       }
@@ -200,12 +197,12 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       }
 
       QueryResumePoint qrp = result.getResumeCursor();
-      if ( qrp == null ) {
+      if (qrp == null) {
         websafeCursorString = null;
       } else {
         websafeCursorString = qrp.asWebsafeCursor();
       }
-      
+
       if (websafeCursorString != null) {
         // emit the cursor value...
         Element eCursorContinue = d.createElement(XML_TAG_NAMESPACE, CURSOR_TAG);
