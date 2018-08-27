@@ -45,6 +45,8 @@ import org.opendatakit.common.utils.WebCursorUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Servlet to generate the XML list of submission instanceIDs for a given form.
@@ -73,6 +75,7 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * @author mitchellsundt@gmail.com
  */
 public class SubmissionDownloadListServlet extends ServletUtilBase {
+  private static final Logger log = LoggerFactory.getLogger(SubmissionDownloadListServlet.class);
 
   private static final String ID_FRAGMENT_TAG = "idChunk";
 
@@ -173,6 +176,7 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
               // Optional.map() uses Optional.ofNullable() to wrap the
               // mappers output. Returning null here will make this optional
               // instance to be empty
+              log.warn("Can't parse incoming includeIncomplete query string arg", t);
               return null;
             }
           })
