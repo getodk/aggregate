@@ -164,7 +164,18 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       Query query = cc.getDatastore().createQuery(tbl, "SubmissionDownloadListServlet.doGet", cc.getCurrentUser());
       query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
       boolean includeIncomplete = Optional.ofNullable(getParameter(req, "includeIncomplete"))
-          .map(Boolean::parseBoolean)
+          .map(value -> {
+            // This try block will prevent failures when we get something
+            // that can't be parsed into Boolean
+            try {
+              return Boolean.parseBoolean(value);
+            } catch (Throwable t) {
+              // Optional.map() uses Optional.ofNullable() to wrap the
+              // mappers output. Returning null here will make this optional
+              // instance to be empty
+              return null;
+            }
+          })
           .orElse(false);
       if (!includeIncomplete)
         query.addFilter(tbl.isComplete, FilterOperation.EQUAL, true);
