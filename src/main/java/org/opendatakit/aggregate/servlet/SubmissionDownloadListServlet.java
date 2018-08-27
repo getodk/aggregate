@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -165,7 +166,11 @@ public class SubmissionDownloadListServlet extends ServletUtilBase {
       // are fully uploaded. We snarf everything.
       Query query = cc.getDatastore().createQuery(tbl, "SubmissionDownloadListServlet.doGet", cc.getCurrentUser());
       query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-      query.addFilter(tbl.isComplete, FilterOperation.EQUAL, true);
+      boolean includeIncomplete = Optional.ofNullable(getParameter(req, "includeIncomplete"))
+          .map(Boolean::parseBoolean)
+          .orElse(false);
+      if (!includeIncomplete)
+        query.addFilter(tbl.isComplete, FilterOperation.EQUAL, true);
 
       QueryResult result = query.executeQuery(cursor, numEntries);
       List<String> uriList = new ArrayList<String>();
