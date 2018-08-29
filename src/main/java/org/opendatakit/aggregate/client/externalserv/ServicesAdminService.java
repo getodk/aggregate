@@ -42,6 +42,7 @@ public interface ServicesAdminService extends RemoteService {
   @XsrfProtect
   String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;

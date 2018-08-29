@@ -319,8 +319,12 @@ public final class PublishPopup extends AbstractPopupBase {
 
       switch (type) {
         case GOOGLE_SPREADSHEET:
-          SecureGWT.getServicesAdminService().createGoogleSpreadsheet(formId, gsName.getText(),
-              serviceOp, ownerEmail, new ReportFailureCallback());
+          secureRequest(
+              SecureGWT.getServicesAdminService(),
+              (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, gsName.getText(), serviceOp, ownerEmail, cb),
+              (String __) -> {},
+              cause -> AggregateUI.getUI().reportError(cause)
+          );
           break;
         case REDCAP_SERVER:
           SecureGWT.getServicesAdminService().createRedCapServer(formId, rcApiKey.getText(),
