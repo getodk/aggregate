@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -142,7 +144,7 @@ public final class ExportPopup extends AbstractPopupBase {
     public void onClick(ClickEvent event) {
       ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
 
-      FilterGroup filterGroup = filtersBox.getSelectedFilter();
+      final FilterGroup filterGroup = filtersBox.getSelectedFilter();
 
       if (filterGroup == null) {
         AggregateUI.getUI().reportError(new Throwable(PROBLEM_NULL_FILTER_GROUP));
@@ -150,7 +152,20 @@ public final class ExportPopup extends AbstractPopupBase {
       }
 
       if (type == ExportType.CSV) {
-        SecureGWT.getFormService().createCsvFromFilter(filterGroup, new CreateExportCallback());
+        secureRequest(
+            SecureGWT.getFormService(),
+            (rpc, sc, cb) -> rpc.createCsvFromFilter(filterGroup, cb),
+            (Boolean result) -> {
+              if (result) {
+                AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
+              } else {
+                Window.alert(EXPORT_ERROR_MSG);
+              }
+
+              hide();
+            },
+            cause -> AggregateUI.getUI().reportError(cause)
+        );
       } else if (type == ExportType.JSONFILE) {
         SecureGWT.getFormService().createJsonFileFromFilter(filterGroup, new CreateExportCallback());
       } else if (type == ExportType.KML) {

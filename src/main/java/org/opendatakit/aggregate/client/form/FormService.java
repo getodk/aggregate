@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.form;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 import java.util.ArrayList;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -38,6 +39,7 @@ public interface FormService extends RemoteService {
 
   ArrayList<ExportSummary> getExports() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   Boolean createJsonFileFromFilter(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
