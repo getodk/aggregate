@@ -335,10 +335,14 @@ public final class PublishPopup extends AbstractPopupBase {
           );
           break;
         case JSON_SERVER: {
-          String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
-          BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
-          SecureGWT.getServicesAdminService().createSimpleJsonServer(formId, jsAuthKey.getText(),
-              jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOp, new ReportFailureCallback());
+          final String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
+          final BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
+          secureRequest(
+              SecureGWT.getServicesAdminService(),
+              (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOp, cb),
+              (String __) -> {},
+              cause -> AggregateUI.getUI().reportError(cause)
+          );
         }
         break;
         case OHMAGE_JSON_SERVER:
