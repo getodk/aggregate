@@ -23,11 +23,11 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
+import java.util.function.Consumer;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UIUtils;
@@ -55,6 +55,8 @@ public final class PublishPopup extends AbstractPopupBase {
 
   private static final String BO_TYPE_TOOLTIP = "Sets how the binary data from Media should be published";
   private static final String BO_TYPE_BALLOON = "Selects how the binary dat from Media should be published. Aggregate will provide links in the publish OR will embed the data in the publish";
+  public static final Consumer<String> NO_OP_CONSUMER = (String __) -> {
+  };
 
   // this is the main flex table for the popup
   private final FlexTable layout;
@@ -322,16 +324,16 @@ public final class PublishPopup extends AbstractPopupBase {
           secureRequest(
               SecureGWT.getServicesAdminService(),
               (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, gsName.getText(), serviceOp, ownerEmail, cb),
-              (String __) -> {},
-              cause -> AggregateUI.getUI().reportError(cause)
+              NO_OP_CONSUMER,
+              this::onFailure
           );
           break;
         case REDCAP_SERVER:
           secureRequest(
               SecureGWT.getServicesAdminService(),
               (rpc, sc, cb) -> rpc.createRedCapServer(formId, rcApiKey.getText(), rcUrl.getText(), serviceOp, ownerEmail, cb),
-              (String __) -> {},
-              cause -> AggregateUI.getUI().reportError(cause)
+              NO_OP_CONSUMER,
+              this::onFailure
           );
           break;
         case JSON_SERVER: {
@@ -340,8 +342,8 @@ public final class PublishPopup extends AbstractPopupBase {
           secureRequest(
               SecureGWT.getServicesAdminService(),
               (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOp, cb),
-              (String __) -> {},
-              cause -> AggregateUI.getUI().reportError(cause)
+              NO_OP_CONSUMER,
+              this::onFailure
           );
         }
         break;
@@ -352,16 +354,16 @@ public final class PublishPopup extends AbstractPopupBase {
                   ohmageCampaignUrn.getText(), ohmageCampaignTimestamp.getText(),
                   ohmageUsername.getText(), ohmageHashedPassword.getText(), ohmageUrl.getText(),
                   serviceOp, ownerEmail, cb),
-              (String __) -> {},
-              cause -> AggregateUI.getUI().reportError(cause)
+              NO_OP_CONSUMER,
+              this::onFailure
           );
           break;
         case GOOGLE_FUSIONTABLES:
           secureRequest(
               SecureGWT.getServicesAdminService(),
               (rpc, sc, cb) -> rpc.createFusionTable(formId, serviceOp, ownerEmail, cb),
-              (String __) -> {},
-              cause -> AggregateUI.getUI().reportError(cause)
+              NO_OP_CONSUMER,
+              this::onFailure
           );
           break;
         default: // unknown type
@@ -369,6 +371,10 @@ public final class PublishPopup extends AbstractPopupBase {
       }
 
       hide();
+    }
+
+    private void onFailure(Throwable cause) {
+      AggregateUI.getUI().reportError(cause);
     }
 
     private String getOwnerEmail(UserSecurityInfo info) {
@@ -381,16 +387,6 @@ public final class PublishPopup extends AbstractPopupBase {
         }
       }
       return ownerEmail;
-    }
-  }
-
-  private class ReportFailureCallback implements AsyncCallback<String> {
-
-    public void onFailure(Throwable caught) {
-      AggregateUI.getUI().reportError(caught);
-    }
-
-    public void onSuccess(String result) {
     }
   }
 
