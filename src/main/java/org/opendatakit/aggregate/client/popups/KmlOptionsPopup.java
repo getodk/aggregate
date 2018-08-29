@@ -15,6 +15,8 @@
  */
 package org.opendatakit.aggregate.client.popups;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -135,8 +137,20 @@ public final class KmlOptionsPopup extends AbstractPopupBase {
       }
 
       if (atLeastOneKmlElementCreated) {
-        SecureGWT.getFormService().createKmlFromFilter(selectedfilterGroup, kmlElementsToInclude,
-            new CreateExportCallback());
+        secureRequest(
+            SecureGWT.getFormService(),
+            (rpc, sc, cb) -> rpc.createKmlFromFilter(selectedfilterGroup, kmlElementsToInclude, cb),
+            (Boolean result) -> {
+              if (result) {
+                AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
+              } else {
+                Window.alert(EXPORT_ERROR_MSG);
+              }
+
+              hide();
+            },
+            cause -> AggregateUI.getUI().reportError(cause)
+        );
       } else {
         Window.alert(KML_ELEMENTS_ZERO_ERROR_MSG);
       }

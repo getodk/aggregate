@@ -47,6 +47,7 @@ public interface FormService extends RemoteService {
 
   KmlOptionsSummary getPossibleKmlSettings(String formId) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   Boolean createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   GeopointElementList getGpsCoordnates(String formId) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
