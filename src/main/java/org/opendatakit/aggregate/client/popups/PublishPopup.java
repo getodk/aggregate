@@ -327,8 +327,12 @@ public final class PublishPopup extends AbstractPopupBase {
           );
           break;
         case REDCAP_SERVER:
-          SecureGWT.getServicesAdminService().createRedCapServer(formId, rcApiKey.getText(),
-              rcUrl.getText(), serviceOp, ownerEmail, new ReportFailureCallback());
+          secureRequest(
+              SecureGWT.getServicesAdminService(),
+              (rpc, sc, cb) -> rpc.createRedCapServer(formId, rcApiKey.getText(), rcUrl.getText(), serviceOp, ownerEmail, cb),
+              (String __) -> {},
+              cause -> AggregateUI.getUI().reportError(cause)
+          );
           break;
         case JSON_SERVER: {
           String jsBinaryOpString = jsBinaryOptions.getSelectedValue();

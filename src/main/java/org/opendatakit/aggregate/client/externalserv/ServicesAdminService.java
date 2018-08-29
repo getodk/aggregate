@@ -49,6 +49,7 @@ public interface ServicesAdminService extends RemoteService {
 
   String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   Boolean deletePublisher(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
