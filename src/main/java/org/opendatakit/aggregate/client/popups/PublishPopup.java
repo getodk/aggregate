@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -311,14 +313,9 @@ public final class PublishPopup extends AbstractPopupBase {
           ExternalServicePublicationOption.valueOf(serviceOpString);
 
       UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
-      String ownerEmail = info.getEmail();
-      if (ownerEmail == null || ownerEmail.length() == 0) {
-        try {
-          ownerEmail = UIUtils.promptForEmailAddress();
-        } catch (Exception e) {
-          return; // user pressed cancel
-        }
-      }
+      String ownerEmail = getOwnerEmail(info);
+      if (ownerEmail == null)
+        return;
 
       switch (type) {
         case GOOGLE_SPREADSHEET:
@@ -343,14 +340,30 @@ public final class PublishPopup extends AbstractPopupBase {
               serviceOp, ownerEmail, new ReportFailureCallback());
           break;
         case GOOGLE_FUSIONTABLES:
-          SecureGWT.getServicesAdminService().createFusionTable(formId, serviceOp, ownerEmail,
-              new ReportFailureCallback());
+          secureRequest(
+              SecureGWT.getServicesAdminService(),
+              (rpc, sc, cb) -> rpc.createFusionTable(formId, serviceOp, ownerEmail, cb),
+              (String __) -> {},
+              cause -> AggregateUI.getUI().reportError(cause)
+          );
           break;
         default: // unknown type
           break;
       }
 
       hide();
+    }
+
+    private String getOwnerEmail(UserSecurityInfo info) {
+      String ownerEmail = info.getEmail();
+      if (ownerEmail == null || ownerEmail.length() == 0) {
+        try {
+          ownerEmail = UIUtils.promptForEmailAddress();
+        } catch (Exception e) {
+          ownerEmail = null; // user pressed cancel
+        }
+      }
+      return ownerEmail;
     }
   }
 

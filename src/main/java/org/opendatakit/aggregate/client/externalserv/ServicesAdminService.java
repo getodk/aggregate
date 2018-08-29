@@ -19,6 +19,7 @@ package org.opendatakit.aggregate.client.externalserv;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -38,6 +39,7 @@ public interface ServicesAdminService extends RemoteService {
 
   ExternServSummary[] getExternalServices(String formid) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
