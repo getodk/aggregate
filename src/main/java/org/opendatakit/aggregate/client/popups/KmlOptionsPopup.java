@@ -140,32 +140,19 @@ public final class KmlOptionsPopup extends AbstractPopupBase {
         secureRequest(
             SecureGWT.getFormService(),
             (rpc, sc, cb) -> rpc.createKmlFromFilter(selectedfilterGroup, kmlElementsToInclude, cb),
-            (Boolean result) -> {
-              if (result) {
-                AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
-              } else {
-                Window.alert(EXPORT_ERROR_MSG);
-              }
-
-              hide();
-            },
-            cause -> AggregateUI.getUI().reportError(cause)
+            this::onSuccess,
+            this::onFailure
         );
       } else {
         Window.alert(KML_ELEMENTS_ZERO_ERROR_MSG);
       }
     }
-  }
 
-  private class CreateExportCallback implements AsyncCallback<Boolean> {
-
-    @Override
-    public void onFailure(Throwable caught) {
-      AggregateUI.getUI().reportError(caught);
+    private void onFailure(Throwable cause) {
+      AggregateUI.getUI().reportError(cause);
     }
 
-    @Override
-    public void onSuccess(Boolean result) {
+    private void onSuccess(Boolean result) {
       if (result) {
         AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
       } else {
