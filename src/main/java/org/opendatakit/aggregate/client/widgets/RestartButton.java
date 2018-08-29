@@ -32,6 +32,9 @@ import org.opendatakit.aggregate.constants.common.ExternalServiceType;
  */
 public final class RestartButton extends AggregateButton implements ClickHandler {
 
+  public static final Runnable NO_OP_RUNNABLE = () -> {
+  };
+
   public enum Circumstance {CREDENTIALS, ABANDONED, PAUSED}
 
   ;
@@ -61,16 +64,6 @@ public final class RestartButton extends AggregateButton implements ClickHandler
     addStyleDependentName("negative");
   }
 
-  private class ReportErrorsCallback implements AsyncCallback<Void> {
-
-    public void onFailure(Throwable caught) {
-      AggregateUI.getUI().reportError(caught);
-    }
-
-    public void onSuccess(Void result) {
-    }
-  }
-
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
@@ -89,18 +82,22 @@ public final class RestartButton extends AggregateButton implements ClickHandler
         secureRequest(
             SecureGWT.getServicesAdminService(),
             (rpc, sc, cb) -> rpc.updateApiKeyAndRestartPublisher(publisher.getUri(), apiKey, cb),
-            () -> {},
-            cause -> AggregateUI.getUI().reportError(cause)
+            NO_OP_RUNNABLE,
+            this::onFailure
         );
         break;
       default:
         secureRequest(
             SecureGWT.getServicesAdminService(),
             (rpc, sc, cb) -> rpc.restartPublisher(publisher.getUri(), cb),
-            () -> {},
-            cause -> AggregateUI.getUI().reportError(cause)
+            NO_OP_RUNNABLE,
+            this::onFailure
         );
         break;
     }
+  }
+
+  private void onFailure(Throwable cause) {
+    AggregateUI.getUI().reportError(cause);
   }
 }
