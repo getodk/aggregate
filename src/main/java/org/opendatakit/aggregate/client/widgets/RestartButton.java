@@ -94,8 +94,12 @@ public final class RestartButton extends AggregateButton implements ClickHandler
         );
         break;
       default:
-        SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-            new ReportErrorsCallback());
+        secureRequest(
+            SecureGWT.getServicesAdminService(),
+            (rpc, sc, cb) -> rpc.restartPublisher(publisher.getUri(), cb),
+            () -> {},
+            cause -> AggregateUI.getUI().reportError(cause)
+        );
         break;
     }
   }
