@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -84,8 +86,12 @@ public final class RestartButton extends AggregateButton implements ClickHandler
         } catch (Exception e) {
           return; // user pressed cancel
         }
-        SecureGWT.getServicesAdminService().updateApiKeyAndRestartPublisher(publisher.getUri(),
-            apiKey, new ReportErrorsCallback());
+        secureRequest(
+            SecureGWT.getServicesAdminService(),
+            (rpc, sc, cb) -> rpc.updateApiKeyAndRestartPublisher(publisher.getUri(), apiKey, cb),
+            () -> {},
+            cause -> AggregateUI.getUI().reportError(cause)
+        );
         break;
       default:
         SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
