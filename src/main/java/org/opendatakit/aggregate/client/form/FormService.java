@@ -42,6 +42,7 @@ public interface FormService extends RemoteService {
   @XsrfProtect
   Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   Boolean createJsonFileFromFilter(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   KmlOptionsSummary getPossibleKmlSettings(String formId) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;

@@ -167,7 +167,20 @@ public final class ExportPopup extends AbstractPopupBase {
             cause -> AggregateUI.getUI().reportError(cause)
         );
       } else if (type == ExportType.JSONFILE) {
-        SecureGWT.getFormService().createJsonFileFromFilter(filterGroup, new CreateExportCallback());
+        secureRequest(
+            SecureGWT.getFormService(),
+            (rpc, sc, cb) -> rpc.createJsonFileFromFilter(filterGroup, cb),
+            (Boolean result) -> {
+              if (result) {
+                AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
+              } else {
+                Window.alert(EXPORT_ERROR_MSG);
+              }
+
+              hide();
+            },
+            cause -> AggregateUI.getUI().reportError(cause)
+        );
       } else if (type == ExportType.KML) {
         KmlOptionsPopup popup = new KmlOptionsPopup(formId, filterGroup);
         popup.setPopupPositionAndShow(popup.getPositionCallBack());
