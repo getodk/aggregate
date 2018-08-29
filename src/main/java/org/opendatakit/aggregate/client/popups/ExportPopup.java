@@ -95,26 +95,6 @@ public final class ExportPopup extends AbstractPopupBase {
     setWidget(optionsBar);
   }
 
-  private class CreateExportCallback implements AsyncCallback<Boolean> {
-
-    @Override
-    public void onFailure(Throwable caught) {
-      AggregateUI.getUI().reportError(caught);
-    }
-
-    @Override
-    public void onSuccess(Boolean result) {
-      if (result) {
-        AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
-      } else {
-        Window.alert(EXPORT_ERROR_MSG);
-      }
-
-      hide();
-    }
-  }
-
-
   private class FiltersCallback implements AsyncCallback<FilterSet> {
 
     private static final String PROBLEM_NULL_FILTER_SET = "PROBLEM: got a NULL for a filterSet from server";
@@ -147,7 +127,7 @@ public final class ExportPopup extends AbstractPopupBase {
       final FilterGroup filterGroup = filtersBox.getSelectedFilter();
 
       if (filterGroup == null) {
-        AggregateUI.getUI().reportError(new Throwable(PROBLEM_NULL_FILTER_GROUP));
+        onFailure(new Throwable(PROBLEM_NULL_FILTER_GROUP));
         return;
       }
 
@@ -155,31 +135,15 @@ public final class ExportPopup extends AbstractPopupBase {
         secureRequest(
             SecureGWT.getFormService(),
             (rpc, sc, cb) -> rpc.createCsvFromFilter(filterGroup, cb),
-            (Boolean result) -> {
-              if (result) {
-                AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
-              } else {
-                Window.alert(EXPORT_ERROR_MSG);
-              }
-
-              hide();
-            },
-            cause -> AggregateUI.getUI().reportError(cause)
+            this::onSuccess,
+            this::onFailure
         );
       } else if (type == ExportType.JSONFILE) {
         secureRequest(
             SecureGWT.getFormService(),
             (rpc, sc, cb) -> rpc.createJsonFileFromFilter(filterGroup, cb),
-            (Boolean result) -> {
-              if (result) {
-                AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
-              } else {
-                Window.alert(EXPORT_ERROR_MSG);
-              }
-
-              hide();
-            },
-            cause -> AggregateUI.getUI().reportError(cause)
+            this::onSuccess,
+            this::onFailure
         );
       } else if (type == ExportType.KML) {
         KmlOptionsPopup popup = new KmlOptionsPopup(formId, filterGroup);
@@ -189,6 +153,20 @@ public final class ExportPopup extends AbstractPopupBase {
         new ErrorDialog().show();
       }
 
+    }
+
+    private void onFailure(Throwable cause) {
+      AggregateUI.getUI().reportError(cause);
+    }
+
+    private void onSuccess(Boolean result) {
+      if (result) {
+        AggregateUI.getUI().redirectToSubTab(SubTabs.EXPORT);
+      } else {
+        Window.alert(EXPORT_ERROR_MSG);
+      }
+
+      hide();
     }
   }
 
