@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.server;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,11 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -57,10 +54,9 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FormServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.form.FormService {
@@ -111,16 +107,17 @@ public class FormServiceImpl extends RemoteServiceServlet implements
           summary.setMostRecentPurgeSubmissionsRequestStatus(t);
         }
       }
-      Collections.sort(formSummaries, new Comparator<FormSummary>(){
+      Collections.sort(formSummaries, new Comparator<FormSummary>() {
 
         @Override
         public int compare(FormSummary arg0, FormSummary arg1) {
           int cmp;
           cmp = arg0.getTitle().compareTo(arg1.getTitle());
-          if ( cmp != 0 ) return cmp;
+          if (cmp != 0) return cmp;
           cmp = arg0.getId().compareTo(arg1.getId());
           return cmp;
-        }});
+        }
+      });
 
       return formSummaries;
 
@@ -137,7 +134,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public ArrayList<ExportSummary> getExports() throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
+  public ArrayList<ExportSummary> getExports() throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -183,7 +180,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public KmlOptionsSummary getPossibleKmlSettings(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
+  public KmlOptionsSummary getPossibleKmlSettings(String formId) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -208,7 +205,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public GeopointElementList getGpsCoordnates(String formId) throws RequestFailureException, FormNotAvailableException, DatastoreFailureException {
+  public GeopointElementList getGpsCoordnates(String formId) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -234,7 +231,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public Boolean createCsvFromFilter(FilterGroup group) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -283,8 +280,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public Boolean createJsonFileFromFilter(FilterGroup group) throws AccessDeniedException,
-      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public Boolean createJsonFileFromFilter(FilterGroup group) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -332,7 +328,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public Boolean createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public Boolean createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -408,21 +404,21 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 //        }
 //      }
 
-      
+
       // encode all the settings form the selections
       StringBuilder encodedKmlSettings = new StringBuilder();
       boolean firstItem = true;
-      for(KmlSelection kmlSetting : kmlElementsToInclude) {
-        if(firstItem) {
+      for (KmlSelection kmlSetting : kmlElementsToInclude) {
+        if (firstItem) {
           firstItem = false;
         } else {
           encodedKmlSettings.append(KmlGenerator.KML_SELECTIONS_DELIMITER);
         }
         // TODO: think about a bad setting (checking comment out above will prevent this);
         String tmpString = kmlSetting.generateEncodedString();
-        encodedKmlSettings.append(tmpString );
+        encodedKmlSettings.append(tmpString);
       }
-      
+
       Map<String, String> params = new HashMap<String, String>();
       params.put(KmlGenerator.KML_SELECTIONS_KEY, encodedKmlSettings.toString());
 
@@ -447,8 +443,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void deleteExport(String uri) throws AccessDeniedException, FormNotAvailableException,
-      RequestFailureException, DatastoreFailureException {
+  public void deleteExport(String uri) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

@@ -16,7 +16,15 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -27,15 +35,6 @@ import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.client.widgets.FilterListBox;
 import org.opendatakit.aggregate.constants.common.ExportType;
 import org.opendatakit.aggregate.constants.common.SubTabs;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 
 public final class ExportPopup extends AbstractPopupBase {
 
@@ -79,7 +78,7 @@ public final class ExportPopup extends AbstractPopupBase {
 
     fileType = new EnumListBox<ExportType>(ExportType.values(), FILE_TYPE_TOOLTIP,
         FILE_TYPE_BALLOON);
-    
+
     // set the standard header widgets
     optionsBar = new FlexTable();
     optionsBar.addStyleName("stretch_header");
@@ -134,7 +133,9 @@ public final class ExportPopup extends AbstractPopupBase {
       // created filter list
       filtersBox.updateFilterDropDown(filterSet);
     }
-  };
+  }
+
+  ;
 
   private class CreateExportHandler implements ClickHandler {
     @Override
@@ -142,8 +143,8 @@ public final class ExportPopup extends AbstractPopupBase {
       ExportType type = ExportType.valueOf(fileType.getValue(fileType.getSelectedIndex()));
 
       FilterGroup filterGroup = filtersBox.getSelectedFilter();
-      
-      if ( filterGroup == null ) {
+
+      if (filterGroup == null) {
         AggregateUI.getUI().reportError(new Throwable(PROBLEM_NULL_FILTER_GROUP));
         return;
       }
@@ -152,7 +153,7 @@ public final class ExportPopup extends AbstractPopupBase {
         SecureGWT.getFormService().createCsvFromFilter(filterGroup, new CreateExportCallback());
       } else if (type == ExportType.JSONFILE) {
         SecureGWT.getFormService().createJsonFileFromFilter(filterGroup, new CreateExportCallback());
-      } else if( type == ExportType.KML) {
+      } else if (type == ExportType.KML) {
         KmlOptionsPopup popup = new KmlOptionsPopup(formId, filterGroup);
         popup.setPopupPositionAndShow(popup.getPositionCallBack());
         hide();
@@ -162,7 +163,7 @@ public final class ExportPopup extends AbstractPopupBase {
 
     }
   }
-  
+
   private static class ErrorDialog extends DialogBox {
 
     public ErrorDialog() {
