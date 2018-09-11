@@ -25,7 +25,9 @@ This Aggregate Docker image works by using an external running PostgreSQL 9.6 da
   **We strongly advice to use a stronger password on the first line of the script.**
   
 - Take note of the database connection parameters: host, port, database name, username and password.
-  
+
+- If you haven't cloned the Aggregate Git repo, follow the instructions of [Getting the code](https://github.com/opendatakit/aggregate#getting-the-code). It's important that you install Git LFS before cloning it.
+
 - Build the Docker image with `./gradlew clean dockerBuild -xtest -PwarMode=complete`.
 
   Take note of the tag of the created image. It will appear in a message like this one:
