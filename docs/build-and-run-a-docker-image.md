@@ -4,6 +4,10 @@
 
 - Install [Docker](https://www.docker.com)
 - Already have a PostgreSQL 9.6 database running
+- Follow the instructions of the main [README](https://github.com/opendatakit/aggregate), including:
+  - Install Git LFS, as well as its git hooks, and enable the git hooks for Git LFS.
+  - Only then clone your fork of Aggregate - included .jar files only download correctly with Git LFS.
+  - Install IntelliJ IDEA and import project as instructed to let IDEA download, build, and configure sources.
 
 ## Quick start - External PostgreSQL instance
 
