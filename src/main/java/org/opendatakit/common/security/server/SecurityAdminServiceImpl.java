@@ -16,6 +16,7 @@
 
 package org.opendatakit.common.security.server;
 
+import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +36,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  * @author mitchellsundt@gmail.com
  *
  */
-public class SecurityAdminServiceImpl extends RemoteServiceServlet implements
+public class SecurityAdminServiceImpl extends XsrfProtectedServiceServlet implements
 org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 
     /**
