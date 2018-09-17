@@ -16,31 +16,30 @@
 
 package org.opendatakit.aggregate.client.externalserv;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ServicesAdminServiceAsync {
 
   void getExternalServices(String formid, AsyncCallback<ExternServSummary[]> callback);
 
   void createFusionTable(String formId, ExternalServicePublicationOption esOption,
-      String ownerEmail, AsyncCallback<String> callback);
+                         String ownerEmail, AsyncCallback<String> callback);
 
   void createGoogleSpreadsheet(String formId, String name,
-      ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
+                               ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
   void createSimpleJsonServer(String formId, String authKey, String url,
-      ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption,
-      AsyncCallback<String> callback);
+                              ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption,
+                              AsyncCallback<String> callback);
 
   void createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp,
-      String user, String hashedPassword, String url, ExternalServicePublicationOption es,
-      String ownerEmail, AsyncCallback<String> callback);
+                              String user, String hashedPassword, String url, ExternalServicePublicationOption es,
+                              String ownerEmail, AsyncCallback<String> callback);
 
   void createRedCapServer(String formId, String apiKey, String url,
-      ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
+                          ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
   void deletePublisher(String uri, AsyncCallback<Boolean> callback);
 

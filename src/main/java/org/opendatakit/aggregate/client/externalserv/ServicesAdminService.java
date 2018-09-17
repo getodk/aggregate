@@ -17,15 +17,14 @@
 package org.opendatakit.aggregate.client.externalserv;
 
 
-import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
-
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * These are the actions requiring the ROLE_DATA_OWNER privilege.  They
@@ -34,26 +33,32 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 @RemoteServiceRelativePath("servicesadminservice")
 public interface ServicesAdminService extends RemoteService {
 
-  ExternServSummary [] getExternalServices(String formid) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  ExternServSummary[] getExternalServices(String formid) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
-  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  @XsrfProtect
+  String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  @XsrfProtect
+  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  @XsrfProtect
+  String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  @XsrfProtect
+  String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  Boolean deletePublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  @XsrfProtect
+  String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  void restartPublisher(String uri) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  Boolean deletePublisher(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
-  void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  @XsrfProtect
+  void restartPublisher(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+
+  @XsrfProtect
+  void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }

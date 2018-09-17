@@ -16,10 +16,9 @@
 
 package org.opendatakit.aggregate.server;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -48,23 +47,17 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.externalserv.ServicesAdminService {
 
-  /**
-     *
-     */
   private static final long serialVersionUID = 51251316598366231L;
 
   @Override
-  public ExternServSummary[] getExternalServices(String formId) throws AccessDeniedException,
-      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public ExternServSummary[] getExternalServices(String formId) throws
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -103,7 +96,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createFusionTable(String formId, ExternalServicePublicationOption esOption,
-      String ownerEmail) throws AccessDeniedException, FormNotAvailableException,
+                                  String ownerEmail) throws
       RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -143,8 +136,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createGoogleSpreadsheet(String formId, String name,
-      ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException,
-      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+                                        ExternalServicePublicationOption esOption, String ownerEmail) throws
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -186,8 +179,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createRedCapServer(String formId, String apiKey, String url,
-      ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException,
-      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+                                   ExternalServicePublicationOption esOption, String ownerEmail) throws
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -222,8 +215,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createSimpleJsonServer(String formId, String authKey, String url,
-      ExternalServicePublicationOption esOption, String ownerEmail, BinaryOption binaryOption)
-      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
+                                       ExternalServicePublicationOption esOption, String ownerEmail, BinaryOption binaryOption)
+      throws RequestFailureException,
       DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -260,8 +253,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp,
-      String user, String hashedPassword, String url, ExternalServicePublicationOption esOption,
-      String ownerEmail) throws AccessDeniedException, FormNotAvailableException,
+                                       String user, String hashedPassword, String url, ExternalServicePublicationOption esOption,
+                                       String ownerEmail) throws
       RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
@@ -297,8 +290,8 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public Boolean deletePublisher(String uri) throws AccessDeniedException,
-      FormNotAvailableException, RequestFailureException, DatastoreFailureException {
+  public Boolean deletePublisher(String uri) throws
+      RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -345,8 +338,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void restartPublisher(String uri) throws AccessDeniedException, FormNotAvailableException,
-      RequestFailureException, DatastoreFailureException {
+  public void restartPublisher(String uri) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -361,9 +353,9 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
         throw new RequestFailureException("Service description not found for this publisher");
       }
       OperationalStatus status = fsc.getOperationalStatus();
-      if ( status != OperationalStatus.BAD_CREDENTIALS && 
-           status != OperationalStatus.ABANDONED &&
-           status != OperationalStatus.PAUSED ) {
+      if (status != OperationalStatus.BAD_CREDENTIALS &&
+          status != OperationalStatus.ABANDONED &&
+          status != OperationalStatus.PAUSED) {
         throw new RequestFailureException(
             "Rejecting change request -- publisher is not in a failure state");
       }
@@ -391,7 +383,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public void updateApiKeyAndRestartPublisher(String uri, String apiKey)
-      throws AccessDeniedException, FormNotAvailableException, RequestFailureException,
+      throws RequestFailureException,
       DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);

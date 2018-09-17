@@ -16,23 +16,29 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UIUtils;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 /**
  * Restarts Publisher because of failures
  */
 public final class RestartButton extends AggregateButton implements ClickHandler {
 
-  public enum Circumstance { CREDENTIALS, ABANDONED, PAUSED };
-  
+  public static final Runnable NO_OP_RUNNABLE = () -> {
+  };
+
+  public enum Circumstance {CREDENTIALS, ABANDONED, PAUSED}
+
+  ;
+
   private static final String BUTTON_BAD_CREDENTIAL_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Credential was BAD";
   private static final String TOOLTIP_BAD_CREDENTIAL_TEXT = "Publish failure because of bad credential - click to Restart the Publisher";
   private static final String HELP_BALLOON_BAD_CREDENTIAL_TXT = "The external service was failing or the credentials were bad. Click to restart the publisher.";
@@ -48,24 +54,14 @@ public final class RestartButton extends AggregateButton implements ClickHandler
   private final ExternServSummary publisher;
 
   public RestartButton(ExternServSummary publisher, Circumstance credentialFailure) {
-    super((credentialFailure == Circumstance.CREDENTIALS) ? BUTTON_BAD_CREDENTIAL_TXT : 
-          ((credentialFailure == Circumstance.CREDENTIALS) ? BUTTON_FAILURE_TXT : BUTTON_PAUSED_TXT),
-          (credentialFailure == Circumstance.CREDENTIALS) ? TOOLTIP_BAD_CREDENTIAL_TEXT : 
+    super((credentialFailure == Circumstance.CREDENTIALS) ? BUTTON_BAD_CREDENTIAL_TXT :
+            ((credentialFailure == Circumstance.CREDENTIALS) ? BUTTON_FAILURE_TXT : BUTTON_PAUSED_TXT),
+        (credentialFailure == Circumstance.CREDENTIALS) ? TOOLTIP_BAD_CREDENTIAL_TEXT :
             ((credentialFailure == Circumstance.CREDENTIALS) ? TOOLTIP_FAILURE_TEXT : TOOLTIP_PAUSED_TEXT),
-            (credentialFailure == Circumstance.CREDENTIALS) ? HELP_BALLOON_BAD_CREDENTIAL_TXT : 
-              ((credentialFailure == Circumstance.CREDENTIALS) ? HELP_BALLOON_FAILURE_TXT : HELP_BALLOON_PAUSED_TXT));
+        (credentialFailure == Circumstance.CREDENTIALS) ? HELP_BALLOON_BAD_CREDENTIAL_TXT :
+            ((credentialFailure == Circumstance.CREDENTIALS) ? HELP_BALLOON_FAILURE_TXT : HELP_BALLOON_PAUSED_TXT));
     this.publisher = publisher;
     addStyleDependentName("negative");
-  }
-
-  private class ReportErrorsCallback implements AsyncCallback<Void> {
-
-    public void onFailure(Throwable caught) {
-      AggregateUI.getUI().reportError(caught);
-    }
-
-    public void onSuccess(Void result) {
-    }
   }
 
   @Override
@@ -76,20 +72,32 @@ public final class RestartButton extends AggregateButton implements ClickHandler
 
     switch (type) {
 
-    case REDCAP_SERVER:
-      String apiKey;
-      try {
-        apiKey = UIUtils.promptForREDCapApiKey();
-      } catch (Exception e) {
-        return; // user pressed cancel
-      }
-      SecureGWT.getServicesAdminService().updateApiKeyAndRestartPublisher(publisher.getUri(),
-          apiKey, new ReportErrorsCallback());
-      break;
-    default:
-      SecureGWT.getServicesAdminService().restartPublisher(publisher.getUri(),
-          new ReportErrorsCallback());
-      break;
+      case REDCAP_SERVER:
+        String apiKey;
+        try {
+          apiKey = UIUtils.promptForREDCapApiKey();
+        } catch (Exception e) {
+          return; // user pressed cancel
+        }
+        secureRequest(
+            SecureGWT.getServicesAdminService(),
+            (rpc, sc, cb) -> rpc.updateApiKeyAndRestartPublisher(publisher.getUri(), apiKey, cb),
+            NO_OP_RUNNABLE,
+            this::onFailure
+        );
+        break;
+      default:
+        secureRequest(
+            SecureGWT.getServicesAdminService(),
+            (rpc, sc, cb) -> rpc.restartPublisher(publisher.getUri(), cb),
+            NO_OP_RUNNABLE,
+            this::onFailure
+        );
+        break;
     }
+  }
+
+  private void onFailure(Throwable cause) {
+    AggregateUI.getUI().reportError(cause);
   }
 }

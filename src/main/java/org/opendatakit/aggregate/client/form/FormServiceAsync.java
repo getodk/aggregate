@@ -16,11 +16,9 @@
 
 package org.opendatakit.aggregate.client.form;
 
-import java.util.ArrayList;
-
-import org.opendatakit.aggregate.client.filter.FilterGroup;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 
 public interface FormServiceAsync {
 
@@ -35,7 +33,7 @@ public interface FormServiceAsync {
   void createCsvFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
 
   void createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude,
-      AsyncCallback<Boolean> callback);
+                           AsyncCallback<Boolean> callback);
 
   void createJsonFileFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
 
