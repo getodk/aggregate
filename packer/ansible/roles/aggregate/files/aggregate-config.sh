@@ -3,6 +3,7 @@
 set -o errexit
 
 PROPS_FILE=/var/lib/tomcat8/webapps/ROOT/WEB-INF/classes/security.properties
+TOMCAT_CONFIG_FILE=/var/lib/tomcat8/conf/server.xml
 HELP=NO
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -29,6 +30,11 @@ case $key in
     shift
     shift
     ;;
+    --net-mode)
+    NET_MODE="$2"
+    shift
+    shift
+    ;;
     *)
     POSITIONAL+=("$1")
     shift
@@ -49,11 +55,26 @@ showHelp() {
   echo "                     (not recommended if your IP address changes)"
   echo "--http-port  <value> Set a new HTTP port"
   echo "--https-port <value> Set a new HTTPS port"
+  echo "--net-mode   <value> Set the VM's network mode. Use 'nat' or 'bridge'"
 }
 
 if [ ${HELP} = YES ]; then
   showHelp
   exit 0
+fi
+
+if [ ${NET_MODE} != "nat" ] && [ ${NET_MODE} != "bridge" ]; then
+  echo "Error: Invalid --net-mode value. Use 'nat' or 'bridge' according to the VM's networking configuration"
+  echo ""
+  showHelp
+  exit 1
+fi
+
+if [ ${NET_MODE} == "bridge" ] && ([ -z ${HTTP_PORT} ] || [ -z ${HTTPS_PORT} ]); then
+  echo "Error: In net mode 'bridge' you need to provide values for --http-port and --https-port"
+  echo ""
+  showHelp
+  exit 1
 fi
 
 if [ ${HELP} = NO ] && [ -z ${FQDN} ] && [ -z ${HTTP_PORT} ] && [ -z ${HTTPS_PORT} ]; then
@@ -85,6 +106,16 @@ fi
 if [ ! -z ${HTTPS_PORT} ]; then
   cat ${PROPS_FILE} | sed -e "s/^security\.server\.securePort=.*$/security.server.securePort=${HTTPS_PORT}/" > /tmp/temp_file
   cp /tmp/temp_file ${PROPS_FILE}
+fi
+
+if [ ${NET_MODE} = "nat" ]; then
+  cat ${TOMCAT_CONFIG_FILE} | sed -e "s/^.*Connector.*$/    <Connector port=\"80\" protocol=\"HTTP\/1.1\" connectionTimeout=\"20000\" redirectPort=\"443\"\/>/" > /tmp/temp_file
+  cp /tmp/temp_file ${TOMCAT_CONFIG_FILE}
+fi
+
+if [ ${NET_MODE} = "bridge" ]; then
+  cat ${TOMCAT_CONFIG_FILE} | sed -e "s/^.*Connector.*$/    <Connector port=\"${HTTP_PORT}\" protocol=\"HTTP\/1.1\" connectionTimeout=\"20000\" redirectPort=\"${HTTPS_PORT}\"\/>/" > /tmp/temp_file
+  cp /tmp/temp_file ${TOMCAT_CONFIG_FILE}
 fi
 
 rm /tmp/temp_file || true
