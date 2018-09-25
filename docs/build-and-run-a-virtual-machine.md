@@ -32,4 +32,7 @@ The VM is configured to use a NAT network device by default and will make the fo
 ## Network configuration
 
 - If you need to change the network configuration, log into your Aggregate VM using a terminal and run `aggregate-config`. 
-  - This is a tool that lets you configure your VM to use different FQDN and ports. You can run the tool without arguments to get a help message.
+  
+  This is a tool that lets you configure your VM to use different FQDN and ports. You can run the tool without arguments to get a help message.
+  
+  You need to use this tool if you want to use a bridged network device in your VM (or to switch back to a NAT network device)
