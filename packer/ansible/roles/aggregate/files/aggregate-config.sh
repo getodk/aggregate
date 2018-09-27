@@ -63,22 +63,29 @@ if [ "${HELP}" = YES ]; then
   exit 0
 fi
 
-if [ "${NET_MODE}" != "nat" ] && [ "${NET_MODE}" != "bridge" ]; then
-  echo "Error: Invalid --net-mode value. Use 'nat' or 'bridge' according to the VM's networking configuration"
-  echo ""
-  showHelp
-  exit 1
-fi
-
-if [ "${NET_MODE}" == "bridge" ] && ([ -z "${HTTP_PORT}" ] || [ -z "${HTTPS_PORT}" ]); then
-  echo "Error: In net mode 'bridge' you need to provide values for --http-port and --https-port"
-  echo ""
-  showHelp
-  exit 1
-fi
-
 if [ "${HELP}" = NO ] && [ -z "${FQDN}" ] && [ -z "${HTTP_PORT}" ] && [ -z "${HTTPS_PORT}" ]; then
   echo "Error: You need to set at least one argument"
+  echo ""
+  showHelp
+  exit 1
+fi
+
+if ([ ! -z "${HTTP_PORT}" ] && [ -z "${HTTPS_PORT}" ]) || ([ -z "${HTTP_PORT}" ] && [ ! -z "${HTTPS_PORT}" ]); then
+  echo "Error: You need to set both --http-port and --https-port arguments"
+  echo ""
+  showHelp
+  exit 1
+fi
+
+if [ ! -z "${HTTP_PORT}" ] && [ -z "${NET_MODE}" ]; then
+  echo "Error: Setting --net-mode is required with --http-port and --https-port arguments"
+  echo ""
+  showHelp
+  exit 1
+fi
+
+if [ ! -z "${NET_MODE}" ] && [ "${NET_MODE}" != "nat" ] && [ "${NET_MODE}" != "bridge" ]; then
+  echo "Error: Invalid --net-mode value. Use 'nat' or 'bridge' according to the VM's networking configuration"
   echo ""
   showHelp
   exit 1
