@@ -3,6 +3,7 @@
 set -o errexit
 
 PROPS_FILE=/var/lib/tomcat8/webapps/ROOT/WEB-INF/classes/security.properties
+TOMCAT_CONFIG_FILE=/var/lib/tomcat8/conf/server.xml
 HELP=NO
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -29,6 +30,11 @@ case $key in
     shift
     shift
     ;;
+    --net-mode)
+    NET_MODE="$2"
+    shift
+    shift
+    ;;
     *)
     POSITIONAL+=("$1")
     shift
@@ -49,15 +55,37 @@ showHelp() {
   echo "                     (not recommended if your IP address changes)"
   echo "--http-port  <value> Set a new HTTP port"
   echo "--https-port <value> Set a new HTTPS port"
+  echo "--net-mode   <value> Set the VM's network mode. Use 'nat' or 'bridge'"
 }
 
-if [ ${HELP} = YES ]; then
+if [ "${HELP}" = YES ]; then
   showHelp
   exit 0
 fi
 
-if [ ${HELP} = NO ] && [ -z ${FQDN} ] && [ -z ${HTTP_PORT} ] && [ -z ${HTTPS_PORT} ]; then
+if [ "${HELP}" = NO ] && [ -z "${FQDN}" ] && [ -z "${HTTP_PORT}" ] && [ -z "${HTTPS_PORT}" ]; then
   echo "Error: You need to set at least one argument"
+  echo ""
+  showHelp
+  exit 1
+fi
+
+if ([ ! -z "${HTTP_PORT}" ] && [ -z "${HTTPS_PORT}" ]) || ([ -z "${HTTP_PORT}" ] && [ ! -z "${HTTPS_PORT}" ]); then
+  echo "Error: You need to set both --http-port and --https-port arguments"
+  echo ""
+  showHelp
+  exit 1
+fi
+
+if [ ! -z "${HTTP_PORT}" ] && [ -z "${NET_MODE}" ]; then
+  echo "Error: Setting --net-mode is required with --http-port and --https-port arguments"
+  echo ""
+  showHelp
+  exit 1
+fi
+
+if [ ! -z "${NET_MODE}" ] && [ "${NET_MODE}" != "nat" ] && [ "${NET_MODE}" != "bridge" ]; then
+  echo "Error: Invalid --net-mode value. Use 'nat' or 'bridge' according to the VM's networking configuration"
   echo ""
   showHelp
   exit 1
@@ -67,24 +95,34 @@ echo "Stopping Tomcat. Please wait..."
 echo ""
 service tomcat8 stop
 
-if [ ! -z ${FQDN} ] && [ ${FQDN} = "auto" ]; then
-  cat ${PROPS_FILE} | sed -e "s/^security\.server\.hostname=.*$/security.server.hostname=/" > /tmp/temp_file
+if [ ! -z "${FQDN}" ] && [ "${FQDN}" = "auto" ]; then
+  sed -e "s/^security\.server\.hostname=.*$/security.server.hostname=/" ${PROPS_FILE} > /tmp/temp_file
   cp /tmp/temp_file ${PROPS_FILE}
 fi
 
-if [ ! -z ${FQDN} ] && [ ! ${FQDN} = "auto" ]; then
-  cat ${PROPS_FILE} | sed -e "s/^security\.server\.hostname=.*$/security.server.hostname=${FQDN}/" > /tmp/temp_file
+if [ ! -z "${FQDN}" ] && [ ! "${FQDN}" = "auto" ]; then
+  sed -e "s/^security\.server\.hostname=.*$/security.server.hostname=${FQDN}/" ${PROPS_FILE} > /tmp/temp_file
   cp /tmp/temp_file ${PROPS_FILE}
 fi
 
-if [ ! -z ${HTTP_PORT} ]; then
-  cat ${PROPS_FILE} | sed -e "s/^security\.server\.port=.*$/security.server.port=${HTTP_PORT}/" > /tmp/temp_file
+if [ ! -z "${HTTP_PORT}" ]; then
+  sed -e "s/^security\.server\.port=.*$/security.server.port=${HTTP_PORT}/" ${PROPS_FILE} > /tmp/temp_file
   cp /tmp/temp_file ${PROPS_FILE}
 fi
 
-if [ ! -z ${HTTPS_PORT} ]; then
-  cat ${PROPS_FILE} | sed -e "s/^security\.server\.securePort=.*$/security.server.securePort=${HTTPS_PORT}/" > /tmp/temp_file
+if [ ! -z "${HTTPS_PORT}" ]; then
+  sed -e "s/^security\.server\.securePort=.*$/security.server.securePort=${HTTPS_PORT}/" ${PROPS_FILE} > /tmp/temp_file
   cp /tmp/temp_file ${PROPS_FILE}
+fi
+
+if [ "${NET_MODE}" = "nat" ]; then
+  sed -e "s/^.*Connector.*$/    <Connector port=\"80\" protocol=\"HTTP\/1.1\" connectionTimeout=\"20000\" redirectPort=\"443\"\/>/" ${TOMCAT_CONFIG_FILE} > /tmp/temp_file
+  cp /tmp/temp_file ${TOMCAT_CONFIG_FILE}
+fi
+
+if [ "${NET_MODE}" = "bridge" ]; then
+  sed -e "s/^.*Connector.*$/    <Connector port=\"${HTTP_PORT}\" protocol=\"HTTP\/1.1\" connectionTimeout=\"20000\" redirectPort=\"${HTTPS_PORT}\"\/>/" ${TOMCAT_CONFIG_FILE} > /tmp/temp_file
+  cp /tmp/temp_file ${TOMCAT_CONFIG_FILE}
 fi
 
 rm /tmp/temp_file || true
