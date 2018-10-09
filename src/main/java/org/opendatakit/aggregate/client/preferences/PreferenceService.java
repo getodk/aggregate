@@ -36,6 +36,7 @@ public interface PreferenceService extends RemoteService {
   @XsrfProtect
   void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
