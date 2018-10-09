@@ -38,6 +38,7 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 @RemoteServiceRelativePath("formadminservice")
 public interface FormAdminService extends RemoteService {
 
+  @XsrfProtect
   void setFormDownloadable(String formId, Boolean downloadable) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
