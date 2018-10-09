@@ -16,7 +16,12 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import static com.google.gwt.user.client.Window.alert;
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
@@ -24,45 +29,45 @@ import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-
 /**
  * Popup asking for confirmation to delete an external service publisher
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class ConfirmPublishDeletePopup extends AbstractPopupBase {
 
-  private static final String BUTTON_ICON = "<img src=\"images/green_right_arrow.png\" />";
+  private static final String BUTTON_ICON = "<img src=\"images/green_right_arrow.png\"/>";
   private static final String TOOLTIP_TXT = "Remove this publisher";
-  private static final String HELP_BALLOON_TXT = "This will remove the publisher.  You will no longer "
-      + "be able to upload or stream data.";
+  private static final String HELP_BALLOON_TXT = "This will remove the publisher. You will no longer be able to upload or stream data.";
 
-  private final ExternServSummary publisher;
-  private final String action;
 
   public ConfirmPublishDeletePopup(ExternServSummary publisher) {
     super();
 
-    this.publisher = publisher;
-    this.action = ((publisher.getStatus() == OperationalStatus.COMPLETED) || (publisher.getStatus() == OperationalStatus.ABANDONED)) ? "remove"
+    String action = (publisher.getStatus() == OperationalStatus.COMPLETED || publisher.getStatus() == OperationalStatus.ABANDONED)
+        ? "remove"
         : "stop publishing and remove";
 
     String buttonTxt = BUTTON_ICON + action + " Publisher";
     AggregateButton deleteButton = new AggregateButton(buttonTxt, TOOLTIP_TXT, HELP_BALLOON_TXT);
-    deleteButton.addClickHandler(new ExecuteDelete());
+    deleteButton.addClickHandler(event -> {
+      secureRequest(
+          SecureGWT.getServicesAdminService(),
+          (rpc, sessionCookie, cb) -> rpc.deletePublisher(publisher.getUri(), cb),
+          (Boolean result) -> onSuccess(action, result),
+          this::onError
+      );
+      hide();
+    });
 
     FlexTable layout = new FlexTable();
 
-    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped("Delete this publisher?").appendHtmlConstant("<br/>").appendEscaped("Do you wish to " + action
-        + " this location?").toSafeHtml());
+    HTML message = new HTML(new SafeHtmlBuilder()
+        .appendEscaped("Delete this publisher?")
+        .appendHtmlConstant("<br/>")
+        .appendEscaped("Do you wish to " + action + " this location?")
+        .toSafeHtml());
     layout.setWidget(0, 0, message);
     layout.setWidget(0, 1, deleteButton);
     layout.setWidget(0, 2, new ClosePopupButton(this));
@@ -70,32 +75,14 @@ public final class ConfirmPublishDeletePopup extends AbstractPopupBase {
     setWidget(layout);
   }
 
-  private class ExecuteDelete implements ClickHandler {
+  private void onError(Throwable cause) {
+    AggregateUI.getUI().reportError(cause);
+  }
 
-    @Override
-    public void onClick(ClickEvent event) {
-
-      // OK -- we are to proceed.
-      // Set up the callback object.
-      AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-        }
-
-        @Override
-        public void onSuccess(Boolean result) {
-          AggregateUI.getUI().clearError();
-          if (!result) {
-            // we failed -- display alert
-            Window.alert("Error: Unable to " + action + " this publisher");
-          }
-          AggregateUI.getUI().getTimer().refreshNow();
-        }
-      };
-      // Make the call to the services service.
-      SecureGWT.getServicesAdminService().deletePublisher(publisher.getUri(), callback);
-      hide();
-    }
+  private void onSuccess(String action, Boolean result) {
+    AggregateUI.getUI().clearError();
+    if (!result)
+      alert("Error: Unable to " + action + " this publisher");
+    AggregateUI.getUI().getTimer().refreshNow();
   }
 }
