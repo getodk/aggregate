@@ -16,46 +16,44 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+import static org.opendatakit.common.security.common.GrantedAuthorityName.ROLE_DATA_OWNER;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.SecureGWT;
 
 public final class AcceptSubmissionCheckBox extends AggregateCheckBox implements ValueChangeHandler<Boolean> {
-    
-    private static final String TOOLTIP_TXT = "Allow or disallow form to accept submissions";
-    private static final String HELP_BALLOON_TXT = "Check this box if you want your form to accept " +
-            "submissions.  Otherwise leave unchecked.";
 
-    private final String formId;
-    
-    public AcceptSubmissionCheckBox(String formId, Boolean accept) {
-        super(null, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
-        this.formId = formId;
-        setValue(accept);
-        boolean enabled = AggregateUI.getUI().getUserInfo()
-        .getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-        setEnabled(enabled);
-    }
+  private static final String TOOLTIP_TXT = "Allow or disallow form to accept submissions";
+  private static final String HELP_BALLOON_TXT = "Check this box if you want your form to accept submissions. Otherwise leave unchecked.";
 
-    @Override
-    public void onValueChange(ValueChangeEvent<Boolean> event) {
-        super.onValueChange(event);
-        
-        SecureGWT.getFormAdminService().setFormAcceptSubmissions(formId, event.getValue(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                AggregateUI.getUI().reportError(caught);
-            }
+  private final String formId;
 
-            @Override
-            public void onSuccess(Void v) {
-                AggregateUI.getUI().clearError();
-            }
-        });
-    }
+  public AcceptSubmissionCheckBox(String formId, Boolean accept) {
+    super(null, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.formId = formId;
+    setValue(accept);
+    setEnabled(AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(ROLE_DATA_OWNER));
+  }
 
+  @Override
+  public void onValueChange(ValueChangeEvent<Boolean> event) {
+    super.onValueChange(event);
+    secureRequest(
+        SecureGWT.getFormAdminService(),
+        (rpc, sessionCookie, cb) -> rpc.setFormAcceptSubmissions(formId, event.getValue(), cb),
+        this::onSuccess,
+        this::onError
+    );
+  }
+
+  private void onError(Throwable cause) {
+    AggregateUI.getUI().reportError(cause);
+  }
+
+  private void onSuccess() {
+    AggregateUI.getUI().clearError();
+  }
 }

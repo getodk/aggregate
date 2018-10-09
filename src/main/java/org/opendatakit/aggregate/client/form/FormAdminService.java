@@ -40,6 +40,7 @@ public interface FormAdminService extends RemoteService {
 
   void setFormDownloadable(String formId, Boolean downloadable) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
