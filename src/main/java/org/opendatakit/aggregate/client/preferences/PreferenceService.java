@@ -40,5 +40,6 @@ public interface PreferenceService extends RemoteService {
   @XsrfProtect
   void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void setOdkAppName(String appName) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }
