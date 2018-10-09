@@ -54,6 +54,7 @@ public interface FormAdminService extends RemoteService {
 
   SubmissionUISummary getIncompleteSubmissions(FilterGroup filter) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
+  @XsrfProtect
   void markSubmissionAsComplete(String submissionKeyAsString) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
   ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
