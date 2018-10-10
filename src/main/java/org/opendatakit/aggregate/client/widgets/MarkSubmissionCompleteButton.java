@@ -16,12 +16,12 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.SecureGWT;
 
 public class MarkSubmissionCompleteButton extends AggregateButton implements ClickHandler {
 
@@ -40,22 +40,20 @@ public class MarkSubmissionCompleteButton extends AggregateButton implements Cli
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-
-    // Set up the callback object.
-    AsyncCallback<Void> callback = new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        AggregateUI.getUI().reportError(caught);
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-        AggregateUI.getUI().clearError();
-        AggregateUI.getUI().getTimer().refreshNow();
-      }
-    };
-    // Make the call to the form service.
-    SecureGWT.getFormAdminService().markSubmissionAsComplete(submissionKeyAsString, callback);
+    secureRequest(
+        SecureGWT.getFormAdminService(),
+        (rpc, sessionCookie, cb) -> rpc.markSubmissionAsComplete(submissionKeyAsString, cb),
+        this::onSuccess,
+        this::onError
+    );
   }
 
+  private void onError(Throwable cause) {
+    AggregateUI.getUI().reportError(cause);
+  }
+
+  private void onSuccess() {
+    AggregateUI.getUI().clearError();
+    AggregateUI.getUI().getTimer().refreshNow();
+  }
 }

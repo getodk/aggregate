@@ -54,6 +54,7 @@ public interface ServicesAdminService extends RemoteService {
   @XsrfProtect
   String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   Boolean deletePublisher(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect

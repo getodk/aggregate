@@ -16,18 +16,17 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+import static org.opendatakit.common.security.common.GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN;
+
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-public final class SkipMalformedSubmissionsCheckbox extends AggregateCheckBox implements
-    ValueChangeHandler<Boolean> {
+public final class SkipMalformedSubmissionsCheckbox extends AggregateCheckBox implements ValueChangeHandler<Boolean> {
 
   private static final String LABEL = "Skip malformed submissions (exports, publishing) (ignores corrupted submissions)";
   private static final String TOOLTIP_TXT = "Enable/Disable skipping of malformed submissions";
@@ -39,36 +38,35 @@ public final class SkipMalformedSubmissionsCheckbox extends AggregateCheckBox im
     super(LABEL, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.settingsChange = settingsChange;
     setValue(enabled);
-    boolean accessible = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
-        .contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
+    boolean accessible = AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(ROLE_SITE_ACCESS_ADMIN);
     setEnabled(accessible);
   }
 
   public void updateValue(Boolean value) {
     Boolean currentValue = getValue();
-    if (currentValue != value) {
+    if (currentValue != value)
       setValue(value);
-    }
   }
 
   @Override
   public void onValueChange(ValueChangeEvent<Boolean> event) {
     super.onValueChange(event);
+    secureRequest(
+        SecureGWT.getPreferenceService(),
+        (rpc, sessionCookie, cb) -> rpc.setSkipMalformedSubmissions(event.getValue(), cb),
+        this::onSuccess,
+        this::onError
+    );
+  }
 
-    final Boolean skipMalformedSubmissions = event.getValue();
-    SecureGWT.getPreferenceService().setSkipMalformedSubmissions(skipMalformedSubmissions, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        // restore old value
-        setValue(Preferences.getSkipMalformedSubmissions());
-        AggregateUI.getUI().reportError(caught);
-      }
+  private void onError(Throwable cause) {
+    // restore old value
+    setValue(Preferences.getSkipMalformedSubmissions());
+    AggregateUI.getUI().reportError(cause);
+  }
 
-      @Override
-      public void onSuccess(Void result) {
-        AggregateUI.getUI().clearError();
-        Preferences.updatePreferences(settingsChange);
-      }
-    });
+  private void onSuccess() {
+    AggregateUI.getUI().clearError();
+    Preferences.updatePreferences(settingsChange);
   }
 }

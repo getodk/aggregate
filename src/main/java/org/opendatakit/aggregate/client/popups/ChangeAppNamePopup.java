@@ -16,6 +16,12 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.TextBox;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.Preferences;
@@ -23,28 +29,16 @@ import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompl
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextBox;
-
 public class ChangeAppNamePopup extends AbstractPopupBase {
 
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Change ODK 2.0 App Name";
   private static final String TOOLTIP_TXT = "Change the Application Name used by the ODK 2.0 client application.";
   private static final String HELP_BALLOON_TXT = "This is the name of the Android directory under <tt>/sdcard/opendatakit</tt>.";
 
-  private PreferencesCompletionCallback settingsChange;
-  
   private TextBox appNameBox;
 
   public ChangeAppNamePopup(PreferencesCompletionCallback settingsChange) {
     super();
-    
-    this.settingsChange = settingsChange;
 
     appNameBox = new TextBox();
     appNameBox.setText(Preferences.getAppName());
@@ -54,9 +48,22 @@ public class ChangeAppNamePopup extends AbstractPopupBase {
     layout.setWidget(1, 0, new HTML("App Name:"));
     layout.setWidget(1, 1, appNameBox);
 
-    AggregateButton changeAppNameButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT,
-        HELP_BALLOON_TXT);
-    changeAppNameButton.addClickHandler(new ChangeAppNameHandler());
+    AggregateButton changeAppNameButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    changeAppNameButton.addClickHandler(event -> {
+      TextBox appNameBox = getAppName();
+
+      String appName = appNameBox.getText();
+      if (appName == null || appName.length() == 0) {
+        Window.alert("ODK 2.0 App Name cannot be blank");
+      } else if (!appName.equals(Preferences.getAppName())) {
+        secureRequest(
+            SecureGWT.getPreferenceService(),
+            (rpc, sessionCookie, cb) -> rpc.setOdkAppName(appName, cb),
+            () -> onSuccess(settingsChange),
+            this::onError
+        );
+      }
+    });
 
     layout.setWidget(3, 0, changeAppNameButton);
     layout.setWidget(3, 1, new ClosePopupButton(this));
@@ -64,38 +71,19 @@ public class ChangeAppNamePopup extends AbstractPopupBase {
     setWidget(layout);
   }
 
-  private TextBox getAppName() {
-    return appNameBox;
+  private void onSuccess(PreferencesCompletionCallback settingsChange) {
+    hide();
+    AggregateUI.getUI().clearError();
+    Preferences.updatePreferences(settingsChange);
   }
 
-  private class ChangeAppNameHandler implements ClickHandler {
+  private void onError(Throwable cause) {
+    hide();
+    AggregateUI.getUI().reportError(cause);
+  }
 
-    @Override
-    public void onClick(ClickEvent event) {
-      TextBox appNameBox = getAppName();
-
-      String appName = appNameBox.getText();
-      if (appName == null || appName.length() == 0) {
-        Window.alert("ODK 2.0 App Name cannot be blank");
-      } else if ( !appName.equals(Preferences.getAppName()) ) {
-
-        SecureGWT.getPreferenceService().setOdkAppName(appName, new AsyncCallback<Void>() {
-
-          @Override
-          public void onFailure(Throwable caught) {
-            hide();
-            AggregateUI.getUI().reportError(caught);
-          }
-
-          @Override
-          public void onSuccess(Void result) {
-            hide();
-            AggregateUI.getUI().clearError();
-            Preferences.updatePreferences(settingsChange);
-          }
-        });
-      }
-    }
+  private TextBox getAppName() {
+    return appNameBox;
   }
 
 }

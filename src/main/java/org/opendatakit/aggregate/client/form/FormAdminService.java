@@ -38,8 +38,10 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 @RemoteServiceRelativePath("formadminservice")
 public interface FormAdminService extends RemoteService {
 
+  @XsrfProtect
   void setFormDownloadable(String formId, Boolean downloadable) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
@@ -53,6 +55,7 @@ public interface FormAdminService extends RemoteService {
 
   SubmissionUISummary getIncompleteSubmissions(FilterGroup filter) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
+  @XsrfProtect
   void markSubmissionAsComplete(String submissionKeyAsString) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
 
   ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;

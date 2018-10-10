@@ -16,13 +16,11 @@
 
 package org.opendatakit.aggregate.client.form;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.ArrayList;
 import java.util.Date;
-
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FormAdminServiceAsync {
 
@@ -30,8 +28,7 @@ public interface FormAdminServiceAsync {
 
   void purgePublishedData(String uriExternalService, Date earliest, AsyncCallback<Date> callback);
 
-  void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions,
-      AsyncCallback<Void> callback);
+  void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions, AsyncCallback<Void> callback);
 
   void setFormDownloadable(String formId, Boolean downloadable, AsyncCallback<Void> callback);
 

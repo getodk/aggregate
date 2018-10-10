@@ -16,23 +16,21 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+import static org.opendatakit.common.security.common.GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN;
+
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
-    ValueChangeHandler<Boolean> {
+public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements ValueChangeHandler<Boolean> {
 
   private static final String LABEL = "ODK Tables Syncronization Functionality";
   private static final String TOOLTIP_TXT = "Enable/Disable ODK Tables Sync Functionality";
-  private static final String HELP_BALLOON_TXT = "Check this box if you want to manage ODK Tables.  "
-      + "Otherwise leave unchecked.";
+  private static final String HELP_BALLOON_TXT = "Check this box if you want to manage ODK Tables. Otherwise leave unchecked.";
 
   private PreferencesCompletionCallback settingsChange;
 
@@ -40,36 +38,35 @@ public final class EnableOdkTablesCheckbox extends AggregateCheckBox implements
     super(LABEL, false, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.settingsChange = settingsChange;
     setValue(enabled);
-    boolean accessible = AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
-        .contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
+    boolean accessible = AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(ROLE_SITE_ACCESS_ADMIN);
     setEnabled(accessible);
   }
 
   public void updateValue(Boolean value) {
     Boolean currentValue = getValue();
-    if (currentValue != value) {
+    if (currentValue != value)
       setValue(value);
-    }
   }
 
   @Override
   public void onValueChange(ValueChangeEvent<Boolean> event) {
     super.onValueChange(event);
 
-    final Boolean enabled = event.getValue();
-    SecureGWT.getPreferenceService().setOdkTablesEnabled(enabled, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        // restore old value
-        setValue(Preferences.getOdkTablesEnabled());
-        AggregateUI.getUI().reportError(caught);
-      }
+    secureRequest(
+        SecureGWT.getPreferenceService(),
+        (rpc, sessionCookie, cb) -> rpc.setOdkTablesEnabled(event.getValue(), cb),
+        this::onSuccess,
+        this::onError
+    );
+  }
 
-      @Override
-      public void onSuccess(Void result) {
-        AggregateUI.getUI().clearError();
-        Preferences.updatePreferences(settingsChange);
-      }
-    });
+  private void onError(Throwable cause) {
+    setValue(Preferences.getOdkTablesEnabled());
+    AggregateUI.getUI().reportError(cause);
+  }
+
+  private void onSuccess() {
+    AggregateUI.getUI().clearError();
+    Preferences.updatePreferences(settingsChange);
   }
 }

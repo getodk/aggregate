@@ -16,52 +16,57 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequest;
+import static org.opendatakit.aggregate.constants.common.ExportStatus.ABANDONED;
+import static org.opendatakit.aggregate.constants.common.ExportStatus.AVAILABLE;
+
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.constants.common.ExportStatus;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 
 /**
  * Popup asking for confirmation to delete an exported data file
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public final class ConfirmExportDeletePopup extends AbstractPopupBase {
 
-  private static final String BUTTON_ICON = "<img src=\"images/green_right_arrow.png\" />";
+  private static final String BUTTON_ICON = "<img src=\"images/green_right_arrow.png\"/>";
   private static final String TOOLTIP_TXT = "Remove this exported datafile";
-  private static final String HELP_BALLOON_TXT = "This will remove this exported datafile.  You will no longer "
-      + "be able to download this datafile.";
-
-  private final ExportSummary export;
-  private final String action;
+  private static final String HELP_BALLOON_TXT = "This will remove this exported datafile. You will no longer be able to download this datafile.";
 
   public ConfirmExportDeletePopup(ExportSummary export) {
     super();
 
-    this.export = export;
-    this.action = ((export.getStatus() == ExportStatus.AVAILABLE) || (export.getStatus() == ExportStatus.ABANDONED)) ? "remove"
+    String action = (export.getStatus() == AVAILABLE || export.getStatus() == ABANDONED)
+        ? "remove"
         : "cancel generation and remove";
 
     String buttonTxt = BUTTON_ICON + action + " exported datafile";
     AggregateButton deleteButton = new AggregateButton(buttonTxt, TOOLTIP_TXT, HELP_BALLOON_TXT);
-    deleteButton.addClickHandler(new ExecuteDelete());
+    deleteButton.addClickHandler(event -> {
+      secureRequest(
+          SecureGWT.getFormService(),
+          (rpc, sessionCookie, cb) -> rpc.deleteExport(export.getUri(), cb),
+          this::onSuccess,
+          this::onError
+      );
+      hide();
+    });
 
     FlexTable layout = new FlexTable();
 
-    HTML message = new HTML(new SafeHtmlBuilder().appendEscaped("Delete this exported datafile?").appendHtmlConstant("<br/>").appendEscaped("Do you wish to " + action
-        + " this exported datafile?").toSafeHtml());
+    HTML message = new HTML(new SafeHtmlBuilder()
+        .appendEscaped("Delete this exported datafile?")
+        .appendHtmlConstant("<br/>")
+        .appendEscaped("Do you wish to " + action + " this exported datafile?")
+        .toSafeHtml());
     layout.setWidget(0, 0, message);
     layout.setWidget(0, 1, deleteButton);
     layout.setWidget(0, 2, new ClosePopupButton(this));
@@ -69,28 +74,12 @@ public final class ConfirmExportDeletePopup extends AbstractPopupBase {
     setWidget(layout);
   }
 
-  private class ExecuteDelete implements ClickHandler {
+  private void onError(Throwable cause) {
+    AggregateUI.getUI().reportError(cause);
+  }
 
-    @Override
-    public void onClick(ClickEvent event) {
-
-      // OK -- we are to proceed.
-      // Set up the callback object.
-      AsyncCallback<Void> callback = new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          AggregateUI.getUI().reportError(caught);
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          AggregateUI.getUI().clearError();
-          AggregateUI.getUI().getTimer().refreshNow();
-        }
-      };
-      // Make the call to the services service.
-      SecureGWT.getFormService().deleteExport(export.getUri(), callback);
-      hide();
-    }
+  private void onSuccess() {
+    AggregateUI.getUI().clearError();
+    AggregateUI.getUI().getTimer().refreshNow();
   }
 }

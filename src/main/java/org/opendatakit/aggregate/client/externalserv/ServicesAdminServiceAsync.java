@@ -24,22 +24,15 @@ public interface ServicesAdminServiceAsync {
 
   void getExternalServices(String formid, AsyncCallback<ExternServSummary[]> callback);
 
-  void createFusionTable(String formId, ExternalServicePublicationOption esOption,
-                         String ownerEmail, AsyncCallback<String> callback);
+  void createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
-  void createGoogleSpreadsheet(String formId, String name,
-                               ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
+  void createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
-  void createSimpleJsonServer(String formId, String authKey, String url,
-                              ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption,
-                              AsyncCallback<String> callback);
+  void createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption, AsyncCallback<String> callback);
 
-  void createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp,
-                              String user, String hashedPassword, String url, ExternalServicePublicationOption es,
-                              String ownerEmail, AsyncCallback<String> callback);
+  void createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail, AsyncCallback<String> callback);
 
-  void createRedCapServer(String formId, String apiKey, String url,
-                          ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
+  void createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail, AsyncCallback<String> callback);
 
   void deletePublisher(String uri, AsyncCallback<Boolean> callback);
 

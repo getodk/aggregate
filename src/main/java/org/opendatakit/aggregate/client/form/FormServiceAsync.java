@@ -32,8 +32,7 @@ public interface FormServiceAsync {
 
   void createCsvFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
 
-  void createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude,
-                           AsyncCallback<Boolean> callback);
+  void createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude, AsyncCallback<Boolean> callback);
 
   void createJsonFileFromFilter(FilterGroup group, AsyncCallback<Boolean> callback);
 

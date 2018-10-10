@@ -52,5 +52,6 @@ public interface FormService extends RemoteService {
 
   GeopointElementList getGpsCoordnates(String formId) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void deleteExport(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }

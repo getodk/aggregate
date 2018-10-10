@@ -16,29 +16,32 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
-
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * These actions require the ROLE_USER privilege, which is the least capable
  * privilege (granted to all authorized users of the system).
  *
  * @author wbrunette@gmail.com
- *
  */
 @RemoteServiceRelativePath("preferenceservice")
 public interface PreferenceService extends RemoteService {
   PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 
+  @XsrfProtect
   void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-  
-  void setOdkAppName(String appName) throws AccessDeniedException, RequestFailureException, DatastoreFailureException; 
+
+  @XsrfProtect
+  void setOdkAppName(String appName) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }
