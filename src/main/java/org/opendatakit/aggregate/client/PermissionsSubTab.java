@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
+
 import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
@@ -58,6 +60,7 @@ public class PermissionsSubTab extends AggregateSubTabBase {
         if ( accessConfig == null ) {
             accessConfig = new AccessConfigurationSheet(this);
             add(accessConfig);
+            add(buildVersionNote());
         }
         accessConfig.setVisible(true);
     } else {

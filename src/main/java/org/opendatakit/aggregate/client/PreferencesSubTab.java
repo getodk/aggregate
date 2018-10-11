@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
+
 import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
@@ -236,6 +238,8 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     skipMalformedSubmissions = new SkipMalformedSubmissionsCheckbox(
         Preferences.getSkipMalformedSubmissions(), settingsChange);
     add(skipMalformedSubmissions);
+
+    add(buildVersionNote());
   }
 
   @Override
