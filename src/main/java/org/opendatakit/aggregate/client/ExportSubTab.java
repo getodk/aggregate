@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
+
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.ExportSummary;
@@ -37,6 +39,7 @@ public class ExportSubTab extends AggregateSubTabBase {
 
     exportTable = new ExportTable();
     add(exportTable);
+    add(buildVersionNote());
   }
 
   @Override

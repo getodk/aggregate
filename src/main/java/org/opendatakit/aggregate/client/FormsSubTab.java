@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
+
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -60,6 +62,7 @@ public class FormsSubTab extends AggregateSubTabBase {
     // add tables to panels
     add(newForm);
     add(listOfForms);
+    add(buildVersionNote());
 
   }
 
