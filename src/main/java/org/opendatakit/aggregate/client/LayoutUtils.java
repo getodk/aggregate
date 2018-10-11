@@ -1,8 +1,9 @@
 package org.opendatakit.aggregate.client;
 
+import static org.opendatakit.aggregate.buildconfig.BuildConfig.VERSION;
+
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
-import org.opendatakit.aggregate.buildconfig.BuildConfig;
 
 public class LayoutUtils {
   private static String latestVersion;
@@ -18,18 +19,15 @@ public class LayoutUtils {
   static HTML buildVersionNote() {
     if (latestVersion == null)
       latestVersion = getLatestVersion();
-    boolean needsUpdate = !BuildConfig.VERSION.startsWith(latestVersion);
-    HTML versionNote = new HTML("" +
-        "<small>ODK Aggregate " + BuildConfig.VERSION + "<br/>" +
-        (needsUpdate
-            ? "Update available: <a href=\"https://github.com/opendatakit/aggregate/releases/latest\" target=\"_blank\">" + latestVersion + "</a>"
-            : "You're up to date"
-        ) +
-        "</small>");
-    Style style = versionNote.getElement().getStyle();
+    String shortVersion = VERSION.contains("-") ? VERSION.substring(0, VERSION.indexOf("-")) : VERSION;
+    String versionNote = shortVersion.equals(latestVersion)
+        ? "You're up to date!"
+        : "<a href=\"https://github.com/opendatakit/aggregate/releases/latest\" target=\"_blank\">Update available</a>";
+    HTML html = new HTML("<small>" + shortVersion + " - " + versionNote + "</small>");
+    Style style = html.getElement().getStyle();
     style.setProperty("position", "fixed");
     style.setProperty("bottom", "10px");
     style.setProperty("left", "10px");
-    return versionNote;
+    return html;
   }
 }
