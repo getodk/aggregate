@@ -26,8 +26,10 @@ public class LayoutUtils {
     HTML html = new HTML("<small>" + shortVersion + " - " + versionNote + "</small>");
     Style style = html.getElement().getStyle();
     style.setProperty("position", "fixed");
-    style.setProperty("bottom", "10px");
-    style.setProperty("left", "10px");
+    style.setProperty("bottom", "0");
+    style.setProperty("left", "0");
+    style.setProperty("padding", "5px 10px");
+    style.setProperty("backgroundColor", "rgba(255,255,255,.9)");
     return html;
   }
 }
