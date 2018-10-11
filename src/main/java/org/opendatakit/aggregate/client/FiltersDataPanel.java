@@ -16,7 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
-import com.google.gwt.dom.client.Style;
+import static org.opendatakit.aggregate.client.LayoutUtils.*;
+
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -28,7 +29,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -90,34 +90,13 @@ public class FiltersDataPanel extends ScrollPanel {
     filtersTree = new Tree();
     panel.add(filtersTree);
 
-    String latestVersion = getLatestVersion();
-    boolean needsUpdate = !BuildConfig.VERSION.startsWith(latestVersion);
-    HTML versionNote = new HTML("" +
-        "<small>ODK Aggregate " + BuildConfig.VERSION + "<br/>" +
-        (needsUpdate
-            ? "Update available: <a href=\"https://github.com/opendatakit/aggregate/releases/latest\" target=\"_blank\">" + latestVersion + "</a>"
-            : "You're up to date"
-        ) +
-        "</small>");
-    Style style = versionNote.getElement().getStyle();
-    style.setProperty("position", "fixed");
-    style.setProperty("bottom", "10px");
-    style.setProperty("left", "10px");
-    panel.add(versionNote);
+    panel.add(buildVersionNote());
 
     // create the root as the new filter button
     addFilter = new AddFilterButton(parentPanel);
 
     add(panel);
   }
-
-  private native String getLatestVersion() /*-{
-    var req = new XMLHttpRequest();
-    req.open('GET', 'https://api.github.com/repos/opendatakit/aggregate/releases/latest', false);
-    req.send(null);
-    if (req.readyState === 4 && req.status === 200)
-      return JSON.parse(req.responseText).tag_name;
-  }-*/;
 
   public void update(FilterGroup group) {
     // check if filter group has changed
