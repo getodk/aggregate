@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
+import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
+
 import java.util.ArrayList;
 
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
@@ -57,6 +59,7 @@ public class PublishSubTab extends AggregateSubTabBase {
     // add tables to panels
     add(navTable);
     add(publishTable);
+    add(buildVersionNote());
   }
 
 

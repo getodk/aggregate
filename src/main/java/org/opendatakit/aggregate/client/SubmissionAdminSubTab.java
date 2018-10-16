@@ -16,8 +16,15 @@
 
 package org.opendatakit.aggregate.client;
 
-import java.util.ArrayList;
+import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import java.util.ArrayList;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.FormServiceAsync;
 import org.opendatakit.aggregate.client.form.FormSummary;
@@ -29,13 +36,6 @@ import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ScrollPanel;
 
 public class SubmissionAdminSubTab extends AggregateSubTabBase {
 
@@ -78,12 +78,13 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     add(navTable);
     add(new Label("Incomplete Submissions:"));
     add(submissions);
+    add(buildVersionNote());
   }
 
 
   @Override
   public boolean canLeave() {
-     return true;
+    return true;
   }
 
   private class UpdateAction implements AsyncCallback<ArrayList<FormSummary>> {
@@ -103,17 +104,19 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       // Make the call to get the published services
       updateContent();
     }
-  };
+  }
+
+  ;
 
   @Override
   public void update() {
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER)) {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER)) {
       formsBox.setVisible(true);
       submissions.setVisible(true);
-       FormServiceAsync formSvc = SecureGWT.getFormService();
+      FormServiceAsync formSvc = SecureGWT.getFormService();
 
-       // Make the call to the form service.
-       formSvc.getForms(new UpdateAction());
+      // Make the call to the form service.
+      formSvc.getForms(new UpdateAction());
     } else {
       formsBox.setVisible(false);
       submissions.setVisible(false);
@@ -153,13 +156,12 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
 
   /**
    * Handler to process the change in the form drop down
-   *
    */
   private class ChangeDropDownHandler implements ChangeHandler {
     @Override
     public void onChange(ChangeEvent event) {
       FormSummary form = formsBox.getSelectedForm();
-      if(form != null) {
+      if (form != null) {
         selectedForm = form;
       }
       updateContent();

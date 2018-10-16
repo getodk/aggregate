@@ -16,10 +16,19 @@
 
 package org.opendatakit.aggregate.client;
 
+import static org.opendatakit.aggregate.client.LayoutUtils.*;
+
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -33,15 +42,6 @@ import org.opendatakit.aggregate.client.widgets.RemoveFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveAsFilterGroupButton;
 import org.opendatakit.aggregate.client.widgets.SaveFilterGroupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.Tree;
-import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class FiltersDataPanel extends ScrollPanel {
 
@@ -62,8 +62,7 @@ public class FiltersDataPanel extends ScrollPanel {
     getElement().setId("filters_container");
 
     FlowPanel panel = new FlowPanel();
-   // panel.add( new HTML("<h2 id=\"filter_header\">" + HtmlConsts.SPACE + "Filters</h2>"));
-  
+
     FlexTable filterGroupButtons = new FlexTable();
     filterGroupButtons.setWidget(0, 0, new SaveFilterGroupButton(parentSubTab));
     copyButton = new SaveAsFilterGroupButton(parentSubTab);
@@ -90,6 +89,8 @@ public class FiltersDataPanel extends ScrollPanel {
     // create tree
     filtersTree = new Tree();
     panel.add(filtersTree);
+
+    panel.add(buildVersionNote());
 
     // create the root as the new filter button
     addFilter = new AddFilterButton(parentPanel);
