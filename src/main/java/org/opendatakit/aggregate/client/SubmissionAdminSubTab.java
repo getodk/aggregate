@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client;
 
 import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -78,7 +79,7 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     add(navTable);
     add(new Label("Incomplete Submissions:"));
     add(submissions);
-    add(buildVersionNote());
+    add(buildVersionNote(this));
   }
 
 

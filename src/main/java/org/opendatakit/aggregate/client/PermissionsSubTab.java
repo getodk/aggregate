@@ -60,7 +60,7 @@ public class PermissionsSubTab extends AggregateSubTabBase {
         if ( accessConfig == null ) {
             accessConfig = new AccessConfigurationSheet(this);
             add(accessConfig);
-            add(buildVersionNote());
+            add(buildVersionNote(this));
         }
         accessConfig.setVisible(true);
     } else {

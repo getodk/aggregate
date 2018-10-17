@@ -59,7 +59,7 @@ public class PublishSubTab extends AggregateSubTabBase {
     // add tables to panels
     add(navTable);
     add(publishTable);
-    add(buildVersionNote());
+    add(buildVersionNote(this));
   }
 
 
