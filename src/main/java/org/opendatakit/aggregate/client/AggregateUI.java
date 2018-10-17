@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.dom.client.Style;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -172,6 +173,8 @@ public class AggregateUI implements EntryPoint {
     helpPanel.add(helpTree);
     helpPanel.getElement().setId("help_panel");
     helpPanel.setVisible(false);
+    Style style = helpPanel.getElement().getStyle();
+    style.setProperty("backgroundColor", "white");
 
     wrappingLayoutPanel.add(helpPanel);
 
