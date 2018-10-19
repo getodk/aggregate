@@ -39,7 +39,7 @@ public class ExportSubTab extends AggregateSubTabBase {
 
     exportTable = new ExportTable();
     add(exportTable);
-    add(buildVersionNote());
+    add(buildVersionNote(this));
   }
 
   @Override

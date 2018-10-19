@@ -62,7 +62,7 @@ public class FormsSubTab extends AggregateSubTabBase {
     // add tables to panels
     add(newForm);
     add(listOfForms);
-    add(buildVersionNote());
+    add(buildVersionNote(this));
 
   }
 

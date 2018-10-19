@@ -90,7 +90,7 @@ public class FiltersDataPanel extends ScrollPanel {
     filtersTree = new Tree();
     panel.add(filtersTree);
 
-    panel.add(buildVersionNote());
+    panel.add(buildVersionNote(panel));
 
     // create the root as the new filter button
     addFilter = new AddFilterButton(parentPanel);

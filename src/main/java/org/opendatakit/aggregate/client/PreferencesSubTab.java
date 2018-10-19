@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client;
 
 import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
+import com.google.gwt.dom.client.Style;
 import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
@@ -239,7 +240,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
         Preferences.getSkipMalformedSubmissions(), settingsChange);
     add(skipMalformedSubmissions);
 
-    add(buildVersionNote());
+    add(buildVersionNote(this));
   }
 
   @Override
