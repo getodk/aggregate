@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
@@ -33,33 +32,57 @@ import org.opendatakit.common.web.CallingContext;
  * Tracks the ETags of the manifests associated with a given TableId. Appl-level manifests
  * have a TableId of APP_LEVEL ("APP LEVEL"); the space ensures it could never collide with
  * a valid tableId.
- * 
+ * <p>
  * TableId is the PK of this table.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class DbManifestETags extends Relation {
 
   public static final String APP_LEVEL = "APP LEVEL";
-  
-  private DbManifestETags(String namespace, String tableName, List<DataField> fields, CallingContext cc)
-      throws ODKDatastoreException {
-    super(namespace, tableName, fields, cc);
-  }
-
   private static final String RELATION_NAME = "MANIFEST_ETAGS";
-
   /**
    * eTag of the manifest for this tableId
    */
   private static final DataField MANIFEST_ETAG = new DataField("MANIFEST_ETAG",
       DataType.STRING, true);
-
   private static final List<DataField> dataFields;
+  private static DbManifestETags relation = null;
+
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(MANIFEST_ETAG);
+  }
+
+  private DbManifestETags(String namespace, String tableName, List<DataField> fields, CallingContext cc)
+      throws ODKDatastoreException {
+    super(namespace, tableName, fields, cc);
+  }
+
+  public static synchronized final DbManifestETags getRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      relation = new DbManifestETags(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
+    }
+    return relation;
+  }
+
+  /**
+   * Create a new row in this relation. The row is not yet persisted.
+   *
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static DbManifestETagEntity createNewEntity(String tableId, CallingContext cc)
+      throws ODKDatastoreException {
+    return new DbManifestETagEntity(getRelation(cc).newEntity(tableId, cc));
+  }
+
+  public static DbManifestETagEntity getTableIdEntry(String tableId, CallingContext cc)
+      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
+
+    return new DbManifestETagEntity(getRelation(cc).getEntity(tableId, cc));
   }
 
   public static class DbManifestETagEntity {
@@ -91,34 +114,6 @@ public class DbManifestETags extends Relation {
     public void setManifestETag(String value) {
       e.set(MANIFEST_ETAG, value);
     }
-  }
-
-  private static DbManifestETags relation = null;
-
-  public static synchronized final DbManifestETags getRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      relation = new DbManifestETags(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
-    }
-    return relation;
-  }
-
-  /**
-   * Create a new row in this relation. The row is not yet persisted.
-   *
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static DbManifestETagEntity createNewEntity(String tableId, CallingContext cc)
-      throws ODKDatastoreException {
-    return new DbManifestETagEntity(getRelation(cc).newEntity(tableId, cc));
-  }
-
-  public static DbManifestETagEntity getTableIdEntry(String tableId, CallingContext cc)
-      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
-
-    return new DbManifestETagEntity(getRelation(cc).getEntity(tableId, cc));
   }
 
 }

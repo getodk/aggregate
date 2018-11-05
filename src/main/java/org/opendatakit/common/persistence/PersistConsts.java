@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -19,15 +19,14 @@ package org.opendatakit.common.persistence;
 
 /**
  * Constant strings used to identify properties in an entity
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class PersistConsts {
 
   public static final int AUDIT_COLUMN_COUNT = 4;
-  
+
   public static final String URI_COLUMN_NAME = "_URI";
   public static final String LAST_UPDATE_DATE_COLUMN_NAME = "_LAST_UPDATE_DATE";
   public static final String LAST_UPDATE_URI_USER_COLUMN_NAME = "_LAST_UPDATE_URI_USER";

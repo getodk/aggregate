@@ -21,10 +21,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 
-@Produces({ MediaType.APPLICATION_XML })
+@Produces({MediaType.APPLICATION_XML})
 @Provider
 public class ODKTaskLockExceptionApplicationXmlMapper implements ExceptionMapper<ODKTaskLockException> {
 

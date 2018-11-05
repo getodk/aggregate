@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2010 University of Washington
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.process;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.FormFactory;
@@ -37,10 +36,9 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Takes a list of submission keys and performs recursive delete on all elements
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class DeleteSubmissions {
 
@@ -55,20 +53,20 @@ public class DeleteSubmissions {
 
     for (SubmissionKey submissionKey : submissionKeys) {
       List<SubmissionKeyPart> parts = submissionKey.splitSubmissionKey();
-      
+
       // fetch the top-level entity for this submission.
       // If this doesn't exist, then we assume the submission
       // is entirely absent.
       TopLevelDynamicBase tle = null;
       try {
-        tle = Submission.fetchTopLevelSubmissionObject(parts, cc); 
+        tle = Submission.fetchTopLevelSubmissionObject(parts, cc);
       } catch (ODKEntityNotFoundException e) {
         // ignore
       } catch (ODKFormNotFoundException e) {
         // also ignore, but log it...
         e.printStackTrace();
       }
-      if ( tle != null ) {
+      if (tle != null) {
         // we have the top-level entity. Construct the submission.
         IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
         try {

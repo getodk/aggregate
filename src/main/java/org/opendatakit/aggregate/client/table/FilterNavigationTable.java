@@ -16,8 +16,12 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
@@ -33,12 +37,6 @@ import org.opendatakit.aggregate.client.widgets.FormListBox;
 import org.opendatakit.aggregate.client.widgets.PublishButton;
 import org.opendatakit.aggregate.client.widgets.VisualizationButton;
 import org.opendatakit.common.web.constants.BasicConsts;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
 
 public class FilterNavigationTable extends FlexTable {
 
@@ -91,7 +89,7 @@ public class FilterNavigationTable extends FlexTable {
     PublishButton publishButton = new PublishButton(filterGroup.getFormId());
     actionTable.setWidget(0, columnIndex, publishButton);
 
-    if ( getCellCount(0) == 2 ) {
+    if (getCellCount(0) == 2) {
       removeCell(0, 1);
     }
 
@@ -192,7 +190,7 @@ public class FilterNavigationTable extends FlexTable {
     }
 
     boolean newShowEnketoIntegration = Preferences.showEnketoIntegration();
-    if ( newShowEnketoIntegration != showEnketoIntegration ) {
+    if (newShowEnketoIntegration != showEnketoIntegration) {
       showEnketoIntegration = newShowEnketoIntegration;
       updateNavTable(filterGroup);
     }
@@ -202,7 +200,6 @@ public class FilterNavigationTable extends FlexTable {
 
   /**
    * Handler to process the change in the form drop down
-   *
    */
   private class FormChangeDropDownHandler implements ChangeHandler {
     @Override
@@ -228,7 +225,6 @@ public class FilterNavigationTable extends FlexTable {
 
   /**
    * Handler to process the change in the filter drop down
-   *
    */
   private class FilterChangeDropDownHandler implements ChangeHandler {
     @Override

@@ -16,39 +16,37 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * This holds a list of {@link PropertyEntryXml}.
  * Proper XML documents can contain only one root node.
  * This wrapping class provides that root node.
- * 
- * This is used when getting the properties.csv as an 
+ * <p>
+ * This is used when getting the properties.csv as an
  * XML properties array, and when putting an update to that
  * file as an XML properties array.
- * 
+ * <p>
  * See {@link PropertyEntryJson} for the JSON variant.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="propertyList")
+@JacksonXmlRootElement(localName = "propertyList")
 public class PropertyEntryXmlList {
 
   /**
    * The KeyValueStore entries.
    */
   @JsonProperty(required = true)
-  @JsonTypeInfo(use=JsonTypeInfo.Id.NONE, defaultImpl=PropertyEntryXml.class)
-  @JacksonXmlElementWrapper(useWrapping=false,localName="properties")
-  @JacksonXmlProperty(localName="property")
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NONE, defaultImpl = PropertyEntryXml.class)
+  @JacksonXmlElementWrapper(useWrapping = false, localName = "properties")
+  @JacksonXmlProperty(localName = "property")
   private ArrayList<PropertyEntryXml> properties;
 
   /**
@@ -60,16 +58,16 @@ public class PropertyEntryXmlList {
 
   /**
    * Constructor used by our Java code.
-   * 
+   * <p>
    * The list cannot contain any nulls.
-   * 
-   * Sorts the passed-in array and 
+   * <p>
+   * Sorts the passed-in array and
    * takes ownership of it.
    *
    * @param entries
    */
   public PropertyEntryXmlList(ArrayList<PropertyEntryXml> properties) {
-    if ( properties == null ) {
+    if (properties == null) {
       this.properties = new ArrayList<PropertyEntryXml>();
     } else {
       this.properties = properties;
@@ -80,7 +78,7 @@ public class PropertyEntryXmlList {
 
   /**
    * Get the sorted list of properties.
-   * 
+   *
    * @return
    */
   public ArrayList<PropertyEntryXml> getProperties() {
@@ -89,8 +87,8 @@ public class PropertyEntryXmlList {
 
   /**
    * The list cannot contain any nulls.
-   * 
-   * Sorts the passed-in array and 
+   * <p>
+   * Sorts the passed-in array and
    * takes ownership of it.
    *
    * @param properties
@@ -122,20 +120,20 @@ public class PropertyEntryXmlList {
     }
     PropertyEntryXmlList other = (PropertyEntryXmlList) obj;
     boolean simpleResult = (properties == null ? other.properties == null : (other.properties != null && properties.size() == other.properties.size()));
-    if ( !simpleResult ) {
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( properties == null ) {
+
+    if (properties == null) {
       return true;
     }
 
     // the properties are an ordered list. 
     // Do an O(n) compare of the lists.
-    for ( int i = 0 ; i < properties.size() ; ++i ) {
+    for (int i = 0; i < properties.size(); ++i) {
       PropertyEntryXml left = this.properties.get(i);
       PropertyEntryXml right = other.properties.get(i);
-      if ( ! left.equals(right) ) {
+      if (!left.equals(right)) {
         return false;
       }
     }

@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.task.tomcat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -34,31 +33,15 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean. It cannot have any per-request state. It uses a
  * static inner class to encapsulate the per-request state of a running
  * background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class KmlGeneratorImpl implements KmlGenerator {
 
-  static class KmlRunner implements Runnable {
-    final KmlWorkerImpl impl;
-
-    public KmlRunner(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-        List<KmlSelection> kmlElementsToInclude, CallingContext cc) {
-
-      impl = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, kmlElementsToInclude, cc);
-    }
-
-    @Override
-    public void run() {
-      impl.generateKml();
-    }
-  }
-
   @Override
   public void createKmlTask(IForm form, PersistentResults persistentResults, long attemptCount,
-      CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                            CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
 
     List<KmlSelection> kmlElementsToInclude = new ArrayList<KmlSelection>();
 
@@ -82,5 +65,20 @@ public class KmlGeneratorImpl implements KmlGenerator {
         kmlElementsToInclude, wd.getCallingContext());
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(runner);
+  }
+
+  static class KmlRunner implements Runnable {
+    final KmlWorkerImpl impl;
+
+    public KmlRunner(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
+                     List<KmlSelection> kmlElementsToInclude, CallingContext cc) {
+
+      impl = new KmlWorkerImpl(form, persistentResultsKey, attemptCount, kmlElementsToInclude, cc);
+    }
+
+    @Override
+    public void run() {
+      impl.generateKml();
+    }
   }
 }

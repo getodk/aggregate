@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -42,141 +41,141 @@ import org.opendatakit.common.web.CallingContext;
  */
 public class OhmageJsonElementFormatter implements ElementFormatter {
 
-    private List<OhmageJsonTypes.Response> responses;
-    private Map<UUID, ByteArrayBody> photos;
+  private List<OhmageJsonTypes.Response> responses;
+  private Map<UUID, ByteArrayBody> photos;
 
-    public OhmageJsonElementFormatter() {
-        this.responses = new ArrayList<OhmageJsonTypes.Response>();
-        this.photos = new HashMap<UUID, ByteArrayBody>();
-    }
+  public OhmageJsonElementFormatter() {
+    this.responses = new ArrayList<OhmageJsonTypes.Response>();
+    this.photos = new HashMap<UUID, ByteArrayBody>();
+  }
 
-    @Override
-    public void formatUid(String uri, String propertyName, Row row) {
-        // unneeded so unimplemented
-    }
+  public static String getBinaryContentTransferEncoding() {
+    return "base64";
+  }
 
-    @Override
-    public void formatBinary(BlobSubmissionType blobSubmission,
-            FormElementModel element, String ordinalValue, Row row,
-            CallingContext cc) throws ODKDatastoreException {
-        if (!(blobSubmission == null
-                || (blobSubmission.getAttachmentCount(cc) == 0) || (blobSubmission
-                    .getContentHash(1, cc) == null))) {
-            byte[] imageBlob = null;
-            if (blobSubmission.getAttachmentCount(cc) == 1) {
-                imageBlob = blobSubmission.getBlob(1, cc);
-            }
-            if (imageBlob != null && imageBlob.length > 0) {
-                UUID photoUUID = UUID.randomUUID();
-                OhmageJsonTypes.photo photo = new OhmageJsonTypes.photo(
-                        element.getElementName(), photoUUID);
-                responses.add(photo);
-                photos.put(photoUUID,
-                new ByteArrayBody(imageBlob, ContentType.create(blobSubmission.getContentType(1, cc)), photoUUID.toString()));
-            }
-        }
-    }
+  @Override
+  public void formatUid(String uri, String propertyName, Row row) {
+    // unneeded so unimplemented
+  }
 
-    @Override
-    public void formatBoolean(Boolean bool, FormElementModel element,
-            String ordinalValue, Row row) {
-        OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
-                element.getElementName(), bool.toString());
-        responses.add(resp);
+  @Override
+  public void formatBinary(BlobSubmissionType blobSubmission,
+                           FormElementModel element, String ordinalValue, Row row,
+                           CallingContext cc) throws ODKDatastoreException {
+    if (!(blobSubmission == null
+        || (blobSubmission.getAttachmentCount(cc) == 0) || (blobSubmission
+        .getContentHash(1, cc) == null))) {
+      byte[] imageBlob = null;
+      if (blobSubmission.getAttachmentCount(cc) == 1) {
+        imageBlob = blobSubmission.getBlob(1, cc);
+      }
+      if (imageBlob != null && imageBlob.length > 0) {
+        UUID photoUUID = UUID.randomUUID();
+        OhmageJsonTypes.photo photo = new OhmageJsonTypes.photo(
+            element.getElementName(), photoUUID);
+        responses.add(photo);
+        photos.put(photoUUID,
+            new ByteArrayBody(imageBlob, ContentType.create(blobSubmission.getContentType(1, cc)), photoUUID.toString()));
+      }
     }
+  }
 
-    @Override
-    public void formatChoices(List<String> choices, FormElementModel element,
-            String ordinalValue, Row row) {
-        OhmageJsonTypes.Response choice;
-        // TODO: how to retrieve all possible choices?
-        choice = new OhmageJsonTypes.multi_choice_custom(
-                element.getElementName(), choices, null);
-        responses.add(choice);
-    }
+  @Override
+  public void formatBoolean(Boolean bool, FormElementModel element,
+                            String ordinalValue, Row row) {
+    OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
+        element.getElementName(), bool.toString());
+    responses.add(resp);
+  }
 
-    @Override
-    public void formatDate(Date date, FormElementModel element,
-            String ordinalValue, Row row) {
-        OhmageJsonTypes.timestamp resp = new OhmageJsonTypes.timestamp(
-                element.getElementName(), date);
-        responses.add(resp);
-    }
+  @Override
+  public void formatChoices(List<String> choices, FormElementModel element,
+                            String ordinalValue, Row row) {
+    OhmageJsonTypes.Response choice;
+    // TODO: how to retrieve all possible choices?
+    choice = new OhmageJsonTypes.multi_choice_custom(
+        element.getElementName(), choices, null);
+    responses.add(choice);
+  }
 
-    @Override
-    public void formatDateTime(Date date, FormElementModel element,
-            String ordinalValue, Row row) {
-        formatDate(date, element, ordinalValue, row);
-    }
+  @Override
+  public void formatDate(Date date, FormElementModel element,
+                         String ordinalValue, Row row) {
+    OhmageJsonTypes.timestamp resp = new OhmageJsonTypes.timestamp(
+        element.getElementName(), date);
+    responses.add(resp);
+  }
 
-    @Override
-    public void formatTime(Date date, FormElementModel element,
-            String ordinalValue, Row row) {
-        formatDate(date, element, ordinalValue, row);
-    }
+  @Override
+  public void formatDateTime(Date date, FormElementModel element,
+                             String ordinalValue, Row row) {
+    formatDate(date, element, ordinalValue, row);
+  }
 
-    @Override
-    public void formatDecimal(WrappedBigDecimal dub, FormElementModel element,
-            String ordinalValue, Row row) {
-        OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
-                element.getElementName(), dub.toString());
-        responses.add(resp);
-    }
+  @Override
+  public void formatTime(Date date, FormElementModel element,
+                         String ordinalValue, Row row) {
+    formatDate(date, element, ordinalValue, row);
+  }
 
-    @Override
-    public void formatGeoPoint(GeoPoint coordinate, FormElementModel element,
-            String ordinalValue, Row row) {
-        OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
-                element.getElementName(), coordinate.toString());
-        responses.add(resp);
-    }
+  @Override
+  public void formatDecimal(WrappedBigDecimal dub, FormElementModel element,
+                            String ordinalValue, Row row) {
+    OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
+        element.getElementName(), dub.toString());
+    responses.add(resp);
+  }
 
-    @Override
-    public void formatLong(Long longInt, FormElementModel element,
-            String ordinalValue, Row row) {
-        OhmageJsonTypes.number resp = new OhmageJsonTypes.number(
-                element.getElementName(), longInt);
-        responses.add(resp);
-    }
+  @Override
+  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element,
+                             String ordinalValue, Row row) {
+    OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
+        element.getElementName(), coordinate.toString());
+    responses.add(resp);
+  }
 
-    @Override
-    public void formatRepeats(SubmissionRepeat repeat,
-            FormElementModel repeatElement, Row row, CallingContext cc)
-            throws ODKDatastoreException {
-        // TODO: how to get skipped, not_displayed?
-        OhmageJsonTypes.RepeatableSet repeatSet = new OhmageJsonTypes.RepeatableSet(
-                repeatElement.getElementName(), false, false);
-        for (SubmissionSet set : repeat.getSubmissionSets()) {
-            OhmageJsonElementFormatter formatter = new OhmageJsonElementFormatter();
-            set.getFormattedValuesAsRow(null, formatter, false, cc);
-            repeatSet.addRepeatableSetIteration(formatter.getResponses());
-        }
-        responses.add(repeatSet);
-    }
+  @Override
+  public void formatLong(Long longInt, FormElementModel element,
+                         String ordinalValue, Row row) {
+    OhmageJsonTypes.number resp = new OhmageJsonTypes.number(
+        element.getElementName(), longInt);
+    responses.add(resp);
+  }
 
-    @Override
-    public void formatString(String string, FormElementModel element,
-            String ordinalValue, Row row) {
-        OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
-                element.getElementName(), string);
-        responses.add(resp);
+  @Override
+  public void formatRepeats(SubmissionRepeat repeat,
+                            FormElementModel repeatElement, Row row, CallingContext cc)
+      throws ODKDatastoreException {
+    // TODO: how to get skipped, not_displayed?
+    OhmageJsonTypes.RepeatableSet repeatSet = new OhmageJsonTypes.RepeatableSet(
+        repeatElement.getElementName(), false, false);
+    for (SubmissionSet set : repeat.getSubmissionSets()) {
+      OhmageJsonElementFormatter formatter = new OhmageJsonElementFormatter();
+      set.getFormattedValuesAsRow(null, formatter, false, cc);
+      repeatSet.addRepeatableSetIteration(formatter.getResponses());
     }
+    responses.add(repeatSet);
+  }
 
-    /**
-     * @return the responses
-     */
-    public List<OhmageJsonTypes.Response> getResponses() {
-        return responses;
-    }
+  @Override
+  public void formatString(String string, FormElementModel element,
+                           String ordinalValue, Row row) {
+    OhmageJsonTypes.text resp = new OhmageJsonTypes.text(
+        element.getElementName(), string);
+    responses.add(resp);
+  }
 
-    /**
-     * @return the photos
-     */
-    public Map<UUID, ByteArrayBody> getPhotos() {
-        return photos;
-    }
+  /**
+   * @return the responses
+   */
+  public List<OhmageJsonTypes.Response> getResponses() {
+    return responses;
+  }
 
-    public static String getBinaryContentTransferEncoding() {
-        return "base64";
-    }
+  /**
+   * @return the photos
+   */
+  public Map<UUID, ByteArrayBody> getPhotos() {
+    return photos;
+  }
 }

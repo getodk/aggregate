@@ -16,12 +16,11 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
 
 /**
  * This holds a list of {@link RowResource}.
@@ -29,21 +28,20 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  * This wrapping class provides that root node.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="rowResourceList")
+@JacksonXmlRootElement(localName = "rowResourceList")
 public class RowResourceList {
 
   /**
    * The entries in the manifest.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="rowResource")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "rowResource")
   private ArrayList<RowResource> rows;
 
   /**
-   * The dataETag of the table at the START of this request. 
+   * The dataETag of the table at the START of this request.
    */
   @JsonProperty(required = false)
   private String dataETag;
@@ -95,8 +93,8 @@ public class RowResourceList {
    * @param entries
    */
   public RowResourceList(ArrayList<RowResource> rows, String dataETag, String tableUri,
-      String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
-    if ( rows == null ) {
+                         String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
+    if (rows == null) {
       this.rows = new ArrayList<RowResource>();
     } else {
       this.rows = rows;
@@ -209,14 +207,14 @@ public class RowResourceList {
         (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
         (hasMoreResults == other.hasMoreResults) &&
         (hasPriorResults == other.hasPriorResults);
-    if ( !simpleResult ) {
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( rows == null ) {
+
+    if (rows == null) {
       return true;
     }
-    
+
     return rows.containsAll(other.rows);
   }
 

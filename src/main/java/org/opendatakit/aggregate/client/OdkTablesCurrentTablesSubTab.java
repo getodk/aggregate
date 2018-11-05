@@ -26,7 +26,6 @@ import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
  * Based on OdkTablesAdminSubTab.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase implements TablesChangeNotification {
 
@@ -36,7 +35,7 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase implements
   private static final String IMPORT_TABLE_BUTTON_TXT = "<img src =\"images/yellow_plus.png\" />Import Table From CSV";
 
   private OdkTablesTabUI parent;
-  
+
   private OdkTablesTableList tableList;
 
   // private OdkTablesAddTableButton addButton;
@@ -76,12 +75,12 @@ public class OdkTablesCurrentTablesSubTab extends AggregateSubTabBase implements
   public void update() {
     parent.update(this);
   }
-  
+
 
   @Override
   public void updateTableSet(boolean tableListChanged) {
-      tableList.updateTableList(parent.getTables(), tableListChanged);
-      tableList.setVisible(true);
+    tableList.updateTableList(parent.getTables(), tableListChanged);
+    tableList.setVisible(true);
   }
 
 }

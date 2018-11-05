@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -20,9 +20,6 @@ package org.opendatakit.aggregate.submission;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -38,30 +35,29 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines a form submission that can be converted into a datastore entity.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class Submission extends SubmissionSet {
   private static final Logger logger = LoggerFactory.getLogger(Submission.class);
 
   /**
    * Construct an empty submission for the given form definition.
-   * 
    */
   public Submission(Long modelVersion, Long uiVersion, String uriTopLevelGroup, IForm form,
-      Date submissionDate, CallingContext cc) throws ODKDatastoreException {
+                    Date submissionDate, CallingContext cc) throws ODKDatastoreException {
     super(modelVersion, uiVersion, uriTopLevelGroup, form, cc);
     ((TopLevelDynamicBase) getGroupBackingObject()).setSubmissionDate(submissionDate);
   }
 
   /**
    * Construct a submission from an entity from the data store
-   * 
    */
   public Submission(TopLevelDynamicBase submission, IForm form, CallingContext cc)
       throws ODKDatastoreException {
@@ -73,6 +69,86 @@ public class Submission extends SubmissionSet {
     super(null, (TopLevelDynamicBase) cc.getDatastore().getEntity(
         form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype(), uri,
         cc.getCurrentUser()), form.getTopLevelGroupElement(), form, cc);
+  }
+
+  public static Submission fetchSubmission(List<SubmissionKeyPart> parts, CallingContext cc)
+      throws ODKFormNotFoundException, ODKDatastoreException {
+    if (parts == null || parts.size() == 0) {
+      throw new IllegalArgumentException("submission key is empty");
+    }
+    IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+    if (!form.hasValidFormDefinition()) {
+      throw new IllegalArgumentException("Form definition is ill-formed"); // ill-formed
+      // definition
+    }
+
+    if (parts.size() < 2) {
+      throw new IllegalArgumentException("submission key does not have a top level group");
+    }
+    SubmissionKeyPart tlg = parts.get(1);
+    if (!form.getTopLevelGroupElement().getElementName().equals(tlg.getElementName())) {
+      throw new IllegalArgumentException("top level group name: " + tlg.getElementName()
+          + " is not as expected: " + form.getTopLevelGroupElement().getElementName());
+    }
+    if (tlg.getAuri() == null) {
+      throw new IllegalArgumentException("submission key does not have top level auri");
+    }
+
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    TopLevelDynamicBase tle = (TopLevelDynamicBase) ds.getEntity(form.getTopLevelGroupElement()
+        .getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
+
+    try {
+      return new Submission(tle, form, cc);
+    } catch (ODKDatastoreException e) {
+      logger.error("Unable to reconstruct submission for " + tle.getSchemaName() + "."
+          + tle.getTableName() + " uri " + tle.getUri(), e);
+
+      if ((e instanceof ODKEntityNotFoundException) ||
+          (e instanceof ODKEnumeratedElementException)) {
+        // see if we should throw an error or skip processing...
+        Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
+        if (skip) {
+          return null;
+        } else {
+          throw e;
+        }
+      } else {
+        throw e;
+      }
+    }
+
+  }
+
+  public static TopLevelDynamicBase fetchTopLevelSubmissionObject(List<SubmissionKeyPart> parts, CallingContext cc)
+      throws ODKFormNotFoundException, ODKDatastoreException {
+    if (parts == null || parts.size() == 0) {
+      throw new IllegalArgumentException("submission key is empty");
+    }
+    IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
+    if (!form.hasValidFormDefinition()) {
+      throw new IllegalArgumentException("Form definition is ill-formed"); // ill-formed
+      // definition
+    }
+
+    if (parts.size() < 2) {
+      throw new IllegalArgumentException("submission key does not have a top level group");
+    }
+    SubmissionKeyPart tlg = parts.get(1);
+    if (!form.getTopLevelGroupElement().getElementName().equals(tlg.getElementName())) {
+      throw new IllegalArgumentException("top level group name: " + tlg.getElementName()
+          + " is not as expected: " + form.getTopLevelGroupElement().getElementName());
+    }
+    if (tlg.getAuri() == null) {
+      throw new IllegalArgumentException("submission key does not have top level auri");
+    }
+
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    return (TopLevelDynamicBase) ds.getEntity(form.getTopLevelGroupElement()
+        .getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
   }
 
   /**
@@ -100,12 +176,12 @@ public class Submission extends SubmissionSet {
     return ((TopLevelDynamicBase) getGroupBackingObject()).getIsComplete();
   }
 
-  public void setMarkedAsCompleteDate(Date value) {
-    ((TopLevelDynamicBase) getGroupBackingObject()).setMarkedAsCompleteDate(value);
-  }
-
   public Date getMarkedAsCompleteDate() {
     return ((TopLevelDynamicBase) getGroupBackingObject()).getMarkedAsCompleteDate();
+  }
+
+  public void setMarkedAsCompleteDate(Date value) {
+    ((TopLevelDynamicBase) getGroupBackingObject()).setMarkedAsCompleteDate(value);
   }
 
   /**
@@ -117,11 +193,10 @@ public class Submission extends SubmissionSet {
    * metadata elements to be reported, you would pass [ METADATA ] in the types
    * list. The resulting subset is then rendered (and the resulting row might
    * have no columns).
-   * 
    */
   public Row getFormattedValuesAsRow(List<FormElementNamespace> types,
-      List<FormElementModel> propertyNames, ElementFormatter elemFormatter,
-      boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
+                                     List<FormElementModel> propertyNames, ElementFormatter elemFormatter,
+                                     boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
 
     if (propertyNames == null) {
       Row row = new Row(constructSubmissionKey(null));
@@ -157,10 +232,9 @@ public class Submission extends SubmissionSet {
   /**
    * Given the list of FormElementNamespaces to render, this renders the
    * namespaces in the order given.
-   * 
    */
   public void getFormattedNamespaceValuesForRow(Row row, List<FormElementNamespace> types,
-      ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc)
+                                                ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc)
       throws ODKDatastoreException {
     List<FormElementModel> elementList = new ArrayList<>();
     // get the in-order list of all flattened elements within this submission
@@ -197,85 +271,5 @@ public class Submission extends SubmissionSet {
     }
 
     return resolveSubmissionKeyBeginningAt(1, parts);
-  }
-
-  public static Submission fetchSubmission(List<SubmissionKeyPart> parts, CallingContext cc)
-      throws ODKFormNotFoundException, ODKDatastoreException {
-    if (parts == null || parts.size() == 0) {
-      throw new IllegalArgumentException("submission key is empty");
-    }
-    IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-    if (!form.hasValidFormDefinition()) {
-      throw new IllegalArgumentException("Form definition is ill-formed"); // ill-formed
-                                                                           // definition
-    }
-
-    if (parts.size() < 2) {
-      throw new IllegalArgumentException("submission key does not have a top level group");
-    }
-    SubmissionKeyPart tlg = parts.get(1);
-    if (!form.getTopLevelGroupElement().getElementName().equals(tlg.getElementName())) {
-      throw new IllegalArgumentException("top level group name: " + tlg.getElementName()
-          + " is not as expected: " + form.getTopLevelGroupElement().getElementName());
-    }
-    if (tlg.getAuri() == null) {
-      throw new IllegalArgumentException("submission key does not have top level auri");
-    }
-
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    TopLevelDynamicBase tle = (TopLevelDynamicBase) ds.getEntity(form.getTopLevelGroupElement()
-        .getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
-
-    try {
-      return new Submission(tle, form, cc);
-    } catch (ODKDatastoreException e) {
-      logger.error("Unable to reconstruct submission for " + tle.getSchemaName() + "."
-          + tle.getTableName() + " uri " + tle.getUri(), e);
-      
-      if ( (e instanceof ODKEntityNotFoundException) ||
-           (e instanceof ODKEnumeratedElementException) ) {
-        // see if we should throw an error or skip processing...
-        Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
-        if ( skip ) {
-          return null;
-        } else {
-          throw e;
-        }
-      } else {
-        throw e;
-      }
-    }
-
-  }
-
-  public static TopLevelDynamicBase fetchTopLevelSubmissionObject(List<SubmissionKeyPart> parts, CallingContext cc)
-      throws ODKFormNotFoundException, ODKDatastoreException {
-    if (parts == null || parts.size() == 0) {
-      throw new IllegalArgumentException("submission key is empty");
-    }
-    IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
-    if (!form.hasValidFormDefinition()) {
-      throw new IllegalArgumentException("Form definition is ill-formed"); // ill-formed
-                                                                           // definition
-    }
-
-    if (parts.size() < 2) {
-      throw new IllegalArgumentException("submission key does not have a top level group");
-    }
-    SubmissionKeyPart tlg = parts.get(1);
-    if (!form.getTopLevelGroupElement().getElementName().equals(tlg.getElementName())) {
-      throw new IllegalArgumentException("top level group name: " + tlg.getElementName()
-          + " is not as expected: " + form.getTopLevelGroupElement().getElementName());
-    }
-    if (tlg.getAuri() == null) {
-      throw new IllegalArgumentException("submission key does not have top level auri");
-    }
-
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    return (TopLevelDynamicBase) ds.getEntity(form.getTopLevelGroupElement()
-        .getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
   }
 }

@@ -16,20 +16,18 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import java.util.Date;
-
-import org.opendatakit.aggregate.client.form.FormSummary;
-import org.opendatakit.aggregate.client.widgets.AggregateButton;
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.datepicker.client.DatePicker;
+import java.util.Date;
+import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 public class PurgeUpToDatePopup extends AbstractPopupBase {
 
@@ -56,15 +54,16 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
 
       @Override
       public void onValueChange(ValueChangeEvent<Date> event) {
-        if ( selectedDate != null ) {
+        if (selectedDate != null) {
           picker.removeStyleFromDates("datePickerDayIsSelectedAndHighlighted", selectedDate);
         }
         selectedDate = event.getValue();
-        if ( selectedDate != null ) {
+        if (selectedDate != null) {
           picker.addTransientStyleToDates("datePickerDayIsSelectedAndHighlighted", selectedDate);
         }
         confirm.setEnabled(selectedDate != null);
-      }});
+      }
+    });
 
     FlexTable layout = new FlexTable();
     layout.setWidget(0, 0, new HTML(new SafeHtmlBuilder()
@@ -90,15 +89,15 @@ public class PurgeUpToDatePopup extends AbstractPopupBase {
 
       // set time to one millisecond past midnight at the start of the chosen day
       @SuppressWarnings("deprecation")
-      Date theDate = new Date( Date.UTC(selectedDate.getYear(),
-                                selectedDate.getMonth(), selectedDate.getDate(),
-                                0, 0, 0));
+      Date theDate = new Date(Date.UTC(selectedDate.getYear(),
+          selectedDate.getMonth(), selectedDate.getDate(),
+          0, 0, 0));
 
-      if ( theDate.getTime() > System.currentTimeMillis() ) {
+      if (theDate.getTime() > System.currentTimeMillis()) {
         // if in the future -- reset to current time...
         theDate = new Date();
       }
-      ConfirmPurgeUpToDatePopup popup = new ConfirmPurgeUpToDatePopup( summary, theDate );
+      ConfirmPurgeUpToDatePopup popup = new ConfirmPurgeUpToDatePopup(summary, theDate);
       popup.setPopupPositionAndShow(popup.getPositionCallBack());
     }
   }

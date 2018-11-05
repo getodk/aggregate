@@ -1,5 +1,6 @@
 package org.opendatakit.aggregate.odktables.entity.serialization;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
@@ -8,19 +9,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Properties;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-
 import org.apache.http.HttpStatus;
 import org.apache.wink.server.handlers.HandlersChain;
 import org.apache.wink.server.handlers.MessageContext;
 import org.apache.wink.server.handlers.ResponseHandler;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class NotModifiedHandler implements ResponseHandler {
 
@@ -41,7 +38,7 @@ public class NotModifiedHandler implements ResponseHandler {
 
       String eTag = null;
       boolean overrideWithNotModifiedStatus = false;
-      
+
       // if the implementation provides an ETAG, do nothing. Otherwise
       // compute the ETAG from the md5hash of the JSON serialization of
       // whatever the implementation is providing.
@@ -96,21 +93,21 @@ public class NotModifiedHandler implements ResponseHandler {
 
           response.getMetadata().add(HttpHeaders.ETAG, eTag);
         }
-      } else if ( response.getStatus() == HttpStatus.SC_NOT_MODIFIED ) {
-        if ( response.getMetadata().containsKey(HttpHeaders.ETAG) ) {
+      } else if (response.getStatus() == HttpStatus.SC_NOT_MODIFIED) {
+        if (response.getMetadata().containsKey(HttpHeaders.ETAG)) {
           eTag = (String) response.getMetadata().getFirst(HttpHeaders.ETAG);
           overrideWithNotModifiedStatus = true;
         }
       }
-      
-      if ( overrideWithNotModifiedStatus ) {
+
+      if (overrideWithNotModifiedStatus) {
         context.setResponseEntity(null);
         context.setResponseStatusCode(HttpStatus.SC_NOT_MODIFIED);
-        
+
         // force the response...
         final HttpServletResponse httpResponse = context
             .getAttribute(HttpServletResponse.class);
-        
+
         httpResponse.addHeader(HttpHeaders.ETAG, eTag);
         httpResponse.addHeader(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
         httpResponse.addHeader("Access-Control-Allow-Origin", "*");

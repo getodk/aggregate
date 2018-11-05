@@ -16,15 +16,14 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
 import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
 import org.opendatakit.aggregate.client.table.OdkAdminListTable;
 import org.opendatakit.aggregate.client.widgets.AddTablesAdminButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
 
 public class OdkTablesAdminSubTab extends AggregateSubTabBase {
 

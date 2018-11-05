@@ -26,7 +26,6 @@ import java.io.Serializable;
  * non-phone object has to be created for the server.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableAclResourceClient extends TableAclClient implements Serializable {
 
@@ -57,8 +56,7 @@ public class TableAclResourceClient extends TableAclClient implements Serializab
   }
 
   /**
-   * @param selfUri
-   *          the selfUri to set
+   * @param selfUri the selfUri to set
    */
   public void setSelfUri(String selfUri) {
     this.selfUri = selfUri;
@@ -72,8 +70,7 @@ public class TableAclResourceClient extends TableAclClient implements Serializab
   }
 
   /**
-   * @param aclUri
-   *          the aclUri to set
+   * @param aclUri the aclUri to set
    */
   public void setAclUri(String aclUri) {
     this.aclUri = aclUri;
@@ -87,8 +84,7 @@ public class TableAclResourceClient extends TableAclClient implements Serializab
   }
 
   /**
-   * @param tableUri
-   *          the tableUri to set
+   * @param tableUri the tableUri to set
    */
   public void setTableUri(String tableUri) {
     this.tableUri = tableUri;

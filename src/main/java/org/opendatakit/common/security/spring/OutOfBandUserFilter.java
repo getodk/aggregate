@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2012 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,17 +16,15 @@
 package org.opendatakit.common.security.spring;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.opendatakit.common.utils.OutOfBandUserFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendatakit.common.utils.OutOfBandUserFetcher;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -40,18 +38,17 @@ import org.springframework.web.filter.GenericFilterBean;
  * OAuthService) fetcher to return the user e-mail to use for
  * authorization decisions.  That e-mail needs to be in the registered
  * users table and assigned permissions on the website.
- * 
+ * <p>
  * Any user returned by the outOfBandUserFetcher is assumed to have been
  * properly authenticated.  This mechanism could be used to obtain user
  * identities authenticated through a portal.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class OutOfBandUserFilter extends GenericFilterBean {
 
   Logger logger = LoggerFactory.getLogger(OutOfBandUserFilter.class);
-  
+
   AuthenticationProvider authenticationProvider = null;
   OutOfBandUserFetcher outOfBandUserFetcher = null;
 
@@ -84,19 +81,19 @@ public class OutOfBandUserFilter extends GenericFilterBean {
     HttpServletRequest request = (HttpServletRequest) req;
     HttpServletResponse response = (HttpServletResponse) res;
 
-    if ( SecurityContextHolder.getContext().getAuthentication() == null ) {
+    if (SecurityContextHolder.getContext().getAuthentication() == null) {
       try {
         String userEmail = outOfBandUserFetcher.getEmail();
-  
+
         if (userEmail != null) {
-          
+
           // In the common case, if userEmail is non-null, the user should be known to the server.
-          Authentication auth = 
+          Authentication auth =
               authenticationProvider.authenticate(new OutOfBandAuthenticationToken(userEmail));
-  
+
           SecurityContextHolder.getContext().setAuthentication(auth);
         }
-      } catch ( AuthenticationException ex ) {
+      } catch (AuthenticationException ex) {
         // if the authentication fails to recognize the user, silently ignore the failure.
         // Warnings were already logged by the AuthenticationProvider.
       }

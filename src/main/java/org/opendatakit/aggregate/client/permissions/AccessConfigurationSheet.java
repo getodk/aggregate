@@ -75,6 +75,8 @@ public class AccessConfigurationSheet extends Composite {
   private static final ArrayList<String> userType;
   private static final String ACCOUNT_TYPE_ODK = "ODK";
   private static final String ACCOUNT_TYPE_GOOGLE = "Google";
+  private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
+      .create(TemporaryAccessConfigurationSheetUiBinder.class);
 
   static {
     userType = new ArrayList<String>();
@@ -82,27 +84,106 @@ public class AccessConfigurationSheet extends Composite {
     userType.add(ACCOUNT_TYPE_GOOGLE);
   }
 
-  private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
-      .create(TemporaryAccessConfigurationSheetUiBinder.class);
-
-  interface TemporaryAccessConfigurationSheetUiBinder extends
-      UiBinder<Widget, AccessConfigurationSheet> {
-  }
-
   private final ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
   private final ListHandler<UserSecurityInfo> columnSortHandler = new ListHandler<UserSecurityInfo>(
       dataProvider.getList());
-
+  @UiField
+  TextArea addedUsers;
+  @UiField
+  UploadUsersAndPermsServletPopupButton uploadCsv;
+  @UiField
+  Anchor downloadCsv;
+  @UiField
+  Button addNow;
+  @UiField
+  CellTable<UserSecurityInfo> userTable;
+  @UiField
+  CheckBox anonymousAttachmentViewers;
+  @UiField
+  Button button;
   private boolean anonymousAttachmentBoolean = false;
-
   private PermissionsSubTab permissionsTab;
   private boolean changesHappened = false;
-
   private GroupMembershipColumn formsAdmin;
   private GroupMembershipColumn synchronizeTables;
   private GroupMembershipColumn superUserTables;
   private GroupMembershipColumn administerTables;
   private GroupMembershipColumn siteAdmin;
+
+  public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
+    this.permissionsTab = permissionsTab;
+    initWidget(uiBinder.createAndBindUi(this));
+    sinkEvents(Event.ONCHANGE | Event.ONCLICK);
+
+    downloadCsv.setHref(UIConsts.GET_USERS_AND_PERMS_CSV_SERVLET_ADDR);
+
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<img src=\"images/red_x.png\" />");
+    UIEnabledActionColumn<UserSecurityInfo> deleteMe = new UIEnabledActionColumn<UserSecurityInfo>(
+        sb.toSafeHtml(), null, new EnableNotAnonymousOrSuperUserPredicate(),
+        new DeleteActionCallback());
+    userTable.addColumn(deleteMe, "");
+
+    // Username
+    UsernameTextColumn username = new UsernameTextColumn();
+    userTable.addColumn(username, "Username");
+
+    // Full Name
+    FullNameTextColumn fullname = new FullNameTextColumn();
+    userTable.addColumn(fullname, "Full Name");
+
+    // Change Password
+    UIEnabledActionColumn<UserSecurityInfo> changePassword = new UIEnabledActionColumn<UserSecurityInfo>(
+        "Change Password", new EnableLocalAccountPredicate(), new ChangePasswordActionCallback());
+    userTable.addColumn(changePassword, "");
+
+    // Type of User
+    AccountTypeSelectionColumn type = new AccountTypeSelectionColumn();
+    userTable.addColumn(type, "Account Type");
+
+    GroupMembershipColumn dc = new GroupMembershipColumn(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+    userTable.addColumn(dc, GrantedAuthorityName.GROUP_DATA_COLLECTORS.getDisplayText());
+
+    GroupMembershipColumn dv = new GroupMembershipColumn(GrantedAuthorityName.GROUP_DATA_VIEWERS);
+    userTable.addColumn(dv, GrantedAuthorityName.GROUP_DATA_VIEWERS.getDisplayText());
+
+    formsAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_FORM_MANAGERS);
+    userTable.addColumn(formsAdmin, GrantedAuthorityName.GROUP_FORM_MANAGERS.getDisplayText());
+
+    columnSortHandler.setComparator(username, username.getComparator());
+    columnSortHandler.setComparator(fullname, fullname.getComparator());
+    columnSortHandler.setComparator(type, type.getComparator());
+    columnSortHandler.setComparator(dc, dc.getComparator());
+    columnSortHandler.setComparator(dv, dv.getComparator());
+    columnSortHandler.setComparator(formsAdmin, formsAdmin.getComparator());
+
+    synchronizeTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
+    if (Preferences.getOdkTablesEnabled()) {
+      userTable.addColumn(synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
+    }
+
+    superUserTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
+    if (Preferences.getOdkTablesEnabled()) {
+      userTable.addColumn(superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
+    }
+
+    administerTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
+    if (Preferences.getOdkTablesEnabled()) {
+      userTable.addColumn(administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
+    }
+
+    columnSortHandler.setComparator(synchronizeTables, synchronizeTables.getComparator());
+    columnSortHandler.setComparator(superUserTables, superUserTables.getComparator());
+    columnSortHandler.setComparator(administerTables, administerTables.getComparator());
+
+    siteAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SITE_ADMINS);
+    userTable.addColumn(siteAdmin, GrantedAuthorityName.GROUP_SITE_ADMINS.getDisplayText());
+    columnSortHandler.setComparator(siteAdmin, siteAdmin.getComparator());
+
+    dataProvider.addDataDisplay(userTable);
+
+    userTable.addColumnSortHandler(columnSortHandler);
+  }
 
   public boolean isUiOutOfSyncWithServer() {
     return changesHappened;
@@ -114,6 +195,153 @@ public class AccessConfigurationSheet extends Composite {
 
   private void uiOutOfSyncWithServer() {
     changesHappened = true;
+  }
+
+  public void deleteUser(UserSecurityInfo user) {
+    dataProvider.getList().remove(user);
+    updateUsersOnServer();
+  }
+
+  public void updateUsersOnServer() {
+    final ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
+    allGroups.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
+    allGroups.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
+    allGroups.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
+    allGroups.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
+    allGroups.add(GrantedAuthorityName.GROUP_FORM_MANAGERS);
+    allGroups.add(GrantedAuthorityName.GROUP_DATA_VIEWERS);
+    allGroups.add(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+    allGroups.add(GrantedAuthorityName.USER_IS_ANONYMOUS);
+
+    ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
+    users.addAll(dataProvider.getList());
+    for (UserSecurityInfo i : users) {
+      if (i.getType() == UserType.ANONYMOUS) {
+        if (anonymousAttachmentBoolean) {
+          i.getAssignedUserGroups().add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+        } else {
+          i.getAssignedUserGroups().remove(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
+        }
+        break;
+      } else {
+        if (i.getUsername() == null) {
+          // don't allow Google users to be data collectors
+          i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
+        }
+      }
+    }
+    SecurityUtils.secureRequest(
+        SecureGWT.getSecurityAdminService(),
+        (rpc, sessionCookie, callback) -> rpc.setUsersAndGrantedAuthorities(sessionCookie, users, allGroups, callback),
+        () -> SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay()),
+        cause -> AggregateUI.getUI().reportError("Incomplete security update: ", cause)
+    );
+
+  }
+
+  public void changeTablesPrivilegesVisibility(boolean isVisible) {
+    int idxNow;
+
+    // insert or remove the synchronizeTables permissions
+    idxNow = userTable.getColumnIndex(synchronizeTables);
+    if (isVisible && idxNow == -1) {
+      idxNow = userTable.getColumnIndex(formsAdmin);
+      if (idxNow != -1) {
+        userTable.insertColumn(idxNow + 1, synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
+        // make idxNow point to the synchronizeTables column
+        ++idxNow;
+      }
+    } else if (!isVisible && idxNow != -1) {
+      userTable.removeColumn(idxNow);
+    }
+
+    // insert or remove the superUserTables permissions
+    int idxPrior = idxNow;
+    idxNow = userTable.getColumnIndex(superUserTables);
+    if (isVisible && idxNow == -1) {
+      idxNow = idxPrior;
+      if (idxNow != -1) {
+        userTable.insertColumn(idxNow + 1, superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
+      }
+    } else if (!isVisible && idxNow != -1) {
+      userTable.removeColumn(idxNow);
+    }
+
+    // insert or remove the administerTables permissions
+    idxNow = userTable.getColumnIndex(administerTables);
+    if (isVisible && idxNow == -1) {
+      idxNow = userTable.getColumnIndex(siteAdmin);
+      if (idxNow != -1) {
+        userTable.insertColumn(idxNow, administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
+      }
+    } else if (!isVisible && idxNow != -1) {
+      userTable.removeColumn(idxNow);
+    }
+  }
+
+  @Override
+  public void setVisible(boolean isVisible) {
+    super.setVisible(isVisible);
+    if (isVisible) {
+      SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay());
+    }
+  }
+
+  @UiHandler("anonymousAttachmentViewers")
+  void onAnonAttachmentViewerChange(ValueChangeEvent<Boolean> event) {
+    anonymousAttachmentBoolean = event.getValue();
+    uiOutOfSyncWithServer();
+  }
+
+  @UiHandler("uploadCsv")
+  void onUploadCsvClick(ClickEvent e) {
+    uploadCsv.onClick(permissionsTab, e);
+  }
+
+  @UiHandler("addNow")
+  void onAddUsersClick(ClickEvent e) {
+    String text = addedUsers.getText();
+    Collection<Email> emails = EmailParser.parseEmails(text);
+    HashMap<String, UserSecurityInfo> localUsers = new HashMap<String, UserSecurityInfo>();
+    HashMap<String, UserSecurityInfo> googleUsers = new HashMap<String, UserSecurityInfo>();
+    List<UserSecurityInfo> list = dataProvider.getList();
+    for (UserSecurityInfo u : list) {
+      if (u.getUsername() != null) {
+        localUsers.put(u.getUsername(), u);
+      } else {
+        googleUsers.put(u.getEmail(), u);
+      }
+    }
+    int nAdded = 0;
+    for (Email email : emails) {
+      boolean localUser = (email.getUsername() != null);
+      UserSecurityInfo u = localUser ? localUsers.get(email.getUsername()) : googleUsers.get(email
+          .getEmail());
+      if (u == null) {
+        u = new UserSecurityInfo(email.getUsername(), email.getFullName(), email.getEmail(),
+            UserType.REGISTERED);
+        list.add(u);
+        if (localUser) {
+          localUsers.put(u.getUsername(), u);
+        } else {
+          googleUsers.put(u.getEmail(), u);
+        }
+        ++nAdded;
+      }
+    }
+    if (nAdded != 0) {
+      userTable.setPageSize(Math.max(15, list.size()));
+      uiOutOfSyncWithServer();
+    }
+  }
+
+  @UiHandler("button")
+  void onUpdateClick(ClickEvent e) {
+    updateUsersOnServer();
+  }
+
+  interface TemporaryAccessConfigurationSheetUiBinder extends
+      UiBinder<Widget, AccessConfigurationSheet> {
   }
 
   private static final class AuthChangeValidation implements
@@ -275,6 +503,110 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
+  private static final class VisibleNotAnonymousPredicate implements
+      UIVisiblePredicate<UserSecurityInfo> {
+
+    @Override
+    public boolean isVisible(UserSecurityInfo info) {
+      // enable only if it is not the anonymous user
+      return (info.getType() != UserType.ANONYMOUS);
+    }
+  }
+
+  private static final class EnableNotAnonymousOrSuperUserPredicate implements
+      UIEnabledPredicate<UserSecurityInfo> {
+    @Override
+    public boolean isEnabled(UserSecurityInfo info) {
+      // enable only if it is a registered user
+      if (info.getType() != UserType.REGISTERED)
+        return false;
+      // enable only if the user is not the superUser.
+      String email = info.getEmail();
+      String superUserEmail = AggregateUI.getUI().getRealmInfo().getSuperUserEmail();
+      String username = info.getUsername();
+      String superUsername = AggregateUI.getUI().getRealmInfo().getSuperUsername();
+      if ((email != null && superUserEmail != null && superUserEmail.equals(email)) ||
+          (username != null && superUsername != null && superUsername.equals(username))) {
+        return false;
+      }
+      return true;
+    }
+  }
+
+  private static final class EnableNotAnonymousPredicate implements
+      UIEnabledPredicate<UserSecurityInfo> {
+    @Override
+    public boolean isEnabled(UserSecurityInfo info) {
+      // enable only if it is a registered user
+      return (info.getType() == UserType.REGISTERED);
+    }
+  }
+
+  private static final class EnableLocalAccountPredicate implements
+      UIEnabledPredicate<UserSecurityInfo> {
+    @Override
+    public boolean isEnabled(UserSecurityInfo info) {
+      return (info.getType() == UserType.REGISTERED && info.getUsername() != null);
+    }
+  }
+
+  private static class UsernameComparator implements Comparator<UserSecurityInfo> {
+    @Override
+    public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+      if (arg0 == arg1)
+        return 0;
+
+      if (arg0 != null) {
+        return (arg1 != null) ? arg0.getCanonicalName()
+            .compareToIgnoreCase(arg1.getCanonicalName()) : 1;
+      }
+      return -1;
+    }
+  }
+
+  private static class FullNameComparator implements Comparator<UserSecurityInfo> {
+    @Override
+    public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
+      if (arg0 == arg1)
+        return 0;
+
+      if (arg0 != null) {
+        return (arg1 != null) ? arg0.getFullName().compareToIgnoreCase(arg1.getFullName()) : 1;
+      }
+      return -1;
+    }
+  }
+
+  /**
+   * If a Google account type is chosen, the username should be an e-mail
+   * address.
+   */
+  private static final class ValidatingAccountTypePredicate implements
+      StringValidationPredicate<UserSecurityInfo> {
+
+    @Override
+    public boolean isValid(String prospectiveValue, UserSecurityInfo key) {
+      if (prospectiveValue == null || prospectiveValue.length() == 0) {
+        Window.alert("Account Type cannot be empty");
+        return false;
+      }
+
+      if (prospectiveValue.equals(ACCOUNT_TYPE_GOOGLE) && key.getEmail() == null) {
+        // must be changing to a Google account type from an ODK account
+        // verify that the username is a well-formed e-mail address...
+        String username = key.getUsername();
+        if (username == null || username.length() == 0) {
+          return false;
+        }
+        if (EmailParser.hasInvalidEmailCharacters(username) || username.indexOf(EmailParser.K_AT) == -1) {
+          Window.alert(NOT_VALID_EMAIL);
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
   private class GroupMembershipColumn extends UIEnabledValidatingCheckboxColumn<UserSecurityInfo> {
     final GrantedAuthorityName auth;
 
@@ -371,95 +703,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  public void deleteUser(UserSecurityInfo user) {
-    dataProvider.getList().remove(user);
-    updateUsersOnServer();
-  }
-
-  public void updateUsersOnServer() {
-    final ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
-    allGroups.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
-    allGroups.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
-    allGroups.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
-    allGroups.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
-    allGroups.add(GrantedAuthorityName.GROUP_FORM_MANAGERS);
-    allGroups.add(GrantedAuthorityName.GROUP_DATA_VIEWERS);
-    allGroups.add(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
-    allGroups.add(GrantedAuthorityName.USER_IS_ANONYMOUS);
-
-    ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
-    users.addAll(dataProvider.getList());
-    for (UserSecurityInfo i : users) {
-      if (i.getType() == UserType.ANONYMOUS) {
-        if (anonymousAttachmentBoolean) {
-          i.getAssignedUserGroups().add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
-        } else {
-          i.getAssignedUserGroups().remove(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER);
-        }
-        break;
-      } else {
-        if (i.getUsername() == null) {
-          // don't allow Google users to be data collectors
-          i.getAssignedUserGroups().remove(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
-        }
-      }
-    }
-    SecurityUtils.secureRequest(
-        SecureGWT.getSecurityAdminService(),
-        (rpc, sessionCookie, callback) -> rpc.setUsersAndGrantedAuthorities(sessionCookie, users, allGroups, callback),
-        () -> SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay()),
-        cause -> AggregateUI.getUI().reportError("Incomplete security update: ", cause)
-    );
-
-  }
-
-  private static final class VisibleNotAnonymousPredicate implements
-      UIVisiblePredicate<UserSecurityInfo> {
-
-    @Override
-    public boolean isVisible(UserSecurityInfo info) {
-      // enable only if it is not the anonymous user
-      return (info.getType() != UserType.ANONYMOUS);
-    }
-  }
-
-  private static final class EnableNotAnonymousOrSuperUserPredicate implements
-      UIEnabledPredicate<UserSecurityInfo> {
-    @Override
-    public boolean isEnabled(UserSecurityInfo info) {
-      // enable only if it is a registered user
-      if (info.getType() != UserType.REGISTERED)
-        return false;
-      // enable only if the user is not the superUser. 
-      String email = info.getEmail();
-      String superUserEmail = AggregateUI.getUI().getRealmInfo().getSuperUserEmail();
-      String username = info.getUsername();
-      String superUsername = AggregateUI.getUI().getRealmInfo().getSuperUsername();
-      if ((email != null && superUserEmail != null && superUserEmail.equals(email)) ||
-          (username != null && superUsername != null && superUsername.equals(username))) {
-        return false;
-      }
-      return true;
-    }
-  }
-
-  private static final class EnableNotAnonymousPredicate implements
-      UIEnabledPredicate<UserSecurityInfo> {
-    @Override
-    public boolean isEnabled(UserSecurityInfo info) {
-      // enable only if it is a registered user
-      return (info.getType() == UserType.REGISTERED);
-    }
-  }
-
-  private static final class EnableLocalAccountPredicate implements
-      UIEnabledPredicate<UserSecurityInfo> {
-    @Override
-    public boolean isEnabled(UserSecurityInfo info) {
-      return (info.getType() == UserType.REGISTERED && info.getUsername() != null);
-    }
-  }
-
   /**
    * Username cannot be null or zero-length. If it is a Google account type (an
    * e-mail address), then it should look like an e-mail address.
@@ -507,20 +750,6 @@ public class AccessConfigurationSheet extends Composite {
 
   }
 
-  private static class UsernameComparator implements Comparator<UserSecurityInfo> {
-    @Override
-    public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
-      if (arg0 == arg1)
-        return 0;
-
-      if (arg0 != null) {
-        return (arg1 != null) ? arg0.getCanonicalName()
-            .compareToIgnoreCase(arg1.getCanonicalName()) : 1;
-      }
-      return -1;
-    }
-  }
-
   private final class UsernameTextColumn extends
       UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
 
@@ -551,19 +780,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  private static class FullNameComparator implements Comparator<UserSecurityInfo> {
-    @Override
-    public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
-      if (arg0 == arg1)
-        return 0;
-
-      if (arg0 != null) {
-        return (arg1 != null) ? arg0.getFullName().compareToIgnoreCase(arg1.getFullName()) : 1;
-      }
-      return -1;
-    }
-  }
-
   private final class FullNameTextColumn extends
       UIEnabledValidatingTextInputColumn<UserSecurityInfo> {
 
@@ -581,36 +797,6 @@ public class AccessConfigurationSheet extends Composite {
       uiOutOfSyncWithServer();
       // validation happens in the validation predicate...
       object.setFullName(value);
-    }
-  }
-
-  /**
-   * If a Google account type is chosen, the username should be an e-mail
-   * address.
-   */
-  private static final class ValidatingAccountTypePredicate implements
-      StringValidationPredicate<UserSecurityInfo> {
-
-    @Override
-    public boolean isValid(String prospectiveValue, UserSecurityInfo key) {
-      if (prospectiveValue == null || prospectiveValue.length() == 0) {
-        Window.alert("Account Type cannot be empty");
-        return false;
-      }
-
-      if (prospectiveValue.equals(ACCOUNT_TYPE_GOOGLE) && key.getEmail() == null) {
-        // must be changing to a Google account type from an ODK account
-        // verify that the username is a well-formed e-mail address...
-        String username = key.getUsername();
-        if (username == null || username.length() == 0) {
-          return false;
-        }
-        if (EmailParser.hasInvalidEmailCharacters(username) || username.indexOf(EmailParser.K_AT) == -1) {
-          Window.alert(NOT_VALID_EMAIL);
-          return false;
-        }
-      }
-      return true;
     }
   }
 
@@ -708,196 +894,5 @@ public class AccessConfigurationSheet extends Composite {
         }
       });
     }
-  }
-
-  public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
-    this.permissionsTab = permissionsTab;
-    initWidget(uiBinder.createAndBindUi(this));
-    sinkEvents(Event.ONCHANGE | Event.ONCLICK);
-
-    downloadCsv.setHref(UIConsts.GET_USERS_AND_PERMS_CSV_SERVLET_ADDR);
-
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<img src=\"images/red_x.png\" />");
-    UIEnabledActionColumn<UserSecurityInfo> deleteMe = new UIEnabledActionColumn<UserSecurityInfo>(
-        sb.toSafeHtml(), null, new EnableNotAnonymousOrSuperUserPredicate(),
-        new DeleteActionCallback());
-    userTable.addColumn(deleteMe, "");
-
-    // Username
-    UsernameTextColumn username = new UsernameTextColumn();
-    userTable.addColumn(username, "Username");
-
-    // Full Name
-    FullNameTextColumn fullname = new FullNameTextColumn();
-    userTable.addColumn(fullname, "Full Name");
-
-    // Change Password
-    UIEnabledActionColumn<UserSecurityInfo> changePassword = new UIEnabledActionColumn<UserSecurityInfo>(
-        "Change Password", new EnableLocalAccountPredicate(), new ChangePasswordActionCallback());
-    userTable.addColumn(changePassword, "");
-
-    // Type of User
-    AccountTypeSelectionColumn type = new AccountTypeSelectionColumn();
-    userTable.addColumn(type, "Account Type");
-
-    GroupMembershipColumn dc = new GroupMembershipColumn(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
-    userTable.addColumn(dc, GrantedAuthorityName.GROUP_DATA_COLLECTORS.getDisplayText());
-
-    GroupMembershipColumn dv = new GroupMembershipColumn(GrantedAuthorityName.GROUP_DATA_VIEWERS);
-    userTable.addColumn(dv, GrantedAuthorityName.GROUP_DATA_VIEWERS.getDisplayText());
-
-    formsAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_FORM_MANAGERS);
-    userTable.addColumn(formsAdmin, GrantedAuthorityName.GROUP_FORM_MANAGERS.getDisplayText());
-
-    columnSortHandler.setComparator(username, username.getComparator());
-    columnSortHandler.setComparator(fullname, fullname.getComparator());
-    columnSortHandler.setComparator(type, type.getComparator());
-    columnSortHandler.setComparator(dc, dc.getComparator());
-    columnSortHandler.setComparator(dv, dv.getComparator());
-    columnSortHandler.setComparator(formsAdmin, formsAdmin.getComparator());
-
-    synchronizeTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
-    if (Preferences.getOdkTablesEnabled()) {
-      userTable.addColumn(synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
-    }
-
-    superUserTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
-    if (Preferences.getOdkTablesEnabled()) {
-      userTable.addColumn(superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
-    }
-
-    administerTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
-    if (Preferences.getOdkTablesEnabled()) {
-      userTable.addColumn(administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
-    }
-
-    columnSortHandler.setComparator(synchronizeTables, synchronizeTables.getComparator());
-    columnSortHandler.setComparator(superUserTables, superUserTables.getComparator());
-    columnSortHandler.setComparator(administerTables, administerTables.getComparator());
-
-    siteAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SITE_ADMINS);
-    userTable.addColumn(siteAdmin, GrantedAuthorityName.GROUP_SITE_ADMINS.getDisplayText());
-    columnSortHandler.setComparator(siteAdmin, siteAdmin.getComparator());
-
-    dataProvider.addDataDisplay(userTable);
-
-    userTable.addColumnSortHandler(columnSortHandler);
-  }
-
-  public void changeTablesPrivilegesVisibility(boolean isVisible) {
-    int idxNow;
-
-    // insert or remove the synchronizeTables permissions
-    idxNow = userTable.getColumnIndex(synchronizeTables);
-    if (isVisible && idxNow == -1) {
-      idxNow = userTable.getColumnIndex(formsAdmin);
-      if (idxNow != -1) {
-        userTable.insertColumn(idxNow + 1, synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
-        // make idxNow point to the synchronizeTables column
-        ++idxNow;
-      }
-    } else if (!isVisible && idxNow != -1) {
-      userTable.removeColumn(idxNow);
-    }
-
-    // insert or remove the superUserTables permissions
-    int idxPrior = idxNow;
-    idxNow = userTable.getColumnIndex(superUserTables);
-    if (isVisible && idxNow == -1) {
-      idxNow = idxPrior;
-      if (idxNow != -1) {
-        userTable.insertColumn(idxNow + 1, superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
-      }
-    } else if (!isVisible && idxNow != -1) {
-      userTable.removeColumn(idxNow);
-    }
-
-    // insert or remove the administerTables permissions
-    idxNow = userTable.getColumnIndex(administerTables);
-    if (isVisible && idxNow == -1) {
-      idxNow = userTable.getColumnIndex(siteAdmin);
-      if (idxNow != -1) {
-        userTable.insertColumn(idxNow, administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
-      }
-    } else if (!isVisible && idxNow != -1) {
-      userTable.removeColumn(idxNow);
-    }
-  }
-
-  @Override
-  public void setVisible(boolean isVisible) {
-    super.setVisible(isVisible);
-    if (isVisible) {
-      SecureGWT.getSecurityAdminService().getAllUsers(true, new UpdateUserDisplay());
-    }
-  }
-
-  @UiField
-  TextArea addedUsers;
-  @UiField
-  UploadUsersAndPermsServletPopupButton uploadCsv;
-  @UiField
-  Anchor downloadCsv;
-  @UiField
-  Button addNow;
-  @UiField
-  CellTable<UserSecurityInfo> userTable;
-  @UiField
-  CheckBox anonymousAttachmentViewers;
-  @UiField
-  Button button;
-
-  @UiHandler("anonymousAttachmentViewers")
-  void onAnonAttachmentViewerChange(ValueChangeEvent<Boolean> event) {
-    anonymousAttachmentBoolean = event.getValue();
-    uiOutOfSyncWithServer();
-  }
-
-  @UiHandler("uploadCsv")
-  void onUploadCsvClick(ClickEvent e) {
-    uploadCsv.onClick(permissionsTab, e);
-  }
-
-  @UiHandler("addNow")
-  void onAddUsersClick(ClickEvent e) {
-    String text = addedUsers.getText();
-    Collection<Email> emails = EmailParser.parseEmails(text);
-    HashMap<String, UserSecurityInfo> localUsers = new HashMap<String, UserSecurityInfo>();
-    HashMap<String, UserSecurityInfo> googleUsers = new HashMap<String, UserSecurityInfo>();
-    List<UserSecurityInfo> list = dataProvider.getList();
-    for (UserSecurityInfo u : list) {
-      if (u.getUsername() != null) {
-        localUsers.put(u.getUsername(), u);
-      } else {
-        googleUsers.put(u.getEmail(), u);
-      }
-    }
-    int nAdded = 0;
-    for (Email email : emails) {
-      boolean localUser = (email.getUsername() != null);
-      UserSecurityInfo u = localUser ? localUsers.get(email.getUsername()) : googleUsers.get(email
-          .getEmail());
-      if (u == null) {
-        u = new UserSecurityInfo(email.getUsername(), email.getFullName(), email.getEmail(),
-            UserType.REGISTERED);
-        list.add(u);
-        if (localUser) {
-          localUsers.put(u.getUsername(), u);
-        } else {
-          googleUsers.put(u.getEmail(), u);
-        }
-        ++nAdded;
-      }
-    }
-    if (nAdded != 0) {
-      userTable.setPageSize(Math.max(15, list.size()));
-      uiOutOfSyncWithServer();
-    }
-  }
-
-  @UiHandler("button")
-  void onUpdateClick(ClickEvent e) {
-    updateUsersOnServer();
   }
 }

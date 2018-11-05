@@ -46,8 +46,7 @@ public class TableAclResource extends TableAcl {
   }
 
   /**
-   * @param selfUri
-   *          the selfUri to set
+   * @param selfUri the selfUri to set
    */
   public void setSelfUri(String selfUri) {
     this.selfUri = selfUri;
@@ -61,8 +60,7 @@ public class TableAclResource extends TableAcl {
   }
 
   /**
-   * @param aclUri
-   *          the aclUri to set
+   * @param aclUri the aclUri to set
    */
   public void setAclUri(String aclUri) {
     this.aclUri = aclUri;
@@ -76,8 +74,7 @@ public class TableAclResource extends TableAcl {
   }
 
   /**
-   * @param tableUri
-   *          the tableUri to set
+   * @param tableUri the tableUri to set
    */
   public void setTableUri(String tableUri) {
     this.tableUri = tableUri;

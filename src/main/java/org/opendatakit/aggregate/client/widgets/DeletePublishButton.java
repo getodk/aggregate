@@ -16,15 +16,13 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPublishDeletePopup;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-
 /**
  * Delete the publishing of data to an external service.
- * 
  */
 public final class DeletePublishButton extends AggregateButton implements ClickHandler {
 
@@ -43,7 +41,7 @@ public final class DeletePublishButton extends AggregateButton implements ClickH
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     ConfirmPublishDeletePopup popup = new ConfirmPublishDeletePopup(publisher);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

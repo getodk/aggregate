@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -17,9 +17,6 @@ import java.io.PrintStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -29,6 +26,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This entity defines the mapping between a submission element and a backing
@@ -69,37 +68,21 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * structure field (with a null column name) plus one data element underneath
  * that marker for each value in the structured type (e.g., lat, long, alt,
  * acc).
- * 
+ *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- * 
+ *
  */
 public final class FormDataModel extends CommonFieldsBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(FormDataModel.class.getName());
-
   public static final Long MAX_ELEMENT_NAME_LENGTH = PersistConsts.GUARANTEED_SEARCHABLE_LEN;
-
-  /* xform element types */
-  public static enum ElementType {
-    // xform tag types
-    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
-     
-    BINARY, // identifies BinaryContent table
-    BOOLEAN, SELECT1, // identifies SelectChoice table
-    SELECTN, // identifies SelectChoice table
-    REPEAT, GROUP,
-    // additional supporting tables
-    PHANTOM, // if a relation needs to be divided in order to fit
-    BINARY_CONTENT_REF_BLOB, // association between BINARY and REF_BLOB
-    REF_BLOB, // the table of the actual byte[] data (xxxBLOB)
-  };
-
-  private static final String TABLE_NAME = "_form_data_model";
-
   public static final DataField URI_SUBMISSION_DATA_MODEL = new DataField(
       "URI_SUBMISSION_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN)
       .setIndexable(IndexType.HASH);
+  private static final Logger logger = LoggerFactory.getLogger(FormDataModel.class.getName());
+
+  ;
+  private static final String TABLE_NAME = "_form_data_model";
   private static final DataField PARENT_URI_FORM_DATA_MODEL = new DataField(
       "PARENT_URI_FORM_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
   /** ordinal (1st, 2nd, ... ) of this item in the form element */
@@ -115,96 +98,20 @@ public final class FormDataModel extends CommonFieldsBase {
       DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
   private static final DataField PERSIST_AS_SCHEMA_NAME = new DataField("PERSIST_AS_SCHEMA_NAME",
       DataField.DataType.STRING, true, PersistConsts.URI_STRING_LEN);
-
-  /**
-   * Predicate function for determining whether a given field is one that is
-   * expected to be stored within a data table, vs. in a special auxiliary
-   * table. Returns true if it is stored in a data table.
-   * 
-   * This predicate function is used to determine if a parent FormDataModel is
-   * divided across multiple data tables.
-   * 
-   * @param t
-   * @return
-   */
-  public static boolean isFieldStoredWithinDataTable(ElementType t) {
-    switch (t) {
-    case STRING:
-    case JRDATETIME:
-    case JRDATE:
-    case JRTIME:
-    case INTEGER:
-    case DECIMAL:
-    case GEOPOINT:
-    case GEOTRACE:
-    case GEOSHAPE:
-    case BOOLEAN:
-    case SELECT1: // identifies SelectChoice table
-    case GROUP:
-    case PHANTOM: // if a relation needs to be divided in order to fit
-      return true;
-    default:
-      return false;
-    }
-  }
-
-  /**
-   * Class wrapping the persisted object name. Used when dealing with backing
-   * object maps.
-   * 
-   * @author mitchellsundt@gmail.com
-   * 
-   */
-  public final class DDRelationName {
-
-    private DDRelationName() {
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof DDRelationName))
-        return false;
-      DDRelationName ref = (DDRelationName) obj;
-      return toString().equals(ref.toString());
-    }
-
-    @Override
-    public int hashCode() {
-      return FormDataModel.this.getPersistAsTable().hashCode() + 103
-          * FormDataModel.this.getPersistAsSchema().hashCode();
-    }
-
-    @Override
-    public String toString() {
-      return FormDataModel.this.getPersistAsSchema() + "." + FormDataModel.this.getPersistAsTable();
-    }
-  };
-
+  private static FormDataModel relation = null;
+  private final List<FormDataModel> children = new ArrayList<FormDataModel>();
   // linked up value...
   private WeakReference<FormDataModel> parent = null;
-  private final List<FormDataModel> children = new ArrayList<FormDataModel>();
+
+  ;
   private CommonFieldsBase backingObject = null;
   private DataField backingKey = null;
-
-  /**
-   * Reset the linked up values so FormDefinition can construct a new model.
-   * 
-   * Called by the FormParserForJavaRosa to reset the FDM prior to trying once
-   * again to create the relations it describes.
-   */
-  public void resetDerivedFields() {
-    parent = null;
-    children.clear();
-    backingObject = null;
-    backingKey = null;
-  }
-
   /**
    * Constructor to create the relation prototype. Only called via
    * {@link #assertRelation(CallingContext)}
-   * 
+   *
    * Note that the backing relation is not created by this constructor.
-   * 
+   *
    * @param schemaName
    */
   FormDataModel(String schemaName) {
@@ -218,17 +125,75 @@ public final class FormDataModel extends CommonFieldsBase {
     fieldList.add(PERSIST_AS_TABLE_NAME);
     fieldList.add(PERSIST_AS_SCHEMA_NAME);
   }
-
   /**
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   * 
+   *
    * Note that the backing relation is not created by this constructor.
-   * 
+   *
    * @param ref
    * @param user
    */
   private FormDataModel(FormDataModel ref, User user) {
     super(ref, user);
+  }
+
+  /**
+   * Predicate function for determining whether a given field is one that is
+   * expected to be stored within a data table, vs. in a special auxiliary
+   * table. Returns true if it is stored in a data table.
+   *
+   * This predicate function is used to determine if a parent FormDataModel is
+   * divided across multiple data tables.
+   *
+   * @param t
+   * @return
+   */
+  public static boolean isFieldStoredWithinDataTable(ElementType t) {
+    switch (t) {
+      case STRING:
+      case JRDATETIME:
+      case JRDATE:
+      case JRTIME:
+      case INTEGER:
+      case DECIMAL:
+      case GEOPOINT:
+      case GEOTRACE:
+      case GEOSHAPE:
+      case BOOLEAN:
+      case SELECT1: // identifies SelectChoice table
+      case GROUP:
+      case PHANTOM: // if a relation needs to be divided in order to fit
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  public static synchronized final FormDataModel assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      FormDataModel relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      relationPrototype = new FormDataModel(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
+  }
+
+  /**
+   * Reset the linked up values so FormDefinition can construct a new model.
+   *
+   * Called by the FormParserForJavaRosa to reset the FDM prior to trying once
+   * again to create the relations it describes.
+   */
+  public void resetDerivedFields() {
+    parent = null;
+    children.clear();
+    backingObject = null;
+    backingKey = null;
   }
 
   // Only called from within the persistence layer.
@@ -317,7 +282,7 @@ public final class FormDataModel extends CommonFieldsBase {
    * or top-level group name is not part of the constructed qualified name.
    * <p>
    * For many uses, the SubmissionKey is likely more appropriate.
-   * 
+   *
    * @return the colon-separated qualified name for this element.
    */
   public final String getGroupQualifiedElementName() {
@@ -357,30 +322,30 @@ public final class FormDataModel extends CommonFieldsBase {
     }
 
     switch (getElementType()) {
-    // xform tag types
-    case STRING:
-    case JRDATETIME:
-    case JRDATE:
-    case JRTIME:
-    case INTEGER:
-    case DECIMAL:
-    case GEOPOINT:
-    case GEOTRACE:
-    case GEOSHAPE:
-    case BINARY: // identifies BinaryContent table
-    case BOOLEAN:
-    case SELECT1: // identifies SelectChoice table
-    case SELECTN: // identifies SelectChoice table
-    case REPEAT:
-    case GROUP:
-      return groupPrefix + getElementName();
-    case PHANTOM: // if a relation needs to be divided in order to fit
-      return getParent().getGroupQualifiedElementNameCommon(xpath);
-    case BINARY_CONTENT_REF_BLOB: // association between VERSIONED_BINARY and
-                                  // REF_BLOB
-    case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
-    default:
-      throw new IllegalStateException("unexpected request for unreferencable element type");
+      // xform tag types
+      case STRING:
+      case JRDATETIME:
+      case JRDATE:
+      case JRTIME:
+      case INTEGER:
+      case DECIMAL:
+      case GEOPOINT:
+      case GEOTRACE:
+      case GEOSHAPE:
+      case BINARY: // identifies BinaryContent table
+      case BOOLEAN:
+      case SELECT1: // identifies SelectChoice table
+      case SELECTN: // identifies SelectChoice table
+      case REPEAT:
+      case GROUP:
+        return groupPrefix + getElementName();
+      case PHANTOM: // if a relation needs to be divided in order to fit
+        return getParent().getGroupQualifiedElementNameCommon(xpath);
+      case BINARY_CONTENT_REF_BLOB: // association between VERSIONED_BINARY and
+        // REF_BLOB
+      case REF_BLOB: // the table of the actual byte[] data (xxxBLOB)
+      default:
+        throw new IllegalStateException("unexpected request for unreferencable element type");
     }
   }
 
@@ -448,14 +413,14 @@ public final class FormDataModel extends CommonFieldsBase {
     return null;
   }
 
-  public final void setParent(FormDataModel p) {
-    parent = new WeakReference<FormDataModel>(p);
-  }
-
   public final FormDataModel getParent() {
     if (parent == null)
       return null;
     return parent.get();
+  }
+
+  public final void setParent(FormDataModel p) {
+    parent = new WeakReference<FormDataModel>(p);
   }
 
   public final void setChild(Long ordinal, FormDataModel child) {
@@ -512,22 +477,6 @@ public final class FormDataModel extends CommonFieldsBase {
     this.backingKey = backingKey;
   }
 
-  private static FormDataModel relation = null;
-
-  public static synchronized final FormDataModel assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      FormDataModel relationPrototype;
-      Datastore ds = cc.getDatastore();
-      User user = cc.getUserService().getDaemonAccountUser();
-      relationPrototype = new FormDataModel(ds.getDefaultSchemaName());
-      ds.assertRelation(relationPrototype, user); // may throw exception...
-      // at this point, the prototype has become fully populated
-      relation = relationPrototype; // set static variable only upon success...
-    }
-    return relation;
-  }
-
   public void print(PrintStream out) {
     String ppk = getParentUriFormDataModel();
     if (ppk == null) {
@@ -552,6 +501,53 @@ public final class FormDataModel extends CommonFieldsBase {
 
     } else {
       out.format("                persistAsScheme %s\n", getPersistAsSchema());
+    }
+  }
+
+  /* xform element types */
+  public static enum ElementType {
+    // xform tag types
+    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
+
+    BINARY, // identifies BinaryContent table
+    BOOLEAN, SELECT1, // identifies SelectChoice table
+    SELECTN, // identifies SelectChoice table
+    REPEAT, GROUP,
+    // additional supporting tables
+    PHANTOM, // if a relation needs to be divided in order to fit
+    BINARY_CONTENT_REF_BLOB, // association between BINARY and REF_BLOB
+    REF_BLOB, // the table of the actual byte[] data (xxxBLOB)
+  }
+
+  /**
+   * Class wrapping the persisted object name. Used when dealing with backing
+   * object maps.
+   *
+   * @author mitchellsundt@gmail.com
+   *
+   */
+  public final class DDRelationName {
+
+    private DDRelationName() {
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof DDRelationName))
+        return false;
+      DDRelationName ref = (DDRelationName) obj;
+      return toString().equals(ref.toString());
+    }
+
+    @Override
+    public int hashCode() {
+      return FormDataModel.this.getPersistAsTable().hashCode() + 103
+          * FormDataModel.this.getPersistAsSchema().hashCode();
+    }
+
+    @Override
+    public String toString() {
+      return FormDataModel.this.getPersistAsSchema() + "." + FormDataModel.this.getPersistAsTable();
     }
   }
 }

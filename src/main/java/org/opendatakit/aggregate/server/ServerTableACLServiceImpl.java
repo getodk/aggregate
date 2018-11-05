@@ -16,15 +16,14 @@
 
 package org.opendatakit.aggregate.server;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -51,14 +50,12 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     ServerTableACLService {
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = 9023285673934784466L;
 
   @Override
@@ -397,16 +394,16 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
     UriBuilder selfBuilder = ub.clone().path(TableService.class, "getAcl");
     URI self;
     switch (type) {
-    case USER:
-      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
-      break;
-    case GROUP:
-      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
-      break;
-    case DEFAULT:
-    default:
-      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
-      break;
+      case USER:
+        self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
+        break;
+      case GROUP:
+        self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
+        break;
+      case DEFAULT:
+      default:
+        self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
+        break;
     }
     URI acls = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
     URI table = ub.clone().path(TableService.class, "getTable").build(appId, tableId);
@@ -424,7 +421,7 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
   }
 
   private ArrayList<TableAclResourceClient> getResources(List<TableAcl> acls, TableAclManager am,
-      UriInfo info) throws RequestFailureException {
+                                                         UriInfo info) throws RequestFailureException {
     ArrayList<TableAclResourceClient> resources = new ArrayList<TableAclResourceClient>();
     for (TableAcl acl : acls) {
       resources.add(getResource(acl, am, info));
@@ -438,21 +435,21 @@ public class ServerTableACLServiceImpl extends RemoteServiceServlet implements
   private TableRole transformTableRoleClient(TableRoleClient role) {
     // first start with the name of the role
     switch (role) {
-    case NONE:
-      return TableRole.NONE;
-    case FILTERED_WRITER:
-      return TableRole.FILTERED_WRITER;
-    case UNFILTERED_READER_FILTERED_WRITER:
-      return TableRole.UNFILTERED_READER_FILTERED_WRITER;
-    case READER:
-      return TableRole.READER;
-    case WRITER:
-      return TableRole.WRITER;
-    case OWNER:
-      return TableRole.OWNER;
-    default:
-      throw new IllegalStateException("No assignable permissions in transforming table role, "
-          + "ServerTableACLServiceImpl.");
+      case NONE:
+        return TableRole.NONE;
+      case FILTERED_WRITER:
+        return TableRole.FILTERED_WRITER;
+      case UNFILTERED_READER_FILTERED_WRITER:
+        return TableRole.UNFILTERED_READER_FILTERED_WRITER;
+      case READER:
+        return TableRole.READER;
+      case WRITER:
+        return TableRole.WRITER;
+      case OWNER:
+        return TableRole.OWNER;
+      default:
+        throw new IllegalStateException("No assignable permissions in transforming table role, "
+            + "ServerTableACLServiceImpl.");
     }
   }
 

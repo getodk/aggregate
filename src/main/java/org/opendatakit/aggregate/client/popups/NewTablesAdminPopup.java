@@ -16,10 +16,15 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
@@ -28,19 +33,33 @@ import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-
 public final class NewTablesAdminPopup extends AbstractPopupBase {
 
   private static final String LABEL_TXT = "Grant ODK Tables Admin Rights to User";
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Grant Admin Rights";
   private static final String TOOLTIP_TXT = "Grant administrative rights to ODK Tables data to a user with Synchronize Tables privileges";
   private static final String HELP_BALLOON_TXT = "Enable a user with Synchronize Tables privileges to perform administrative actions on that data.";
+  private final UserListBox users;
+
+  ;
+  private ArrayList<UserSecurityInfo> userList;
+  public NewTablesAdminPopup() {
+    super();
+
+    users = new UserListBox();
+    AggregateButton addButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
+    addButton.addClickHandler(new CreateUser());
+
+    FlexTable layout = new FlexTable();
+    layout.setWidget(0, 0, new ClosePopupButton(this));
+    layout.setWidget(0, 1, new HTML(LABEL_TXT));
+    layout.setWidget(1, 0, new HTML("Users:"));
+    layout.setWidget(1, 1, users);
+    layout.setWidget(3, 1, addButton);
+
+    SecureGWT.getSecurityAdminService().getAllUsers(true, new ODKTablesAdminPopupCallback());
+    setWidget(layout);
+  }
 
   public class UserListBox extends AggregateListBox {
 
@@ -48,10 +67,9 @@ public final class NewTablesAdminPopup extends AbstractPopupBase {
       super(TOOLTIP_TXT, true, HELP_BALLOON_TXT);
     }
 
-  };
+  }
 
-  private ArrayList<UserSecurityInfo> userList;
-  private final UserListBox users;
+  ;
 
   public class ODKTablesAdminPopupCallback implements AsyncCallback<ArrayList<UserSecurityInfo>> {
     public ODKTablesAdminPopupCallback() {
@@ -104,24 +122,6 @@ public final class NewTablesAdminPopup extends AbstractPopupBase {
       }
     }
 
-  };
-
-  public NewTablesAdminPopup() {
-    super();
-
-    users = new UserListBox();
-    AggregateButton addButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
-    addButton.addClickHandler(new CreateUser());
-
-    FlexTable layout = new FlexTable();
-    layout.setWidget(0, 0, new ClosePopupButton(this));
-    layout.setWidget(0, 1, new HTML(LABEL_TXT));
-    layout.setWidget(1, 0, new HTML("Users:"));
-    layout.setWidget(1, 1, users);
-    layout.setWidget(3, 1, addButton);
-
-    SecureGWT.getSecurityAdminService().getAllUsers(true, new ODKTablesAdminPopupCallback());
-    setWidget(layout);
   }
 
   private class CreateUser implements ClickHandler {

@@ -11,12 +11,12 @@ class BulkRowObjWrapper {
   private Row row;
   private Entity entity;
   private RowOutcome outcome;
-  
+
   private RowFilterScope rowFilterScope;
-  
+
   private boolean newRowId;
   private boolean nullIncomingScope;
-  
+
   BulkRowObjWrapper(Row inputRow) {
     outcome = null;
     row = inputRow;
@@ -71,12 +71,12 @@ class BulkRowObjWrapper {
   public boolean outcomeAlreadySet() {
     return (outcome != null);
   }
-  
+
   public Row getRow() {
     return row;
   }
 
-  
+
   public String getRowId() {
     return row.getRowId();
   }
@@ -87,11 +87,11 @@ class BulkRowObjWrapper {
 
   /**
    * Should only be called if the request didn't specify a rowFilterScope
-   * 
+   *
    * @param rowFilterScope
    */
   public void setRowFilterScope(RowFilterScope rowFilterScope) {
-    if ( !nullIncomingScope ) {
+    if (!nullIncomingScope) {
       throw new IllegalStateException("Should not be called");
     }
     this.rowFilterScope = rowFilterScope;
@@ -105,7 +105,6 @@ class BulkRowObjWrapper {
   public boolean hasNullIncomingScope() {
     return nullIncomingScope;
   }
-  
 
-  
+
 }

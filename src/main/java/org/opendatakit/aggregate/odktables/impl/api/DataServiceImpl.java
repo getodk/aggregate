@@ -20,13 +20,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.api.DataService;
@@ -78,7 +76,7 @@ public class DataServiceImpl implements DataService {
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Credentials", "true").build();
   }
-  
+
   @Override
   public Response /*RowOutcomeList*/ alterRows(RowList rows)
       throws ODKTaskLockException, ODKDatastoreException,
@@ -116,7 +114,7 @@ public class DataServiceImpl implements DataService {
       throw new IllegalArgumentException("unable to convert URL ");
     }
   }
-  
+
   private RowResource getResource(Row row) {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();

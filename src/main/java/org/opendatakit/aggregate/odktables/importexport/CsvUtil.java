@@ -18,8 +18,6 @@ package org.opendatakit.aggregate.odktables.importexport;
 
 import java.io.BufferedReader;
 import java.util.List;
-
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -28,19 +26,19 @@ import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClien
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is OBSOLETE and BROKEN!!!!  See the one from the Android codebase.
- *
+ * <p>
  * Holds various things for importing and exporting tables through CSVs.
  * <p>
  * Modified from the same class on the phone.
- *
+ * <p>
  * TODO: subclass from phone definition and modify to fit server. TODO: THIS IS
  * BROKEN!!!!
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class CsvUtil {
 
@@ -135,7 +133,7 @@ public class CsvUtil {
    */
 
   private boolean importTable(RFC4180CsvReader reader, String tableName, List<ColumnClient> columns,
-      boolean includeTs, boolean includePn, CallingContext cc) throws BadColumnNameExceptionClient,
+                              boolean includeTs, boolean includePn, CallingContext cc) throws BadColumnNameExceptionClient,
       EntityNotFoundExceptionClient, PermissionDeniedExceptionClient, ETagMismatchExceptionClient,
       ImportFromCSVExceptionClient {
     return false; // unimplemented and out of date.

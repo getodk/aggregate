@@ -38,7 +38,7 @@ public final class ClosePopupButton extends AggregateButton implements ClickHand
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     popup.hide();
   }
 }

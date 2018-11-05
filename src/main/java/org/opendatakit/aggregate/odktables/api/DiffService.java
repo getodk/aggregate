@@ -23,7 +23,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -41,9 +40,8 @@ public interface DiffService {
   public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
-   *
    * @param dataETag
-   * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
+   * @param cursor     - null or a websafeCursor value from the RowResourceList of a previous call
    * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
    * @return {@link RowResourceList} of row changes since the dataETag value
    * @throws ODKDatastoreException
@@ -56,16 +54,16 @@ public interface DiffService {
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowResourceList*/ getRowsSince(@QueryParam(QUERY_DATA_ETAG) String dataETag, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
       throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException;
-  
+
   /**
    * Get the changeSets that have been applied since the dataETag changeSet
    * (must be a valid dataETag) or since the given sequenceValue.
-   * 
+   * <p>
    * These are returned in no meaningful order. For consistency, the values
    * are sorted alphabetically. The returned object includes a sequenceValue
    * that can be used on a subsequent call to get all changes to this table
    * since this point in time.
-   * 
+   *
    * @param dataETag
    * @param sequenceValue
    * @return
@@ -86,7 +84,7 @@ public interface DiffService {
    * If isActive is specified, then return only the currently-active
    * row changes. I.e., if a later changeSet has revised an
    * affected row, do not return that row.
-
+   *
    * @param dataETag
    * @param isActive
    * @param cursor

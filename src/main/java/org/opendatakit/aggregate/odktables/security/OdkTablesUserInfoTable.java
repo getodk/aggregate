@@ -19,12 +19,9 @@ package org.opendatakit.aggregate.odktables.security;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
-import org.opendatakit.aggregate.odktables.OdkTablesLockTemplate;
 import org.opendatakit.aggregate.odktables.ODKTablesTaskLockType;
+import org.opendatakit.aggregate.odktables.OdkTablesLockTemplate;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -41,6 +38,8 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -52,7 +51,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  * uriUser and the external ODK Tables-specific USER_ID_EXTERNAL
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTablesUserInfo {
 
@@ -89,7 +87,7 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
    * confirm that the user is still allowed to access the server. This enables
    * alternative authentication for email accounts when the internet is not
    * reachable.
-   *
+   * <p>
    * TODO: wire this up
    */
   private static final DataField X_BEARER_CODE = new DataField("X_BEARER_CODE",
@@ -98,6 +96,16 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
   /**
    * TODO: permissions and permission groups granted to this user
    */
+  /**
+   * This is the actual prototype. This is the canonical empty row for this
+   * table that essentially serves as the schema. Therefore the table is nothing
+   * without this relation being initiated.
+   * <p>
+   * For that reason, it is important to always access the prototype by calling
+   * assertRelation() before trying to manipulate the table. Otherwise you might
+   * end up with a table that is empty and shapeless.
+   */
+  private static OdkTablesUserInfoTable relation = null;
 
   /**
    * Construct a relation prototype. It will load a table into the data store
@@ -125,48 +133,11 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
   }
 
   /**
-   * I'm pretty sure this is returning the prototype, or the empty row.
-   *
-   */
-  @Override
-  public CommonFieldsBase getEmptyRow(User user) {
-    return new OdkTablesUserInfoTable(this, user);
-  }
-
-  /**
-   * I copied this from ServerPreferences. I believe this is how you actually
-   * add the data into the table, making it "persist."
-   *
-   * @param cc
-   *          so you have information about the call
-   * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException
-   */
-  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    ds.putEntity(this, user);
-  }
-
-  /**
-   * This is the actual prototype. This is the canonical empty row for this
-   * table that essentially serves as the schema. Therefore the table is nothing
-   * without this relation being initiated.
-   *
-   * For that reason, it is important to always access the prototype by calling
-   * assertRelation() before trying to manipulate the table. Otherwise you might
-   * end up with a table that is empty and shapeless.
-   */
-  private static OdkTablesUserInfoTable relation = null;
-
-  /**
    * This must be called to ensure that the datamodel for the table has been
    * initiated.
    *
-   * @param cc
-   *          calling context that allows the datastore and user to be
-   *          determined
+   * @param cc calling context that allows the datastore and user to be
+   *           determined
    * @return the prototype, eg the canonical empty row for the table
    * @throws ODKDatastoreException
    */
@@ -213,7 +184,6 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
     return true;
   }
 
-  
   public static synchronized final OdkTablesUserInfoTable getOdkTablesUserInfo(String uriUser, Set<GrantedAuthority> grants, CallingContext cc)
       throws ODKDatastoreException, ODKTaskLockException, ODKEntityPersistException,
       ODKOverQuotaException, PermissionDeniedException {
@@ -289,27 +259,34 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
     }
   }
 
-  
+  /**
+   * I'm pretty sure this is returning the prototype, or the empty row.
+   */
+  @Override
+  public CommonFieldsBase getEmptyRow(User user) {
+    return new OdkTablesUserInfoTable(this, user);
+  }
+
+  /**
+   * I copied this from ServerPreferences. I believe this is how you actually
+   * add the data into the table, making it "persist."
+   *
+   * @param cc so you have information about the call
+   * @throws ODKEntityPersistException
+   * @throws ODKOverQuotaException
+   */
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    ds.putEntity(this, user);
+  }
+
   /**
    * Get the aggregate userid.
    */
   public String getUriUser() {
     return getStringField(URI_USER);
-  }
-
-  @Override
-  public String getOdkTablesUserId() {
-    return getStringField(ODK_TABLES_USER_ID);
-  }
-
-  @Override
-  public String getPhoneNumber() {
-    return getStringField(PHONE_NUMBER);
-  }
-
-  @Override
-  public String getXBearerCode() {
-    return getStringField(X_BEARER_CODE);
   }
 
   /**
@@ -323,16 +300,20 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
     }
   }
 
+  @Override
+  public String getOdkTablesUserId() {
+    return getStringField(ODK_TABLES_USER_ID);
+  }
+
   /**
    * Set the ODK Tables user id.
    *
-   * @throws IllegalArgumentException
-   *           if the value cannot be set, most likely due to overflow.
+   * @throws IllegalArgumentException if the value cannot be set, most likely due to overflow.
    */
   public void setOdkTablesUserId(String odkTablesUserId) {
     if (!(odkTablesUserId.startsWith(SecurityUtils.MAILTO_COLON) ||
-          odkTablesUserId.startsWith(SecurityUtils.USERNAME_COLON) ||
-          odkTablesUserId.equals(User.ANONYMOUS_USER))) {
+        odkTablesUserId.startsWith(SecurityUtils.USERNAME_COLON) ||
+        odkTablesUserId.equals(User.ANONYMOUS_USER))) {
       throw new IllegalArgumentException("ODK Tables User Id does not start with "
           + SecurityUtils.MAILTO_COLON + " or " + SecurityUtils.USERNAME_COLON
           + " or is not " + User.ANONYMOUS_USER);
@@ -340,6 +321,11 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
     if (!setStringField(ODK_TABLES_USER_ID, odkTablesUserId)) {
       throw new IllegalArgumentException("overflow external odkTablesUserId");
     }
+  }
+
+  @Override
+  public String getPhoneNumber() {
+    return getStringField(PHONE_NUMBER);
   }
 
   /**
@@ -351,6 +337,11 @@ public class OdkTablesUserInfoTable extends CommonFieldsBase implements OdkTable
     if (!setStringField(PHONE_NUMBER, phoneNumber)) {
       throw new IllegalArgumentException("overflow phoneNumber");
     }
+  }
+
+  @Override
+  public String getXBearerCode() {
+    return getStringField(X_BEARER_CODE);
   }
 
   /**

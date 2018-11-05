@@ -17,18 +17,17 @@ package org.opendatakit.aggregate.odktables.rest;
 
 /**
  * All the primitive data types in the ODK 2.0 storage model.
- * 
+ * <p>
  * Note that because 'boolean' is a reserved word, we cannot use an enum (and we
  * shorten that type to 'bool' here).
- * 
+ * <p>
  * It provides the name() and a modified valueOfOrNull() that acts as
- * 
+ * <p>
  * to shorten that enum to 'bool'. To preserve the use of 'boolean' in the
  * transport, use the 'nameExternal()' and 'valueOfExternalOrNull(...)' methods
  * instead of the 'name()' and 'valueOf(...)' methods.
- * 
- * @author Administrator
  *
+ * @author Administrator
  */
 public class ElementDataType {
   public static final ElementDataType integer = new ElementDataType("integer");
@@ -47,21 +46,8 @@ public class ElementDataType {
   }
 
   /**
-   * Use this instead of name().
-   * 
-   * @return the external name of this enum for storage and transport.
-   */
-  public String name() {
-    return nameExternal;
-  }
-
-  public String toString() {
-    return name();
-  }
-
-  /**
    * Use this instead of valueOf(...)
-   * 
+   *
    * @param name
    * @return the enum for the external name
    * @throws IllegalArgumentException
@@ -85,5 +71,18 @@ public class ElementDataType {
       return object;
     }
     throw new IllegalArgumentException("unrecognized ElementDataType: " + name);
+  }
+
+  /**
+   * Use this instead of name().
+   *
+   * @return the external name of this enum for storage and transport.
+   */
+  public String name() {
+    return nameExternal;
+  }
+
+  public String toString() {
+    return name();
   }
 }

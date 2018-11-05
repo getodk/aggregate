@@ -24,8 +24,8 @@ public class ETagMismatchExceptionClient extends Exception implements Serializab
       "ETag mismatch";
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = 845010225426780357L;
 
   private String message;

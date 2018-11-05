@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.TreeSet;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
@@ -32,8 +31,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.ConfigFileChangeDetail;
 import org.opendatakit.aggregate.odktables.FileContentInfo;
@@ -55,6 +52,7 @@ import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.LoggerFactory;
 
 public class FileServiceImpl implements FileService {
 
@@ -67,7 +65,7 @@ public class FileServiceImpl implements FileService {
   private TablesUserPermissions userPermissions;
 
   public FileServiceImpl(ServletContext sc, HttpServletRequest req, HttpHeaders headers,
-      UriInfo info, String appId, CallingContext cc) throws ODKEntityNotFoundException,
+                         UriInfo info, String appId, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException, PermissionDeniedException, ODKTaskLockException {
     this.sc = sc;
     this.req = req;
@@ -81,9 +79,9 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response getFile(@Context HttpHeaders httpHeaders,
-      @PathParam("odkClientVersion") String odkClientVersion,
-      @PathParam("filePath") List<PathSegment> segments,
-      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
+                          @PathParam("odkClientVersion") String odkClientVersion,
+                          @PathParam("filePath") List<PathSegment> segments,
+                          @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
       throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException,
       FileNotFoundException {
 
@@ -153,7 +151,7 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response putFile(@PathParam("odkClientVersion") String odkClientVersion,
-      @PathParam("filePath") List<PathSegment> segments, byte[] content)
+                          @PathParam("filePath") List<PathSegment> segments, byte[] content)
       throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
@@ -184,15 +182,15 @@ public class FileServiceImpl implements FileService {
 
     ConfigFileChangeDetail outcome = fm.putFile(odkClientVersion, tableId, fi, userPermissions);
 
-    if ( outcome != ConfigFileChangeDetail.FILE_NOT_CHANGED ) {
+    if (outcome != ConfigFileChangeDetail.FILE_NOT_CHANGED) {
       // if the request includes an installation header, 
       // log that the user that has been changing the configuration from that installation.
       String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
       try {
-        if ( installationId != null ) {
+        if (installationId != null) {
           DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
         }
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         LoggerFactory.getLogger(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
       }
     }
@@ -214,7 +212,7 @@ public class FileServiceImpl implements FileService {
 
   @Override
   public Response deleteFile(@PathParam("odkClientVersion") String odkClientVersion,
-      @PathParam("filePath") List<PathSegment> segments)
+                             @PathParam("filePath") List<PathSegment> segments)
       throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
@@ -245,10 +243,10 @@ public class FileServiceImpl implements FileService {
       // log that the user that has been changing the configuration from that installation.
       String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
       try {
-        if ( installationId != null ) {
+        if (installationId != null) {
           DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
         }
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         LoggerFactory.getLogger(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
       }
     }

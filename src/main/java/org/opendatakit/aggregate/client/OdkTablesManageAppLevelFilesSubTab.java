@@ -16,33 +16,24 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.table.OdkTablesViewAppLevelFileInfo;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-
 /**
  * This class builds the subtab that allows for viewing and managing the files
  * that are associated with an appName but not an individual tableId. <br>
- *
+ * <p>
  * Copied from ODKTableManageTableFilesSubTab
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesManageAppLevelFilesSubTab extends AggregateSubTabBase implements TablesChangeNotification {
-
-  private OdkTablesTabUI parent;
-  
-  // this is the panel with the add button
-  private FlexTable selectTablePanel;
-
-  private HorizontalPanel topPanel;
 
   // the string constants for adding a file
   private static final String ADD_FILE_TXT = "Add an application file";
@@ -50,7 +41,10 @@ public class OdkTablesManageAppLevelFilesSubTab extends AggregateSubTabBase impl
   private static final String ADD_FILE_BALLOON_TXT = "Upload a file that is not associated with a specific tableId";
   private static final String ADD_FILE_BUTTON_TXT = "<img src=\"images/yellow_plus.png\" />"
       + ADD_FILE_TXT;
-
+  private OdkTablesTabUI parent;
+  // this is the panel with the add button
+  private FlexTable selectTablePanel;
+  private HorizontalPanel topPanel;
   // this is a button for adding a file.
   private ServletPopupButton addFileButton;
 
@@ -73,7 +67,7 @@ public class OdkTablesManageAppLevelFilesSubTab extends AggregateSubTabBase impl
     selectTablePanel = new FlexTable();
     selectTablePanel.getElement().setId("app_level_panel");
     selectTablePanel.setHTML(0, 0, "<h2> Application Level Files </h2>");
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       selectTablePanel.setWidget(1, 0, addFileButton);
     }
 

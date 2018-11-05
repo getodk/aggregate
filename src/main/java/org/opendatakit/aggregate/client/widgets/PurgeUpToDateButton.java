@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.form.FormSummary;
-import org.opendatakit.aggregate.client.popups.PurgeUpToDatePopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.form.FormSummary;
+import org.opendatakit.aggregate.client.popups.PurgeUpToDatePopup;
 
 public final class PurgeUpToDateButton extends AggregateButton implements ClickHandler {
 
@@ -29,13 +28,13 @@ public final class PurgeUpToDateButton extends AggregateButton implements ClickH
   private static final String HELP_BALLOON_TXT = "Delete a selected form's data through a given date.";
 
   private FormSummary formSummary;
-  
+
   public PurgeUpToDateButton() {
     super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
   }
 
   public void setSelectedForm(FormSummary formSummary) {
-    if ( formSummary == null || formSummary.getId().equals("") ) {
+    if (formSummary == null || formSummary.getId().equals("")) {
       this.formSummary = null;
       setEnabled(false);
     } else {
@@ -43,7 +42,7 @@ public final class PurgeUpToDateButton extends AggregateButton implements ClickH
       setEnabled(true);
     }
   }
-  
+
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -18,7 +18,6 @@
 package org.opendatakit.aggregate.submission.type;
 
 import java.util.Date;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
@@ -27,82 +26,78 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Data Storage Converter for Data Type
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date> {
-    /**
-     * Constructor
-     * 
-     * @param propertyName
-     *            Name of submission element
-     */
-    protected DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
-        super(backingObject, element);
-    }
+  /**
+   * Constructor
+   *
+   * @param propertyName Name of submission element
+   */
+  protected DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
+    super(backingObject, element);
+  }
 
-    /**
-     * Parse the value from string format and convert to Date
-     * 
-     * @param value
-     *            string form of the value
-     * @throws ODKConversionException
-     */
-    @Override
-    public void setValueFromString(String value) throws ODKConversionException {
-        Date d;
-        try {
-            d = WebUtils.parseDate(value);
-        } catch( IllegalArgumentException e ) {
-            throw new ODKConversionException(e);
-        }
-        setValue(d);
+  /**
+   * Parse the value from string format and convert to Date
+   *
+   * @param value string form of the value
+   * @throws ODKConversionException
+   */
+  @Override
+  public void setValueFromString(String value) throws ODKConversionException {
+    Date d;
+    try {
+      d = WebUtils.parseDate(value);
+    } catch (IllegalArgumentException e) {
+      throw new ODKConversionException(e);
     }
-    
-    /**
-     * Helper for updating dates in predefined forms...
-     * 
-     * @param date
-     */
-    public void setValueFromDate(Date date) {
-        setValue(date);
-    }
-    
-    @Override
-    public void getValueFromEntity(CallingContext cc) {
-        Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
-        setValue(value);
-    }
+    setValue(d);
+  }
 
-    /**
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof DateSubmissionType)) {
-            return false;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        return true;
-    }
+  /**
+   * Helper for updating dates in predefined forms...
+   *
+   * @param date
+   */
+  public void setValueFromDate(Date date) {
+    setValue(date);
+  }
 
-    @Override
-    public Date getValue() {
-        return backingObject.getDateField(element.getFormDataModel().getBackingKey());
-    }
+  @Override
+  public void getValueFromEntity(CallingContext cc) {
+    Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
+    setValue(value);
+  }
 
-    /**
-     * Set the value of submission field
-     * 
-     * @param value
-     *            value to set
-     */
-    protected void setValue(Date value) {
-        backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof DateSubmissionType)) {
+      return false;
     }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public Date getValue() {
+    return backingObject.getDateField(element.getFormDataModel().getBackingKey());
+  }
+
+  /**
+   * Set the value of submission field
+   *
+   * @param value value to set
+   */
+  protected void setValue(Date value) {
+    backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
+  }
 
 }

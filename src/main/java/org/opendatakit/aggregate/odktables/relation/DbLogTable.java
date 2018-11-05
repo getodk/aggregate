@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.rest.TableConstants;
@@ -33,13 +32,7 @@ import org.opendatakit.common.web.CallingContext;
 
 public class DbLogTable extends Relation {
 
-  private DbLogTable(String namespace, String tableName, List<DataField> fields, CallingContext cc)
-      throws ODKDatastoreException {
-    super(namespace, tableName, fields, cc);
-  }
-
   public static final String LAST_UPDATE_DATE_COLUMN_NAME = CommonFieldsBase.LAST_UPDATE_DATE_COLUMN_NAME;
-  
   /**
    * NOTE: the PK of this table is the ROW_ETAG of the DbTable Row
    * who's state matches this log entry.
@@ -51,7 +44,6 @@ public class DbLogTable extends Relation {
   // Global sequence value that monotonically increased -- for change ordering
   public static final DataField SEQUENCE_VALUE = new DataField("_SEQUENCE_VALUE", DataType.STRING,
       false).setIndexable(IndexType.ORDERED);
-
   // ETag of the DbTable Row's state prior to this one (may be null if the row did not exist)
   public static final DataField PREVIOUS_ROW_ETAG = new DataField("_PREVIOUS_ROW_ETAG", DataType.STRING, true);
   // ETag in the TableEntry that tracks this modification (for eventual bulk updates)
@@ -64,8 +56,6 @@ public class DbLogTable extends Relation {
       DataType.STRING, true);
   // Whether or not this DbTable Row is deleted.
   public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
-
-
   // limited to 10 characters
   public static final DataField DEFAULT_ACCESS = new DataField(TableConstants.DEFAULT_ACCESS.toUpperCase(),
       DataType.STRING, true, 10L);
@@ -99,8 +89,9 @@ public class DbLogTable extends Relation {
   // the creator of this row, as reported by the device (may be a remote SMS user)
   public static final DataField SAVEPOINT_CREATOR = new DataField(
       TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);
-
   private static final List<DataField> dataFields;
+  private static final EntityConverter converter = new EntityConverter();
+
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(ROW_ID);
@@ -126,7 +117,10 @@ public class DbLogTable extends Relation {
     dataFields.add(SAVEPOINT_CREATOR);
   }
 
-  private static final EntityConverter converter = new EntityConverter();
+  private DbLogTable(String namespace, String tableName, List<DataField> fields, CallingContext cc)
+      throws ODKDatastoreException {
+    super(namespace, tableName, fields, cc);
+  }
 
   public static final String getDbLogTableName(String dataTableName) {
     return dataTableName + "_LOG";
@@ -140,7 +134,7 @@ public class DbLogTable extends Relation {
   }
 
   private static synchronized DbLogTable getRelation(String tableName, List<DataField> fields,
-      CallingContext cc) throws ODKDatastoreException {
+                                                     CallingContext cc) throws ODKDatastoreException {
     DbLogTable relation = new DbLogTable(RUtil.NAMESPACE, tableName, fields, cc);
     return relation;
   }

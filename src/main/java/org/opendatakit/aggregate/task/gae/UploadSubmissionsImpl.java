@@ -31,7 +31,6 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
@@ -54,7 +53,7 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
       //
       // Otherwise, use the frontend thread.
       boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
-      if ( onBackground && !disabled ) {
+      if (onBackground && !disabled) {
         b.enqueue();
       } else {
         b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);

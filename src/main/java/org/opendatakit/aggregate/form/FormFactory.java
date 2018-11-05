@@ -16,8 +16,14 @@
 
 package org.opendatakit.aggregate.form;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
@@ -32,24 +38,25 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
-
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory class for managing Form objects.
  * Does caching of the forms so as to minimize the number of database accesses.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class FormFactory {
 
   private static final Logger logger = LoggerFactory.getLogger(FormFactory.class);
-
-  private static long cacheTimestamp = 0L;
   private static final List<IForm> cache = new LinkedList<IForm>();
+  private static long cacheTimestamp = 0L;
 
-  private FormFactory() {};
+  private FormFactory() {
+  }
+
+  ;
 
   /**
    * Return the list of forms in the database.
@@ -67,7 +74,7 @@ public class FormFactory {
       throws ODKOverQuotaException, ODKDatastoreException {
 
     List<IForm> forms = new ArrayList<IForm>();
-    if ( cacheTimestamp + PersistConsts.MAX_SETTLE_MILLISECONDS > System.currentTimeMillis() ) {
+    if (cacheTimestamp + PersistConsts.MAX_SETTLE_MILLISECONDS > System.currentTimeMillis()) {
       // TODO: This cache should reside in MemCache.  Right now, different running
       // servers might see different Form definitions for up to the settle time.
       //
@@ -80,8 +87,8 @@ public class FormFactory {
     } else {
       // we have a fairly stale list of forms -- interrogate the database
       // for what is really there and update the cache.
-      Map<String,IForm> oldForms = new HashMap<String,IForm>();
-      for ( IForm f : cache ) {
+      Map<String, IForm> oldForms = new HashMap<String, IForm>();
+      for (IForm f : cache) {
         oldForms.put(f.getUri(), f);
       }
       cache.clear();
@@ -102,10 +109,10 @@ public class FormFactory {
         // top-level FormInfoTable even if only subordinate values are updated.
         Date infoDate = infoRow.getLastUpdateDate();
         Date oldDate = (f == null) ? null : f.getLastUpdateDate();
-        if ( f != null &&  f.hasValidFormDefinition() &&
+        if (f != null && f.hasValidFormDefinition() &&
             (infoRow.getCreationDate().equals(f.getCreationDate())) &&
             ((infoDate == null && oldDate == null) ||
-             (infoDate != null && oldDate != null && infoDate.equals(oldDate))) ) {
+                (infoDate != null && oldDate != null && infoDate.equals(oldDate)))) {
           cache.add(f);
         } else {
           logger.info("FormCache: refreshing form definition from database: " + infoRow.getStringField(FormInfoTable.FORM_ID));
@@ -127,9 +134,10 @@ public class FormFactory {
         @Override
         public int compare(IForm o1, IForm o2) {
           int ref = o1.getViewableName().compareToIgnoreCase(o2.getViewableName());
-          if ( ref != 0 ) return ref;
+          if (ref != 0) return ref;
           return o1.getFormId().compareToIgnoreCase(o2.getFormId());
-        }});
+        }
+      });
 
       // update cacheTimestamp -- note that if the datastore is very slow, this will
       // space out the updates because the cacheTimestamp is established after all
@@ -141,7 +149,7 @@ public class FormFactory {
     }
 
     for (IForm v : cache) {
-      if ( topLevelAuri == null || v.getUri().equals(topLevelAuri) ) {
+      if (topLevelAuri == null || v.getUri().equals(topLevelAuri)) {
         forms.add(v);
       }
     }
@@ -171,7 +179,8 @@ public class FormFactory {
       throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
     List<IForm> forms = internalGetForms(topLevelAuri, cc);
 
-    if ( forms.isEmpty() ) throw new ODKEntityNotFoundException("Could not retrieve form uri: " + topLevelAuri);
+    if (forms.isEmpty())
+      throw new ODKEntityNotFoundException("Could not retrieve form uri: " + topLevelAuri);
     IForm f = forms.get(0);
     // TODO: check authorization?
     return f;
@@ -215,16 +224,12 @@ public class FormFactory {
    * Static function to retrieve a form with the specified ODK id from the
    * datastore
    *
-   * @param formId
-   *          The ODK identifier that identifies the form
-   *
+   * @param formId The ODK identifier that identifies the form
    * @return The ODK aggregate form definition/conversion object
-   *
    * @throws ODKOverQuotaException
    * @throws ODKDatastoreException
-   * @throws ODKFormNotFoundException
-   *           Thrown when a form was not able to be found with the
-   *           corresponding ODK ID
+   * @throws ODKFormNotFoundException Thrown when a form was not able to be found with the
+   *                                  corresponding ODK ID
    */
   public static IForm retrieveFormByFormId(String formId, CallingContext cc)
       throws ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
@@ -255,16 +260,12 @@ public class FormFactory {
    * Static function to retrieve a form with the specified ODK id from the
    * datastore
    *
-   * @param formId
-   *          The ODK identifier that identifies the form
-   *
+   * @param formId The ODK identifier that identifies the form
    * @return The ODK aggregate form definition/conversion object
-   *
    * @throws ODKOverQuotaException
    * @throws ODKDatastoreException
-   * @throws ODKFormNotFoundException
-   *           Thrown when a form was not able to be found with the
-   *           corresponding ODK ID
+   * @throws ODKFormNotFoundException Thrown when a form was not able to be found with the
+   *                                  corresponding ODK ID
    */
   public static IForm retrieveForm(List<SubmissionKeyPart> parts, CallingContext cc)
       throws ODKOverQuotaException, ODKDatastoreException, ODKFormNotFoundException {
@@ -277,11 +278,11 @@ public class FormFactory {
       String formUri = parts.get(1).getAuri();
       IForm form = getForm(formUri, cc);
       return form;
-    } catch ( ODKOverQuotaException e) { // datastore exception
+    } catch (ODKOverQuotaException e) { // datastore exception
       throw e;
-    } catch ( ODKEntityNotFoundException e) { // datastore exception
+    } catch (ODKEntityNotFoundException e) { // datastore exception
       throw new ODKFormNotFoundException(e);
-    } catch ( ODKDatastoreException e) {
+    } catch (ODKDatastoreException e) {
       throw e;
     } catch (Exception e) {
       throw new ODKFormNotFoundException(e);
@@ -303,8 +304,8 @@ public class FormFactory {
    * @throws ODKConversionException
    */
   public static IForm createFormId(String incomingFormXml, XFormParameters rootElementDefn,
-        boolean isEncryptedForm, boolean isDownloadEnabled, String title, CallingContext cc)
-            throws ODKDatastoreException {
+                                   boolean isEncryptedForm, boolean isDownloadEnabled, String title, CallingContext cc)
+      throws ODKDatastoreException {
     IForm thisForm = null;
 
     String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);

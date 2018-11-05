@@ -17,6 +17,8 @@
 
 package org.opendatakit.aggregate.externalservice;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -24,9 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.entity.ContentType;
@@ -51,18 +51,14 @@ import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class OhmageJsonServer extends AbstractExternalService implements ExternalService {
 
   private static final Gson gson;
+
   static {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(OhmageJsonTypes.Survey.class, new OhmageJsonTypes.Survey());
@@ -79,14 +75,14 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
   private final OhmageJsonServer2ParameterTable objectEntity;
 
   private OhmageJsonServer(OhmageJsonServer2ParameterTable entity,
-      FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
+                           FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
     super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
 
   private OhmageJsonServer(OhmageJsonServer2ParameterTable entity, IForm form,
-      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+                           ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
     this(entity, createFormServiceCursor(form, entity, externalServiceOption,
         ExternalServiceType.OHMAGE_JSON_SERVER, cc), form, cc);
@@ -100,8 +96,8 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
   }
 
   public OhmageJsonServer(IForm form, String campaignUrn, String campaignTimestamp, String user,
-      String hashedPassword, String serverURL,
-      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+                          String hashedPassword, String serverURL,
+                          ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
     this(newEntity(OhmageJsonServer2ParameterTable.assertRelation(cc), cc), form,
         externalServiceOption, ownerEmail, cc);
@@ -159,31 +155,31 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
    * @throws URISyntaxException
    */
   public void uploadSurveys(List<OhmageJsonTypes.Survey> surveys, Map<UUID, ByteArrayBody> photos,
-      CallingContext cc) throws ClientProtocolException, IOException, ODKExternalServiceException,
+                            CallingContext cc) throws ClientProtocolException, IOException, ODKExternalServiceException,
       URISyntaxException {
 
 
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();
     builder.setMode(HttpMultipartMode.STRICT)
-           .setCharset(UTF_CHARSET);
-    
+        .setCharset(UTF_CHARSET);
+
     ContentType utf8Text = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), UTF_CHARSET);
     // emit the configured publisher parameters if the values are non-empty...
     String value;
     value = getOhmageCampaignUrn();
-    if ( value != null && value.length() != 0 ) {
+    if (value != null && value.length() != 0) {
       builder.addTextBody("campaign_urn", getOhmageCampaignUrn(), utf8Text);
     }
     value = getOhmageCampaignCreationTimestamp();
-    if ( value != null && value.length() != 0 ) {
+    if (value != null && value.length() != 0) {
       builder.addTextBody("campaign_creation_timestamp", getOhmageCampaignCreationTimestamp(), utf8Text);
     }
     value = getOhmageUsername();
-    if ( value != null && value.length() != 0 ) {
+    if (value != null && value.length() != 0) {
       builder.addTextBody("user", getOhmageUsername(), utf8Text);
     }
     value = getOhmageHashedPassword();
-    if ( value != null && value.length() != 0 ) {
+    if (value != null && value.length() != 0) {
       builder.addTextBody("passowrd", getOhmageHashedPassword(), utf8Text);
     }
     // emit the client identity and the json representation of the survey...

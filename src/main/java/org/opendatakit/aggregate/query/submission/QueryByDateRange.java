@@ -18,9 +18,6 @@ package org.opendatakit.aggregate.query.submission;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
@@ -36,25 +33,25 @@ import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class QueryByDateRange extends QueryBase {
 
   final int fetchLimit;
   final QueryResumePoint startCursor;
   QueryResumePoint resumeCursor = null;
-  
+
   public QueryByDateRange(IForm form, int maxFetchLimit, Date startDate, Date endDate, String uriLast, CallingContext cc) {
     super(form);
     this.fetchLimit = maxFetchLimit;
-   
+
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
-    
+
     // Query by markedAsCompleteDate, filtering by isCompleted.
     // Submissions may be partially uploaded and are marked completed once they 
     // are fully uploaded.  We want the query to be aware of that and to not 
@@ -65,7 +62,7 @@ public class QueryByDateRange extends QueryBase {
     query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN_OR_EQUAL, startDate);
     query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
 
-    this.startCursor = (uriLast != null) ? new QueryResumePoint( tbl.markedAsCompleteDate.getName(),
+    this.startCursor = (uriLast != null) ? new QueryResumePoint(tbl.markedAsCompleteDate.getName(),
         EngineUtils.getAttributeValueAsString(startDate, tbl.markedAsCompleteDate), uriLast, true) : null;
   }
 
@@ -75,7 +72,8 @@ public class QueryByDateRange extends QueryBase {
 
   /**
    * Fetch the record with the most recent markedAsCompleteDate, excluding
-   * records that arrived within the MAX_SETTLE of now. 
+   * records that arrived within the MAX_SETTLE of now.
+   *
    * @param form
    * @param cc
    */
@@ -83,9 +81,9 @@ public class QueryByDateRange extends QueryBase {
     super(form);
     this.fetchLimit = 1;
     this.startCursor = null;
-    
+
     TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
-    
+
     // Query by lastUpdateDate, filtering by isCompleted.
     // Submissions may be partially uploaded and are marked completed once they 
     // are fully uploaded.  We want the query to be aware of that and to not 
@@ -95,7 +93,7 @@ public class QueryByDateRange extends QueryBase {
     query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS));
     query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
   }
-  
+
   @Override
   public List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData,
       ODKDatastoreException {
@@ -103,9 +101,9 @@ public class QueryByDateRange extends QueryBase {
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
     QueryResult result = query.executeQuery(startCursor, fetchLimit);
-    
+
     resumeCursor = result.getResumeCursor();
-    
+
     // retrieve submissions
     List<? extends CommonFieldsBase> submissionEntities = result.getResultList();
 
@@ -114,17 +112,17 @@ public class QueryByDateRange extends QueryBase {
       CommonFieldsBase subEntity = submissionEntities.get(count);
       try {
         retrievedSubmissions.add(new Submission((TopLevelDynamicBase) subEntity, getForm(), cc));
-      } catch ( ODKDatastoreException e ) {
+      } catch (ODKDatastoreException e) {
         Logger logger = LoggerFactory.getLogger(QueryByUIFilterGroup.class);
         e.printStackTrace();
-        logger.error("Unable to reconstruct submission for " + 
+        logger.error("Unable to reconstruct submission for " +
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
-        
-        if ( (e instanceof ODKEntityNotFoundException) ||
-            (e instanceof ODKEnumeratedElementException) ) {
+
+        if ((e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException)) {
           // see if we should throw an error or skip processing...
           Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
-          if ( skip ) {
+          if (skip) {
             continue;
           } else {
             throw e;
@@ -136,7 +134,7 @@ public class QueryByDateRange extends QueryBase {
     }
     return retrievedSubmissions;
   }
-  
+
   public QueryResumePoint getResumeCursor() {
     return resumeCursor;
   }

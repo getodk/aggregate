@@ -23,14 +23,13 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * API for creating JSON File generation tasks.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public interface JsonFileGenerator {
 
   public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey,
-      long attemptCount, CallingContext cc) throws ODKDatastoreException;
-  
+                                 long attemptCount, CallingContext cc) throws ODKDatastoreException;
+
 }

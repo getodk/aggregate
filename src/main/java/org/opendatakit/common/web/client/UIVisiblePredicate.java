@@ -18,13 +18,12 @@ package org.opendatakit.common.web.client;
 
 /**
  * Interface passed to ValidatingTextInputCell and other classes
- * to determine whether or not the input element should be 
+ * to determine whether or not the input element should be
  * visible.  If the predicate returns false, the element is not visible.
- * 
- * @author mitchellsundt@gmail.com
  *
  * @param <T> type of the backing object for the row containing the cell.
+ * @author mitchellsundt@gmail.com
  */
 public interface UIVisiblePredicate<T> {
-    boolean isVisible(T key);
+  boolean isVisible(T key);
 }

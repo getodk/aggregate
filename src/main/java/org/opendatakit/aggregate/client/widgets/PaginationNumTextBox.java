@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.FilterSubTab;
-
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.FilterSubTab;
 
 public class PaginationNumTextBox extends AggregateTextBox implements ValueChangeHandler<String> {
 

@@ -21,8 +21,8 @@ import java.io.Serializable;
 /**
  * Exception to be passed back to the client in case there is an exception
  * importing from the CSV.
- * @author sudar.sam@gmail.com
  *
+ * @author sudar.sam@gmail.com
  */
 public class ImportFromCSVExceptionClient extends Exception
     implements Serializable {

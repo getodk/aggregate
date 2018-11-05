@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl;
@@ -43,51 +42,23 @@ import org.opendatakit.common.web.CallingContext;
  * Manages retrieving and setting access control lists on a table.
  *
  * @author the.dylan.price@gmail.com
- *
  */
 public class TableAclManager {
-  
-  public static class WebsafeAcls {
-    public final List<TableAcl> acls;
 
-    public final String websafeRefetchCursor;
-    public final String websafeBackwardCursor;
-    public final String websafeResumeCursor;
-    public final boolean hasMore;
-    public final boolean hasPrior;
-
-    public WebsafeAcls(List<TableAcl> acls,
-        String websafeRefetchCursor, String websafeBackwardCursor, String websafeResumeCursor,
-        boolean hasMore, boolean hasPrior) {
-      this.acls = acls;
-      this.websafeRefetchCursor = websafeRefetchCursor;
-      this.websafeBackwardCursor = websafeBackwardCursor;
-      this.websafeResumeCursor = websafeResumeCursor;
-      this.hasMore = hasMore;
-      this.hasPrior = hasPrior;
-    }
-  }
-  
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
   private EntityConverter converter;
   private EntityCreator creator;
   private String appId;
   private String tableId;
-
   /**
    * Construct a new TableAclManager.
    *
-   * @param appId
-   *          the unique application id
-   * @param tableId
-   *          the unique identifier of the table
-   * @param cc
-   *          the calling context
-   * @throws ODKEntityNotFoundException
-   *           if no table with the given id exists
-   * @throws ODKDatastoreException
-   *           if there is an internal error in the datastore
+   * @param appId   the unique application id
+   * @param tableId the unique identifier of the table
+   * @param cc      the calling context
+   * @throws ODKEntityNotFoundException if no table with the given id exists
+   * @throws ODKDatastoreException      if there is an internal error in the datastore
    */
   public TableAclManager(String appId, String tableId, TablesUserPermissions userPermissions, CallingContext cc) throws ODKEntityNotFoundException,
       ODKDatastoreException {
@@ -133,26 +104,25 @@ public class TableAclManager {
    */
   public WebsafeAcls getAcls(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException, PermissionDeniedException {
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ACL);
-    
+
     WebsafeQueryResult result = DbTableAcl.queryTableIdAcls(tableId, startCursor, fetchLimit, cc);
-    
+
 
     List<DbTableAclEntity> results = new ArrayList<DbTableAclEntity>();
     for (Entity e : result.entities) {
       results.add(new DbTableAclEntity(e));
     }
 
-    return new WebsafeAcls( converter.toTableAcls(results),
-            result.websafeRefetchCursor,
-            result.websafeBackwardCursor,
-            result.websafeResumeCursor, result.hasMore, result.hasPrior);
+    return new WebsafeAcls(converter.toTableAcls(results),
+        result.websafeRefetchCursor,
+        result.websafeBackwardCursor,
+        result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
 
   /**
    * Get all acls for the table and given scope type.
    *
-   * @param type
-   *          the type of acls to retrieve
+   * @param type the type of acls to retrieve
    * @return a list of TableAcl
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -167,8 +137,8 @@ public class TableAclManager {
     for (Entity e : result.entities) {
       results.add(new DbTableAclEntity(e));
     }
-    
-    return new WebsafeAcls( converter.toTableAcls(results),
+
+    return new WebsafeAcls(converter.toTableAcls(results),
         result.websafeRefetchCursor,
         result.websafeBackwardCursor,
         result.websafeResumeCursor, result.hasMore, result.hasPrior);
@@ -177,8 +147,7 @@ public class TableAclManager {
   /**
    * Get the access control list for the given scope.
    *
-   * @param scope
-   *          the scope of the list
+   * @param scope the scope of the list
    * @return the acl, or null if none exists
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -220,10 +189,8 @@ public class TableAclManager {
   /**
    * Set the permissions of an access control list.
    *
-   * @param scope
-   *          the scope of the acl
-   * @param role
-   *          the role of the acl
+   * @param scope the scope of the acl
+   * @param role  the role of the acl
    * @return the modified acl (created if none already exists)
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -249,8 +216,7 @@ public class TableAclManager {
   /**
    * Delete the acl with the given scope.
    *
-   * @param scope
-   *          the scope of the acl
+   * @param scope the scope of the acl
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    */
@@ -263,6 +229,27 @@ public class TableAclManager {
         scope.getType().name(), scope.getValue(), cc);
     if (acl != null) {
       acl.delete(cc);
+    }
+  }
+
+  public static class WebsafeAcls {
+    public final List<TableAcl> acls;
+
+    public final String websafeRefetchCursor;
+    public final String websafeBackwardCursor;
+    public final String websafeResumeCursor;
+    public final boolean hasMore;
+    public final boolean hasPrior;
+
+    public WebsafeAcls(List<TableAcl> acls,
+                       String websafeRefetchCursor, String websafeBackwardCursor, String websafeResumeCursor,
+                       boolean hasMore, boolean hasPrior) {
+      this.acls = acls;
+      this.websafeRefetchCursor = websafeRefetchCursor;
+      this.websafeBackwardCursor = websafeBackwardCursor;
+      this.websafeResumeCursor = websafeResumeCursor;
+      this.hasMore = hasMore;
+      this.hasPrior = hasPrior;
     }
   }
 }

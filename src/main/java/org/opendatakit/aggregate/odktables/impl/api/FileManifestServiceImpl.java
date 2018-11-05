@@ -18,16 +18,12 @@ package org.opendatakit.aggregate.odktables.impl.api;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
-
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.FileManifestManager;
 import org.opendatakit.aggregate.odktables.api.FileManifestService;
@@ -44,6 +40,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The implementation of the file manifest service. Handles the actual requests
@@ -81,7 +79,7 @@ public class FileManifestServiceImpl implements FileManifestService {
 
   @Override
   public Response getAppLevelFileManifest(HttpHeaders httpHeaders,
-      @PathParam("odkClientVersion") String odkClientVersion)
+                                          @PathParam("odkClientVersion") String odkClientVersion)
       throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);
@@ -155,7 +153,7 @@ public class FileManifestServiceImpl implements FileManifestService {
 
   @Override
   public Response getTableIdFileManifest(HttpHeaders httpHeaders,
-      @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId)
+                                         @PathParam("odkClientVersion") String odkClientVersion, @PathParam("tableId") String tableId)
       throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     FileManifestManager manifestManager = new FileManifestManager(appId, odkClientVersion, cc);

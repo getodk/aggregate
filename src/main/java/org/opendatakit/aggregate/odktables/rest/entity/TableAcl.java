@@ -40,8 +40,7 @@ public class TableAcl implements Comparable<TableAcl> {
   }
 
   /**
-   * @param scope
-   *          the scope to set
+   * @param scope the scope to set
    */
   public void setScope(Scope scope) {
     this.scope = scope;
@@ -55,8 +54,7 @@ public class TableAcl implements Comparable<TableAcl> {
   }
 
   /**
-   * @param role
-   *          the role to set
+   * @param role the role to set
    */
   public void setRole(TableRole role) {
     this.role = role;
@@ -115,11 +113,11 @@ public class TableAcl implements Comparable<TableAcl> {
 
   @Override
   public int compareTo(TableAcl arg0) {
-    if ( arg0 == null ) {
+    if (arg0 == null) {
       return -1;
     }
     int outcome = this.getRole().compareTo(arg0.getRole());
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
     outcome = this.getScope().compareTo(arg0.getScope());

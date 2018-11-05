@@ -12,7 +12,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
  * of a REST request.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public interface TablesUserPermissions {
 
@@ -23,11 +22,9 @@ public interface TablesUserPermissions {
    *
    * @param appId
    * @param tableId
-   * @param permission
-   *          the permission to check
+   * @param permission the permission to check
    * @throws ODKDatastoreException
-   * @throws PermissionDeniedException
-   *           if the current user does not have the permission
+   * @throws PermissionDeniedException if the current user does not have the permission
    */
   public abstract void checkPermission(String appId, String tableId, TablePermission permission)
       throws ODKDatastoreException, PermissionDeniedException;
@@ -38,8 +35,7 @@ public interface TablesUserPermissions {
    *
    * @param appId
    * @param tableId
-   * @param permission
-   *          the permission to check
+   * @param permission the permission to check
    * @return true if the user has the given permission, false otherwise
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -52,15 +48,12 @@ public interface TablesUserPermissions {
    *
    * @param appId
    * @param tableId
-   * @param permission
-   *          the permission that guards access to the row. Should be one of
-   *          {@link TablePermission#READ_ROW},
-   *          {@link TablePermission#WRITE_ROW}, or
-   *          {@link TablePermission#DELETE_ROW}.
-   * @param rowId
-   *          the row to check
-   * @param filterScope
-   *          the filter scope bound to that row
+   * @param permission  the permission that guards access to the row. Should be one of
+   *                    {@link TablePermission#READ_ROW},
+   *                    {@link TablePermission#WRITE_ROW}, or
+   *                    {@link TablePermission#DELETE_ROW}.
+   * @param rowId       the row to check
+   * @param filterScope the filter scope bound to that row
    * @return
    * @throws ODKDatastoreException
    * @throws ODKEntityNotFoundException

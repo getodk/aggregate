@@ -16,21 +16,19 @@
 package org.opendatakit.aggregate.odktables.impl.api.wink;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.wink.server.internal.servlet.contentencode.ContentEncodingRequestFilter;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.security.Realm;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GaeAwareContentEncodingRequestFilter extends ContentEncodingRequestFilter {
 
@@ -38,7 +36,7 @@ public class GaeAwareContentEncodingRequestFilter extends ContentEncodingRequest
 
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-      FilterChain chain) throws IOException, ServletException {
+                       FilterChain chain) throws IOException, ServletException {
 
     if (servletRequest instanceof HttpServletRequest) {
 

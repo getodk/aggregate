@@ -20,9 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
@@ -31,6 +28,8 @@ import org.opendatakit.common.persistence.Query.FilterOperation;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DeleteHelper {
 
@@ -45,7 +44,7 @@ public class DeleteHelper {
    * of the keys in the supplied list (the supplied list is easier to construct
    * in retrieval order, and we generally want to delete using a
    * reverse-retrieval order).
-   * 
+   *
    * @param keys
    * @param cc
    * @throws ODKDatastoreException
@@ -117,8 +116,8 @@ public class DeleteHelper {
   }
 
   public static void deleteDamagedSubmission(TopLevelDynamicBase tle,
-      Set<DynamicCommonFieldsBase> backingObjects, CallingContext cc) throws ODKDatastoreException {
-    
+                                             Set<DynamicCommonFieldsBase> backingObjects, CallingContext cc) throws ODKDatastoreException {
+
     Logger logger = LoggerFactory.getLogger(DeleteHelper.class);
 
     Set<DynamicDocumentBase> documents = new TreeSet<DynamicDocumentBase>(

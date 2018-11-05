@@ -1,9 +1,9 @@
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
@@ -15,9 +15,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
@@ -39,17 +36,17 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("")
 public class OdkTablesImpl implements OdkTables {
-  
+
   private static final ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public Response getAppNames(@Context ServletContext sc, @Context HttpServletRequest req,
-      @Context HttpHeaders httpHeaders) throws ODKDatastoreException {
+                              @Context HttpHeaders httpHeaders) throws ODKDatastoreException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
@@ -64,7 +61,7 @@ public class OdkTablesImpl implements OdkTables {
 
   @Override
   public Response getOdkClientVersions(ServletContext sc, HttpServletRequest req,
-      HttpHeaders httpHeaders, UriInfo info, String appId) throws AppNameMismatchException,
+                                       HttpHeaders httpHeaders, UriInfo info, String appId) throws AppNameMismatchException,
       PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
@@ -118,8 +115,7 @@ public class OdkTablesImpl implements OdkTables {
 
   @Override
   public Response getPrivilegesInfo(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
-      @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException
-  {
+                                    @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
@@ -128,7 +124,7 @@ public class OdkTablesImpl implements OdkTables {
     if (!preferencesAppId.equals(appId)) {
       throw new AppNameMismatchException("AppName (" + appId + ") differs");
     }
-    
+
     try {
       PrivilegesInfo privilegesInfo = SecurityServiceUtil.getRolesAndDefaultGroup(cc);
 
@@ -136,19 +132,19 @@ public class OdkTablesImpl implements OdkTables {
       // log that the user that has been verified on that installation.
       String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
       try {
-        if ( installationId != null ) {
+        if (installationId != null) {
           DbInstallationInteractionLog.recordVerificationEntry(installationId, cc);
         }
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         LoggerFactory.getLogger(OdkTablesImpl.class).warn("Unable to write verification log entry for " +
-                    installationId + " user " + cc.getCurrentUser().getUriUser(), e);
+            installationId + " user " + cc.getCurrentUser().getUriUser(), e);
       }
 
       return Response.ok(privilegesInfo)
           .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
           .header("Access-Control-Allow-Origin", "*")
           .header("Access-Control-Allow-Credentials", "true").build();
-    } catch ( Exception e ) {
+    } catch (Exception e) {
       Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
       log.error("Exception retrieving user privileges");
       e.printStackTrace();
@@ -160,11 +156,10 @@ public class OdkTablesImpl implements OdkTables {
           .header("Access-Control-Allow-Credentials", "true").build();
     }
   }
-  
+
   @Override
   public Response /*UserInfoList*/ getUsersInfo(@Context ServletContext sc, @Context HttpServletRequest req, @Context HttpHeaders httpHeaders,
-      @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException
-  {
+                                                @Context UriInfo info, @PathParam("appId") String appId) throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
     CallingContext cc = ContextFactory.getCallingContext(sc, req);
@@ -173,11 +168,11 @@ public class OdkTablesImpl implements OdkTables {
     if (!preferencesAppId.equals(appId)) {
       throw new AppNameMismatchException("AppName (" + appId + ") differs");
     }
-    
+
     PrivilegesInfo currentUserPrivileges = SecurityServiceUtil.getRolesAndDefaultGroup(cc);
-      
+
     boolean returnFullList = false;
-    for ( String grant : currentUserPrivileges.getRoles() ) {
+    for (String grant : currentUserPrivileges.getRoles()) {
       if (grant.equals(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.name()) ||
           grant.equals(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name()) ||
           grant.equals(GrantedAuthorityName.ROLE_SUPER_USER_TABLES.name())) {
@@ -185,62 +180,62 @@ public class OdkTablesImpl implements OdkTables {
         break;
       }
     }
-      
+
     // returned object (will be JSON serialized).
     ArrayList<UserInfo> listOfUsers = new ArrayList<UserInfo>();
 
-    if ( !returnFullList ) {
+    if (!returnFullList) {
       // only return ourself -- we don't have privileges to see everyone
       UserInfo userInfo = new UserInfo(currentUserPrivileges.getUser_id(),
           currentUserPrivileges.getFull_name(), currentUserPrivileges.getRoles());
       listOfUsers.add(userInfo);
     } else {
-        // we have privileges to see all users -- return the full mapping
-          ArrayList<UserSecurityInfo> allUsers;
-          try {
-            allUsers = SecurityServiceUtil.getAllUsers(true, cc);
-          } catch (AccessDeniedException e) {
-            Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
-            log.error("AccessDeniedException retrieving user list");
-            e.printStackTrace();
+      // we have privileges to see all users -- return the full mapping
+      ArrayList<UserSecurityInfo> allUsers;
+      try {
+        allUsers = SecurityServiceUtil.getAllUsers(true, cc);
+      } catch (AccessDeniedException e) {
+        Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
+        log.error("AccessDeniedException retrieving user list");
+        e.printStackTrace();
 
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity("AccessDeniedException retrieving user list.")
-                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Credentials", "true").build();
-          } catch (DatastoreFailureException e) {
-            Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
-            log.error("DatastoreFailureException retrieving user list");
-            e.printStackTrace();
+        return Response.status(Status.INTERNAL_SERVER_ERROR)
+            .entity("AccessDeniedException retrieving user list.")
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true").build();
+      } catch (DatastoreFailureException e) {
+        Logger log = LoggerFactory.getLogger(OdkTablesImpl.class);
+        log.error("DatastoreFailureException retrieving user list");
+        e.printStackTrace();
 
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity("DatastoreFailureException retrieving user list.")
-                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Credentials", "true").build();
-          }
-          
-          for (UserSecurityInfo i : allUsers ) {
-            if ( i.getType() == UserType.ANONYMOUS ) {
-                continue;
-            }
-            UserInfo userInfo = SecurityServiceUtil.createUserInfo(cc, i);
-            listOfUsers.add(userInfo);
-          }
+        return Response.status(Status.INTERNAL_SERVER_ERROR)
+            .entity("DatastoreFailureException retrieving user list.")
+            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Credentials", "true").build();
       }
-      
-      UserInfoList userInfoList = new UserInfoList(listOfUsers);
-      
-      return Response.ok(userInfoList)
-          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-          .header("Access-Control-Allow-Origin", "*")
-          .header("Access-Control-Allow-Credentials", "true").build();
+
+      for (UserSecurityInfo i : allUsers) {
+        if (i.getType() == UserType.ANONYMOUS) {
+          continue;
+        }
+        UserInfo userInfo = SecurityServiceUtil.createUserInfo(cc, i);
+        listOfUsers.add(userInfo);
+      }
+    }
+
+    UserInfoList userInfoList = new UserInfoList(listOfUsers);
+
+    return Response.ok(userInfoList)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
   public Response postInstallationInfo(ServletContext sc, HttpServletRequest req,
-      HttpHeaders httpHeaders, UriInfo info, String appId, Object body) throws AppNameMismatchException,
+                                       HttpHeaders httpHeaders, UriInfo info, String appId, Object body) throws AppNameMismatchException,
       PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
@@ -256,25 +251,25 @@ public class OdkTablesImpl implements OdkTables {
       // log that the user that has been changing the configuration from that installation.
       String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
       try {
-        if ( installationId != null ) {
-          DbInstallationInteractionLog.recordDeviceInfoEntry(installationId, 
+        if (installationId != null) {
+          DbInstallationInteractionLog.recordDeviceInfoEntry(installationId,
               mapper.writeValueAsString(body), cc);
         }
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         LoggerFactory.getLogger(OdkTablesImpl.class).error("(ignored) Unable to recordChangeConfigurationEntry", e);
       }
     }
-    
+
     // no body in response
     return Response.ok()
-            .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-            .header("Access-Control-Allow-Origin", "*")
-            .header("Access-Control-Allow-Credentials", "true").build();
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
   public FileManifestServiceImpl getFileManifestService(ServletContext sc, HttpServletRequest req,
-      HttpHeaders httpHeaders, UriInfo info, String appId) throws AppNameMismatchException,
+                                                        HttpHeaders httpHeaders, UriInfo info, String appId) throws AppNameMismatchException,
       PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
@@ -290,7 +285,7 @@ public class OdkTablesImpl implements OdkTables {
 
   @Override
   public FileServiceImpl getFilesService(ServletContext sc, HttpServletRequest req,
-      HttpHeaders httpHeaders, UriInfo info, String appId) throws AppNameMismatchException,
+                                         HttpHeaders httpHeaders, UriInfo info, String appId) throws AppNameMismatchException,
       PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     ServiceUtils.examineRequest(sc, req, httpHeaders);
@@ -306,8 +301,8 @@ public class OdkTablesImpl implements OdkTables {
 
   @Override
   public Response /* TableResourceList */ getTables(ServletContext sc, HttpServletRequest req,
-      HttpHeaders httpHeaders, UriInfo info, String appId,
-      @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
+                                                    HttpHeaders httpHeaders, UriInfo info, String appId,
+                                                    @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
       throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException,
       ODKTaskLockException {
 
@@ -325,7 +320,7 @@ public class OdkTablesImpl implements OdkTables {
 
   @Override
   public TableServiceImpl getTablesService(ServletContext sc, HttpServletRequest req,
-      HttpHeaders httpHeaders, UriInfo info, String appId, String tableId)
+                                           HttpHeaders httpHeaders, UriInfo info, String appId, String tableId)
       throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException,
       ODKTaskLockException {
 

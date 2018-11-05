@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.submission.type;
 
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.submission.SubmissionField;
@@ -39,7 +38,7 @@ public abstract class MetadataBaseType<T> implements SubmissionField<T> {
   protected final FormElementModel metadataType;
 
   MetadataBaseType(DynamicCommonFieldsBase backingObject, FormElementModel metadataType,
-      DataField field) {
+                   DataField field) {
     this.backingObject = backingObject;
     this.field = field;
     this.metadataType = metadataType;
@@ -88,7 +87,7 @@ public abstract class MetadataBaseType<T> implements SubmissionField<T> {
 
   @Override
   public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType,
-      String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
+                                                     String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
     throw new IllegalStateException("unexpected call to setValueFromByteArray");
   }
 

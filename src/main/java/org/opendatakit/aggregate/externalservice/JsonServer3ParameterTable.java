@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010-2013 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -42,6 +42,7 @@ public final class JsonServer3ParameterTable extends CommonFieldsBase {
 
   private static final DataField BINARY_OPTION_PROPERTY = new DataField("BINARY_OPTION",
       DataField.DataType.STRING, true, 4096L);
+  private static JsonServer3ParameterTable relation = null;
 
   /**
    * Construct a relation prototype. Only called via
@@ -66,6 +67,20 @@ public final class JsonServer3ParameterTable extends CommonFieldsBase {
    */
   private JsonServer3ParameterTable(JsonServer3ParameterTable ref, User user) {
     super(ref, user);
+  }
+
+  public static synchronized final JsonServer3ParameterTable assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      JsonServer3ParameterTable relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      relationPrototype = new JsonServer3ParameterTable(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
   }
 
   // Only called from within the persistence layer.
@@ -113,22 +128,6 @@ public final class JsonServer3ParameterTable extends CommonFieldsBase {
     if (!setStringField(BINARY_OPTION_PROPERTY, value.name())) {
       throw new IllegalArgumentException("overflow BinaryOption");
     }
-  }
-
-  private static JsonServer3ParameterTable relation = null;
-
-  public static synchronized final JsonServer3ParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      JsonServer3ParameterTable relationPrototype;
-      Datastore ds = cc.getDatastore();
-      User user = cc.getUserService().getDaemonAccountUser();
-      relationPrototype = new JsonServer3ParameterTable(ds.getDefaultSchemaName());
-      ds.assertRelation(relationPrototype, user); // may throw exception...
-      // at this point, the prototype has become fully populated
-      relation = relationPrototype; // set static variable only upon success...
-    }
-    return relation;
   }
 
 }

@@ -17,13 +17,11 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.util.Enumeration;
 import java.util.List;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
-
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
 /**
@@ -31,14 +29,15 @@ import org.opendatakit.aggregate.odktables.rest.ApiConstants;
  * clients so that we can debug protocols more easily.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class ServiceUtils {
 
   private ServiceUtils() {
-  };
+  }
 
-  @SuppressWarnings({ "rawtypes", "unused" })
+  ;
+
+  @SuppressWarnings({"rawtypes", "unused"})
   public static void examineRequest(ServletContext sc, HttpServletRequest req) {
     Enumeration headers = req.getHeaderNames();
     StringBuilder b = new StringBuilder();
@@ -64,9 +63,9 @@ public class ServiceUtils {
 
   @SuppressWarnings("unused")
   public static void examineRequest(ServletContext sc, HttpServletRequest req, HttpHeaders httpHeaders) {
-    MultivaluedMap<String,String> headers = httpHeaders.getRequestHeaders();
+    MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
     StringBuilder b = new StringBuilder();
-    for ( String headerName : headers.keySet() ) {
+    for (String headerName : headers.keySet()) {
       List<String> fieldValues = headers.get(headerName);
       for (String fieldValue : fieldValues) {
         b.append(headerName).append(": ").append(fieldValue).append("\n");

@@ -27,13 +27,12 @@ import java.io.Serializable;
  * same function needs to be created for the server.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableAclClient implements Serializable {
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = 3563986876354300986L;
 
   private ScopeClient scope;
@@ -57,8 +56,7 @@ public class TableAclClient implements Serializable {
   }
 
   /**
-   * @param scope
-   *          the scope to set
+   * @param scope the scope to set
    */
   public void setScope(ScopeClient scope) {
     this.scope = scope;
@@ -72,8 +70,7 @@ public class TableAclClient implements Serializable {
   }
 
   /**
-   * @param role
-   *          the role to set
+   * @param role the role to set
    */
   public void setRole(TableRoleClient role) {
     this.role = role;

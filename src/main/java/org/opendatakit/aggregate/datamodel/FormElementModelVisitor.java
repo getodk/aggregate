@@ -20,16 +20,15 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * Visitor interface for the {@link FormElementModel#depthFirstTraversal }
  * method.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public interface FormElementModelVisitor {
 
   /**
    * Invoked when traversing a form element without children (includes selectN,
    * binary and geopoint).
-   * 
+   *
    * @param element
    * @param cc
    * @return true if the traversal should immediately stop, false otherwise.
@@ -38,10 +37,9 @@ public interface FormElementModelVisitor {
 
   /**
    * Invoked when entering a form element with children (e.g., group or repeat).
-   * 
+   *
    * @param element
    * @param cc
-   * 
    * @return true if the traversal should immediately stop, false otherwise.
    */
   public boolean enter(FormElementModel element, CallingContext cc);
@@ -51,23 +49,20 @@ public interface FormElementModelVisitor {
    * predicate is used to determine how many repetitions of a repeat group are
    * manifest within a given submission. The return value does not figure into
    * the short-circuit logic of the enter() and traverse() methods.
-   * 
-   * @param element
-   *          - a repeat element
-   * @param ordinal
-   *          - the 1st, 2nd, etc. repeat
+   *
+   * @param element - a repeat element
+   * @param ordinal - the 1st, 2nd, etc. repeat
    * @param cc
    * @return true if the children should be traversed (this ordinal exists),
-   *         false otherwise.
+   *     false otherwise.
    */
   public boolean descendIntoRepeat(FormElementModel element, int ordinal, CallingContext cc);
 
   /**
    * Invoked after all completing the traversal of all the children of a
    * concrete instance of a repeat element.
-   * 
-   * @param element
-   *          - a repeat element
+   *
+   * @param element - a repeat element
    * @param ordinal
    * @param cc
    */
@@ -75,7 +70,7 @@ public interface FormElementModelVisitor {
 
   /**
    * Invoked when a form element with children is popped from the stack.
-   * 
+   *
    * @param element
    * @param cc
    */

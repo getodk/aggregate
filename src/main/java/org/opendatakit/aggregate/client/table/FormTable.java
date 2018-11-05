@@ -16,9 +16,14 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.popups.MediaFileListPopup;
 import org.opendatakit.aggregate.client.preferences.Preferences;
@@ -30,13 +35,6 @@ import org.opendatakit.aggregate.client.widgets.ExportButton;
 import org.opendatakit.aggregate.client.widgets.PublishButton;
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 import org.opendatakit.common.security.client.UserSecurityInfo;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
 
 public class FormTable extends FlexTable {
 

@@ -16,39 +16,37 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
 /**
  * The XML document that represents a column. This is the XML representation of
  * a column definition as stored in the (keep this fully qualified!)
  * {@link org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions}
  * table.
- *
+ * <p>
  * Removed all JAXB annotations -- these cause issues on Android 4.2 and earlier.
  *
  * @author dylan price?
  * @author sudar.sam@gmail.com
- *
  */
 public class Column implements Serializable {
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -6624997293167731653L;
 
   /**
    * The tableId containing this elementKey
    */
   /**
-   * The fully qualified key for this element. This is the element's database 
+   * The fully qualified key for this element. This is the element's database
    * column name. For composite types whose elements are individually retained
-   * (e.g., geopoint), this would be the elementName of the geopoint (e.g., 
-   * 'myLocation' concatenated with '_' and this elementName (e.g., 
+   * (e.g., geopoint), this would be the elementName of the geopoint (e.g.,
+   * 'myLocation' concatenated with '_' and this elementName (e.g.,
    * 'myLocation_latitude').
-   *
+   * <p>
    * Never longer than 58 characters.
    * Never a SQL or SQLite reserved word
    * Satisfies this regex: '^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)*$'
@@ -59,7 +57,7 @@ public class Column implements Serializable {
    * The name by which this element is referred. For composite types whose
    * elements are individually retained (e.g., geopoint), this would be simply
    * 'latitude'
-   *
+   * <p>
    * Never longer than 58 characters.
    * Never a SQL or SQLite reserved word
    * Satisfies this regex: '^\\p{L}\\p{M}*(\\p{L}\\p{M}*|\\p{Nd}|_)*$'
@@ -69,62 +67,61 @@ public class Column implements Serializable {
 
   /**
    * This is the ColumnType of the field. It is either:
-   *    boolean
-   *    integer
-   *    number
-   *    configpath
-   *    rowpath
-   *    array
-   *    array(len)
-   *    string
-   *    string(len)
-   *    typename
-   *    typename(len)
-   *    
-   *    or
-   *    
-   *    typename:datatype
-   *    typename:datatype(len)
-   *    
-   *    where datatype can be one of boolean, integer, number, array, object
-   *
-   *    Where:
-   *
-   *    'typename' is any other alpha-numeric name (user-definable data type).
-   *
-   *    The (len) attribute, if present, identifies the VARCHAR storage
-   *    requirements for the field when the field is a unit of retention.
-   *    Ignored if not a unit of retention.
-   *
-   *    The server stores:
-   *
-   *      integer as a 32-bit integer.
-   *
-   *      number as a double-precision floating point value.
-   *
-   *      configpath indicates that it is a relative path to a file under the 'config'
-   *             directory in the 'new' directory structure. i.e., the relative path is
-   *             rooted from:
-   *                 /sdcard/opendatakit/{appId}/config/
-   *
-   *      rowpath indicates that it is a relative path to a file under the row's attachment
-   *             directory in the 'new' directory structure. i.e., the relative path is
-   *             rooted from:
-   *                 /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}/
-   *
-   *      array is a JSON serialization expecting one child element key
-   *            that defines the data type in the array.  Array fields
-   *            MUST be a unit of retention (or be nested within one).
-   *
-   *      string is a string value
-   *
-   *      anything else, if it has no child element key, it is a string
-   *            (simple user-defined data type). Unless a datatype is specified.
-   *
-   *      anything else, if it has one or more child element keys, is a
-   *            JSON serialization of an object containing those keys
-   *            (complex user-defined data type).
-   *
+   * boolean
+   * integer
+   * number
+   * configpath
+   * rowpath
+   * array
+   * array(len)
+   * string
+   * string(len)
+   * typename
+   * typename(len)
+   * <p>
+   * or
+   * <p>
+   * typename:datatype
+   * typename:datatype(len)
+   * <p>
+   * where datatype can be one of boolean, integer, number, array, object
+   * <p>
+   * Where:
+   * <p>
+   * 'typename' is any other alpha-numeric name (user-definable data type).
+   * <p>
+   * The (len) attribute, if present, identifies the VARCHAR storage
+   * requirements for the field when the field is a unit of retention.
+   * Ignored if not a unit of retention.
+   * <p>
+   * The server stores:
+   * <p>
+   * integer as a 32-bit integer.
+   * <p>
+   * number as a double-precision floating point value.
+   * <p>
+   * configpath indicates that it is a relative path to a file under the 'config'
+   * directory in the 'new' directory structure. i.e., the relative path is
+   * rooted from:
+   * /sdcard/opendatakit/{appId}/config/
+   * <p>
+   * rowpath indicates that it is a relative path to a file under the row's attachment
+   * directory in the 'new' directory structure. i.e., the relative path is
+   * rooted from:
+   * /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}/
+   * <p>
+   * array is a JSON serialization expecting one child element key
+   * that defines the data type in the array.  Array fields
+   * MUST be a unit of retention (or be nested within one).
+   * <p>
+   * string is a string value
+   * <p>
+   * anything else, if it has no child element key, it is a string
+   * (simple user-defined data type). Unless a datatype is specified.
+   * <p>
+   * anything else, if it has one or more child element keys, is a
+   * JSON serialization of an object containing those keys
+   * (complex user-defined data type).
    */
   private String elementType;
 
@@ -135,16 +132,16 @@ public class Column implements Serializable {
    * value stored in this elementKey is a JSON serialization of
    * either an array or an object. Otherwise, it is either an
    * integer, number or string field.
-   *
+   * <p>
    * If the elementType is 'array', the serialization is an
    * array and the nested field is retrieved via a subscript.
-   *
+   * <p>
    * Otherwise, the serialization is an object and the nested
    * field is retrieved via the elementName of that field.
    */
   @JsonProperty(required = false)
   private String listChildElementKeys;
-  
+
   /**
    * If true, then this elementKey is a column in the backing
    * database table. If false, then either the elementKey is a
@@ -164,17 +161,17 @@ public class Column implements Serializable {
    * adjacent columns, or what exactly. Either way, its implementation should be
    * brought into alignment with ColumnClient, which has both display and
    * backing names when the answer to the above questions is decided.
-   * 
+   *
    * @param tableId
    * @param elementKey
    * @param elementName
    * @param elementType
    * @param listChildElementKeys - a JSON serialization of a list of child
-   *                 elementKey values. These must be in the (alphabetical) order 
-   *                 produced by Javascript sort().
+   *                             elementKey values. These must be in the (alphabetical) order
+   *                             produced by Javascript sort().
    */
   public Column(final String elementKey, final String elementName,
-      final String elementType, final String listChildElementKeys) {
+                final String elementType, final String listChildElementKeys) {
     this.elementKey = elementKey;
     this.elementName = elementName;
     this.elementType = elementType;
@@ -199,7 +196,7 @@ public class Column implements Serializable {
   public String getListChildElementKeys() {
     return this.listChildElementKeys;
   }
-  
+
   @Override
   public String toString() {
     return "Column(elementKey=" + this.getElementKey()
@@ -235,6 +232,6 @@ public class Column implements Serializable {
         && (elementName == null ? other.elementName == null : elementName.equals(other.elementName))
         && (elementType == null ? other.elementType == null : elementType.equals(other.elementType))
         && (listChildElementKeys == null ? other.listChildElementKeys == null
-            : listChildElementKeys.equals(other.listChildElementKeys));
+        : listChildElementKeys.equals(other.listChildElementKeys));
   }
 }

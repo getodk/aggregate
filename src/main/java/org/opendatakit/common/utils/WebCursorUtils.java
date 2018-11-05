@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -18,7 +18,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-
 import org.javarosa.xform.parse.XFormParser;
 import org.kxml2.io.KXmlParser;
 import org.kxml2.io.KXmlSerializer;
@@ -31,9 +30,9 @@ import org.xmlpull.v1.XmlPullParser;
 
 /**
  * Useful methods for parsing boolean and date values and formatting dates.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class WebCursorUtils {
 
@@ -63,9 +62,9 @@ public class WebCursorUtils {
     c = d.createElement(WebCursorUtils.XML_TAG_NAMESPACE, WebUtils.IS_FORWARD_CURSOR_VALUE_TAG);
     c.addChild(0, Node.TEXT, Boolean.toString(cursor.isForwardCursor()));
     e.addChild(idx++, Node.ELEMENT, c);
-  
+
     ByteArrayOutputStream ba = new ByteArrayOutputStream();
-  
+
     KXmlSerializer serializer = new KXmlSerializer();
     try {
       serializer.setOutput(ba, HtmlConsts.UTF8_ENCODE);
@@ -77,7 +76,7 @@ public class WebCursorUtils {
       e1.printStackTrace();
       throw new IllegalStateException("unexpected failure");
     }
-  
+
     try {
       return ba.toString(HtmlConsts.UTF8_ENCODE);
     } catch (UnsupportedEncodingException e1) {
@@ -130,38 +129,38 @@ public class WebCursorUtils {
       e.printStackTrace();
       throw new IllegalArgumentException("unable to parse websafeCursor");
     }
-  
+
     Element manifestElement = doc.getRootElement();
     if (!manifestElement.getName().equals(WebUtils.CURSOR_TAG)) {
       WebUtils.logger.error("websafe cursor root element is not <cursor> -- was "
           + manifestElement.getName());
       throw new IllegalArgumentException("websafe cursor root element is not <cursor>");
     }
-  
+
     String namespace = manifestElement.getNamespace();
     if (!WebCursorUtils.XML_TAG_NAMESPACE.equals(namespace)) {
       WebUtils.logger.error("Root element Namespace is incorrect: " + namespace);
       throw new IllegalArgumentException("websafe cursor root element namespace invalid");
     }
-  
+
     String attributeName = null;
     String attributeValue = null;
     String uriLastReturnedValue = null;
     boolean isForwardCursor = true;
-  
+
     int nElements = manifestElement.getChildCount();
     for (int i = 0; i < nElements; ++i) {
       if (manifestElement.getType(i) != Element.ELEMENT) {
         // e.g., whitespace (text)
         continue;
       }
-  
+
       Element child = (Element) manifestElement.getElement(i);
       if (!WebCursorUtils.XML_TAG_NAMESPACE.equals(child.getNamespace())) {
         // someone else's extension?
         continue;
       }
-  
+
       String name = child.getName();
       if (name.equalsIgnoreCase(WebUtils.ATTRIBUTE_NAME_TAG)) {
         attributeName = XFormParser.getXMLText(child, true);
@@ -186,11 +185,11 @@ public class WebCursorUtils {
         }
       }
     }
-  
+
     if (attributeName == null || attributeValue == null) {
       throw new IllegalArgumentException("null value for websafeCursor element");
     }
-  
+
     return new QueryResumePoint(attributeName, attributeValue, uriLastReturnedValue,
         isForwardCursor);
   }

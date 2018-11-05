@@ -16,10 +16,10 @@
 
 package org.opendatakit.aggregate.odktables.impl.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.TreeSet;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
@@ -27,9 +27,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.TableManager;
 import org.opendatakit.aggregate.odktables.api.DataService;
 import org.opendatakit.aggregate.odktables.api.DiffService;
@@ -53,12 +50,12 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RealizedTableServiceImpl implements RealizedTableService {
   private static final Logger logger = LoggerFactory.getLogger(RealizedTableServiceImpl.class);
-  
+
   private static final ObjectMapper mapper = new ObjectMapper();
 
   private final ServletContext sc;
@@ -74,9 +71,9 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   private final CallingContext cc;
 
   public RealizedTableServiceImpl(ServletContext sc, HttpServletRequest req,
-      HttpHeaders headers, UriInfo info,
-      String appId, String tableId, String schemaETag, boolean notActiveSchema, 
-      TablesUserPermissions userPermissions, TableManager tm, CallingContext cc)
+                                  HttpHeaders headers, UriInfo info,
+                                  String appId, String tableId, String schemaETag, boolean notActiveSchema,
+                                  TablesUserPermissions userPermissions, TableManager tm, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     this.sc = sc;
     this.req = req;
@@ -96,7 +93,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
       PermissionDeniedException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -108,10 +105,10 @@ public class RealizedTableServiceImpl implements RealizedTableService {
       // log that the user that has been changing the configuration from that installation.
       String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
       try {
-        if ( installationId != null ) {
+        if (installationId != null) {
           DbInstallationInteractionLog.recordChangeConfigurationEntry(installationId, tableId, cc);
         }
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         LoggerFactory.getLogger(FileServiceImpl.class).error("Unable to recordChangeConfigurationEntry", e);
       }
     }
@@ -125,7 +122,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   @Override
   public DataService getData() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException {
 
-    if ( notActiveSchema ) {
+    if (notActiveSchema) {
       throw new TableNotFoundException(TableServiceImpl.ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     DataService service = new DataServiceImpl(appId, tableId, schemaETag, info, userPermissions, cc);
@@ -135,7 +132,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   @Override
   public DiffService getDiff() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException {
 
-    if ( notActiveSchema ) {
+    if (notActiveSchema) {
       throw new TableNotFoundException(TableServiceImpl.ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     DiffService service = new DiffServiceImpl(appId, tableId, schemaETag, info, userPermissions, cc);
@@ -145,7 +142,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   @Override
   public QueryService getQuery() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException {
 
-    if ( notActiveSchema ) {
+    if (notActiveSchema) {
       throw new TableNotFoundException(TableServiceImpl.ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     QueryService service = new QueryServiceImpl(appId, tableId, schemaETag, info, userPermissions, cc);
@@ -160,7 +157,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   @Override
   public InstanceFileService getInstanceFiles(@PathParam("rowId") String rowId) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException {
 
-    if ( notActiveSchema ) {
+    if (notActiveSchema) {
       throw new TableNotFoundException(TableServiceImpl.ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     InstanceFileService service = new InstanceFileServiceImpl(appId, tableId, schemaETag, rowId, info, userPermissions, cc);
@@ -170,7 +167,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   @Override
   public Response getDefinition() throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, AppNameMismatchException, TableNotFoundException {
 
-    if ( notActiveSchema ) {
+    if (notActiveSchema) {
       throw new TableNotFoundException(TableServiceImpl.ERROR_TABLE_NOT_FOUND + "\n" + tableId);
     }
     TableDefinition definition = tm.getTableDefinition(tableId);
@@ -193,7 +190,7 @@ public class RealizedTableServiceImpl implements RealizedTableService {
   }
 
   @Override
-  public Response /*OK*/ postInstallationStatus(Object syncDetails) 
+  public Response /*OK*/ postInstallationStatus(Object syncDetails)
       throws AppNameMismatchException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
 
     {
@@ -201,10 +198,10 @@ public class RealizedTableServiceImpl implements RealizedTableService {
       // log that the user that has been changing the configuration from that installation.
       String installationId = req.getHeader(ApiConstants.OPEN_DATA_KIT_INSTALLATION_HEADER);
       try {
-        if ( installationId != null ) {
+        if (installationId != null) {
           DbInstallationInteractionLog.recordSyncStatusEntry(installationId, tableId, mapper.writeValueAsString(syncDetails), cc);
         }
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         LoggerFactory.getLogger(RealizedTableServiceImpl.class).error("Unable to recordSyncStatusEntry", e);
       }
     }

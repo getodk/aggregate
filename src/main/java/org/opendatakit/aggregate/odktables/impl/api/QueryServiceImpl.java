@@ -21,12 +21,10 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.opendatakit.aggregate.odktables.DataManager;
 import org.opendatakit.aggregate.odktables.DataManager.WebsafeRows;
 import org.opendatakit.aggregate.odktables.api.DataService;
@@ -50,7 +48,7 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
 public class QueryServiceImpl implements QueryService {
-  
+
   private final String schemaETag;
   private final DataManager dm;
   private final UriInfo info;
@@ -61,7 +59,7 @@ public class QueryServiceImpl implements QueryService {
     this.dm = new DataManager(appId, tableId, userPermissions, cc);
     this.info = info;
   }
-  
+
   @Override
   public Response getRowsInTimeRangeBasedOnLastUpdateDate(@QueryParam(QUERY_START_TIME) String startTime, @QueryParam(QUERY_END_TIME) String endTime, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException,
       PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException, ParseException {
@@ -89,7 +87,7 @@ public class QueryServiceImpl implements QueryService {
         websafeResult.hasMore, websafeResult.hasPrior);
     return Response.ok(rowResourceList).build();
   }
-  
+
 
   private String getTableUri() {
     String appId = dm.getAppId();
@@ -105,7 +103,7 @@ public class QueryServiceImpl implements QueryService {
       throw new IllegalArgumentException("unable to convert URL ");
     }
   }
-  
+
   private RowResource getResource(Row row) {
     String appId = dm.getAppId();
     String tableId = dm.getTableId();

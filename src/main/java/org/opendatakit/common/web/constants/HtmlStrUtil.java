@@ -24,11 +24,8 @@ package org.opendatakit.common.web.constants;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class HtmlStrUtil {
-
-  private static final int INPUT_WIDGET_SIZE_LIMIT = 80;// same size as URI...
 
   protected static final String HREF = "href";
   protected static final String A = "a";
@@ -43,6 +40,7 @@ public class HtmlStrUtil {
   protected static final String ATTR_SIZE = "size";
   protected static final String ATTR_CHECKED = "checked";
   protected static final String ATTR_SRC = "src";
+  private static final int INPUT_WIDGET_SIZE_LIMIT = 80;// same size as URI...
 
   public static final String createEndTag(String tag) {
     return HtmlConsts.BEGIN_CLOSE_TAG + tag + HtmlConsts.END_TAG;
@@ -88,30 +86,30 @@ public class HtmlStrUtil {
     html.append(BasicConsts.SPACE);
     html.append(createAttribute(ATTR_SIZE, Integer.toString(size)));
 
-    if ( extras != null) {
-        html.append(BasicConsts.SPACE);
-        html.append(extras);
+    if (extras != null) {
+      html.append(BasicConsts.SPACE);
+      html.append(extras);
     }
 
-    if ( isChecked ) {
-        html.append(BasicConsts.SPACE);
-        html.append(ATTR_CHECKED);
+    if (isChecked) {
+      html.append(BasicConsts.SPACE);
+      html.append(ATTR_CHECKED);
     }
     html.append(HtmlConsts.END_SELF_CLOSING_TAG);
     return html.toString();
   }
 
   public static final String createInput(String type, String name, String value, int size) {
-      return createInput(type, name, value, false, size, null);
+    return createInput(type, name, value, false, size, null);
   }
 
   public static final String createInput(String type, String name, String value) {
-      return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT, null);
+    return createInput(type, name, value, false, INPUT_WIDGET_SIZE_LIMIT, null);
   }
 
   public static final String createNonSavingPasswordInput(String name) {
-      return createInput(HtmlConsts.INPUT_TYPE_PASSWORD, name, "",
-                            false, INPUT_WIDGET_SIZE_LIMIT, "autocomplete=\"off\"");
+    return createInput(HtmlConsts.INPUT_TYPE_PASSWORD, name, "",
+        false, INPUT_WIDGET_SIZE_LIMIT, "autocomplete=\"off\"");
   }
 
   public static final String createInput(String type, String name, String value, boolean checked) {

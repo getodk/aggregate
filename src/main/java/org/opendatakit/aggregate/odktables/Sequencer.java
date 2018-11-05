@@ -25,22 +25,21 @@ import org.opendatakit.common.web.CallingContext;
 /**
  * Impose a strict ordering on the log entries associated with a file. The
  * ordering consists of two concatentated counters:
- *
+ * <p>
  * sequenceBase.counter
- *
+ * <p>
  * Where sequenceBase is a value that is fetched, incremented and written to the
  * datastore via
- *
+ * <p>
  * ServerPreferencesProperties.unsafeIncOdkTablesSequencerBase(cc).
- *
+ * <p>
  * This is obtained when the Sequencer is created, which is at the time the
  * update lock is obtained.
- *
+ * <p>
  * Counter is simply a counter held within this object instance to order the
  * updates occuring during the holding of the lock.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class Sequencer {
 
@@ -64,7 +63,7 @@ public class Sequencer {
 
   /**
    * Generate the next sequence value.
-   *
+   * <p>
    * Use seq1.compareTo(seq2) as the natural ordering of these values.
    *
    * @return

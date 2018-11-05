@@ -23,15 +23,14 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * API for creating a task to create/define a destination Google spreadsheet
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public interface WorksheetCreator {
 
-    public void createWorksheetTask(IForm form,
-          MiscTasks miscTasks, long attemptCount,
-            CallingContext cc)
-            throws ODKDatastoreException, ODKFormNotFoundException;
+  public void createWorksheetTask(IForm form,
+                                  MiscTasks miscTasks, long attemptCount,
+                                  CallingContext cc)
+      throws ODKDatastoreException, ODKFormNotFoundException;
 }

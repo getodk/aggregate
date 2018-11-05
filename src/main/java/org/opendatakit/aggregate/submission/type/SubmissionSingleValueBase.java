@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -18,7 +18,6 @@
 package org.opendatakit.aggregate.submission.type;
 
 import java.util.List;
-
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
@@ -31,12 +30,9 @@ import org.opendatakit.common.web.constants.BasicConsts;
 /**
  * Base class for type conversion
  *
+ * @param <T> a GAE datastore type
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
- * @param <T>
- *  a GAE datastore type
- * 
  */
 public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T> {
 
@@ -52,7 +48,7 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
     super(element);
     this.backingObject = backingObject;
   }
-    
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
@@ -61,9 +57,9 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
     if (!(obj instanceof SubmissionSingleValueBase<?>)) {
       return false;
     }
-    
+
     SubmissionSingleValueBase<?> other = (SubmissionSingleValueBase<?>) obj;
-    
+
     return super.equals(obj) && (backingObject == other.backingObject);
   }
 
@@ -72,23 +68,23 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
    */
   @Override
   public int hashCode() {
-    return super.hashCode() + backingObject.hashCode(); 
+    return super.hashCode() + backingObject.hashCode();
   }
-  
+
   /**
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     T value = getValue();
-    return super.toString() + FormatConsts.TO_STRING_DELIMITER 
-      + (value != null ? value.toString() : BasicConsts.EMPTY_STRING);
+    return super.toString() + FormatConsts.TO_STRING_DELIMITER
+        + (value != null ? value.toString() : BasicConsts.EMPTY_STRING);
   }
 
   @Override
   public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) {
   }
-  
+
   @Override
   public void persist(CallingContext cc) throws ODKEntityPersistException {
   }

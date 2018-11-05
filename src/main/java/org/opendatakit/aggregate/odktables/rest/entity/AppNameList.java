@@ -16,22 +16,20 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 /**
  * This holds a list of appNames.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
-@JacksonXmlRootElement(localName="appNames")
+@JacksonXmlRootElement(localName = "appNames")
 public class AppNameList extends ArrayList<String> {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = -8124923511487754240L;
 

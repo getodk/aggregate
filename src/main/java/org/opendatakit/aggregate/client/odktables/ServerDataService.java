@@ -16,8 +16,9 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -26,9 +27,6 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
 /**
  * This will be the DataService for the server. It will act the same way as
  * org.opendatakit.aggregate.odktables.api.DataService, except that it will be
@@ -36,7 +34,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * phone.
  *
  * @author sudar.sam@gmail.com
- *
  */
 
 @RemoteServiceRelativePath("serverdataservice")

@@ -17,39 +17,37 @@ package org.opendatakit.aggregate.task.tomcat;
 
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
-
 import org.springframework.scheduling.TaskScheduler;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class AggregrateThreadExecutor {
 
   private static AggregrateThreadExecutor classInstance = null;
-
-  public synchronized static void initialize( TaskScheduler taskScheduler ) {
-      if ( classInstance != null ) throw new IllegalStateException("called after having set the task scheduler");
-
-      classInstance = new AggregrateThreadExecutor(taskScheduler);
-  }
-
-  public synchronized static AggregrateThreadExecutor getAggregateThreadExecutor() {
-    if ( classInstance == null ) throw new IllegalStateException("called before having initialized the task scheduler");
-
-    return classInstance;
-  }
-
   private TaskScheduler exec;
 
   private AggregrateThreadExecutor(TaskScheduler taskScheduler) {
     exec = taskScheduler;
   }
 
+  public synchronized static void initialize(TaskScheduler taskScheduler) {
+    if (classInstance != null)
+      throw new IllegalStateException("called after having set the task scheduler");
+
+    classInstance = new AggregrateThreadExecutor(taskScheduler);
+  }
+
+  public synchronized static AggregrateThreadExecutor getAggregateThreadExecutor() {
+    if (classInstance == null)
+      throw new IllegalStateException("called before having initialized the task scheduler");
+
+    return classInstance;
+  }
+
   public void execute(Runnable task) {
-      exec.schedule(task, new Date(System.currentTimeMillis() + 100));
+    exec.schedule(task, new Date(System.currentTimeMillis() + 100));
   }
 
   /**
@@ -59,14 +57,11 @@ public class AggregrateThreadExecutor {
    * suppressed. Otherwise, the task will only terminate via cancellation or
    * termination of the executor.
    *
-   * @param command
-   *          - the task to execute.
-   * @param periodInMilliseconds
-   *          - the period between successive executions.
-   *
+   * @param command              - the task to execute.
+   * @param periodInMilliseconds - the period between successive executions.
    * @return object that can be used to cancel the fixed-rate task in the executor
    */
-  public ScheduledFuture<?> scheduleAtFixedRate( Runnable command, long periodInMilliseconds ) {
+  public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long periodInMilliseconds) {
     return exec.scheduleAtFixedRate(command, periodInMilliseconds);
   }
 }

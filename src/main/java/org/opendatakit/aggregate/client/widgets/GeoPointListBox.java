@@ -1,7 +1,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.externalserv.GeoPointElement;
 
 public class GeoPointListBox extends AggregateListBox {

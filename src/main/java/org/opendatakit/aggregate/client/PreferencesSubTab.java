@@ -18,7 +18,9 @@ package org.opendatakit.aggregate.client;
 
 import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
@@ -31,10 +33,6 @@ import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.PreferencesConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-
 public class PreferencesSubTab extends AggregateSubTabBase {
 
   // Preferences tab
@@ -45,7 +43,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   private static final String VERSION_LABEL = "<h2>Version Information</h2>";
   private static final String VERSION_STRING_STYLE = "app_version_string";
-  
+
   private static final String GOOGLE_API_CREDENTIALS_LABEL = "<h2>Google API Credentials</h2>";
   private static final String GOOGLE_API_CREDENTIALS_INFO = "<p>See <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">http://opendatakit.org/use/aggregate/oauth2-service-account/</a> for instructions on obtaining and supplying these values.</p>";
   private static final String GOOGLE_API_KEY_LABEL = "<h3>Simple API Access Key</h3>";
@@ -73,16 +71,16 @@ public class PreferencesSubTab extends AggregateSubTabBase {
       + NEW_ENKETO_SERVICE_ACCOUNT_TXT;
 
   private static final String ODK_TABLES_FEATURES_LABEL = "<h2>ODK 2.0 Features</h2>";
-  
+
   //external: enable 2.0 features checkbox
-  
+
   private static final String ODK_TABLES_APP_NAME_LABEL = "<h3>ODK 2.0 Application Name</h3>";
   private static final String ODK_TABLES_APP_NAME_INFO = "<p>The Application Name used by the ODK 2.0 client application -- the name of the Android directory under <tt>/sdcard/opendatakit</tt>.</p>";
 
   private static final String FEATURES_LABEL = "<h2>Aggregate Features</h2>";
 
   // external: slower background publishing checkbox
-  
+
   private Label simpleApiKey;
   private Label googleApiClientId;
 
@@ -225,7 +223,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     changeAppNameButton = new ChangeAppNameButton(settingsChange);
     changeAppNameButton.setStylePrimaryName(INDENTED_STYLE);
     add(changeAppNameButton);
-    
+
     HTML features = new HTML(FEATURES_LABEL);
     add(features);
 
@@ -235,7 +233,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
     HTML linebreak = new HTML("<br>");
     add(linebreak);
-    
+
     skipMalformedSubmissions = new SkipMalformedSubmissionsCheckbox(
         Preferences.getSkipMalformedSubmissions(), settingsChange);
     add(skipMalformedSubmissions);

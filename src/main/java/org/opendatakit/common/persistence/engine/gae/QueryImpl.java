@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -13,6 +13,14 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.apphosting.api.ApiProxy.OverQuotaException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,9 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
@@ -39,15 +44,8 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.WebUtils;
-
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.SortDirection;
-import com.google.apphosting.api.ApiProxy.OverQuotaException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -57,9 +55,13 @@ import com.google.apphosting.api.ApiProxy.OverQuotaException;
  */
 public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
-  private static final boolean isWorkingZigZagEqualityFiltering = false;
-
   static final Map<FilterOperation, FilterOperator> operationMap = new HashMap<FilterOperation, FilterOperator>();
+  private static final boolean isWorkingZigZagEqualityFiltering = false;
+  private static final long ACTIVE_COST_LOGGING_CHECK_INTERVAL = 10 * 1000; // 10
+  // seconds
+  static long costLoggingMinimumMegacyclesThreshold = 10 * 1200; // 10
+  // seconds
+  private static long milliLastCheck = 0L;
 
   static {
     operationMap.put(FilterOperation.EQUAL, FilterOperator.EQUAL);
@@ -76,12 +78,18 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   private final User user;
   private final Logger logger;
   private final ExecutionTimeLogger gaeCostLogger;
+  private final List<Tracker> filterList = new ArrayList<Tracker>();
+  private final List<SortTracker> sortList = new ArrayList<SortTracker>();
 
-  private static final long ACTIVE_COST_LOGGING_CHECK_INTERVAL = 10 * 1000; // 10
-                                                                            // seconds
-  static long costLoggingMinimumMegacyclesThreshold = 10 * 1200; // 10
-                                                                         // seconds
-  private static long milliLastCheck = 0L;
+  public QueryImpl(CommonFieldsBase relation, String loggingContextTag, DatastoreImpl datastore,
+                   User user) {
+    this.relation = relation;
+    this.loggingContextTag = loggingContextTag;
+    this.datastore = datastore;
+    this.user = user;
+    this.logger = LoggerFactory.getLogger(QueryImpl.class);
+    this.gaeCostLogger = new ExecutionTimeLogger(datastore, loggingContextTag, relation);
+  }
 
   final static synchronized void updateCostLoggingThreshold(DatastoreImpl datastore) {
     Logger logger = LoggerFactory.getLogger(QueryImpl.class);
@@ -90,7 +98,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     if (milliLastCheck + ACTIVE_COST_LOGGING_CHECK_INTERVAL < currentTime) {
 
       milliLastCheck = currentTime;// update early in case an exception is
-                                   // thrown...
+      // thrown...
       try {
         com.google.appengine.api.datastore.Query query = new Query("_COST_LOGGING_");
         PreparedQuery pq = datastore.getDatastoreService().prepare(query);
@@ -104,7 +112,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           com.google.appengine.api.datastore.Entity e = new com.google.appengine.api.datastore.Entity(
               "_COST_LOGGING_", "T" + WebUtils.iso8601Date(new Date()));
           e.setProperty("COST_LOGGING_MEGACYCLE_THRESHOLD", 10 * 1200); // 10
-                                                                        // seconds...
+          // seconds...
           e.setProperty("LAST_UPDATE_DATE", new Date());
           datastore.getDatastoreService().put(e);
         } else {
@@ -164,28 +172,14 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  private final List<Tracker> filterList = new ArrayList<Tracker>();
-
-  private final List<SortTracker> sortList = new ArrayList<SortTracker>();
-
-  public QueryImpl(CommonFieldsBase relation, String loggingContextTag, DatastoreImpl datastore,
-      User user) {
-    this.relation = relation;
-    this.loggingContextTag = loggingContextTag;
-    this.datastore = datastore;
-    this.user = user;
-    this.logger = LoggerFactory.getLogger(QueryImpl.class);
-    this.gaeCostLogger = new ExecutionTimeLogger(datastore, loggingContextTag, relation);
-  }
-
-  private SimpleFilterTracker constructFilter( DataField attribute, FilterOperation op, Object value) {
+  private SimpleFilterTracker constructFilter(DataField attribute, FilterOperation op, Object value) {
     // do everything locally except the first one (later)...
     if (attribute.getDataType() == DataType.DECIMAL) {
       if (value != null) {
         WrappedBigDecimal wbd;
         if (value instanceof WrappedBigDecimal) {
           wbd = (WrappedBigDecimal) value;
-        } else if ( value instanceof Double) {
+        } else if (value instanceof Double) {
           wbd = WrappedBigDecimal.fromDouble((Double) value);
         } else {
           wbd = new WrappedBigDecimal(value.toString());
@@ -220,7 +214,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           } else {
             bd = new BigDecimal(value.toString());
           }
-          if ( !attribute.isDoublePrecision() ) {
+          if (!attribute.isDoublePrecision()) {
             bd = bd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
           }
           bdList.add(bd);
@@ -287,8 +281,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     DataField dominantSortAttr = dominantSort.getAttribute();
     SortDirection dominantSortDirection =
         dominantSort.direction.equals(Direction.ASCENDING)
-        ? SortDirection.ASCENDING
-        : SortDirection.DESCENDING;
+            ? SortDirection.ASCENDING
+            : SortDirection.DESCENDING;
 
 
     DatastoreService ds = datastore.getDatastoreService();
@@ -321,8 +315,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
     SimpleFilterTracker impliedDominantFilter = constructFilter(dominantSortAttr,
         dominantSort.direction.equals(Direction.ASCENDING)
-        ? FilterOperation.GREATER_THAN_OR_EQUAL
-        : FilterOperation.LESS_THAN_OR_EQUAL, dominantFilterValue );
+            ? FilterOperation.GREATER_THAN_OR_EQUAL
+            : FilterOperation.LESS_THAN_OR_EQUAL, dominantFilterValue);
 
     return impliedDominantFilter;
   }
@@ -336,7 +330,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * @throws ODKOverQuotaException
    * @throws ODKDatastoreException
    */
-  private PreparedQuery prepareQuery( SimpleFilterTracker startCursorFilter,  SimpleFilterTracker impliedDominantFilter) throws ODKOverQuotaException, ODKDatastoreException {
+  private PreparedQuery prepareQuery(SimpleFilterTracker startCursorFilter, SimpleFilterTracker impliedDominantFilter) throws ODKOverQuotaException, ODKDatastoreException {
 
     SortTracker dominantSort = sortList.get(0);
     DataField dominantSortAttr = dominantSort.getAttribute();
@@ -368,7 +362,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       }
 
       // and add all other equality filter conditions.
-      if ( isWorkingZigZagEqualityFiltering ) {
+      if (isWorkingZigZagEqualityFiltering) {
         // GAE: this doesn't work in production,
         // though the ZigZag queries are supposed
         // to support this...
@@ -384,17 +378,17 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         }
       }
 
-      if ( filters.size() == 1 ) {
+      if (filters.size() == 1) {
         hack.setFilter(filters.get(0));
-      } else if ( filters.size() > 1 ) {
-        hack.setFilter(new Query.CompositeFilter( CompositeFilterOperator.AND, filters));
+      } else if (filters.size() > 1) {
+        hack.setFilter(new Query.CompositeFilter(CompositeFilterOperator.AND, filters));
       }
 
       // add the dominant sort.
       SortDirection dominantSortDirection =
           dominantSort.direction.equals(Direction.ASCENDING)
-          ? SortDirection.ASCENDING
-          : SortDirection.DESCENDING;
+              ? SortDirection.ASCENDING
+              : SortDirection.DESCENDING;
 
       hack.addSort(dominantSort.getAttribute().getName(), dominantSortDirection);
       // subordinate sorts cannot be applied
@@ -431,7 +425,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * @throws ODKOverQuotaException
    */
   private void chunkFetch(ResultContainer odkEntities, SimpleFilterTracker startCursorFilter,
-      int fetchLimit) throws ODKDatastoreException, ODKOverQuotaException {
+                          int fetchLimit) throws ODKDatastoreException, ODKOverQuotaException {
 
     // Step 1: create a prepared query that we may repeatedly
     // fetch values from using a chunk size, fetch limit and
@@ -450,7 +444,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
     if (!hasDominantAttributeFilter(dominantSortAttr, startCursorFilter)) {
       impliedDominantFilter = getImpliedDominantAttributeFilter();
-      if ( impliedDominantFilter == null ) {
+      if (impliedDominantFilter == null) {
         // we need a filter but there are no items in the table...
         return; // no data...
       }
@@ -494,7 +488,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     WorkingValues w = new WorkingValues();
 
     boolean hasQueryResults = true;
-    for (; hasQueryResults;) {
+    for (; hasQueryResults; ) {
 
       logger.debug("hqrLoop: "
           + idx
@@ -502,7 +496,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
           + fetchOffset
           + " startCursor "
           + ((startCursorFilter == null) ? "<<none>>" : ((startCursorFilter.value == null) ? "null"
-              : startCursorFilter.value.toString())));
+          : startCursorFilter.value.toString())));
 
       // Since we are filtering locally, we need to grab a chunk of values
       // in the expectation that most will fail the filter.
@@ -514,7 +508,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       // Prefetch only 105 records to handle the common case of an
       // unfiltered paged display of 100 submissions.
       FetchOptions options = FetchOptions.Builder.withDefaults().chunkSize(chunkSize)
-          .prefetchSize(105).offset(fetchOffset).limit(8*chunkSize);
+          .prefetchSize(105).offset(fetchOffset).limit(8 * chunkSize);
 
       logger.debug("hqrLoop: executing preparedQuery on " + relation.getSchemaName() + "."
           + relation.getTableName());
@@ -583,20 +577,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     logger.debug("hqrLoop: done fetching everything!");
   }
 
-  private final static class WorkingValues {
-    int idx;
-    int fetchOffset;
-    SimpleFilterTracker startCursorFilter;
-    boolean possiblyBeforeStartCursor;
-    int sizeQuestionableFirstMatches;
-    CommonFieldsBase odkFirstEntityOfCurrentDominantValue;
-    boolean dominantSortAttrValueHasChanged;
-    List<CommonFieldsBase> odkAdditionalEntities = new ArrayList<CommonFieldsBase>();
-
-    WorkingValues() {
-    }
-  }
-
   /**
    * Updates WorkingValues with current status values.
    * This fetches the records from the result-set iterator
@@ -617,9 +597,9 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * @throws ODKOverQuotaException
    */
   private final boolean fetchResults(Iterable<com.google.appengine.api.datastore.Entity> it,
-      SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m,
-      boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize,
-      WorkingValues w) throws ODKDatastoreException, ODKOverQuotaException {
+                                     SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m,
+                                     boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize,
+                                     WorkingValues w) throws ODKDatastoreException, ODKOverQuotaException {
 
     // loop as long as the query returns at least one result...
     boolean hasQueryResults = false;
@@ -656,8 +636,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
               w.startCursorFilter = new SimpleFilterTracker(
                   dominantSortAttr,
                   dominantSort.direction.equals(Direction.ASCENDING)
-                    ? FilterOperation.GREATER_THAN_OR_EQUAL
-                    : FilterOperation.LESS_THAN_OR_EQUAL,
+                      ? FilterOperation.GREATER_THAN_OR_EQUAL
+                      : FilterOperation.LESS_THAN_OR_EQUAL,
                   EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr));
             }
           }
@@ -672,7 +652,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
               && !matchingDominantAttr
               && !w.possiblyBeforeStartCursor
               && odkEntitiesSize + w.odkAdditionalEntities.size() > fetchLimit
-                  + w.sizeQuestionableFirstMatches + 1) {
+              + w.sizeQuestionableFirstMatches + 1) {
             // we're done!
             return false;
           }
@@ -924,8 +904,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         for (Tracker t : filterList) {
           if (t instanceof SimpleFilterTracker) {
             SimpleFilterTracker st = (SimpleFilterTracker) t;
-            if ( isWorkingZigZagEqualityFiltering ) {
-              if (st.isEqualityTest() ) {
+            if (isWorkingZigZagEqualityFiltering) {
+              if (st.isEqualityTest()) {
                 continue; //   zig-zag allows multiple equality tests...
               }
             }
@@ -955,7 +935,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
   @Override
   public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable,
-      DataField topLevelAuri) throws ODKDatastoreException, ODKOverQuotaException {
+                                               DataField topLevelAuri) throws ODKDatastoreException, ODKOverQuotaException {
 
     try {
       List<?> keys = doExecuteDistinctValueForDataField(topLevelAuri);
@@ -1011,5 +991,19 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       }
     }
     return values;
+  }
+
+  private final static class WorkingValues {
+    int idx;
+    int fetchOffset;
+    SimpleFilterTracker startCursorFilter;
+    boolean possiblyBeforeStartCursor;
+    int sizeQuestionableFirstMatches;
+    CommonFieldsBase odkFirstEntityOfCurrentDominantValue;
+    boolean dominantSortAttrValueHasChanged;
+    List<CommonFieldsBase> odkAdditionalEntities = new ArrayList<CommonFieldsBase>();
+
+    WorkingValues() {
+    }
   }
 }

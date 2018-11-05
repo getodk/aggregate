@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -41,17 +40,17 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * Used for the new briefcase download.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class XmlMediaAttachmentFormatter implements ElementFormatter {
   XmlAttachmentFormatter xmlAttachmentFormatter;
+
   /**
    * Construct a XML Media Attachment Formatter
- * @param xmlAttachmentFormatter
    *
+   * @param xmlAttachmentFormatter
    */
   public XmlMediaAttachmentFormatter(XmlAttachmentFormatter xmlAttachmentFormatter) {
-      this.xmlAttachmentFormatter = xmlAttachmentFormatter;
+    this.xmlAttachmentFormatter = xmlAttachmentFormatter;
   }
 
   @Override
@@ -60,28 +59,28 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
 
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
-      Row row, CallingContext cc) throws ODKDatastoreException {
+                           Row row, CallingContext cc) throws ODKDatastoreException {
 
-    if( blobSubmission == null ||
+    if (blobSubmission == null ||
         (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null) ) {
-        return;
+        (blobSubmission.getContentHash(1, cc) == null)) {
+      return;
     }
 
     String urlLink;
     {
-        Map<String, String> properties = new HashMap<String, String>();
-        SubmissionKey k = blobSubmission.generateSubmissionKey(1);
-        properties.put(ServletConsts.BLOB_KEY, k.toString());
-        properties.put(ServletConsts.AS_ATTACHMENT, "true");
-        String downloadRequestURL = cc.getServerURL() + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
-        urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
+      Map<String, String> properties = new HashMap<String, String>();
+      SubmissionKey k = blobSubmission.generateSubmissionKey(1);
+      properties.put(ServletConsts.BLOB_KEY, k.toString());
+      properties.put(ServletConsts.AS_ATTACHMENT, "true");
+      String downloadRequestURL = cc.getServerURL() + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR;
+      urlLink = HtmlUtil.createLinkWithProperties(downloadRequestURL, properties);
     }
     // parallel to XFormsManifestXmlTable
     String xmlString = "<mediaFile>" +
-            "<filename>" + StringEscapeUtils.escapeXml10(blobSubmission.getUnrootedFilename(1, cc)) + "</filename>" +
-            "<hash>"    + StringEscapeUtils.escapeXml10(blobSubmission.getContentHash(1, cc)) + "</hash>" +
-            "<downloadUrl>" + StringEscapeUtils.escapeXml10(urlLink) + "</downloadUrl>" +
+        "<filename>" + StringEscapeUtils.escapeXml10(blobSubmission.getUnrootedFilename(1, cc)) + "</filename>" +
+        "<hash>" + StringEscapeUtils.escapeXml10(blobSubmission.getContentHash(1, cc)) + "</hash>" +
+        "<downloadUrl>" + StringEscapeUtils.escapeXml10(urlLink) + "</downloadUrl>" +
         "</mediaFile>\n";
 
     row.addFormattedValue(xmlString);
@@ -121,8 +120,8 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
-      CallingContext cc) throws ODKDatastoreException {
-      xmlAttachmentFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
+                            CallingContext cc) throws ODKDatastoreException {
+    xmlAttachmentFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
   }
 
   @Override

@@ -16,23 +16,22 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import org.opendatakit.aggregate.client.popups.OdkTablesAddNewTablePopup;
 
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-
 public class OdkTablesTableIdBox extends AggregateTextBox implements
-        ValueChangeHandler<String> {
+    ValueChangeHandler<String> {
 
-     private static final String TOOLTIP_TXT = "TableId for this Table";
-     private static final String HELP_BALLOON_TXT = "Enter the unique identifier for this table. This is not translated";
+  private static final String TOOLTIP_TXT = "TableId for this Table";
+  private static final String HELP_BALLOON_TXT = "Enter the unique identifier for this table. This is not translated";
 
-      private final OdkTablesAddNewTablePopup popup;
+  private final OdkTablesAddNewTablePopup popup;
 
-      public OdkTablesTableIdBox(OdkTablesAddNewTablePopup popup) {
-        super(TOOLTIP_TXT, HELP_BALLOON_TXT);
-        this.popup = popup;
+  public OdkTablesTableIdBox(OdkTablesAddNewTablePopup popup) {
+    super(TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.popup = popup;
 
-        setEnabled(true);
-      }
+    setEnabled(true);
+  }
 
-    }
+}

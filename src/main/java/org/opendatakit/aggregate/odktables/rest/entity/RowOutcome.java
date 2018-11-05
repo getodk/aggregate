@@ -23,26 +23,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class RowOutcome extends Row {
 
   /**
-   * Possible values:
-   * <ul>
-   * <li>UNKNOWN -- initial default value</li>
-   * <li>SUCCESS -- rowETag, dataETagAtModification, filterScope updated</li>
-   * <li>DENIED -- permission denied -- just the rowId is returned</li>
-   * <li>IN_CONFLICT -- server record is returned (in full)</li>
-   * <li>FAILED -- anonymous insert conflict (impossible?) or
-   *               delete of non-existent row -- just rowId is returned</li>
-   * </ul>
-   */
-  public enum OutcomeType {
-    UNKNOWN, SUCCESS, DENIED, IN_CONFLICT, FAILED
-  }
-
-  /**
    * The URL that returns this RowResource.
    */
   @JsonProperty(required = false)
   private String selfUri;
-
   @JsonProperty(required = false)
   private OutcomeType outcome = OutcomeType.UNKNOWN;
 
@@ -58,17 +42,17 @@ public class RowOutcome extends Row {
     return this.selfUri;
   }
 
-  public OutcomeType getOutcome() {
-    return this.outcome;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
   }
 
+  public OutcomeType getOutcome() {
+    return this.outcome;
+  }
+
   public void setOutcome(final OutcomeType outcome) {
     this.outcome = outcome;
-    if (outcome == OutcomeType.SUCCESS 
+    if (outcome == OutcomeType.SUCCESS
         || outcome == OutcomeType.DENIED
         || outcome == OutcomeType.FAILED) {
       // for these outcomes, we only need to preserve
@@ -88,7 +72,7 @@ public class RowOutcome extends Row {
 
       // additionally...
       if (outcome == OutcomeType.DENIED || outcome == OutcomeType.FAILED) {
-        // for these outcomes, preserve only the 
+        // for these outcomes, preserve only the
         // rowId and deleted fields.
 
         this.setRowETag(null);
@@ -135,6 +119,21 @@ public class RowOutcome extends Row {
   public String toString() {
     return "RowResource(super=" + super.toString() + ", selfUri=" + this.getSelfUri()
         + ", outcome=" + this.getOutcome().name() + ")";
+  }
+
+  /**
+   * Possible values:
+   * <ul>
+   * <li>UNKNOWN -- initial default value</li>
+   * <li>SUCCESS -- rowETag, dataETagAtModification, filterScope updated</li>
+   * <li>DENIED -- permission denied -- just the rowId is returned</li>
+   * <li>IN_CONFLICT -- server record is returned (in full)</li>
+   * <li>FAILED -- anonymous insert conflict (impossible?) or
+   * delete of non-existent row -- just rowId is returned</li>
+   * </ul>
+   */
+  public enum OutcomeType {
+    UNKNOWN, SUCCESS, DENIED, IN_CONFLICT, FAILED
   }
 
 }

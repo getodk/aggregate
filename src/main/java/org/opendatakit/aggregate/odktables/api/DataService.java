@@ -25,7 +25,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -46,8 +45,8 @@ public interface DataService {
 
   /**
    * Get all data rows.
-   * 
-   * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
+   *
+   * @param cursor     - null or a websafeCursor value from the RowResourceList of a previous call
    * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
    * @return {@link RowResourceList} containing the rows being returned.
    * @throws ODKDatastoreException
@@ -62,10 +61,10 @@ public interface DataService {
 
   /**
    * API for creating, updating or deleting rows.
-   * 
-   * This API will return 409 (Conflict) if the RowList dataETag does not 
+   * <p>
+   * This API will return 409 (Conflict) if the RowList dataETag does not
    * match the current dataETag for this table.
-   * 
+   *
    * @param rows
    * @return {@link RowOutcomeList} of the newly added/modified/deleted rows.
    * @throws ODKTaskLockException
@@ -73,18 +72,18 @@ public interface DataService {
    * @throws PermissionDeniedException
    * @throws BadColumnNameException
    * @throws InconsistentStateException
-   * @throws TableDataETagMismatchException 
+   * @throws TableDataETagMismatchException
    */
   @PUT
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*RowOutcomeList*/ alterRows(RowList rows)
-      throws ODKTaskLockException, ODKDatastoreException, 
+      throws ODKTaskLockException, ODKDatastoreException,
       PermissionDeniedException, BadColumnNameException, InconsistentStateException, TableDataETagMismatchException;
 
   /**
    * Get the current values for a single rowId
-   * 
+   *
    * @param rowId
    * @return {@link RowResource} of the row
    * @throws ODKDatastoreException

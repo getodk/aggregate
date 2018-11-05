@@ -19,33 +19,32 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 
 /**
  * Common base class to SubmissionSet, SubmissionValue
- * 
+ *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- * 
  */
 public interface SubmissionElement {
 
-      /**
-       * Get Property Name
-       * 
-       * @return property name
-       */
-      public String getPropertyName();
+  /**
+   * Get Property Name
+   *
+   * @return property name
+   */
+  public String getPropertyName();
 
-     
-      /**
-       * Get the submission element's form element model
-       * @return
-       *    form element model
-       */
-      public FormElementModel getFormElementModel();
-      
-      /**
-       * Perform a left-to-right depth-first traversal of the submission.
-       * 
-       * @param visitor to invoke on each element in the submission.
-       * @return true if the traversal should end (short-circuit) immediately.
-       */
-      public boolean depthFirstTraversal( SubmissionVisitor visitor );
+
+  /**
+   * Get the submission element's form element model
+   *
+   * @return form element model
+   */
+  public FormElementModel getFormElementModel();
+
+  /**
+   * Perform a left-to-right depth-first traversal of the submission.
+   *
+   * @param visitor to invoke on each element in the submission.
+   * @return true if the traversal should end (short-circuit) immediately.
+   */
+  public boolean depthFirstTraversal(SubmissionVisitor visitor);
 }

@@ -28,35 +28,34 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean. It cannot have any per-request state. It uses a
  * static inner class to encapsulate the per-request state of a running
  * background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class JsonFileGeneratorImpl implements JsonFileGenerator {
 
+  @Override
+  public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
+                                 CallingContext cc) throws ODKDatastoreException {
+    WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
+    // use watchdog's calling context in runner...
+    JsonRunner runner = new JsonRunner(form, persistentResultsKey, attemptCount, wd.getCallingContext());
+    AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
+    exec.execute(runner);
+
+  }
+
   static class JsonRunner implements Runnable {
     final JsonFileWorkerImpl impl;
-    
-    public JsonRunner( IForm form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
-       impl = new JsonFileWorkerImpl(form, persistentResultsKey, attemptCount, cc );
+
+    public JsonRunner(IForm form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
+      impl = new JsonFileWorkerImpl(form, persistentResultsKey, attemptCount, cc);
     }
 
     @Override
     public void run() {
-       impl.generateJsonFile();
+      impl.generateJsonFile();
     }
- }
-  
-  @Override
-  public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-      CallingContext cc) throws ODKDatastoreException {
-    WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
-    // use watchdog's calling context in runner...
-    JsonRunner runner = new JsonRunner(form, persistentResultsKey, attemptCount, wd.getCallingContext() );
-     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
-     exec.execute(runner);
-
   }
 
 }

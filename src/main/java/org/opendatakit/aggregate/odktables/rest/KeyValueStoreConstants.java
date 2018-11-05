@@ -20,7 +20,6 @@ package org.opendatakit.aggregate.odktables.rest;
  * Constants used to access well-known values within the KVS.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class KeyValueStoreConstants {
 

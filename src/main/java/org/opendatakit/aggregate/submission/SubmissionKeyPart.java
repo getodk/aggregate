@@ -20,7 +20,6 @@ package org.opendatakit.aggregate.submission;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public class SubmissionKeyPart {
 

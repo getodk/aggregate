@@ -48,15 +48,13 @@ import org.slf4j.LoggerFactory;
 public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
 
   /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = -3784460108221008112L;
-
-  /**
    * URI from base
    */
   public static final String ADDR = UIConsts.SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR;
-
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = -3784460108221008112L;
   /**
    * Title for generated webpage
    */

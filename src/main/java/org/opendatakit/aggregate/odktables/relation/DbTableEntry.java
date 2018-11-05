@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Query;
 import org.opendatakit.common.ermodel.Relation;
@@ -63,17 +62,10 @@ import org.opendatakit.common.web.CallingContext;
  * <p>Data stale cleanup is not applicable.</p>
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class DbTableEntry extends Relation {
 
-  private DbTableEntry(String namespace, String tableName, List<DataField> fields, CallingContext cc)
-      throws ODKDatastoreException {
-    super(namespace, tableName, fields, cc);
-  }
-
   private static final String RELATION_NAME = "TABLE_ENTRY4";
-
   /**
    * changes to row values that are in-progress but not complete will be tagged
    * with the pending data ETag value
@@ -85,12 +77,11 @@ public class DbTableEntry extends Relation {
    * and the pending data ETag will be set to null.
    */
   private static final DataField DATA_ETAG = new DataField("DATA_ETAG", DataType.STRING, true);
-  // there is no STALE_DATA_ETAG, as we maintain a history of all changes to the data values
-
   /**
    * When asynchronous schema changes become supported, the task uri is saved in this field.
    */
   private static final DataField URI_SCHEMA_TASK = new DataField("URI_SCHEMA_TASK", DataType.STRING, true);
+  // there is no STALE_DATA_ETAG, as we maintain a history of all changes to the data values
   /**
    * If the pending schema ETag != null, then there is a schema change in progress.
    */
@@ -109,7 +100,6 @@ public class DbTableEntry extends Relation {
    */
   private static final DataField STALE_SCHEMA_ETAG = new DataField("STALE_SCHEMA_ETAG",
       DataType.STRING, true);
-
   /**
    * Since ETags are uuids, we need a way to sort and order them for row-level change history. An
    * internal sequence value in the DbLogTable is used for this. The sequence value here is a
@@ -118,7 +108,6 @@ public class DbTableEntry extends Relation {
    */
   private static final DataField APRIORI_DATA_SEQUENCE_VALUE = new DataField(
       "APRIORI_DATA_SEQUENCE_VALUE", DataType.STRING, false);
-
   /**
    * The target number of rows returned at one time by queries on this table.
    * The actual number is moderated by the granularity of the data ETag value.
@@ -127,8 +116,9 @@ public class DbTableEntry extends Relation {
    */
   private static final DataField TARGET_ROW_BATCH_SIZE = new DataField("TARGET_ROW_BATCH_SIZE",
       DataType.INTEGER, true);
-
   private static final List<DataField> dataFields;
+  private static DbTableEntry relation = null;
+
   static {
     dataFields = new ArrayList<DataField>();
     dataFields.add(PENDING_DATA_ETAG);
@@ -139,6 +129,48 @@ public class DbTableEntry extends Relation {
     dataFields.add(STALE_SCHEMA_ETAG);
     dataFields.add(APRIORI_DATA_SEQUENCE_VALUE);
     dataFields.add(TARGET_ROW_BATCH_SIZE);
+  }
+
+  private DbTableEntry(String namespace, String tableName, List<DataField> fields, CallingContext cc)
+      throws ODKDatastoreException {
+    super(namespace, tableName, fields, cc);
+  }
+
+  public static synchronized final DbTableEntry getRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      relation = new DbTableEntry(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
+    }
+    return relation;
+  }
+
+  /**
+   * Create a new row in this relation. The row is not yet persisted.
+   *
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
+   */
+  public static DbTableEntryEntity createNewEntity(String tableId, CallingContext cc)
+      throws ODKDatastoreException {
+    return new DbTableEntryEntity(getRelation(cc).newEntity(tableId, cc));
+  }
+
+  public static DbTableEntryEntity getTableIdEntry(String tableId, CallingContext cc)
+      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
+
+    return new DbTableEntryEntity(getRelation(cc).getEntity(tableId, cc));
+  }
+
+  public static List<DbTableEntryEntity> query(CallingContext cc) throws ODKDatastoreException {
+    Query query = getRelation(cc).query("DbTableEntry.query", cc);
+
+    List<Entity> list = query.execute();
+    List<DbTableEntryEntity> results = new ArrayList<DbTableEntryEntity>();
+    for (Entity e : list) {
+      results.add(new DbTableEntryEntity(e));
+    }
+    return results;
   }
 
   public static class DbTableEntryEntity {
@@ -226,45 +258,6 @@ public class DbTableEntry extends Relation {
     public void setTargetRowBatchSize(Long value) {
       e.set(TARGET_ROW_BATCH_SIZE, value);
     }
-  }
-
-  private static DbTableEntry relation = null;
-
-  public static synchronized final DbTableEntry getRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      relation = new DbTableEntry(RUtil.NAMESPACE, RELATION_NAME, dataFields, cc);
-    }
-    return relation;
-  }
-
-  /**
-   * Create a new row in this relation. The row is not yet persisted.
-   *
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static DbTableEntryEntity createNewEntity(String tableId, CallingContext cc)
-      throws ODKDatastoreException {
-    return new DbTableEntryEntity(getRelation(cc).newEntity(tableId, cc));
-  }
-
-  public static DbTableEntryEntity getTableIdEntry(String tableId, CallingContext cc)
-      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
-
-    return new DbTableEntryEntity(getRelation(cc).getEntity(tableId, cc));
-  }
-
-  public static List<DbTableEntryEntity> query(CallingContext cc) throws ODKDatastoreException {
-    Query query = getRelation(cc).query("DbTableEntry.query", cc);
-
-    List<Entity> list = query.execute();
-    List<DbTableEntryEntity> results = new ArrayList<DbTableEntryEntity>();
-    for (Entity e : list) {
-      results.add(new DbTableEntryEntity(e));
-    }
-    return results;
   }
 
 }

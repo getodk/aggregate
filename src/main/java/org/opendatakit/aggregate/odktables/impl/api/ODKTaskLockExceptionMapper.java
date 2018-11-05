@@ -20,7 +20,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
-
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.Error;
 import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
@@ -29,7 +28,7 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 public class ODKTaskLockExceptionMapper implements ExceptionMapper<ODKTaskLockException> {
 
   private final MediaType type;
-  
+
   public ODKTaskLockExceptionMapper(MediaType type) {
     this.type = type;
   }
@@ -48,8 +47,8 @@ public class ODKTaskLockExceptionMapper implements ExceptionMapper<ODKTaskLockEx
         .entity(
             new Error(ErrorType.LOCK_TIMEOUT, "Please try again later. "
                 + "Timed out waiting for lock: " + msg)).type(type)
-                .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Credentials", "true").build();
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 }

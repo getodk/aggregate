@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.odktables.api;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -29,7 +28,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -50,7 +48,6 @@ public interface TableService {
   public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
-   *
    * Get all tables on the server. Invoked from OdkTables implementation class.
    *
    * @return {@link TableResourceList} of all tables the user has access to.
@@ -88,24 +85,24 @@ public interface TableService {
   @PUT
   @Consumes({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*TableResource*/ createTable(TableDefinition definition )
+  public Response /*TableResource*/ createTable(TableDefinition definition)
       throws ODKDatastoreException, TableAlreadyExistsException, PermissionDeniedException, ODKTaskLockException, IOException;
 
   /**
    * Get the properties.csv for this tableId.
-   * 
-   * The properties.csv is not versioned but is atomically 
+   * <p>
+   * The properties.csv is not versioned but is atomically
    * updated. It is the metadata for the tableId excluding
-   * the data type definitions which are defined in the 
+   * the data type definitions which are defined in the
    * TableDefinition's Column array.
-   * 
+   *
    * @param odkClientVersion
    * @return
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
    * @throws TableNotFoundException
-   * @throws FileNotFoundException 
+   * @throws FileNotFoundException
    */
   @GET
   @Path("properties/{odkClientVersion}")
@@ -117,9 +114,9 @@ public interface TableService {
    * Replace the properties.csv with the supplied propertiesList.
    * This does not preserve the existing properties in the properties.csv,
    * but does a wholesale, atomic, replacement of those properties.
-   * 
+   * <p>
    * This is the XML variant of this API. See putJsonTableProperties, below.
-   * 
+   *
    * @param odkClientVersion
    * @param propertiesList
    * @return
@@ -139,9 +136,9 @@ public interface TableService {
    * Replace the properties.csv with the supplied propertiesList.
    * This does not preserve the existing properties in the properties.csv,
    * but does a wholesale, atomic, replacement of those properties.
-   * 
+   * <p>
    * This is the JSON variant of this API. See putXmlTableProperties, above.
-   * 
+   *
    * @param odkClientVersion
    * @param propertiesList
    * @return
@@ -154,7 +151,7 @@ public interface TableService {
   @Path("properties/{odkClientVersion}")
   @Consumes({MediaType.APPLICATION_JSON})
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
-  public Response /*void*/ putJsonTableProperties(@PathParam("odkClientVersion") String odkClientVersion, ArrayList<Map<String,Object>> propertiesList) throws ODKDatastoreException,
+  public Response /*void*/ putJsonTableProperties(@PathParam("odkClientVersion") String odkClientVersion, ArrayList<Map<String, Object>> propertiesList) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException, TableNotFoundException;
 
   /**

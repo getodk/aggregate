@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -45,11 +44,9 @@ import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author adam.lerer@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class KmlGeoPointGenerator extends AbstractKmlElementBase implements RepeatCallbackFormatter {
 
@@ -66,7 +63,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
   private List<GpsRepeatRowData> rowsForGpsInRepeats;
 
   public KmlGeoPointGenerator(FormElementModel gpsField, FormElementModel titleField,
-      FormElementModel imgField, String webServerUrl, FormElementModel rootElement) {
+                              FormElementModel imgField, String webServerUrl, FormElementModel rootElement) {
     super(gpsField, rootElement);
     baseWebServerUrl = webServerUrl;
     elemFormatter = new KmlElementFormatter(webServerUrl, true, this);
@@ -97,7 +94,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
 
   @Override
   String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
-      CallingContext cc) throws ODKDatastoreException {
+                                     CallingContext cc) throws ODKDatastoreException {
 
     StringBuilder placemarks = new StringBuilder();
 
@@ -133,7 +130,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
 
   @Override
   public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats,
-      FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
+                                                  FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
 
     for (SubmissionSet repeatSet : repeats) {
       Row rowFromRepeat = repeatSet.getFormattedValuesAsRow(null, elemFormatter, false, cc);
@@ -195,7 +192,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
   }
 
   private String generateFormattedPlacemark(Row row, String identifier, String title,
-      String imageURL, GeoPoint gp) {
+                                            String imageURL, GeoPoint gp) {
 
     // make sure no null values slip by
     String id = (identifier == null) ? BasicConsts.EMPTY_STRING : identifier;
@@ -219,7 +216,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
     String geopoint = BasicConsts.EMPTY_STRING;
     if (gp != null) {
       if (gp.getLatitude() != null && gp.getLongitude() != null) {
-          WrappedBigDecimal altitude;
+        WrappedBigDecimal altitude;
         if (gp.getAltitude() == null) {
           altitude = WrappedBigDecimal.fromDouble(0.0);
         } else {
@@ -274,7 +271,7 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
     }
 
     String getId() {
-        return id;
+      return id;
     }
   }
 

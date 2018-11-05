@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -31,113 +30,110 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class GoogleSpreadsheet2RepeatParameterTable extends CommonFieldsBase {
 
-      private static final String TABLE_NAME = "_google_spreadsheet_2_repeat";
+  private static final String TABLE_NAME = "_google_spreadsheet_2_repeat";
 
-      private static final DataField URI_GOOGLE_SPREADSHEET = new DataField("URI_GOOGLE_SPREADSHEET",
-              DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-      private static final DataField WORKSHEET_ID = new DataField("WORKSHEET_ID",
-          DataField.DataType.STRING, true, 4096L);
-      private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY",
-          DataField.DataType.STRING, true, 4096L);
+  private static final DataField URI_GOOGLE_SPREADSHEET = new DataField("URI_GOOGLE_SPREADSHEET",
+      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField WORKSHEET_ID = new DataField("WORKSHEET_ID",
+      DataField.DataType.STRING, true, 4096L);
+  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY",
+      DataField.DataType.STRING, true, 4096L);
+  private static GoogleSpreadsheet2RepeatParameterTable relation = null;
 
-        /**
-         * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
-         *
-         * @param databaseSchema
-         * @param tableName
-         */
-      GoogleSpreadsheet2RepeatParameterTable(String schemaName) {
-        super(schemaName, TABLE_NAME);
-        fieldList.add(URI_GOOGLE_SPREADSHEET);
-        fieldList.add(WORKSHEET_ID);
-        fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
-      }
+  /**
+   * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
+   *
+   * @param databaseSchema
+   * @param tableName
+   */
+  GoogleSpreadsheet2RepeatParameterTable(String schemaName) {
+    super(schemaName, TABLE_NAME);
+    fieldList.add(URI_GOOGLE_SPREADSHEET);
+    fieldList.add(WORKSHEET_ID);
+    fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
+  }
 
-      /**
-       * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-       *
-       * @param ref
-       * @param user
-       */
-      private GoogleSpreadsheet2RepeatParameterTable(GoogleSpreadsheet2RepeatParameterTable ref, User user) {
-        super(ref, user);
-      }
+  /**
+   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+   *
+   * @param ref
+   * @param user
+   */
+  private GoogleSpreadsheet2RepeatParameterTable(GoogleSpreadsheet2RepeatParameterTable ref, User user) {
+    super(ref, user);
+  }
 
-      // Only called from within the persistence layer.
-      @Override
-      public GoogleSpreadsheet2RepeatParameterTable getEmptyRow(User user) {
-        return new GoogleSpreadsheet2RepeatParameterTable(this, user);
-      }
+  public static synchronized final GoogleSpreadsheet2RepeatParameterTable assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      GoogleSpreadsheet2RepeatParameterTable relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getCurrentUser();
+      relationPrototype = new GoogleSpreadsheet2RepeatParameterTable(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
+  }
 
-      public String getUriGoogleSpreadsheet() {
-          return getStringField(URI_GOOGLE_SPREADSHEET);
-      }
+  public static List<GoogleSpreadsheet2RepeatParameterTable> getRepeatGroupAssociations(String uri,
+                                                                                        CallingContext cc) throws ODKDatastoreException {
+    List<GoogleSpreadsheet2RepeatParameterTable> list = new ArrayList<GoogleSpreadsheet2RepeatParameterTable>();
+    GoogleSpreadsheet2RepeatParameterTable frpt = assertRelation(cc);
 
-      public void setUriGoogleSpreadsheet(String value) {
-        if (!setStringField(URI_GOOGLE_SPREADSHEET, value)) {
-          throw new IllegalArgumentException("overflow uriGoogleSpreadsheet");
-        }
-      }
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    Query query = ds.createQuery(frpt, "GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations", user);
+    query.addFilter(URI_GOOGLE_SPREADSHEET, FilterOperation.EQUAL, uri);
 
-      public String getWorksheetId() {
-        return getStringField(WORKSHEET_ID);
-      }
+    List<? extends CommonFieldsBase> results = query.executeQuery();
+    for (CommonFieldsBase b : results) {
+      list.add((GoogleSpreadsheet2RepeatParameterTable) b);
+    }
+    return list;
+  }
 
-      public void setWorksheetId(String value) {
-        if (!setStringField(WORKSHEET_ID, value)) {
-          throw new IllegalArgumentException("overflow worksheetId");
-        }
-      }
+  // Only called from within the persistence layer.
+  @Override
+  public GoogleSpreadsheet2RepeatParameterTable getEmptyRow(User user) {
+    return new GoogleSpreadsheet2RepeatParameterTable(this, user);
+  }
 
-      public FormElementKey getFormElementKey() {
-        String key = getStringField(FORM_ELEMENT_KEY_PROPERTY);
-        if ( key == null ) return null;
-        return new FormElementKey(key);
-      }
+  public String getUriGoogleSpreadsheet() {
+    return getStringField(URI_GOOGLE_SPREADSHEET);
+  }
 
-      public void setFormElementKey(FormElementKey value) {
-        if (!setStringField(FORM_ELEMENT_KEY_PROPERTY, value.toString())) {
-          throw new IllegalArgumentException("overflow formElementKey");
-        }
-      }
+  public void setUriGoogleSpreadsheet(String value) {
+    if (!setStringField(URI_GOOGLE_SPREADSHEET, value)) {
+      throw new IllegalArgumentException("overflow uriGoogleSpreadsheet");
+    }
+  }
 
-      private static GoogleSpreadsheet2RepeatParameterTable relation = null;
+  public String getWorksheetId() {
+    return getStringField(WORKSHEET_ID);
+  }
 
-      public static synchronized final GoogleSpreadsheet2RepeatParameterTable assertRelation(CallingContext cc)
-          throws ODKDatastoreException {
-        if (relation == null) {
-            GoogleSpreadsheet2RepeatParameterTable relationPrototype;
-            Datastore ds = cc.getDatastore();
-            User user = cc.getCurrentUser();
-            relationPrototype = new GoogleSpreadsheet2RepeatParameterTable(ds.getDefaultSchemaName());
-            ds.assertRelation(relationPrototype, user); // may throw exception...
-            // at this point, the prototype has become fully populated
-            relation = relationPrototype; // set static variable only upon success...
-        }
-        return relation;
-      }
+  public void setWorksheetId(String value) {
+    if (!setStringField(WORKSHEET_ID, value)) {
+      throw new IllegalArgumentException("overflow worksheetId");
+    }
+  }
 
-      public static List<GoogleSpreadsheet2RepeatParameterTable> getRepeatGroupAssociations(String uri,
-                                                            CallingContext cc) throws ODKDatastoreException {
-          List<GoogleSpreadsheet2RepeatParameterTable> list = new ArrayList<GoogleSpreadsheet2RepeatParameterTable> ();
-          GoogleSpreadsheet2RepeatParameterTable frpt = assertRelation(cc);
+  public FormElementKey getFormElementKey() {
+    String key = getStringField(FORM_ELEMENT_KEY_PROPERTY);
+    if (key == null) return null;
+    return new FormElementKey(key);
+  }
 
-          Datastore ds = cc.getDatastore();
-          User user = cc.getCurrentUser();
-          Query query = ds.createQuery(frpt, "GoogleSpreadsheetRepeatParameterTable.getRepeatGroupAssociations", user);
-          query.addFilter(URI_GOOGLE_SPREADSHEET, FilterOperation.EQUAL, uri);
-
-          List<? extends CommonFieldsBase> results = query.executeQuery();
-          for ( CommonFieldsBase b : results ) {
-              list.add((GoogleSpreadsheet2RepeatParameterTable) b);
-          }
-          return list;
-      }
+  public void setFormElementKey(FormElementKey value) {
+    if (!setStringField(FORM_ELEMENT_KEY_PROPERTY, value.toString())) {
+      throw new IllegalArgumentException("overflow formElementKey");
+    }
+  }
 }

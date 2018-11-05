@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.popups.ChangeAppNamePopup;
-import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.popups.ChangeAppNamePopup;
+import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 
 public class ChangeAppNameButton extends AggregateButton implements ClickHandler {
 
@@ -29,16 +28,16 @@ public class ChangeAppNameButton extends AggregateButton implements ClickHandler
   private static final String HELP_BALLOON_TXT = "This is the name of the Android directory under <tt>/sdcard/opendatakit</tt>.";
 
   private PreferencesCompletionCallback settingsChange;
-  
+
   public ChangeAppNameButton(PreferencesCompletionCallback settingsChange) {
     super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.settingsChange = settingsChange;
   }
-  
+
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     ChangeAppNamePopup popup = new ChangeAppNamePopup(settingsChange);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

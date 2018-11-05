@@ -16,22 +16,21 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import org.opendatakit.aggregate.client.popups.OdkTablesAddNewTablePopup;
 
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-
 public class OdkTablesTableNameBox extends AggregateTextBox implements
-        ValueChangeHandler<String> {
+    ValueChangeHandler<String> {
 
-      private static final String TOOLTIP_TXT = "Display Name for this Table";
-      private static final String HELP_BALLOON_TXT = "Enter the user-friendly display name for this table";
+  private static final String TOOLTIP_TXT = "Display Name for this Table";
+  private static final String HELP_BALLOON_TXT = "Enter the user-friendly display name for this table";
 
-      private final OdkTablesAddNewTablePopup popup;
+  private final OdkTablesAddNewTablePopup popup;
 
-      public OdkTablesTableNameBox(OdkTablesAddNewTablePopup popup) {
-        super(TOOLTIP_TXT, HELP_BALLOON_TXT);
-        this.popup = popup;
+  public OdkTablesTableNameBox(OdkTablesAddNewTablePopup popup) {
+    super(TOOLTIP_TXT, HELP_BALLOON_TXT);
+    this.popup = popup;
 
-        setEnabled(true);
-      }
-    }
+    setEnabled(true);
+  }
+}

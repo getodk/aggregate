@@ -21,10 +21,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -43,21 +41,18 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class FormXmlServlet extends ServletUtilBase {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = -5861240658170389989L;
 
   /**
    * URI from base
    */
   public static final String ADDR = "formXml";
   public static final String WWW_ADDR = "www/formXml";
-
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = -5861240658170389989L;
   /**
    * Title for generated webpage
    */
@@ -67,7 +62,7 @@ public class FormXmlServlet extends ServletUtilBase {
    * Handler for HTTP Get request that responds with the XML in plain
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

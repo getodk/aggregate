@@ -18,12 +18,8 @@
 package org.opendatakit.aggregate.task.gae.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
@@ -37,32 +33,30 @@ import org.opendatakit.aggregate.task.WorksheetCreatorWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class WorksheetServlet extends ServletUtilBase {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 3054003683995535651L;
-
-  private static final Logger logger = LoggerFactory.getLogger(WorksheetServlet.class);
 
   /**
    * URI from base
    */
   public static final String ADDR = "gae/worksheetCreatorTask";
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 3054003683995535651L;
+  private static final Logger logger = LoggerFactory.getLogger(WorksheetServlet.class);
 
   /**
    * Handler for HTTP Get request to create xform upload page
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

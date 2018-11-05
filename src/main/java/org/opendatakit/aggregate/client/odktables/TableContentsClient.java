@@ -28,7 +28,6 @@ import java.util.ArrayList;
  * is no corresponding client-side TableContents object.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableContentsClient implements Serializable {
 
@@ -36,26 +35,21 @@ public class TableContentsClient implements Serializable {
    *
    */
   private static final long serialVersionUID = -6147829783718751L;
-
-  public TableContentsClient() {
-    // necessary for gwt serialization
-  }
-
   /**
    * The tables rows.
    */
   public ArrayList<RowClient> rows;
-
   /**
    * The names of the table's columns.
    */
   public ArrayList<String> columnNames;
-  
-  
   public String websafeRefetchCursor;
   public String websafeBackwardCursor;
   public String websafeResumeCursor;
   public boolean hasMore;
   public boolean hasPrior;
+  public TableContentsClient() {
+    // necessary for gwt serialization
+  }
 
 }

@@ -16,15 +16,13 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.form.MediaFileSummary;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
 
 public class MediaFileListPopup extends AbstractPopupBase {
 
@@ -58,11 +56,11 @@ public class MediaFileListPopup extends AbstractPopupBase {
 
     @Override
     public void onSuccess(ArrayList<MediaFileSummary> result) {
-      if(result == null)
+      if (result == null)
         return;
 
       int index = 2;
-      for(MediaFileSummary file : result) {
+      for (MediaFileSummary file : result) {
         fileList.setText(index, 0, file.getFilename());
         fileList.setText(index, 1, file.getContentType());
         fileList.setText(index, 2, Long.toString(file.getContentLength()));

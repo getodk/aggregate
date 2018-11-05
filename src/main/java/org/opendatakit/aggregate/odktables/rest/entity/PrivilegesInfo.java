@@ -16,13 +16,12 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * This contains the default group of the user and the list of
@@ -30,14 +29,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  * assigned.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="privilegesInfo")
+@JacksonXmlRootElement(localName = "privilegesInfo")
 public class PrivilegesInfo {
 
   /**
    * User id -- this may be more fully-qualified than the user identity information
-   * that the client used for login (the server may have provided auto-completion 
+   * that the client used for login (the server may have provided auto-completion
    * of a qualifying domain, etc.). The client should update their user
    * identity property to this value.
    */
@@ -62,8 +60,8 @@ public class PrivilegesInfo {
    * This is sorted alphabetically.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="roles")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "roles")
   private ArrayList<String> roles;
 
   /**
@@ -82,9 +80,9 @@ public class PrivilegesInfo {
    * @param entries
    */
   public PrivilegesInfo(String user_id,
-      String full_name,
-      ArrayList<String> roles,
-      String defaultGroup) {
+                        String full_name,
+                        ArrayList<String> roles,
+                        String defaultGroup) {
     this.user_id = user_id;
     this.full_name = full_name;
     if (roles == null) {
@@ -153,22 +151,22 @@ public class PrivilegesInfo {
     }
     PrivilegesInfo other = (PrivilegesInfo) obj;
     boolean simpleResult = ((roles == null) ? (other.roles == null) :
-              ((other.roles != null) && (roles.size() == other.roles.size()))) &&
-      (user_id == null ? other.user_id == null : (user_id.equals(other.user_id))) &&
-      (full_name == null ? other.full_name == null : (full_name.equals(other.full_name))) &&
-      (defaultGroup == null ? other.defaultGroup == null : (defaultGroup.equals(other.defaultGroup)));
-    
-    if ( !simpleResult ) {
+        ((other.roles != null) && (roles.size() == other.roles.size()))) &&
+        (user_id == null ? other.user_id == null : (user_id.equals(other.user_id))) &&
+        (full_name == null ? other.full_name == null : (full_name.equals(other.full_name))) &&
+        (defaultGroup == null ? other.defaultGroup == null : (defaultGroup.equals(other.defaultGroup)));
+
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( roles == null ) {
+
+    if (roles == null) {
       return true;
     }
-    
+
     // roles is a sorted list. Compare linearly...
-    for ( int i = 0 ; i < roles.size() ; ++i ) {
-      if ( !roles.get(i).equals(other.roles.get(i)) ) {
+    for (int i = 0; i < roles.size(); ++i) {
+      if (!roles.get(i).equals(other.roles.get(i))) {
         return false;
       }
     }

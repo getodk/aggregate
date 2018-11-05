@@ -16,12 +16,11 @@
 
 package org.opendatakit.aggregate.util.gae;
 
-import org.opendatakit.aggregate.util.ImageUtil;
-
 import com.google.appengine.api.images.Image;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.images.Transform;
+import org.opendatakit.aggregate.util.ImageUtil;
 
 public class ImageUtilImpl implements ImageUtil {
 

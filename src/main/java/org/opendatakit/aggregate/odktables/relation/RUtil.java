@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.relation;
 
 /**
  * @author the.dylan.price@gmail.com
- *
  */
 public class RUtil {
 

@@ -20,20 +20,20 @@ public class GeoPointElement implements Serializable {
     this.setElementKey(elementKey);
   }
 
+  public String getDisplayName() {
+    return displayName;
+  }
+
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
 
-  public String getDisplayName() {
-    return displayName;
+  public String getElementKey() {
+    return elementKey;
   }
 
   public void setElementKey(String elementKey) {
     this.elementKey = elementKey;
   }
 
-  public String getElementKey() {
-    return elementKey;
-  }
-  
 }

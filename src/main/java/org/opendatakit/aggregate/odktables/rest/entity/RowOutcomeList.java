@@ -16,12 +16,11 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
 
 /**
  * This holds a list of {@link Row}.
@@ -29,9 +28,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  * This wrapping class provides that root node.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="rowList")
+@JacksonXmlRootElement(localName = "rowList")
 public class RowOutcomeList {
 
   /**
@@ -44,8 +42,8 @@ public class RowOutcomeList {
    * The entries in the manifest.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="row")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "row")
   private ArrayList<RowOutcome> rows;
 
   /**
@@ -68,7 +66,7 @@ public class RowOutcomeList {
    * @param entries
    */
   public RowOutcomeList(ArrayList<RowOutcome> rows, String dataETag) {
-    if ( rows == null ) {
+    if (rows == null) {
       this.rows = new ArrayList<RowOutcome>();
     } else {
       this.rows = rows;
@@ -125,14 +123,14 @@ public class RowOutcomeList {
     boolean simpleResult = (tableUri == null ? other.tableUri == null : tableUri.equals(other.tableUri)) &&
         (dataETag == null ? other.dataETag == null : dataETag.equals(other.dataETag)) &&
         (rows == null ? other.rows == null : (other.rows != null && rows.size() == other.rows.size()));
-    if ( !simpleResult ) {
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( rows == null ) {
+
+    if (rows == null) {
       return true;
     }
-    
+
     return rows.containsAll(other.rows);
   }
 

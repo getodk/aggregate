@@ -17,15 +17,12 @@ package org.opendatakit.aggregate.constants.externalservice;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class FusionTableConsts {
 
@@ -44,6 +41,7 @@ public final class FusionTableConsts {
   public static final long BACKOFF_DELAY_MILLISECONDS = 60000L;
 
   public static final Map<ElementType, FusionTableType> typeMap = new HashMap<ElementType, FusionTableType>();
+
   static {
     typeMap.put(ElementType.STRING, FusionTableType.STRING);
     typeMap.put(ElementType.JRDATETIME, FusionTableType.DATE);

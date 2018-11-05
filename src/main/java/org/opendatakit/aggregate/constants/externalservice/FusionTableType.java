@@ -17,19 +17,17 @@
 package org.opendatakit.aggregate.constants.externalservice;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public enum FusionTableType {
   DATE("DATETIME"),
   GPS("LOCATION"),
   NUMBER("NUMBER"),
   STRING("STRING");
- 
+
   private String fusionType;
- 
+
   private FusionTableType(String value) {
     fusionType = value;
   }
@@ -37,5 +35,5 @@ public enum FusionTableType {
   public String getFusionTypeValue() {
     return fusionType;
   }
- 
+
 }

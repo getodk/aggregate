@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
-@JacksonXmlRootElement(localName="tableResource")
+@JacksonXmlRootElement(localName = "tableResource")
 public class TableResource extends TableEntry {
 
   /**
@@ -56,7 +56,7 @@ public class TableResource extends TableEntry {
    * Path prefix for permissions / access-control service.
    */
   private String aclUri;
-  
+
   /**
    * table-level file manifest ETag (optional)
    */
@@ -75,52 +75,52 @@ public class TableResource extends TableEntry {
     return this.selfUri;
   }
 
-  public String getDefinitionUri() {
-    return this.definitionUri;
-  }
-
-  public String getDataUri() {
-    return this.dataUri;
-  }
-
-  public String getInstanceFilesUri() {
-    return this.instanceFilesUri;
-  }
-
-  public String getDiffUri() {
-    return this.diffUri;
-  }
-
-  public String getAclUri() {
-    return this.aclUri;
-  }
-
-  public String getTableLevelManifestETag() {
-    return tableLevelManifestETag;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
+  }
+
+  public String getDefinitionUri() {
+    return this.definitionUri;
   }
 
   public void setDefinitionUri(final String definitionUri) {
     this.definitionUri = definitionUri;
   }
 
+  public String getDataUri() {
+    return this.dataUri;
+  }
+
   public void setDataUri(final String dataUri) {
     this.dataUri = dataUri;
+  }
+
+  public String getInstanceFilesUri() {
+    return this.instanceFilesUri;
   }
 
   public void setInstanceFilesUri(final String instanceFilesUri) {
     this.instanceFilesUri = instanceFilesUri;
   }
 
+  public String getDiffUri() {
+    return this.diffUri;
+  }
+
   public void setDiffUri(final String diffUri) {
     this.diffUri = diffUri;
   }
 
+  public String getAclUri() {
+    return this.aclUri;
+  }
+
   public void setAclUri(final String aclUri) {
     this.aclUri = aclUri;
+  }
+
+  public String getTableLevelManifestETag() {
+    return tableLevelManifestETag;
   }
 
   public void setTableLevelManifestETag(String tableLevelManifestETag) {

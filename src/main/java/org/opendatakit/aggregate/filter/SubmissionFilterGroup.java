@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.filter;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -39,9 +38,8 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Creates the database interface for filter group objects
- * 
+ *
  * @author wbrunette@gmail.com
- * 
  */
 public class SubmissionFilterGroup extends CommonFieldsBase {
 
@@ -57,12 +55,12 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
       true);
   private static final DataField INCLUDE_METADATA = new DataField("INCLUDE_METADATA", DataField.DataType.BOOLEAN,
       true);
-  
+  private static SubmissionFilterGroup relation = null;
   private List<SubmissionFilter> filters;
 
   /**
    * Construct a relation prototype.
-   * 
+   *
    * @param databaseSchema
    * @param tableName
    */
@@ -77,12 +75,94 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
   /**
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   * 
+   *
    * @param ref
    * @param user
    */
   private SubmissionFilterGroup(SubmissionFilterGroup ref, User user) {
     super(ref, user);
+  }
+
+  private static synchronized final SubmissionFilterGroup assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      SubmissionFilterGroup relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      relationPrototype = new SubmissionFilterGroup(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
+  }
+
+  public static final SubmissionFilterGroup getFilterGroup(String uri, CallingContext cc)
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
+    try {
+      SubmissionFilterGroup relation = assertRelation(cc);
+      CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
+
+      if (entity != null && entity instanceof SubmissionFilterGroup) {
+        SubmissionFilterGroup filterGroup = (SubmissionFilterGroup) entity;
+        filterGroup.addFilters(SubmissionFilter.getFilterList(uri, cc));
+        return filterGroup;
+      } else {
+        return null;
+      }
+    } catch (ODKOverQuotaException e) {
+      throw e;
+    } catch (ODKDatastoreException e) {
+      throw new ODKEntityNotFoundException(e);
+    }
+  }
+
+  public static final SubmissionFilterGroup transform(FilterGroup filterGroup, CallingContext cc)
+      throws ODKEntityNotFoundException, ODKOverQuotaException, ODKDatastoreException {
+
+    SubmissionFilterGroup relation = assertRelation(cc);
+    String uri = filterGroup.getUri();
+    SubmissionFilterGroup subFilterGroup;
+
+    if (uri.equals(UIConsts.URI_DEFAULT)) {
+      subFilterGroup = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
+      subFilterGroup.setUriUser(cc.getCurrentUser().getUriUser());
+    } else {
+      CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
+      subFilterGroup = (SubmissionFilterGroup) entity;
+    }
+
+    subFilterGroup.setName(filterGroup.getName());
+    subFilterGroup.setFormId(filterGroup.getFormId());
+    subFilterGroup.setIncludeMetadata(filterGroup.getIncludeMetadata());
+    subFilterGroup.setIsPublic(true); // currently is always public if involved in ui, private filters are used for exporting
+
+    for (Filter filter : filterGroup.getFilters()) {
+      SubmissionFilter subFilter = SubmissionFilter.transform(filter, subFilterGroup, cc);
+      subFilterGroup.addFilter(subFilter);
+    }
+
+    return subFilterGroup;
+  }
+
+  public static final List<SubmissionFilterGroup> getFilterGroupList(String formId,
+                                                                     CallingContext cc) throws ODKDatastoreException {
+    SubmissionFilterGroup relation = assertRelation(cc);
+    Query query = cc.getDatastore().createQuery(relation, "SubmissionFilterGroup.getFilterGroupList", cc.getCurrentUser());
+    query.addFilter(SubmissionFilterGroup.FORM_ID_PROPERTY, FilterOperation.EQUAL, formId);
+
+    List<SubmissionFilterGroup> filterGroupList = new ArrayList<SubmissionFilterGroup>();
+
+    List<? extends CommonFieldsBase> results = query.executeQuery();
+    for (CommonFieldsBase cb : results) {
+      if (cb instanceof SubmissionFilterGroup) {
+        SubmissionFilterGroup tmp = (SubmissionFilterGroup) cb;
+        List<SubmissionFilter> filters = SubmissionFilter.getFilterList(tmp.getUri(), cc);
+        tmp.addFilters(filters);
+        filterGroupList.add(tmp);
+      }
+    }
+    return filterGroupList;
   }
 
   @Override
@@ -109,11 +189,11 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
       throw new IllegalArgumentException("overflow name");
     }
   }
-  
+
   public String getUriUser() {
     return getStringField(URI_USER_PROPERTY);
   }
-  
+
   public void setUriUser(String uriUser) {
     if (!setStringField(URI_USER_PROPERTY, uriUser)) {
       throw new IllegalArgumentException("overflow uriUser");
@@ -123,7 +203,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   public Boolean isPublic() {
     // treat null values as TRUE
     Boolean fieldValue = getBooleanField(IS_PUBLIC);
-    if ( fieldValue == null ) return Boolean.TRUE;
+    if (fieldValue == null) return Boolean.TRUE;
     return fieldValue;
   }
 
@@ -134,14 +214,14 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
   public Boolean includeMetadata() {
     // treat null values as FALSE
     Boolean fieldValue = getBooleanField(INCLUDE_METADATA);
-    if ( fieldValue == null ) return Boolean.FALSE;
+    if (fieldValue == null) return Boolean.FALSE;
     return fieldValue;
   }
 
   public void setIncludeMetadata(Boolean value) {
     setBooleanField(INCLUDE_METADATA, value);
   }
-  
+
   List<SubmissionFilter> getFilters() {
     return filters;
   }
@@ -165,7 +245,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
     filterGroup.setName(getName());
     filterGroup.setFormId(getFormId());
-    
+
     if (filters != null) {
       for (SubmissionFilter filter : filters) {
         filterGroup.addFilter(filter.transform());
@@ -216,89 +296,5 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
       }
     }
     ds.deleteEntity(this.getEntityKey(), user);
-  }
-
-  private static SubmissionFilterGroup relation = null;
-
-  private static synchronized final SubmissionFilterGroup assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      SubmissionFilterGroup relationPrototype;
-      Datastore ds = cc.getDatastore();
-      User user = cc.getUserService().getDaemonAccountUser();
-      relationPrototype = new SubmissionFilterGroup(ds.getDefaultSchemaName());
-      ds.assertRelation(relationPrototype, user); // may throw exception...
-      // at this point, the prototype has become fully populated
-      relation = relationPrototype; // set static variable only upon success...
-    }
-    return relation;
-  }
-
-  public static final SubmissionFilterGroup getFilterGroup(String uri, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    try {
-      SubmissionFilterGroup relation = assertRelation(cc);
-      CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
-      
-      if (entity != null && entity instanceof SubmissionFilterGroup) {
-        SubmissionFilterGroup filterGroup = (SubmissionFilterGroup) entity;
-        filterGroup.addFilters(SubmissionFilter.getFilterList(uri, cc));
-        return filterGroup;
-      } else {
-        return null;
-      }
-    } catch (ODKOverQuotaException e) {
-      throw e;
-    } catch (ODKDatastoreException e) {
-      throw new ODKEntityNotFoundException(e);
-    }
-  }
-
-  public static final SubmissionFilterGroup transform(FilterGroup filterGroup, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException, ODKDatastoreException {
-
-    SubmissionFilterGroup relation = assertRelation(cc);
-    String uri = filterGroup.getUri();
-    SubmissionFilterGroup subFilterGroup;
-
-    if (uri.equals(UIConsts.URI_DEFAULT)) {
-      subFilterGroup = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
-      subFilterGroup.setUriUser(cc.getCurrentUser().getUriUser());
-    } else {
-      CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
-      subFilterGroup = (SubmissionFilterGroup) entity;
-    }
-
-    subFilterGroup.setName(filterGroup.getName());
-    subFilterGroup.setFormId(filterGroup.getFormId());
-    subFilterGroup.setIncludeMetadata(filterGroup.getIncludeMetadata());
-    subFilterGroup.setIsPublic(true); // currently is always public if involved in ui, private filters are used for exporting 
-    
-    for (Filter filter : filterGroup.getFilters()) {
-      SubmissionFilter subFilter = SubmissionFilter.transform(filter, subFilterGroup, cc);
-      subFilterGroup.addFilter(subFilter);
-    }
-
-    return subFilterGroup;
-  }
-
-  public static final List<SubmissionFilterGroup> getFilterGroupList(String formId,
-      CallingContext cc) throws ODKDatastoreException {
-    SubmissionFilterGroup relation = assertRelation(cc);
-    Query query = cc.getDatastore().createQuery(relation, "SubmissionFilterGroup.getFilterGroupList", cc.getCurrentUser());
-    query.addFilter(SubmissionFilterGroup.FORM_ID_PROPERTY, FilterOperation.EQUAL, formId);
-
-    List<SubmissionFilterGroup> filterGroupList = new ArrayList<SubmissionFilterGroup>();
-
-    List<? extends CommonFieldsBase> results = query.executeQuery();
-    for (CommonFieldsBase cb : results) {
-      if (cb instanceof SubmissionFilterGroup) {
-        SubmissionFilterGroup tmp = (SubmissionFilterGroup) cb;
-        List<SubmissionFilter> filters = SubmissionFilter.getFilterList(tmp.getUri(), cc);
-        tmp.addFilters(filters);
-        filterGroupList.add(tmp);
-      }
-    }
-    return filterGroupList;
   }
 }

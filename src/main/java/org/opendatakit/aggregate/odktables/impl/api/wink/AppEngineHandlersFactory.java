@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.impl.api.wink;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.wink.server.handlers.HandlersFactory;
 import org.apache.wink.server.handlers.ResponseHandler;
 import org.opendatakit.aggregate.odktables.entity.serialization.NotModifiedHandler;

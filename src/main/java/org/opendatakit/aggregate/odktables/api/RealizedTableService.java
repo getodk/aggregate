@@ -25,7 +25,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.exception.SchemaETagMismatchException;
@@ -41,7 +40,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
  * unique, schemaETag.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public interface RealizedTableService {
 
@@ -65,13 +63,13 @@ public interface RealizedTableService {
    * @throws PermissionDeniedException
    * @throws ODKTaskLockException
    * @throws AppNameMismatchException
-   * @throws TableNotFoundException 
+   * @throws TableNotFoundException
    */
   @GET
   @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
   public Response /*TableDefinitionResource*/ getDefinition()
       throws ODKDatastoreException, PermissionDeniedException, ODKTaskLockException, AppNameMismatchException, TableNotFoundException;
-  
+
   /**
    * Data row subresource for a realized tableId (supplied in implementation constructor)
    *
@@ -81,7 +79,7 @@ public interface RealizedTableService {
    * @throws PermissionDeniedException
    * @throws AppNameMismatchException
    * @throws ODKTaskLockException
-   * @throws TableNotFoundException 
+   * @throws TableNotFoundException
    */
   @Path("rows")
   public DataService getData() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException;
@@ -106,7 +104,7 @@ public interface RealizedTableService {
    * @throws PermissionDeniedException
    * @throws AppNameMismatchException
    * @throws ODKTaskLockException
-   * @throws TableNotFoundException 
+   * @throws TableNotFoundException
    */
   @Path("attachments/{rowId}")
   public InstanceFileService getInstanceFiles(@PathParam("rowId") String rowId) throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException;
@@ -120,11 +118,11 @@ public interface RealizedTableService {
    * @throws PermissionDeniedException
    * @throws AppNameMismatchException
    * @throws ODKTaskLockException
-   * @throws TableNotFoundException 
+   * @throws TableNotFoundException
    */
   @Path("diff")
   public DiffService getDiff() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException;
-  
+
   /**
    * Differences subresource for a realized tableId (supplied in implementation constructor)
    *
@@ -134,11 +132,11 @@ public interface RealizedTableService {
    * @throws PermissionDeniedException
    * @throws AppNameMismatchException
    * @throws ODKTaskLockException
-   * @throws TableNotFoundException 
+   * @throws TableNotFoundException
    */
   @Path("query")
   public QueryService getQuery() throws ODKDatastoreException, PermissionDeniedException, SchemaETagMismatchException, AppNameMismatchException, ODKTaskLockException, TableNotFoundException;
-  
+
 
   @POST
   @Path("installationStatus")

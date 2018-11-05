@@ -27,16 +27,15 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * This is a singleton bean for generating Json
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class JsonFileGeneratorImpl implements JsonFileGenerator {
 
   @Override
   public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-      CallingContext cc) throws ODKDatastoreException {
+                                 CallingContext cc) throws ODKDatastoreException {
     TaskOptionsBuilder b = new TaskOptionsBuilder(JsonGeneratorTaskServlet.ADDR);
     b.countdownMillis(PersistConsts.MAX_SETTLE_MILLISECONDS);
     b.param(ServletConsts.FORM_ID, form.getFormId());

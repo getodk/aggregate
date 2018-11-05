@@ -23,7 +23,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.OdkTablesFileManifest;
@@ -37,12 +36,10 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
  * and the correct table.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public interface FileManifestService {
 
   /**
-   *
    * @param httpHeaders
    * @param odkClientVersion
    * @return {@link OdkTablesFileManifest} of all the files meeting the filter criteria.
@@ -58,7 +55,6 @@ public interface FileManifestService {
   public Response /*OdkTablesFileManifest*/ getAppLevelFileManifest(@Context HttpHeaders httpHeaders, @PathParam("odkClientVersion") String odkClientVersion) throws ODKEntityNotFoundException, ODKOverQuotaException, PermissionDeniedException, ODKDatastoreException, ODKTaskLockException;
 
   /**
-   *
    * @param httpHeaders
    * @param odkClientVersion
    * @param tableId

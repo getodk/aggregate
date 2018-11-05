@@ -19,9 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.ws.rs.core.MultivaluedMap;
-
 import org.apache.http.HeaderElement;
 import org.apache.http.message.BasicHeaderValueParser;
 import org.apache.http.message.HeaderValueParser;
@@ -46,25 +44,15 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Implementation of file management APIs for row-level attachments.
- * 
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class InstanceFileManager {
 
-  public interface FetchBlobHandler {
-    byte[] getBlob() throws ODKDatastoreException;
-  }
-
-  public interface FileContentHandler {
-    void processFileContent(FileContentInfo content, FetchBlobHandler fetcher);
-  };
-
   private static final String ERROR_FILE_VERSION_DIFFERS = "File on server does not match file being uploaded. Aborting upload. ";
-
   private String appId;
 
+  ;
   private CallingContext cc;
 
   public InstanceFileManager(String appId, CallingContext cc) {
@@ -75,7 +63,7 @@ public class InstanceFileManager {
   /**
    * Retrieve the content info for a given file. Access to the blob entity set
    * needs to be guarded by a task lock.
-   * 
+   *
    * @param tableId
    * @param rowId
    * @param partialPath
@@ -86,7 +74,7 @@ public class InstanceFileManager {
    * @throws PermissionDeniedException
    */
   public FileContentInfo getFile(String tableId, String rowId, String partialPath,
-      TablesUserPermissions userPermissions)
+                                 TablesUserPermissions userPermissions)
       throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
 
     try {
@@ -163,7 +151,7 @@ public class InstanceFileManager {
    * Save a given file content under this tableId and rowId. Manipulations of
    * the blob entity set (which is being updated) needs to be guarded by a task
    * lock.
-   * 
+   *
    * @param tableId
    * @param rowId
    * @param fi
@@ -174,7 +162,7 @@ public class InstanceFileManager {
    * @throws PermissionDeniedException
    */
   public InstanceFileChangeDetail putFile(String tableId, String rowId, FileContentInfo fi,
-      TablesUserPermissions userPermissions)
+                                          TablesUserPermissions userPermissions)
       throws ODKDatastoreException, ODKTaskLockException, PermissionDeniedException {
 
     try {
@@ -226,14 +214,14 @@ public class InstanceFileManager {
             fi.partialPath, false, cc);
 
         switch (outcome) {
-        case FILE_UNCHANGED:
-          return InstanceFileChangeDetail.FILE_PRESENT;
-        case NEW_FILE_VERSION:
-          return InstanceFileChangeDetail.FILE_INCOMPATIBLE;
-        case COMPLETELY_NEW_FILE:
-          return InstanceFileChangeDetail.FILE_PRESENT;
-        default:
-          throw new IllegalStateException("Unexpected extra status for BlobSubmissionOutcome");
+          case FILE_UNCHANGED:
+            return InstanceFileChangeDetail.FILE_PRESENT;
+          case NEW_FILE_VERSION:
+            return InstanceFileChangeDetail.FILE_INCOMPATIBLE;
+          case COMPLETELY_NEW_FILE:
+            return InstanceFileChangeDetail.FILE_PRESENT;
+          default:
+            throw new IllegalStateException("Unexpected extra status for BlobSubmissionOutcome");
         }
 
       } finally {
@@ -265,13 +253,12 @@ public class InstanceFileManager {
    * treated as read-only by the caller. Updates should be done through the
    * putFile or postFiles APIs. Manipulations of the blob entity set (which is
    * being updated) needs to be guarded by a task lock.
-   * 
+   * <p>
    * It is safe to fetch the Blob from this set because the set is write-only.
-   * 
+   *
    * @param tableId
    * @param rowId
-   * @param cb
-   *          -- callback to process each file manifest entry
+   * @param cb              -- callback to process each file manifest entry
    * @param userPermissions
    * @return map of partial path of file to the FileContentInfo for that file.
    * @throws IOException
@@ -280,7 +267,7 @@ public class InstanceFileManager {
    * @throws ODKDatastoreException
    */
   public void getInstanceAttachments(String tableId, String rowId, FileContentHandler cb,
-      TablesUserPermissions userPermissions)
+                                     TablesUserPermissions userPermissions)
       throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
     try {
@@ -342,7 +329,7 @@ public class InstanceFileManager {
   }
 
   public void postFiles(String tableId, String rowId, InMultiPart inMP,
-      TablesUserPermissions userPermissions)
+                        TablesUserPermissions userPermissions)
       throws IOException, ODKTaskLockException, ODKTablesException, ODKDatastoreException {
 
     try {
@@ -478,5 +465,13 @@ public class InstanceFileManager {
       e.printStackTrace();
       throw e;
     }
+  }
+
+  public interface FetchBlobHandler {
+    byte[] getBlob() throws ODKDatastoreException;
+  }
+
+  public interface FileContentHandler {
+    void processFileContent(FileContentInfo content, FetchBlobHandler fetcher);
   }
 }

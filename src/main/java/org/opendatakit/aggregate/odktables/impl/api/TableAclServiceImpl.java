@@ -21,12 +21,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
-
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
 import org.opendatakit.aggregate.odktables.TableAclManager;
 import org.opendatakit.aggregate.odktables.TableAclManager.WebsafeAcls;
 import org.opendatakit.aggregate.odktables.api.OdkTables;
@@ -69,10 +67,10 @@ public class TableAclServiceImpl implements TableAclService {
         WebUtils.safeEncode(websafeResult.websafeBackwardCursor),
         WebUtils.safeEncode(websafeResult.websafeResumeCursor),
         websafeResult.hasMore, websafeResult.hasPrior);
-     return Response.ok(list)
-         .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-         .header("Access-Control-Allow-Origin", "*")
-         .header("Access-Control-Allow-Credentials", "true").build();
+    return Response.ok(list)
+        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Credentials", "true").build();
   }
 
   @Override
@@ -147,7 +145,7 @@ public class TableAclServiceImpl implements TableAclService {
       PermissionDeniedException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -166,7 +164,7 @@ public class TableAclServiceImpl implements TableAclService {
       PermissionDeniedException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -183,7 +181,7 @@ public class TableAclServiceImpl implements TableAclService {
       PermissionDeniedException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -199,7 +197,7 @@ public class TableAclServiceImpl implements TableAclService {
   public Response deleteDefaultAcl() throws ODKDatastoreException, PermissionDeniedException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -214,7 +212,7 @@ public class TableAclServiceImpl implements TableAclService {
   public Response deleteUserAcl(String odkTablesUserId) throws ODKDatastoreException, PermissionDeniedException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -230,7 +228,7 @@ public class TableAclServiceImpl implements TableAclService {
       PermissionDeniedException {
 
     TreeSet<GrantedAuthorityName> ui = SecurityServiceUtil.getCurrentUserSecurityInfo(cc);
-    if ( !ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES) ) {
+    if (!ui.contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
       throw new PermissionDeniedException("User does not belong to the 'Administer Tables' group");
     }
 
@@ -254,16 +252,16 @@ public class TableAclServiceImpl implements TableAclService {
     UriBuilder selfBuilder = ub.clone().path(TableService.class, "getAcl");
     URI self;
     switch (type) {
-    case USER:
-      self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
-      break;
-    case GROUP:
-      self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
-      break;
-    case DEFAULT:
-    default:
-      self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
-      break;
+      case USER:
+        self = selfBuilder.path(TableAclService.class, "getUserAcl").build(appId, tableId, value);
+        break;
+      case GROUP:
+        self = selfBuilder.path(TableAclService.class, "getGroupAcl").build(appId, tableId, value);
+        break;
+      case DEFAULT:
+      default:
+        self = selfBuilder.path(TableAclService.class, "getDefaultAcl").build(appId, tableId);
+        break;
     }
     URI acls = ub.clone().path(TableService.class, "getAcl").build(appId, tableId);
     URI table = ub.clone().build(appId, tableId);

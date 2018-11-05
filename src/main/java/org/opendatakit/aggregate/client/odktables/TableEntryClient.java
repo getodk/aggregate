@@ -26,13 +26,12 @@ import java.io.Serializable;
  * similar non-phone objects will be needed on the server side.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableEntryClient implements Serializable {
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -70945438534365403L;
 
   private String tableId;
@@ -43,7 +42,7 @@ public class TableEntryClient implements Serializable {
   }
 
   public TableEntryClient(final String tableId, final String dataETag,
-      final String schemaETag) {
+                          final String schemaETag) {
     this.tableId = tableId;
     this.dataETag = dataETag;
     this.schemaETag = schemaETag;

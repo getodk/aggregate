@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -14,7 +14,6 @@
 package org.opendatakit.common.ermodel;
 
 import java.util.Date;
-
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
@@ -56,9 +55,9 @@ import org.opendatakit.common.web.CallingContext;
  * <p>
  * Retrieval of information about a particular blob relies on the ordinal number
  * for that blob.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public interface BlobEntitySet {
   // primary key
@@ -69,7 +68,7 @@ public interface BlobEntitySet {
 
   /**
    * Get the number of blobs in this BlobEntitySet.
-   * 
+   *
    * @return
    */
   public int getAttachmentCount(CallingContext cc) throws ODKDatastoreException;
@@ -89,7 +88,7 @@ public interface BlobEntitySet {
   /**
    * Get the hash string of the "ordinal'th" blob. This is an md5 hash and is
    * used to detect equivalent content.
-   * 
+   *
    * @param ordinal
    *          [1..]
    * @param cc
@@ -100,7 +99,7 @@ public interface BlobEntitySet {
 
   /**
    * Get the byte length of the "ordinal'th" blob.
-   * 
+   *
    * @param ordinal
    *          [1..]
    * @param cc
@@ -111,7 +110,7 @@ public interface BlobEntitySet {
 
   /**
    * Get the content type (mime type) of the "ordinal'th" blob.
-   * 
+   *
    * @param ordinal
    *          [1..]
    * @param cc
@@ -123,7 +122,7 @@ public interface BlobEntitySet {
   /**
    * Get the unrooted filepath of the "ordinal'th" blob. This can be null and
    * will be unique within this Blob set.
-   * 
+   *
    * @param ordinal
    *          [1..]
    * @param cc
@@ -134,7 +133,7 @@ public interface BlobEntitySet {
 
   /**
    * Get the contents of the "ordinal'th" blob.
-   * 
+   *
    * @param ordinal
    *          [1..]
    * @param cc
@@ -146,7 +145,7 @@ public interface BlobEntitySet {
   /**
    * Save this BlobSet. Only useful for empty blob sets, as inserting a blob
    * always causes an immediate persist of the blob set.
-   * 
+   *
    * @param cc
    * @throws ODKEntityPersistException
    * @throws ODKOverQuotaException
@@ -155,7 +154,7 @@ public interface BlobEntitySet {
 
   /**
    * Remove the BlobSet from the datastore.
-   * 
+   *
    * @param cc
    * @throws ODKDatastoreException
    */
@@ -167,7 +166,7 @@ public interface BlobEntitySet {
    * matching unrootedFilePath, the return value indicates whether or not the
    * byteArray is different from that in the datastore, and
    * <em>no update is performed</em> unless overwriteOK is true.
-   * 
+   *
    * @param byteArray
    * @param contentType
    * @param unrootedFilePath
@@ -177,6 +176,6 @@ public interface BlobEntitySet {
    * @throws ODKDatastoreException
    */
   public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType,
-      String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException;
+                                       String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException;
 
 }

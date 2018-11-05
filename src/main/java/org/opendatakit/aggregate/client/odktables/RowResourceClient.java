@@ -25,7 +25,6 @@ import java.io.Serializable;
  * the client.
  *
  * @author sudars
- *
  */
 public class RowResourceClient extends RowClient implements Serializable {
 

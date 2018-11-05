@@ -19,28 +19,28 @@ package org.opendatakit.aggregate.constants.common;
 import java.io.Serializable;
 
 public enum Tabs implements Serializable {
-   SUBMISSIONS("Submissions", "submissions"),
-   MANAGEMENT("Form Management", "management"),
-   ADMIN("Site Admin", "admin"),
-   ODKTABLES("ODK Tables", "odkTables");
-   
-   private String tabLabel;
-   private String hashString;
-   
-   private Tabs() {
-     // GWT
-   }
-   
-   private Tabs(String label, String hash) {
-     tabLabel = label;
-     hashString = hash;
-   }
-   
-   public String getTabLabel() {
-     return tabLabel;
-   }
-   
-   public String getHashString() {
-     return hashString;
-   }
+  SUBMISSIONS("Submissions", "submissions"),
+  MANAGEMENT("Form Management", "management"),
+  ADMIN("Site Admin", "admin"),
+  ODKTABLES("ODK Tables", "odkTables");
+
+  private String tabLabel;
+  private String hashString;
+
+  private Tabs() {
+    // GWT
+  }
+
+  private Tabs(String label, String hash) {
+    tabLabel = label;
+    hashString = hash;
+  }
+
+  public String getTabLabel() {
+    return tabLabel;
+  }
+
+  public String getHashString() {
+    return hashString;
+  }
 };

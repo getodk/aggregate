@@ -16,28 +16,24 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateSubTabBase;
-import org.opendatakit.aggregate.client.popups.ViewServletPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
+import org.opendatakit.aggregate.client.AggregateSubTabBase;
+import org.opendatakit.aggregate.client.popups.ViewServletPopup;
 
 public final class OdkTablesTableIdServletPopupButton extends AggregateButton implements ClickHandler {
 
-  public interface OdkTablesData {
-    String getTableId();
-  };
-
   private final String url;
+
+  ;
   private final String title;
   private final AggregateSubTabBase basePanel;
   private final OdkTablesData dataAccess;
-
   public OdkTablesTableIdServletPopupButton(String buttonText, String title, String url,
-              String tooltipText, String balloonText, AggregateSubTabBase basePanel, OdkTablesData dataAccess) {
+                                            String tooltipText, String balloonText, AggregateSubTabBase basePanel, OdkTablesData dataAccess) {
     super(buttonText, tooltipText, balloonText);
     this.title = title;
     this.url = url;
@@ -50,21 +46,25 @@ public final class OdkTablesTableIdServletPopupButton extends AggregateButton im
     super.onClick(event);
 
     String tableId = dataAccess.getTableId();
-    if ( tableId == null ) {
+    if (tableId == null) {
       return;
     }
     ViewServletPopup servletPopup = new ViewServletPopup(title,
-          url + "?table_id=" + tableId);
+        url + "?table_id=" + tableId);
     servletPopup.setPopupPositionAndShow(servletPopup.getPositionCallBack());
     servletPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
 
       @Override
       public void onClose(CloseEvent<PopupPanel> event) {
-        if(basePanel != null) {
+        if (basePanel != null) {
           basePanel.update();
         }
       }
 
     });
+  }
+
+  public interface OdkTablesData {
+    String getTableId();
   }
 }

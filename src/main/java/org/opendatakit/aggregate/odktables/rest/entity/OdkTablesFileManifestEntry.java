@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * struct that is parsed into and recovered from JSON.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesFileManifestEntry implements Comparable<OdkTablesFileManifestEntry> {
 
@@ -35,12 +34,12 @@ public class OdkTablesFileManifestEntry implements Comparable<OdkTablesFileManif
    * app-level and table-level files) or the
    * row's attachments directory (for row-level
    * attachments).
-   *
+   * <p>
    * I.e., for the new directory structure,
    * if the manifest holds configpath files, it is under:
-   *   /sdcard/opendatakit/{appId}/config
+   * /sdcard/opendatakit/{appId}/config
    * if the manifest holds rowpath files, it is under:
-   *   /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}
+   * /sdcard/opendatakit/{appId}/data/attachments/{tableId}/{rowId}
    */
   public String filename;
 
@@ -91,7 +90,7 @@ public class OdkTablesFileManifestEntry implements Comparable<OdkTablesFileManif
     OdkTablesFileManifestEntry other = (OdkTablesFileManifestEntry) obj;
     return (filename == null ? other.filename == null : filename.equals(other.filename))
         && (contentLength == null ? other.contentLength == null : contentLength
-            .equals(other.contentLength))
+        .equals(other.contentLength))
         && (contentType == null ? other.contentType == null : contentType.equals(other.contentType))
         && (md5hash == null ? other.md5hash == null : md5hash.equals(other.md5hash))
         && (downloadUrl == null ? other.downloadUrl == null : downloadUrl.equals(other.downloadUrl));
@@ -99,27 +98,27 @@ public class OdkTablesFileManifestEntry implements Comparable<OdkTablesFileManif
 
   @Override
   public int compareTo(OdkTablesFileManifestEntry other) {
-    if ( filename == null ) {
-      if ( other.filename != null ) {
+    if (filename == null) {
+      if (other.filename != null) {
         return -1;
       }
-    } else if ( other.filename == null ) {
+    } else if (other.filename == null) {
       return 1;
     }
-    
+
     int cmp = filename.compareTo(other.filename);
-    if ( cmp != 0 ) {
+    if (cmp != 0) {
       return cmp;
     }
 
-    if ( md5hash == null ) {
-      if ( other.md5hash != null ) {
+    if (md5hash == null) {
+      if (other.md5hash != null) {
         return -1;
       }
-    } else if ( other.md5hash == null ) {
+    } else if (other.md5hash == null) {
       return 1;
     }
-    
+
     cmp = md5hash.compareTo(other.md5hash);
     return cmp;
   }

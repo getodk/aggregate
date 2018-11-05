@@ -16,23 +16,21 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This holds a list of {@link TableResource}. Proper XML documents can contain
  * only one root node. This wrapping class provides that root node.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="tableResourceList")
+@JacksonXmlRootElement(localName = "tableResourceList")
 public class TableResourceList {
 
   /**
@@ -68,12 +66,12 @@ public class TableResourceList {
    * This is and ordered list by tableId.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="tableResource")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "tableResource")
   private ArrayList<TableResource> tables;
 
   /**
-   * If known, the ETag of the app-level files 
+   * If known, the ETag of the app-level files
    * manifest is also returned.
    */
   @JsonProperty(required = false)
@@ -93,7 +91,7 @@ public class TableResourceList {
    * @param entries
    */
   public TableResourceList(ArrayList<TableResource> tables,
-      String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
+                           String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
     if (tables == null) {
       this.tables = new ArrayList<TableResource>();
     } else {
@@ -191,24 +189,24 @@ public class TableResourceList {
     }
     TableResourceList other = (TableResourceList) obj;
     boolean simpleResult = (tables == null ? other.tables == null : (other.tables != null && tables.size() == other.tables.size())) &&
-            (appLevelManifestETag == null ? other.appLevelManifestETag == null : (appLevelManifestETag.equals(other.appLevelManifestETag))) &&
-            (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
-            (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
-            (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
-            (hasMoreResults == other.hasMoreResults) &&
-            (hasPriorResults == other.hasPriorResults);
-    
-    if ( !simpleResult ) {
+        (appLevelManifestETag == null ? other.appLevelManifestETag == null : (appLevelManifestETag.equals(other.appLevelManifestETag))) &&
+        (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
+        (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
+        (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
+        (hasMoreResults == other.hasMoreResults) &&
+        (hasPriorResults == other.hasPriorResults);
+
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( tables == null ) {
+
+    if (tables == null) {
       return true;
     }
-    
+
     // tables is a sorted list. Compare linearly...
-    for ( int i = 0 ; i < tables.size() ; ++i ) {
-      if ( !tables.get(i).equals(other.tables.get(i)) ) {
+    for (int i = 0; i < tables.size(); ++i) {
+      if (!tables.get(i).equals(other.tables.get(i))) {
         return false;
       }
     }

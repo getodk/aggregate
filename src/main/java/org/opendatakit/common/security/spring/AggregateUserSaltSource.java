@@ -20,16 +20,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Fetches the salt used for the Basic Authentication password computation.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class AggregateUserSaltSource implements SaltSource {
 
-    @Override
-    public Object getSalt(UserDetails userDetail) {
-        AggregateUser user = (AggregateUser) userDetail;
-        return user.getSalt();
-    }
+  @Override
+  public Object getSalt(UserDetails userDetail) {
+    AggregateUser user = (AggregateUser) userDetail;
+    return user.getSalt();
+  }
 
 }

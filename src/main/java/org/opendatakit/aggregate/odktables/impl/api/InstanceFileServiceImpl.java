@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -34,9 +33,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.wink.common.model.multipart.BufferedOutMultiPart;
 import org.apache.wink.common.model.multipart.InMultiPart;
 import org.apache.wink.common.model.multipart.OutPart;
@@ -64,12 +60,14 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InstanceFileServiceImpl implements InstanceFileService {
 
   /**
    * String to stand in for those things in the app's root directory.
-   *
+   * <p>
    * NOTE: This cannot be null -- GAE doesn't like that!
    */
   public static final String NO_TABLE_ID = "";
@@ -91,7 +89,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
   private final String schemaETag;
 
   public InstanceFileServiceImpl(String appId, String tableId, String schemaETag, String rowId,
-      UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
+                                 UriInfo info, TablesUserPermissions userPermissions, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException {
     this.cc = cc;
     this.appId = appId;
@@ -104,7 +102,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
   @Override
   public Response getManifest(@Context HttpHeaders httpHeaders,
-      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
+                              @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
       throws IOException, ODKTaskLockException, PermissionDeniedException {
 
     UriBuilder ub = info.getBaseUriBuilder();
@@ -208,8 +206,8 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
   @Override
   public Response getFile(@Context HttpHeaders httpHeaders,
-      @PathParam("filePath") List<PathSegment> segments,
-      @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
+                          @PathParam("filePath") List<PathSegment> segments,
+                          @QueryParam(PARAM_AS_ATTACHMENT) String asAttachment)
       throws IOException, ODKTaskLockException, PermissionDeniedException {
     // The appId and tableId are from the surrounding TableService.
     // The rowId is already pulled out.
@@ -442,7 +440,7 @@ public class InstanceFileServiceImpl implements InstanceFileService {
 
   @Override
   public Response putFile(@Context HttpServletRequest req,
-      @PathParam("filePath") List<PathSegment> segments, byte[] content)
+                          @PathParam("filePath") List<PathSegment> segments, byte[] content)
       throws IOException, ODKTaskLockException, PermissionDeniedException, ODKDatastoreException {
 
     if (segments.size() < 1) {

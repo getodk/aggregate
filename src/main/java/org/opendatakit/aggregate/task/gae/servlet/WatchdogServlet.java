@@ -16,12 +16,8 @@
 package org.opendatakit.aggregate.task.gae.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
@@ -30,31 +26,29 @@ import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
-public class WatchdogServlet extends ServletUtilBase{
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 4295412985320942609L;
-
-  private static final Logger logger = LoggerFactory.getLogger(WatchdogServlet.class);
-
+public class WatchdogServlet extends ServletUtilBase {
   /**
    * URI from base
    */
   public static final String ADDR = "gae/watchdog";
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 4295412985320942609L;
+  private static final Logger logger = LoggerFactory.getLogger(WatchdogServlet.class);
 
   /**
    * Handler for HTTP Get request to run watchdog task
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

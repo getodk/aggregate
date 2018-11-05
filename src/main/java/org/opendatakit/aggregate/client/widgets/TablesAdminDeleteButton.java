@@ -16,10 +16,9 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.popups.ConfirmDeleteTablesAdminPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.popups.ConfirmDeleteTablesAdminPopup;
 
 public final class TablesAdminDeleteButton extends AggregateButton implements ClickHandler {
 

@@ -18,26 +18,26 @@ package org.opendatakit.aggregate.constants.common;
 
 
 public enum PreferencesConsts implements HelpSliderConsts {
-    GOOGLE("Google API Credentials", "These credentials are used when publishing into Google services."),
-    ENKETO("Enketo Credentials", "These credentials are used for Enketo webforms integration."),
-    FEATURES("Aggregate Features",
-            "These settings affect the operations of the server.<br>" +
-            "1. Disable faster background actions - check this to reduce AppEngine quota usage.<br>" +
-            "2. ODK Tables Synchronization Functionality - check this to enable ODK Tables functionality.");
+  GOOGLE("Google API Credentials", "These credentials are used when publishing into Google services."),
+  ENKETO("Enketo Credentials", "These credentials are used for Enketo webforms integration."),
+  FEATURES("Aggregate Features",
+      "These settings affect the operations of the server.<br>" +
+          "1. Disable faster background actions - check this to reduce AppEngine quota usage.<br>" +
+          "2. ODK Tables Synchronization Functionality - check this to enable ODK Tables functionality.");
 
-    private String title;
-    private String content;
+  private String title;
+  private String content;
 
-    private PreferencesConsts(String titleString, String contentString) {
-        title = titleString;
-        content = contentString;
-    }
+  private PreferencesConsts(String titleString, String contentString) {
+    title = titleString;
+    content = contentString;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public String getContent() {
-        return content;
-    }
+  public String getContent() {
+    return content;
+  }
 }

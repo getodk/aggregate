@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.FilterSubTab;
-import org.opendatakit.aggregate.client.filter.FilterGroup;
-
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import org.opendatakit.aggregate.client.FilterSubTab;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 
 public final class MetadataCheckBox extends AggregateCheckBox implements
     ValueChangeHandler<Boolean> {

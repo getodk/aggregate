@@ -23,7 +23,6 @@ package org.opendatakit.aggregate.constants;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class ServletConsts {
 

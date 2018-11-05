@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.FilterSubTab;
-import org.opendatakit.aggregate.client.filter.Filter;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.FilterSubTab;
+import org.opendatakit.aggregate.client.filter.Filter;
 
 public final class DeleteFilterButton extends AggregateButton implements ClickHandler {
 
@@ -42,7 +41,7 @@ public final class DeleteFilterButton extends AggregateButton implements ClickHa
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     parentSubTab.getDisplayedFilterGroup().removeFilter(remove);
     parentSubTab.update();
   }

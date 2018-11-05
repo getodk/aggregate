@@ -16,8 +16,11 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import java.security.NoSuchAlgorithmException;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.permissions.CredentialsInfoBuilder;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
@@ -25,20 +28,14 @@ import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-
 /**
  * Uses whatever the secure channel is (https: if available; http: if not) and
  * GWT RequestBuilder to POST back to ODK Aggregate to change a user's password.
  * The password is sent as a hash back to the server, so even if it is sent over
  * http: (which happens if the server does not have SSL configured), it would
  * take a while to compromise the password.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public final class ExecuteChangePasswordButton extends AggregateButton implements ClickHandler {
 
@@ -56,10 +53,38 @@ public final class ExecuteChangePasswordButton extends AggregateButton implement
     this.popup = popup;
   }
 
+  public native static void getJson(int requestId, String url, ExecuteChangePasswordButton handler) /*-{
+    var callback = "callback" + requestId;
+
+    var script = document.createElement("script");
+    script.setAttribute("src", url + callback);
+    script.setAttribute("type", "text/javascript");
+
+    window[callback] = function (jsonObj) {
+      window[callback + "done"] = true;
+      handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(jsonObj.username, jsonObj.status);
+    }
+
+    // JSON change password has 15-second timeout
+    setTimeout(
+        function () {
+          if (!window[callback + "done"]) {
+            handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(null, null);
+          }
+
+          // cleanup
+          document.body.removeChild(script);
+          delete window[callback];
+          delete window[callback + "done"];
+        }, 15000);
+
+    document.body.appendChild(script);
+  }-*/;
+
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     PasswordTextBox password1 = popup.getPassword1();
     PasswordTextBox password2 = popup.getPassword2();
     UserSecurityInfo userInfo = popup.getUser();
@@ -111,32 +136,4 @@ public final class ExecuteChangePasswordButton extends AggregateButton implement
   public void onError(String echo, String error) {
     Window.alert("Unable to change passwored for " + echo + " error: " + error);
   }
-
-  public native static void getJson(int requestId, String url, ExecuteChangePasswordButton handler) /*-{
-        var callback = "callback" + requestId;
-
-        var script = document.createElement("script");
-        script.setAttribute("src", url + callback);
-        script.setAttribute("type", "text/javascript");
-
-        window[callback] = function(jsonObj) {
-            window[callback + "done"] = true;
-            handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(jsonObj.username, jsonObj.status);
-        }
-
-        // JSON change password has 15-second timeout
-        setTimeout(
-                function() {
-                    if (!window[callback + "done"]) {
-                        handler.@org.opendatakit.aggregate.client.widgets.ExecuteChangePasswordButton::handleJsonResponse(Ljava/lang/String;Ljava/lang/String;)(null, null);
-                    }
-
-                    // cleanup
-                    document.body.removeChild(script);
-                    delete window[callback];
-                    delete window[callback + "done"];
-                }, 15000);
-
-        document.body.appendChild(script);
-  }-*/;
 }

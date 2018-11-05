@@ -16,13 +16,12 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesManageInstanceFilesSubTab;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.constants.common.SubTabs;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 
 public class OdkTablesShowTableFilesButton extends AggregateButton implements ClickHandler {
 
@@ -30,7 +29,7 @@ public class OdkTablesShowTableFilesButton extends AggregateButton implements Cl
       "<img src=\"images/green_right_arrow.png\" /> Data Files Associated with Table";
   private static final String TOOLTIP_TXT = "Display Data Files for this Table";
   private static final String HELP_BALLOON_TXT = "View the data files that have " +
-        "been uploaded for this table.";
+      "been uploaded for this table.";
 
   // the table id of the button this table is tied to.
   private String tableId;
@@ -39,7 +38,7 @@ public class OdkTablesShowTableFilesButton extends AggregateButton implements Cl
   private OdkTablesTableList parentTable;
 
   public OdkTablesShowTableFilesButton(OdkTablesTableList parentTable,
-      String tableId) {
+                                       String tableId) {
     super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.parentTable = parentTable;
     this.tableId = tableId;
@@ -50,7 +49,7 @@ public class OdkTablesShowTableFilesButton extends AggregateButton implements Cl
     super.onClick(event);
     OdkTablesManageInstanceFilesSubTab fileSubTab =
         (OdkTablesManageInstanceFilesSubTab) AggregateUI.getUI()
-        .getSubTab(SubTabs.MANAGE_INSTANCE_FILES);
+            .getSubTab(SubTabs.MANAGE_INSTANCE_FILES);
     fileSubTab.setCurrentTable(tableId);
     fileSubTab.update();
     AggregateUI.getUI().redirectToSubTab(SubTabs.MANAGE_INSTANCE_FILES);

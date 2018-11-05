@@ -16,65 +16,64 @@
 
 package org.opendatakit.common.web.client;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.cellview.client.Column;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public abstract class UIEnabledValidatingSelectionColumn<T> extends
-        Column<T, String> implements FieldUpdater<T, String> {
+    Column<T, String> implements FieldUpdater<T, String> {
 
-    final UIEnabledPredicate<T> isEnabledPredicate;
+  final UIEnabledPredicate<T> isEnabledPredicate;
 
-    final Comparator<T> comparator;
+  final Comparator<T> comparator;
 
-    protected UIEnabledValidatingSelectionColumn(
-            StringValidationPredicate<T> validationPredicate,
-            UIVisiblePredicate<T> isVisiblePredicate, Comparator<T> comparator,
-            ArrayList<String> choices) {
-        this(validationPredicate, isVisiblePredicate, null, comparator, choices);
+  protected UIEnabledValidatingSelectionColumn(
+      StringValidationPredicate<T> validationPredicate,
+      UIVisiblePredicate<T> isVisiblePredicate, Comparator<T> comparator,
+      ArrayList<String> choices) {
+    this(validationPredicate, isVisiblePredicate, null, comparator, choices);
+  }
+
+  protected UIEnabledValidatingSelectionColumn(
+      StringValidationPredicate<T> validationPredicate,
+      UIEnabledPredicate<T> isEnabledPredicate, Comparator<T> comparator,
+      ArrayList<String> choices) {
+    this(validationPredicate, null, isEnabledPredicate, comparator, choices);
+  }
+
+  protected UIEnabledValidatingSelectionColumn(
+      StringValidationPredicate<T> validationPredicate,
+      UIVisiblePredicate<T> isVisiblePredicate,
+      UIEnabledPredicate<T> isEnabledPredicate, Comparator<T> comparator,
+      ArrayList<String> choices) {
+    super(new UIEnabledValidatingSelectionCell<T>(validationPredicate,
+        isVisiblePredicate, isEnabledPredicate, choices));
+    this.isEnabledPredicate = isEnabledPredicate;
+    this.comparator = comparator;
+    setSortable(comparator != null);
+    setFieldUpdater(this);
+  }
+
+  @Override
+  public void onBrowserEvent(Context context, Element elem, T object,
+                             NativeEvent event) {
+    if (isEnabledPredicate == null || isEnabledPredicate.isEnabled(object)) {
+      super.onBrowserEvent(context, elem, object, event);
     }
+  }
 
-    protected UIEnabledValidatingSelectionColumn(
-            StringValidationPredicate<T> validationPredicate,
-            UIEnabledPredicate<T> isEnabledPredicate, Comparator<T> comparator,
-            ArrayList<String> choices) {
-        this(validationPredicate, null, isEnabledPredicate, comparator, choices);
-    }
-    
-    protected UIEnabledValidatingSelectionColumn(
-            StringValidationPredicate<T> validationPredicate,
-            UIVisiblePredicate<T> isVisiblePredicate, 
-            UIEnabledPredicate<T> isEnabledPredicate, Comparator<T> comparator,
-            ArrayList<String> choices) {
-        super(new UIEnabledValidatingSelectionCell<T>(validationPredicate,
-                isVisiblePredicate, isEnabledPredicate, choices));
-        this.isEnabledPredicate = isEnabledPredicate;
-        this.comparator = comparator;
-        setSortable(comparator != null);
-        setFieldUpdater(this);
-    }
+  public Comparator<T> getComparator() {
+    return comparator;
+  }
 
-    @Override
-    public void onBrowserEvent(Context context, Element elem, T object,
-            NativeEvent event) {
-        if (isEnabledPredicate == null || isEnabledPredicate.isEnabled(object)) {
-            super.onBrowserEvent(context, elem, object, event);
-        }
-    }
+  public abstract void setValue(T object, String value);
 
-    public Comparator<T> getComparator() {
-        return comparator;
-    }
-
-    public abstract void setValue(T object, String value);
-
-    @Override
-    public void update(int index, T object, String value) {
-        setValue(object, value);
-    }
+  @Override
+  public void update(int index, T object, String value) {
+    setValue(object, value);
+  }
 }

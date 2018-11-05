@@ -18,7 +18,7 @@ package org.opendatakit.aggregate.client.preferences;
 
 import java.io.Serializable;
 
-public class OdkTablesAdmin implements Serializable{
+public class OdkTablesAdmin implements Serializable {
 
   /**
    *

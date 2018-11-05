@@ -21,35 +21,35 @@ import java.util.Date;
 
 public class FormActionStatusTimestamp implements Serializable {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6347744032355543871L;
-    
-    private FormActionStatus status;
-    private Date timestamp;
-    
-    public FormActionStatusTimestamp() {
-    }
+  /**
+   *
+   */
+  private static final long serialVersionUID = 6347744032355543871L;
 
-    public FormActionStatusTimestamp(FormActionStatus status, Date timestamp) {
-        this.status = status;
-        this.timestamp = timestamp;
-    }
+  private FormActionStatus status;
+  private Date timestamp;
 
-    public FormActionStatus getStatus() {
-        return status;
-    }
+  public FormActionStatusTimestamp() {
+  }
 
-    public void setStatus(FormActionStatus status) {
-        this.status = status;
-    }
-    
-    public Date getTimestamp() {
-        return timestamp;
-    }
-    
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
+  public FormActionStatusTimestamp(FormActionStatus status, Date timestamp) {
+    this.status = status;
+    this.timestamp = timestamp;
+  }
+
+  public FormActionStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(FormActionStatus status) {
+    this.status = status;
+  }
+
+  public Date getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Date timestamp) {
+    this.timestamp = timestamp;
+  }
 }

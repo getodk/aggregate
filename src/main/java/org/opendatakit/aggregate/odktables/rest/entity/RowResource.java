@@ -19,7 +19,7 @@ package org.opendatakit.aggregate.odktables.rest.entity;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 
-@JacksonXmlRootElement(localName="rowResource")
+@JacksonXmlRootElement(localName = "rowResource")
 public class RowResource extends Row {
 
   /**

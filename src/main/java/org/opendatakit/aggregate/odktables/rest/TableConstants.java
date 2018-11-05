@@ -30,7 +30,6 @@ import java.util.SimpleTimeZone;
  * retained by Aggregate.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableConstants {
 
@@ -83,7 +82,7 @@ public class TableConstants {
    */
   public static final String FILTER_VALUE = "_filter_value";
   public static final String ROW_OWNER = "_row_owner";
-  
+
   /**
    * Contains the groupType attribute of a Scope. The Scope describes the access
    * controls on this row. Changes to this value on the device may or may not
@@ -96,7 +95,7 @@ public class TableConstants {
    * be applied during a sync action (TBD).
    */
   public static final String GROUP_MODIFY = "_group_modify";
-  
+
   /**
    * Contains the ext attribute of a Scope. The Scope describes the access
    * controls on this row. Changes to this value on the device may or may not
@@ -107,22 +106,22 @@ public class TableConstants {
   /**
    * (form_id, locale, savepoint_type, savepoint_timestamp, savepoint_creator)
    * are the tuple written and managed by ODK Survey when a record is updated.
-   *
+   * <p>
    * ODK Tables needs to update these appropriately when a cell is directly
    * edited based upon whether or not the table is 'form-managed' or not. If
    * form-managed, and direct cell editing is allowed, it should set
    * 'savepoint_type' to 'INCOMPLETE' and should leave form_id unchanged.
    * Otherwise, it can set 'savepoint_type' to 'COMPLETE' and set form_id to null.
-   *
+   * <p>
    * The value of 'savepoint_creator' is the user that is making the change. This
    * may be a remote SMS user.
-   *
+   * <p>
    * In a table being sync'd, the value of 'savepoint_type' for each row must
    * either be INCOMPLETE or COMPLETE.  There is a clean-up step before a sync
    * during which the user is prompted to select whether to mark a checkpoint
    * (null) savepoint-type as INCOMPLETE or to remove it. Only once that is done
    * can the sync proceed.
-   *
+   * <p>
    * In contrast, the row security management, savepoint, form, locale, sync
    * state, and conflict resolution fields are metadata and are not directly
    * exposed to the user.
@@ -146,6 +145,8 @@ public class TableConstants {
    * between phones.
    */
   public static final Set<String> CLIENT_ONLY_COLUMN_NAMES;
+  // nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
+  private static final String MILLI_TO_NANO_TIMESTAMP_EXTENSION = "000000";
 
   static {
     SHARED_COLUMN_NAMES = new HashSet<String>();
@@ -166,13 +167,10 @@ public class TableConstants {
     CLIENT_ONLY_COLUMN_NAMES.add(CONFLICT_TYPE);
   }
 
-  // nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
-  private static final String MILLI_TO_NANO_TIMESTAMP_EXTENSION = "000000";
-
-  public static String nanoSecondsFromMillis(Long timeMillis ) {
-    if ( timeMillis == null ) return null;
+  public static String nanoSecondsFromMillis(Long timeMillis) {
+    if (timeMillis == null) return null;
     // convert to a nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
-    Calendar c = GregorianCalendar.getInstance(new SimpleTimeZone(0,"UT"));
+    Calendar c = GregorianCalendar.getInstance(new SimpleTimeZone(0, "UT"));
     SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     sf.setCalendar(c);
     Date d = new Date(timeMillis);
@@ -180,13 +178,13 @@ public class TableConstants {
     return v;
   }
 
-  public static Long milliSecondsFromNanos(String timeNanos ) {
-    if ( timeNanos == null ) return null;
+  public static Long milliSecondsFromNanos(String timeNanos) {
+    if (timeNanos == null) return null;
     // convert from a nanosecond-extended iso8601-style UTC date yyyy-mm-ddTHH:MM:SS.sssssssss
-    Calendar c = GregorianCalendar.getInstance(new SimpleTimeZone(0,"UT"));
+    Calendar c = GregorianCalendar.getInstance(new SimpleTimeZone(0, "UT"));
     SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     sf.setCalendar(c);
-    String truncated = timeNanos.substring(0, timeNanos.length()-MILLI_TO_NANO_TIMESTAMP_EXTENSION.length());
+    String truncated = timeNanos.substring(0, timeNanos.length() - MILLI_TO_NANO_TIMESTAMP_EXTENSION.length());
     Date d;
     try {
       d = sf.parse(truncated);

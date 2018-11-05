@@ -18,9 +18,6 @@ package org.opendatakit.aggregate.server;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.ETagMismatchExceptionClient;
 import org.opendatakit.aggregate.client.exception.EntityNotFoundExceptionClient;
@@ -49,6 +46,8 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The idea is that this will house methods for OdkTables that could exist in
@@ -57,7 +56,6 @@ import org.opendatakit.common.web.CallingContext;
  * change, and this will be the home for that level of indirection.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class ServerOdkTablesUtil {
 
@@ -75,7 +73,7 @@ public class ServerOdkTablesUtil {
    * @throws ETagMismatchException
    */
   public static TableEntryClient createTable(String appId, String tableId, TableDefinitionClient definition,
-      TablesUserPermissions userPermissions, CallingContext cc) throws DatastoreFailureException,
+                                             TablesUserPermissions userPermissions, CallingContext cc) throws DatastoreFailureException,
       TableAlreadyExistsExceptionClient, PermissionDeniedExceptionClient, ETagMismatchException {
     Logger logger = LoggerFactory.getLogger(ServerOdkTablesUtil.class);
     // TODO: add access control stuff
@@ -130,7 +128,7 @@ public class ServerOdkTablesUtil {
    * @throws InconsistentStateException
    */
   public static RowClient createOrUpdateRow(String appId, String tableId, String rowId, RowClient row,
-      TablesUserPermissions userPermissions, CallingContext cc) throws AccessDeniedException,
+                                            TablesUserPermissions userPermissions, CallingContext cc) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException, ETagMismatchExceptionClient,
       PermissionDeniedExceptionClient, BadColumnNameExceptionClient, EntityNotFoundExceptionClient, InconsistentStateException {
     try {

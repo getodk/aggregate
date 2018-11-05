@@ -19,17 +19,17 @@ package org.opendatakit.aggregate.client;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
-public class SubmissionTabUI extends AggregateTabBase { 
-  
+public class SubmissionTabUI extends AggregateTabBase {
+
   public SubmissionTabUI(AggregateUI baseUI) {
     super();
-    
+
     // build the UI    
     addSubTab(new FilterSubTab(), SubTabs.FILTER);
     addSubTab(new ExportSubTab(), SubTabs.EXPORT);
-   
+
     // register handler to manage tab selection change (and selecting our tab)
     registerClickHandlers(Tabs.SUBMISSIONS, baseUI);
   }
-  
+
 }

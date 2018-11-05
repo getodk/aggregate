@@ -16,22 +16,20 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
 
 /**
  * The async server side.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public interface ServerDataServiceAsync {
 
   void getRow(String tableId, String rowId, AsyncCallback<TableContentsClient> callback);
 
   void createOrUpdateRow(String tableId, String rowId, RowClient row,
-      AsyncCallback<RowClient> callback);
+                         AsyncCallback<RowClient> callback);
 
   void deleteRow(String tableId, String rowId, String rowETag, AsyncCallback<Void> callback);
 
@@ -52,6 +50,6 @@ public interface ServerDataServiceAsync {
   void deleteAppLevelFile(String odkClientApiVersion, String filepath, AsyncCallback<Void> callback);
 
   void deleteInstanceFile(String tableId, String rowId, String filepath,
-      AsyncCallback<Void> callback);
+                          AsyncCallback<Void> callback);
 
 }

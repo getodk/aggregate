@@ -22,9 +22,8 @@ import java.math.BigDecimal;
  * Wrapper to encapsulate and pass through the special double values of NaN,
  * -Infinity and Infinity while still preserving decimal precision returned from
  * the database layer.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
 
@@ -49,14 +48,6 @@ public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
     }
   }
 
-  public static WrappedBigDecimal fromDouble(Double value) {
-    if (value == null) {
-      throw new IllegalStateException("Unexpected null value");
-    } else {
-      return new WrappedBigDecimal(Double.toString(value));
-    }
-  }
-
   public WrappedBigDecimal(String value) {
     if (value == null) {
       throw new IllegalStateException("Unexpected null value");
@@ -72,6 +63,14 @@ public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
     } else {
       d = null;
       bd = new BigDecimal(value);
+    }
+  }
+
+  public static WrappedBigDecimal fromDouble(Double value) {
+    if (value == null) {
+      throw new IllegalStateException("Unexpected null value");
+    } else {
+      return new WrappedBigDecimal(Double.toString(value));
     }
   }
 

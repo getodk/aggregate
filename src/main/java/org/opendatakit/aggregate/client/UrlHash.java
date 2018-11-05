@@ -16,20 +16,17 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.constants.common.UIConsts;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 public class UrlHash {
   public static final int MAIN_MENU = 0;
   public static final int SUB_MENU = 1;
   public static final int FORM = 2;
   public static final int FILTER = 3;
-
-  private String[] parameters;
-
   private static UrlHash single;
+  private String[] parameters;
 
   private UrlHash() {
     parameters = new String[4];
@@ -42,6 +39,17 @@ public class UrlHash {
       single = new UrlHash();
     return single;
   }
+
+  public static void redirect() {
+    String url = GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR + Window.Location.getQueryString();
+    redirectTo(url);
+  }
+
+  private native static void redirectTo(String url)
+    /*-{
+      console.error("redirect to " + url);
+      $wnd.location.replace(url);
+    }-*/;
 
   /*
    * Gets the UrlHash from the url bar.
@@ -116,22 +124,11 @@ public class UrlHash {
     return result.toString();
   }
 
-  public static void redirect() {
-    String url = GWT.getHostPageBaseURL() + UIConsts.HOST_PAGE_BASE_ADDR + Window.Location.getQueryString();
-    redirectTo(url);
-  }
-
-  private native static void redirectTo(String url)
-  /*-{
-      console.error("redirect to " + url);
-        $wnd.location.replace(url);
-  }-*/;
-
   private native String getHashFromUrlBar() /*-{
-        return $wnd.location.hash;
+    return $wnd.location.hash;
   }-*/;
 
   private native void putHashToUrlBar(String hash) /*-{
-        $wnd.location.hash = hash;
-    }-*/;
+    $wnd.location.hash = hash;
+  }-*/;
 }

@@ -22,11 +22,11 @@ import java.io.Serializable;
  * The error to be passed to the client when something requested has not been
  * found. The idea is that this is more specific than a generic
  * DatstoreFailureException.
- * @author sudar.sam@gmail.com
  *
+ * @author sudar.sam@gmail.com
  */
 public class EntityNotFoundExceptionClient extends Exception
-  implements Serializable {
+    implements Serializable {
 
   /**
    *

@@ -16,22 +16,20 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 /**
  * This holds the list of odkClientVersion values available on the server.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
-@JacksonXmlRootElement(localName="clientVersions")
+@JacksonXmlRootElement(localName = "clientVersions")
 public class ClientVersionList extends ArrayList<String> {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = -5668906194279093300L;
 

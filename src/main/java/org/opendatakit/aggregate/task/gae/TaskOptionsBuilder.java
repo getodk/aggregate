@@ -15,21 +15,19 @@
  */
 package org.opendatakit.aggregate.task.gae;
 
-import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.common.web.constants.BasicConsts;
-
 import com.google.appengine.api.modules.ModulesService;
 import com.google.appengine.api.modules.ModulesServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
  * Builder for the TaskOptions structure. Also enqueues the created task onto
  * the specified task queue.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public class TaskOptionsBuilder {
 

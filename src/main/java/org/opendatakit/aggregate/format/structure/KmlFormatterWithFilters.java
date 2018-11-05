@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.format.structure;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.KmlSelection;
@@ -36,11 +35,9 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author adam.lerer@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class KmlFormatterWithFilters implements SubmissionFormatter {
 
@@ -55,8 +52,8 @@ public class KmlFormatterWithFilters implements SubmissionFormatter {
   private List<AbstractKmlElementBase> geoformaters;
 
   public KmlFormatterWithFilters(IForm xform, String webServerUrl,
-      List<KmlSelection> kmlElementsToInclude, PrintWriter printWriter,
-      FilterGroup filterGroup, CallingContext cc) {
+                                 List<KmlSelection> kmlElementsToInclude, PrintWriter printWriter,
+                                 FilterGroup filterGroup, CallingContext cc) {
 
     form = xform;
     output = printWriter;
@@ -72,7 +69,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter {
     // will be udpated to true as kml element formatters are created if used
     hasGeotraceOrGeoshape = false;
     hasImages = false;
-    
+
     // create kml element formatters
     geoformaters = new ArrayList<AbstractKmlElementBase>();
     for (KmlSelection kmlElement : kmlElementsToInclude) {
@@ -101,9 +98,9 @@ public class KmlFormatterWithFilters implements SubmissionFormatter {
 
         geoformaters.add(new KmlGeoPointGenerator(geopointField, titleField, imgField,
             webServerUrl, topElement));
-      }  else if (kmlElement.getGeoType() == KmlOptionType.GEO_TRACE_N_SHAPE) {
+      } else if (kmlElement.getGeoType() == KmlOptionType.GEO_TRACE_N_SHAPE) {
         hasGeotraceOrGeoshape = true;
-        
+
         FormElementModel geoField = null;
         String geoKey = kmlElement.getGeoElementKey();
         if (geoKey != null) {

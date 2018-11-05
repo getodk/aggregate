@@ -16,17 +16,16 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 public class Row {
 
@@ -46,10 +45,10 @@ public class Row {
   private String rowETag;
 
   /**
-   * identifies the service-level 
-   * interaction during which this 
-   * revision was made. Useful for 
-   * finding coincident changes 
+   * identifies the service-level
+   * interaction during which this
+   * revision was made. Useful for
+   * finding coincident changes
    * and prior/next changes.
    */
   @JsonProperty(required = false)
@@ -62,14 +61,14 @@ public class Row {
   private boolean deleted;
 
   /**
-   * audit field returned for 
+   * audit field returned for
    * archive/recovery tools.
    */
   @JsonProperty(required = false)
   private String createUser;
 
   /**
-   * audit field returned for 
+   * audit field returned for
    * archive/recovery tools
    */
   @JsonProperty(required = false)
@@ -77,12 +76,12 @@ public class Row {
 
   /**
    * OdkTables metadata column.
-   *
-   * The ODK Survey form that 
+   * <p>
+   * The ODK Survey form that
    * was used when revising this
    * row.
-   *
-   * This can be useful for 
+   * <p>
+   * This can be useful for
    * implementing workflows.
    * I.e., if savepointTyp is
    * COMPLETE with this formId,
@@ -94,8 +93,8 @@ public class Row {
 
   /**
    * OdkTables metadata column.
-   *
-   * The locale of the device 
+   * <p>
+   * The locale of the device
    * that last revised this row.
    */
   @JsonProperty(required = false)
@@ -103,12 +102,12 @@ public class Row {
 
   /**
    * OdkTables metadata column.
-   *
+   * <p>
    * One of either COMPLETE
    * or INCOMPLETE. COMPLETE
    * indicates that the formId
    * used to fill out the row
-   * has validated the entered 
+   * has validated the entered
    * values.
    */
   @JsonProperty(required = false)
@@ -116,15 +115,15 @@ public class Row {
 
   /**
    * OdkTables metadata column.
-   *
+   * <p>
    * For Mezuri, the timestamp
    * of this data value.
-   *
+   * <p>
    * For ODK Survey, the last
    * save time of the survey.
-   *
+   * <p>
    * For sensor data,
-   * the timestamp for the 
+   * the timestamp for the
    * reading in this row.
    */
   @JsonProperty(required = false)
@@ -132,28 +131,28 @@ public class Row {
 
   /**
    * OdkTables metadata column.
-   *
+   * <p>
    * For ODK Survey, the user
    * that filled out the survey.
-   *
-   * Unclear what this would be 
+   * <p>
+   * Unclear what this would be
    * for sensors.
-   *
+   * <p>
    * For Mezuri, this would be
-   * the task execution ID that 
+   * the task execution ID that
    * created the row.
    */
- @JsonProperty(required = false)
+  @JsonProperty(required = false)
   private String savepointCreator;
 
   /**
    * RowFilterScope is passed down to device.
-   *
+   * <p>
    * Implements DEFAULT, MODIFY, READ_ONLY, HIDDEN
    * with rowOwner being the "owner" of the row.
-   * 
-   * It is passed down to the 
-   * device so that the 
+   * <p>
+   * It is passed down to the
+   * device so that the
    * device can do best-effort
    * enforcement of access control
    * (trusted executor)
@@ -168,99 +167,9 @@ public class Row {
    * Sorted by ascending column name.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(localName="orderedColumns")
-  @JacksonXmlProperty(localName="value")
+  @JacksonXmlElementWrapper(localName = "orderedColumns")
+  @JacksonXmlProperty(localName = "value")
   private ArrayList<DataKeyValue> orderedColumns;
-
-  /**
-   * Construct a row for insertion. This is used by the remote client (ODK
-   * Tables) to construct a REST request to insert the row.
-   *
-   * @param rowId
-   * @param values
-   */
-  public static Row forInsert(String rowId, String formId, String locale, String savepointType,
-      String savepointTimestamp, String savepointCreator, RowFilterScope filterScope,
-      ArrayList<DataKeyValue> values) {
-    Row row = new Row();
-    row.rowId = rowId;
-    row.formId = formId;
-    row.locale = locale;
-    row.savepointType = savepointType;
-    row.savepointTimestamp = savepointTimestamp;
-    row.savepointCreator = savepointCreator;
-    row.rowFilterScope = filterScope;
-    if ( values == null ) {
-      row.orderedColumns = new ArrayList<DataKeyValue>();
-    } else {
-      Collections.sort(values, new Comparator<DataKeyValue>(){
-
-        @Override
-        public int compare(DataKeyValue arg0, DataKeyValue arg1) {
-          return arg0.column.compareTo(arg1.column);
-        }});
-
-      row.orderedColumns = values;
-    }
-    return row;
-  }
-
-  /**
-   * Construct a row for updating. This is used by the remote client (ODK
-   * Tables) to construct a REST request to modify the row.
-   *
-   * @param rowId
-   * @param rowETag
-   * @param values
-   */
-  public static Row forUpdate(String rowId, String rowETag, String formId, String locale,
-      String savepointType, String savepointTimestamp, String savepointCreator, RowFilterScope filterScope,
-      ArrayList<DataKeyValue> values) {
-    Row row = new Row();
-    row.rowId = rowId;
-    row.rowETag = rowETag;
-    row.formId = formId;
-    row.locale = locale;
-    row.savepointType = savepointType;
-    row.savepointTimestamp = savepointTimestamp;
-    row.savepointCreator = savepointCreator;
-    row.rowFilterScope = filterScope;
-    if ( values == null ) {
-      row.orderedColumns = new ArrayList<DataKeyValue>();
-    } else {
-      Collections.sort(values, new Comparator<DataKeyValue>(){
-
-        @Override
-        public int compare(DataKeyValue arg0, DataKeyValue arg1) {
-          return arg0.column.compareTo(arg1.column);
-        }});
-
-      row.orderedColumns = values;
-    }
-    return row;
-  }
-
-  public static final ArrayList<DataKeyValue> convertFromMap(Map<String,String> cvalues) {
-    ArrayList<DataKeyValue> svalues = new ArrayList<DataKeyValue>();
-    for ( String key : cvalues.keySet() ) {
-      svalues.add(new DataKeyValue(key, cvalues.get(key)));
-    }
-    Collections.sort(svalues, new Comparator<DataKeyValue>(){
-
-      @Override
-      public int compare(DataKeyValue arg0, DataKeyValue arg1) {
-        return arg0.column.compareTo(arg1.column);
-      }});
-    return svalues;
-  }
-
-  public static final HashMap<String,String> convertToMap(ArrayList<DataKeyValue> svalues) {
-    HashMap<String,String> cvalues = new HashMap<String,String>();
-    for ( DataKeyValue kv : svalues ) {
-      cvalues.put(kv.column, kv.value);
-    }
-    return cvalues;
-  }
 
   public Row() {
     this.rowId = null;
@@ -296,118 +205,189 @@ public class Row {
     this.orderedColumns = r.orderedColumns;
   }
 
+  /**
+   * Construct a row for insertion. This is used by the remote client (ODK
+   * Tables) to construct a REST request to insert the row.
+   *
+   * @param rowId
+   * @param values
+   */
+  public static Row forInsert(String rowId, String formId, String locale, String savepointType,
+                              String savepointTimestamp, String savepointCreator, RowFilterScope filterScope,
+                              ArrayList<DataKeyValue> values) {
+    Row row = new Row();
+    row.rowId = rowId;
+    row.formId = formId;
+    row.locale = locale;
+    row.savepointType = savepointType;
+    row.savepointTimestamp = savepointTimestamp;
+    row.savepointCreator = savepointCreator;
+    row.rowFilterScope = filterScope;
+    if (values == null) {
+      row.orderedColumns = new ArrayList<DataKeyValue>();
+    } else {
+      Collections.sort(values, new Comparator<DataKeyValue>() {
+
+        @Override
+        public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+          return arg0.column.compareTo(arg1.column);
+        }
+      });
+
+      row.orderedColumns = values;
+    }
+    return row;
+  }
+
+  /**
+   * Construct a row for updating. This is used by the remote client (ODK
+   * Tables) to construct a REST request to modify the row.
+   *
+   * @param rowId
+   * @param rowETag
+   * @param values
+   */
+  public static Row forUpdate(String rowId, String rowETag, String formId, String locale,
+                              String savepointType, String savepointTimestamp, String savepointCreator, RowFilterScope filterScope,
+                              ArrayList<DataKeyValue> values) {
+    Row row = new Row();
+    row.rowId = rowId;
+    row.rowETag = rowETag;
+    row.formId = formId;
+    row.locale = locale;
+    row.savepointType = savepointType;
+    row.savepointTimestamp = savepointTimestamp;
+    row.savepointCreator = savepointCreator;
+    row.rowFilterScope = filterScope;
+    if (values == null) {
+      row.orderedColumns = new ArrayList<DataKeyValue>();
+    } else {
+      Collections.sort(values, new Comparator<DataKeyValue>() {
+
+        @Override
+        public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+          return arg0.column.compareTo(arg1.column);
+        }
+      });
+
+      row.orderedColumns = values;
+    }
+    return row;
+  }
+
+  public static final ArrayList<DataKeyValue> convertFromMap(Map<String, String> cvalues) {
+    ArrayList<DataKeyValue> svalues = new ArrayList<DataKeyValue>();
+    for (String key : cvalues.keySet()) {
+      svalues.add(new DataKeyValue(key, cvalues.get(key)));
+    }
+    Collections.sort(svalues, new Comparator<DataKeyValue>() {
+
+      @Override
+      public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+        return arg0.column.compareTo(arg1.column);
+      }
+    });
+    return svalues;
+  }
+
+  public static final HashMap<String, String> convertToMap(ArrayList<DataKeyValue> svalues) {
+    HashMap<String, String> cvalues = new HashMap<String, String>();
+    for (DataKeyValue kv : svalues) {
+      cvalues.put(kv.column, kv.value);
+    }
+    return cvalues;
+  }
+
   public String getRowId() {
     return this.rowId;
-  }
-
-  public String getRowETag() {
-    return this.rowETag;
-  }
-
-  public String getDataETagAtModification() {
-    return this.dataETagAtModification;
-  }
-
-  public boolean isDeleted() {
-    return this.deleted;
-  }
-
-  public String getCreateUser() {
-    return createUser;
-  }
-
-  public String getLastUpdateUser() {
-    return lastUpdateUser;
-  }
-
-  public RowFilterScope getRowFilterScope() {
-    return rowFilterScope;
-  }
-
-  public String getSavepointCreator() {
-    return this.savepointCreator;
-  }
-
-  public String getFormId() {
-    return this.formId;
-  }
-
-  public String getLocale() {
-    return this.locale;
-  }
-
-  public String getSavepointType() {
-    return this.savepointType;
-  }
-
-  public String getSavepointTimestamp() {
-    return this.savepointTimestamp;
-  }
-
-  @JsonIgnore
-  public ArrayList<DataKeyValue> getValues() {
-    return this.orderedColumns;
   }
 
   public void setRowId(final String rowId) {
     this.rowId = rowId;
   }
 
+  public String getRowETag() {
+    return this.rowETag;
+  }
+
   public void setRowETag(final String rowETag) {
     this.rowETag = rowETag;
+  }
+
+  public String getDataETagAtModification() {
+    return this.dataETagAtModification;
   }
 
   public void setDataETagAtModification(final String dataETagAtModification) {
     this.dataETagAtModification = dataETagAtModification;
   }
 
+  public boolean isDeleted() {
+    return this.deleted;
+  }
+
   public void setDeleted(final boolean deleted) {
     this.deleted = deleted;
+  }
+
+  public String getCreateUser() {
+    return createUser;
   }
 
   public void setCreateUser(String createUser) {
     this.createUser = createUser;
   }
 
+  public String getLastUpdateUser() {
+    return lastUpdateUser;
+  }
+
   public void setLastUpdateUser(String lastUpdateUser) {
     this.lastUpdateUser = lastUpdateUser;
+  }
+
+  public RowFilterScope getRowFilterScope() {
+    return rowFilterScope;
   }
 
   public void setRowFilterScope(RowFilterScope filterScope) {
     this.rowFilterScope = filterScope;
   }
 
+  public String getSavepointCreator() {
+    return this.savepointCreator;
+  }
+
   public void setSavepointCreator(String savepointCreator) {
     this.savepointCreator = savepointCreator;
+  }
+
+  public String getFormId() {
+    return this.formId;
   }
 
   public void setFormId(String formId) {
     this.formId = formId;
   }
 
+  public String getLocale() {
+    return this.locale;
+  }
+
   public void setLocale(String locale) {
     this.locale = locale;
+  }
+
+  public String getSavepointType() {
+    return this.savepointType;
   }
 
   public void setSavepointType(String savepointType) {
     this.savepointType = savepointType;
   }
 
-  @JsonIgnore
-  public void setValues(final ArrayList<DataKeyValue> values) {
-    if ( values == null ) {
-      this.orderedColumns = null;
-      return;
-    }
-    
-    Collections.sort(values, new Comparator<DataKeyValue>(){
-
-      @Override
-      public int compare(DataKeyValue arg0, DataKeyValue arg1) {
-        return arg0.column.compareTo(arg1.column);
-      }});
-
-    this.orderedColumns = values;
+  public String getSavepointTimestamp() {
+    return this.savepointTimestamp;
   }
 
   /**
@@ -418,6 +398,29 @@ public class Row {
    */
   public void setSavepointTimestamp(String savepointTimestamp) {
     this.savepointTimestamp = savepointTimestamp;
+  }
+
+  @JsonIgnore
+  public ArrayList<DataKeyValue> getValues() {
+    return this.orderedColumns;
+  }
+
+  @JsonIgnore
+  public void setValues(final ArrayList<DataKeyValue> values) {
+    if (values == null) {
+      this.orderedColumns = null;
+      return;
+    }
+
+    Collections.sort(values, new Comparator<DataKeyValue>() {
+
+      @Override
+      public int compare(DataKeyValue arg0, DataKeyValue arg1) {
+        return arg0.column.compareTo(arg1.column);
+      }
+    });
+
+    this.orderedColumns = values;
   }
 
   @Override
@@ -456,32 +459,32 @@ public class Row {
     boolean simpleMatch = (rowId == null ? other.rowId == null : rowId.equals(other.rowId))
         && (rowETag == null ? other.rowETag == null : rowETag.equals(other.rowETag))
         && (dataETagAtModification == null ? other.dataETagAtModification == null
-            : dataETagAtModification.equals(other.dataETagAtModification))
+        : dataETagAtModification.equals(other.dataETagAtModification))
         && (deleted == other.deleted)
         && (createUser == null ? other.createUser == null : createUser.equals(other.createUser))
         && (lastUpdateUser == null ? other.lastUpdateUser == null : lastUpdateUser
-            .equals(other.lastUpdateUser))
+        .equals(other.lastUpdateUser))
         && (rowFilterScope == null ? other.rowFilterScope == null : rowFilterScope.equals(other.rowFilterScope))
         && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
-            .equals(other.savepointCreator))
+        .equals(other.savepointCreator))
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
         && (savepointType == null ? other.savepointType == null : savepointType
-            .equals(other.savepointType))
+        .equals(other.savepointType))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
-            .equals(other.savepointTimestamp))
-        && ( orderedColumns == null ? other.orderedColumns == null : 
-            (other.orderedColumns != null && orderedColumns.size() == other.orderedColumns.size()));
-    if ( !simpleMatch ) {
+        .equals(other.savepointTimestamp))
+        && (orderedColumns == null ? other.orderedColumns == null :
+        (other.orderedColumns != null && orderedColumns.size() == other.orderedColumns.size()));
+    if (!simpleMatch) {
       return false;
     }
-    if ( orderedColumns == null ) {
+    if (orderedColumns == null) {
       return true;
     }
 
     // columns are ordered... compare one-to-one
-    for ( int i = 0 ; i < orderedColumns.size() ; ++i ) {
-      if ( !orderedColumns.get(i).equals(other.orderedColumns.get(i)) ) {
+    for (int i = 0; i < orderedColumns.size(); ++i) {
+      if (!orderedColumns.get(i).equals(other.orderedColumns.get(i))) {
         return false;
       }
     }
@@ -512,23 +515,23 @@ public class Row {
         && (formId == null ? other.formId == null : formId.equals(other.formId))
         && (locale == null ? other.locale == null : locale.equals(other.locale))
         && (savepointType == null ? other.savepointType == null : savepointType
-            .equals(other.savepointType))
+        .equals(other.savepointType))
         && (savepointTimestamp == null ? other.savepointTimestamp == null : savepointTimestamp
-            .equals(other.savepointTimestamp))
+        .equals(other.savepointTimestamp))
         && (savepointCreator == null ? other.savepointCreator == null : savepointCreator
-            .equals(other.savepointCreator))
-        && ( orderedColumns == null ? other.orderedColumns == null : 
-            (other.orderedColumns != null && orderedColumns.size() == other.orderedColumns.size()));
-    if ( !simpleMatch ) {
+        .equals(other.savepointCreator))
+        && (orderedColumns == null ? other.orderedColumns == null :
+        (other.orderedColumns != null && orderedColumns.size() == other.orderedColumns.size()));
+    if (!simpleMatch) {
       return false;
     }
-    if ( orderedColumns == null ) {
+    if (orderedColumns == null) {
       return true;
     }
-    
+
     // columns are ordered... compare one-to-one
-    for ( int i = 0 ; i < orderedColumns.size() ; ++i ) {
-      if ( deepComparator.compare(orderedColumns.get(i), other.orderedColumns.get(i)) != 0 ) {
+    for (int i = 0; i < orderedColumns.size(); ++i) {
+      if (deepComparator.compare(orderedColumns.get(i), other.orderedColumns.get(i)) != 0) {
         return false;
       }
     }

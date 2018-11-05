@@ -16,9 +16,8 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
 
 public interface ServerTableACLServiceAsync {
 
@@ -37,10 +36,10 @@ public interface ServerTableACLServiceAsync {
   void setDefaultAcl(TableAclClient acl, String tableId, AsyncCallback<TableAclClient> callback);
 
   void setUserAcl(String userId, TableAclClient acl, String tableId,
-      AsyncCallback<TableAclClient> callback);
+                  AsyncCallback<TableAclClient> callback);
 
   void setGroupAcl(String groupId, TableAclClient acl, String tableId,
-      AsyncCallback<TableAclClient> callback);
+                   AsyncCallback<TableAclClient> callback);
 
   void deleteDefaultAcl(String tableId, AsyncCallback<Void> callback);
 

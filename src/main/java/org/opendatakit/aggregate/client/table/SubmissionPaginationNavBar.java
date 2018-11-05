@@ -17,12 +17,11 @@
 package org.opendatakit.aggregate.client.table;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.SimplePanel;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.client.widgets.CursorAdvancementButton;
-
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.SimplePanel;
 
 public class SubmissionPaginationNavBar extends SimplePanel {
 

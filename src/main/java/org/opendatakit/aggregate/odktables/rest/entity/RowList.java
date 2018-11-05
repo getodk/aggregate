@@ -16,12 +16,11 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
 
 /**
  * This holds a list of {@link Row}.
@@ -29,21 +28,20 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  * This wrapping class provides that root node.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="rowList")
+@JacksonXmlRootElement(localName = "rowList")
 public class RowList {
 
   /**
    * The entries in the manifest.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="row")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "row")
   private ArrayList<Row> rows;
 
   /**
-   * The dataETag of the table at the START of this request. 
+   * The dataETag of the table at the START of this request.
    */
   @JsonProperty(required = false)
   private String dataETag;
@@ -61,7 +59,7 @@ public class RowList {
    * @param entries
    */
   public RowList(ArrayList<Row> rows, String dataETag) {
-    if ( rows == null ) {
+    if (rows == null) {
       this.rows = new ArrayList<Row>();
     } else {
       this.rows = rows;
@@ -106,17 +104,17 @@ public class RowList {
       return false;
     }
     RowList other = (RowList) obj;
-    boolean simpleResult = 
+    boolean simpleResult =
         (rows == null ? other.rows == null : (other.rows != null && rows.size() == other.rows.size())) &&
-        (dataETag == null ? other.dataETag == null : (dataETag.equals(other.dataETag)));
-    if ( !simpleResult ) {
+            (dataETag == null ? other.dataETag == null : (dataETag.equals(other.dataETag)));
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( rows == null ) {
+
+    if (rows == null) {
       return true;
     }
-    
+
     return rows.containsAll(other.rows);
   }
 

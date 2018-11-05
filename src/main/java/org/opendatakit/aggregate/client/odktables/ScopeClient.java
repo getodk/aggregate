@@ -26,40 +26,31 @@ import java.io.Serializable;
  * translating almost directly the code implemented in the services there.</p>
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class ScopeClient implements Serializable {
 
-  /**
-     *
-     */
-  private static final long serialVersionUID = -7603521544860371942L;
-
   public static final ScopeClient EMPTY_SCOPE;
+  /**
+   *
+   */
+  private static final long serialVersionUID = -7603521544860371942L;
 
   static {
     EMPTY_SCOPE = new ScopeClient();
     EMPTY_SCOPE.initFields(null, null);
   }
 
-  public enum Type {
-    DEFAULT, USER, GROUP,
-  }
-
   private Type type;
-
   private String value;
 
   /**
    * Constructs a new Scope.
    *
-   * @param type
-   *          the type of the scope. Must not be null. The empty scope may be
-   *          accessed as {@link Scope#EMPTY_SCOPE}.
-   * @param value
-   *          the userId if type is {@link Type#USER}, or the groupId of type is
-   *          {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
-   *          ignored (set to null).
+   * @param type  the type of the scope. Must not be null. The empty scope may be
+   *              accessed as {@link Scope#EMPTY_SCOPE}.
+   * @param value the userId if type is {@link Type#USER}, or the groupId of type is
+   *              {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
+   *              ignored (set to null).
    */
   public ScopeClient(Type type, String value) {
     // TODO make sure these validate things are compensated for somehow
@@ -89,8 +80,7 @@ public class ScopeClient implements Serializable {
   }
 
   /**
-   * @param type
-   *          the type to set
+   * @param type the type to set
    */
   public void setType(Type type) {
     this.type = type;
@@ -104,8 +94,7 @@ public class ScopeClient implements Serializable {
   }
 
   /**
-   * @param value
-   *          the value to set
+   * @param value the value to set
    */
   public void setValue(String value) {
     this.value = value;
@@ -163,6 +152,10 @@ public class ScopeClient implements Serializable {
     builder.append(value);
     builder.append("]");
     return builder.toString();
+  }
+
+  public enum Type {
+    DEFAULT, USER, GROUP,
   }
 
 }

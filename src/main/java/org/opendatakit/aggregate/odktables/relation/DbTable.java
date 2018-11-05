@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
@@ -41,14 +40,8 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author dylan price
  * @author sudar.sam@gmail.com
- *
  */
 public class DbTable extends Relation {
-
-  private DbTable(String namespace, String tableName, List<DataField> fields, CallingContext cc)
-      throws ODKDatastoreException {
-    super(namespace, tableName, fields, cc);
-  }
 
   /**
    * NOTE: the PK of this table is the ROW_ID of the DbLogTable entry
@@ -65,7 +58,6 @@ public class DbTable extends Relation {
   public static final DataField LAST_UPDATE_USER = new DataField("_LAST_UPDATE_USER",
       DataType.STRING, true);
   public static final DataField DELETED = new DataField("_DELETED", DataType.BOOLEAN, false);
-
   // limited to 10 characters
   public static final DataField DEFAULT_ACCESS = new DataField(TableConstants.DEFAULT_ACCESS.toUpperCase(),
       DataType.STRING, true, 10L);
@@ -81,7 +73,6 @@ public class DbTable extends Relation {
   // limited to 50 characters
   public static final DataField GROUP_PRIVILEGED = new DataField(TableConstants.GROUP_PRIVILEGED.toUpperCase(),
       DataType.STRING, true, 50L).setIndexable(IndexType.HASH);
-  
   // The FormId of the form that was in use when this record was last saved.
   // limited to 50 characters
   public static final DataField FORM_ID = new DataField(TableConstants.FORM_ID.toUpperCase(),
@@ -100,8 +91,9 @@ public class DbTable extends Relation {
   // the creator of this row, as reported by the device (may be a remote SMS user)
   public static final DataField SAVEPOINT_CREATOR = new DataField(
       TableConstants.SAVEPOINT_CREATOR.toUpperCase(), DataType.STRING, true);
-
   private static final List<DataField> dataFields;
+  private static final EntityConverter converter = new EntityConverter();
+
   static {
     dataFields = new ArrayList<DataField>();
 
@@ -125,7 +117,10 @@ public class DbTable extends Relation {
     dataFields.add(SAVEPOINT_CREATOR);
   }
 
-  private static final EntityConverter converter = new EntityConverter();
+  private DbTable(String namespace, String tableName, List<DataField> fields, CallingContext cc)
+      throws ODKDatastoreException {
+    super(namespace, tableName, fields, cc);
+  }
 
   public static DbTable getRelation(DbTableDefinitionsEntity entity, List<DbColumnDefinitionsEntity> entities, CallingContext cc)
       throws ODKDatastoreException {
@@ -135,7 +130,7 @@ public class DbTable extends Relation {
   }
 
   private static synchronized DbTable getRelation(String dbTableName, List<DataField> fields,
-      CallingContext cc) throws ODKDatastoreException {
+                                                  CallingContext cc) throws ODKDatastoreException {
     DbTable relation = new DbTable(RUtil.NAMESPACE, dbTableName, fields, cc);
     return relation;
   }
@@ -152,14 +147,11 @@ public class DbTable extends Relation {
   /**
    * Retrieve a list of {@link DbTable} row entities.
    *
-   * @param table
-   *          the {@link DbTable} relation.
-   * @param rowIds
-   *          the ids of the rows to get.
+   * @param table  the {@link DbTable} relation.
+   * @param rowIds the ids of the rows to get.
    * @param cc
    * @return the row entities
-   * @throws ODKEntityNotFoundException
-   *           if one of the rows does not exist
+   * @throws ODKEntityNotFoundException if one of the rows does not exist
    * @throws ODKDatastoreException
    */
   public static List<Entity> query(DbTable table, List<String> rowIds, CallingContext cc)

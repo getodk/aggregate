@@ -18,9 +18,6 @@ package org.opendatakit.aggregate.util;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.task.Watchdog;
@@ -33,39 +30,30 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements the mechanisms used in GAE to launch Watchdog during periods of
  * website activity ( triggerWatchdog ) and from within the Watchdog
  * implementation when there are background tasks requiring supervision (
  * scheduleFutureWatchdog ).
- *
+ * <p>
  * To do that, it tracks:
- *
+ * <p>
  * - the start time of each Watchdog iteration ( updateWatchdogStart ),
- *
+ * <p>
  * - the time-at-enqueuing of a Watchdog Task on the AppEngine queue,
- *
+ * <p>
  * - the time-to-fire of the earliest future Watchdog activity.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class BackendActionsTable extends CommonFieldsBase {
 
-  private static final String WATCHDOG_SCHEDULING_ROW_ID = "rid:watchdog_scheduling";
-  private static final String WATCHDOG_ENQUEUE_ROW_ID = "rid:watchdog_enqueue";
-  private static final String WATCHDOG_START_ROW_ID = "rid:watchdog_start";
-  private static final String WATCHDOG_DEATH_TOGGLE_ROW_ID = "rid:watchdog_death_toggle";
-
-  private static final String TABLE_NAME = "_backend_actions";
-
-  private static final DataField LAST_REVISION_DATE = new DataField("LAST_REVISION",
-      DataField.DataType.DATETIME, true);
-
-  private static final Logger logger = LoggerFactory.getLogger(BackendActionsTable.class);
-
-  /** delay between re-loads of the lastPublisherRevision HashMap. 30 seconds. */
+  /**
+   * delay between re-loads of the lastPublisherRevision HashMap. 30 seconds.
+   */
   public static final long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
   /**
    * delay between re-issuing uploadSubmissions tasks for a given uriFsc. 3.5
@@ -77,26 +65,52 @@ public class BackendActionsTable extends CommonFieldsBase {
    * onward). 30 seconds.
    */
   public static final long FAST_PUBLISHING_RETRY_MILLISECONDS = 30L * 1000L;
-  /** delay between watchdog sweeps when there are no active tasks. 15 minutes. */
+  /**
+   * delay between watchdog sweeps when there are no active tasks. 15 minutes.
+   */
   public static final long IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS = 15L * 60000L;
+  private static final String WATCHDOG_SCHEDULING_ROW_ID = "rid:watchdog_scheduling";
+  private static final String WATCHDOG_ENQUEUE_ROW_ID = "rid:watchdog_enqueue";
+  private static final String WATCHDOG_START_ROW_ID = "rid:watchdog_start";
+  private static final String WATCHDOG_DEATH_TOGGLE_ROW_ID = "rid:watchdog_death_toggle";
+  private static final String TABLE_NAME = "_backend_actions";
+  private static final DataField LAST_REVISION_DATE = new DataField("LAST_REVISION",
+      DataField.DataType.DATETIME, true);
+  private static final Logger logger = LoggerFactory.getLogger(BackendActionsTable.class);
 
   // fields used to determine triggering of UploadSubmissions task creation.
-  /** last time we reloaded the publisher hashMap from the datastore */
-  public static long lastHashmapCleanTimestamp = 0L;
-  /** the publisher hashMap<uriFsc, lastUploadSubmissionTaskEnqueueTime> */
-  public static Map<String, Long> lastPublisherRevision = new HashMap<String, Long>();
-
-  /** last time we reloaded the lastWatchdog... values from the datastore */
-  private static long lastFetchTime = 0L;
+  private static final String INCOMING = "incoming-";
+  private static final String FETCHED = "-fetched-";
+  private static final String SCHEDULED = "Fs-update";
 
   // fields used to determine when to fire a watchdog based upon usage.
-
-  /** last time a Watchdog was started (directly fetched) */
+  private static final String CLEARED = "Fs-clear-";
+  private static final String ENQUEUED = "Eq-update";
+  /**
+   * last time we reloaded the publisher hashMap from the datastore
+   */
+  public static long lastHashmapCleanTimestamp = 0L;
+  /**
+   * the publisher hashMap<uriFsc, lastUploadSubmissionTaskEnqueueTime>
+   */
+  public static Map<String, Long> lastPublisherRevision = new HashMap<String, Long>();
+  /**
+   * last time we reloaded the lastWatchdog... values from the datastore
+   */
+  private static long lastFetchTime = 0L;
+  /**
+   * last time a Watchdog was started (directly fetched)
+   */
   private static long lastWatchdogStartTime = 0L;
-  /** the last time we enqueued a Watchdog to start */
+  /**
+   * the last time we enqueued a Watchdog to start
+   */
   private static long lastWatchdogEnqueueTime = 0L;
-  /** the time when we should next enqueue a Watchdog */
+  /**
+   * the time when we should next enqueue a Watchdog
+   */
   private static long lastWatchdogSchedulingTime = 0L;
+  private static BackendActionsTable relation = null;
 
   /**
    * Construct a relation prototype. Only called via
@@ -119,23 +133,6 @@ public class BackendActionsTable extends CommonFieldsBase {
     super(ref, user);
   }
 
-  // Only called from within the persistence layer.
-  @Override
-  public CommonFieldsBase getEmptyRow(User user) {
-    BackendActionsTable t = new BackendActionsTable(this, user);
-    return t;
-  }
-
-  private Date getLastRevisionDate() {
-    return getDateField(LAST_REVISION_DATE);
-  }
-
-  private void setLastRevisionDate(Date value) {
-    setDateField(LAST_REVISION_DATE, value);
-  }
-
-  private static BackendActionsTable relation = null;
-
   /**
    * This is private because this table implements a singleton pattern.
    *
@@ -145,7 +142,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    * @throws ODKDatastoreException
    */
   private static synchronized final BackendActionsTable assertRelation(Datastore datastore,
-      User user) throws ODKDatastoreException {
+                                                                       User user) throws ODKDatastoreException {
     if (relation == null) {
       BackendActionsTable relationPrototype;
       relationPrototype = new BackendActionsTable(datastore.getDefaultSchemaName());
@@ -165,7 +162,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    * @throws ODKDatastoreException
    */
   private static final BackendActionsTable getSingletonRecord(String uri, Datastore datastore,
-      User user) throws ODKDatastoreException {
+                                                              User user) throws ODKDatastoreException {
     BackendActionsTable prototype = assertRelation(datastore, user);
     BackendActionsTable record = null;
     try {
@@ -174,14 +171,14 @@ public class BackendActionsTable extends CommonFieldsBase {
       record = datastore.createEntityUsingRelation(prototype, user);
       record.setStringField(prototype.primaryKey, uri);
       record.setLastRevisionDate(new Date(0)); // NOTE: Defaults differently
-                                               // than SecurityRevisionsTable
+      // than SecurityRevisionsTable
       datastore.putEntity(record, user);
     }
     return record;
   }
 
   public static final synchronized boolean mayHaveRecentPublisherRevision(String uriFsc, CallingContext cc)
-        throws ODKDatastoreException {
+      throws ODKDatastoreException {
     boolean wasDaemon = cc.getAsDeamon();
     cc.setAsDaemon(true);
     try {
@@ -201,7 +198,7 @@ public class BackendActionsTable extends CommonFieldsBase {
         oldTime = t.getLastRevisionDate().getTime();
         lastPublisherRevision.put(uriFsc, oldTime);
       }
-      return ( oldTime + HASHMAP_LIFETIME_MILLISECONDS + PUBLISHING_DELAY_MILLISECONDS > now );
+      return (oldTime + HASHMAP_LIFETIME_MILLISECONDS + PUBLISHING_DELAY_MILLISECONDS > now);
     } finally {
       cc.setAsDaemon(wasDaemon);
     }
@@ -311,7 +308,7 @@ public class BackendActionsTable extends CommonFieldsBase {
   }
 
   private static final void logValues(String tag, long now, long futureMilliseconds,
-      long requestedTime) {
+                                      long requestedTime) {
     String msg;
     if (requestedTime == -1L) {
       msg = String.format(
@@ -332,56 +329,11 @@ public class BackendActionsTable extends CommonFieldsBase {
     logger.info(msg);
   }
 
-  private static final String INCOMING = "incoming-";
-  private static final String FETCHED = "-fetched-";
-  private static final String SCHEDULED = "Fs-update";
-  private static final String CLEARED = "Fs-clear-";
-  private static final String ENQUEUED = "Eq-update";
-
-  private static class WatchdogRecords {
-    private BackendActionsTable startTime = null;
-    private BackendActionsTable enqueueTime = null;
-    private BackendActionsTable schedulingTime = null;
-
-    WatchdogRecords(long now, CallingContext cc) throws ODKDatastoreException {
-
-      // refetch all the data if it is more than the settle period old...
-      if (lastFetchTime + PersistConsts.MAX_SETTLE_MILLISECONDS < now) {
-        fetchAll(now, cc);
-      }
-    }
-
-    void fetchAll(long now, CallingContext cc) throws ODKDatastoreException {
-      Datastore ds = cc.getDatastore();
-      User user = cc.getCurrentUser();
-
-      if (lastFetchTime == now)
-        return;
-
-      // this is gratuitous, but it puts the queue activities in context
-      // it would only be updated on the background process if we didn't
-      // read it here.
-      startTime = getSingletonRecord(WATCHDOG_START_ROW_ID, ds, user);
-      lastWatchdogStartTime = startTime.getLastRevisionDate().getTime();
-
-      enqueueTime = getSingletonRecord(WATCHDOG_ENQUEUE_ROW_ID, ds, user);
-      lastWatchdogEnqueueTime = enqueueTime.getLastRevisionDate().getTime();
-
-      schedulingTime = getSingletonRecord(WATCHDOG_SCHEDULING_ROW_ID, ds, user);
-      lastWatchdogSchedulingTime = schedulingTime.getLastRevisionDate().getTime();
-
-      lastFetchTime = now;
-
-      logValues(FETCHED, now, -1L, -1L);
-    }
-
-  }
-
   /**
    * This is effectively GAE-specific: Tomcat installations use a scheduled
    * executor to periodically fire the watchdog (and do not use this mechanism).
    * i.e., on Tomcat, the calls to: Watchdog.onUsage(delay, cc); are no-ops.
-   *
+   * <p>
    * Schedule a watchdog to run the specified number of milliseconds into the
    * future (zero is OK).
    *
@@ -390,7 +342,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    * @param cc
    */
   private static final synchronized void scheduleFutureWatchdog(Watchdog wd,
-      long futureMilliseconds, CallingContext cc) {
+                                                                long futureMilliseconds, CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
 
     long now = System.currentTimeMillis();
@@ -451,8 +403,8 @@ public class BackendActionsTable extends CommonFieldsBase {
             // we are not doing fast publishing.
             // During fast publishing, the watchdog should be enqueued during rescheduleWatchdog()...
             if ((wd.getFasterWatchdogCycleEnabled() &&
-                  (lastWatchdogStartTime < (now - (FAST_PUBLISHING_RETRY_MILLISECONDS + PUBLISHING_DELAY_MILLISECONDS))))
-                  || !wd.getFasterWatchdogCycleEnabled()) {
+                (lastWatchdogStartTime < (now - (FAST_PUBLISHING_RETRY_MILLISECONDS + PUBLISHING_DELAY_MILLISECONDS))))
+                || !wd.getFasterWatchdogCycleEnabled()) {
               wd.onUsage(0L, cc); // no wait, as we are well past due...
             }
 
@@ -501,7 +453,7 @@ public class BackendActionsTable extends CommonFieldsBase {
   /**
    * This is effectively GAE-specific: Tomcat installations use a scheduled
    * executor to periodically fire the watchdog (and do not use this mechanism).
-   *
+   * <p>
    * Check whether a watchdog should be spun up. Spin one up every
    * IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS. Note that if the Watchdog
    * determines that there is work pending, it will schedule a watchdog every
@@ -530,7 +482,7 @@ public class BackendActionsTable extends CommonFieldsBase {
   /**
    * This is effectively GAE-specific: Tomcat installations use a scheduled
    * executor to periodically fire the watchdog (and do not use this mechanism).
-   *
+   * <p>
    * At the completion of the current watchdog, if we have active tasks or have
    * fast publishing enabled, schedule a new watchdon
    * FAST_PUBLISHING_RETRY_MILLISECONDS into the future. Note that if we do not
@@ -538,14 +490,12 @@ public class BackendActionsTable extends CommonFieldsBase {
    * effect, but is a suggested next start time, and only if the website is
    * active will it be honored.
    *
-   * @param hasActiveTasks
-   *          -- whether active tasks were detected
-   * @param cullThisWatchdog
-   *          -- whether this watchdog should be rescheduled
+   * @param hasActiveTasks   -- whether active tasks were detected
+   * @param cullThisWatchdog -- whether this watchdog should be rescheduled
    * @param cc
    */
   public static final synchronized void rescheduleWatchdog(boolean hasActiveTasks,
-      boolean cullThisWatchdog, CallingContext cc) {
+                                                           boolean cullThisWatchdog, CallingContext cc) {
 
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
 
@@ -582,5 +532,59 @@ public class BackendActionsTable extends CommonFieldsBase {
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
     }
+  }
+
+  // Only called from within the persistence layer.
+  @Override
+  public CommonFieldsBase getEmptyRow(User user) {
+    BackendActionsTable t = new BackendActionsTable(this, user);
+    return t;
+  }
+
+  private Date getLastRevisionDate() {
+    return getDateField(LAST_REVISION_DATE);
+  }
+
+  private void setLastRevisionDate(Date value) {
+    setDateField(LAST_REVISION_DATE, value);
+  }
+
+  private static class WatchdogRecords {
+    private BackendActionsTable startTime = null;
+    private BackendActionsTable enqueueTime = null;
+    private BackendActionsTable schedulingTime = null;
+
+    WatchdogRecords(long now, CallingContext cc) throws ODKDatastoreException {
+
+      // refetch all the data if it is more than the settle period old...
+      if (lastFetchTime + PersistConsts.MAX_SETTLE_MILLISECONDS < now) {
+        fetchAll(now, cc);
+      }
+    }
+
+    void fetchAll(long now, CallingContext cc) throws ODKDatastoreException {
+      Datastore ds = cc.getDatastore();
+      User user = cc.getCurrentUser();
+
+      if (lastFetchTime == now)
+        return;
+
+      // this is gratuitous, but it puts the queue activities in context
+      // it would only be updated on the background process if we didn't
+      // read it here.
+      startTime = getSingletonRecord(WATCHDOG_START_ROW_ID, ds, user);
+      lastWatchdogStartTime = startTime.getLastRevisionDate().getTime();
+
+      enqueueTime = getSingletonRecord(WATCHDOG_ENQUEUE_ROW_ID, ds, user);
+      lastWatchdogEnqueueTime = enqueueTime.getLastRevisionDate().getTime();
+
+      schedulingTime = getSingletonRecord(WATCHDOG_SCHEDULING_ROW_ID, ds, user);
+      lastWatchdogSchedulingTime = schedulingTime.getLastRevisionDate().getTime();
+
+      lastFetchTime = now;
+
+      logValues(FETCHED, now, -1L, -1L);
+    }
+
   }
 }

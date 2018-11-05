@@ -17,9 +17,6 @@ package org.opendatakit.aggregate.odktables;
 
 import java.util.List;
 import java.util.Locale;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.relation.DbManifestETags;
 import org.opendatakit.aggregate.odktables.relation.DbManifestETags.DbManifestETagEntity;
@@ -35,15 +32,16 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of file management APIs.
- * 
+ * <p>
  * Isolated here so that the differences between Mezuri and Aggregate can be
  * isolated to this one class.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class FileManager {
 
@@ -82,18 +80,18 @@ public class FileManager {
    * The convention is that any table-related file must be under:
    * /tables/tableid OR a csv file: /assets/csv/tableid....csv OR
    * /assets/csv/tableid/instances/...
-   *
+   * <p>
    * So the 2nd position (0 indexed) will be the table id if the first position
    * is "tables", and the 3rd position (0 indexed) will begin with the table id
    * if it is a csv file under the assets/csv directory. Otherwise, if there are
    * more than 3 positions, it should be the table id (and there should be
    * instance files underneath that are referenced by one or more of the csv
    * files).
-   * 
+   * <p>
    * And verify that the presumptive tableId does not contain a period. If the
    * data came via a Mac OSX system, there might be hidden .DS_Store directories
    * that we should not treat as table ids.
-   * 
+   *
    * @param appRelativeFilePath
    * @return tableId or DbTableFileInfo.NO_TABLE_ID
    */
@@ -178,7 +176,7 @@ public class FileManager {
   }
 
   public ConfigFileChangeDetail putFile(String odkClientVersion, String tableId, FileContentInfo fi,
-      TablesUserPermissions userPermissions) throws ODKDatastoreException, ODKTaskLockException {
+                                        TablesUserPermissions userPermissions) throws ODKDatastoreException, ODKTaskLockException {
 
     if (fi.partialPath == null) {
       throw new IllegalArgumentException("partialPath cannot be null!");
@@ -259,14 +257,14 @@ public class FileManager {
       tableFileInfoRow.put(cc);
 
       switch (outcome) {
-      case FILE_UNCHANGED:
-        return ConfigFileChangeDetail.FILE_NOT_CHANGED;
-      case NEW_FILE_VERSION:
-        return ConfigFileChangeDetail.FILE_UPDATED;
-      case COMPLETELY_NEW_FILE:
-        return ConfigFileChangeDetail.FILE_NEWLY_CREATED;
-      default:
-        throw new IllegalStateException("Unexpected extra status for BlobSubmissionOutcome");
+        case FILE_UNCHANGED:
+          return ConfigFileChangeDetail.FILE_NOT_CHANGED;
+        case NEW_FILE_VERSION:
+          return ConfigFileChangeDetail.FILE_UPDATED;
+        case COMPLETELY_NEW_FILE:
+          return ConfigFileChangeDetail.FILE_NEWLY_CREATED;
+        default:
+          throw new IllegalStateException("Unexpected extra status for BlobSubmissionOutcome");
       }
 
     } finally {

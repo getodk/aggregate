@@ -25,7 +25,6 @@ import java.io.Writer;
  * dependency entirely.  The RFC4180CsvReader is a working reader.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class RFC4180CsvWriter {
 
@@ -47,29 +46,28 @@ public class RFC4180CsvWriter {
    * Writes the next line to the file. All non-null fields
    * are written surrounded by
    *
-   * @param nextLine
-   *            a string array with each comma-separated element as a separate entry.
+   * @param nextLine a string array with each comma-separated element as a separate entry.
    * @throws IOException
    */
   public void writeNext(String[] nextLine) throws IOException {
 
     if (nextLine == null)
-       return;
+      return;
 
     boolean first = true;
-    for ( String term : nextLine ) {
-      if ( !first ) {
+    for (String term : nextLine) {
+      if (!first) {
         bw.write(separator);
       }
       first = false;
-      if ( term != null ) {
+      if (term != null) {
         // wrap an empty string in double-quotes to
         // distinguish between null and empty string
-        if ( term.length() == 0 ||
-             term.indexOf(cr) != -1 ||
-             term.indexOf(lf) != -1 ||
-             term.indexOf(separator) != -1 ||
-             term.indexOf(quotechar) != -1 ) {
+        if (term.length() == 0 ||
+            term.indexOf(cr) != -1 ||
+            term.indexOf(lf) != -1 ||
+            term.indexOf(separator) != -1 ||
+            term.indexOf(quotechar) != -1) {
           // this string needs to be quoted
           bw.write(quotechar);
           // and any quotes within need to be doubled-up
@@ -93,7 +91,7 @@ public class RFC4180CsvWriter {
    */
   public void flush() throws IOException {
 
-      bw.flush();
+    bw.flush();
 
   }
 
@@ -101,11 +99,10 @@ public class RFC4180CsvWriter {
    * Close the underlying stream writer flushing any buffered content.
    *
    * @throws IOException if bad things happen
-   *
    */
   public void close() throws IOException {
-      flush();
-      bw.close();
+    flush();
+    bw.close();
   }
 
 }

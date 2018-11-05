@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.odktables.api;
 
 import java.io.IOException;
 import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -30,7 +29,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.FileNotFoundException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -53,7 +51,6 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
  * basis.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public interface FileService {
 

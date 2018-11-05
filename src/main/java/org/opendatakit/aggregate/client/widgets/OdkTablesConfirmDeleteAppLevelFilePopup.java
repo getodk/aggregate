@@ -16,17 +16,16 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateSubTabBase;
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.popups.AbstractPopupBase;
-import org.opendatakit.aggregate.client.popups.OdkTablesConfirmDeleteRowPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import org.opendatakit.aggregate.client.AggregateSubTabBase;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.popups.AbstractPopupBase;
+import org.opendatakit.aggregate.client.popups.OdkTablesConfirmDeleteRowPopup;
 
 /**
  * The popup that performs the deletion of a file from the datastore. NB: This
@@ -35,7 +34,6 @@ import com.google.gwt.user.client.ui.HTML;
  * OdkTables table.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesConfirmDeleteAppLevelFilePopup extends AbstractPopupBase {
 

@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
 
@@ -26,12 +25,12 @@ public final class ColumnListBox extends AggregateListBox {
   private final ArrayList<Column> headers;
 
   public ColumnListBox(ArrayList<Column> headers, boolean multipleValueSelection,
-      boolean onlyIncludeTextColumns, String tooltipText) {
+                       boolean onlyIncludeTextColumns, String tooltipText) {
     this(headers, multipleValueSelection, onlyIncludeTextColumns, tooltipText, null);
   }
 
   public ColumnListBox(ArrayList<Column> headers, boolean multipleValueSelection,
-      boolean onlyIncludeTextColumns, String tooltipText, String helpBalloonTxt) {
+                       boolean onlyIncludeTextColumns, String tooltipText, String helpBalloonTxt) {
     super(tooltipText, multipleValueSelection, helpBalloonTxt);
     this.headers = headers;
 

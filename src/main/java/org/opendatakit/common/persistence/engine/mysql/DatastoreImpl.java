@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -22,10 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
-
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
@@ -41,6 +38,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -60,60 +58,9 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
-  private static final boolean logBindDetails = false;
-
-  private static final int MAX_COLUMN_NAME_LEN = 64;
-  private static final int MAX_TABLE_NAME_LEN = 64;
-
-  // unknown what the limit is MySQL capacity; I suspect 64k.
-  private static final int MAX_BIND_PARAMS = 65000;
-
-  private final DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
-  private DataSource dataSource = null;
-  private DataSourceTransactionManager tm = null;
-
-  private String schemaName = null;
-
-  public DatastoreImpl() throws ODKDatastoreException {
-  }
-
-  public void setDataSource(DataSource dataSource) {
-    this.dataSource = dataSource;
-    try {
-      Class.forName("com.mysql.jdbc.Driver");
-    } catch ( Exception e ) {
-      // ignore this but log a brief info message
-      LoggerFactory.getLogger(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.Driver (did you download and install/copy MySQL Connector/J ?) Exception: " + e.toString());
-    }
-    try {
-      Class.forName("com.mysql.jdbc.GoogleDriver");
-    } catch ( Exception e ) {
-      // ignore this but log a brief info message
-      LoggerFactory.getLogger(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.GoogleDriver Exception: " + e.toString());
-    }
-    this.tm = new DataSourceTransactionManager(dataSource);
-  }
-
-  public void setSchemaName(String schemaName) {
-    this.schemaName = schemaName;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    if (dataSource == null) {
-      throw new IllegalStateException("dataSource property must be set!");
-    }
-    if (schemaName == null) {
-      JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-      List<?> databaseNames = jdbcTemplate.queryForList("SELECT DATABASE()", String.class);
-      schemaName = (String) databaseNames.get(0);
-    }
-  }
-
   public static final String K_CREATE_TABLE = "CREATE TABLE ";
   public static final String K_DROP_TABLE = "DROP TABLE ";
   public static final String K_SHOW_CREATE_TABLE = "SHOW CREATE TABLE ";
-
   public static final String K_OPEN_PAREN = " ( ";
   public static final String K_CLOSE_PAREN = " ) ";
   public static final String K_SELECT = "SELECT ";
@@ -133,328 +80,163 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   public static final String K_UPDATE = "UPDATE ";
   public static final String K_SET = " SET ";
   public static final String K_DELETE_FROM = "DELETE FROM ";
-
   public static final Integer DEFAULT_DBL_NUMERIC_SCALE = 10;
   public static final Integer DEFAULT_DBL_NUMERIC_PRECISION = 38;
   public static final Integer DEFAULT_INT_NUMERIC_PRECISION = 9;
-
-  private static final class TableDefinition {
-
-    public DataField.DataType getDataType() {
-      return dataType;
-    }
-
-    public void setDataType(DataField.DataType dataType) {
-      this.dataType = dataType;
-    }
-
-    public String getColumnName() {
-      return columnName;
-    }
-
-    public boolean isNullable() {
-      return isNullable;
-    }
-
-    public Long getMaxCharLen() {
-      return maxCharLen;
-    }
-
-    public Integer getNumericScale() {
-      return numericScale;
-    }
-
-    public Integer getNumericPrecision() {
-      return numericPrecision;
-    }
-
-    public boolean isDoublePrecision() {
-      return isDoublePrecision;
-    }
-
-    final private String columnName;
-    final private boolean isNullable;
-    final private Long maxCharLen;
-    final private Integer numericScale;
-    final private Integer numericPrecision;
-    final private boolean isDoublePrecision;
-
-    private DataField.DataType dataType;
-
-    private static final String K_SHOW = "SHOW COLUMNS FROM ";
-    private static final int IDX_COLUMN_NAME = 1;
-    private static final int IDX_COLUMN_TYPE = 2;
-    private static final int IDX_IS_NULLABLE = 3;
-    private static final String K_VARCHAR = "varchar";
-    private static final String K_BINARY = "binary";
-    private static final String K_DECIMAL = "decimal";
-    private static final String K_DOUBLE = "double";
-    private static final String K_INT = "int";
-    private static final String K_CHAR = "char";
-    private static final String K_DATE = "date";
-    private static final String K_TIME = "time";
-    private static final String K_BLOB = "blob";
-    private static final String K_TEXT = "text";
-    private static final String K_TINY = "tiny";
-    private static final String K_MEDIUM = "medium";
-    private static final String K_LONG = "long";
-    private static final Long MAX_ROW_SIZE = 65000L;
-
-    private static final Map<String, TableDefinition> query(String schemaName, String tableName,
-        JdbcTemplate db, DatastoreAccessMetrics dam) {
-      StringBuilder b = new StringBuilder();
-      b.append(K_SHOW);
-      b.append(K_BQ);
-      b.append(schemaName);
-      b.append(K_BQ);
-      b.append(".");
-      b.append(K_BQ);
-      b.append(tableName);
-      b.append(K_BQ);
-
-      Map<String, TableDefinition> defs = new HashMap<String, TableDefinition>();
-      try {
-        List<?> columns;
-        columns = db.query(b.toString(), tableDef);
-        dam.recordQueryUsage("SHOW COLUMNS", columns.size());
-
-        for (Object o : columns) {
-          TableDefinition sd = (TableDefinition) o;
-          defs.put(sd.getColumnName(), sd);
-        }
-      } catch (BadSqlGrammarException e) {
-        // we expect this if the table doesn't exist...
-      }
-      return defs;
-    }
-
-    TableDefinition(ResultSet rs) throws SQLException {
-      this.columnName = rs.getString(IDX_COLUMN_NAME);
-      this.isNullable = rs.getBoolean(IDX_IS_NULLABLE);
-
-      String dataType = null;
-      Integer firstTerm = null;
-      Integer secondTerm = null;
-      {
-        String columnType = rs.getString(IDX_COLUMN_TYPE);
-        dataType = columnType;
-
-        int idx = columnType.indexOf("(");
-        if (idx != -1) {
-          dataType = columnType.substring(0, idx);
-          String parenTerm = columnType.substring(idx + 1, columnType.length() - 1);
-          idx = parenTerm.indexOf(",");
-          if (idx != -1) {
-            String part = parenTerm.substring(0, idx);
-            if (part.length() != 0) {
-              firstTerm = Integer.valueOf(part);
-            }
-            part = parenTerm.substring(idx + 1);
-            if (part.length() != 0) {
-              secondTerm = Integer.valueOf(part);
-            }
-          } else if (parenTerm.length() != 0) {
-            firstTerm = Integer.valueOf(parenTerm);
-          }
-        }
-      }
-
-      if (dataType.contains(K_VARCHAR) || dataType.contains(K_CHAR)) {
-        this.maxCharLen = Long.valueOf(firstTerm);
-        this.dataType = DataField.DataType.STRING;
-        this.numericPrecision = null;
-        this.numericScale = null;
-        this.isDoublePrecision = false;
-      } else if (dataType.contains(K_DECIMAL)) {
-        if (secondTerm.equals(0)) {
-          this.dataType = DataField.DataType.INTEGER;
-          this.maxCharLen = null;
-          this.numericPrecision = firstTerm;
-          this.numericScale = null;
-          this.isDoublePrecision = false;
-        } else {
-          this.dataType = DataField.DataType.DECIMAL;
-          this.maxCharLen = null;
-          this.numericPrecision = firstTerm;
-          this.numericScale = secondTerm;
-          this.isDoublePrecision = false;
-        }
-      } else if (dataType.contains(K_DOUBLE)) {
-        this.dataType = DataField.DataType.DECIMAL;
-        this.maxCharLen = null;
-        this.numericPrecision = 53;
-        this.numericScale = null;
-        this.isDoublePrecision = true;
-      } else if (dataType.contains(K_INT)) {
-        this.dataType = DataField.DataType.INTEGER;
-        this.maxCharLen = null;
-        this.numericPrecision = firstTerm;
-        this.numericScale = null;
-        this.isDoublePrecision = false;
-      } else {
-        this.numericPrecision = null;
-        this.numericScale = null;
-        this.isDoublePrecision = false;
-
-        if (dataType.contains(K_DATE) || dataType.contains(K_TIME)) {
-          this.maxCharLen = null;
-          this.dataType = DataField.DataType.DATETIME;
-        } else if (dataType.contains(K_BINARY)) {
-          this.maxCharLen = Long.valueOf(firstTerm);
-          this.dataType = DataField.DataType.BINARY;
-        } else if (dataType.contains(K_BLOB)) {
-          this.dataType = DataField.DataType.BINARY;
-          if (dataType.contains(K_TINY)) {
-            this.maxCharLen = 255L;
-          } else if (dataType.contains(K_MEDIUM)) {
-            // protocol restriction is max_allowed_packet setting.
-            // defaults to: 1048576L
-            this.maxCharLen = 16777215L;
-          } else if (dataType.contains(K_LONG)) {
-            // potential storage: this.maxCharLen = 4294967295L;
-            // protocol restriction is max_allowed_packet setting.
-            // which is limited to less than 1GB; budget 65k overhead.
-            this.maxCharLen = 1073741823L - 65536L;
-          } else {
-            this.maxCharLen = 65535L;
-          }
-        } else if (dataType.contains(K_TEXT)) {
-          this.dataType = DataField.DataType.LONG_STRING;
-          if (dataType.contains(K_TINY)) {
-            this.maxCharLen = 255L;
-          } else if (dataType.contains(K_MEDIUM)) {
-            // protocol restriction is max_allowed_packet setting.
-            // defaults to: 1048576L
-            this.maxCharLen = 16777215L;
-          } else if (dataType.contains(K_LONG)) {
-            // potential storage: this.maxCharLen = 4294967295L;
-            // protocol restriction is max_allowed_packet setting.
-            // which is limited to less than 1GB; budget 65k overhead.
-            this.maxCharLen = 1073741823L - 65536L;
-          } else {
-            this.maxCharLen = 65535L;
-          }
-        } else {
-          throw new IllegalStateException("unexpected dataType: " + dataType);
-        }
-      }
-
-      if (this.dataType == DataField.DataType.STRING
-          && this.maxCharLen.compareTo(MAX_ROW_SIZE) > 0) {
-        this.dataType = DataField.DataType.LONG_STRING;
-      }
-    }
-  }
-
+  private static final boolean logBindDetails = false;
+  private static final int MAX_COLUMN_NAME_LEN = 64;
+  private static final int MAX_TABLE_NAME_LEN = 64;
+  // unknown what the limit is MySQL capacity; I suspect 64k.
+  private static final int MAX_BIND_PARAMS = 65000;
   private static RowMapper<TableDefinition> tableDef = new RowMapper<TableDefinition>() {
     @Override
     public TableDefinition mapRow(ResultSet rs, int rowNum) throws SQLException {
       return new TableDefinition(rs);
     }
   };
+  private final DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
+  private DataSource dataSource = null;
+  private DataSourceTransactionManager tm = null;
+  private String schemaName = null;
+
+  public DatastoreImpl() throws ODKDatastoreException {
+  }
 
   static SqlParameterValue getBindValue(DataField f, Object value) {
     switch (f.getDataType()) {
-    case BOOLEAN:
-      if ( value == null ) {
-        return new SqlParameterValue(java.sql.Types.BOOLEAN, null);
-      } else if ( value instanceof Boolean ) {
-        return new SqlParameterValue(java.sql.Types.BOOLEAN, (Boolean) value);
-      } else {
-        Boolean b = Boolean.valueOf(value.toString());
-        return new SqlParameterValue(java.sql.Types.BOOLEAN, b);
-      }
-    case STRING:
-    case URI:
-      if ( value == null ) {
-        return new SqlParameterValue(java.sql.Types.VARCHAR, null);
-      } else {
-        return new SqlParameterValue(java.sql.Types.VARCHAR, value.toString());
-      }
-    case INTEGER:
-      if ( value == null ) {
-        return new SqlParameterValue(java.sql.Types.BIGINT, null);
-      } else if ( value instanceof Long ) {
-        return new SqlParameterValue(java.sql.Types.BIGINT, (Long) value);
-      } else {
-        Long l = Long.valueOf(value.toString());
-        return new SqlParameterValue(java.sql.Types.BIGINT, l);
-      }
-    case DECIMAL: {
-      if ( value == null ) {
-        return new SqlParameterValue(java.sql.Types.DECIMAL, null);
-      } else {
-        WrappedBigDecimal wbd;
-        if ( value instanceof WrappedBigDecimal ) {
-          wbd = (WrappedBigDecimal) value;
+      case BOOLEAN:
+        if (value == null) {
+          return new SqlParameterValue(java.sql.Types.BOOLEAN, null);
+        } else if (value instanceof Boolean) {
+          return new SqlParameterValue(java.sql.Types.BOOLEAN, (Boolean) value);
         } else {
-          wbd = new WrappedBigDecimal(value.toString());
+          Boolean b = Boolean.valueOf(value.toString());
+          return new SqlParameterValue(java.sql.Types.BOOLEAN, b);
         }
-        if ( wbd.isSpecialValue() ) {
-          return new SqlParameterValue(java.sql.Types.DOUBLE, wbd.d);
+      case STRING:
+      case URI:
+        if (value == null) {
+          return new SqlParameterValue(java.sql.Types.VARCHAR, null);
         } else {
-          return new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd);
+          return new SqlParameterValue(java.sql.Types.VARCHAR, value.toString());
+        }
+      case INTEGER:
+        if (value == null) {
+          return new SqlParameterValue(java.sql.Types.BIGINT, null);
+        } else if (value instanceof Long) {
+          return new SqlParameterValue(java.sql.Types.BIGINT, (Long) value);
+        } else {
+          Long l = Long.valueOf(value.toString());
+          return new SqlParameterValue(java.sql.Types.BIGINT, l);
+        }
+      case DECIMAL: {
+        if (value == null) {
+          return new SqlParameterValue(java.sql.Types.DECIMAL, null);
+        } else {
+          WrappedBigDecimal wbd;
+          if (value instanceof WrappedBigDecimal) {
+            wbd = (WrappedBigDecimal) value;
+          } else {
+            wbd = new WrappedBigDecimal(value.toString());
+          }
+          if (wbd.isSpecialValue()) {
+            return new SqlParameterValue(java.sql.Types.DOUBLE, wbd.d);
+          } else {
+            return new SqlParameterValue(java.sql.Types.DECIMAL, wbd.bd);
+          }
         }
       }
-    }
-    case DATETIME: {
-      // This doesn't like TIMESTAMP data type
-      if ( value == null ) {
-        return new SqlParameterValue(java.sql.Types.TIMESTAMP, null);
-      } else if ( value instanceof Date ) {
-        return new SqlParameterValue(java.sql.Types.TIMESTAMP, (Date) value);
-      } else {
-        throw new IllegalArgumentException("expected Date for DATETIME bind parameter");
+      case DATETIME: {
+        // This doesn't like TIMESTAMP data type
+        if (value == null) {
+          return new SqlParameterValue(java.sql.Types.TIMESTAMP, null);
+        } else if (value instanceof Date) {
+          return new SqlParameterValue(java.sql.Types.TIMESTAMP, (Date) value);
+        } else {
+          throw new IllegalArgumentException("expected Date for DATETIME bind parameter");
+        }
       }
-    }
-    case BINARY:
-      if ( value == null ) {
-        return new SqlParameterValue(java.sql.Types.LONGVARBINARY, null);
-      } else if ( value instanceof byte[] ) {
-        return new SqlParameterValue(java.sql.Types.LONGVARBINARY, value);
-      } else {
-        throw new IllegalArgumentException("expected byte[] for BINARY bind parameter");
-      }
-    case LONG_STRING:
-      if ( value == null ) {
-        return new SqlParameterValue(java.sql.Types.LONGVARCHAR, null);
-      } else {
-        return new SqlParameterValue(java.sql.Types.LONGVARCHAR, value.toString());
-      }
+      case BINARY:
+        if (value == null) {
+          return new SqlParameterValue(java.sql.Types.LONGVARBINARY, null);
+        } else if (value instanceof byte[]) {
+          return new SqlParameterValue(java.sql.Types.LONGVARBINARY, value);
+        } else {
+          throw new IllegalArgumentException("expected byte[] for BINARY bind parameter");
+        }
+      case LONG_STRING:
+        if (value == null) {
+          return new SqlParameterValue(java.sql.Types.LONGVARCHAR, null);
+        } else {
+          return new SqlParameterValue(java.sql.Types.LONGVARCHAR, value.toString());
+        }
 
-    default:
-      throw new IllegalStateException("Unexpected data type");
+      default:
+        throw new IllegalStateException("Unexpected data type");
     }
   }
 
   public static void buildArgumentList(List<SqlParameterValue> pv, CommonFieldsBase entity,
-      DataField f) {
+                                       DataField f) {
     switch (f.getDataType()) {
-    case BOOLEAN:
-      pv.add(getBindValue(f, entity.getBooleanField(f)));
-      break;
-    case STRING:
-    case URI:
-      pv.add(getBindValue(f, entity.getStringField(f)));
-      break;
-    case INTEGER:
-      pv.add(getBindValue(f, entity.getLongField(f)));
-      break;
-    case DECIMAL:
-      pv.add(getBindValue(f, entity.getNumericField(f)));
-      break;
-    case DATETIME:
-      pv.add(getBindValue(f, entity.getDateField(f)));
-      break;
-    case BINARY:
-      pv.add(getBindValue(f, entity.getBlobField(f)));
-      break;
-    case LONG_STRING:
-      pv.add(getBindValue(f, entity.getStringField(f)));
-      break;
+      case BOOLEAN:
+        pv.add(getBindValue(f, entity.getBooleanField(f)));
+        break;
+      case STRING:
+      case URI:
+        pv.add(getBindValue(f, entity.getStringField(f)));
+        break;
+      case INTEGER:
+        pv.add(getBindValue(f, entity.getLongField(f)));
+        break;
+      case DECIMAL:
+        pv.add(getBindValue(f, entity.getNumericField(f)));
+        break;
+      case DATETIME:
+        pv.add(getBindValue(f, entity.getDateField(f)));
+        break;
+      case BINARY:
+        pv.add(getBindValue(f, entity.getBlobField(f)));
+        break;
+      case LONG_STRING:
+        pv.add(getBindValue(f, entity.getStringField(f)));
+        break;
 
-    default:
-      throw new IllegalStateException("Unexpected data type");
+      default:
+        throw new IllegalStateException("Unexpected data type");
+    }
+  }
+
+  public void setDataSource(DataSource dataSource) {
+    this.dataSource = dataSource;
+    try {
+      Class.forName("com.mysql.jdbc.Driver");
+    } catch (Exception e) {
+      // ignore this but log a brief info message
+      LoggerFactory.getLogger(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.Driver (did you download and install/copy MySQL Connector/J ?) Exception: " + e.toString());
+    }
+    try {
+      Class.forName("com.mysql.jdbc.GoogleDriver");
+    } catch (Exception e) {
+      // ignore this but log a brief info message
+      LoggerFactory.getLogger(DatastoreImpl.class).info("Failed to load com.mysql.jdbc.GoogleDriver Exception: " + e.toString());
+    }
+    this.tm = new DataSourceTransactionManager(dataSource);
+  }
+
+  public void setSchemaName(String schemaName) {
+    this.schemaName = schemaName;
+  }
+
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    if (dataSource == null) {
+      throw new IllegalStateException("dataSource property must be set!");
+    }
+    if (schemaName == null) {
+      JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+      List<?> databaseNames = jdbcTemplate.queryForList("SELECT DATABASE()", String.class);
+      schemaName = (String) databaseNames.get(0);
     }
   }
 
@@ -482,7 +264,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   }
 
   private final boolean updateRelation(JdbcTemplate jc, CommonFieldsBase relation,
-      String originalStatement) {
+                                       String originalStatement) {
 
     Map<String, TableDefinition> map = TableDefinition.query(relation.getSchemaName(),
         relation.getTableName(), jc, dam);
@@ -568,9 +350,9 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   @Override
   public void assertRelation(CommonFieldsBase relation, User user) throws ODKDatastoreException {
     JdbcTemplate jc = getJdbcConnection();
-    // TODO: transactions are questionable here, as MySQL (and Oracle) do 
+    // TODO: transactions are questionable here, as MySQL (and Oracle) do
     // TODO: not evaluate DDL statements under transactional semantics.
-    // TODO: This does, perhaps, block other threads from executing 
+    // TODO: This does, perhaps, block other threads from executing
     // TODO: identical code at the same time.  Copied from PostgreSQL
     // TODO: to make codebase as similar as possible.
     TransactionStatus status = null;
@@ -622,72 +404,72 @@ public class DatastoreImpl implements Datastore, InitializingBean {
           b.append(K_BQ);
           DataField.DataType type = f.getDataType();
           switch (type) {
-          case BINARY:
-            b.append(" MEDIUMBLOB");
-            break;
-          case LONG_STRING:
-            b.append(" MEDIUMTEXT CHARACTER SET utf8");
-            break;
-          case STRING:
-            b.append(" VARCHAR(");
-            Long len = f.getMaxCharLen();
-            if (len == null) {
-              len = PersistConsts.DEFAULT_MAX_STRING_LENGTH;
-            }
-            b.append(len.toString());
-            b.append(K_CLOSE_PAREN);
-            b.append(" CHARACTER SET utf8");
-            break;
-          case BOOLEAN:
-            b.append(" CHAR(1) CHARACTER SET utf8");
-            break;
-          case INTEGER:
-            Integer int_digits = f.getNumericPrecision();
-            if (int_digits == null) {
-              int_digits = DEFAULT_INT_NUMERIC_PRECISION;
-            }
+            case BINARY:
+              b.append(" MEDIUMBLOB");
+              break;
+            case LONG_STRING:
+              b.append(" MEDIUMTEXT CHARACTER SET utf8");
+              break;
+            case STRING:
+              b.append(" VARCHAR(");
+              Long len = f.getMaxCharLen();
+              if (len == null) {
+                len = PersistConsts.DEFAULT_MAX_STRING_LENGTH;
+              }
+              b.append(len.toString());
+              b.append(K_CLOSE_PAREN);
+              b.append(" CHARACTER SET utf8");
+              break;
+            case BOOLEAN:
+              b.append(" CHAR(1) CHARACTER SET utf8");
+              break;
+            case INTEGER:
+              Integer int_digits = f.getNumericPrecision();
+              if (int_digits == null) {
+                int_digits = DEFAULT_INT_NUMERIC_PRECISION;
+              }
 
-            if (int_digits.compareTo(10) > 0) {
-              b.append(" BIGINT(");
-              b.append(int_digits.toString());
-              b.append(K_CLOSE_PAREN);
-            } else {
-              b.append(" INTEGER(");
-              b.append(int_digits.toString());
-              b.append(K_CLOSE_PAREN);
-            }
-            break;
-          case DECIMAL:
-            if (f.isDoublePrecision()) {
-              b.append(" FLOAT(53)");
-            } else {
-              Integer dbl_digits = f.getNumericPrecision();
-              Integer dbl_fract = f.getNumericScale();
-              if (dbl_digits == null) {
-                dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+              if (int_digits.compareTo(10) > 0) {
+                b.append(" BIGINT(");
+                b.append(int_digits.toString());
+                b.append(K_CLOSE_PAREN);
+              } else {
+                b.append(" INTEGER(");
+                b.append(int_digits.toString());
+                b.append(K_CLOSE_PAREN);
               }
-              if (dbl_fract == null) {
-                dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
+              break;
+            case DECIMAL:
+              if (f.isDoublePrecision()) {
+                b.append(" FLOAT(53)");
+              } else {
+                Integer dbl_digits = f.getNumericPrecision();
+                Integer dbl_fract = f.getNumericScale();
+                if (dbl_digits == null) {
+                  dbl_digits = DEFAULT_DBL_NUMERIC_PRECISION;
+                }
+                if (dbl_fract == null) {
+                  dbl_fract = DEFAULT_DBL_NUMERIC_SCALE;
+                }
+                b.append(" DECIMAL(");
+                b.append(dbl_digits.toString());
+                b.append(K_CS);
+                b.append(dbl_fract.toString());
+                b.append(K_CLOSE_PAREN);
               }
-              b.append(" DECIMAL(");
-              b.append(dbl_digits.toString());
-              b.append(K_CS);
-              b.append(dbl_fract.toString());
-              b.append(K_CLOSE_PAREN);
-            }
-            break;
-          case DATETIME:
-            b.append(" DATETIME(6)");
-            break;
-          case URI:
-            b.append(" VARCHAR(");
-            len = f.getMaxCharLen();
-            if (len == null) {
-              len = PersistConsts.URI_STRING_LEN;
-            }
-            b.append(len.toString());
-            b.append(") CHARACTER SET utf8");
-            break;
+              break;
+            case DATETIME:
+              b.append(" DATETIME(6)");
+              break;
+            case URI:
+              b.append(" VARCHAR(");
+              len = f.getMaxCharLen();
+              if (len == null) {
+                len = PersistConsts.URI_STRING_LEN;
+              }
+              b.append(len.toString());
+              b.append(") CHARACTER SET utf8");
+              break;
           }
 
           if (f.getNullable()) {
@@ -696,11 +478,11 @@ public class DatastoreImpl implements Datastore, InitializingBean {
             b.append(" NOT NULL ");
           }
         }
-        
+
         if (countColumns > MAX_BIND_PARAMS) {
           throw new IllegalArgumentException("Table size exceeds bind parameter limit");
         }
-        
+
         /*
          * Setting the primary key as the _URI and making it use HASH.
          */
@@ -849,87 +631,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     return query;
   }
 
-  private static class ReusableStatementSetter implements PreparedStatementSetter {
-
-    String sql = null;
-    List<SqlParameterValue> argList = null;
-
-    ReusableStatementSetter() {
-    };
-
-    ReusableStatementSetter(String sql, List<SqlParameterValue> args) {
-      this.sql = sql;
-      this.argList = args;
-    }
-
-    public void setArgList(String sql, List<SqlParameterValue> args) {
-      this.sql = sql;
-      this.argList = args;
-    }
-    
-    private void createLogContent(StringBuilder b, int i, SqlParameterValue arg) {
-      b.append("\nbinding[").append(i).append("]: type: ");
-      switch ( arg.getSqlType() ) {
-      case java.sql.Types.BOOLEAN:
-        b.append("BOOLEAN");
-        break;
-      case java.sql.Types.BIGINT:
-        b.append("BIGINT");
-        break;
-      case java.sql.Types.DECIMAL:
-        b.append("DECIMAL");
-        break;
-      case java.sql.Types.DOUBLE:
-        b.append("DOUBLE");
-        break;
-      case java.sql.Types.TIMESTAMP:
-        b.append("TIMESTAMP");
-        break;
-      case java.sql.Types.VARCHAR:
-        b.append("VARCHAR");
-        break;
-      case java.sql.Types.VARBINARY:
-        b.append("VARBINARY");
-        break;
-      default:
-        b.append("**").append(arg.getSqlType()).append("**");
-      }
-      if ( arg.getValue() == null ) {
-        b.append(" is null");
-      } else {
-        b.append(" = ").append(arg.getValue());
-      }
-    }
-
-    @Override
-    public void setValues(PreparedStatement ps) throws SQLException {
-      if ( logBindDetails ) {
-        StringBuilder b = new StringBuilder();
-        b.append(sql);
-        for (int i = 0; i < argList.size(); ++i) {
-          SqlParameterValue arg = argList.get(i);
-          createLogContent(b, i+1, arg);
-        }
-        LoggerFactory.getLogger(DatastoreImpl.class).info(b.toString());
-      }
-      for (int i = 0; i < argList.size(); ++i) {
-        SqlParameterValue arg = argList.get(i);
-        if ((arg.getSqlType() == java.sql.Types.LONGVARBINARY) ||
-            (arg.getSqlType() == java.sql.Types.VARBINARY)) {
-          if (arg.getValue() == null) {
-            ps.setNull(i + 1, arg.getSqlType());
-          } else {
-            ps.setBytes(i + 1, (byte[]) arg.getValue());
-          }
-        } else if (arg.getValue() == null) {
-          ps.setNull(i + 1, arg.getSqlType());
-        } else {
-          ps.setObject(i + 1, arg.getValue(), arg.getSqlType());
-        }
-      }
-    }
-  }
-
   @Override
   public void putEntity(CommonFieldsBase entity, User user) throws ODKEntityPersistException {
     dam.recordPutUsage(entity);
@@ -1042,30 +743,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   }
 
-  private static final class BatchStatementFieldSetter implements BatchPreparedStatementSetter {
-
-    final String sql;
-    final List<List<SqlParameterValue> > batchArgs;
-    ReusableStatementSetter setter = new ReusableStatementSetter();
-
-    BatchStatementFieldSetter(String sql, List<List<SqlParameterValue> > batchArgs) {
-      this.sql = sql;
-      this.batchArgs = batchArgs;
-    }
-
-    @Override
-    public int getBatchSize() {
-      return batchArgs.size();
-    }
-
-    @Override
-    public void setValues(PreparedStatement ps, int idx) throws SQLException {
-      List<SqlParameterValue> argArray = batchArgs.get(idx);
-      setter.setArgList(sql, argArray);
-      setter.setValues(ps);
-    }
-  }
-
   @Override
   public void batchAlterData(List<? extends CommonFieldsBase> changes, User user)
       throws ODKEntityPersistException {
@@ -1073,23 +750,23 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       return;
     }
 
-    // we need to be careful -- SqlServer only allows a small number of 
+    // we need to be careful -- SqlServer only allows a small number of
     // bind parameters on a request. This severely limits the batch size
     // that can be sent.
     CommonFieldsBase firstEntity = changes.get(0);
     int maxPerBatch = (MAX_BIND_PARAMS / firstEntity.getFieldList().size());
-    for ( int idxStart = 0; idxStart < changes.size() ; idxStart += maxPerBatch ) {
+    for (int idxStart = 0; idxStart < changes.size(); idxStart += maxPerBatch) {
       int idxAfterEnd = idxStart + maxPerBatch;
-      if ( idxAfterEnd > changes.size() ) {
+      if (idxAfterEnd > changes.size()) {
         idxAfterEnd = changes.size();
       }
       partialBatchAlterData(changes, idxStart, idxAfterEnd, user);
     }
-    
+
   }
-  
-  private void partialBatchAlterData(List<? extends CommonFieldsBase> allChanges, 
-      int idxStart, int idxAfterEnd, User user)
+
+  private void partialBatchAlterData(List<? extends CommonFieldsBase> allChanges,
+                                     int idxStart, int idxAfterEnd, User user)
       throws ODKEntityPersistException {
     if (allChanges.isEmpty()) {
       return;
@@ -1097,10 +774,10 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
     boolean generateSQL = true;
     String sql = null;
-    List<List<SqlParameterValue> > batchArgs = new ArrayList<List<SqlParameterValue> >();
+    List<List<SqlParameterValue>> batchArgs = new ArrayList<List<SqlParameterValue>>();
     StringBuilder b = new StringBuilder();
 
-    for (int idx = idxStart ; idx < idxAfterEnd ; ++idx ) {
+    for (int idx = idxStart; idx < idxAfterEnd; ++idx) {
       CommonFieldsBase entity = allChanges.get(idx);
       dam.recordPutUsage(entity);
 
@@ -1218,7 +895,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
       // if this was an insert, set the fromDatabase flag in the entities
       if (!allChanges.get(0).isFromDatabase()) {
-        for (int idx = idxStart ; idx < idxAfterEnd ; ++idx ) {
+        for (int idx = idxStart; idx < idxAfterEnd; ++idx) {
           CommonFieldsBase entity = allChanges.get(idx);
           entity.setFromDatabase(true);
         }
@@ -1253,7 +930,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
       LoggerFactory.getLogger(DatastoreImpl.class).info("Executing " + b.toString() + " with key "
           + key.getKey() + " by user " + user.getUriUser());
-      getJdbcConnection().update(b.toString(), new Object[] { key.getKey() });
+      getJdbcConnection().update(b.toString(), new Object[]{key.getKey()});
     } catch (Exception e) {
       throw new ODKDatastoreException("delete failed", e);
     }
@@ -1279,5 +956,317 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   @Override
   public TaskLock createTaskLock(User user) {
     return new TaskLockImpl(this, dam, user);
+  }
+
+  private static final class TableDefinition {
+
+    private static final String K_SHOW = "SHOW COLUMNS FROM ";
+    private static final int IDX_COLUMN_NAME = 1;
+    private static final int IDX_COLUMN_TYPE = 2;
+    private static final int IDX_IS_NULLABLE = 3;
+    private static final String K_VARCHAR = "varchar";
+    private static final String K_BINARY = "binary";
+    private static final String K_DECIMAL = "decimal";
+    private static final String K_DOUBLE = "double";
+    private static final String K_INT = "int";
+    private static final String K_CHAR = "char";
+    private static final String K_DATE = "date";
+    private static final String K_TIME = "time";
+    private static final String K_BLOB = "blob";
+    private static final String K_TEXT = "text";
+    private static final String K_TINY = "tiny";
+    private static final String K_MEDIUM = "medium";
+    private static final String K_LONG = "long";
+    private static final Long MAX_ROW_SIZE = 65000L;
+    final private String columnName;
+    final private boolean isNullable;
+    final private Long maxCharLen;
+    final private Integer numericScale;
+    final private Integer numericPrecision;
+    final private boolean isDoublePrecision;
+    private DataField.DataType dataType;
+    TableDefinition(ResultSet rs) throws SQLException {
+      this.columnName = rs.getString(IDX_COLUMN_NAME);
+      this.isNullable = rs.getBoolean(IDX_IS_NULLABLE);
+
+      String dataType = null;
+      Integer firstTerm = null;
+      Integer secondTerm = null;
+      {
+        String columnType = rs.getString(IDX_COLUMN_TYPE);
+        dataType = columnType;
+
+        int idx = columnType.indexOf("(");
+        if (idx != -1) {
+          dataType = columnType.substring(0, idx);
+          String parenTerm = columnType.substring(idx + 1, columnType.length() - 1);
+          idx = parenTerm.indexOf(",");
+          if (idx != -1) {
+            String part = parenTerm.substring(0, idx);
+            if (part.length() != 0) {
+              firstTerm = Integer.valueOf(part);
+            }
+            part = parenTerm.substring(idx + 1);
+            if (part.length() != 0) {
+              secondTerm = Integer.valueOf(part);
+            }
+          } else if (parenTerm.length() != 0) {
+            firstTerm = Integer.valueOf(parenTerm);
+          }
+        }
+      }
+
+      if (dataType.contains(K_VARCHAR) || dataType.contains(K_CHAR)) {
+        this.maxCharLen = Long.valueOf(firstTerm);
+        this.dataType = DataField.DataType.STRING;
+        this.numericPrecision = null;
+        this.numericScale = null;
+        this.isDoublePrecision = false;
+      } else if (dataType.contains(K_DECIMAL)) {
+        if (secondTerm.equals(0)) {
+          this.dataType = DataField.DataType.INTEGER;
+          this.maxCharLen = null;
+          this.numericPrecision = firstTerm;
+          this.numericScale = null;
+          this.isDoublePrecision = false;
+        } else {
+          this.dataType = DataField.DataType.DECIMAL;
+          this.maxCharLen = null;
+          this.numericPrecision = firstTerm;
+          this.numericScale = secondTerm;
+          this.isDoublePrecision = false;
+        }
+      } else if (dataType.contains(K_DOUBLE)) {
+        this.dataType = DataField.DataType.DECIMAL;
+        this.maxCharLen = null;
+        this.numericPrecision = 53;
+        this.numericScale = null;
+        this.isDoublePrecision = true;
+      } else if (dataType.contains(K_INT)) {
+        this.dataType = DataField.DataType.INTEGER;
+        this.maxCharLen = null;
+        this.numericPrecision = firstTerm;
+        this.numericScale = null;
+        this.isDoublePrecision = false;
+      } else {
+        this.numericPrecision = null;
+        this.numericScale = null;
+        this.isDoublePrecision = false;
+
+        if (dataType.contains(K_DATE) || dataType.contains(K_TIME)) {
+          this.maxCharLen = null;
+          this.dataType = DataField.DataType.DATETIME;
+        } else if (dataType.contains(K_BINARY)) {
+          this.maxCharLen = Long.valueOf(firstTerm);
+          this.dataType = DataField.DataType.BINARY;
+        } else if (dataType.contains(K_BLOB)) {
+          this.dataType = DataField.DataType.BINARY;
+          if (dataType.contains(K_TINY)) {
+            this.maxCharLen = 255L;
+          } else if (dataType.contains(K_MEDIUM)) {
+            // protocol restriction is max_allowed_packet setting.
+            // defaults to: 1048576L
+            this.maxCharLen = 16777215L;
+          } else if (dataType.contains(K_LONG)) {
+            // potential storage: this.maxCharLen = 4294967295L;
+            // protocol restriction is max_allowed_packet setting.
+            // which is limited to less than 1GB; budget 65k overhead.
+            this.maxCharLen = 1073741823L - 65536L;
+          } else {
+            this.maxCharLen = 65535L;
+          }
+        } else if (dataType.contains(K_TEXT)) {
+          this.dataType = DataField.DataType.LONG_STRING;
+          if (dataType.contains(K_TINY)) {
+            this.maxCharLen = 255L;
+          } else if (dataType.contains(K_MEDIUM)) {
+            // protocol restriction is max_allowed_packet setting.
+            // defaults to: 1048576L
+            this.maxCharLen = 16777215L;
+          } else if (dataType.contains(K_LONG)) {
+            // potential storage: this.maxCharLen = 4294967295L;
+            // protocol restriction is max_allowed_packet setting.
+            // which is limited to less than 1GB; budget 65k overhead.
+            this.maxCharLen = 1073741823L - 65536L;
+          } else {
+            this.maxCharLen = 65535L;
+          }
+        } else {
+          throw new IllegalStateException("unexpected dataType: " + dataType);
+        }
+      }
+
+      if (this.dataType == DataField.DataType.STRING
+          && this.maxCharLen.compareTo(MAX_ROW_SIZE) > 0) {
+        this.dataType = DataField.DataType.LONG_STRING;
+      }
+    }
+
+    private static final Map<String, TableDefinition> query(String schemaName, String tableName,
+                                                            JdbcTemplate db, DatastoreAccessMetrics dam) {
+      StringBuilder b = new StringBuilder();
+      b.append(K_SHOW);
+      b.append(K_BQ);
+      b.append(schemaName);
+      b.append(K_BQ);
+      b.append(".");
+      b.append(K_BQ);
+      b.append(tableName);
+      b.append(K_BQ);
+
+      Map<String, TableDefinition> defs = new HashMap<String, TableDefinition>();
+      try {
+        List<?> columns;
+        columns = db.query(b.toString(), tableDef);
+        dam.recordQueryUsage("SHOW COLUMNS", columns.size());
+
+        for (Object o : columns) {
+          TableDefinition sd = (TableDefinition) o;
+          defs.put(sd.getColumnName(), sd);
+        }
+      } catch (BadSqlGrammarException e) {
+        // we expect this if the table doesn't exist...
+      }
+      return defs;
+    }
+
+    public DataField.DataType getDataType() {
+      return dataType;
+    }
+
+    public void setDataType(DataField.DataType dataType) {
+      this.dataType = dataType;
+    }
+
+    public String getColumnName() {
+      return columnName;
+    }
+
+    public boolean isNullable() {
+      return isNullable;
+    }
+
+    public Long getMaxCharLen() {
+      return maxCharLen;
+    }
+
+    public Integer getNumericScale() {
+      return numericScale;
+    }
+
+    public Integer getNumericPrecision() {
+      return numericPrecision;
+    }
+
+    public boolean isDoublePrecision() {
+      return isDoublePrecision;
+    }
+  }
+
+  private static class ReusableStatementSetter implements PreparedStatementSetter {
+
+    String sql = null;
+    List<SqlParameterValue> argList = null;
+
+    ReusableStatementSetter() {
+    }
+
+    ;
+
+    ReusableStatementSetter(String sql, List<SqlParameterValue> args) {
+      this.sql = sql;
+      this.argList = args;
+    }
+
+    public void setArgList(String sql, List<SqlParameterValue> args) {
+      this.sql = sql;
+      this.argList = args;
+    }
+
+    private void createLogContent(StringBuilder b, int i, SqlParameterValue arg) {
+      b.append("\nbinding[").append(i).append("]: type: ");
+      switch (arg.getSqlType()) {
+        case java.sql.Types.BOOLEAN:
+          b.append("BOOLEAN");
+          break;
+        case java.sql.Types.BIGINT:
+          b.append("BIGINT");
+          break;
+        case java.sql.Types.DECIMAL:
+          b.append("DECIMAL");
+          break;
+        case java.sql.Types.DOUBLE:
+          b.append("DOUBLE");
+          break;
+        case java.sql.Types.TIMESTAMP:
+          b.append("TIMESTAMP");
+          break;
+        case java.sql.Types.VARCHAR:
+          b.append("VARCHAR");
+          break;
+        case java.sql.Types.VARBINARY:
+          b.append("VARBINARY");
+          break;
+        default:
+          b.append("**").append(arg.getSqlType()).append("**");
+      }
+      if (arg.getValue() == null) {
+        b.append(" is null");
+      } else {
+        b.append(" = ").append(arg.getValue());
+      }
+    }
+
+    @Override
+    public void setValues(PreparedStatement ps) throws SQLException {
+      if (logBindDetails) {
+        StringBuilder b = new StringBuilder();
+        b.append(sql);
+        for (int i = 0; i < argList.size(); ++i) {
+          SqlParameterValue arg = argList.get(i);
+          createLogContent(b, i + 1, arg);
+        }
+        LoggerFactory.getLogger(DatastoreImpl.class).info(b.toString());
+      }
+      for (int i = 0; i < argList.size(); ++i) {
+        SqlParameterValue arg = argList.get(i);
+        if ((arg.getSqlType() == java.sql.Types.LONGVARBINARY) ||
+            (arg.getSqlType() == java.sql.Types.VARBINARY)) {
+          if (arg.getValue() == null) {
+            ps.setNull(i + 1, arg.getSqlType());
+          } else {
+            ps.setBytes(i + 1, (byte[]) arg.getValue());
+          }
+        } else if (arg.getValue() == null) {
+          ps.setNull(i + 1, arg.getSqlType());
+        } else {
+          ps.setObject(i + 1, arg.getValue(), arg.getSqlType());
+        }
+      }
+    }
+  }
+
+  private static final class BatchStatementFieldSetter implements BatchPreparedStatementSetter {
+
+    final String sql;
+    final List<List<SqlParameterValue>> batchArgs;
+    ReusableStatementSetter setter = new ReusableStatementSetter();
+
+    BatchStatementFieldSetter(String sql, List<List<SqlParameterValue>> batchArgs) {
+      this.sql = sql;
+      this.batchArgs = batchArgs;
+    }
+
+    @Override
+    public int getBatchSize() {
+      return batchArgs.size();
+    }
+
+    @Override
+    public void setValues(PreparedStatement ps, int idx) throws SQLException {
+      List<SqlParameterValue> argArray = batchArgs.get(idx);
+      setter.setArgList(sql, argArray);
+      setter.setValues(ps);
+    }
   }
 }

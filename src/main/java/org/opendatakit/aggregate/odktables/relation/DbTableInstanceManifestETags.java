@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.odktables.relation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.ermodel.Relation;
 import org.opendatakit.common.persistence.DataField;
@@ -35,28 +34,51 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author dylan price
  * @author sudar.sam@gmail.com
- *
  */
 public class DbTableInstanceManifestETags extends Relation {
+
+  /**
+   * NOTE: the PK of this table is the PK of the DbTable relation.
+   * i.e., the ROW_ID of a DbLogTable entry. Instance manifests are
+   * always comprehensive.
+   */
+
+  public static final DataField MANIFEST_ETAG = new DataField("_MANIFEST_ETAG", DataType.STRING, false);
+  private static final List<DataField> dataFields;
+
+  static {
+    dataFields = new ArrayList<DataField>();
+
+    dataFields.add(MANIFEST_ETAG);
+  }
 
   private DbTableInstanceManifestETags(String namespace, String tableName, List<DataField> fields, CallingContext cc)
       throws ODKDatastoreException {
     super(namespace, tableName, fields, cc);
   }
 
+  public static synchronized DbTableInstanceManifestETags getRelation(String tableId, CallingContext cc) throws ODKDatastoreException {
+    DbTableInstanceManifestETags relation = new DbTableInstanceManifestETags(RUtil.NAMESPACE,
+        tableId.toUpperCase(Locale.ENGLISH) + "_MFE", dataFields, cc);
+    return relation;
+  }
+
   /**
-   * NOTE: the PK of this table is the PK of the DbTable relation.
-   * i.e., the ROW_ID of a DbLogTable entry. Instance manifests are 
-   * always comprehensive.
+   * Create a new row in this relation. The row is not yet persisted.
+   *
+   * @param cc
+   * @return
+   * @throws ODKDatastoreException
    */
+  public static DbTableInstanceManifestETagEntity createNewEntity(String tableId, String rowId, CallingContext cc)
+      throws ODKDatastoreException {
+    return new DbTableInstanceManifestETagEntity(getRelation(tableId, cc).newEntity(rowId, cc));
+  }
 
-  public static final DataField MANIFEST_ETAG = new DataField("_MANIFEST_ETAG", DataType.STRING, false);
+  public static DbTableInstanceManifestETagEntity getRowIdEntry(String tableId, String rowId, CallingContext cc)
+      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
 
-  private static final List<DataField> dataFields;
-  static {
-    dataFields = new ArrayList<DataField>();
-
-    dataFields.add(MANIFEST_ETAG);
+    return new DbTableInstanceManifestETagEntity(getRelation(tableId, cc).getEntity(rowId, cc));
   }
 
   public static class DbTableInstanceManifestETagEntity {
@@ -88,30 +110,6 @@ public class DbTableInstanceManifestETags extends Relation {
     public void setManifestETag(String value) {
       e.set(MANIFEST_ETAG, value);
     }
-  }
-
-  public static synchronized DbTableInstanceManifestETags getRelation(String tableId, CallingContext cc) throws ODKDatastoreException {
-    DbTableInstanceManifestETags relation = new DbTableInstanceManifestETags(RUtil.NAMESPACE, 
-        tableId.toUpperCase(Locale.ENGLISH) + "_MFE", dataFields, cc);
-    return relation;
-  }
-
-  /**
-   * Create a new row in this relation. The row is not yet persisted.
-   *
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static DbTableInstanceManifestETagEntity createNewEntity(String tableId, String rowId, CallingContext cc)
-      throws ODKDatastoreException {
-    return new DbTableInstanceManifestETagEntity(getRelation(tableId, cc).newEntity(rowId, cc));
-  }
-
-  public static DbTableInstanceManifestETagEntity getRowIdEntry(String tableId, String rowId, CallingContext cc)
-      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
-
-    return new DbTableInstanceManifestETagEntity(getRelation(tableId, cc).getEntity(rowId, cc));
   }
 
 }

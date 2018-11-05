@@ -20,60 +20,59 @@ import java.io.Serializable;
 
 /**
  * Datastore failure exception that can be returned through GWT.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public class DatastoreFailureException extends Exception implements Serializable {
-    private static final String DATASTORE_FAILURE_EXCEPTION = "Problem persisting data or accessing data";
+  private static final String DATASTORE_FAILURE_EXCEPTION = "Problem persisting data or accessing data";
 
   /**
-     * 
-     */
-    private static final long serialVersionUID = 3102327639058143399L;
+   *
+   */
+  private static final long serialVersionUID = 3102327639058143399L;
 
-    private String message;
+  private String message;
 
-    /**
-     * 
-     */
-    public DatastoreFailureException() {
-        super();
-        message = DATASTORE_FAILURE_EXCEPTION;
-    }
+  /**
+   *
+   */
+  public DatastoreFailureException() {
+    super();
+    message = DATASTORE_FAILURE_EXCEPTION;
+  }
 
-    /**
-     * @param arg0
-     * @param arg1
-     */
-    public DatastoreFailureException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
-        message = arg0 + "(" + arg1.getMessage() + ")";
-    }
+  /**
+   * @param arg0
+   * @param arg1
+   */
+  public DatastoreFailureException(String arg0, Throwable arg1) {
+    super(arg0, arg1);
+    message = arg0 + "(" + arg1.getMessage() + ")";
+  }
 
-    /**
-     * @param arg0
-     */
-    public DatastoreFailureException(String arg0) {
-        super(arg0);
-        message = arg0;
-    }
+  /**
+   * @param arg0
+   */
+  public DatastoreFailureException(String arg0) {
+    super(arg0);
+    message = arg0;
+  }
 
-    /**
-     * @param arg0
-     */
-    public DatastoreFailureException(Throwable arg0) {
-        super(arg0);
-        message = DATASTORE_FAILURE_EXCEPTION + " (" + arg0.getMessage() + ")";
-    }
+  /**
+   * @param arg0
+   */
+  public DatastoreFailureException(Throwable arg0) {
+    super(arg0);
+    message = DATASTORE_FAILURE_EXCEPTION + " (" + arg0.getMessage() + ")";
+  }
 
-    @Override
-    public String getLocalizedMessage() {
-        return message;
-    }
+  @Override
+  public String getLocalizedMessage() {
+    return message;
+  }
 
-    @Override
-    public String getMessage() {
-        return message;
-    }
+  @Override
+  public String getMessage() {
+    return message;
+  }
 }

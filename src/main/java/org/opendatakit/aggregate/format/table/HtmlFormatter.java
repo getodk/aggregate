@@ -19,7 +19,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -32,18 +31,16 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class HtmlFormatter extends TableFormatterBase implements SubmissionFormatter {
 
   List<Row> formattedElements = new ArrayList<Row>();
   List<String> headers = null;
-  
+
   private boolean checkboxes;
-  
+
   public HtmlFormatter(IForm form, String webServerUrl, PrintWriter printWriter, List<FormElementModel> selectedColumnNames, boolean includeCheckboxes) {
     super(form, printWriter, selectedColumnNames);
     checkboxes = includeCheckboxes;
@@ -59,7 +56,7 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
 
   @Override
   protected void processSubmissionSetSegment(Collection<? extends SubmissionSet> submissions,
-      FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
+                                             FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
     // format row elements 
     for (SubmissionSet sub : submissions) {
       Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
@@ -79,7 +76,7 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
 
 
   public void processSubmissionSetPublic(Collection<? extends SubmissionSet> submissions,
-    FormElementModel formElementModel, CallingContext cc) throws ODKDatastoreException {
+                                         FormElementModel formElementModel, CallingContext cc) throws ODKDatastoreException {
     processSubmissionSet(submissions, formElementModel, cc);
   }
 

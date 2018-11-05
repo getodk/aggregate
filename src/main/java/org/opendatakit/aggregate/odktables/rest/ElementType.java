@@ -32,40 +32,6 @@ public class ElementType {
     this.auxInfo = auxInfo;
   }
 
-  public ElementDataType getDataType() {
-    return dataType;
-  }
-
-  public String getElementType() {
-    return elementType;
-  }
-
-  public String getAuxInfo() {
-    return auxInfo;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof ElementType)) {
-      return false;
-    }
-    ElementType other = (ElementType) o;
-    return (getDataType() == other.getDataType())
-        && getElementType().equals(other.getElementType())
-        && ((getAuxInfo() == null) ? (other.getAuxInfo() == null) : getAuxInfo().equals(
-            other.getAuxInfo()));
-  }
-
-  public String toString() {
-    String suffix = (auxInfo == null) ? "" : auxInfo;
-    String dataTypeString = ":" + dataType.name();
-    if (dataType == ElementDataType.object || dataType.name().equals(elementType)
-        || dataType == ElementDataType.string) {
-      dataTypeString = "";
-    }
-    return elementType + dataTypeString + suffix;
-  }
-
   public static final ElementType parseElementType(String type, boolean hasChildren) {
     int idxCloseParen = type.lastIndexOf(')');
     int idxOpenParen = type.indexOf('(');
@@ -126,7 +92,7 @@ public class ElementType {
       throw new IllegalArgumentException(
           "malformed ElementType - invalid primitive datatype for elementType with children: " + type);
     }
-    
+
     if (!hasChildren && (dataType == ElementDataType.object || dataType == ElementDataType.array)) {
       throw new IllegalArgumentException("malformed elementType -- cannot declare an object or array having no children: " + type);
     }
@@ -137,6 +103,40 @@ public class ElementType {
     }
 
     return new ElementType(elementType, dataType, auxInfo);
+  }
+
+  public ElementDataType getDataType() {
+    return dataType;
+  }
+
+  public String getElementType() {
+    return elementType;
+  }
+
+  public String getAuxInfo() {
+    return auxInfo;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof ElementType)) {
+      return false;
+    }
+    ElementType other = (ElementType) o;
+    return (getDataType() == other.getDataType())
+        && getElementType().equals(other.getElementType())
+        && ((getAuxInfo() == null) ? (other.getAuxInfo() == null) : getAuxInfo().equals(
+        other.getAuxInfo()));
+  }
+
+  public String toString() {
+    String suffix = (auxInfo == null) ? "" : auxInfo;
+    String dataTypeString = ":" + dataType.name();
+    if (dataType == ElementDataType.object || dataType.name().equals(elementType)
+        || dataType == ElementDataType.string) {
+      dataTypeString = "";
+    }
+    return elementType + dataTypeString + suffix;
   }
 
 }

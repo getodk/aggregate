@@ -16,8 +16,12 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesManageTableFilesSubTab;
@@ -29,25 +33,12 @@ import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
-
 /**
  * Displays the files associated with individual rows in a table.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesViewInstanceFileInfo extends FlexTable {
-
-  // the table whose info we are currently displaying.
-  private TableEntryClient currentTable;
-
-  // that table's info rows
-  private ArrayList<FileSummaryClient> fileSummaries;
 
   private static final int INSTANCE_ID_COLUMN = 0;
   private static final String INSTANCE_ID_HEADING = "Row ID";
@@ -59,14 +50,15 @@ public class OdkTablesViewInstanceFileInfo extends FlexTable {
   private static final String CONTENT_TYPE_HEADING = "Content Type";
   private static final int DOWNLOAD_COLUMN = 4;
   private static final String DOWNLOAD_HEADING = "Download";
-
   private static final int numColumns = 5;
-
-  // this is just the tab that opened the table
-  private AggregateSubTabBase basePanel;
-
   // the message to display when there are no rows in the table
   private static String NO_ROWS_MESSAGE = "There are no rows to display.";
+  // the table whose info we are currently displaying.
+  private TableEntryClient currentTable;
+  // that table's info rows
+  private ArrayList<FileSummaryClient> fileSummaries;
+  // this is just the tab that opened the table
+  private AggregateSubTabBase basePanel;
 
   /**
    * This is the constructor to call when there has not been a table selected.

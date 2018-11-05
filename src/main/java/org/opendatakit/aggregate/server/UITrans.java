@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.server;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.Visibility;
 import org.opendatakit.common.persistence.Query;
@@ -27,7 +26,6 @@ import org.opendatakit.common.persistence.Query;
  * Translate enumerations between the UI layer and the rest of Aggregate
  *
  * @author wbrunette@gmail.com
- *
  */
 public final class UITrans {
 
@@ -53,7 +51,7 @@ public final class UITrans {
   }
 
   public static final Query.FilterOperation convertFilterOperation(FilterOperation op,
-      Visibility visibility) {
+                                                                   Visibility visibility) {
     return toPersistenceDisplay.get(op);
   }
 

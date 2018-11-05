@@ -8,11 +8,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
  * Holds the key-value entry for one user-defined field of the row
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class DataKeyValue {
 
-  @JacksonXmlProperty(isAttribute=true)
+  @JacksonXmlProperty(isAttribute = true)
   public String column;
 
   @JacksonXmlText
@@ -20,7 +19,7 @@ public class DataKeyValue {
 
   public DataKeyValue() {
   }
-  
+
   public DataKeyValue(String column, String value) {
     this.column = column;
     this.value = value;
@@ -28,7 +27,7 @@ public class DataKeyValue {
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj != null && obj instanceof DataKeyValue ) {
+    if (obj != null && obj instanceof DataKeyValue) {
       DataKeyValue kv = (DataKeyValue) obj;
       return column.equals(kv.column) &&
           ((value == null) ? (kv.value == null) : value.equals(kv.value));

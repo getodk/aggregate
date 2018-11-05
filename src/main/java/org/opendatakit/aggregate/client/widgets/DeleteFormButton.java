@@ -16,12 +16,11 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.ConfirmFormDeletePopup;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 
 public final class DeleteFormButton extends AggregateButton implements ClickHandler {
 
@@ -43,7 +42,7 @@ public final class DeleteFormButton extends AggregateButton implements ClickHand
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     ConfirmFormDeletePopup popup = new ConfirmFormDeletePopup(formId);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

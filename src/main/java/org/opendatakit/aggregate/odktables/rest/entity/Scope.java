@@ -16,32 +16,44 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.apache.commons.lang3.Validate;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.Validate;
 
 public class Scope implements Comparable<Scope> {
 
-  /**
-   * Type of Scope.
-   *
-   * Limited to 10 characters
-   */
-  public enum Type {
-    DEFAULT, USER, GROUP,
+  public static final Scope EMPTY_SCOPE;
+
+  static {
+    EMPTY_SCOPE = new Scope();
+    EMPTY_SCOPE.initFields(Scope.Type.DEFAULT, null);
   }
 
   @JsonProperty(required = false)
   private Type type;
-
   @JsonProperty(required = false)
   private String value;
 
+  /**
+   * Constructs a new Scope.
+   *
+   * @param type  the type of the scope. Must not be null. The empty scope may be
+   *              accessed as {@link Scope#EMPTY_SCOPE}.
+   * @param value the userId if type is {@link Type#USER}, or the groupId of type is
+   *              {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
+   *              ignored (set to null).
+   */
+  public Scope(Type type, String value) {
+    Validate.notNull(type);
+    if (type.equals(Type.GROUP)) {
+      Validate.notEmpty(value);
+    } else if (type.equals(Type.DEFAULT)) {
+      value = null;
+    }
 
-  public static final Scope EMPTY_SCOPE;
-  static {
-    EMPTY_SCOPE = new Scope();
-    EMPTY_SCOPE.initFields(Scope.Type.DEFAULT, null);
+    initFields(type, value);
+  }
+
+  private Scope() {
   }
 
   public static Scope asScope(String filterType, String filterValue) {
@@ -58,31 +70,6 @@ public class Scope implements Comparable<Scope> {
     }
   }
 
-  /**
-   * Constructs a new Scope.
-   *
-   * @param type
-   *          the type of the scope. Must not be null. The empty scope may be
-   *          accessed as {@link Scope#EMPTY_SCOPE}.
-   * @param value
-   *          the userId if type is {@link Type#USER}, or the groupId of type is
-   *          {@link Type#GROUP}. If type is {@link Type#DEFAULT}, value is
-   *          ignored (set to null).
-   */
-  public Scope(Type type, String value) {
-    Validate.notNull(type);
-    if (type.equals(Type.GROUP)) {
-      Validate.notEmpty(value);
-    } else if (type.equals(Type.DEFAULT)) {
-      value = null;
-    }
-
-    initFields(type, value);
-  }
-
-  private Scope() {
-  }
-
   private void initFields(Type type, String value) {
     this.type = type;
     this.value = value;
@@ -96,8 +83,7 @@ public class Scope implements Comparable<Scope> {
   }
 
   /**
-   * @param type
-   *          the type to set
+   * @param type the type to set
    */
   public void setType(Type type) {
     this.type = type;
@@ -111,8 +97,7 @@ public class Scope implements Comparable<Scope> {
   }
 
   /**
-   * @param value
-   *          the value to set
+   * @param value the value to set
    */
   public void setValue(String value) {
     this.value = value;
@@ -171,17 +156,26 @@ public class Scope implements Comparable<Scope> {
 
   @Override
   public int compareTo(Scope arg0) {
-    if ( arg0 == null ) {
+    if (arg0 == null) {
       return -1;
     }
-    
+
     int outcome = type.name().compareTo(arg0.type.name());
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    outcome = (value == null) ? 
+    outcome = (value == null) ?
         ((arg0.value == null) ? 0 : -1) : value.compareTo(arg0.value);
     return outcome;
+  }
+
+  /**
+   * Type of Scope.
+   * <p>
+   * Limited to 10 characters
+   */
+  public enum Type {
+    DEFAULT, USER, GROUP,
   }
 
 }

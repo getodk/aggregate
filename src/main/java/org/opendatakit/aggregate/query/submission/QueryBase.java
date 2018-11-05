@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.query.submission;
 
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
@@ -32,93 +31,89 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public abstract class QueryBase {
 
-  protected Query query;
   private final IForm form;
-  
-  
-  
+  protected Query query;
+
+
   protected QueryBase(IForm form) {
     this.form = form;
   }
 
   /**
    * CAUTION: the attribute must be in the top-level record!
-   * 
+   *
    * @param attribute
    * @param op
    * @param value
    */
   public void addFilter(FormElementModel attribute, FilterOperation op,
                         Object value) {
-    if ( attribute.isMetadata() ) {
-        DataField metaField;
-        TopLevelDynamicBase tlb = ((TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
-        switch ( attribute.getType() ) {
+    if (attribute.isMetadata()) {
+      DataField metaField;
+      TopLevelDynamicBase tlb = ((TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
+      switch (attribute.getType()) {
         case META_INSTANCE_ID:
-            metaField = tlb.primaryKey;
-            break;
+          metaField = tlb.primaryKey;
+          break;
         case META_IS_COMPLETE:
-            metaField = tlb.isComplete;
-            break;
+          metaField = tlb.isComplete;
+          break;
         case META_MODEL_VERSION:
-            metaField = tlb.modelVersion;
-            break;
+          metaField = tlb.modelVersion;
+          break;
         case META_SUBMISSION_DATE:
-            metaField = tlb.submissionDate;
-            break;
+          metaField = tlb.submissionDate;
+          break;
         case META_UI_VERSION:
-            metaField = tlb.uiVersion;
-            break;
+          metaField = tlb.uiVersion;
+          break;
         case META_DATE_MARKED_AS_COMPLETE:
-            metaField = tlb.markedAsCompleteDate;
+          metaField = tlb.markedAsCompleteDate;
         default:
-            throw new IllegalStateException("unknown Metadata type");
-        }
-        query.addFilter(metaField, op, value);
+          throw new IllegalStateException("unknown Metadata type");
+      }
+      query.addFilter(metaField, op, value);
     } else {
-        query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
+      query.addFilter(attribute.getFormDataModel().getBackingKey(), op, value);
     }
   }
-  
+
   public void addFilterGeoPoint(FormElementModel attr, Long ordinal, FilterOperation op,
-      Object value) {
+                                Object value) {
 
     List<FormDataModel> geoList = attr.getFormDataModel().getChildren();
 
-    for ( FormDataModel m : geoList ) {
-       if ( m.getOrdinalNumber().equals(Long.valueOf(ordinal)) ) {
-         query.addFilter(m.getBackingKey(), op, value);
-       } 
+    for (FormDataModel m : geoList) {
+      if (m.getOrdinalNumber().equals(Long.valueOf(ordinal))) {
+        query.addFilter(m.getBackingKey(), op, value);
+      }
     }
   }
 
   public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException;
 
-  
-  public final IForm getForm(){
+
+  public final IForm getForm() {
     return form;
   }
 
   /**
-   * Generates a QueryResultthat contains all the submission data 
+   * Generates a QueryResultthat contains all the submission data
    * of the form specified by the ODK ID
-   * @return
-   * 
-   * @throws ODKDatastoreException 
    *
+   * @return
+   * @throws ODKDatastoreException
    */
-  protected QueryResult getQueryResult(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {    
+  protected QueryResult getQueryResult(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
     return query.executeQuery(startCursor, fetchLimit);
 
-    
+
   }
-  
-  
+
+
 }

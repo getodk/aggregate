@@ -16,26 +16,9 @@
 
 package org.opendatakit.aggregate.client;
 
-import com.google.gwt.dom.client.Style;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.aggregate.client.handlers.RefreshCloseHandler;
-import org.opendatakit.aggregate.client.handlers.RefreshOpenHandler;
-import org.opendatakit.aggregate.client.handlers.RefreshSelectionHandler;
-import org.opendatakit.aggregate.client.preferences.Preferences;
-import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
-import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
-import org.opendatakit.aggregate.constants.common.SubTabs;
-import org.opendatakit.aggregate.constants.common.Tabs;
-import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.common.security.client.RealmSecurityInfo;
-import org.opendatakit.common.security.client.UserSecurityInfo;
-import org.opendatakit.common.security.common.GrantedAuthorityName;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -57,58 +40,51 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.opendatakit.aggregate.client.exception.RequestFailureException;
+import org.opendatakit.aggregate.client.handlers.RefreshCloseHandler;
+import org.opendatakit.aggregate.client.handlers.RefreshOpenHandler;
+import org.opendatakit.aggregate.client.handlers.RefreshSelectionHandler;
+import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
+import org.opendatakit.aggregate.constants.common.SubTabs;
+import org.opendatakit.aggregate.constants.common.Tabs;
+import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.common.security.client.RealmSecurityInfo;
+import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 
 public class AggregateUI implements EntryPoint {
 
+  // hack...
+  public static final String QUOTA_EXCEEDED = "Quota exceeded";
+  private static AggregateUI singleton = null;
+  // session variables for tab visibility
+  private static boolean manageVisible = false;
+  private static boolean adminVisible = false;
+  private static boolean odkTablesVisible = false;
   private UrlHash hash;
   private Label notSecureMsgLabel;
   private FlowPanel notSecurePanel;
   private Label errorMsgLabel;
   private FlowPanel errorPanel;
-
   private FlowPanel wrappingLayoutPanel;
   private HorizontalPanel layoutPanel;
   private ScrollPanel helpPanel;
   private TreeItem rootItem;
-
   private NavLinkBar settingsBar;
-
   private DecoratedTabPanel mainNav;
-
   // tab datastructures
   private HashMap<Tabs, AggregateTabBase> tabMap;
   private ArrayList<Tabs> tabPosition;
-
   private RefreshTimer timer;
-
-  private static AggregateUI singleton = null;
-
-  // session variables for tab visibility
-  private static boolean manageVisible = false;
-  private static boolean adminVisible = false;
-  private static boolean odkTablesVisible = false;
-
-  // hack...
-  public static final String QUOTA_EXCEEDED = "Quota exceeded";
-
-  /***********************************
-   ***** SINGLETON FETCHING ******
-   ***********************************/
-
-  public static synchronized final AggregateUI getUI() {
-    if (singleton == null) {
-      // if you get here, you've put something in the AggregateUI()
-      // constructor that should have been put in the onModuleLoad()
-      // method.
-      GWT.log("AggregateUI.getUI() called before singleton has been initialized");
-    }
-    return singleton;
-  }
-
-  public RefreshTimer getTimer() {
-    return timer;
-  }
+  private long lastUserInfoUpdateAttemptTimestamp = 0L;
+  private UserSecurityInfo userInfo = null;
+  private long lastRealmInfoUpdateAttemptTimestamp = 0L;
+  private RealmSecurityInfo realmInfo = null;
 
   /***********************************
    ***** INITIALIZATION ******
@@ -131,7 +107,7 @@ public class AggregateUI implements EntryPoint {
     notSecurePanel = new FlowPanel();
     notSecurePanel.add(notSecureMsgLabel);
     notSecurePanel.setVisible(false);
-    
+
     // define the error message info...
     errorMsgLabel = new Label();
     errorMsgLabel.setStyleName("error_message");
@@ -179,13 +155,35 @@ public class AggregateUI implements EntryPoint {
     wrappingLayoutPanel.add(helpPanel);
 
     settingsBar = new NavLinkBar();
-    
+
     RootPanel.get("not_secure_content").add(notSecurePanel);
     RootPanel.get("error_content").add(errorPanel);
     RootPanel.get("dynamic_content").add(
         new HTML("<img src=\"images/odk_color.png\" id=\"odk_aggregate_logo\" class=\"gwt-Image\" />"));
     RootPanel.get("dynamic_content").add(settingsBar);
     RootPanel.get("dynamic_content").add(wrappingLayoutPanel);
+  }
+
+  /***********************************
+   ***** SINGLETON FETCHING ******
+   ***********************************/
+
+  public static synchronized final AggregateUI getUI() {
+    if (singleton == null) {
+      // if you get here, you've put something in the AggregateUI()
+      // constructor that should have been put in the onModuleLoad()
+      // method.
+      GWT.log("AggregateUI.getUI() called before singleton has been initialized");
+    }
+    return singleton;
+  }
+
+  public native static void resize() /*-{
+    $wnd.onAggregateResize();
+  }-*/;
+
+  public RefreshTimer getTimer() {
+    return timer;
   }
 
   private void addTabToDatastructures(AggregateTabBase tabPanel, Tabs tab) {
@@ -205,9 +203,9 @@ public class AggregateUI implements EntryPoint {
 
     // assign the singleton here...
     singleton = this;
-    
+
     beforeContentLoaded();
-    
+
     // start the refresh timer...
     timer.setInitialized();
 
@@ -232,9 +230,9 @@ public class AggregateUI implements EntryPoint {
 
           @Override
           public void onFailure(Throwable caught) {
-            if ( caught instanceof RequestFailureException ) {
+            if (caught instanceof RequestFailureException) {
               RequestFailureException e = (RequestFailureException) caught;
-              if ( e.getMessage().equals(QUOTA_EXCEEDED) ) {
+              if (e.getMessage().equals(QUOTA_EXCEEDED)) {
                 return; // Don't retry -- we have a quota problem...
               }
             }
@@ -262,7 +260,8 @@ public class AggregateUI implements EntryPoint {
                     @Override
                     public void failedRefresh() {
                       commonUserInfoUpdateCompleteAction();
-                    }});
+                    }
+                  });
                 }
               }
             });
@@ -312,7 +311,8 @@ public class AggregateUI implements EntryPoint {
                     @Override
                     public void failedRefresh() {
                       commonUserInfoUpdateCompleteAction();
-                    }});
+                    }
+                  });
                 }
               }
             });
@@ -321,22 +321,22 @@ public class AggregateUI implements EntryPoint {
   }
 
   public void updateOdkTablesFeatureVisibility() {
-    if ( authorizedForTab(Tabs.ODKTABLES) ) {
+    if (authorizedForTab(Tabs.ODKTABLES)) {
       odkTablesVisible = Preferences.getOdkTablesEnabled();
       AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
-      if ( odkTables != null ) {
+      if (odkTables != null) {
         odkTables.setVisible(odkTablesVisible);
       }
       for (int i = 0; i < mainNav.getWidgetCount(); i++) {
         Widget w = mainNav.getWidget(i);
-        if ( w != null && w instanceof OdkTablesTabUI ) {
+        if (w != null && w instanceof OdkTablesTabUI) {
           w.setVisible(odkTablesVisible);
           ((Widget) mainNav.getTabBar().getTab(i)).setVisible(odkTablesVisible);
           ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
         }
       }
 
-      if ( authorizedForTab(Tabs.ADMIN) ) {
+      if (authorizedForTab(Tabs.ADMIN)) {
         AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
         if (AminTab != null && AminTab instanceof AdminTabUI) {
           AdminTabUI adminTab = (AdminTabUI) AminTab;
@@ -351,19 +351,19 @@ public class AggregateUI implements EntryPoint {
       }
     } else {
       AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
-      if ( odkTables != null ) {
+      if (odkTables != null) {
         odkTables.setVisible(false);
       }
       for (int i = 0; i < mainNav.getWidgetCount(); i++) {
         Widget w = mainNav.getWidget(i);
-        if ( w != null && w instanceof OdkTablesTabUI ) {
+        if (w != null && w instanceof OdkTablesTabUI) {
           w.setVisible(false);
           ((Widget) mainNav.getTabBar().getTab(i)).setVisible(false);
           ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
         }
       }
 
-      if ( authorizedForTab(Tabs.ADMIN) ) {
+      if (authorizedForTab(Tabs.ADMIN)) {
         AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
         if (AminTab != null && AminTab instanceof AdminTabUI) {
           AdminTabUI adminTab = (AdminTabUI) AminTab;
@@ -393,7 +393,7 @@ public class AggregateUI implements EntryPoint {
     if (userInfo != null) {
       if (authorizedForTab(Tabs.SUBMISSIONS)) {
         mainNav.add(submissions, Tabs.SUBMISSIONS.getTabLabel());
-       // If this is visible, mark it as the tab to use to size the screen
+        // If this is visible, mark it as the tab to use to size the screen
         mainNav.getElement().getFirstChildElement().getFirstChildElement()
             .addClassName("tab_measure_1");
       }
@@ -404,12 +404,12 @@ public class AggregateUI implements EntryPoint {
       }
 
       if (authorizedForTab(Tabs.ODKTABLES)) {
-          mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
-          if ( !authorizedForTab(Tabs.SUBMISSIONS) ) {
+        mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
+        if (!authorizedForTab(Tabs.SUBMISSIONS)) {
           // If submissions is not visible, mark it as the tab to use to size the screen
-            mainNav.getElement().getFirstChildElement().getFirstChildElement()
-                .addClassName("tab_measure_1");
-          }
+          mainNav.getElement().getFirstChildElement().getFirstChildElement()
+              .addClassName("tab_measure_1");
+        }
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
@@ -452,15 +452,11 @@ public class AggregateUI implements EntryPoint {
   // Currently calls into javascript/resize.js, if we add more JavaScript
   // then that should be changed.
   public native void contentLoaded() /*-{
-        $wnd.gwtContentLoaded();
+    $wnd.gwtContentLoaded();
   }-*/;
 
   public native void beforeContentLoaded() /*-{
-      $wnd.gwtBeforeContentLoaded();
-  }-*/;
-
-  public native static void resize() /*-{
-      $wnd.onAggregateResize();
+    $wnd.gwtBeforeContentLoaded();
   }-*/;
 
   /***********************************
@@ -576,25 +572,20 @@ public class AggregateUI implements EntryPoint {
 
   private boolean authorizedForTab(Tabs tab) {
     switch (tab) {
-    case SUBMISSIONS:
-      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
-    case MANAGEMENT:
-      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
-    case ADMIN:
-      return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
-    case ODKTABLES:
+      case SUBMISSIONS:
+        return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_VIEWER);
+      case MANAGEMENT:
+        return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
+      case ADMIN:
+        return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
+      case ODKTABLES:
         return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) ||
-               userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SUPER_USER_TABLES) ||
-               userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES);
-    default:
-      return false;
+            userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SUPER_USER_TABLES) ||
+            userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES);
+      default:
+        return false;
     }
   }
-
-  private long lastUserInfoUpdateAttemptTimestamp = 0L;
-  private UserSecurityInfo userInfo = null;
-  private long lastRealmInfoUpdateAttemptTimestamp = 0L;
-  private RealmSecurityInfo realmInfo = null;
 
   public UserSecurityInfo getUserInfo() {
     if (userInfo == null) {
@@ -623,24 +614,24 @@ public class AggregateUI implements EntryPoint {
   }
 
   public void updateNotSecureInfo() {
-    if ( realmInfo != null ) {
-      if (!realmInfo.isSuperUsernamePasswordSet() ) {
+    if (realmInfo != null) {
+      if (!realmInfo.isSuperUsernamePasswordSet()) {
         notSecureMsgLabel.setText("Warning: Anyone can take control of this server. Go to the Site Admin tab and change the primary Site Administrator's password now!");
         notSecurePanel.setVisible(true);
         resize();
-      } else if ( notSecurePanel.isVisible() ) {
+      } else if (notSecurePanel.isVisible()) {
         notSecureMsgLabel.setText("");
         notSecurePanel.setVisible(false);
         resize();
       }
     }
   }
-  
+
   public void forceUpdateNotSecureInfo() {
     lastRealmInfoUpdateAttemptTimestamp = 0L;
     getRealmInfo();
   }
-  
+
   public RealmSecurityInfo getRealmInfo() {
     if (realmInfo == null) {
       GWT.log("AggregateUI.getRealmInfo: realmInfo is null");
@@ -732,7 +723,7 @@ public class AggregateUI implements EntryPoint {
       // could occur if the cached JavaScript is out-of-sync with server
       UrlHash.redirect();
       return;
-    } else if ( t.getMessage().contains("uuid:081e8b57-1698-4bbf-ba5b-ae31338b121d") ) {
+    } else if (t.getMessage().contains("uuid:081e8b57-1698-4bbf-ba5b-ae31338b121d")) {
       // magic number for the service-error.html page.
       // Generally means an out-of-quota error.
       UrlHash.redirect();

@@ -16,66 +16,65 @@
 package org.opendatakit.common.datamodel;
 
 import java.util.Comparator;
-
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.security.User;
 
 /**
  * Common abstract class that unifies all TopLevelDynamic and Dynamic classes.
- * Primarily so that Submission can derive from SubmissionSet.  Useful for 
+ * Primarily so that Submission can derive from SubmissionSet.  Useful for
  * reconstruction of the FormInfo table definition.
- * 
+ *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- * 
  */
 public abstract class DynamicCommonFieldsBase extends CommonFieldsBase {
 
-  public static final Comparator<DynamicCommonFieldsBase> sameTableName = 
-      new Comparator<DynamicCommonFieldsBase>(){
+  public static final Comparator<DynamicCommonFieldsBase> sameTableName =
+      new Comparator<DynamicCommonFieldsBase>() {
 
-    @Override
-    public int compare(DynamicCommonFieldsBase arg0, DynamicCommonFieldsBase arg1) {
-      int cmp = 0;
-      if ( arg0.sameTable(arg1) ) {
-        return 0;
-      }
-      cmp = arg0.getSchemaName().compareTo(arg1.getSchemaName());
-      if ( cmp != 0 ) {
-        return cmp;
-      }
-      cmp = arg0.getTableName().compareTo(arg1.getTableName());
-      return cmp;
-    }};
-    
-    /**
-     * Construct a relation prototype.
-     * 
-     * @param databaseSchema
-     * @param tableName
-     * @param type
-     */
-    protected DynamicCommonFieldsBase(String databaseSchema, String tableName) {
-        super(databaseSchema, tableName);
-    }
+        @Override
+        public int compare(DynamicCommonFieldsBase arg0, DynamicCommonFieldsBase arg1) {
+          int cmp = 0;
+          if (arg0.sameTable(arg1)) {
+            return 0;
+          }
+          cmp = arg0.getSchemaName().compareTo(arg1.getSchemaName());
+          if (cmp != 0) {
+            return cmp;
+          }
+          cmp = arg0.getTableName().compareTo(arg1.getTableName());
+          return cmp;
+        }
+      };
 
-    /**
-     * Construct an empty entity.
-     * 
-     * @param ref
-     * @param user
-     */
-    protected DynamicCommonFieldsBase(CommonFieldsBase ref, User user) {
-        super(ref, user);
-    }
-    
-    /**
-     * Add a field to the field list.  Needed for dynamic form construction.
-     * 
-     * @param d
-     */
-    public void addDataField(DataField d) {
-        fieldList.add(d);
-    }
+  /**
+   * Construct a relation prototype.
+   *
+   * @param databaseSchema
+   * @param tableName
+   * @param type
+   */
+  protected DynamicCommonFieldsBase(String databaseSchema, String tableName) {
+    super(databaseSchema, tableName);
+  }
+
+  /**
+   * Construct an empty entity.
+   *
+   * @param ref
+   * @param user
+   */
+  protected DynamicCommonFieldsBase(CommonFieldsBase ref, User user) {
+    super(ref, user);
+  }
+
+  /**
+   * Add a field to the field list.  Needed for dynamic form construction.
+   *
+   * @param d
+   */
+  public void addDataField(DataField d) {
+    fieldList.add(d);
+  }
 }

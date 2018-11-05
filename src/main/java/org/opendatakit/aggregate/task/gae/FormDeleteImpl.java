@@ -27,16 +27,15 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean. It cannot have any per-request state. It uses a
  * static inner class to encapsulate the per-request state of a running
  * background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class FormDeleteImpl implements FormDelete {
 
   @Override
   public final void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey, long attemptCount,
-      CallingContext cc) {
+                                         CallingContext cc) {
     TaskOptionsBuilder b = new TaskOptionsBuilder(FormDeleteTaskServlet.ADDR);
     b.countdownMillis(PersistConsts.MAX_SETTLE_MILLISECONDS);
     b.param(ServletConsts.FORM_ID, form.getFormId());

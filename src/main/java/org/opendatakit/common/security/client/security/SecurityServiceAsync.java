@@ -16,15 +16,14 @@
 
 package org.opendatakit.common.security.client.security;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 public interface SecurityServiceAsync {
 
-    void getUserInfo(AsyncCallback<UserSecurityInfo> callback);
+  void getUserInfo(AsyncCallback<UserSecurityInfo> callback);
 
-    void getRealmInfo(String xsrfString,
-            AsyncCallback<RealmSecurityInfo> callback);
+  void getRealmInfo(String xsrfString,
+                    AsyncCallback<RealmSecurityInfo> callback);
 }

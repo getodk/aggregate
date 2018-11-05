@@ -16,10 +16,6 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.popups.EnketoRedirectErrorPopup;
-import org.opendatakit.aggregate.client.preferences.Preferences;
-import org.opendatakit.aggregate.constants.common.UIConsts;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
@@ -28,6 +24,9 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.Window;
+import org.opendatakit.aggregate.client.popups.EnketoRedirectErrorPopup;
+import org.opendatakit.aggregate.client.preferences.Preferences;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 public class EnketoWebformButton extends AggregateButton implements ClickHandler {
 
@@ -84,44 +83,44 @@ public class EnketoWebformButton extends AggregateButton implements ClickHandler
           int statusCode = response.getStatusCode();
           EnketoRedirectErrorPopup popup;
           switch (statusCode) {
-          case 200:
-            Window.open(response.getHeader("enketo_url"), "_self", "");
-            break;
-          case 201:
-            Window.open(response.getHeader("enketo_url"), "_self", "");
-            break;
-          case 400:
-            popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_400);
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
-          case 401:
-            popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_401);
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
-          case 403:
-            popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_403);
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
-          case 404:
-            popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_404);
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
-          case 405:
-            popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_405);
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
-          case 410:
-            popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_410);
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
-          case 411:
-            popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_411);
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
-          default:
-            popup = new EnketoRedirectErrorPopup(response.getHeader("error"));
-            popup.setPopupPositionAndShow(popup.getPositionCallBack());
-            break;
+            case 200:
+              Window.open(response.getHeader("enketo_url"), "_self", "");
+              break;
+            case 201:
+              Window.open(response.getHeader("enketo_url"), "_self", "");
+              break;
+            case 400:
+              popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_400);
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
+            case 401:
+              popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_401);
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
+            case 403:
+              popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_403);
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
+            case 404:
+              popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_404);
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
+            case 405:
+              popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_405);
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
+            case 410:
+              popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_410);
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
+            case 411:
+              popup = new EnketoRedirectErrorPopup(ENKETO_ERROR_411);
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
+            default:
+              popup = new EnketoRedirectErrorPopup(response.getHeader("error"));
+              popup.setPopupPositionAndShow(popup.getPositionCallBack());
+              break;
           }
         }
 

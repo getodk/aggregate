@@ -21,7 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
-
 import org.opendatakit.aggregate.odktables.exception.AppNameMismatchException;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
@@ -42,10 +41,11 @@ import org.opendatakit.aggregate.odktables.rest.entity.Error.ErrorType;
 public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesException> {
 
   MediaType type;
-  
+
   ODKTablesExceptionMapper(MediaType type) {
     this.type = type;
   }
+
   @Override
   public Response toResponse(ODKTablesException e) {
     e.printStackTrace();
@@ -56,10 +56,10 @@ public class ODKTablesExceptionMapper implements ExceptionMapper<ODKTablesExcept
     }
     if (e instanceof AppNameMismatchException) {
       return Response.status(Status.PRECONDITION_FAILED)
-        .entity(new Error(ErrorType.APP_NAME_MISMATCH, msg)).type(type)
-        .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Credentials", "true").build();
+          .entity(new Error(ErrorType.APP_NAME_MISMATCH, msg)).type(type)
+          .header(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION)
+          .header("Access-Control-Allow-Origin", "*")
+          .header("Access-Control-Allow-Credentials", "true").build();
     } else if (e instanceof BadColumnNameException) {
       return Response.status(Status.BAD_REQUEST).entity(new Error(ErrorType.BAD_COLUMN_NAME, msg))
           .type(type)

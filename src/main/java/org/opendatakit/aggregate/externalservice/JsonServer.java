@@ -17,14 +17,15 @@
 
 package org.opendatakit.aggregate.externalservice;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
@@ -49,15 +50,9 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class JsonServer extends AbstractExternalService implements ExternalService {
 
@@ -67,14 +62,14 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   private final JsonServer3ParameterTable objectEntity;
 
   private JsonServer(JsonServer3ParameterTable entity, FormServiceCursor formServiceCursor,
-      IForm form, CallingContext cc) {
+                     IForm form, CallingContext cc) {
     super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
 
   private JsonServer(JsonServer3ParameterTable entity, IForm form,
-      ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
+                     ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
       throws ODKDatastoreException {
     this(entity, createFormServiceCursor(form, entity, externalServiceOption,
         ExternalServiceType.JSON_SERVER, cc), form, cc);
@@ -88,7 +83,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
   }
 
   public JsonServer(IForm form, String authKey, String serverURL,
-      ExternalServicePublicationOption externalServiceOption, String ownerEmail, BinaryOption binaryOption, CallingContext cc)
+                    ExternalServicePublicationOption externalServiceOption, String ownerEmail, BinaryOption binaryOption, CallingContext cc)
       throws ODKDatastoreException {
     this(newEntity(JsonServer3ParameterTable.assertRelation(cc), cc), form, externalServiceOption,
         ownerEmail, cc);
@@ -134,7 +129,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       // get response
       int statusCode = resp.getStatusLine().getStatusCode();
       String reason = resp.getStatusLine().getReasonPhrase();
-      if(reason == null) {
+      if (reason == null) {
         reason = BasicConsts.EMPTY_STRING;
       }
       if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {

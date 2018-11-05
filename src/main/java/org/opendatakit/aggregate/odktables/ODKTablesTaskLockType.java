@@ -23,7 +23,6 @@ import org.opendatakit.common.persistence.PersistConsts;
  * There is only one lock for ODK Tables data.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public enum ODKTablesTaskLockType implements ITaskLockType {
   TABLES_NON_PERMISSIONS_CHANGES(66000, PersistConsts.MIN_SETTLE_MILLISECONDS),
@@ -51,5 +50,5 @@ public enum ODKTablesTaskLockType implements ITaskLockType {
   public long getMinSettleTime() {
     return minSettleTime;
   }
-  
+
 }

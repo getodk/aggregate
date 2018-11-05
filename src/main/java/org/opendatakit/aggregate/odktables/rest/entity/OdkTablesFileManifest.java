@@ -16,33 +16,31 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 /**
  * This holds a list of {@link OdkTablesFileManifestEntry}.
  * Proper XML documents can contain only one root node.
  * This wrapping class provides that root node.
- *
+ * <p>
  * Removed all JAXB annotations -- these cause issues on Android 4.2 and earlier.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="manifest")
+@JacksonXmlRootElement(localName = "manifest")
 public class OdkTablesFileManifest {
 
   /**
    * The entries in the manifest.
    * Ordered by filename and md5hash.
    */
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="file")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "file")
   private ArrayList<OdkTablesFileManifestEntry> files;
 
   /**
@@ -58,7 +56,7 @@ public class OdkTablesFileManifest {
    * @param entries
    */
   public OdkTablesFileManifest(ArrayList<OdkTablesFileManifestEntry> files) {
-    if ( files == null ) {
+    if (files == null) {
       this.files = new ArrayList<OdkTablesFileManifestEntry>();
     } else {
       this.files = files;
@@ -85,10 +83,10 @@ public class OdkTablesFileManifest {
 
   @Override
   public boolean equals(Object obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return false;
     }
-    if ( obj == this ) {
+    if (obj == this) {
       return true;
     }
     if (!(obj instanceof OdkTablesFileManifest)) {
@@ -96,17 +94,17 @@ public class OdkTablesFileManifest {
     }
     OdkTablesFileManifest other = (OdkTablesFileManifest) obj;
     boolean simpleResult = (files == null) ? (other.files == null) :
-      ( other.files != null &&  files.size() == other.files.size());
-    if ( !simpleResult ) {
+        (other.files != null && files.size() == other.files.size());
+    if (!simpleResult) {
       return false;
     }
-    if ( files == null ) {
+    if (files == null) {
       return true;
     }
-    
+
     // files are in sorted order -- compare linearly
-    for ( int i = 0 ; i < files.size() ; ++i ) {
-      if ( !files.get(i).equals(other.files.get(i)) ) {
+    for (int i = 0; i < files.size(); ++i) {
+      if (!files.get(i).equals(other.files.get(i))) {
         return false;
       }
     }

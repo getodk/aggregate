@@ -17,35 +17,33 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 
 /**
  * This will just provide a list box of String values. It is modeled after
  * ColumnListBox.
- *
+ * <p>
  * NB: not currently used, b/c can't do updates and whatnot.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableEntryClientListBox extends AggregateListBox {
 
   private final ArrayList<TableEntryClient> tables;
 
   public TableEntryClientListBox(ArrayList<TableEntryClient> tables,
-      boolean multipleValueSelection, String tooltipText) {
+                                 boolean multipleValueSelection, String tooltipText) {
     this(tables, multipleValueSelection, tooltipText, null);
   }
 
   public TableEntryClientListBox(ArrayList<TableEntryClient> tables,
-      boolean multipleValueSelection, String tooltipText,
-      String helpBalloonTxt) {
+                                 boolean multipleValueSelection, String tooltipText,
+                                 String helpBalloonTxt) {
     super(tooltipText, multipleValueSelection, helpBalloonTxt);
     this.tables = tables;
 
     for (TableEntryClient table : tables) {
-        addItem(table.getTableId(), table.getTableId());
+      addItem(table.getTableId(), table.getTableId());
     }
   }
 

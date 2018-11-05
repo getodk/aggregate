@@ -22,9 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * If you use the 'properties' API, please consider switching
  * to the put/get of the properties.csv. It is far more time
  * and space efficient than this interface.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
 
@@ -48,14 +47,14 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
    */
   public PropertyEntryXml() {
   }
-  
+
   /**
    * Construct a KeyValueStore entry for insertion. This can be used
-   * by a remote client to construct an XML request to update the 
+   * by a remote client to construct an XML request to update the
    * properties.csv using a list of properties. It is also used
-   * by the server when constructing the XML response to fetch 
+   * by the server when constructing the XML response to fetch
    * the properties.csv as a list of properties.
-   * 
+   *
    * @param partition
    * @param aspect
    * @param key
@@ -63,7 +62,7 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
    * @param value
    */
   public PropertyEntryXml(String partition, String aspect, String key, String type,
-      String value) {
+                          String value) {
     this.partition = partition;
     this.aspect = aspect;
     this.key = key;
@@ -73,7 +72,7 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
 
   /**
    * Clone a KeyValueStore entry.
-   * 
+   *
    * @param r
    */
   protected PropertyEntryXml(PropertyEntryXml r) {
@@ -88,36 +87,36 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
     return partition;
   }
 
-  public String getAspect() {
-    return aspect;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public String getValue() {
-    return value;
-  }
-
   public void setPartition(final String partition) {
     this.partition = partition;
+  }
+
+  public String getAspect() {
+    return aspect;
   }
 
   public void setAspect(final String aspect) {
     this.aspect = aspect;
   }
 
+  public String getKey() {
+    return key;
+  }
+
   public void setKey(final String key) {
     this.key = key;
   }
 
+  public String getType() {
+    return type;
+  }
+
   public void setType(final String type) {
     this.type = type;
+  }
+
+  public String getValue() {
+    return value;
   }
 
   public void setValue(final String value) {
@@ -180,14 +179,14 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
 
   /**
    * Sort by partition, aspect, key, type and finally value (in order).
-   * 
+   * <p>
    * In practice, it is invalid to have two or more records with
    * matching (partition, aspect, key). We do not enforce this.
    */
   @Override
   public int compareTo(PropertyEntryXml other) {
     int outcome;
-    
+
     // compare partition
     if (this.partition == null && other.partition == null) {
       outcome = 0;
@@ -198,10 +197,10 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
     } else {
       outcome = this.partition.compareTo(other.partition);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare aspect
     if (this.aspect == null && other.aspect == null) {
       outcome = 0;
@@ -212,10 +211,10 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
     } else {
       outcome = this.aspect.compareTo(other.aspect);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare key
     if (this.key == null && other.key == null) {
       outcome = 0;
@@ -226,10 +225,10 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
     } else {
       outcome = this.key.compareTo(other.key);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare type
     if (this.type == null && other.type == null) {
       outcome = 0;
@@ -240,10 +239,10 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
     } else {
       outcome = this.type.compareTo(other.type);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare value
     if (this.value == null && other.value == null) {
       outcome = 0;
@@ -254,10 +253,10 @@ public class PropertyEntryXml implements Comparable<PropertyEntryXml> {
     } else {
       outcome = this.value.compareTo(other.value);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     return 0;
   }
 

@@ -21,18 +21,18 @@ import java.io.Serializable;
 public class MediaFileSummary implements Serializable {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = -6087879867808529452L;
-  
+
   private String filename;
   private String contentType;
   private Long contentLength;
-  
+
   public MediaFileSummary() {
   }
-  
-  public MediaFileSummary( String filename, String contentType, Long contentLength ) {
+
+  public MediaFileSummary(String filename, String contentType, Long contentLength) {
     this.filename = filename;
     this.contentType = contentType;
     this.contentLength = contentLength;

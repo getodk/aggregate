@@ -16,9 +16,8 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
 
 public interface ServerTableServiceAsync {
 
@@ -27,7 +26,7 @@ public interface ServerTableServiceAsync {
   void getTable(String tableId, AsyncCallback<TableEntryClient> callback);
 
   void createTable(String tableId, TableDefinitionClient definition,
-      AsyncCallback<TableEntryClient> callback);
+                   AsyncCallback<TableEntryClient> callback);
 
   void deleteTable(String tableId, AsyncCallback<Void> callback);
 

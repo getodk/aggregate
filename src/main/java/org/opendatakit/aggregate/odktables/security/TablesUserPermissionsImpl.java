@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope;
 import org.opendatakit.aggregate.odktables.rest.entity.Scope.Type;
@@ -43,7 +42,7 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
     this.cc = cc;
   }
 
- 
+
   public TablesUserPermissionsImpl(CallingContext cc) throws ODKDatastoreException,
       PermissionDeniedException, ODKTaskLockException {
     this(cc, cc.getCurrentUser().getUriUser(), cc.getCurrentUser().getAuthorities());
@@ -126,7 +125,7 @@ public class TablesUserPermissionsImpl implements TablesUserPermissions {
 
   @Override
   public boolean hasFilterScope(String appId, String tableId, TablePermission permission,
-      String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException {
+                                String rowId, Scope filterScope) throws ODKEntityNotFoundException, ODKDatastoreException {
     AuthFilter authFilter = getAuthFilter(appId, tableId);
     if (authFilter != null) {
       return authFilter.hasFilterScope(permission, rowId, filterScope);

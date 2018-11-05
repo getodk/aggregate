@@ -16,35 +16,33 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * This holds a list of dataETag (changeSet) values.
  * It also supplies a sequenceValue that can be used
  * to get all dataETag (changeSet) values made after
  * this request.
- * 
+ * <p>
  * Proper XML documents can contain only one root node.
  * This wrapping class provides that root node.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="changeSetList")
+@JacksonXmlRootElement(localName = "changeSetList")
 public class ChangeSetList {
 
   /**
    * The dataETag values.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="changeSet")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "changeSet")
   private ArrayList<String> changeSets;
 
   /**
@@ -75,7 +73,7 @@ public class ChangeSetList {
    * @param entries
    */
   public ChangeSetList(ArrayList<String> changeSets, String dataETag, String sequenceValue) {
-    if ( changeSets == null ) {
+    if (changeSets == null) {
       this.changeSets = new ArrayList<String>();
     } else {
       this.changeSets = changeSets;
@@ -133,17 +131,17 @@ public class ChangeSetList {
     ChangeSetList other = (ChangeSetList) obj;
     boolean simpleResult =
         (dataETag == null ? other.dataETag == null : dataETag.equals(other.dataETag)) &&
-        (sequenceValue == null ? other.sequenceValue == null : sequenceValue.equals(other.sequenceValue)) &&
-        (changeSets == null ? other.changeSets == null : (other.changeSets != null && changeSets.size() == other.changeSets.size())); 
-    
-    if ( !simpleResult ) {
+            (sequenceValue == null ? other.sequenceValue == null : sequenceValue.equals(other.sequenceValue)) &&
+            (changeSets == null ? other.changeSets == null : (other.changeSets != null && changeSets.size() == other.changeSets.size()));
+
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( changeSets == null ) {
+
+    if (changeSets == null) {
       return true;
     }
-    
+
     return changeSets.containsAll(other.changeSets);
   }
 

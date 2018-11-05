@@ -30,7 +30,6 @@ import java.util.ArrayList;
  * is no corresponding client-side TableContents object.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableContentsForFilesClient implements Serializable {
 
@@ -38,15 +37,14 @@ public class TableContentsForFilesClient implements Serializable {
    *
    */
   private static final long serialVersionUID = -564495395828330964L;
-
-  public TableContentsForFilesClient() {
-    // necessary for gwt serialization
-  }
-
   /**
    * The files for the table. The usage determines whether
    * these are table-level or instance files.
    */
   public ArrayList<FileSummaryClient> files;
+
+  public TableContentsForFilesClient() {
+    // necessary for gwt serialization
+  }
 
 }

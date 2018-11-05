@@ -18,9 +18,7 @@ package org.opendatakit.aggregate.odktables.impl.api;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.core.Application;
-
 import org.apache.wink.common.internal.providers.entity.ByteArrayProvider;
 import org.apache.wink.common.internal.providers.entity.FileProvider;
 import org.apache.wink.common.internal.providers.multipart.BufferedInMultiPartProvider;
@@ -34,10 +32,10 @@ public class ODKTablesAPIApplication extends Application {
   @Override
   public Set<Class<?>> getClasses() {
     final java.util.HashSet<java.lang.Class<?>> classes = new HashSet<Class<?>>();
-    
+
     // the root of the REST services hierarchy
     classes.add(OdkTablesImpl.class);
-    
+
     // standard content stream reader/writer
     classes.add(SimpleJSONMessageReaderWriter.class);
     classes.add(SimpleXMLMessageReaderWriter.class);
@@ -46,24 +44,24 @@ public class ODKTablesAPIApplication extends Application {
     classes.add(OutMultiPartProvider.class);
     classes.add(FileProvider.class);
     classes.add(ByteArrayProvider.class);
-    
+
     // exception response generators - 3 flavors of each because MessageContext is not available
     classes.add(ODKDatastoreExceptionJsonMapper.class);
     classes.add(ODKDatastoreExceptionTextXmlMapper.class);
     classes.add(ODKDatastoreExceptionApplicationXmlMapper.class);
-    
+
     classes.add(ODKTablesExceptionJsonMapper.class);
     classes.add(ODKTablesExceptionTextXmlMapper.class);
     classes.add(ODKTablesExceptionApplicationXmlMapper.class);
-    
+
     classes.add(ODKTaskLockExceptionJsonMapper.class);
     classes.add(ODKTaskLockExceptionTextXmlMapper.class);
     classes.add(ODKTaskLockExceptionApplicationXmlMapper.class);
-    
+
     classes.add(IOExceptionJsonMapper.class);
     classes.add(IOExceptionTextXmlMapper.class);
     classes.add(IOExceptionApplicationXmlMapper.class);
-    
+
     classes.add(RuntimeExceptionJsonMapper.class);
     classes.add(RuntimeExceptionTextXmlMapper.class);
     classes.add(RuntimeExceptionApplicationXmlMapper.class);

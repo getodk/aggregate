@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.user.client.ui.Widget;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
-
-import com.google.gwt.user.client.ui.Widget;
 
 public class AdminTabUI extends AggregateTabBase {
 
@@ -39,7 +38,7 @@ public class AdminTabUI extends AggregateTabBase {
     addSubTab(odkTablesAdminTab, SubTabs.TABLES);
 
     // show panel by default, so need to hide it
-    if(!Preferences.getOdkTablesEnabled()) {
+    if (!Preferences.getOdkTablesEnabled()) {
       hideOdkTablesSubTab();
     }
 
@@ -50,13 +49,13 @@ public class AdminTabUI extends AggregateTabBase {
   private void changeVisibilityOdkTablesSubTab(boolean outcome) {
     SubTabInterface odkTablesAdmin = getSubTab(SubTabs.TABLES);
     OdkTablesAdminSubTab subTab = ((OdkTablesAdminSubTab) odkTablesAdmin);
-    if ( subTab != null ) {
+    if (subTab != null) {
       subTab.setVisible(outcome);
     }
     for (int i = 0; i < subTabPosition.size(); i++) {
-      if ( subTabPosition.get(i).equals(SubTabs.TABLES) ) {
+      if (subTabPosition.get(i).equals(SubTabs.TABLES)) {
         Widget w = ((Widget) this.getTabBar().getTab(i));
-        if ( w != null ) {
+        if (w != null) {
           w.setVisible(outcome);
         }
       }

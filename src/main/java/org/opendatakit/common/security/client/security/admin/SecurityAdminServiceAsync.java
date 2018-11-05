@@ -16,19 +16,17 @@
 
 package org.opendatakit.common.security.client.security.admin;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.ArrayList;
-
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 public interface SecurityAdminServiceAsync {
 
-    void getAllUsers(boolean withAuthorities, AsyncCallback<ArrayList<UserSecurityInfo>> callback);
+  void getAllUsers(boolean withAuthorities, AsyncCallback<ArrayList<UserSecurityInfo>> callback);
 
-    void setUsersAndGrantedAuthorities(String xsrfString,
-            ArrayList<UserSecurityInfo> users,
-            ArrayList<GrantedAuthorityName> allGroups,
-            AsyncCallback<Void> callback);
+  void setUsersAndGrantedAuthorities(String xsrfString,
+                                     ArrayList<UserSecurityInfo> users,
+                                     ArrayList<GrantedAuthorityName> allGroups,
+                                     AsyncCallback<Void> callback);
 }

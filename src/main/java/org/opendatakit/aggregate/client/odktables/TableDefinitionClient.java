@@ -27,13 +27,12 @@ import java.util.ArrayList;
  * be created for the server to do non-phone things.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableDefinitionClient implements Serializable {
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -113634509888543150L;
 
   private String tableId;

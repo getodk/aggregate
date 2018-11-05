@@ -16,9 +16,14 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTableFileInfo;
@@ -26,13 +31,6 @@ import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButt
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
 
 /**
  * This class builds the subtab that allows for viewing and managing the files
@@ -44,16 +42,9 @@ import com.google.gwt.user.client.ui.ListBox;
  * does what.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase implements OdkTablesData,
     TablesChangeNotification {
-
-  private OdkTablesTabUI parent;
-
-  // this is the panel with the information and the dropdown box
-  // that tells you to select a table
-  private FlexTable selectTablePanel;
 
   // the string constants for adding a file
   private static final String ADD_FILE_TXT = "Add a table file";
@@ -61,7 +52,12 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   private static final String ADD_FILE_BALLOON_TXT = "Upload a file to be associated with a specific table";
   private static final String ADD_FILE_BUTTON_TXT = "<img src=\"images/yellow_plus.png\" />"
       + ADD_FILE_TXT;
-
+  // array list so that you can access with indices reliably
+  private final ArrayList<TableEntryClient> currentTables;
+  private OdkTablesTabUI parent;
+  // this is the panel with the information and the dropdown box
+  // that tells you to select a table
+  private FlexTable selectTablePanel;
   // this is a button for adding a file to be associated with a table.
   private OdkTablesTableIdServletPopupButton addFileButton;
   /**
@@ -75,11 +71,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
    * This is the int in the list box that is selected.
    */
   private int selectedValue;
-
   private HorizontalPanel topPanel;
-
-  // array list so that you can access with indices reliably
-  private final ArrayList<TableEntryClient> currentTables;
   // the box that shows the data
   private OdkTablesViewTableFileInfo tableFileData;
 
@@ -158,7 +150,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
 
   private boolean updateTableList(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
     boolean realChange = addTablesToListBox(tables, tableListChanged);
-    
+
     if (tables.isEmpty()) {
       tableBox.clear();
       setTabToDislpayZero();
@@ -177,7 +169,7 @@ public class OdkTablesManageTableFilesSubTab extends AggregateSubTabBase impleme
   /*
    * temporarily existed to display deleted rows public Boolean
    * getDisplayDeleted() { return displayDeleted; }
-   * 
+   *
    * public void setDisplayDeleted(Boolean display) { this.displayDeleted =
    * display; }
    */

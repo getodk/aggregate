@@ -16,14 +16,13 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * This holds a list of {@link TableAclResource}.
@@ -31,7 +30,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  * This wrapping class provides that root node.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class TableAclResourceList {
 
@@ -68,8 +66,8 @@ public class TableAclResourceList {
    * The entries in the manifest.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="aclResource")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "aclResource")
   private ArrayList<TableAclResource> orderedAcls;
 
   /**
@@ -85,17 +83,18 @@ public class TableAclResourceList {
    * @param entries
    */
   public TableAclResourceList(ArrayList<TableAclResource> acls,
-      String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
-    if ( acls == null ) {
+                              String refetchCursor, String backCursor, String resumeCursor, boolean hasMore, boolean hasPrior) {
+    if (acls == null) {
       this.orderedAcls = new ArrayList<TableAclResource>();
     } else {
       this.orderedAcls = acls;
-      Collections.sort(orderedAcls, new Comparator<TableAclResource>(){
+      Collections.sort(orderedAcls, new Comparator<TableAclResource>() {
 
         @Override
         public int compare(TableAclResource arg0, TableAclResource arg1) {
           return arg0.compareTo(arg1);
-        }});
+        }
+      });
     }
     this.webSafeRefetchCursor = refetchCursor;
     this.webSafeBackwardCursor = backCursor;
@@ -112,12 +111,13 @@ public class TableAclResourceList {
   @JsonIgnore
   public void setAcls(ArrayList<TableAclResource> acls) {
     this.orderedAcls = acls;
-    Collections.sort(orderedAcls, new Comparator<TableAclResource>(){
+    Collections.sort(orderedAcls, new Comparator<TableAclResource>() {
 
       @Override
       public int compare(TableAclResource arg0, TableAclResource arg1) {
         return arg0.compareTo(arg1);
-      }});
+      }
+    });
   }
 
   public String getWebSafeRefetchCursor() {
@@ -185,25 +185,25 @@ public class TableAclResourceList {
       return false;
     }
     TableAclResourceList other = (TableAclResourceList) obj;
-    boolean simpleResult = (orderedAcls == null ? other.orderedAcls == null : 
-            (other.orderedAcls != null && orderedAcls.size() == other.orderedAcls.size())) &&
-    (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
-    (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
-    (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
-    (hasMoreResults == other.hasMoreResults) &&
-    (hasPriorResults == other.hasPriorResults);
-    
-    if ( !simpleResult ) {
+    boolean simpleResult = (orderedAcls == null ? other.orderedAcls == null :
+        (other.orderedAcls != null && orderedAcls.size() == other.orderedAcls.size())) &&
+        (webSafeRefetchCursor == null ? other.webSafeRefetchCursor == null : (webSafeRefetchCursor.equals(other.webSafeRefetchCursor))) &&
+        (webSafeBackwardCursor == null ? other.webSafeBackwardCursor == null : (webSafeBackwardCursor.equals(other.webSafeBackwardCursor))) &&
+        (webSafeResumeCursor == null ? other.webSafeResumeCursor == null : (webSafeResumeCursor.equals(other.webSafeResumeCursor))) &&
+        (hasMoreResults == other.hasMoreResults) &&
+        (hasPriorResults == other.hasPriorResults);
+
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( orderedAcls == null ) {
+
+    if (orderedAcls == null) {
       return true;
     }
-    
+
     // acls are ordered... compare in order
-    for ( int i = 0 ; i < orderedAcls.size(); ++i ) {
-      if ( ! orderedAcls.get(i).equals(other.orderedAcls.get(i)) ) {
+    for (int i = 0; i < orderedAcls.size(); ++i) {
+      if (!orderedAcls.get(i).equals(other.orderedAcls.get(i))) {
         return false;
       }
     }

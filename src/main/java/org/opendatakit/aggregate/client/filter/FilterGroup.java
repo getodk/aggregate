@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.persistence.client.UIQueryResumePoint;
 
@@ -50,7 +49,7 @@ public final class FilterGroup implements Serializable {
     this.includeMetadata = false;
     this.queryFetchLimit = DEFAULT_FETCH_LIMIT;
 
-    if(filtersToApply == null) {
+    if (filtersToApply == null) {
       this.filters = new ArrayList<Filter>();
     } else {
       this.filters = filtersToApply;
@@ -76,7 +75,7 @@ public final class FilterGroup implements Serializable {
    */
   public void resetUriToDefault() {
     this.uri = UIConsts.URI_DEFAULT;
-    for(Filter filter : filters) {
+    for (Filter filter : filters) {
       filter.resetUriToDefault();
     }
   }
@@ -85,16 +84,16 @@ public final class FilterGroup implements Serializable {
     return name;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
   public String getFormId() {
     return formId;
   }
 
   public void setFormId(String formId) {
     this.formId = formId;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public Boolean getIncludeMetadata() {
@@ -120,8 +119,7 @@ public final class FilterGroup implements Serializable {
   /**
    * This should add the filter to the group
    *
-   * @param filter
-   *          the filter to be added
+   * @param filter the filter to be added
    */
   public void addFilter(Filter filter) {
     filters.add(filter);
@@ -130,11 +128,10 @@ public final class FilterGroup implements Serializable {
   /**
    * This should remove the filter from the group
    *
-   * @param filter
-   *          the filter to be removed
+   * @param filter the filter to be removed
    */
   public void removeFilter(Filter filter) {
-      filters.remove(filter);
+    filters.remove(filter);
   }
 
   public int getQueryFetchLimit() {

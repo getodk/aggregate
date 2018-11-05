@@ -16,11 +16,9 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
-import java.util.ArrayList;
-
-import org.opendatakit.common.security.client.UserSecurityInfo;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
+import org.opendatakit.common.security.client.UserSecurityInfo;
 
 public interface OdkTablesAdminServiceAsync {
 

@@ -16,10 +16,8 @@
 
 package org.opendatakit.aggregate.server;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
@@ -31,8 +29,8 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PreferenceServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.preferences.PreferenceService {

@@ -16,15 +16,14 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.popups.HelpBalloon;
-import org.opendatakit.common.web.constants.BasicConsts;
-
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.Widget;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.popups.HelpBalloon;
+import org.opendatakit.common.web.constants.BasicConsts;
 
 public final class AggregateBaseHandlers implements MouseOverHandler, MouseOutHandler {
 
@@ -37,7 +36,7 @@ public final class AggregateBaseHandlers implements MouseOverHandler, MouseOutHa
     this.tooltipText = tooltipTxt;
 
     // setup help system
-    if(helpBalloonTxt == null) {
+    if (helpBalloonTxt == null) {
       this.helpBalloon = null;
     } else {
       this.helpBalloon = new HelpBalloon(widget, helpBalloonTxt);
@@ -54,11 +53,11 @@ public final class AggregateBaseHandlers implements MouseOverHandler, MouseOutHa
   }
 
   public void onMouseOver(MouseOverEvent event) {
-    if(!AggregateUI.getUI().displayingHelpBalloons()) {
+    if (!AggregateUI.getUI().displayingHelpBalloons()) {
       return;
     }
 
-    if(helpBalloon != null) {
+    if (helpBalloon != null) {
       // hide the tool tip
       widget.setTitle(BasicConsts.EMPTY_STRING);
 
@@ -68,7 +67,7 @@ public final class AggregateBaseHandlers implements MouseOverHandler, MouseOutHa
   }
 
   public void onMouseOut(MouseOutEvent event) {
-    if(helpBalloon != null) {
+    if (helpBalloon != null) {
       // restore the tool tip
       widget.setTitle(tooltipText);
 

@@ -23,8 +23,8 @@ public class InconsistentStateException extends ODKTablesException implements Se
   // private static final long serialVersionUID = 1L;
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -6853618331957236931L;
 
   public InconsistentStateException() {

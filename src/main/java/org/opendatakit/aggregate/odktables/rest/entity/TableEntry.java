@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author dylan price?
  * @author sudar.sam@gmail.com
- *
  */
 public class TableEntry implements Comparable<TableEntry> {
 
@@ -115,33 +114,33 @@ public class TableEntry implements Comparable<TableEntry> {
 
   @Override
   public int compareTo(TableEntry o) {
-    if ( tableId == null ) {
-      if ( o.tableId != null ) {
+    if (tableId == null) {
+      if (o.tableId != null) {
         return -1;
       }
-    } else if ( o.tableId == null ) {
+    } else if (o.tableId == null) {
       return 1;
     }
     int cmp = tableId.compareTo(o.tableId);
-    if ( cmp != 0 ) {
+    if (cmp != 0) {
       return cmp;
     }
-    
+
     // schemaETags never collide unless everything 
     // is identical...
-    
-    if ( schemaETag == null ) {
-      if ( o.schemaETag != null ) {
+
+    if (schemaETag == null) {
+      if (o.schemaETag != null) {
         return -1;
       }
-    } else if ( o.schemaETag == null ) {
+    } else if (o.schemaETag == null) {
       return 1;
     }
     cmp = schemaETag.compareTo(o.schemaETag);
-    if ( cmp != 0 ) {
+    if (cmp != 0) {
       return cmp;
     }
-    
+
     return 0;
   }
 }

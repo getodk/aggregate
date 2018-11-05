@@ -26,7 +26,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 import org.opendatakit.aggregate.odktables.rest.entity.TableAcl;
@@ -35,12 +34,11 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableAclResourceList;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 
 public interface TableAclService {
-  
+
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
 
   /**
-   *
    * @return {@link TableAclResourceList}
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -50,7 +48,6 @@ public interface TableAclService {
   public Response /*TableAclResourceList*/ getAcls(@QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit) throws ODKDatastoreException, PermissionDeniedException;
 
   /**
-   *
    * @return {@link TableAclResourceList}
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -62,7 +59,6 @@ public interface TableAclService {
       PermissionDeniedException;
 
   /**
-   *
    * @return {@link TableAclResourceList}
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -74,7 +70,6 @@ public interface TableAclService {
       PermissionDeniedException;
 
   /**
-   *
    * @return {@link TableAclResource}
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -85,7 +80,6 @@ public interface TableAclService {
   public Response /*TableAclResource*/ getDefaultAcl() throws ODKDatastoreException, PermissionDeniedException;
 
   /**
-   *
    * @param userId
    * @return {@link TableAclResource}
    * @throws ODKDatastoreException
@@ -98,7 +92,6 @@ public interface TableAclService {
       throws ODKDatastoreException, PermissionDeniedException;
 
   /**
-   *
    * @param groupId
    * @return {@link TableAclResource}
    * @throws ODKDatastoreException
@@ -111,7 +104,6 @@ public interface TableAclService {
       throws ODKDatastoreException, PermissionDeniedException;
 
   /**
-   *
    * @param acl
    * @return {@link TableAclResource}
    * @throws ODKDatastoreException
@@ -125,7 +117,6 @@ public interface TableAclService {
       PermissionDeniedException;
 
   /**
-   *
    * @param userId
    * @param acl
    * @return {@link TableAclResource}
@@ -140,7 +131,6 @@ public interface TableAclService {
       throws ODKDatastoreException, PermissionDeniedException;
 
   /**
-   *
    * @param groupId
    * @param acl
    * @return {@link TableAclResource}
@@ -155,7 +145,6 @@ public interface TableAclService {
       throws ODKDatastoreException, PermissionDeniedException;
 
   /**
-   *
    * @return HttpStatus.OK
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
@@ -165,7 +154,6 @@ public interface TableAclService {
   public Response /*void*/ deleteDefaultAcl() throws ODKDatastoreException, PermissionDeniedException;
 
   /**
-   *
    * @param userId
    * @return HttpStatus.OK
    * @throws ODKDatastoreException
@@ -177,7 +165,6 @@ public interface TableAclService {
       PermissionDeniedException;
 
   /**
-   *
    * @param groupId
    * @return HttpStatus.OK
    * @throws ODKDatastoreException

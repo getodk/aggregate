@@ -16,13 +16,12 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Describes a user who can manipulate odkTables appName content.
@@ -30,9 +29,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  * but may be able to verify identity and operate on the device.
  *
  * @author mitchellsundt@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="userInfo")
+@JacksonXmlRootElement(localName = "userInfo")
 public class UserInfo {
 
   /**
@@ -52,8 +50,8 @@ public class UserInfo {
    * Sorted.
    */
   @JsonProperty(required = true)
-  @JacksonXmlElementWrapper(useWrapping=false)
-  @JacksonXmlProperty(localName="roles")
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JacksonXmlProperty(localName = "roles")
   private ArrayList<String> roles;
 
   /**
@@ -80,7 +78,7 @@ public class UserInfo {
       Collections.sort(this.roles);
     }
   }
-  
+
   public ArrayList<String> getRoles() {
     return roles;
   }
@@ -129,21 +127,21 @@ public class UserInfo {
     }
     UserInfo other = (UserInfo) obj;
     boolean simpleResult = ((roles == null) ? (other.roles == null) :
-              ((other.roles != null) && (roles.size() == other.roles.size()))) &&
-      (user_id == null ? other.user_id == null : (user_id.equals(other.user_id))) &&
-      (full_name == null ? other.full_name == null : (full_name.equals(other.full_name)));
-    
-    if ( !simpleResult ) {
+        ((other.roles != null) && (roles.size() == other.roles.size()))) &&
+        (user_id == null ? other.user_id == null : (user_id.equals(other.user_id))) &&
+        (full_name == null ? other.full_name == null : (full_name.equals(other.full_name)));
+
+    if (!simpleResult) {
       return false;
     }
-    
-    if ( roles == null ) {
+
+    if (roles == null) {
       return true;
     }
-    
+
     // roles is a sorted list. Compare linearly...
-    for ( int i = 0 ; i < roles.size() ; ++i ) {
-      if ( !roles.get(i).equals(other.roles.get(i)) ) {
+    for (int i = 0; i < roles.size(); ++i) {
+      if (!roles.get(i).equals(other.roles.get(i))) {
         return false;
       }
     }

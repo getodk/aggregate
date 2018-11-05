@@ -21,42 +21,41 @@ import com.google.gwt.user.cellview.client.Column;
 
 /**
  * Button that can be enabled or disabled.
- * 
- * @author mitchellsundt@gmail.com
  *
  * @param <T>
+ * @author mitchellsundt@gmail.com
  */
 public class UIEnabledActionColumn<T> extends Column<T, T> {
-    public UIEnabledActionColumn(String label, UIVisiblePredicate<T> isVisiblePredicate,
-        UIEnabledActionCell.Delegate<T> action) {
-        this(label, isVisiblePredicate, null, action);
-    }
+  public UIEnabledActionColumn(String label, UIVisiblePredicate<T> isVisiblePredicate,
+                               UIEnabledActionCell.Delegate<T> action) {
+    this(label, isVisiblePredicate, null, action);
+  }
 
-    public UIEnabledActionColumn(String label, UIEnabledPredicate<T> isEnabledPredicate,
-        UIEnabledActionCell.Delegate<T> action) {
-        this(label, null, isEnabledPredicate, action);
-    }
+  public UIEnabledActionColumn(String label, UIEnabledPredicate<T> isEnabledPredicate,
+                               UIEnabledActionCell.Delegate<T> action) {
+    this(label, null, isEnabledPredicate, action);
+  }
 
-    public UIEnabledActionColumn(String label, 
-            UIVisiblePredicate<T> isVisiblePredicate,
-            UIEnabledPredicate<T> isEnabledPredicate,
-            UIEnabledActionCell.Delegate<T> action) {
-        super(new UIEnabledActionCell<T>(label, 
-                    isVisiblePredicate, isEnabledPredicate,
-                    action));
-    }
+  public UIEnabledActionColumn(String label,
+                               UIVisiblePredicate<T> isVisiblePredicate,
+                               UIEnabledPredicate<T> isEnabledPredicate,
+                               UIEnabledActionCell.Delegate<T> action) {
+    super(new UIEnabledActionCell<T>(label,
+        isVisiblePredicate, isEnabledPredicate,
+        action));
+  }
 
-    public UIEnabledActionColumn(SafeHtml html, 
-            UIVisiblePredicate<T> isVisiblePredicate,
-            UIEnabledPredicate<T> isEnabledPredicate,
-            UIEnabledActionCell.Delegate<T> action) {
-        super(new UIEnabledActionCell<T>(html, 
-                    isVisiblePredicate, isEnabledPredicate,
-                    action));
-    }
+  public UIEnabledActionColumn(SafeHtml html,
+                               UIVisiblePredicate<T> isVisiblePredicate,
+                               UIEnabledPredicate<T> isEnabledPredicate,
+                               UIEnabledActionCell.Delegate<T> action) {
+    super(new UIEnabledActionCell<T>(html,
+        isVisiblePredicate, isEnabledPredicate,
+        action));
+  }
 
-    @Override
-    public T getValue(T object) {
-        return object;
-    }
+  @Override
+  public T getValue(T object) {
+    return object;
+  }
 }

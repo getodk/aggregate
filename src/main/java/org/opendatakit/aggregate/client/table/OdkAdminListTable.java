@@ -17,11 +17,10 @@
 package org.opendatakit.aggregate.client.table;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
-import org.opendatakit.aggregate.client.widgets.TablesAdminDeleteButton;
-
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import org.opendatakit.aggregate.client.preferences.OdkTablesAdmin;
+import org.opendatakit.aggregate.client.widgets.TablesAdminDeleteButton;
 
 public class OdkAdminListTable extends FlexTable {
 

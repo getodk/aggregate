@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2012 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,11 +16,9 @@
 package org.opendatakit.common.security.spring;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -34,9 +32,8 @@ import org.springframework.util.StringUtils;
  * Copied from Spring Security SavedRequestAwareAuthenticationSuccessHandler
  * Prefers using the redirect target URL (coming in as a query string parameter)
  * over the saved request URL.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class TargetUrlRequestAwareAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -45,33 +42,33 @@ public class TargetUrlRequestAwareAuthenticationSuccessHandler extends SimpleUrl
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-          Authentication authentication) throws ServletException, IOException {
-      SavedRequest savedRequest = requestCache.getRequest(request, response);
+                                      Authentication authentication) throws ServletException, IOException {
+    SavedRequest savedRequest = requestCache.getRequest(request, response);
 
-      String targetUrlParameter = getTargetUrlParameter();
-      if (isAlwaysUseDefaultTargetUrl() || (targetUrlParameter != null && StringUtils.hasText(request.getParameter(targetUrlParameter)))) {
-          requestCache.removeRequest(request, response);
-          super.onAuthenticationSuccess(request, response, authentication);
+    String targetUrlParameter = getTargetUrlParameter();
+    if (isAlwaysUseDefaultTargetUrl() || (targetUrlParameter != null && StringUtils.hasText(request.getParameter(targetUrlParameter)))) {
+      requestCache.removeRequest(request, response);
+      super.onAuthenticationSuccess(request, response, authentication);
 
-          return;
-      }
+      return;
+    }
 
-      // fall back to SimpleUrl actions only if no targetUrlParameter
-      if (savedRequest == null) {
-          super.onAuthenticationSuccess(request, response, authentication);
+    // fall back to SimpleUrl actions only if no targetUrlParameter
+    if (savedRequest == null) {
+      super.onAuthenticationSuccess(request, response, authentication);
 
-          return;
-      }
+      return;
+    }
 
-      clearAuthenticationAttributes(request);
+    clearAuthenticationAttributes(request);
 
-      // Use the DefaultSavedRequest URL
-      String targetUrl = savedRequest.getRedirectUrl();
-      logger.debug("Redirecting to DefaultSavedRequest Url: " + targetUrl);
-      getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    // Use the DefaultSavedRequest URL
+    String targetUrl = savedRequest.getRedirectUrl();
+    logger.debug("Redirecting to DefaultSavedRequest Url: " + targetUrl);
+    getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 
   public void setRequestCache(RequestCache requestCache) {
-      this.requestCache = requestCache;
+    this.requestCache = requestCache;
   }
 }

@@ -26,7 +26,6 @@ import java.io.Serializable;
  * class has to be created on the server.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class TableResourceClient extends TableEntryClient implements Serializable {
   /**
@@ -53,44 +52,44 @@ public class TableResourceClient extends TableEntryClient implements Serializabl
     return this.selfUri;
   }
 
-  public String getDefinitionUri() {
-    return this.definitionUri;
-  }
-
-  public String getDataUri() {
-    return this.dataUri;
-  }
-
-  public String getInstanceFilesUri() {
-    return this.instanceFilesUri;
-  }
-
-  public String getDiffUri() {
-    return this.diffUri;
-  }
-
-  public String getAclUri() {
-    return this.aclUri;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
+  }
+
+  public String getDefinitionUri() {
+    return this.definitionUri;
   }
 
   public void setDefinitionUri(final String definitionUri) {
     this.definitionUri = definitionUri;
   }
 
+  public String getDataUri() {
+    return this.dataUri;
+  }
+
   public void setDataUri(final String dataUri) {
     this.dataUri = dataUri;
+  }
+
+  public String getInstanceFilesUri() {
+    return this.instanceFilesUri;
   }
 
   public void setInstanceFilesUri(final String instanceFilesUri) {
     this.instanceFilesUri = instanceFilesUri;
   }
 
+  public String getDiffUri() {
+    return this.diffUri;
+  }
+
   public void setDiffUri(final String diffUri) {
     this.diffUri = diffUri;
+  }
+
+  public String getAclUri() {
+    return this.aclUri;
   }
 
   public void setAclUri(final String aclUri) {

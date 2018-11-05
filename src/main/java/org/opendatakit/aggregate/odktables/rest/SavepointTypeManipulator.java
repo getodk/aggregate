@@ -22,7 +22,6 @@ package org.opendatakit.aggregate.odktables.rest;
  * enums are difficult to extend.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class SavepointTypeManipulator {
   // values are limited to 10 characters or less!

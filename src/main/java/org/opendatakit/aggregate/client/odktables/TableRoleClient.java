@@ -25,7 +25,6 @@ import java.util.ArrayList;
  * The idea is that it will serve the same function as the server-side code.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public enum TableRoleClient implements Serializable {
   NONE("No permissions. Can not see that the table exists."),
@@ -82,7 +81,6 @@ public enum TableRoleClient implements Serializable {
   }
 
   /**
-   *
    * @param permission
    * @return true if this role has the given permission
    */

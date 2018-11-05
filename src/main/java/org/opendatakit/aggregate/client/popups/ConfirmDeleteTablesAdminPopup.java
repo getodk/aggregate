@@ -16,17 +16,16 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.widgets.AggregateButton;
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.SecureGWT;
+import org.opendatakit.aggregate.client.widgets.AggregateButton;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 public class ConfirmDeleteTablesAdminPopup extends AbstractPopupBase {
 

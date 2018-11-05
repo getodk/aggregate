@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.format.table;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
@@ -31,21 +30,19 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public abstract class TableFormatterBase implements SubmissionFormatter {
 
+  protected final IForm form;
+  protected final PrintWriter output;
   protected ElementFormatter elemFormatter;
   protected HeaderFormatter headerFormatter;
   protected List<FormElementModel> propertyNames;
-  protected final IForm form;
-  protected final PrintWriter output;
 
   public TableFormatterBase(IForm xform, PrintWriter printWriter,
-      List<FormElementModel> selectedColumnNames) {
+                            List<FormElementModel> selectedColumnNames) {
     form = xform;
     output = printWriter;
     propertyNames = selectedColumnNames;
@@ -69,21 +66,21 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
       throws ODKDatastoreException {
     processSubmissionSetSegment(submissions, form.getTopLevelGroupElement(), cc);
   }
-  
+
   @Override
   public final void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
     afterProcessSubmissionSet(form.getTopLevelGroupElement(), cc);
   }
 
   protected abstract void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
-  
+
   protected abstract void processSubmissionSetSegment(Collection<? extends SubmissionSet> submissions,
-          FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
-  
+                                                      FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
+
   protected abstract void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
-   
+
   public final void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
-        FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
+                                         FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
     beforeProcessSubmissionSet(rootGroup, cc);
     processSubmissionSetSegment(submissions, rootGroup, cc);
     afterProcessSubmissionSet(rootGroup, cc);

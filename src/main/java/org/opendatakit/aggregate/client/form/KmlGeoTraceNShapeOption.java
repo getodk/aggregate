@@ -25,42 +25,39 @@ public final class KmlGeoTraceNShapeOption implements Serializable {
    * Serialization Version Identifier
    */
   private static final long serialVersionUID = -682412346245691227L;
-
-  public enum GeoTraceNShapeType {
-    GEOTRACE,
-    GEOSHAPE;
-  }
-  
   private GeoTraceNShapeType type;
   private KmlOptionSetting geoElement;
   private ArrayList<KmlOptionSetting> nameNodes = new ArrayList<KmlOptionSetting>();
-
   // default constructor required
   public KmlGeoTraceNShapeOption() {
-    
+
   }
-  
-  
+
   public KmlGeoTraceNShapeOption(GeoTraceNShapeType type, String displayName, String elementKey) {
     this.type = type;
     this.geoElement = new KmlOptionSetting(displayName, elementKey);
   }
-  
+
   public KmlOptionSetting getGeoElement() {
     return geoElement;
   }
-  
+
   public void addNameNode(String displayName, String elementKey) {
     KmlOptionSetting node = new KmlOptionSetting(displayName, elementKey);
     nameNodes.add(node);
   }
-  
+
   public ArrayList<KmlOptionSetting> getNameNodes() {
     return nameNodes;
   }
 
   public GeoTraceNShapeType getType() {
     return type;
+  }
+
+  public enum GeoTraceNShapeType {
+    GEOTRACE,
+    GEOSHAPE;
   }
 
 }

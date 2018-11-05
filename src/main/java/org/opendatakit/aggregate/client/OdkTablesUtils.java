@@ -20,8 +20,8 @@ package org.opendatakit.aggregate.client;
 /**
  * This houses methods that are commonly used by ODKTables, making it
  * easy to update them.
- * @author sudars
  *
+ * @author sudars
  */
 public class OdkTablesUtils {
 

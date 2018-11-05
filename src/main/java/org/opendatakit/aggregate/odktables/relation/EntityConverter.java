@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableAcl.DbTableAclEntity;
 import org.opendatakit.aggregate.odktables.relation.DbTableDefinitions.DbTableDefinitionsEntity;
@@ -45,10 +44,57 @@ import org.opendatakit.common.persistence.DataField.DataType;
  *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
- *
  */
 
 public class EntityConverter {
+
+  public static RowFilterScope getDbLogTableRowFilterScope(Entity entity) {
+    RowFilterScope.Access defaultAccess = RowFilterScope.Access.FULL;
+
+    String access = entity.getString(DbLogTable.DEFAULT_ACCESS);
+
+    if (access != null) {
+      defaultAccess = RowFilterScope.Access.valueOf(access);
+    }
+
+    String rowOwner = entity.getString(DbLogTable.ROW_OWNER);
+    String groupReadOnly = entity.getString(DbLogTable.GROUP_READ_ONLY);
+    String groupModify = entity.getString(DbLogTable.GROUP_MODIFY);
+    String groupPrivileged = entity.getString(DbLogTable.GROUP_PRIVILEGED);
+
+    return new RowFilterScope(defaultAccess, rowOwner, groupReadOnly, groupModify, groupPrivileged);
+  }
+
+  public static RowFilterScope getDbTableRowFilterScope(Entity entity) {
+    RowFilterScope.Access defaultAccess = RowFilterScope.Access.FULL;
+
+    String access = entity.getString(DbTable.DEFAULT_ACCESS);
+    if (access != null) {
+      defaultAccess = RowFilterScope.Access.valueOf(access);
+    }
+
+    String rowOwner = entity.getString(DbTable.ROW_OWNER);
+    String groupReadOnly = entity.getString(DbTable.GROUP_READ_ONLY);
+    String groupModify = entity.getString(DbTable.GROUP_MODIFY);
+    String groupPrivileged = entity.getString(DbTable.GROUP_PRIVILEGED);
+
+    return new RowFilterScope(defaultAccess, rowOwner, groupReadOnly, groupModify, groupPrivileged);
+  }
+
+  public static Scope getDbTableFileInfoFilterScope(DbTableFileInfoEntity entity) {
+    String filterType = entity.getStringField(DbTableFileInfo.FILTER_TYPE);
+    if (filterType != null) {
+      Scope.Type type = Scope.Type.valueOf(filterType);
+      if (filterType.equals(Scope.Type.DEFAULT)) {
+        return new Scope(Scope.Type.DEFAULT, null);
+      } else {
+        String value = entity.getStringField(DbTableFileInfo.FILTER_VALUE);
+        return new Scope(type, value);
+      }
+    } else {
+      return Scope.EMPTY_SCOPE;
+    }
+  }
 
   /**
    * Convert a {@link DbTableEntry} entity to a {@link TableEntry}
@@ -65,8 +111,7 @@ public class EntityConverter {
    * Convert a list of {@link DbTableEntry} entities to a list of
    * {@link TableEntry}
    *
-   * @param entities
-   *          the entities to convert
+   * @param entities the entities to convert
    */
   public List<TableEntry> toTableEntries(List<DbTableEntryEntity> entities) {
     ArrayList<TableEntry> entries = new ArrayList<TableEntry>();
@@ -113,7 +158,7 @@ public class EntityConverter {
    * @return
    */
   public TableDefinition toTableDefinition(TableEntry entryEntity,
-      DbTableDefinitionsEntity schemaEntity) {
+                                           DbTableDefinitionsEntity schemaEntity) {
     String tableId = schemaEntity.getTableId();
     String schemaETag = schemaEntity.getSchemaETag();
     TableDefinition td = new TableDefinition(tableId, schemaETag, null);
@@ -170,21 +215,21 @@ public class EntityConverter {
           "Attempt to get DataField for a non-persisted elementKey (" + entity.getElementKey()
               + ")");
     }
-    ElementType type = ElementType.parseElementType(entity.getElementType(), 
-                                                    !entity.getArrayListChildElementKeys().isEmpty());
+    ElementType type = ElementType.parseElementType(entity.getElementType(),
+        !entity.getArrayListChildElementKeys().isEmpty());
     ElementDataType dataType = type.getDataType();
-    if ( dataType == ElementDataType.bool ) {
+    if (dataType == ElementDataType.bool) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.BOOLEAN, true);
-    } else if ( dataType == ElementDataType.integer ) {
+    } else if (dataType == ElementDataType.integer) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.INTEGER, true);
-    } else if ( dataType == ElementDataType.number ) {
+    } else if (dataType == ElementDataType.number) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.DECIMAL, true);
-    } else if ( type.getAuxInfo() == null || type.getAuxInfo().trim().length() == 0 ) {
+    } else if (type.getAuxInfo() == null || type.getAuxInfo().trim().length() == 0) {
       return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true);
     } else {
       // string length explicitly specified for this field...
       String parenLen = type.getAuxInfo().trim();
-      String rawLen = parenLen.substring(1, parenLen.length()-1);
+      String rawLen = parenLen.substring(1, parenLen.length() - 1);
       long len = Long.valueOf(rawLen);
       return new DataField(entity.getElementKey().toUpperCase(), DataType.STRING, true, len);
     }
@@ -203,63 +248,13 @@ public class EntityConverter {
     return fields;
   }
 
-  public static RowFilterScope getDbLogTableRowFilterScope(Entity entity) {
-    RowFilterScope.Access defaultAccess = RowFilterScope.Access.FULL;
-    
-    String access = entity.getString(DbLogTable.DEFAULT_ACCESS);
-    
-    if (access != null) {
-      defaultAccess = RowFilterScope.Access.valueOf(access);
-    }
-    
-    String rowOwner = entity.getString(DbLogTable.ROW_OWNER);
-    String groupReadOnly = entity.getString(DbLogTable.GROUP_READ_ONLY);
-    String groupModify = entity.getString(DbLogTable.GROUP_MODIFY);
-    String groupPrivileged = entity.getString(DbLogTable.GROUP_PRIVILEGED);
-      
-    return new RowFilterScope(defaultAccess, rowOwner, groupReadOnly, groupModify, groupPrivileged);
-  }
-
-  public static RowFilterScope getDbTableRowFilterScope(Entity entity) {
-    RowFilterScope.Access defaultAccess = RowFilterScope.Access.FULL;
-    
-    String access = entity.getString(DbTable.DEFAULT_ACCESS);
-    if (access != null) {
-      defaultAccess = RowFilterScope.Access.valueOf(access);
-    }
-    
-    String rowOwner = entity.getString(DbTable.ROW_OWNER);
-    String groupReadOnly = entity.getString(DbTable.GROUP_READ_ONLY);
-    String groupModify = entity.getString(DbTable.GROUP_MODIFY);
-    String groupPrivileged = entity.getString(DbTable.GROUP_PRIVILEGED);
-        
-    return new RowFilterScope(defaultAccess, rowOwner, groupReadOnly, groupModify, groupPrivileged);
-  }
-
-  public static Scope getDbTableFileInfoFilterScope(DbTableFileInfoEntity entity) {
-    String filterType = entity.getStringField(DbTableFileInfo.FILTER_TYPE);
-    if (filterType != null) {
-      Scope.Type type = Scope.Type.valueOf(filterType);
-      if (filterType.equals(Scope.Type.DEFAULT)) {
-        return new Scope(Scope.Type.DEFAULT, null);
-      } else {
-        String value = entity.getStringField(DbTableFileInfo.FILTER_VALUE);
-        return new Scope(type, value);
-      }
-    } else {
-      return Scope.EMPTY_SCOPE;
-    }
-  }
-
   /**
    * Convert a {@link DbTable} entity into a {@link Row}. The returned row will
    * have the {@link DbTable} metadata columns such as _savepoint_timestamp and
    * row_version set.
    *
-   * @param entity
-   *          the {@link DbTable} entity.
-   * @param columns
-   *          the {@link DbColumnDefinitions} entities of the table
+   * @param entity  the {@link DbTable} entity.
+   * @param columns the {@link DbColumnDefinitions} entities of the table
    * @return the row
    */
   public Row toRow(Entity entity, List<DbColumnDefinitionsEntity> columns) {
@@ -285,10 +280,8 @@ public class EntityConverter {
   /**
    * Convert a {@link DbLogTable} entity into a {@link Row}
    *
-   * @param entity
-   *          the {@link DbLogTable} entity.
-   * @param columns
-   *          the {@link DbColumnDefinitions} entities of the table
+   * @param entity  the {@link DbLogTable} entity.
+   * @param columns the {@link DbColumnDefinitions} entities of the table
    * @return the row
    */
   public Row toRowFromLogTable(Entity entity, List<DbColumnDefinitionsEntity> columns) {
@@ -327,16 +320,13 @@ public class EntityConverter {
    * Convert a list of {@link DbTable} or {@link DbLogTable} entities into a
    * list of {@link Row}
    *
-   * @param entities
-   *          the {@link DbTable} or {@link DbLogTable} entities
-   * @param columns
-   *          the {@link DbColumnDefinitions} of the table
-   * @param fromLogTable
-   *          true if the rows are from the {@link DbLogTable}
+   * @param entities     the {@link DbTable} or {@link DbLogTable} entities
+   * @param columns      the {@link DbColumnDefinitions} of the table
+   * @param fromLogTable true if the rows are from the {@link DbLogTable}
    * @return the converted rows
    */
   public List<Row> toRows(List<Entity> entities, List<DbColumnDefinitionsEntity> columns,
-      boolean fromLogTable) {
+                          boolean fromLogTable) {
     ArrayList<Row> rows = new ArrayList<Row>();
     for (Entity entity : entities) {
       if (fromLogTable)

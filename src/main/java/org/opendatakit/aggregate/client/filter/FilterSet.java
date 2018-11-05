@@ -21,37 +21,40 @@ import java.util.ArrayList;
 
 public final class FilterSet implements Serializable {
 
-    private static final long serialVersionUID = -7646690488192856868L;
-    private ArrayList<FilterGroup> groups = new ArrayList<FilterGroup>();
-    private String formId;
-    
-    public FilterSet() {}
+  private static final long serialVersionUID = -7646690488192856868L;
+  private ArrayList<FilterGroup> groups = new ArrayList<FilterGroup>();
+  private String formId;
 
-    public FilterSet(String formId) {
-      this.formId = formId;
-    }
-    
-    public ArrayList<FilterGroup> getGroups() {
-        return groups;
-    }
-    
-    /**
-     * This should add a new filter group to the database
-     * @param group the new group
-     */
-    public void addFilterGroup(FilterGroup group) {
-        groups.add(group);
-    }
-    
-    /**
-     * This should remove the filter group altogether
-     * @param group the group to be removed
-     */
-    public void removeFilterGroup(FilterGroup group) {
-        groups.remove(group);
-    }
+  public FilterSet() {
+  }
+
+  public FilterSet(String formId) {
+    this.formId = formId;
+  }
+
+  public ArrayList<FilterGroup> getGroups() {
+    return groups;
+  }
+
+  /**
+   * This should add a new filter group to the database
+   *
+   * @param group the new group
+   */
+  public void addFilterGroup(FilterGroup group) {
+    groups.add(group);
+  }
+
+  /**
+   * This should remove the filter group altogether
+   *
+   * @param group the group to be removed
+   */
+  public void removeFilterGroup(FilterGroup group) {
+    groups.remove(group);
+  }
 
   public String getFormId() {
     return formId;
-  } 
+  }
 }

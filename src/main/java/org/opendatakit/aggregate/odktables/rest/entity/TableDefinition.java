@@ -16,15 +16,14 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Represents the XML format of a table definition. This is essentially all the
@@ -33,9 +32,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  *
  * @author dylan price?
  * @author sudar.sam@gmail.com
- *
  */
-@JacksonXmlRootElement(localName="tableDefinition")
+@JacksonXmlRootElement(localName = "tableDefinition")
 public class TableDefinition {
 
   /**
@@ -53,8 +51,8 @@ public class TableDefinition {
    * The columns in the table.
    */
   @JsonProperty(required = false)
-  @JacksonXmlElementWrapper(localName="orderedColumns")
-  @JacksonXmlProperty(localName="column")
+  @JacksonXmlElementWrapper(localName = "orderedColumns")
+  @JacksonXmlProperty(localName = "column")
   private ArrayList<Column> orderedColumns;
 
   protected TableDefinition() {
@@ -63,35 +61,30 @@ public class TableDefinition {
   /**
    * Construct the table definition
    *
-   * @param tableId
-   *          id of the table
-   * @param schemaETag
-   *          schemaETag of the table
-   * @param columns
-   *          list of {@link Column} objects
-   * @param displayName
-   *          the displayName of the table (JSON.parse() to get viewable name)
-   * @param type
-   *          the string type of the table (must be one of (keep this fully
-   *          qualified!)
-   *          {@link org.opendatakit.aggregate.client.odktables.TableTypeClient#getRepresentation()}
-   *          )
-   * @param tableIdAccessControls
-   *          id of the table holding access controls
+   * @param tableId               id of the table
+   * @param schemaETag            schemaETag of the table
+   * @param columns               list of {@link Column} objects
+   * @param displayName           the displayName of the table (JSON.parse() to get viewable name)
+   * @param type                  the string type of the table (must be one of (keep this fully
+   *                              qualified!)
+   *                              {@link org.opendatakit.aggregate.client.odktables.TableTypeClient#getRepresentation()}
+   *                              )
+   * @param tableIdAccessControls id of the table holding access controls
    */
   public TableDefinition(final String tableId, final String schemaETag, final ArrayList<Column> columns) {
     this.tableId = tableId;
     this.schemaETag = schemaETag;
-    if ( columns == null ) {
+    if (columns == null) {
       this.orderedColumns = new ArrayList<Column>();
     } else {
       this.orderedColumns = columns;
-      Collections.sort(orderedColumns, new Comparator<Column>(){
+      Collections.sort(orderedColumns, new Comparator<Column>() {
 
         @Override
         public int compare(Column arg0, Column arg1) {
           return arg0.getElementKey().compareTo(arg1.getElementKey());
-        }});
+        }
+      });
     }
   }
 
@@ -114,16 +107,17 @@ public class TableDefinition {
 
   @JsonIgnore
   public void setColumns(final ArrayList<Column> columns) {
-    if ( columns == null ) {
+    if (columns == null) {
       this.orderedColumns = new ArrayList<Column>();
     } else {
       this.orderedColumns = columns;
-      Collections.sort(orderedColumns, new Comparator<Column>(){
+      Collections.sort(orderedColumns, new Comparator<Column>() {
 
         @Override
         public int compare(Column arg0, Column arg1) {
           return arg0.getElementKey().compareTo(arg1.getElementKey());
-        }});
+        }
+      });
     }
   }
 

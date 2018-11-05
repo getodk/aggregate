@@ -17,20 +17,19 @@ package org.opendatakit.aggregate.constants.externalservice;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class JsonServerConsts {
 
   public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
 
   public static final Map<ElementType, JsonServerType> typeMap = new HashMap<ElementType, JsonServerType>();
+  public static final int CONNECTION_TIMEOUT = 10000;
+
   static {
     typeMap.put(ElementType.STRING, JsonServerType.STRING);
     typeMap.put(ElementType.JRDATETIME, JsonServerType.DATE);
@@ -48,5 +47,4 @@ public class JsonServerConsts {
     typeMap.put(ElementType.REPEAT, JsonServerType.STRING);
     typeMap.put(ElementType.GROUP, JsonServerType.STRING);
   }
-  public static final int CONNECTION_TIMEOUT = 10000;
 }

@@ -28,13 +28,12 @@ import java.util.HashMap;
  * It is the client-side analogue of that Row object.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class RowClient implements Serializable {
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -339683962551463L;
 
   private String rowId;
@@ -58,39 +57,10 @@ public class RowClient implements Serializable {
   private String savepointTimestampIso8601Date;
 
   private String savepointCreator;
-  
+
   private String dataETagAtModification;
 
-  private HashMap<String,String> values;
-
-  /**
-   * Construct a row for insertion.
-   *
-   * @param rowId
-   * @param values
-   */
-  public static RowClient forInsert(String rowId, HashMap<String,String> values) {
-    RowClient row = new RowClient();
-    row.rowId = rowId;
-    row.values = values;
-    row.rowFilterScope = RowFilterScopeClient.EMPTY_ROW_FILTER_SCOPE;
-    return row;
-  }
-
-  /**
-   * Construct a row for updating.
-   *
-   * @param rowId
-   * @param rowETag
-   * @param values
-   */
-  public static RowClient forUpdate(String rowId, String rowETag, HashMap<String,String> values) {
-    RowClient row = new RowClient();
-    row.rowId = rowId;
-    row.rowETag = rowETag;
-    row.values = values;
-    return row;
-  }
+  private HashMap<String, String> values;
 
   public RowClient() {
     this.rowId = null;
@@ -105,7 +75,7 @@ public class RowClient implements Serializable {
     this.savepointTimestampIso8601Date = null;
     this.savepointCreator = null;
     this.dataETagAtModification = null;
-    this.values = new HashMap<String,String>();
+    this.values = new HashMap<String, String>();
   }
 
   public RowClient(RowClient r) {
@@ -124,100 +94,125 @@ public class RowClient implements Serializable {
     this.values = r.values;
   }
 
+  /**
+   * Construct a row for insertion.
+   *
+   * @param rowId
+   * @param values
+   */
+  public static RowClient forInsert(String rowId, HashMap<String, String> values) {
+    RowClient row = new RowClient();
+    row.rowId = rowId;
+    row.values = values;
+    row.rowFilterScope = RowFilterScopeClient.EMPTY_ROW_FILTER_SCOPE;
+    return row;
+  }
+
+  /**
+   * Construct a row for updating.
+   *
+   * @param rowId
+   * @param rowETag
+   * @param values
+   */
+  public static RowClient forUpdate(String rowId, String rowETag, HashMap<String, String> values) {
+    RowClient row = new RowClient();
+    row.rowId = rowId;
+    row.rowETag = rowETag;
+    row.values = values;
+    return row;
+  }
+
   public String getRowId() {
     return this.rowId;
-  }
-
-  public String getRowETag() {
-    return this.rowETag;
-  }
-
-  public boolean isDeleted() {
-    return this.deleted;
-  }
-
-  public String getCreateUser() {
-    return createUser;
-  }
-
-  public String getLastUpdateUser() {
-    return lastUpdateUser;
-  }
-
-  public RowFilterScopeClient getRowFilterScope() {
-    return rowFilterScope;
-  }
-
-  public HashMap<String,String> getValues() {
-    return this.values;
-  }
-
-  public String getSavepointType() {
-    return this.savepointType;
-  }
-
-  public String getSavepointCreator() {
-    return this.savepointCreator;
-  }
-
-  public String getFormId() {
-    return this.formId;
-  }
-
-  public String getLocale() {
-    return this.locale;
-  }
-
-  public String getSavepointTimestampIso8601Date() {
-    return this.savepointTimestampIso8601Date;
-  }
-  
-  public String getDataETagAtModification() {
-    return this.dataETagAtModification;
   }
 
   public void setRowId(final String rowId) {
     this.rowId = rowId;
   }
 
+  public String getRowETag() {
+    return this.rowETag;
+  }
+
   public void setRowETag(final String rowETag) {
     this.rowETag = rowETag;
+  }
+
+  public boolean isDeleted() {
+    return this.deleted;
   }
 
   public void setDeleted(final boolean deleted) {
     this.deleted = deleted;
   }
 
+  public String getCreateUser() {
+    return createUser;
+  }
+
   public void setCreateUser(String createUser) {
     this.createUser = createUser;
+  }
+
+  public String getLastUpdateUser() {
+    return lastUpdateUser;
   }
 
   public void setLastUpdateUser(String lastUpdateUser) {
     this.lastUpdateUser = lastUpdateUser;
   }
 
+  public RowFilterScopeClient getRowFilterScope() {
+    return rowFilterScope;
+  }
+
   public void setRowFilterScope(RowFilterScopeClient rowFilterScope) {
     this.rowFilterScope = rowFilterScope;
   }
 
-  public void setValues(final HashMap<String,String> values) {
+  public HashMap<String, String> getValues() {
+    return this.values;
+  }
+
+  public void setValues(final HashMap<String, String> values) {
     this.values = values;
+  }
+
+  public String getSavepointType() {
+    return this.savepointType;
   }
 
   public void setSavepointType(String savepointType) {
     this.savepointType = savepointType;
   }
 
+  public String getSavepointCreator() {
+    return this.savepointCreator;
+  }
+
   public void setSavepointCreator(String savepointCreator) {
     this.savepointCreator = savepointCreator;
+  }
+
+  public String getFormId() {
+    return this.formId;
   }
 
   public void setFormId(String formId) {
     this.formId = formId;
   }
 
+  public String getLocale() {
+    return this.locale;
+  }
+
   public void setLocale(String locale) {
     this.locale = locale;
+  }
+
+  public String getSavepointTimestampIso8601Date() {
+    return this.savepointTimestampIso8601Date;
   }
 
   /**
@@ -229,10 +224,14 @@ public class RowClient implements Serializable {
     this.savepointTimestampIso8601Date = savepointTimestampIso8601Date;
   }
 
+  public String getDataETagAtModification() {
+    return this.dataETagAtModification;
+  }
+
   public void setDataETagAtModification(String dataETagAtModification) {
     this.dataETagAtModification = dataETagAtModification;
   }
-  
+
   /*
    * (non-Javadoc)
    *
@@ -329,7 +328,7 @@ public class RowClient implements Serializable {
         return false;
     } else if (!savepointType.equals(other.savepointType))
       return false;
-    
+
     if (savepointTimestampIso8601Date == null) {
       if (other.savepointTimestampIso8601Date != null)
         return false;

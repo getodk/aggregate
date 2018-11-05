@@ -16,66 +16,39 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
-import org.apache.commons.lang3.Validate;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.Validate;
 
 public class RowFilterScope implements Comparable<RowFilterScope> {
 
-  /**
-   * Type of Filter.
-   *
-   * Limited to 10 characters
-   */
-  public enum Access {
-    FULL, MODIFY, READ_ONLY, HIDDEN,
-  }
-
-  @JsonProperty(required = false)
-  private Access defaultAccess;
-
-  @JsonProperty(required = false)
-  private String rowOwner;
-
-  @JsonProperty(required = false)
-  private String groupReadOnly;
-
-  @JsonProperty(required = false)
-  private String groupModify;
-
-  @JsonProperty(required = false)
-  private String groupPrivileged;
-
   public static final RowFilterScope EMPTY_ROW_FILTER;
+
   static {
     EMPTY_ROW_FILTER = new RowFilterScope();
     EMPTY_ROW_FILTER.initFields(RowFilterScope.Access.FULL, null, null,
         null, null);
   }
 
-  public static RowFilterScope asRowFilter(String dAccess, String rowOwner, String groupReadOnly,
-      String groupModify, String groupPrivileged) {
-    RowFilterScope.Access access = RowFilterScope.Access.FULL;
-    
-    if (dAccess != null) {
-      access = RowFilterScope.Access.valueOf(dAccess);
-    }    
-
-    return new RowFilterScope(access, rowOwner, groupReadOnly, groupModify, groupPrivileged);
-
-  }
+  @JsonProperty(required = false)
+  private Access defaultAccess;
+  @JsonProperty(required = false)
+  private String rowOwner;
+  @JsonProperty(required = false)
+  private String groupReadOnly;
+  @JsonProperty(required = false)
+  private String groupModify;
+  @JsonProperty(required = false)
+  private String groupPrivileged;
 
   /**
    * Constructs a new RowFilter.
    *
-   * @param access
-   *          the type of the filter. Must not be null. The empty row filter may
-   *          be accessed as {@link RowFilterScope#EMPTY_ROW_FILTER}.
-   * @param rowOwner
-   *          the "rowOwner" userId if any. null if no designated rowOwner.
+   * @param access   the type of the filter. Must not be null. The empty row filter may
+   *                 be accessed as {@link RowFilterScope#EMPTY_ROW_FILTER}.
+   * @param rowOwner the "rowOwner" userId if any. null if no designated rowOwner.
    */
   public RowFilterScope(Access access, String rowOwner, String groupReadOnly, String groupModify,
-      String groupPrivileged) {
+                        String groupPrivileged) {
     Validate.notNull(access);
 
     initFields(access, rowOwner, groupReadOnly, groupModify, groupPrivileged);
@@ -84,8 +57,20 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
   private RowFilterScope() {
   }
 
+  public static RowFilterScope asRowFilter(String dAccess, String rowOwner, String groupReadOnly,
+                                           String groupModify, String groupPrivileged) {
+    RowFilterScope.Access access = RowFilterScope.Access.FULL;
+
+    if (dAccess != null) {
+      access = RowFilterScope.Access.valueOf(dAccess);
+    }
+
+    return new RowFilterScope(access, rowOwner, groupReadOnly, groupModify, groupPrivileged);
+
+  }
+
   private void initFields(Access access, String rowOwner, String groupReadOnly, String groupModify,
-      String groupPrivileged) {
+                          String groupPrivileged) {
     this.defaultAccess = access;
     this.rowOwner = rowOwner;
     this.groupReadOnly = groupReadOnly;
@@ -101,8 +86,7 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
   }
 
   /**
-   * @param access
-   *          the access level to set
+   * @param access the access level to set
    */
   public void setDefaultAccess(Access access) {
     this.defaultAccess = access;
@@ -116,17 +100,16 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
   }
 
   /**
-   * @param rowOwner
-   *          the rowOwner to set
+   * @param rowOwner the rowOwner to set
    */
   public void setRowOwner(String rowOwner) {
-    
+
     this.rowOwner = rowOwner;
   }
 
   /**
    * getGroupReadOnly
-   * 
+   *
    * @return groupReadOnly
    */
   public String getGroupReadOnly() {
@@ -135,7 +118,7 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
 
   /**
    * setGroupReadOnly
-   * 
+   *
    * @param groupReadOnly
    */
   public void setGroupReadOnly(String groupReadOnly) {
@@ -144,7 +127,7 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
 
   /**
    * getGroupModify
-   * 
+   *
    * @return groupModify
    */
   public String getGroupModify() {
@@ -153,7 +136,7 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
 
   /**
    * setGroupModify
-   * 
+   *
    * @param groupModify
    */
   public void setGroupModify(String groupModify) {
@@ -162,7 +145,7 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
 
   /**
    * getGroupPrivileged
-   * 
+   *
    * @return groupPrivileged
    */
   public String getGroupPrivileged() {
@@ -171,7 +154,7 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
 
   /**
    * setGroupPrivileged
-   * 
+   *
    * @param groupPrivileged
    */
   public void setGroupPrivileged(String groupPrivileged) {
@@ -243,23 +226,42 @@ public class RowFilterScope implements Comparable<RowFilterScope> {
 
   @Override
   public int compareTo(RowFilterScope arg0) {
-    if (arg0 == null) { return -1; }
+    if (arg0 == null) {
+      return -1;
+    }
 
     int outcome = defaultAccess.name().compareTo(arg0.defaultAccess.name());
-    if (outcome != 0) { return outcome; }
+    if (outcome != 0) {
+      return outcome;
+    }
 
     outcome = (rowOwner == null) ? ((arg0.rowOwner == null) ? 0 : -1) : rowOwner.compareTo(arg0.rowOwner);
-    if (outcome != 0) { return outcome; }
-    
+    if (outcome != 0) {
+      return outcome;
+    }
+
     outcome = (groupReadOnly == null) ? ((arg0.groupReadOnly == null) ? 0 : -1) : groupReadOnly.compareTo(arg0.groupReadOnly);
-    if (outcome != 0) { return outcome; }
-    
+    if (outcome != 0) {
+      return outcome;
+    }
+
     outcome = (groupModify == null) ? ((arg0.groupModify == null) ? 0 : -1) : groupModify.compareTo(arg0.groupModify);
-    if (outcome != 0) { return outcome; }
-    
+    if (outcome != 0) {
+      return outcome;
+    }
+
     outcome = (groupPrivileged == null) ? ((arg0 == null) ? 0 : -1) : groupPrivileged.compareTo(arg0.groupPrivileged);
     return outcome;
 
+  }
+
+  /**
+   * Type of Filter.
+   * <p>
+   * Limited to 10 characters
+   */
+  public enum Access {
+    FULL, MODIFY, READ_ONLY, HIDDEN,
   }
 
 }

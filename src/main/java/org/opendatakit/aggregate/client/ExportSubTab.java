@@ -18,16 +18,14 @@ package org.opendatakit.aggregate.client;
 
 import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.table.ExportTable;
 import org.opendatakit.aggregate.constants.common.ExportConsts;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class ExportSubTab extends AggregateSubTabBase {
 
@@ -57,13 +55,13 @@ public class ExportSubTab extends AggregateSubTabBase {
         public void onFailure(Throwable caught) {
           AggregateUI.getUI().reportError(caught);
         }
-  
+
         @Override
         public void onSuccess(ArrayList<ExportSummary> result) {
           exportTable.updateExportPanel(result);
         }
       };
-  
+
       SecureGWT.getFormService().getExports(callback);
     }
   }

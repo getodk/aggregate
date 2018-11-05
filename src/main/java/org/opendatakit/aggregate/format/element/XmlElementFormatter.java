@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.format.element;
 
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -36,27 +35,26 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * Formats xml tags <name>value</name> with proper escaping for
  * reconstructing the submission xml that Collect may have used
  * when submitting data.
- *
+ * <p>
  * NOTE: This class does not use the Row object for the
  * reconstruction, but instead writes to the XmlFormatter
  * output stream directly.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class XmlElementFormatter implements ElementFormatter {
-    XmlFormatter xmlFormatter;
+  XmlFormatter xmlFormatter;
 
-    String prefix = "";
+  String prefix = "";
 
   /**
    * Construct a XML Element Formatter
- * @param xmlFormatter
    *
+   * @param xmlFormatter
    */
   public XmlElementFormatter(XmlFormatter xmlFormatter) {
-      this.xmlFormatter = xmlFormatter;
+    this.xmlFormatter = xmlFormatter;
   }
 
   public void setPrefix(String prefix) {
@@ -70,13 +68,13 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
-      Row row, CallingContext cc) throws ODKDatastoreException {
-    if( blobSubmission == null ||
+                           Row row, CallingContext cc) throws ODKDatastoreException {
+    if (blobSubmission == null ||
         (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null) ) {
-        addToXmlValueToRow(null, element.getElementName(), row);
+        (blobSubmission.getContentHash(1, cc) == null)) {
+      addToXmlValueToRow(null, element.getElementName(), row);
     } else {
-        addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), element.getElementName(), row);
+      addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), element.getElementName(), row);
     }
   }
 
@@ -99,10 +97,10 @@ public class XmlElementFormatter implements ElementFormatter {
       b.append(s);
     }
     String str = b.toString();
-    if ( str.length() > 0 ) {
-        addToXmlValueToRow(str, element.getElementName(), row);
+    if (str.length() > 0) {
+      addToXmlValueToRow(str, element.getElementName(), row);
     } else {
-        addToXmlValueToRow(null, element.getElementName(), row);
+      addToXmlValueToRow(null, element.getElementName(), row);
     }
   }
 
@@ -156,7 +154,7 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
-      CallingContext cc) throws ODKDatastoreException {
+                            CallingContext cc) throws ODKDatastoreException {
   }
 
   @Override
@@ -172,7 +170,7 @@ public class XmlElementFormatter implements ElementFormatter {
       xmlString += HtmlUtil.createEndTag(prefix + propertyName);
       xmlFormatter.writeXml(xmlString);
     } else {
-      xmlFormatter.writeXml( HtmlUtil.createSelfClosingTag(prefix + propertyName));
+      xmlFormatter.writeXml(HtmlUtil.createSelfClosingTag(prefix + propertyName));
     }
   }
 

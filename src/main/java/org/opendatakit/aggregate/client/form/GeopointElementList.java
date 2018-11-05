@@ -34,5 +34,5 @@ public class GeopointElementList implements Serializable {
   public ArrayList<KmlOptionSetting> getGeopointElements() {
     return geopointElements;
   }
-  
+
 }

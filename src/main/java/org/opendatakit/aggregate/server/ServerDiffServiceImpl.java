@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.server;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.BadColumnNameExceptionClient;
 import org.opendatakit.aggregate.client.exception.PermissionDeniedExceptionClient;
@@ -42,13 +41,11 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 public class ServerDiffServiceImpl extends RemoteServiceServlet implements ServerDiffService {
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -5472352346806984818L;
 
   @Override

@@ -17,8 +17,9 @@
 package org.opendatakit.aggregate.client.table;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteTableButton;
@@ -26,17 +27,13 @@ import org.opendatakit.aggregate.client.widgets.OdkTablesShowTableButton;
 import org.opendatakit.aggregate.client.widgets.OdkTablesShowTableFilesButton;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-
 /**
  * This is the class that displays the list of the database tables that belong
  * to ODK Tables to the user. It may eventually be the point of interaction to
  * enter the tables and add coarse control. <br>
  * Based on OdkAdminListTable.
- * 
- * @author sudar.sam@gmail.com
  *
+ * @author sudar.sam@gmail.com
  */
 public class OdkTablesTableList extends FlexTable {
 
@@ -61,20 +58,19 @@ public class OdkTablesTableList extends FlexTable {
 
   /**
    * Updates the list of tables.
-   * 
-   * @param tableList
-   *          the list of tables to be displayed.
+   *
+   * @param tableList the list of tables to be displayed.
    */
   public void updateTableList(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
     if (tables == null) {
       return;
     }
 
-    if ( !tableListChanged && (getRowCount() == tables.size()+1) ) {
+    if (!tableListChanged && (getRowCount() == tables.size() + 1)) {
       // nothing changed and everything is reflected in the UI...
       return;
     }
-    
+
     removeAllRows();
 
     removeAllRows();

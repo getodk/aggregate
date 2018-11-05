@@ -18,9 +18,8 @@ package org.opendatakit.common.security.spring;
 
 /**
  * Miscellaneous things that tightly couple our implementation to Spring frameworks.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class SpringInternals {
 

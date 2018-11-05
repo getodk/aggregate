@@ -16,16 +16,13 @@
 package org.opendatakit.aggregate.format.header;
 
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.form.IForm;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public interface HeaderFormatter {
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup, List<FormElementModel> propertyNames);

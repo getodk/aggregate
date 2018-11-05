@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.parser;
 
 import java.util.Random;
 import java.util.UUID;
-
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -33,7 +32,6 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author mitchellsundt@gmail.com
  * @author the.dylan.price@gmail.com
- *
  */
 public class SubmissionLockTemplate {
   // At 4 tries and 250 initial backoff, the maximum amount of time a single
@@ -41,59 +39,29 @@ public class SubmissionLockTemplate {
   // 250 + 500 + 1000 + 2000 = 3750
   private static final int TRIES = 4;
   private static final int INITIAL_MAX_BACKOFF = 250;
-  
-  private enum SubmissionTaskLockType implements ITaskLockType {
-    MODIFICATION(66000, PersistConsts.MIN_SETTLE_MILLISECONDS);
-
-    private long timeout;
-    private long minSettleTime;
-
-
-    private SubmissionTaskLockType(long timeout, long minSettle) {
-      this.timeout = timeout;
-      this.minSettleTime = minSettle;
-    }
-
-    @Override
-    public long getLockExpirationTimeout() {
-      return timeout;
-    }
-
-    @Override
-    public String getName() {
-      return name();
-    }
-    
-    @Override
-    public long getMinSettleTime() {
-      return minSettleTime;
-    }
-  }
-  
   private String formId;
   private Datastore ds;
   private User user;
   private String lockId;
   private long maxBackoffMs;
   private Random rand;
-
   /**
    * Lock for updating a submission.
    * The instanceId is mapped into one of 256 buckets to allow for multiple simultaneous instance-level file
    * accesses.
-   * 
+   *
    * @param formId
    * @param rowId
    * @param type
    * @param cc
    */
   public SubmissionLockTemplate(String formId, String instanceId, CallingContext cc) {
-    if ( instanceId == null || instanceId.length() == 0 ) {
+    if (instanceId == null || instanceId.length() == 0) {
       throw new IllegalArgumentException("instanceId cannot be null or blank");
     } else {
       this.formId = "submission|" + formId + "|" + Integer.toHexString(instanceId.hashCode() & 0xff);
     }
-    
+
     this.ds = cc.getDatastore();
     this.user = cc.getCurrentUser();
     this.lockId = UUID.randomUUID().toString();
@@ -161,6 +129,34 @@ public class SubmissionLockTemplate {
     long backoff = (long) (rand.nextDouble() * maxBackoffMs);
     maxBackoffMs *= 2;
     return backoff;
+  }
+
+  private enum SubmissionTaskLockType implements ITaskLockType {
+    MODIFICATION(66000, PersistConsts.MIN_SETTLE_MILLISECONDS);
+
+    private long timeout;
+    private long minSettleTime;
+
+
+    private SubmissionTaskLockType(long timeout, long minSettle) {
+      this.timeout = timeout;
+      this.minSettleTime = minSettle;
+    }
+
+    @Override
+    public long getLockExpirationTimeout() {
+      return timeout;
+    }
+
+    @Override
+    public String getName() {
+      return name();
+    }
+
+    @Override
+    public long getMinSettleTime() {
+      return minSettleTime;
+    }
   }
 
 }

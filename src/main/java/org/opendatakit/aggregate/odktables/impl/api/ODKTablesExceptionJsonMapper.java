@@ -21,10 +21,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
 import org.opendatakit.aggregate.odktables.exception.ODKTablesException;
 
-@Produces({ MediaType.APPLICATION_JSON })
+@Produces({MediaType.APPLICATION_JSON})
 @Provider
 public class ODKTablesExceptionJsonMapper implements ExceptionMapper<ODKTablesException> {
 

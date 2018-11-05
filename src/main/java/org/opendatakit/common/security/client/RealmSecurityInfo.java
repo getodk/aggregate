@@ -20,14 +20,13 @@ import java.io.Serializable;
 
 /**
  * Information about the security configuration of the server.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public class RealmSecurityInfo implements Serializable {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = -430735053365397828L;
 
@@ -65,12 +64,12 @@ public class RealmSecurityInfo implements Serializable {
     this.superUsername = superUsername;
   }
 
-  public void setSuperUsernamePasswordSet(boolean isSuperUsernamePasswordSet) {
-    this.isSuperUsernamePasswordSet = isSuperUsernamePasswordSet;
-  }
-
   public boolean isSuperUsernamePasswordSet() {
     return isSuperUsernamePasswordSet;
+  }
+
+  public void setSuperUsernamePasswordSet(boolean isSuperUsernamePasswordSet) {
+    this.isSuperUsernamePasswordSet = isSuperUsernamePasswordSet;
   }
 
   public String getRealmString() {
@@ -81,11 +80,11 @@ public class RealmSecurityInfo implements Serializable {
     this.realmString = realmString;
   }
 
-  public void setChangeUserPasswordURL(String changeUserPasswordURL) {
-    this.changeUserPasswordURL = changeUserPasswordURL;
-  }
-
   public String getChangeUserPasswordURL() {
     return changeUserPasswordURL;
+  }
+
+  public void setChangeUserPasswordURL(String changeUserPasswordURL) {
+    this.changeUserPasswordURL = changeUserPasswordURL;
   }
 }

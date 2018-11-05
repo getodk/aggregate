@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.popups.OdkTablesConfirmDeleteRowPopup;
-import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.popups.OdkTablesConfirmDeleteRowPopup;
+import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
 
 public class OdkTablesDeleteRowButton extends AggregateButton implements ClickHandler {
 

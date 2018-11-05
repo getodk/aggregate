@@ -15,20 +15,6 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.opendatakit.common.persistence.ITaskLockType;
-import org.opendatakit.common.persistence.TaskLock;
-import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
-import org.opendatakit.common.persistence.exception.ODKTaskLockException;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -43,12 +29,22 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
+import org.opendatakit.common.persistence.ITaskLockType;
+import org.opendatakit.common.persistence.TaskLock;
+import org.opendatakit.common.persistence.engine.DatastoreAccessMetrics;
+import org.opendatakit.common.persistence.exception.ODKTaskLockException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class TaskLockImpl implements TaskLock {
 
@@ -87,7 +83,7 @@ public class TaskLockImpl implements TaskLock {
    * the concatenation (formId + taskType.getName()) to create one of 256
    * possible parent entities, and use that entity when manipulating this task
    * lock.
-   * 
+   *
    * @param formId
    * @param taskType
    * @return parent entity to use for strong consistency enforcement
@@ -112,7 +108,7 @@ public class TaskLockImpl implements TaskLock {
    * avoid the long settle times required by the earlier Master-Slave datastore.
    * But, when things go south, we need to back off and wait for the parent
    * entity to settle.
-   * 
+   * <p>
    * No idea how long that back-off should be. Try 1100ms plus a bit since
    * appengine transactions can take over a second for database to settle
    */
@@ -129,7 +125,7 @@ public class TaskLockImpl implements TaskLock {
    * Deletes the specified lockId entry and perhaps any other stale entries. If
    * the deletion of the lockId fails, throws the exception associated with that
    * failure (but ignores failures for the deletion of any stale entries).
-   * 
+   *
    * @param lockId
    * @param formId
    * @param taskType
@@ -143,7 +139,7 @@ public class TaskLockImpl implements TaskLock {
       Query query = new Query(KIND, entityGroupKey);
       query.setAncestor(entityGroupKey);
       query.setFilter(new Query.CompositeFilter(CompositeFilterOperator.AND,
-          Arrays.<Filter> asList(
+          Arrays.<Filter>asList(
               new Query.FilterPredicate(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId),
               new Query.FilterPredicate(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL,
                   taskType.getName()))));
@@ -359,7 +355,6 @@ public class TaskLockImpl implements TaskLock {
   }
 
   /**
-   *
    * @param entity
    * @return true if expired
    * @throws ODKTaskLockException
@@ -498,7 +493,7 @@ public class TaskLockImpl implements TaskLock {
   /**
    * Verifies that the given lockId owns the mutex. If it doesn't, an
    * ODKTaskLockException is thrown.
-   * 
+   *
    * @param lockId
    * @param formId
    * @param taskType
@@ -577,7 +572,7 @@ public class TaskLockImpl implements TaskLock {
 
   /**
    * Update the entity with the given values.
-   * 
+   *
    * @param transaction
    * @param lockId
    * @param formId
@@ -586,7 +581,7 @@ public class TaskLockImpl implements TaskLock {
    * @throws ODKTaskLockException
    */
   private void updateValuesNpersist(Transaction transaction, String lockId, String formId,
-      ITaskLockType taskType, Entity gaeEntity) throws ODKTaskLockException {
+                                    ITaskLockType taskType, Entity gaeEntity) throws ODKTaskLockException {
     Long timestamp = System.currentTimeMillis() + taskType.getLockExpirationTimeout();
 
     dam.recordPutUsage(KIND);
@@ -617,7 +612,7 @@ public class TaskLockImpl implements TaskLock {
    * the expire-time of the lockId. The lockId with the earliest in-the-future
    * expire-time wins as long as there are no other lockIds within
    * SHORTEST_ALLOWABLE_GAIN_LOCK_SEPARATION of it.
-   * 
+   *
    * @param lockId
    * @param formId
    * @param taskType
@@ -625,7 +620,7 @@ public class TaskLockImpl implements TaskLock {
    * @throws ODKTaskLockException
    */
   private synchronized void updateLockIdTimestampMemCache(String lockId, String formId,
-      ITaskLockType taskType, Long timestamp) throws ODKTaskLockException {
+                                                          ITaskLockType taskType, Long timestamp) throws ODKTaskLockException {
     if (syncCache != null) {
       int i;
       try {
@@ -693,16 +688,16 @@ public class TaskLockImpl implements TaskLock {
 
   /**
    * Remove the given lockId from the (formId, taskType) entry.
-   * 
+   * <p>
    * NOTE: We make 10 attempts. If all of these fail, the lockId will be left
    * active. This can cause lock-outs for the duration of the locking period.
-   * 
+   *
    * @param lockId
    * @param formId
    * @param taskType
    */
   private synchronized void deleteLockIdMemCache(String lockId, String formId,
-      ITaskLockType taskType) {
+                                                 ITaskLockType taskType) {
     if (syncCache != null) {
       int i = 0;
       try {
@@ -760,10 +755,10 @@ public class TaskLockImpl implements TaskLock {
   /**
    * Returns the lockId for the lock with the earliest in-the-future expiration
    * timestamp. Whatever lock holds that is considered the winner of the mutex.
-   * 
+   * <p>
    * NOTE: Returning null does not mean there is no active lock. It can mean
    * that the Memcache is unavailable or has been cleared.
-   * 
+   *
    * @param formId
    * @param taskType
    * @return
@@ -819,9 +814,9 @@ public class TaskLockImpl implements TaskLock {
   /**
    * Returns the entity for the lock with the earliest in-the-future expiration
    * timestamp. Whatever lock holds that is considered the winner of the mutex.
-   * 
+   * <p>
    * Returning null means there is no active lock.
-   * 
+   *
    * @param formId
    * @param taskType
    * @return
@@ -834,7 +829,7 @@ public class TaskLockImpl implements TaskLock {
       Query query = new Query(KIND, entityGroupKey);
       query.setAncestor(entityGroupKey);
       query.setFilter(new Query.CompositeFilter(CompositeFilterOperator.AND,
-          Arrays.<Filter> asList(
+          Arrays.<Filter>asList(
               new Query.FilterPredicate(FORM_ID_PROPERTY, Query.FilterOperator.EQUAL, formId),
               new Query.FilterPredicate(TASK_TYPE_PROPERTY, Query.FilterOperator.EQUAL,
                   taskType.getName()))));

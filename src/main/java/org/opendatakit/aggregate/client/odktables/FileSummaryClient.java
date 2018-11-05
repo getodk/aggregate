@@ -26,7 +26,6 @@ import java.io.Serializable;
  * {@link org.opendatakit.aggregate.client.form.MediaFileSummary}
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class FileSummaryClient implements Serializable {
 
@@ -53,7 +52,7 @@ public class FileSummaryClient implements Serializable {
   }
 
   public FileSummaryClient(String filename, String contentType, Long contentLength,
-      String id, String odkClientVersion, String tableId, String downloadUrl) {
+                           String id, String odkClientVersion, String tableId, String downloadUrl) {
     this.filename = filename;
     this.contentType = contentType;
     this.contentLength = contentLength;
@@ -61,10 +60,6 @@ public class FileSummaryClient implements Serializable {
     this.odkClientVersion = odkClientVersion;
     this.tableId = tableId;
     this.downloadUrl = downloadUrl;
-  }
-
-  public void setInstanceId(String instanceId) {
-    this.instanceId = instanceId;
   }
 
   public String getFilename() {
@@ -89,6 +84,10 @@ public class FileSummaryClient implements Serializable {
 
   public String getInstanceId() {
     return instanceId;
+  }
+
+  public void setInstanceId(String instanceId) {
+    this.instanceId = instanceId;
   }
 
   public String getTableId() {

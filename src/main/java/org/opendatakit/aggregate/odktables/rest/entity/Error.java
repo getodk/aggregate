@@ -21,22 +21,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Error return type.
- *
+ * <p>
  * Removed all JAXB annotations -- these cause issues on Android 4.2 and earlier.
  *
  * @author dylan price?
- *
  */
 public class Error {
 
-  public enum ErrorType {
-    APP_NAME_MISMATCH, SCHEMA_ETAG_MISMATCH, ETAG_MISMATCH, TABLE_EXISTS, PERMISSION_DENIED, 
-    RESOURCE_NOT_FOUND, BAD_COLUMN_NAME, INTERNAL_ERROR, BAD_REQUEST, LOCK_TIMEOUT, TABLE_NOT_FOUND,
-    APP_NAME_INFO
-  }
-
   private ErrorType type;
-
   @JsonProperty(required = false)
   private String message;
 
@@ -61,8 +53,7 @@ public class Error {
   }
 
   /**
-   * @param type
-   *          the type to set
+   * @param type the type to set
    */
   public void setType(ErrorType type) {
     this.type = type;
@@ -76,8 +67,7 @@ public class Error {
   }
 
   /**
-   * @param message
-   *          the message to set
+   * @param message the message to set
    */
   public void setMessage(String message) {
     this.message = message;
@@ -135,5 +125,11 @@ public class Error {
     builder.append(message);
     builder.append("]");
     return builder.toString();
+  }
+
+  public enum ErrorType {
+    APP_NAME_MISMATCH, SCHEMA_ETAG_MISMATCH, ETAG_MISMATCH, TABLE_EXISTS, PERMISSION_DENIED,
+    RESOURCE_NOT_FOUND, BAD_COLUMN_NAME, INTERNAL_ERROR, BAD_REQUEST, LOCK_TIMEOUT, TABLE_NOT_FOUND,
+    APP_NAME_INFO
   }
 }

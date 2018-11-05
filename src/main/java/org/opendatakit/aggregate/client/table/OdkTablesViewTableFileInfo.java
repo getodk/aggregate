@@ -16,8 +16,12 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesManageTableFilesSubTab;
@@ -30,31 +34,17 @@ import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteTableFileButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
-
 /**
  * Displays the entries in the DbTableFileInfo table that pertain to a specific
  * table.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesViewTableFileInfo extends FlexTable {
-
-  // the table whose info we are currently displaying.
-  private TableEntryClient currentTable;
-
-  // that table's info rows
-  private ArrayList<FileSummaryClient> fileSummaries;
 
   private static final int DELETE_COLUMN = 0;
   // this is the heading for the delete row button.
   private static final String DELETE_HEADING = "Delete";
-
   private static final int ODK_CLIENT_VERSION_COLUMN = 1;
   private static final String ODK_CLIENT_VERSION_HEADING = "Client Version";
   private static final int FILENAME_COLUMN = 2;
@@ -65,14 +55,15 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
   private static final String CONTENT_TYPE_HEADING = "Content Type";
   private static final int DOWNLOAD_COLUMN = 5;
   private static final String DOWNLOAD_HEADING = "Download";
-
   private static final int numColumns = 6;
-
-  // this is just the tab that opened the table
-  private AggregateSubTabBase basePanel;
-
   // the message to display when there are no rows in the table
   private static String NO_ROWS_MESSAGE = "There are no rows to display.";
+  // the table whose info we are currently displaying.
+  private TableEntryClient currentTable;
+  // that table's info rows
+  private ArrayList<FileSummaryClient> fileSummaries;
+  // this is just the tab that opened the table
+  private AggregateSubTabBase basePanel;
 
   /**
    * This is the constructor to call when there has not been a table selected.
@@ -186,10 +177,10 @@ public class OdkTablesViewTableFileInfo extends FlexTable {
 
       for (int j = 0; j < fileSummaries.size(); j++) {
         FileSummaryClient sum = fileSummaries.get(j);
-        OdkTablesDeleteTableFileButton deleteButton = 
+        OdkTablesDeleteTableFileButton deleteButton =
             new OdkTablesDeleteTableFileButton(this.basePanel,
                 sum.getOdkClientVersion(), currentTable.getTableId(), sum.getFilename());
-        if ( !AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+        if (!AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
           deleteButton.setEnabled(false);
         }
         setWidget(currentRow, DELETE_COLUMN, deleteButton);

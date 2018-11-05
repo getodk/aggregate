@@ -17,20 +17,19 @@ package org.opendatakit.aggregate.constants.externalservice;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class REDCapServerConsts {
 
   public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
 
   public static final Map<ElementType, REDCapServerType> typeMap = new HashMap<ElementType, REDCapServerType>();
+  public static final int CONNECTION_TIMEOUT = 10000;
+
   static {
     typeMap.put(ElementType.STRING, REDCapServerType.STRING);
     typeMap.put(ElementType.JRDATETIME, REDCapServerType.DATE);
@@ -41,7 +40,7 @@ public class REDCapServerConsts {
     typeMap.put(ElementType.GEOPOINT, REDCapServerType.GPS);
     typeMap.put(ElementType.GEOSHAPE, REDCapServerType.STRING);
     typeMap.put(ElementType.GEOTRACE, REDCapServerType.STRING);
-    
+
     typeMap.put(ElementType.BOOLEAN, REDCapServerType.STRING);
     typeMap.put(ElementType.BINARY, REDCapServerType.CONTENT_TYPE);
     typeMap.put(ElementType.SELECT1, REDCapServerType.STRING);
@@ -49,5 +48,4 @@ public class REDCapServerConsts {
     typeMap.put(ElementType.REPEAT, REDCapServerType.STRING);
     typeMap.put(ElementType.GROUP, REDCapServerType.STRING);
   }
-  public static final int CONNECTION_TIMEOUT = 10000;
 }

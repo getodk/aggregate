@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -37,96 +37,96 @@ import org.opendatakit.common.security.User;
  * placeholder for the attachment, and written a second time to update the content
  * information of the attachment.  See {@link BinaryContentManipulator} for 
  * methods to manipulate and maintain this abstraction.
- * 
+ *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- * 
+ *
  */
 public final class BinaryContent extends DynamicBase {
-    private static final DataField UNROOTED_FILE_PATH = new DataField(
-            "UNROOTED_FILE_PATH", DataField.DataType.STRING, true, 4096L);
-    private static final DataField CONTENT_TYPE = new DataField("CONTENT_TYPE",
-            DataField.DataType.STRING, true, 80L);
-    private static final DataField CONTENT_LENGTH = new DataField("CONTENT_LENGTH",
-            DataField.DataType.INTEGER, true);
-    private static final DataField CONTENT_HASH = new DataField("CONTENT_HASH", 
-            DataField.DataType.STRING, true);
+  private static final DataField UNROOTED_FILE_PATH = new DataField(
+      "UNROOTED_FILE_PATH", DataField.DataType.STRING, true, 4096L);
+  private static final DataField CONTENT_TYPE = new DataField("CONTENT_TYPE",
+      DataField.DataType.STRING, true, 80L);
+  private static final DataField CONTENT_LENGTH = new DataField("CONTENT_LENGTH",
+      DataField.DataType.INTEGER, true);
+  private static final DataField CONTENT_HASH = new DataField("CONTENT_HASH",
+      DataField.DataType.STRING, true);
 
-    public final DataField unrootedFilePath;
-    public final DataField contentType;
-    public final DataField contentLength;
-    public final DataField contentHash;
+  public final DataField unrootedFilePath;
+  public final DataField contentType;
+  public final DataField contentLength;
+  public final DataField contentHash;
 
-    /**
-     * Construct a relation prototype.
-     * 
-     * @param databaseSchema
-     * @param tableName
-     */
-    public BinaryContent(String databaseSchema, String tableName) {
-        super(databaseSchema, tableName);
-        fieldList.add(unrootedFilePath = new DataField(UNROOTED_FILE_PATH));
-        fieldList.add(contentType = new DataField(CONTENT_TYPE));
-        fieldList.add(contentLength = new DataField(CONTENT_LENGTH));
-        fieldList.add(contentHash = new DataField(CONTENT_HASH));
+  /**
+   * Construct a relation prototype.
+   *
+   * @param databaseSchema
+   * @param tableName
+   */
+  public BinaryContent(String databaseSchema, String tableName) {
+    super(databaseSchema, tableName);
+    fieldList.add(unrootedFilePath = new DataField(UNROOTED_FILE_PATH));
+    fieldList.add(contentType = new DataField(CONTENT_TYPE));
+    fieldList.add(contentLength = new DataField(CONTENT_LENGTH));
+    fieldList.add(contentHash = new DataField(CONTENT_HASH));
+  }
+
+  /**
+   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+   *
+   * @param ref
+   * @param user
+   */
+  private BinaryContent(BinaryContent ref, User user) {
+    super(ref, user);
+    unrootedFilePath = ref.unrootedFilePath;
+    contentType = ref.contentType;
+    contentLength = ref.contentLength;
+    contentHash = ref.contentHash;
+  }
+
+  // Only called from within the persistence layer.
+  @Override
+  public BinaryContent getEmptyRow(User user) {
+    return new BinaryContent(this, user);
+  }
+
+  public String getUnrootedFilePath() {
+    return getStringField(unrootedFilePath);
+  }
+
+  public void setUnrootedFilePath(String value) {
+    // allow this to overflow
+    if (!setStringField(unrootedFilePath, value)) {
+      throw new IllegalStateException("overflow on unrootedFilePath");
     }
+  }
 
-    /**
-     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-     * 
-     * @param ref
-     * @param user
-     */
-    private BinaryContent(BinaryContent ref, User user) {
-        super(ref, user);
-        unrootedFilePath = ref.unrootedFilePath;
-        contentType = ref.contentType;
-        contentLength = ref.contentLength;
-        contentHash = ref.contentHash;
-    }
+  public String getContentType() {
+    return getStringField(contentType);
+  }
 
-    // Only called from within the persistence layer.
-    @Override
-    public BinaryContent getEmptyRow(User user) {
-        return new BinaryContent(this, user);
+  public void setContentType(String value) {
+    if (!setStringField(contentType, value)) {
+      throw new IllegalStateException("overflow on contentType");
     }
+  }
 
-    public String getUnrootedFilePath() {
-        return getStringField(unrootedFilePath);
-    }
+  public Long getContentLength() {
+    return getLongField(contentLength);
+  }
 
-    public void setUnrootedFilePath(String value) {
-        // allow this to overflow
-        if (!setStringField(unrootedFilePath, value)) {
-            throw new IllegalStateException("overflow on unrootedFilePath");
-        }
-    }
+  public void setContentLength(Long value) {
+    setLongField(contentLength, value);
+  }
 
-    public String getContentType() {
-        return getStringField(contentType);
-    }
+  public String getContentHash() {
+    return getStringField(contentHash);
+  }
 
-    public void setContentType(String value) {
-        if (!setStringField(contentType, value)) {
-            throw new IllegalStateException("overflow on contentType");
-        }
+  public void setContentHash(String value) {
+    if (!setStringField(contentHash, value)) {
+      throw new IllegalStateException("overflow on contentHash");
     }
-
-    public Long getContentLength() {
-        return getLongField(contentLength);
-    }
-
-    public void setContentLength(Long value) {
-        setLongField(contentLength, value);
-    }
-
-    public String getContentHash() {
-        return getStringField(contentHash);
-    }
-
-    public void setContentHash(String value) {
-        if ( !setStringField(contentHash, value)) {
-            throw new IllegalStateException("overflow on contentHash");
-        }
-    }
+  }
 }

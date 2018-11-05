@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client.form;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 
 public final class FormSummary implements Serializable {
@@ -37,15 +36,15 @@ public final class FormSummary implements Serializable {
   // if the form is marked for deletion
   private FormActionStatusTimestamp mostRecentDeletionRequestStatus = null;
   // if the form has a purge-submissions action in progress.
-  private FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus = null; 
-  
-  
+  private FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus = null;
+
+
   public FormSummary() {
 
   }
 
   public FormSummary(String formTitle, String formId, Date creationDate, String formCreateUser,
-          boolean download, boolean receiveSubmissions, String viewableURL, int mediaFileCount) {
+                     boolean download, boolean receiveSubmissions, String viewableURL, int mediaFileCount) {
     this.title = formTitle;
     this.id = formId;
     this.creationDate = creationDate;
@@ -65,9 +64,9 @@ public final class FormSummary implements Serializable {
   }
 
   public Date getCreationDate() {
-      return creationDate;
+    return creationDate;
   }
-  
+
   public String getCreatedUser() {
     return createdUser;
   }
@@ -83,30 +82,30 @@ public final class FormSummary implements Serializable {
   public String getViewableURL() {
     return viewURL;
   }
-  
+
   public int getMediaFileCount() {
     return mediaFileCount;
-}
+  }
 
-public FormActionStatusTimestamp getMostRecentDeletionRequestStatus() {
+  public FormActionStatusTimestamp getMostRecentDeletionRequestStatus() {
     return mostRecentDeletionRequestStatus;
-}
+  }
 
-public void setMostRecentDeletionRequestStatus(
-        FormActionStatusTimestamp mostRecentDeletionRequestStatus) {
+  public void setMostRecentDeletionRequestStatus(
+      FormActionStatusTimestamp mostRecentDeletionRequestStatus) {
     this.mostRecentDeletionRequestStatus = mostRecentDeletionRequestStatus;
-}
+  }
 
-public FormActionStatusTimestamp getMostRecentPurgeSubmissionsRequestStatus() {
+  public FormActionStatusTimestamp getMostRecentPurgeSubmissionsRequestStatus() {
     return mostRecentPurgeSubmissionsRequestStatus;
-}
+  }
 
-public void setMostRecentPurgeSubmissionsRequestStatus(
-        FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus) {
+  public void setMostRecentPurgeSubmissionsRequestStatus(
+      FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus) {
     this.mostRecentPurgeSubmissionsRequestStatus = mostRecentPurgeSubmissionsRequestStatus;
-}
+  }
 
-/**
+  /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -132,5 +131,5 @@ public void setMostRecentPurgeSubmissionsRequestStatus(
       hashCode += id.hashCode();
     return hashCode;
   }
-  
+
 }

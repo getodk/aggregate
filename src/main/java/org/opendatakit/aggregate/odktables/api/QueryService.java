@@ -17,14 +17,12 @@
 package org.opendatakit.aggregate.odktables.api;
 
 import java.text.ParseException;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -41,41 +39,39 @@ public interface QueryService {
   public static final String CURSOR_PARAMETER = "cursor";
   public static final String FETCH_LIMIT = "fetchLimit";
 
- /**
-  *
-  * @param startTime - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS
-  * @param endTime - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS 
-  * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
-  * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
-  * @return {@link RowResourceList} of row changes since the dataETag value
-  * @throws ODKDatastoreException
-  * @throws PermissionDeniedException
-  * @throws InconsistentStateException
-  * @throws ODKTaskLockException
-  * @throws BadColumnNameException
-  */
- @GET
- @Path("lastUpdateDate")
- @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
- public Response /*RowResourceList*/ getRowsInTimeRangeBasedOnLastUpdateDate(@QueryParam(QUERY_START_TIME) String startTime, @QueryParam(QUERY_END_TIME) String endTime, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
-     throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException, ParseException;
+  /**
+   * @param startTime  - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS
+   * @param endTime    - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS
+   * @param cursor     - null or a websafeCursor value from the RowResourceList of a previous call
+   * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
+   * @return {@link RowResourceList} of row changes since the dataETag value
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
+  @GET
+  @Path("lastUpdateDate")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowResourceList*/ getRowsInTimeRangeBasedOnLastUpdateDate(@QueryParam(QUERY_START_TIME) String startTime, @QueryParam(QUERY_END_TIME) String endTime, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
+      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException, ParseException;
 
- /**
-  *
-  * @param startTime - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS
-  * @param endTime - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS 
-  * @param cursor - null or a websafeCursor value from the RowResourceList of a previous call
-  * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
-  * @return {@link RowResourceList} of row changes since the dataETag value
-  * @throws ODKDatastoreException
-  * @throws PermissionDeniedException
-  * @throws InconsistentStateException
-  * @throws ODKTaskLockException
-  * @throws BadColumnNameException
-  */
- @GET
- @Path("savepointTimestamp")
- @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
- public Response /*RowResourceList*/ getRowsInTimeRangeBasedOnSavepointTimestamp(@QueryParam(QUERY_START_TIME) String startTime, @QueryParam(QUERY_END_TIME) String endTime, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
-   throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException, ParseException;
+  /**
+   * @param startTime  - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS
+   * @param endTime    - timestamp in format yyyy-MM-ddTHH:mm:ss.SSSSSSSSS
+   * @param cursor     - null or a websafeCursor value from the RowResourceList of a previous call
+   * @param fetchLimit - null or the number of rows to fetch. If null, server will choose the limit.
+   * @return {@link RowResourceList} of row changes since the dataETag value
+   * @throws ODKDatastoreException
+   * @throws PermissionDeniedException
+   * @throws InconsistentStateException
+   * @throws ODKTaskLockException
+   * @throws BadColumnNameException
+   */
+  @GET
+  @Path("savepointTimestamp")
+  @Produces({MediaType.APPLICATION_JSON, ApiConstants.MEDIA_TEXT_XML_UTF8, ApiConstants.MEDIA_APPLICATION_XML_UTF8})
+  public Response /*RowResourceList*/ getRowsInTimeRangeBasedOnSavepointTimestamp(@QueryParam(QUERY_START_TIME) String startTime, @QueryParam(QUERY_END_TIME) String endTime, @QueryParam(CURSOR_PARAMETER) String cursor, @QueryParam(FETCH_LIMIT) String fetchLimit)
+      throws ODKDatastoreException, PermissionDeniedException, InconsistentStateException, ODKTaskLockException, BadColumnNameException, ParseException;
 }

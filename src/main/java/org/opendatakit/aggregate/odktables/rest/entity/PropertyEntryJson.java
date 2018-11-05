@@ -22,17 +22,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * If you use the 'properties' API, please consider switching
  * to the put/get of the properties.csv. It is far more time
  * and space efficient than this interface.
- * 
- * This holds one KeyValueStore entry that will be returned to the 
+ * <p>
+ * This holds one KeyValueStore entry that will be returned to the
  * user. The value may be a Javascript array or object and will
  * be emitted as such to the user -- it is not a JSON serialization
  * of that array or object, but is the array or object itself.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
-  
+
   @JsonProperty(required = true)
   private String partition;
 
@@ -44,18 +43,18 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
 
   @JsonProperty(required = true)
   private String type;
-  
+
   @JsonProperty(required = false)
   private Object value;
 
   /**
    * Construct a KeyValueStore entry. This can be used to construct
    * a JSON serialization of the entry, but cannot be used to deserialize
-   * that entry. 
-   * 
+   * that entry.
+   * <p>
    * The server processes this via a native object deserialization into
    * an ArrayList<Map<String,Object>>, and traverses and parses that.
-   * 
+   *
    * @param partition
    * @param aspect
    * @param key
@@ -63,7 +62,7 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
    * @param value
    */
   public PropertyEntryJson(String partition, String aspect, String key,
-      String type, Object value) {
+                           String type, Object value) {
     this.partition = partition;
     this.aspect = aspect;
     this.key = key;
@@ -73,7 +72,7 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
 
   /**
    * Clone a KeyValueStore entry.
-   * 
+   *
    * @param r
    */
   protected PropertyEntryJson(PropertyEntryJson r) {
@@ -88,39 +87,38 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
     return partition;
   }
 
-  public String getAspect() {
-    return aspect;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public Object getValue() {
-    return value;
-  }
-
   public void setPartition(final String partition) {
     this.partition = partition;
+  }
+
+  public String getAspect() {
+    return aspect;
   }
 
   public void setAspect(final String aspect) {
     this.aspect = aspect;
   }
 
+  public String getKey() {
+    return key;
+  }
+
   public void setKey(final String key) {
     this.key = key;
+  }
+
+  public String getType() {
+    return type;
   }
 
   public void setType(final String type) {
     this.type = type;
   }
 
-  
+  public Object getValue() {
+    return value;
+  }
+
   public void setValue(final Object value) {
     this.value = value;
   }
@@ -181,14 +179,14 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
 
   /**
    * Sort by partition, aspect, key, type and finally value (in order).
-   * 
+   * <p>
    * In practice, it is invalid to have two or more records with
    * matching (partition, aspect, key). We do not enforce this.
    */
   @Override
   public int compareTo(PropertyEntryJson other) {
     int outcome;
-    
+
     // compare partition
     if (this.partition == null && other.partition == null) {
       outcome = 0;
@@ -199,10 +197,10 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
     } else {
       outcome = this.partition.compareTo(other.partition);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare aspect
     if (this.aspect == null && other.aspect == null) {
       outcome = 0;
@@ -213,10 +211,10 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
     } else {
       outcome = this.aspect.compareTo(other.aspect);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare key
     if (this.key == null && other.key == null) {
       outcome = 0;
@@ -227,10 +225,10 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
     } else {
       outcome = this.key.compareTo(other.key);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare type
     if (this.type == null && other.type == null) {
       outcome = 0;
@@ -241,10 +239,10 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
     } else {
       outcome = this.type.compareTo(other.type);
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     // compare value
     if (this.value == null && other.value == null) {
       outcome = 0;
@@ -255,25 +253,25 @@ public class PropertyEntryJson implements Comparable<PropertyEntryJson> {
     } else {
       int hash1 = this.value.hashCode();
       int hash2 = other.value.hashCode();
-      if ( hash1 == hash2 && this.value.equals(other.value)) {
+      if (hash1 == hash2 && this.value.equals(other.value)) {
         outcome = 0;
-      } else if ( hash1 < hash2 ) {
+      } else if (hash1 < hash2) {
         outcome = -1;
-      } else if ( hash1 > hash2 ) {
+      } else if (hash1 > hash2) {
         outcome = 1;
       } else {
         // hopefully this produces a non-zero outcome...
         outcome = this.value.toString().compareTo(other.value.toString());
-        if ( outcome == 0 ) {
+        if (outcome == 0) {
           // don't know what else to do...
           outcome = 1;
         }
       }
     }
-    if ( outcome != 0 ) {
+    if (outcome != 0) {
       return outcome;
     }
-    
+
     return 0;
   }
 

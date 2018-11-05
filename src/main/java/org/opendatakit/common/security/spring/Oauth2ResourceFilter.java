@@ -15,6 +15,7 @@
  */
 package org.opendatakit.common.security.spring;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,17 +27,13 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.CharEncoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -49,13 +46,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.opendatakit.common.utils.HttpClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * If the session does not already have an Authentication element,
@@ -63,17 +60,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * to a user's Google E-mail address (i.e., has a userinfo.email scope).
  * This is considered sufficient to assume the user's identity provided
  * the 'Enable Tokens' checkbox is checked.
- *
+ * <p>
  * This e-mail needs to be in the registered
  * users table and assigned permissions.
- *
+ * <p>
  * Ideally, we would have a custom scope in the Google Oauth 2.0 grant
  * for this Aggregate instance.  That is not yet possible.
- *
+ * <p>
  * parseToken() is copied verbatim from Spring Security Oauth2 code.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class Oauth2ResourceFilter extends GenericFilterBean {
 
@@ -81,23 +77,24 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
   private static final int SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS = 60000;
   private static final String ACCESS_TOKEN = "access_token";
   private static final String BEARER_TYPE = "Bearer";
-
-  private Logger logger = LoggerFactory.getLogger(Oauth2ResourceFilter.class);
   private static final ObjectMapper mapper = new ObjectMapper();
-
+  private static Map<String, Oauth2AuthenticationToken> authTokenMap
+      = new HashMap<String, Oauth2AuthenticationToken>();
+  private Logger logger = LoggerFactory.getLogger(Oauth2ResourceFilter.class);
   private AuthenticationProvider authenticationProvider = null;
   private HttpClientFactory httpClientFactory = null;
 
-  private static Map<String, Oauth2AuthenticationToken> authTokenMap
-      = new HashMap<String, Oauth2AuthenticationToken>();
+  public Oauth2ResourceFilter() {
+    super();
+  }
 
   private static synchronized Oauth2AuthenticationToken lookupToken(String accessToken) {
 
     Oauth2AuthenticationToken ti = authTokenMap.get(accessToken);
-    if ( ti != null && ( ti.getExpiration().compareTo(new Date()) < 0 )) {
-        // expired...
-        authTokenMap.remove(ti);
-        ti = null;
+    if (ti != null && (ti.getExpiration().compareTo(new Date()) < 0)) {
+      // expired...
+      authTokenMap.remove(ti);
+      ti = null;
     }
 
     return ti;
@@ -105,10 +102,6 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
 
   private static synchronized void insertToken(Oauth2AuthenticationToken token) {
     authTokenMap.put(token.getAccessToken(), token);
-  }
-
-  public Oauth2ResourceFilter() {
-    super();
   }
 
   public AuthenticationProvider getAuthenticationProvider() {
@@ -130,12 +123,12 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
   @Override
   public void afterPropertiesSet() throws ServletException {
     super.afterPropertiesSet();
-    if ( httpClientFactory == null ) {
+    if (httpClientFactory == null) {
       throw new IllegalStateException("httpClientFactory must be defined");
-   }
-   if ( authenticationProvider == null ) {
+    }
+    if (authenticationProvider == null) {
       throw new IllegalStateException("authenticationProvider must be defined");
-   }
+    }
   }
 
   protected String parseToken(HttpServletRequest request) {
@@ -144,182 +137,181 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
 
     // bearer type allows a request parameter as well
     if (token == null) {
-       logger.debug("Token not found in headers. Trying request parameters.");
-       token = request.getParameter(ACCESS_TOKEN);
-       if (token == null) {
-          logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
-       }
+      logger.debug("Token not found in headers. Trying request parameters.");
+      token = request.getParameter(ACCESS_TOKEN);
+      if (token == null) {
+        logger.debug("Token not found in request parameters.  Not an OAuth2 request.");
+      }
     }
 
     return token;
- }
+  }
 
- /**
-  * Parse the OAuth header parameters. The parameters will be oauth-decoded.
-  *
-  * @param request The request.
-  * @return The parsed parameters, or null if no OAuth authorization header was supplied.
-  */
- protected String parseHeaderToken(HttpServletRequest request) {
+  /**
+   * Parse the OAuth header parameters. The parameters will be oauth-decoded.
+   *
+   * @param request The request.
+   * @return The parsed parameters, or null if no OAuth authorization header was supplied.
+   */
+  protected String parseHeaderToken(HttpServletRequest request) {
     Enumeration<String> headers = request.getHeaders("Authorization");
     while (headers.hasMoreElements()) {
-       String value = headers.nextElement();
-       if ((value.toLowerCase().startsWith(BEARER_TYPE.toLowerCase()))) {
-          String authHeaderValue = value.substring(BEARER_TYPE.length()).trim();
+      String value = headers.nextElement();
+      if ((value.toLowerCase().startsWith(BEARER_TYPE.toLowerCase()))) {
+        String authHeaderValue = value.substring(BEARER_TYPE.length()).trim();
 
-          if (authHeaderValue.contains("oauth_signature_method") || authHeaderValue.contains("oauth_verifier")) {
-             // presence of oauth_signature_method or oauth_verifier implies an oauth 1.x request
-             continue;
-          }
+        if (authHeaderValue.contains("oauth_signature_method") || authHeaderValue.contains("oauth_verifier")) {
+          // presence of oauth_signature_method or oauth_verifier implies an oauth 1.x request
+          continue;
+        }
 
-          int commaIndex = authHeaderValue.indexOf(',');
-          if (commaIndex > 0) {
-             authHeaderValue = authHeaderValue.substring(0, commaIndex);
-          }
+        int commaIndex = authHeaderValue.indexOf(',');
+        if (commaIndex > 0) {
+          authHeaderValue = authHeaderValue.substring(0, commaIndex);
+        }
 
-          // todo: parse any parameters...
+        // todo: parse any parameters...
 
-          return authHeaderValue;
-       }
-       else {
-          // todo: support additional authorization schemes for different token types, e.g. "MAC" specified by
-          // http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token
-       }
+        return authHeaderValue;
+      } else {
+        // todo: support additional authorization schemes for different token types, e.g. "MAC" specified by
+        // http://tools.ietf.org/html/draft-hammer-oauth-v2-mac-token
+      }
     }
 
     return null;
- }
+  }
 
- private Map<String,Object> getJsonResponse(String url, String accessToken) {
+  private Map<String, Object> getJsonResponse(String url, String accessToken) {
 
-   Map<String,Object> nullData = new HashMap<String,Object>();
+    Map<String, Object> nullData = new HashMap<String, Object>();
 
-   // OK if we got here, we have a valid token.
-   // Issue the request...
-     URI nakedUri;
-     try {
-       nakedUri = new URI(url);
-     } catch (URISyntaxException e2) {
-       e2.printStackTrace();
-       logger.error(e2.toString());
-       return nullData;
-     }
+    // OK if we got here, we have a valid token.
+    // Issue the request...
+    URI nakedUri;
+    try {
+      nakedUri = new URI(url);
+    } catch (URISyntaxException e2) {
+      e2.printStackTrace();
+      logger.error(e2.toString());
+      return nullData;
+    }
 
-     List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-     qparams.add(new BasicNameValuePair("access_token", accessToken));
-     URI uri;
-     try {
-       uri = new URI( nakedUri.getScheme(), nakedUri.getUserInfo(), nakedUri.getHost(),
-           nakedUri.getPort(), nakedUri.getPath(), URLEncodedUtils.format(qparams, "UTF-8"), null);
-     } catch (URISyntaxException e1) {
-       e1.printStackTrace();
-       logger.error(e1.toString());
-       return nullData;
-     }
+    List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+    qparams.add(new BasicNameValuePair("access_token", accessToken));
+    URI uri;
+    try {
+      uri = new URI(nakedUri.getScheme(), nakedUri.getUserInfo(), nakedUri.getHost(),
+          nakedUri.getPort(), nakedUri.getPath(), URLEncodedUtils.format(qparams, "UTF-8"), null);
+    } catch (URISyntaxException e1) {
+      e1.printStackTrace();
+      logger.error(e1.toString());
+      return nullData;
+    }
 
-     // DON'T NEED clientId on the toke request...
-     // addCredentials(clientId, clientSecret, nakedUri.getHost());
-     // setup request interceptor to do preemptive auth
-     // ((DefaultHttpClient) client).addRequestInterceptor(getPreemptiveAuth(), 0);
+    // DON'T NEED clientId on the toke request...
+    // addCredentials(clientId, clientSecret, nakedUri.getHost());
+    // setup request interceptor to do preemptive auth
+    // ((DefaultHttpClient) client).addRequestInterceptor(getPreemptiveAuth(), 0);
 
-     // setup client
-     SocketConfig socketConfig = SocketConfig.copy(SocketConfig.DEFAULT)
-         .setSoTimeout(SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS)
-         .build();
-     RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-         .setConnectTimeout(SERVICE_TIMEOUT_MILLISECONDS)
-         .setAuthenticationEnabled(true)
-         .setRedirectsEnabled(true)
-         .setMaxRedirects(1)
-         .setCircularRedirectsAllowed(true)
-         .build();
-     CloseableHttpClient client = httpClientFactory.createHttpClient(socketConfig, null, requestConfig);
+    // setup client
+    SocketConfig socketConfig = SocketConfig.copy(SocketConfig.DEFAULT)
+        .setSoTimeout(SOCKET_ESTABLISHMENT_TIMEOUT_MILLISECONDS)
+        .build();
+    RequestConfig requestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
+        .setConnectTimeout(SERVICE_TIMEOUT_MILLISECONDS)
+        .setAuthenticationEnabled(true)
+        .setRedirectsEnabled(true)
+        .setMaxRedirects(1)
+        .setCircularRedirectsAllowed(true)
+        .build();
+    CloseableHttpClient client = httpClientFactory.createHttpClient(socketConfig, null, requestConfig);
 
-     HttpGet httpget = new HttpGet(uri);
-     logger.info(httpget.getURI().toString());
+    HttpGet httpget = new HttpGet(uri);
+    logger.info(httpget.getURI().toString());
 
-     HttpResponse response = null;
-     try {
-         response = client.execute(httpget, new BasicHttpContext());
-         int statusCode = response.getStatusLine().getStatusCode();
+    HttpResponse response = null;
+    try {
+      response = client.execute(httpget, new BasicHttpContext());
+      int statusCode = response.getStatusLine().getStatusCode();
 
-         if ( statusCode != HttpStatus.SC_OK ) {
-           logger.error("not 200: " + statusCode);
-           return nullData;
-         } else {
-           HttpEntity entity = response.getEntity();
+      if (statusCode != HttpStatus.SC_OK) {
+        logger.error("not 200: " + statusCode);
+        return nullData;
+      } else {
+        HttpEntity entity = response.getEntity();
 
-           if (entity != null && entity.getContentType().getValue().toLowerCase()
-                           .contains("json")) {
-             BufferedReader reader = null;
-             InputStreamReader isr = null;
-             try {
-               reader = new BufferedReader(isr = new InputStreamReader(entity.getContent(), CharEncoding.UTF_8));
-               @SuppressWarnings("unchecked")
-               Map<String,Object> userData = mapper.readValue(reader, Map.class);
-               return userData;
-             } finally {
-               if ( reader != null ) {
-                 try {
-                   reader.close();
-                 } catch ( IOException e ) {
-                   // ignore
-                 }
-               }
-               if ( isr != null ) {
-                 try {
-                   isr.close();
-                 } catch ( IOException e ) {
-                   // ignore
-                 }
-               }
-             }
-           } else {
-             logger.error("unexpected body");
-             return nullData;
-           }
-         }
-     } catch ( IOException e ) {
-       logger.error(e.toString());
-       return nullData;
-     } catch ( Exception e ) {
-       logger.error(e.toString());
-       return nullData;
-     }
- }
+        if (entity != null && entity.getContentType().getValue().toLowerCase()
+            .contains("json")) {
+          BufferedReader reader = null;
+          InputStreamReader isr = null;
+          try {
+            reader = new BufferedReader(isr = new InputStreamReader(entity.getContent(), CharEncoding.UTF_8));
+            @SuppressWarnings("unchecked")
+            Map<String, Object> userData = mapper.readValue(reader, Map.class);
+            return userData;
+          } finally {
+            if (reader != null) {
+              try {
+                reader.close();
+              } catch (IOException e) {
+                // ignore
+              }
+            }
+            if (isr != null) {
+              try {
+                isr.close();
+              } catch (IOException e) {
+                // ignore
+              }
+            }
+          }
+        } else {
+          logger.error("unexpected body");
+          return nullData;
+        }
+      }
+    } catch (IOException e) {
+      logger.error(e.toString());
+      return nullData;
+    } catch (Exception e) {
+      logger.error(e.toString());
+      return nullData;
+    }
+  }
 
- private Oauth2AuthenticationToken assertToken(String accessToken) {
+  private Oauth2AuthenticationToken assertToken(String accessToken) {
 
-   Oauth2AuthenticationToken ti = lookupToken(accessToken);
-   if ( ti != null ) {
-     return ti;
-   }
+    Oauth2AuthenticationToken ti = lookupToken(accessToken);
+    if (ti != null) {
+      return ti;
+    }
 
-   Map<String,Object> responseData;
+    Map<String, Object> responseData;
 
-   responseData = getJsonResponse("https://www.googleapis.com/oauth2/v1/tokeninfo", accessToken);
+    responseData = getJsonResponse("https://www.googleapis.com/oauth2/v1/tokeninfo", accessToken);
 
-   Integer expiresInSeconds = (Integer) responseData.get("expires_in");
-   if ( expiresInSeconds == null || expiresInSeconds == 0 ) {
-     return null;
-   }
-   Date deadline = null;
-   deadline = new Date( System.currentTimeMillis() + 1000L*expiresInSeconds);
+    Integer expiresInSeconds = (Integer) responseData.get("expires_in");
+    if (expiresInSeconds == null || expiresInSeconds == 0) {
+      return null;
+    }
+    Date deadline = null;
+    deadline = new Date(System.currentTimeMillis() + 1000L * expiresInSeconds);
 
-   String email = (String) responseData.get("email");
-   if ( email == null ) {
-     responseData = getJsonResponse("https://www.googleapis.com/oauth2/v1/userinfo", accessToken);
+    String email = (String) responseData.get("email");
+    if (email == null) {
+      responseData = getJsonResponse("https://www.googleapis.com/oauth2/v1/userinfo", accessToken);
 
-     email = (String) responseData.get("email");
-     if ( email == null ) {
-       return null;
-     }
-   }
+      email = (String) responseData.get("email");
+      if (email == null) {
+        return null;
+      }
+    }
 
-   ti = new Oauth2AuthenticationToken( accessToken, email, deadline);
-   insertToken(ti);
-   return ti;
- }
+    ti = new Oauth2AuthenticationToken(accessToken, email, deadline);
+    insertToken(ti);
+    return ti;
+  }
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -328,14 +320,14 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
     HttpServletRequest request = (HttpServletRequest) req;
     HttpServletResponse response = (HttpServletResponse) res;
 
-    if ( SecurityContextHolder.getContext().getAuthentication() == null ) {
+    if (SecurityContextHolder.getContext().getAuthentication() == null) {
       try {
         String accessToken = parseToken(request);
 
         if (accessToken != null) {
           Oauth2AuthenticationToken token = assertToken(accessToken);
 
-          if ( token != null ) {
+          if (token != null) {
             // In the common case, if token is non-null, the user should be known to the server.
             Authentication auth =
                 authenticationProvider.authenticate(token);
@@ -343,7 +335,7 @@ public class Oauth2ResourceFilter extends GenericFilterBean {
             SecurityContextHolder.getContext().setAuthentication(auth);
           }
         }
-      } catch ( AuthenticationException ex ) {
+      } catch (AuthenticationException ex) {
         // if the authentication fails to recognize the user, silently ignore the failure.
         // Warnings were already logged by the AuthenticationProvider.
       }

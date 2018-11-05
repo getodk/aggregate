@@ -16,9 +16,8 @@
 
 package org.opendatakit.aggregate.client.odktables;
 
-import java.util.ArrayList;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
 
 public interface ServerDiffServiceAsync {
 

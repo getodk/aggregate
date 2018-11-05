@@ -23,12 +23,12 @@ public class ManageTabUI extends AggregateTabBase {
 
   public ManageTabUI(AggregateUI baseUI) {
     super();
-    
+
     // build the UI    
     addSubTab(new FormsSubTab(baseUI), SubTabs.FORMS);
     addSubTab(new PublishSubTab(), SubTabs.PUBLISH);
     addSubTab(new SubmissionAdminSubTab(), SubTabs.SUBMISSION_ADMIN);
-   
+
     // register handler to manage tab selection change (and selecting our tab)
     registerClickHandlers(Tabs.MANAGEMENT, baseUI);
   }

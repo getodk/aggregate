@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.entity.serialization;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,34 +24,38 @@ import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
-@Produces({ "text/*" })
+@Produces({"text/*"})
 @Provider
 public class SimpleHTMLMessageWriter<T> implements MessageBodyWriter<T> {
 
   private static final XmlMapper mapper = new XmlMapper();
   private static final String DEFAULT_ENCODING = "utf-8";
 
+  protected static String getCharsetAsString(MediaType m) {
+    if (m == null) {
+      return DEFAULT_ENCODING;
+    }
+    String result = m.getParameters().get("charset");
+    return (result == null) ? DEFAULT_ENCODING : result;
+  }
+
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation annotations[],
-      MediaType mediaType) {
+                             MediaType mediaType) {
     return mediaType.getType().equals("text") && !mediaType.getSubtype().equals("xml");
   }
 
   @Override
   public void writeTo(T o, Class<?> aClass, Type type, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, Object> map, OutputStream rawStream)
+                      MediaType mediaType, MultivaluedMap<String, Object> map, OutputStream rawStream)
       throws IOException, WebApplicationException {
     String encoding = getCharsetAsString(mediaType);
     try {
@@ -84,13 +89,5 @@ public class SimpleHTMLMessageWriter<T> implements MessageBodyWriter<T> {
   @Override
   public long getSize(T arg0, Class<?> arg1, Type arg2, Annotation[] arg3, MediaType arg4) {
     return -1;
-  }
-
-  protected static String getCharsetAsString(MediaType m) {
-    if (m == null) {
-      return DEFAULT_ENCODING;
-    }
-    String result = m.getParameters().get("charset");
-    return (result == null) ? DEFAULT_ENCODING : result;
   }
 }

@@ -18,9 +18,6 @@ package org.opendatakit.aggregate.odktables.entity;
 
 import java.util.Date;
 import java.util.HashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.odktables.ColumnClient;
 import org.opendatakit.aggregate.client.odktables.RowClient;
 import org.opendatakit.aggregate.client.odktables.RowFilterScopeClient;
@@ -43,12 +40,13 @@ import org.opendatakit.aggregate.odktables.rest.entity.TableEntry;
 import org.opendatakit.aggregate.odktables.rest.entity.TableResource;
 import org.opendatakit.aggregate.odktables.rest.entity.TableRole;
 import org.opendatakit.common.utils.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Various methods for transforming objects from client to server code.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class UtilTransforms {
   private static final Logger log = LoggerFactory.getLogger(UtilTransforms.class);
@@ -73,7 +71,7 @@ public class UtilTransforms {
     serverRow.setLastUpdateUser(client.getLastUpdateUser());
     serverRow.setRowETag(client.getRowETag());
     serverRow.setRowId(client.getRowId());
-    HashMap<String,String> cvalues = client.getValues();
+    HashMap<String, String> cvalues = client.getValues();
     serverRow.setValues(Row.convertFromMap(cvalues));
     serverRow.setFormId(client.getFormId());
     serverRow.setLocale(client.getLocale());
@@ -96,33 +94,33 @@ public class UtilTransforms {
     RowFilterScope.Access access = getAccess(client.getAccess());
     String groupReadOnly = client.getGroupReadOnly();
     String groupModify = client.getGroupModify();
-    String groupPrivileged = client.getGroupPrivileged(); 
-   
+    String groupPrivileged = client.getGroupPrivileged();
+
     RowFilterScope serverScope = new RowFilterScope(access, rowOwner, groupReadOnly, groupModify, groupPrivileged);
 
     return serverScope;
   }
-  
+
   public static RowFilterScope.Access getAccess(RowFilterScopeClient.Access access) {
     RowFilterScope.Access convertedType = RowFilterScope.Access.FULL;
-    
+
     if (access != null) {
-      switch(access) {
-      case HIDDEN:
-        convertedType = RowFilterScope.Access.HIDDEN;
-        break;
-      case MODIFY:
-        convertedType = RowFilterScope.Access.MODIFY;
-        break;
-      case READ_ONLY:
-        convertedType = RowFilterScope.Access.READ_ONLY;
-        break;
-      case FULL:
-      default:
-        break;
+      switch (access) {
+        case HIDDEN:
+          convertedType = RowFilterScope.Access.HIDDEN;
+          break;
+        case MODIFY:
+          convertedType = RowFilterScope.Access.MODIFY;
+          break;
+        case READ_ONLY:
+          convertedType = RowFilterScope.Access.READ_ONLY;
+          break;
+        case FULL:
+        default:
+          break;
       }
     }
-    
+
     return convertedType;
   }
 
@@ -136,17 +134,17 @@ public class UtilTransforms {
       return serverScope;
     }
     switch (client.getType()) {
-    case DEFAULT:
-      serverScope = new Scope(Scope.Type.DEFAULT, client.getValue());
-      break;
-    case USER:
-      serverScope = new Scope(Scope.Type.USER, client.getValue());
-      break;
-    case GROUP:
-      serverScope = new Scope(Scope.Type.GROUP, client.getValue());
-      break;
-    default:
-      serverScope = Scope.EMPTY_SCOPE;
+      case DEFAULT:
+        serverScope = new Scope(Scope.Type.DEFAULT, client.getValue());
+        break;
+      case USER:
+        serverScope = new Scope(Scope.Type.USER, client.getValue());
+        break;
+      case GROUP:
+        serverScope = new Scope(Scope.Type.GROUP, client.getValue());
+        break;
+      default:
+        serverScope = Scope.EMPTY_SCOPE;
 
     }
     return serverScope;
@@ -158,26 +156,26 @@ public class UtilTransforms {
   public static TableAcl transform(TableAclClient client) {
     TableAcl ta = new TableAcl();
     switch (client.getRole()) {
-    case NONE:
-      ta.setRole(TableRole.NONE);
-      break;
-    case FILTERED_WRITER:
-      ta.setRole(TableRole.FILTERED_WRITER);
-      break;
-    case UNFILTERED_READER_FILTERED_WRITER:
-      ta.setRole(TableRole.UNFILTERED_READER_FILTERED_WRITER);
-      break;
-    case READER:
-      ta.setRole(TableRole.READER);
-      break;
-    case WRITER:
-      ta.setRole(TableRole.WRITER);
-      break;
-    case OWNER:
-      ta.setRole(TableRole.OWNER);
-      break;
-    default:
-      throw new IllegalStateException("No assignable permissions in transforming table role.");
+      case NONE:
+        ta.setRole(TableRole.NONE);
+        break;
+      case FILTERED_WRITER:
+        ta.setRole(TableRole.FILTERED_WRITER);
+        break;
+      case UNFILTERED_READER_FILTERED_WRITER:
+        ta.setRole(TableRole.UNFILTERED_READER_FILTERED_WRITER);
+        break;
+      case READER:
+        ta.setRole(TableRole.READER);
+        break;
+      case WRITER:
+        ta.setRole(TableRole.WRITER);
+        break;
+      case OWNER:
+        ta.setRole(TableRole.OWNER);
+        break;
+      default:
+        throw new IllegalStateException("No assignable permissions in transforming table role.");
     }
     ta.setScope(transform(client.getScope()));
     return ta;
@@ -224,28 +222,28 @@ public class UtilTransforms {
       throw new IllegalStateException("rowFilterScope un-handled value!");
     } else {
       switch (serverRow.getRowFilterScope().getDefaultAccess()) {
-      case FULL:
-        row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.FULL, serverRow.getRowFilterScope()
-            .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(), 
-            serverRow.getRowFilterScope().getGroupPrivileged()));
-        break;
-      case MODIFY:
-        row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.MODIFY, serverRow.getRowFilterScope()
-            .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(), 
-            serverRow.getRowFilterScope().getGroupPrivileged()));
-        break;
-      case READ_ONLY:
-        row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.READ_ONLY, serverRow.getRowFilterScope()
-            .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(), 
-            serverRow.getRowFilterScope().getGroupPrivileged()));
-        break;
-      case HIDDEN:
-        row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.HIDDEN, serverRow.getRowFilterScope()
-            .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(), 
-            serverRow.getRowFilterScope().getGroupPrivileged()));
-        break;
-      default:
-        throw new IllegalStateException("rowFilterScope un-handled value!");
+        case FULL:
+          row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.FULL, serverRow.getRowFilterScope()
+              .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(),
+              serverRow.getRowFilterScope().getGroupPrivileged()));
+          break;
+        case MODIFY:
+          row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.MODIFY, serverRow.getRowFilterScope()
+              .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(),
+              serverRow.getRowFilterScope().getGroupPrivileged()));
+          break;
+        case READ_ONLY:
+          row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.READ_ONLY, serverRow.getRowFilterScope()
+              .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(),
+              serverRow.getRowFilterScope().getGroupPrivileged()));
+          break;
+        case HIDDEN:
+          row.setRowFilterScope(new RowFilterScopeClient(RowFilterScopeClient.Access.HIDDEN, serverRow.getRowFilterScope()
+              .getRowOwner(), serverRow.getRowFilterScope().getGroupReadOnly(), serverRow.getRowFilterScope().getGroupModify(),
+              serverRow.getRowFilterScope().getGroupPrivileged()));
+          break;
+        default:
+          throw new IllegalStateException("rowFilterScope un-handled value!");
       }
     }
 
@@ -299,15 +297,15 @@ public class UtilTransforms {
     // First get the type of this scope
     ScopeClient sc = null;
     switch (serverScope.getType()) {
-    case DEFAULT:
-      sc = new ScopeClient(ScopeClient.Type.DEFAULT, serverScope.getValue());
-      break;
-    case USER:
-      sc = new ScopeClient(ScopeClient.Type.USER, serverScope.getValue());
-      break;
-    case GROUP:
-      sc = new ScopeClient(ScopeClient.Type.GROUP, serverScope.getValue());
-      break;
+      case DEFAULT:
+        sc = new ScopeClient(ScopeClient.Type.DEFAULT, serverScope.getValue());
+        break;
+      case USER:
+        sc = new ScopeClient(ScopeClient.Type.USER, serverScope.getValue());
+        break;
+      case GROUP:
+        sc = new ScopeClient(ScopeClient.Type.GROUP, serverScope.getValue());
+        break;
     }
     if (sc == null)
       sc = ScopeClient.EMPTY_SCOPE;
@@ -319,22 +317,22 @@ public class UtilTransforms {
     RowFilterScopeClient sc = null;
 
     switch (serverScope.getDefaultAccess()) {
-    case FULL:
-      sc = new RowFilterScopeClient(RowFilterScopeClient.Access.FULL, serverScope.getRowOwner(),
-          serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
-      break;
-    case MODIFY:
-      sc = new RowFilterScopeClient(RowFilterScopeClient.Access.MODIFY, serverScope.getRowOwner(),
-          serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
-      break;
-    case READ_ONLY:
-      sc = new RowFilterScopeClient(RowFilterScopeClient.Access.READ_ONLY, serverScope.getRowOwner(),
-          serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
-      break;
-    case HIDDEN:
-      sc = new RowFilterScopeClient(RowFilterScopeClient.Access.HIDDEN, serverScope.getRowOwner(),
-          serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
-      break;
+      case FULL:
+        sc = new RowFilterScopeClient(RowFilterScopeClient.Access.FULL, serverScope.getRowOwner(),
+            serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
+        break;
+      case MODIFY:
+        sc = new RowFilterScopeClient(RowFilterScopeClient.Access.MODIFY, serverScope.getRowOwner(),
+            serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
+        break;
+      case READ_ONLY:
+        sc = new RowFilterScopeClient(RowFilterScopeClient.Access.READ_ONLY, serverScope.getRowOwner(),
+            serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
+        break;
+      case HIDDEN:
+        sc = new RowFilterScopeClient(RowFilterScopeClient.Access.HIDDEN, serverScope.getRowOwner(),
+            serverScope.getGroupReadOnly(), serverScope.getGroupModify(), serverScope.getGroupPrivileged());
+        break;
     }
     if (sc == null) {
       throw new IllegalStateException("rowFilterScope un-handled value!");
@@ -348,26 +346,26 @@ public class UtilTransforms {
   public static TableAclClient transform(TableAcl serverAcl) {
     TableAclClient tac = new TableAclClient();
     switch (serverAcl.getRole()) {
-    case NONE:
-      tac.setRole(TableRoleClient.NONE);
-      break;
-    case FILTERED_WRITER:
-      tac.setRole(TableRoleClient.FILTERED_WRITER);
-      break;
-    case UNFILTERED_READER_FILTERED_WRITER:
-      tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
-      break;
-    case READER:
-      tac.setRole(TableRoleClient.READER);
-      break;
-    case WRITER:
-      tac.setRole(TableRoleClient.WRITER);
-      break;
-    case OWNER:
-      tac.setRole(TableRoleClient.OWNER);
-      break;
-    default:
-      throw new IllegalStateException("No assignable permissions in transforming table role.");
+      case NONE:
+        tac.setRole(TableRoleClient.NONE);
+        break;
+      case FILTERED_WRITER:
+        tac.setRole(TableRoleClient.FILTERED_WRITER);
+        break;
+      case UNFILTERED_READER_FILTERED_WRITER:
+        tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
+        break;
+      case READER:
+        tac.setRole(TableRoleClient.READER);
+        break;
+      case WRITER:
+        tac.setRole(TableRoleClient.WRITER);
+        break;
+      case OWNER:
+        tac.setRole(TableRoleClient.OWNER);
+        break;
+      default:
+        throw new IllegalStateException("No assignable permissions in transforming table role.");
     }
     tac.setScope(UtilTransforms.transform(serverAcl.getScope()));
     return tac;
@@ -380,26 +378,26 @@ public class UtilTransforms {
     TableAclClient tac = new TableAclClient();
     // now set the correct client side role
     switch (serverResource.getRole()) {
-    case NONE:
-      tac.setRole(TableRoleClient.NONE);
-      break;
-    case FILTERED_WRITER:
-      tac.setRole(TableRoleClient.FILTERED_WRITER);
-      break;
-    case UNFILTERED_READER_FILTERED_WRITER:
-      tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
-      break;
-    case READER:
-      tac.setRole(TableRoleClient.READER);
-      break;
-    case WRITER:
-      tac.setRole(TableRoleClient.WRITER);
-      break;
-    case OWNER:
-      tac.setRole(TableRoleClient.OWNER);
-      break;
-    default:
-      throw new IllegalStateException("No assignable permissions in transforming table role.");
+      case NONE:
+        tac.setRole(TableRoleClient.NONE);
+        break;
+      case FILTERED_WRITER:
+        tac.setRole(TableRoleClient.FILTERED_WRITER);
+        break;
+      case UNFILTERED_READER_FILTERED_WRITER:
+        tac.setRole(TableRoleClient.UNFILTERED_READER_FILTERED_WRITER);
+        break;
+      case READER:
+        tac.setRole(TableRoleClient.READER);
+        break;
+      case WRITER:
+        tac.setRole(TableRoleClient.WRITER);
+        break;
+      case OWNER:
+        tac.setRole(TableRoleClient.OWNER);
+        break;
+      default:
+        throw new IllegalStateException("No assignable permissions in transforming table role.");
     }
     tac.setScope(UtilTransforms.transform(serverResource.getScope()));
     TableAclResourceClient tarc = new TableAclResourceClient(tac);

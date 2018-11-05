@@ -18,10 +18,7 @@ package org.opendatakit.aggregate.odktables.relation;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.Sequencer;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.relation.DbColumnDefinitions.DbColumnDefinitionsEntity;
@@ -39,6 +36,8 @@ import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
 import org.opendatakit.common.ermodel.Entity;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates and updates new Entity objects for relations.
@@ -51,7 +50,6 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
- *
  */
 
 public class EntityCreator {
@@ -62,20 +60,17 @@ public class EntityCreator {
   /**
    * Create a new {@link DbTableEntry} entity.
    *
-   * @param tableId
-   *          the table id. May be null to auto generate.
-   * @param pendingSchemaETag
-   *          the unique Id for the (new) schema.
-   * @param aprioriDataSequenceValue
-   *          the monotonically increasing sequence value
-   *          that is less than the lowest such value in
-   *          this table's DbLogTable.
+   * @param tableId                  the table id. May be null to auto generate.
+   * @param pendingSchemaETag        the unique Id for the (new) schema.
+   * @param aprioriDataSequenceValue the monotonically increasing sequence value
+   *                                 that is less than the lowest such value in
+   *                                 this table's DbLogTable.
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
   public DbTableEntryEntity newTableEntryEntity(String tableId, String pendingSchemaETag,
-      String aprioriDataSequenceValue, CallingContext cc) throws ODKDatastoreException {
+                                                String aprioriDataSequenceValue, CallingContext cc) throws ODKDatastoreException {
     Validate.notNull(cc);
     Validate.notNull(tableId);
     Validate.notNull(pendingSchemaETag);
@@ -90,16 +85,14 @@ public class EntityCreator {
   /**
    * Create a new {@link DbColumnDefinitions} entity.
    *
-   * @param tableId
-   *          the id of the table for the new column.
-   * @param column
-   *          the new column.
+   * @param tableId the id of the table for the new column.
+   * @param column  the new column.
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
   public DbColumnDefinitionsEntity newColumnEntity(String tableId, String schemaETag,
-      Column column, CallingContext cc) throws ODKDatastoreException {
+                                                   Column column, CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notEmpty(schemaETag);
     Validate.notNull(column);
@@ -127,9 +120,9 @@ public class EntityCreator {
    * @throws ODKDatastoreException
    */
   public DbTableFileInfoEntity newTableFileInfoEntity(String odkClientVersion,
-      String tableId, String pathToFile,
-      TablesUserPermissions userPermissions,
-      CallingContext cc) throws ODKDatastoreException {
+                                                      String tableId, String pathToFile,
+                                                      TablesUserPermissions userPermissions,
+                                                      CallingContext cc) throws ODKDatastoreException {
     // first do some preliminary checks
     Validate.notEmpty(pathToFile);
     // TODO: check permissions to create a file...
@@ -137,7 +130,7 @@ public class EntityCreator {
     entity.setOdkClientVersion(odkClientVersion);
     entity.setTableId(tableId);
     entity.setPathToFile(pathToFile);
-    
+
     entity.setDeleted(false);
     entity.setFilterType(null);
     entity.setFilterValue(null);
@@ -148,18 +141,15 @@ public class EntityCreator {
   /**
    * Return a new Entity representing a table definition.
    *
-   * @param tableId
-   *          cannot be null
-   * @param tableKey
-   *          cannot be null
-   * @param dbTableName
-   *          cannot be null
+   * @param tableId     cannot be null
+   * @param tableKey    cannot be null
+   * @param dbTableName cannot be null
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
   public DbTableDefinitionsEntity newTableDefinitionEntity(String tableId, String schemaETag,
-      String dbTableName, CallingContext cc) throws ODKDatastoreException {
+                                                           String dbTableName, CallingContext cc) throws ODKDatastoreException {
     // Validate those parameters defined as non-null in the ODK Tables Schema
     // Google doc.
     Validate.notEmpty(tableId);
@@ -176,18 +166,15 @@ public class EntityCreator {
   /**
    * Create a new {@link DbTableAcl} entity.
    *
-   * @param tableId
-   *          the id of the table for the new table acl entity
-   * @param scope
-   *          the scope of the acl
-   * @param role
-   *          the role to be applied to the given scope
+   * @param tableId the id of the table for the new table acl entity
+   * @param scope   the scope of the acl
+   * @param role    the role to be applied to the given scope
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
   public DbTableAclEntity newTableAclEntity(String tableId, Scope scope, TableRole role,
-      CallingContext cc) throws ODKDatastoreException {
+                                            CallingContext cc) throws ODKDatastoreException {
     Validate.notEmpty(tableId);
     Validate.notNull(scope);
     // can't have an empty scope type in an acl entity
@@ -205,9 +192,9 @@ public class EntityCreator {
   }
 
   public void setRowFields(Entity row, String rowETag, String dataETagAtModification,
-      String lastUpdateUser, boolean deleted,
-      RowFilterScope rowFilterScope, String formId, String locale, String savepointType,
-      String savepointTimestamp, String savepointCreator, ArrayList<DataKeyValue> values, List<DbColumnDefinitionsEntity> columns)
+                           String lastUpdateUser, boolean deleted,
+                           RowFilterScope rowFilterScope, String formId, String locale, String savepointType,
+                           String savepointTimestamp, String savepointCreator, ArrayList<DataKeyValue> values, List<DbColumnDefinitionsEntity> columns)
       throws BadColumnNameException {
     row.set(DbTable.ROW_ETAG, rowETag);
     row.set(DbTable.DATA_ETAG_AT_MODIFICATION, dataETagAtModification);
@@ -238,7 +225,7 @@ public class EntityCreator {
     row.set(DbTable.SAVEPOINT_TIMESTAMP, savepointTimestamp);
     row.set(DbTable.SAVEPOINT_CREATOR, savepointCreator);
 
-    for (DataKeyValue kv : values ) {
+    for (DataKeyValue kv : values) {
       String value = kv.value;
       String name = kv.column;
       // There are three possbilities here.
@@ -269,7 +256,7 @@ public class EntityCreator {
   }
 
   private DbColumnDefinitionsEntity findColumn(String elementKey,
-      List<DbColumnDefinitionsEntity> columns) {
+                                               List<DbColumnDefinitionsEntity> columns) {
     for (DbColumnDefinitionsEntity entity : columns) {
       String colName = entity.getElementKey();
       if (elementKey.equals(colName))
@@ -280,28 +267,23 @@ public class EntityCreator {
 
   /**
    * Create a new {@link DbLogTable} row entity.
-   *
+   * <p>
    * NOTE: the rowETag is the primary key for this entry.
    * This is critical!!!! Do not re-use dataETag values across
    * rows!!!!
    *
-   * @param logTable
-   *          the {@link DbLogTable} relation.
-   * @param dataETagAtModification
-   *          the data etag at the time of creation
-   * @param row
-   *          the row
-   * @param columns
-   *          the {@link DbColumnDefinitions} entities for the log table
-   * @param sequencer
-   *          the sequencer for ordering the log entries
+   * @param logTable               the {@link DbLogTable} relation.
+   * @param dataETagAtModification the data etag at the time of creation
+   * @param row                    the row
+   * @param columns                the {@link DbColumnDefinitions} entities for the log table
+   * @param sequencer              the sequencer for ordering the log entries
    * @param cc
    * @return the created entity, not yet persisted
    * @throws ODKDatastoreException
    */
   public Entity newLogEntity(DbLogTable logTable, String dataETagAtModification,
-      String previousRowETag, Entity row,
-      List<DbColumnDefinitionsEntity> columns, Sequencer sequencer, CallingContext cc)
+                             String previousRowETag, Entity row,
+                             List<DbColumnDefinitionsEntity> columns, Sequencer sequencer, CallingContext cc)
       throws ODKDatastoreException {
     Validate.notNull(logTable);
     Validate.notEmpty(dataETagAtModification);

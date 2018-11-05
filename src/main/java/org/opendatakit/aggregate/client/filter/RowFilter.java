@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
-
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.FilterOperation;
 import org.opendatakit.aggregate.constants.common.RowOrCol;
@@ -39,7 +38,7 @@ public final class RowFilter extends Filter implements Serializable {
   }
 
   public RowFilter(Visibility keepRemove, Column column, FilterOperation compare, String inputParam,
-      Long ordinal) {
+                   Long ordinal) {
     super(keepRemove, RowOrCol.ROW, ordinal);
     this.operation = compare;
     this.input = inputParam;
@@ -48,7 +47,7 @@ public final class RowFilter extends Filter implements Serializable {
 
   /**
    * This constructor should only be used by the server
-   * 
+   *
    * @param uri
    */
   public RowFilter(String uri) {
@@ -62,7 +61,7 @@ public final class RowFilter extends Filter implements Serializable {
   public void resetUriToDefault() {
     uri = UIConsts.URI_DEFAULT;
   }
-  
+
 
   public FilterOperation getOperation() {
     return operation;
@@ -79,15 +78,15 @@ public final class RowFilter extends Filter implements Serializable {
   public void setInput(String input) {
     this.input = input;
   }
-  
-  public void setColumn(Column column) {
-    this.column = column;
-  }
-  
+
   public Column getColumn() {
     return this.column;
   }
-  
+
+  public void setColumn(Column column) {
+    this.column = column;
+  }
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
@@ -96,11 +95,11 @@ public final class RowFilter extends Filter implements Serializable {
     if (!(obj instanceof RowFilter)) {
       return false;
     }
-    
-    if(!super.equals(obj)) {
+
+    if (!super.equals(obj)) {
       return false;
     }
-    
+
     RowFilter other = (RowFilter) obj;
     return (column == null ? (other.column == null) : (column.equals(other.column)))
         && (input == null ? (other.input == null) : (input.equals(other.input)))
@@ -115,11 +114,11 @@ public final class RowFilter extends Filter implements Serializable {
     int hashCode = 11;
     if (column != null)
       hashCode += column.hashCode();
-    if(input != null)
+    if (input != null)
       hashCode += input.hashCode();
     if (operation != null)
       hashCode += operation.hashCode();
     return hashCode;
   }
-  
+
 }

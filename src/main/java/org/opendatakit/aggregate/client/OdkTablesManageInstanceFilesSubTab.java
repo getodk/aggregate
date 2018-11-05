@@ -16,38 +16,35 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewInstanceFileInfo;
 import org.opendatakit.aggregate.client.widgets.OdkTablesTableIdServletPopupButton.OdkTablesData;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
-
 /**
  * This class builds the subtab that allows for viewing and managing the files
  * that are associated with data rows in an ODKTables tables. <br>
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
-        implements OdkTablesData, TablesChangeNotification {
+    implements OdkTablesData, TablesChangeNotification {
 
+  // array list so that you can access with indices reliably
+  private final ArrayList<TableEntryClient> currentTables;
   private OdkTablesTabUI parent;
-  
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
   private FlexTable selectTablePanel;
-
   /**
    * This will be the box that lets you choose which of the tables you are going
    * to view.
@@ -59,11 +56,7 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
    * This is the int in the list box that is selected.
    */
   private int selectedValue;
-
   private HorizontalPanel topPanel;
-
-  // array list so that you can access with indices reliably
-  private final ArrayList<TableEntryClient> currentTables;
   // the box that shows the data
   private OdkTablesViewInstanceFileInfo tableFileData;
 
@@ -163,12 +156,12 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
   }
 
   public boolean addTablesToListBox(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
-    if ( currentTables.size() == tables.size() && !tableListChanged && 
-         currentTables.containsAll(tables) ) {
+    if (currentTables.size() == tables.size() && !tableListChanged &&
+        currentTables.containsAll(tables)) {
       // no change...
       return false;
     }
-    
+
     // clear the old tables
     currentTables.clear();
     // and add the new
@@ -180,7 +173,7 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
     for (int i = 0; i < currentTables.size(); i++) {
       tableBox.addItem(currentTables.get(i).getTableId());
     }
-    
+
     return true;
   }
 
@@ -193,7 +186,7 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
       // we also want to have no curren table.
       currentTable = null;
       // clear the "displaying" thing
-      if ( selectTablePanel.getRowCount() > 2 ) {
+      if (selectTablePanel.getRowCount() > 2) {
         selectTablePanel.removeRow(2);
       }
     } else {
@@ -208,7 +201,7 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
 
   @Override
   public String getTableId() {
-    if ( currentTable == null ) {
+    if (currentTable == null) {
       return null;
     } else {
       return currentTable.getTableId();
@@ -247,7 +240,7 @@ public class OdkTablesManageInstanceFilesSubTab extends AggregateSubTabBase
   @Override
   public void updateTableSet(boolean tableListChanged) {
     boolean realChange = updateTableList(parent.getTables(), tableListChanged);
-    if ( realChange ) {
+    if (realChange) {
       updateTableData();
     }
   }

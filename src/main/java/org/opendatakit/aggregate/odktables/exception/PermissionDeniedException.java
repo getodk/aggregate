@@ -23,8 +23,8 @@ public class PermissionDeniedException extends ODKTablesException implements Ser
   // private static final long serialVersionUID = 1L;
 
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -6853618331957236951L;
 
   public PermissionDeniedException() {

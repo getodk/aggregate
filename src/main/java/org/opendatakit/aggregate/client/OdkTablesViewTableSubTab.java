@@ -16,37 +16,34 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.OdkTablesTabUI.TablesChangeNotification;
 import org.opendatakit.aggregate.client.odktables.TableEntryClient;
 import org.opendatakit.aggregate.client.table.OdkTablesViewTable;
 import org.opendatakit.aggregate.client.widgets.OdkTablesAdvanceRowsButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
-
 /**
  * This class builds the subtab that allows for viewing the ODKTables tables
  * that are currently present in the datastore.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements TablesChangeNotification {
 
+  // array list so that you can access with indices reliably
+  private final ArrayList<TableEntryClient> currentTables;
   private OdkTablesTabUI parent;
-  
   // this is the panel with the information and the dropdown box
   // that tells you to select a table
   private FlexTable selectTablePanel;
-
   /**
    * This will be the box that lets you choose which of the tables you are going
    * to view.
@@ -59,11 +56,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
    * to display.
    */
   private int selectedValue;
-
   private HorizontalPanel topPanel;
-
-  // array list so that you can access with indices reliably
-  private final ArrayList<TableEntryClient> currentTables;
   // the box that shows the data
   private OdkTablesViewTable tableData;
   private OdkTablesAdvanceRowsButton tableAdvanceButton;
@@ -111,7 +104,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
     tableData = new OdkTablesViewTable(this);
     tableAdvanceButton = new OdkTablesAdvanceRowsButton(tableData);
     tableData.setAdvanceButton(tableAdvanceButton);
-    
+
     selectTablePanel = new FlexTable();
     selectTablePanel.getElement().setId("select_table_panel");
     selectTablePanel.setHTML(0, 0, "<h2 id=\"table_name\"> Select a Table </h2>");
@@ -141,7 +134,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
 
   private boolean updateTableList(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
     boolean realChange = addTablesToListBox(tables, tableListChanged);
-    if ( tables.isEmpty() ) {
+    if (tables.isEmpty()) {
       tableBox.clear();
       setTabToDisplayZero();
     } else {
@@ -172,7 +165,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
   public void update() {
     parent.update(this);
   }
-  
+
   public boolean addTablesToListBox(ArrayList<TableEntryClient> tables, boolean tableListChanged) {
     if (currentTables.size() == tables.size() && !tableListChanged
         && currentTables.containsAll(tables)) {
@@ -204,7 +197,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
       // we also want to have no current table.
       currentTable = null;
       // clear the "displaying: " thing.
-      if ( selectTablePanel.getRowCount() > 1 ) {
+      if (selectTablePanel.getRowCount() > 1) {
         selectTablePanel.removeRow(1);
       }
 
@@ -214,7 +207,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
 
       selectTablePanel.setHTML(1, 0, "<h2 id=\"table_displayed\"> Displaying: </h2>");
       selectTablePanel.setHTML(1, 1, new SafeHtmlBuilder().appendHtmlConstant("<h2 id=\table_name\">").appendEscaped(" " + currentTable.getTableId() + " ").appendHtmlConstant("</h2>").toSafeHtml());
-      selectTablePanel.setWidget(1,  2, tableAdvanceButton);
+      selectTablePanel.setWidget(1, 2, tableAdvanceButton);
       add(tableData);
     }
   }
@@ -254,7 +247,7 @@ public class OdkTablesViewTableSubTab extends AggregateSubTabBase implements Tab
   @Override
   public void updateTableSet(boolean tableListChanged) {
     boolean realChange = updateTableList(parent.getTables(), tableListChanged);
-    if ( realChange ) {
+    if (realChange) {
       updateTableData();
     }
   }

@@ -49,8 +49,8 @@ package org.opendatakit.aggregate.odktables.rest;
  * server.
  * </ul>
  * </ol>
- * @author sudar.sam@gmail.com
  *
+ * @author sudar.sam@gmail.com
  */
 public class ConflictType {
 

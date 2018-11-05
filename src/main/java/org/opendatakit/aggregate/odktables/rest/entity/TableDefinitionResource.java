@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.util.ArrayList;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
-@JacksonXmlRootElement(localName="tableDefinitionResource")
+@JacksonXmlRootElement(localName = "tableDefinitionResource")
 public class TableDefinitionResource extends TableDefinition {
 
   /**
@@ -49,12 +48,12 @@ public class TableDefinitionResource extends TableDefinition {
     return this.selfUri;
   }
 
-  public String getTableUri() {
-    return this.tableUri;
-  }
-
   public void setSelfUri(final String selfUri) {
     this.selfUri = selfUri;
+  }
+
+  public String getTableUri() {
+    return this.tableUri;
   }
 
   public void setTableUri(final String tableUri) {

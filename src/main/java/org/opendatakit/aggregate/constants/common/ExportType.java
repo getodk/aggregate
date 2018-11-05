@@ -20,26 +20,26 @@ import java.io.Serializable;
 
 
 public enum ExportType implements Serializable {
-    CSV("CSV file"),
-    KML("KML file"),
-    JSONFILE("JSON file");
-    
-    private String displayText;
-    
-    private ExportType() {
-      // GWT
-    }
-    
-    private ExportType(String display) {
-      displayText = display;
-    }
-    
-    public String getDisplayText() {
-      return displayText;
-    }
-    
-    public String toString() {
-        return displayText;
-    }
+  CSV("CSV file"),
+  KML("KML file"),
+  JSONFILE("JSON file");
 
- }
+  private String displayText;
+
+  private ExportType() {
+    // GWT
+  }
+
+  private ExportType(String display) {
+    displayText = display;
+  }
+
+  public String getDisplayText() {
+    return displayText;
+  }
+
+  public String toString() {
+    return displayText;
+  }
+
+}

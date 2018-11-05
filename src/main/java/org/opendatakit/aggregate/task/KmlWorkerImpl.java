@@ -20,9 +20,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -40,13 +37,14 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common worker implementation for the generation of kml files.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class KmlWorkerImpl {
 
@@ -58,7 +56,7 @@ public class KmlWorkerImpl {
   private final CallingContext cc;
 
   public KmlWorkerImpl(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-      List<KmlSelection> kmlElementsToInclude, CallingContext cc) {
+                       List<KmlSelection> kmlElementsToInclude, CallingContext cc) {
     this.form = form;
     this.persistentResultsKey = persistentResultsKey;
     this.attemptCount = attemptCount;
@@ -103,7 +101,7 @@ public class KmlWorkerImpl {
       formatter.beforeProcessSubmissions(cc);
       List<Submission> submissions;
       int count = 0;
-      for (;;) {
+      for (; ; ) {
         count++;
         logger.info("iteration " + Integer.toString(count) + " before issuing query for "
             + form.getFormId());

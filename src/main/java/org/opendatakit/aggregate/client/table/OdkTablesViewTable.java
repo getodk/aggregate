@@ -17,8 +17,10 @@
 package org.opendatakit.aggregate.client.table;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.AggregateSubTabBase;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesViewTableSubTab;
@@ -33,34 +35,15 @@ import org.opendatakit.aggregate.client.widgets.OdkTablesDeleteRowButton;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
-
 /**
  * Displays the contents of a table.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class OdkTablesViewTable extends FlexTable {
 
-  // the table that we are currently displaying.
-  private TableEntryClient currentTable;
-
-  // that table's rows
-  private ArrayList<RowClient> rows;
-
-  // that table's column names
-  private ArrayList<String> columnNames;
-  
-  private String refreshCursor;
-  private String resumeCursor;
-  private boolean hasMore;
-
   // this is the heading for the delete row button.
   private static final String DELETE_ROW_HEADING = "Delete";
-
   // these are far right
   private static final String SAVEPOINT_TYPE = "Savepoint Type";
   private static final String FORM_ID = "Form Id";
@@ -77,19 +60,60 @@ public class OdkTablesViewTable extends FlexTable {
   private static final String DATA_ETAG_AT_MODIFICATION = "Changeset Data ETag";
   private static final String LAST_UPDATE_USER = "Last Update By Verified User";
   private static final String CREATED_BY_USER = "Created By Verified User";
-
-  private AggregateSubTabBase tableSubTab;
-
-  private OdkTablesAdvanceRowsButton tableAdvanceButton;
-  
   // this is the number of columns that exist for a table as returned
   // by the server that are NOT user defined.
   private static final int NUMBER_ADMIN_COLUMNS = 16;
-
   // the message to display when there is no data in the table.
   private static String NO_DATA_MESSAGE = "There is no data in this table.";
   // the message to display when there are no rows in the table
   private static String NO_ROWS_MESSAGE = "There are no rows to display.";
+  // the table that we are currently displaying.
+  private TableEntryClient currentTable;
+  // that table's rows
+  private ArrayList<RowClient> rows;
+  // that table's column names
+  private ArrayList<String> columnNames;
+  private String refreshCursor;
+  private String resumeCursor;
+  private boolean hasMore;
+  private AggregateSubTabBase tableSubTab;
+  private OdkTablesAdvanceRowsButton tableAdvanceButton;
+  // set up the callback object
+  AsyncCallback<TableContentsClient> getDataCallback =
+      new AsyncCallback<TableContentsClient>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          if (caught instanceof EntityNotFoundExceptionClient) {
+            // if this happens it is PROBABLY, but not necessarily, because
+            // we've deleted the table.
+            // TODO ensure the correct exception makes it here
+            ((OdkTablesViewTableSubTab) AggregateUI.getUI()
+                .getSubTab(SubTabs.VIEWTABLE)).setTabToDisplayZero();
+          } else if (caught instanceof PermissionDeniedExceptionClient) {
+            // do nothing, b/c it's probably legitimate that you don't get an
+            // error if there are rows you're not allowed to see.
+
+          } else {
+            AggregateUI.getUI().reportError(caught);
+          }
+        }
+
+        @Override
+        public void onSuccess(TableContentsClient tcc) {
+          columnNames = tcc.columnNames;
+          refreshCursor = tcc.websafeRefetchCursor;
+          resumeCursor = tcc.websafeResumeCursor;
+          hasMore = tcc.hasMore;
+          if (tableAdvanceButton != null) {
+            tableAdvanceButton.setEnabled(hasMore);
+          }
+          setColumnHeadings(columnNames);
+
+          rows = tcc.rows;
+          setRows(rows);
+
+        }
+      };
 
   /**
    * This is the constructor to call when there has not been a table selected.
@@ -110,21 +134,21 @@ public class OdkTablesViewTable extends FlexTable {
   }
 
   public OdkTablesViewTable(AggregateSubTabBase tableSubTab,
-      TableEntryClient table) {
+                            TableEntryClient table) {
     this(tableSubTab);
 
     updateDisplay(table);
 
     this.currentTable = table;
   }
-  
+
   public void setAdvanceButton(OdkTablesAdvanceRowsButton tableAdvanceButton) {
     this.tableAdvanceButton = tableAdvanceButton;
-    if ( this.tableAdvanceButton != null ) {
+    if (this.tableAdvanceButton != null) {
       this.tableAdvanceButton.setEnabled(hasMore);
     }
   }
-  
+
   /**
    * This updates the display to show the contents of the table.
    */
@@ -135,13 +159,13 @@ public class OdkTablesViewTable extends FlexTable {
     // Window.alert("in odktablesViewTable.updateDisplay()");
 
     this.currentTable = table;
-    
-    if ( oldTable == null || currentTable == null ||
-         !oldTable.getTableId().equals(currentTable.getTableId()) ) {
+
+    if (oldTable == null || currentTable == null ||
+        !oldTable.getTableId().equals(currentTable.getTableId())) {
       this.refreshCursor = null;
       this.resumeCursor = null;
       this.hasMore = false;
-      if ( tableAdvanceButton != null ) {
+      if (tableAdvanceButton != null) {
         this.tableAdvanceButton.setEnabled(hasMore);
       }
     }
@@ -156,57 +180,20 @@ public class OdkTablesViewTable extends FlexTable {
 
   }
 
-  // set up the callback object
-  AsyncCallback<TableContentsClient> getDataCallback =
-      new AsyncCallback<TableContentsClient>() {
-    @Override
-    public void onFailure(Throwable caught) {
-      if (caught instanceof EntityNotFoundExceptionClient) {
-        // if this happens it is PROBABLY, but not necessarily, because
-        // we've deleted the table.
-        // TODO ensure the correct exception makes it here
-        ((OdkTablesViewTableSubTab) AggregateUI.getUI()
-            .getSubTab(SubTabs.VIEWTABLE)).setTabToDisplayZero();
-      } else if (caught instanceof PermissionDeniedExceptionClient) {
-        // do nothing, b/c it's probably legitimate that you don't get an
-        // error if there are rows you're not allowed to see.
-
-      } else {
-        AggregateUI.getUI().reportError(caught);
-      }
-    }
-
-    @Override
-    public void onSuccess(TableContentsClient tcc) {
-      columnNames = tcc.columnNames;
-      refreshCursor = tcc.websafeRefetchCursor;
-      resumeCursor = tcc.websafeResumeCursor;
-      hasMore = tcc.hasMore;
-      if ( tableAdvanceButton != null ) {
-        tableAdvanceButton.setEnabled(hasMore);
-      }
-      setColumnHeadings(columnNames);
-
-      rows = tcc.rows;
-      setRows(rows);
-
-    }
-  };
-
   public void nextPage() {
     if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) && hasMore) {
       SecureGWT.getServerDataService().getTableContents(currentTable.getTableId(), resumeCursor,
-        getDataCallback);
+          getDataCallback);
     }
   }
-  
+
   public void updateData(TableEntryClient table) {
     // TODO: paginate this
     if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
         .contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES)) {
       SecureGWT.getServerDataService().getTableContents(table.getTableId(), refreshCursor,
-        getDataCallback);
+          getDataCallback);
     }
   }
 
@@ -342,7 +329,7 @@ public class OdkTablesViewTable extends FlexTable {
           // now set the delete button
           OdkTablesDeleteRowButton deleteButton = new OdkTablesDeleteRowButton(this,
               currentTable.getTableId(), row.getRowId(), row.getRowETag());
-          if ( !AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
+          if (!AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES)) {
             deleteButton.setEnabled(false);
           }
           setWidget(currentRow, 0, deleteButton);

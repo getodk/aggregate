@@ -27,46 +27,34 @@ import java.io.Serializable;
  *
  * @author sudar.sam@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class RowFilterScopeClient implements Serializable {
 
-  /**
-     *
-     */
-  private static final long serialVersionUID = -76035214486037194L;
-
   public static final RowFilterScopeClient EMPTY_ROW_FILTER_SCOPE;
+  /**
+   *
+   */
+  private static final long serialVersionUID = -76035214486037194L;
 
   static {
     EMPTY_ROW_FILTER_SCOPE = new RowFilterScopeClient();
     EMPTY_ROW_FILTER_SCOPE.initFields(Access.FULL, null, null, null, null);
   }
 
-  public enum Access {
-    FULL, MODIFY, READ_ONLY, HIDDEN,
-  }
-
   private Access defaultAccess;
-
   private String rowOwner;
-  
   private String groupReadOnly;
-  
   private String groupModify;
-  
   private String groupPrivileged;
 
   /**
    * Constructs a new Scope.
    *
-   * @param access
-   *          the type of the scope. Must not be null. The empty scope may be
-   *          accessed as {@link Scope#EMPTY_SCOPE}.
-   * @param rowOwner
-   *          the userId if type is {@link Access#USER}, or the groupId of type is
-   *          {@link Access#GROUP}. If type is {@link Access#FULL}, value is
-   *          ignored (set to null).
+   * @param access   the type of the scope. Must not be null. The empty scope may be
+   *                 accessed as {@link Scope#EMPTY_SCOPE}.
+   * @param rowOwner the userId if type is {@link Access#USER}, or the groupId of type is
+   *                 {@link Access#GROUP}. If type is {@link Access#FULL}, value is
+   *                 ignored (set to null).
    */
   public RowFilterScopeClient(Access access, String rowOwner, String groupReadOnly, String groupModify, String groupPrivileged) {
     initFields(access, rowOwner, groupReadOnly, groupModify, groupPrivileged);
@@ -91,13 +79,12 @@ public class RowFilterScopeClient implements Serializable {
   }
 
   /**
-   * @param access
-   *          the access to set
+   * @param access the access to set
    */
   public void setAccess(Access access) {
     this.defaultAccess = access;
   }
-  
+
   /**
    * @return the rowOwner
    */
@@ -106,57 +93,49 @@ public class RowFilterScopeClient implements Serializable {
   }
 
   /**
-   * @param rowOwner
-   *          the rowOwner to set
+   * @param rowOwner the rowOwner to set
    */
   public void setOwner(String rowOwner) {
     this.rowOwner = rowOwner;
   }
-  
+
   /**
    * @return groupReadOnly
    */
   public String getGroupReadOnly() {
     return groupReadOnly;
   }
-  
+
   /**
-   * @param groupReadOnly
-   *     groupReadOnly to set
+   * @param groupReadOnly groupReadOnly to set
    */
   public void setGroupReadOnly(String groupReadOnly) {
     this.groupReadOnly = groupReadOnly;
   }
-  
+
   /**
-   * 
    * @return groupModify
    */
   public String getGroupModify() {
     return groupModify;
   }
-  
+
   /**
-   * 
-   * @param groupModify
-   *     groupModify to set
+   * @param groupModify groupModify to set
    */
   public void setGroupModify(String groupModify) {
     this.groupModify = groupModify;
   }
-  
+
   /**
-   * 
    * @return groupPrivileged
    */
   public String getGroupPrivileged() {
     return groupPrivileged;
   }
-  
+
   /**
-   * 
-   * @param groupPrivileged
-   *        groupPrivileged to set
+   * @param groupPrivileged groupPrivileged to set
    */
   public void setGroupPrivileged(String groupPrivileged) {
     this.groupPrivileged = groupPrivileged;
@@ -192,9 +171,9 @@ public class RowFilterScopeClient implements Serializable {
       return false;
     if (!(obj instanceof RowFilterScopeClient))
       return false;
-    
+
     RowFilterScopeClient other = (RowFilterScopeClient) obj;
-    
+
     return (defaultAccess == null ? other.defaultAccess == null : defaultAccess.equals(other.defaultAccess))
         && (rowOwner == null ? other.rowOwner == null : rowOwner.equals(other.rowOwner))
         && (groupReadOnly == null ? other.groupReadOnly == null : groupReadOnly.equals(other.groupReadOnly))
@@ -222,6 +201,10 @@ public class RowFilterScopeClient implements Serializable {
     builder.append(groupPrivileged);
     builder.append("]");
     return builder.toString();
+  }
+
+  public enum Access {
+    FULL, MODIFY, READ_ONLY, HIDDEN,
   }
 
 }

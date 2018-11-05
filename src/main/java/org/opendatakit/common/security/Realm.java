@@ -120,12 +120,12 @@ public class Realm implements InitializingBean {
     this.isGaeEnvironment = isGaeEnvironment;
   }
 
-  public void setForceHttpsLinks(boolean forceHttpsLinks) {
-    this.forceHttpsLinks = forceHttpsLinks;
-  }
-
   public boolean isForceHttpsLinks() {
     return forceHttpsLinks;
+  }
+
+  public void setForceHttpsLinks(boolean forceHttpsLinks) {
+    this.forceHttpsLinks = forceHttpsLinks;
   }
 
 }

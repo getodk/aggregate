@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -22,9 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.EntityKey;
@@ -34,14 +31,16 @@ import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.engine.EngineUtils;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public class QueryImpl implements Query {
 
@@ -77,18 +76,16 @@ public class QueryImpl implements Query {
   private final CommonFieldsBase relation;
   private final DatastoreImpl dataStoreImpl;
   private final User user;
-
-  private DataField dominantSortAttr = null;
-  private Direction dominantSortDirection = null;
-  private boolean isSortedByUri = false;
-
   private final StringBuilder queryBindBuilder = new StringBuilder();
   private final List<Object> bindValues = new ArrayList<Object>();
   private final StringBuilder querySortBuilder = new StringBuilder();
   private final Logger queryStringLogger;
+  private DataField dominantSortAttr = null;
+  private Direction dominantSortDirection = null;
+  private boolean isSortedByUri = false;
 
   public QueryImpl(CommonFieldsBase relation, String loggingContextTag,
-      DatastoreImpl dataStoreImpl, User user) {
+                   DatastoreImpl dataStoreImpl, User user) {
     this.queryStringLogger = LoggerFactory.getLogger("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
     this.relation = relation;
     this.dataStoreImpl = dataStoreImpl;
@@ -172,13 +169,13 @@ public class QueryImpl implements Query {
   /**
    * Constructs the necessary filter clause to append to the Query filters to
    * support continuation cursors.
-   * 
+   *
    * @param queryContinuationBindBuilder
    * @param continuationValue
    * @return the updated bindArgs
    */
   private ArrayList<Object> addContinuationFilter(StringBuilder queryContinuationBindBuilder,
-      Object continuationValue) {
+                                                  Object continuationValue) {
     if (dominantSortAttr == null) {
       throw new IllegalStateException("unexpected state");
     }
@@ -198,11 +195,11 @@ public class QueryImpl implements Query {
         .equals(Direction.ASCENDING) ? FilterOperation.GREATER_THAN_OR_EQUAL
         : FilterOperation.LESS_THAN_OR_EQUAL));
     queryContinuationBindBuilder.append(K_BIND_VALUE);
-    
+
     ArrayList<Object> values = new ArrayList<Object>();
     values.addAll(bindValues);
     values.add(DatastoreImpl.getBindValue(dominantSortAttr, continuationValue));
-    
+
     return values;
   }
 
@@ -295,7 +292,7 @@ public class QueryImpl implements Query {
 
   @Override
   public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable,
-      DataField topLevelAuri) throws ODKDatastoreException {
+                                               DataField topLevelAuri) throws ODKDatastoreException {
 
     List<?> keys = executeDistinctValueForDataField(topLevelAuri);
 
@@ -310,59 +307,6 @@ public class QueryImpl implements Query {
       keySet.add(new EntityKey(topLevelTable, key));
     }
     return keySet;
-  }
-
-  private class CoreResult {
-    final List<CommonFieldsBase> results;
-    final boolean hasMoreResults;
-
-    CoreResult(List<CommonFieldsBase> results, boolean hasMoreResults) {
-      this.results = results;
-      this.hasMoreResults = hasMoreResults;
-    }
-  }
-
-  private class RowMapperFilteredResultSetExtractor implements ResultSetExtractor<CoreResult> {
-
-    private int readCount = 0;
-    private final QueryResumePoint startCursor;
-    private final int fetchLimit;
-    private final RowMapper<? extends CommonFieldsBase> rowMapper;
-
-    RowMapperFilteredResultSetExtractor(QueryResumePoint startCursor, int fetchLimit,
-        RowMapper<? extends CommonFieldsBase> rowMapper) {
-      this.startCursor = startCursor;
-      this.fetchLimit = fetchLimit;
-      this.rowMapper = rowMapper;
-    }
-
-    @Override
-    public CoreResult extractData(ResultSet rs) throws SQLException {
-      boolean hasMoreResults = false;
-      List<CommonFieldsBase> results = new ArrayList<CommonFieldsBase>();
-      String startUri = (startCursor == null) ? null : startCursor.getUriLastReturnedValue();
-      boolean beforeUri = (startUri != null);
-      while (rs.next()) {
-        ++readCount;
-        CommonFieldsBase cb = this.rowMapper.mapRow(rs, results.size());
-        if (beforeUri) {
-          if (startUri.equals(cb.getUri())) {
-            beforeUri = false;
-          }
-        } else if (fetchLimit == 0 || results.size() < fetchLimit) {
-          results.add(cb);
-        } else {
-          hasMoreResults = true;
-          break;
-        }
-      }
-      return new CoreResult(results, hasMoreResults);
-    }
-    
-    public int getReadCount() {
-      return readCount;
-    }
-
   }
 
   @Override
@@ -450,5 +394,58 @@ public class QueryImpl implements Query {
       e.printStackTrace();
       throw new ODKDatastoreException(e);
     }
+  }
+
+  private class CoreResult {
+    final List<CommonFieldsBase> results;
+    final boolean hasMoreResults;
+
+    CoreResult(List<CommonFieldsBase> results, boolean hasMoreResults) {
+      this.results = results;
+      this.hasMoreResults = hasMoreResults;
+    }
+  }
+
+  private class RowMapperFilteredResultSetExtractor implements ResultSetExtractor<CoreResult> {
+
+    private final QueryResumePoint startCursor;
+    private final int fetchLimit;
+    private final RowMapper<? extends CommonFieldsBase> rowMapper;
+    private int readCount = 0;
+
+    RowMapperFilteredResultSetExtractor(QueryResumePoint startCursor, int fetchLimit,
+                                        RowMapper<? extends CommonFieldsBase> rowMapper) {
+      this.startCursor = startCursor;
+      this.fetchLimit = fetchLimit;
+      this.rowMapper = rowMapper;
+    }
+
+    @Override
+    public CoreResult extractData(ResultSet rs) throws SQLException {
+      boolean hasMoreResults = false;
+      List<CommonFieldsBase> results = new ArrayList<CommonFieldsBase>();
+      String startUri = (startCursor == null) ? null : startCursor.getUriLastReturnedValue();
+      boolean beforeUri = (startUri != null);
+      while (rs.next()) {
+        ++readCount;
+        CommonFieldsBase cb = this.rowMapper.mapRow(rs, results.size());
+        if (beforeUri) {
+          if (startUri.equals(cb.getUri())) {
+            beforeUri = false;
+          }
+        } else if (fetchLimit == 0 || results.size() < fetchLimit) {
+          results.add(cb);
+        } else {
+          hasMoreResults = true;
+          break;
+        }
+      }
+      return new CoreResult(results, hasMoreResults);
+    }
+
+    public int getReadCount() {
+      return readCount;
+    }
+
   }
 }

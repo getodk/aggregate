@@ -16,6 +16,7 @@
 
 package org.opendatakit.aggregate.odktables.entity.serialization;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +26,6 @@ import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -36,10 +36,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
-
 import org.opendatakit.aggregate.odktables.rest.ApiConstants;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Consumes({MediaType.APPLICATION_JSON})
 @Produces({MediaType.APPLICATION_JSON})
@@ -49,34 +46,36 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
 
   private static final ObjectMapper mapper = new ObjectMapper();
   private static final String DEFAULT_ENCODING = "utf-8";
-
-  public static class JSONWrapper {
-    byte[] buffer;
-    public JSONWrapper(byte[] buffer) {
-      this.buffer = buffer;
-    }
-  };
-  
   @Context
   ServletContext context;
 
+  ;
+
+  protected static String getCharsetAsString(MediaType m) {
+    if (m == null) {
+      return DEFAULT_ENCODING;
+    }
+    String result = m.getParameters().get("charset");
+    return (result == null) ? DEFAULT_ENCODING : result;
+  }
+
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation annotations[],
-      MediaType mediaType) {
+                            MediaType mediaType) {
     return mediaType.getType().equals(MediaType.APPLICATION_JSON_TYPE.getType())
         && mediaType.getSubtype().equals(MediaType.APPLICATION_JSON_TYPE.getSubtype());
   }
 
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation annotations[],
-      MediaType mediaType) {
+                             MediaType mediaType) {
     return mediaType.getType().equals(MediaType.APPLICATION_JSON_TYPE.getType())
         && mediaType.getSubtype().equals(MediaType.APPLICATION_JSON_TYPE.getSubtype());
   }
 
   @Override
   public T readFrom(Class<T> aClass, Type genericType, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, String> map, InputStream stream)
+                    MediaType mediaType, MultivaluedMap<String, String> map, InputStream stream)
       throws IOException, WebApplicationException {
     String encoding = getCharsetAsString(mediaType);
     try {
@@ -93,7 +92,7 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
 
   @Override
   public void writeTo(T o, Class<?> aClass, Type type, Annotation[] annotations,
-      MediaType mediaType, MultivaluedMap<String, Object> map, OutputStream rawStream)
+                      MediaType mediaType, MultivaluedMap<String, Object> map, OutputStream rawStream)
       throws IOException, WebApplicationException {
     String encoding = getCharsetAsString(mediaType);
     try {
@@ -109,12 +108,12 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
       byte[] bytes = null;
       {
         Object obj = context.getAttribute(NotModifiedHandler.jsonBufferKey);
-        if ( obj != null && obj instanceof JSONWrapper ) {
+        if (obj != null && obj instanceof JSONWrapper) {
           JSONWrapper wrapper = (JSONWrapper) obj;
           bytes = wrapper.buffer;
         }
       }
-      if ( bytes == null ) {
+      if (bytes == null) {
         // write object to a byte array
         ByteArrayOutputStream bas = new ByteArrayOutputStream(8192);
         OutputStreamWriter w = new OutputStreamWriter(bas,
@@ -144,11 +143,11 @@ public class SimpleJSONMessageReaderWriter<T> implements MessageBodyReader<T>,
     return -1;
   }
 
-  protected static String getCharsetAsString(MediaType m) {
-    if (m == null) {
-      return DEFAULT_ENCODING;
+  public static class JSONWrapper {
+    byte[] buffer;
+
+    public JSONWrapper(byte[] buffer) {
+      this.buffer = buffer;
     }
-    String result = m.getParameters().get("charset");
-    return (result == null) ? DEFAULT_ENCODING : result;
   }
 }

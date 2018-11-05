@@ -22,7 +22,6 @@ package org.opendatakit.aggregate.constants;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class ErrorConsts {
 
@@ -82,7 +81,7 @@ public final class ErrorConsts {
    */
   public static final String INSUFFIECENT_PARAMS = "Insuffiecent Parameters Received";
   public static final String SUBMISSION_NOT_FOUND =
-  "Did NOT find submission matching the provided parameters";
+      "Did NOT find submission matching the provided parameters";
   public static final String NO_STRING_TO_BLOB_CONVERT = "Blob cannot be created from string";
   public static final String UNKNOWN_INTERFACE = "Some how did not get a SubmissionField or SubmissionRepeat";
   public static final String INVALID_PARAMS = "Parameter(s) are not valid";

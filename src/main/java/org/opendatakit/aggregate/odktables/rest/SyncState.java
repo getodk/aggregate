@@ -43,7 +43,6 @@ package org.opendatakit.aggregate.odktables.rest;
  * </p>
  *
  * @author sudar.sam@gmail.com
- *
  */
 public enum SyncState {
   synced, new_row, changed, deleted, in_conflict, synced_pending_files;

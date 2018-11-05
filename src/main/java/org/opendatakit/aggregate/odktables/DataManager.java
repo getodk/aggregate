@@ -23,10 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.odktables.exception.BadColumnNameException;
 import org.opendatakit.aggregate.odktables.exception.ETagMismatchException;
 import org.opendatakit.aggregate.odktables.exception.InconsistentStateException;
@@ -65,65 +62,36 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages read, insert, update, and delete operations on the rows of a table.
  *
  * @author the.dylan.price@gmail.com
  * @author sudar.sam@gmail.com
- *
  */
 
 public class DataManager {
 
   private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
-
-  public static class WebsafeRows {
-    public final List<Row> rows;
-
-    public final String dataETag;
-    public final String websafeRefetchCursor;
-    public final String websafeBackwardCursor;
-    public final String websafeResumeCursor;
-    public final boolean hasMore;
-    public final boolean hasPrior;
-
-    public WebsafeRows(List<Row> rows, String dataETag, 
-        String websafeRefetchCursor, String websafeBackwardCursor,
-        String websafeResumeCursor, boolean hasMore, boolean hasPrior) {
-      this.rows = rows;
-      this.dataETag = dataETag;
-      this.websafeRefetchCursor = websafeRefetchCursor;
-      this.websafeBackwardCursor = websafeBackwardCursor;
-      this.websafeResumeCursor = websafeResumeCursor;
-      this.hasMore = hasMore;
-      this.hasPrior = hasPrior;
-    }
-  }
-
   private CallingContext cc;
   private TablesUserPermissions userPermissions;
   private EntityConverter converter;
   private EntityCreator creator;
   private String appId;
   private String tableId;
-
   /**
    * Construct a new DataManager.
    *
-   * @param tableId
-   *          the unique identifier of the table
-   * @param userPermissions
-   *          the requesting user's permissions
-   * @param cc
-   *          the calling context
-   * @throws ODKEntityNotFoundException
-   *           if no table with the given id exists
-   * @throws ODKDatastoreException
-   *           if there is an internal error in the datastore
+   * @param tableId         the unique identifier of the table
+   * @param userPermissions the requesting user's permissions
+   * @param cc              the calling context
+   * @throws ODKEntityNotFoundException if no table with the given id exists
+   * @throws ODKDatastoreException      if there is an internal error in the datastore
    */
   public DataManager(String appId, String tableId, TablesUserPermissions userPermissions,
-      CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
+                     CallingContext cc) throws ODKEntityNotFoundException, ODKDatastoreException {
     Validate.notEmpty(appId);
     Validate.notEmpty(tableId);
     Validate.notNull(cc);
@@ -144,7 +112,7 @@ public class DataManager {
   }
 
   private void revertPendingChanges(DbTableEntryEntity entry,
-      List<DbColumnDefinitionsEntity> columns, DbTable table, DbLogTable logTable)
+                                    List<DbColumnDefinitionsEntity> columns, DbTable table, DbLogTable logTable)
       throws ODKDatastoreException, BadColumnNameException {
 
     // we have nothing to do if the pending dataETag is null...
@@ -225,7 +193,7 @@ public class DataManager {
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     String currentDataETag = null;
-    
+
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
@@ -241,7 +209,7 @@ public class DataManager {
       }
 
       currentDataETag = entry.getDataETag();
-      
+
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -274,7 +242,7 @@ public class DataManager {
       if (userPermissions.hasPermission(appId, tableId, TablePermission.UNFILTERED_READ)) {
         rows.add(row);
       } else if (userPermissions.hasFilterScope(appId, tableId, TablePermission.READ_ROW,
-          row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE )) {
+          row.getRowId(), /* row.getFilterScope() */ Scope.EMPTY_SCOPE)) {
         rows.add(row);
       }
     }
@@ -294,8 +262,7 @@ public class DataManager {
   /**
    * Retrieves a set of rows representing the changes since the given data etag.
    *
-   * @param dataETag
-   *          the data ETag
+   * @param dataETag the data ETag
    * @return the rows which have changed or been added since the given data etag
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
@@ -310,7 +277,7 @@ public class DataManager {
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     String currentDataETag = null;
-    
+
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
@@ -326,7 +293,7 @@ public class DataManager {
       }
 
       currentDataETag = entry.getDataETag();
-      
+
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -380,37 +347,37 @@ public class DataManager {
     return new WebsafeRows(computeDiff(rows), currentDataETag, result.websafeRefetchCursor,
         result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
   }
-  
+
   /**
    * Retrieves a set of rows representing the changes since the given timestamp.
- * @param dateToUse TODO
- * @param startTime - the timestamp to start at in the format of yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
- * @param endTime - the timestamp to end at in the format of yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
- * @param startCursor - the cursor to start with
- * @param fetchLimit - the number of rows to return in the response
-   * 
+   *
+   * @param dateToUse   TODO
+   * @param startTime   - the timestamp to start at in the format of yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
+   * @param endTime     - the timestamp to end at in the format of yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS
+   * @param startCursor - the cursor to start with
+   * @param fetchLimit  - the number of rows to return in the response
    * @return the rows which have changed or been added since the given timestamp
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    * @throws InconsistentStateException
    * @throws PermissionDeniedException
    * @throws BadColumnNameException
-   * @throws ParseException 
+   * @throws ParseException
    */
   public WebsafeRows getRowsInTimeRange(String dateToUse, String startTime, String endTime, QueryResumePoint startCursor, int fetchLimit)
       throws ODKDatastoreException, ODKTaskLockException, InconsistentStateException,
       PermissionDeniedException, BadColumnNameException, ParseException {
-     
+
     String query_col = DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME;
-     
-   if (dateToUse.equals(DbLogTable.SAVEPOINT_TIMESTAMP.getName())) {
+
+    if (dateToUse.equals(DbLogTable.SAVEPOINT_TIMESTAMP.getName())) {
       query_col = DbLogTable.SAVEPOINT_TIMESTAMP.getName();
-   }
+    }
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
-    
+
     String currentDataETag = null;
-    
+
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
@@ -436,14 +403,14 @@ public class DataManager {
 
       revertPendingChanges(entry, columns, table, logTable);
 
-     SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
-     Date startDateToCompare = null;
+      SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+      Date startDateToCompare = null;
       String startSequenceValue = null;
       if (startTime != null) {
         try {
-        startDateToCompare = sf.parse(startTime);
+          startDateToCompare = sf.parse(startTime);
           startSequenceValue = getSequenceValueForStartTime(logTable, query_col, startTime, startDateToCompare, Direction.ASCENDING);
-              //(startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
+          //(startCursor == null || startCursor.isForwardCursor()) ? Direction.ASCENDING : Direction.DESCENDING);
         } catch (ODKEntityNotFoundException e) {
           // No values to display should return empty list
           ArrayList<Row> rows = new ArrayList<Row>();
@@ -452,22 +419,22 @@ public class DataManager {
       } else {
         throw new IllegalArgumentException("startTime must be specified.");
       }
-      
+
       // endTime is an optional parameter
       // and does not have to have a valid value
-     Date endDateToCompare = null;
+      Date endDateToCompare = null;
       String endSequenceValue = null;
       if (endTime != null) {
         try {
-         endDateToCompare = sf.parse(endTime);
-         // For the end time stamp we want the last one
-         endSequenceValue = getSequenceValueForEndTime(logTable, query_col, endTime, endDateToCompare, Direction.DESCENDING);
-             // (startCursor == null || startCursor.isForwardCursor()) ? Direction.DESCENDING : Direction.ASCENDING);
+          endDateToCompare = sf.parse(endTime);
+          // For the end time stamp we want the last one
+          endSequenceValue = getSequenceValueForEndTime(logTable, query_col, endTime, endDateToCompare, Direction.DESCENDING);
+          // (startCursor == null || startCursor.isForwardCursor()) ? Direction.DESCENDING : Direction.ASCENDING);
         } catch (ODKEntityNotFoundException e) {
           // If a sequence values is not found,
           // the query should still work
         }
-      } 
+      }
 
       // CAL: From getRowsSince
       Query query;
@@ -500,15 +467,15 @@ public class DataManager {
         rows.add(row);
       }
     }
-    
+
     List<Row> diffRows = computeDiff(rows);
-    
-    // Display rows in the order that they were meant to be 
+
+    // Display rows in the order that they were meant to be
     // displayed
     List<Row> orderedRows = new ArrayList<Row>();
     for (int i = 0; i < rows.size(); i++) {
       if (diffRows.contains(rows.get(i))) {
-         orderedRows.add(rows.get(i));
+        orderedRows.add(rows.get(i));
       }
     }
     return new WebsafeRows(orderedRows, currentDataETag, result.websafeRefetchCursor,
@@ -531,15 +498,15 @@ public class DataManager {
 
     // we need the filter to activate the sort for the sequence value
     query.addFilter(DbLogTable.SEQUENCE_VALUE,
-            org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
-    
+        org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
+
     query.addSort(DbLogTable.SEQUENCE_VALUE, Direction.DESCENDING);
 
     List<Entity> values = query.execute();
     if (values == null || values.size() == 0) {
       throw new ODKEntityNotFoundException("ETag " + dataETag + " was not found in log table!");
     } else if (values.size() != 1) {
-      // the descending sort on the sequence value ensures we get the last change for 
+      // the descending sort on the sequence value ensures we get the last change for
       // this dataETagAtModification. This assumes the client has gotten all records
       // matching this tag, and is requesting changes *after* the tag.
       logger.info("Multiple records for dataETagAtModification " + dataETag + " count: " + values.size());
@@ -547,96 +514,96 @@ public class DataManager {
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
   }
-  
+
   /**
    * Perform direct query on dateColToUseForCompare to retrieve the
    * SEQUENCE_VALUE of that row. This is then used to construct the
    * query for getting data with that using this start time.
-   * 
-   * @param logTable - the log table to use
+   *
+   * @param logTable               - the log table to use
    * @param dateColToUseForCompare - the date field to use for the comparison
-   * @param givenTimestamp - the original string value the user passed in
-   * @param dateToCompare - the date to compare against the LAST_UPDATE_DATE_COLUMN_NAME
-   * @param dir - the sort direction to use when retrieving the data
+   * @param givenTimestamp         - the original string value the user passed in
+   * @param dateToCompare          - the date to compare against the LAST_UPDATE_DATE_COLUMN_NAME
+   * @param dir                    - the sort direction to use when retrieving the data
    * @return SEQUENCE_VALUE of that row
    * @throws ODKDatastoreException
    */
   private String getSequenceValueForStartTime(DbLogTable logTable, String dateColToUseForCompare, String givenTimestamp, Date dateToCompare, Direction dir)
       throws ODKDatastoreException {
     Query query = logTable.query("DataManager.getSequenceValueForTimestamp", cc);
-    
+
     // we need the filter to activate the sort for the sequence value
     query.addFilter(DbLogTable.SEQUENCE_VALUE,
-            org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
-    
+        org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
+
     query.addSort(DbLogTable.SEQUENCE_VALUE, dir);
-    
+
     // _LAST_UPDATE_DATE is a datetime field
     // _SAVEPOINT_TIMESTAMP is a String field
     if (dateColToUseForCompare.equals(DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME)) {
-      query.addFilter(dateColToUseForCompare, 
-           org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN_OR_EQUAL, dateToCompare);
+      query.addFilter(dateColToUseForCompare,
+          org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN_OR_EQUAL, dateToCompare);
     } else if (dateColToUseForCompare.equals(DbLogTable.SAVEPOINT_TIMESTAMP.getName())) {
       query.addFilter(dateColToUseForCompare,
-           org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN_OR_EQUAL, givenTimestamp);
+          org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN_OR_EQUAL, givenTimestamp);
     }
-    
+
     List<Entity> values = query.execute();
     if (values == null || values.size() == 0) {
       throw new ODKEntityNotFoundException("Timestamp " + dateToCompare.toString() + " was not found in log table!");
-    } 
+    }
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
   }
-  
+
   /**
    * Perform direct query on dateColToUseForCompare to retrieve the
    * SEQUENCE_VALUE of that row. This is then used to construct the
    * query for getting data with that using this end time.
-   * 
-   * @param logTable - the log table to use
+   *
+   * @param logTable               - the log table to use
    * @param dateColToUseForCompare - the date field to use for the comparison
-   * @param givenTimestamp - the original string value the user passed in
-   * @param dateToCompare - the date to compare against the LAST_UPDATE_DATE_COLUMN_NAME
-   * @param dir - the sort direction to use when retrieving the data
+   * @param givenTimestamp         - the original string value the user passed in
+   * @param dateToCompare          - the date to compare against the LAST_UPDATE_DATE_COLUMN_NAME
+   * @param dir                    - the sort direction to use when retrieving the data
    * @return SEQUENCE_VALUE of that row
    * @throws ODKDatastoreException
    */
   private String getSequenceValueForEndTime(DbLogTable logTable, String dateColToUseForCompare, String givenTimestamp, Date dateToCompare, Direction dir)
       throws ODKDatastoreException {
     Query query = logTable.query("DataManager.getSequenceValueForTimestamp", cc);
-    
+
     // we need the filter to activate the sort for the sequence value
     query.addFilter(DbLogTable.SEQUENCE_VALUE,
-            org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
-    
+        org.opendatakit.common.persistence.Query.FilterOperation.GREATER_THAN, " ");
+
     query.addSort(DbLogTable.SEQUENCE_VALUE, dir);
-    
+
     // _LAST_UPDATE_DATE is a datetime field
     // _SAVEPOINT_TIMESTAMP is a String field
     if (dateColToUseForCompare.equals(DbLogTable.LAST_UPDATE_DATE_COLUMN_NAME)) {
-      query.addFilter(dateColToUseForCompare, 
-           org.opendatakit.common.persistence.Query.FilterOperation.LESS_THAN_OR_EQUAL, dateToCompare);
+      query.addFilter(dateColToUseForCompare,
+          org.opendatakit.common.persistence.Query.FilterOperation.LESS_THAN_OR_EQUAL, dateToCompare);
     } else if (dateColToUseForCompare.equals(DbLogTable.SAVEPOINT_TIMESTAMP.getName())) {
       query.addFilter(dateColToUseForCompare,
-           org.opendatakit.common.persistence.Query.FilterOperation.LESS_THAN_OR_EQUAL, givenTimestamp);
+          org.opendatakit.common.persistence.Query.FilterOperation.LESS_THAN_OR_EQUAL, givenTimestamp);
     }
-    
+
     List<Entity> values = query.execute();
     if (values == null || values.size() == 0) {
       throw new ODKEntityNotFoundException("Timestamp " + dateToCompare.toString() + " was not found in log table!");
-    } 
+    }
     Entity e = values.get(0);
     return e.getString(DbLogTable.SEQUENCE_VALUE);
   }
 
   /**
    * @return the query for rows which have been changed or added from the
-   *         beginning
+   *     beginning
    * @throws ODKDatastoreException
    */
   private Query buildRowsFromBeginningQuery(DbLogTable logTable, DbTableEntryEntity entry,
-      boolean isForwardCursor) throws ODKDatastoreException {
+                                            boolean isForwardCursor) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsBeginningFromQuery", cc);
     query.greaterThanOrEqual(DbLogTable.SEQUENCE_VALUE, entry.getAprioriDataSequenceValue());
     if (isForwardCursor) {
@@ -650,11 +617,11 @@ public class DataManager {
   /**
    * @param sequenceValue
    * @return the query for rows which have been changed or added since the given
-   *         sequenceValue
+   *     sequenceValue
    * @throws ODKDatastoreException
    */
   private Query buildRowsSinceQuery(DbLogTable logTable, String sequenceValue,
-      boolean isForwardCursor) throws ODKDatastoreException {
+                                    boolean isForwardCursor) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsSinceQuery", cc);
     query.greaterThan(DbLogTable.SEQUENCE_VALUE, sequenceValue);
     if (isForwardCursor) {
@@ -664,16 +631,16 @@ public class DataManager {
     }
     return query;
   }
-  
+
   /**
    * @param startSequenceValue
-   * @param endSequenceValue 
+   * @param endSequenceValue
    * @return the query for rows which have been changed or added since the given
-   *         sequenceValue
+   *     sequenceValue
    * @throws ODKDatastoreException
    */
   private Query buildRowsIncludingQuery(DbLogTable logTable, String startSequenceValue,
-      String endSequenceValue, boolean isForwardCursor) throws ODKDatastoreException {
+                                        String endSequenceValue, boolean isForwardCursor) throws ODKDatastoreException {
     Query query = logTable.query("DataManager.buildRowsIncludingQuery", cc);
     query.greaterThanOrEqual(DbLogTable.SEQUENCE_VALUE, startSequenceValue);
     if (endSequenceValue != null) {
@@ -694,8 +661,7 @@ public class DataManager {
    * same rowId, only the last (highest index) row is included in the returned
    * list.
    *
-   * @param rows
-   *          the rows
+   * @param rows the rows
    * @return the list of unique rows
    */
   private List<Row> computeDiff(List<Row> rows) {
@@ -709,11 +675,9 @@ public class DataManager {
   /**
    * Retrieve a row from the table.
    *
-   * @param rowId
-   *          the id of the row
+   * @param rowId the id of the row
    * @return the row
-   * @throws ODKEntityNotFoundException
-   *           if the row with the given id does not exist
+   * @throws ODKEntityNotFoundException if the row with the given id does not exist
    * @throws ODKDatastoreException
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
@@ -806,8 +770,8 @@ public class DataManager {
   }
 
   private void prepareRowForInsertUpdateOrDelete(BulkRowObjWrapper rowWrapper,
-      List<DbColumnDefinitionsEntity> columns, DbTable table,
-      DataKeyValueDeepComparator dc) throws ODKDatastoreException,
+                                                 List<DbColumnDefinitionsEntity> columns, DbTable table,
+                                                 DataKeyValueDeepComparator dc) throws ODKDatastoreException,
       PermissionDeniedException {
 
     Row row = rowWrapper.getRow();
@@ -887,7 +851,7 @@ public class DataManager {
 
   /**
    * The tableUri of the returned rowOutcomeList is null.
-   *  
+   *
    * @param rows
    * @return
    * @throws ODKEntityPersistException
@@ -897,7 +861,7 @@ public class DataManager {
    * @throws BadColumnNameException
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
-   * @throws TableDataETagMismatchException 
+   * @throws TableDataETagMismatchException
    */
   public RowOutcomeList insertOrUpdateRows(RowList rows) throws ODKEntityPersistException,
       ODKEntityNotFoundException, ODKDatastoreException, ODKTaskLockException,
@@ -911,9 +875,9 @@ public class DataManager {
       ArrayList<RowOutcome> rowOutcomes = new ArrayList<RowOutcome>();
 
       userPermissions.checkPermission(appId, tableId, TablePermission.WRITE_ROW);
-      
+
       String dataETagAtModification = null;
-      
+
       OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
           ODKTablesTaskLockType.TABLES_NON_PERMISSIONS_CHANGES, OdkTablesLockTemplate.DelayStrategy.SHORT, cc);
 
@@ -929,10 +893,10 @@ public class DataManager {
           throw new InconsistentStateException("Schema for table " + tableId
               + " is not yet defined.");
         }
-        
+
         String dataETag = entry.getDataETag();
-        if (!((dataETag == null) ? (rows.getDataETag() == null) : dataETag.equals(rows.getDataETag())) ) {
-          throw new TableDataETagMismatchException("The dataETag for table " + tableId + " does not match that supplied in the RowList");          
+        if (!((dataETag == null) ? (rows.getDataETag() == null) : dataETag.equals(rows.getDataETag()))) {
+          throw new TableDataETagMismatchException("The dataETag for table " + tableId + " does not match that supplied in the RowList");
         }
 
         DbTableDefinitionsEntity tableDefn = DbTableDefinitions.getDefinition(tableId, schemaETag,
@@ -1123,31 +1087,25 @@ public class DataManager {
    * Inserts or Updates a row. If inserting, the row must not already exist or
    * the eTag for the row being inserted must exactly match that on the server.
    *
-   * @param af
-   *          -- authentication filter to be applied to this action
-   * @param row
-   *          the row to update. See
-   *          {@link Row#forInsert(String, String, java.util.Map)}.
-   *          {@link Row#forUpdate(String, String, java.util.Map)}
-   *          {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
-   *          {@link Row#getLastUpdateUser()} will be ignored if they are set.
+   * @param af  -- authentication filter to be applied to this action
+   * @param row the row to update. See
+   *            {@link Row#forInsert(String, String, java.util.Map)}.
+   *            {@link Row#forUpdate(String, String, java.util.Map)}
+   *            {@link Row#isDeleted()}, {@link Row#getCreateUser()}, and
+   *            {@link Row#getLastUpdateUser()} will be ignored if they are set.
    * @return a copy of the row that was inserted or updated, with the row's
-   *         rowETtag populated with the new rowETtag. If the original passed in
-   *         row had a null rowId, the row will contain the generated rowId.
-   * @throws ODKEntityNotFoundException
-   *           if the passed in row does not exist
+   *     rowETtag populated with the new rowETtag. If the original passed in
+   *     row had a null rowId, the row will contain the generated rowId.
+   * @throws ODKEntityNotFoundException if the passed in row does not exist
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
-   * @throws ETagMismatchException
-   *           if the passed in row has a different rowETtag from the row in the
-   *           datastore (e.g., on insert, the row already exists, or on update,
-   *           there is conflict that needs to be resolved).
-   * @throws BadColumnNameException
-   *           if the passed in row set a value for a column which doesn't exist
-   *           in the table
+   * @throws ETagMismatchException      if the passed in row has a different rowETtag from the row in the
+   *                                    datastore (e.g., on insert, the row already exists, or on update,
+   *                                    there is conflict that needs to be resolved).
+   * @throws BadColumnNameException     if the passed in row set a value for a column which doesn't exist
+   *                                    in the table
    * @throws PermissionDeniedException
    * @throws InconsistentStateException
-   *
    */
   public Row insertOrUpdateRow(Row row) throws ODKEntityPersistException,
       ODKEntityNotFoundException, ODKDatastoreException, ODKTaskLockException,
@@ -1182,7 +1140,7 @@ public class DataManager {
         DbLogTable logTable = DbLogTable.getRelation(tableDefn, columns, cc);
 
         revertPendingChanges(entry, columns, table, logTable);
-        
+
         DataKeyValueDeepComparator dc = new DataKeyValueDeepComparator(columns);
 
         String rowId = row.getRowId();
@@ -1210,9 +1168,9 @@ public class DataManager {
 
           if (nullIncomingScope) {
             // preserve the scope of the existing entity if the incoming Row didn't specify one.
-              rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
-              // and update the value
-              row.setRowFilterScope(rowFilterScope);
+            rowFilterScope = EntityConverter.getDbTableRowFilterScope(entity);
+            // and update the value
+            row.setRowFilterScope(rowFilterScope);
           }
 
           // confirm that the user has the ability to read the row
@@ -1358,13 +1316,10 @@ public class DataManager {
   /**
    * Delete a row.
    *
-   * @param rowId
-   *          the row to delete.
-   * @param currentRowETag
-   *          the ETag for that row, as known to the requester
+   * @param rowId          the row to delete.
+   * @param currentRowETag the ETag for that row, as known to the requester
    * @return returns the new dataETag that is current after deleting the row.
-   * @throws ODKEntityNotFoundException
-   *           if there is no row with the given id in the datastore
+   * @throws ODKEntityNotFoundException if there is no row with the given id in the datastore
    * @throws ODKDatastoreException
    * @throws ODKTaskLockException
    * @throws PermissionDeniedException
@@ -1534,13 +1489,13 @@ public class DataManager {
   /**
    * Returns the dataETag values that were applied after the given dataETag
    * and/or sequenceValue.
-   * 
+   * <p>
    * There is no meaningful ordering of this returned set. For consistency,
    * the list is ordered by the dataETag values themselves. The returned object
-   * includes the dataETag at the beginning of the processing of this request 
-   * and a sequenceValue. Either of these can be used to return any changes 
+   * includes the dataETag at the beginning of the processing of this request
+   * and a sequenceValue. Either of these can be used to return any changes
    * made after this request.
-   * 
+   *
    * @param dataETag
    * @param sequenceValue
    * @return
@@ -1556,7 +1511,7 @@ public class DataManager {
 
     String currentDataETag = null;
     String retrievalSequenceValue = null;
-    
+
     List<DbColumnDefinitionsEntity> columns = null;
     List<?> result = null;
     OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
@@ -1574,7 +1529,7 @@ public class DataManager {
       }
 
       currentDataETag = entry.getDataETag();
-      
+
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -1594,24 +1549,24 @@ public class DataManager {
         }
       }
 
-      if ( sequenceValue != null && 
-          (unifiedSequenceValue == null || (unifiedSequenceValue.compareTo(sequenceValue) < 0)) ) {
+      if (sequenceValue != null &&
+          (unifiedSequenceValue == null || (unifiedSequenceValue.compareTo(sequenceValue) < 0))) {
         unifiedSequenceValue = sequenceValue;
       }
-      
+
       Query query;
       if (unifiedSequenceValue == null) {
         query = buildRowsFromBeginningQuery(logTable, entry, true);
       } else {
         query = buildRowsSinceQuery(logTable, unifiedSequenceValue, true);
       }
-      
+
       result = query.getDistinct(DbLogTable.DATA_ETAG_AT_MODIFICATION);
     } finally {
       propsLock.release();
     }
 
-    if (result == null || result.isEmpty() ) {
+    if (result == null || result.isEmpty()) {
       return new ChangeSetList(null, currentDataETag, retrievalSequenceValue);
     }
 
@@ -1620,7 +1575,7 @@ public class DataManager {
       String value = (String) o;
       dataETags.add(value);
     }
-    
+
     return new ChangeSetList(dataETags, currentDataETag, retrievalSequenceValue);
   }
 
@@ -1629,7 +1584,7 @@ public class DataManager {
    * If the isActive flag is true, then return only the subset
    * of these that are the most current (in the DbTable).
    * Otherwise, return the full set of changes from the DbLogTable.
-   * 
+   *
    * @param dataETag
    * @param isActive
    * @param startCursor
@@ -1642,12 +1597,12 @@ public class DataManager {
    * @throws BadColumnNameException
    */
   public WebsafeRows getChangeSetRows(String dataETag, boolean isActive,
-      QueryResumePoint startCursor, int fetchLimit) throws PermissionDeniedException, ODKDatastoreException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
+                                      QueryResumePoint startCursor, int fetchLimit) throws PermissionDeniedException, ODKDatastoreException, InconsistentStateException, ODKTaskLockException, BadColumnNameException {
 
     userPermissions.checkPermission(appId, tableId, TablePermission.READ_ROW);
 
     String currentDataETag = null;
-    
+
     List<DbColumnDefinitionsEntity> columns = null;
     WebsafeQueryResult result = null;
     OdkTablesLockTemplate propsLock = new OdkTablesLockTemplate(tableId,
@@ -1663,7 +1618,7 @@ public class DataManager {
       }
 
       currentDataETag = entry.getDataETag();
-      
+
       DbTableDefinitionsEntity tableDefn = DbTableDefinitions
           .getDefinition(tableId, schemaETag, cc);
       columns = DbColumnDefinitions.query(tableId, schemaETag, cc);
@@ -1675,33 +1630,33 @@ public class DataManager {
 
       boolean isForwardCursor = (startCursor == null ? true
           : startCursor.isForwardCursor());
-      
-      if ( isActive ) {
+
+      if (isActive) {
         // query is against DbTable
         Query query = table.query("DataManager.getChangeSetRows", cc);
         query.equal(DbTable.DATA_ETAG_AT_MODIFICATION, dataETag);
         if (isForwardCursor) {
-          query.greaterThan(DbTable.ROW_ETAG,"");
+          query.greaterThan(DbTable.ROW_ETAG, "");
           query.sortAscending(DbTable.ROW_ETAG);
         } else {
-          query.greaterThan(DbTable.ROW_ETAG,"");
+          query.greaterThan(DbTable.ROW_ETAG, "");
           query.sortDescending(DbTable.ROW_ETAG);
         }
 
         result = query.execute(startCursor, fetchLimit);
-        
+
       } else {
         // query is against DbLogTable
         Query query = logTable.query("DataManager.getChangeSetRows", cc);
         query.equal(DbLogTable.DATA_ETAG_AT_MODIFICATION, dataETag);
         if (isForwardCursor) {
-          query.greaterThan(DbLogTable.ROW_ID,"");
+          query.greaterThan(DbLogTable.ROW_ID, "");
           query.sortAscending(DbLogTable.ROW_ID);
         } else {
-          query.greaterThan(DbLogTable.ROW_ID,"");
+          query.greaterThan(DbLogTable.ROW_ID, "");
           query.sortDescending(DbLogTable.ROW_ID);
         }
-        
+
         result = query.execute(startCursor, fetchLimit);
       }
 
@@ -1717,7 +1672,7 @@ public class DataManager {
     // access to because of a access / permissions change for that user and / or
     // row.
     ArrayList<Row> rows = new ArrayList<Row>();
-    if ( isActive ) {
+    if (isActive) {
       // query is against DbTable
       for (Entity entity : result.entities) {
         Row row = converter.toRow(entity, columns);
@@ -1740,9 +1695,32 @@ public class DataManager {
           rows.add(row);
         }
       }
-      
+
     }
     return new WebsafeRows(computeDiff(rows), currentDataETag, result.websafeRefetchCursor,
         result.websafeBackwardCursor, result.websafeResumeCursor, result.hasMore, result.hasPrior);
+  }
+
+  public static class WebsafeRows {
+    public final List<Row> rows;
+
+    public final String dataETag;
+    public final String websafeRefetchCursor;
+    public final String websafeBackwardCursor;
+    public final String websafeResumeCursor;
+    public final boolean hasMore;
+    public final boolean hasPrior;
+
+    public WebsafeRows(List<Row> rows, String dataETag,
+                       String websafeRefetchCursor, String websafeBackwardCursor,
+                       String websafeResumeCursor, boolean hasMore, boolean hasPrior) {
+      this.rows = rows;
+      this.dataETag = dataETag;
+      this.websafeRefetchCursor = websafeRefetchCursor;
+      this.websafeBackwardCursor = websafeBackwardCursor;
+      this.websafeResumeCursor = websafeResumeCursor;
+      this.hasMore = hasMore;
+      this.hasPrior = hasPrior;
+    }
   }
 }

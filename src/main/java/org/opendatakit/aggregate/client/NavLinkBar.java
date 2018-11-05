@@ -16,19 +16,18 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.client.widgets.HelpBookToggleButton;
-import org.opendatakit.aggregate.client.widgets.HelpDialogsToggleButton;
-import org.opendatakit.aggregate.client.widgets.HelpSlidePanelToggleButton;
-import org.opendatakit.common.security.client.UserSecurityInfo;
-import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.web.constants.HtmlConsts;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
+import org.opendatakit.aggregate.client.widgets.HelpBookToggleButton;
+import org.opendatakit.aggregate.client.widgets.HelpDialogsToggleButton;
+import org.opendatakit.aggregate.client.widgets.HelpSlidePanelToggleButton;
+import org.opendatakit.common.security.client.UserSecurityInfo;
+import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
+import org.opendatakit.common.web.constants.HtmlConsts;
 
 public class NavLinkBar extends SimplePanel {
 
@@ -65,19 +64,19 @@ public class NavLinkBar extends SimplePanel {
   }
 
   public void update() {
-     UserSecurityInfo userInfo = AggregateUI.getUI().getUserInfo();
-     if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
-        GWT.log("Setting logout link");
-        loginLogoutLink.setHref(LOGOUT_URL_PATH);
-        loginLogoutLink.setText("Log Out " + userInfo.getCanonicalName());
-     } else {
-        GWT.log("Setting login link");
-        String login = LOGIN_URL_PATH;
-        // preserve any query string (aids in GWT debugging)
-        login += Window.Location.getQueryString();
-        loginLogoutLink.setHref(login);
-        loginLogoutLink.setText("Log In");
-     }
+    UserSecurityInfo userInfo = AggregateUI.getUI().getUserInfo();
+    if ((userInfo != null) && (userInfo.getType() != UserType.ANONYMOUS)) {
+      GWT.log("Setting logout link");
+      loginLogoutLink.setHref(LOGOUT_URL_PATH);
+      loginLogoutLink.setText("Log Out " + userInfo.getCanonicalName());
+    } else {
+      GWT.log("Setting login link");
+      String login = LOGIN_URL_PATH;
+      // preserve any query string (aids in GWT debugging)
+      login += Window.Location.getQueryString();
+      loginLogoutLink.setHref(login);
+      loginLogoutLink.setText("Log In");
+    }
     AggregateUI.resize();
   }
 

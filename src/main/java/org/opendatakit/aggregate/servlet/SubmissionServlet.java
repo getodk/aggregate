@@ -22,15 +22,11 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
@@ -62,27 +58,26 @@ import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Servlet to process a submission from a form
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class SubmissionServlet extends ServletUtilBase {
-
-  private static final Logger logger = LoggerFactory.getLogger(SubmissionServlet.class);
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = -9115712148453543651L;
 
   /**
    * URI from base
    */
   public static final String ADDR = UIConsts.SUBMISSION_SERVLET_ADDR;
-
+  private static final Logger logger = LoggerFactory.getLogger(SubmissionServlet.class);
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = -9115712148453543651L;
   /**
    * Title for generated webpage
    */
@@ -90,13 +85,13 @@ public class SubmissionServlet extends ServletUtilBase {
 
   private static final String UPLOAD_PAGE_BODY_START =
 
-  "<div style=\"overflow: auto;\">"
-      + "<p id=\"subHeading\"><b>Upload one submission into ODK Aggregate</b></p>"
-      + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
-      + "<![endif] -->"
-      + "<form id=\"ie_backward_compatible_form\""
-      + "                        accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
-      + "                        action=\"";// emit the ADDR
+      "<div style=\"overflow: auto;\">"
+          + "<p id=\"subHeading\"><b>Upload one submission into ODK Aggregate</b></p>"
+          + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
+          + "<![endif] -->"
+          + "<form id=\"ie_backward_compatible_form\""
+          + "                        accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
+          + "                        action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
       + "    <table id=\"uploadTable\">"
       + "     <tr>"
@@ -146,7 +141,7 @@ public class SubmissionServlet extends ServletUtilBase {
    * Handler for HTTP Get request that processes a form submission
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -181,7 +176,7 @@ public class SubmissionServlet extends ServletUtilBase {
     headerString.append("\" />");
 
     beginBasicHtmlResponse(TITLE, headerString.toString(), resp, cc);// header
-                                                                     // info
+    // info
     PrintWriter out = resp.getWriter();
     out.write(UPLOAD_PAGE_BODY_START);
     out.write(cc.getWebApplicationURL(ADDR));
@@ -210,7 +205,7 @@ public class SubmissionServlet extends ServletUtilBase {
    * supports plain/xml and multipart
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -243,7 +238,7 @@ public class SubmissionServlet extends ServletUtilBase {
       // firings, so we don't have to worry about bugs here affecting Watchdog.
       if (!submissionParser.wasPreexistingComplete() &&
           submissionParser.getSubmission().isComplete() &&
-          BackendActionsTable.triggerPublisher(form.getUri(), cc) ) {
+          BackendActionsTable.triggerPublisher(form.getUri(), cc)) {
         // send information to remote servers that need to be notified
         List<ExternalService> tmp = FormServiceCursor.getExternalServicesForForm(form, cc);
         UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
@@ -254,7 +249,7 @@ public class SubmissionServlet extends ServletUtilBase {
           ccDaemon.setAsDaemon(true);
           for (ExternalService rs : tmp) {
             // only create upload tasks for active publishers
-            if ( rs.getFormServiceCursor().getOperationalStatus() == OperationalStatus.ACTIVE ) {
+            if (rs.getFormServiceCursor().getOperationalStatus() == OperationalStatus.ACTIVE) {
               uploadTask.createFormUploadTask(rs.getFormServiceCursor(), false, ccDaemon);
             }
           }

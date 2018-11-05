@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.odktables.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 public enum TableRole {
   NONE("No permissions. Can not see that the table exists."),
@@ -78,7 +77,6 @@ public enum TableRole {
   }
 
   /**
-   *
    * @param permission
    * @return true if this role has the given permission
    */

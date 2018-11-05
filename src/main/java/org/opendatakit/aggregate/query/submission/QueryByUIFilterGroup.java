@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.RowFilter;
@@ -53,41 +50,18 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueryByUIFilterGroup extends QueryBase {
 
-  public enum CompletionFlag {
-     ONLY_COMPLETE_SUBMISSIONS,
-     ONLY_INCOMPLETE_SUBMISSIONS,
-     ALL_SUBMISSIONS
-  };
-
   private static final String MISSING_ARGS = "Missing either Form or FilterGroup making it impossible to query";
 
+  ;
   private final CompletionFlag completionFlag;
   private final TopLevelDynamicBase tbl;
-
   private int fetchLimit;
-
   private QueryResumePoint cursor;
-
-  public void addFilterByPrimaryDate(Query.FilterOperation operation, Date dateToFilter) {
-
-    switch ( completionFlag ) {
-    case ONLY_COMPLETE_SUBMISSIONS:
-      query.addFilter(tbl.markedAsCompleteDate, operation, dateToFilter);
-      break;
-    case ONLY_INCOMPLETE_SUBMISSIONS:
-      query.addFilter(tbl.lastUpdateDate, operation, dateToFilter);
-      break;
-    case ALL_SUBMISSIONS:
-      query.addFilter(tbl.lastUpdateDate, operation, dateToFilter);
-      break;
-    default:
-        throw new IllegalStateException("unhandled case");
-    }
-
-  }
 
   public QueryByUIFilterGroup(IForm form, FilterGroup filterGroup, CompletionFlag completionFlag, CallingContext cc) {
     super(form);
@@ -107,49 +81,49 @@ public class QueryByUIFilterGroup extends QueryBase {
         true :
         filterGroup.getCursor().getIsForwardCursor());
 
-    switch ( completionFlag ) {
-    case ONLY_COMPLETE_SUBMISSIONS:
-      // order by the completion date and filter against isComplete == true
-      if ( isForwardCursor ) {
-        query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
-      } else {
-        query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
-      }
-      query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
-      break;
-    case ONLY_INCOMPLETE_SUBMISSIONS:
-      // we expect incomplete submissions to be a small fraction of
-      // total submissions -- so filter by these, with subsidiary
-      // filtering by lastUpdateDate.
-      query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
-      query.addSort(tbl.isComplete, Query.Direction.ASCENDING); // gae optimization
+    switch (completionFlag) {
+      case ONLY_COMPLETE_SUBMISSIONS:
+        // order by the completion date and filter against isComplete == true
+        if (isForwardCursor) {
+          query.addSort(tbl.markedAsCompleteDate, Query.Direction.ASCENDING);
+        } else {
+          query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
+        }
+        query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+        query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, true);
+        break;
+      case ONLY_INCOMPLETE_SUBMISSIONS:
+        // we expect incomplete submissions to be a small fraction of
+        // total submissions -- so filter by these, with subsidiary
+        // filtering by lastUpdateDate.
+        query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, false);
+        query.addSort(tbl.isComplete, Query.Direction.ASCENDING); // gae optimization
 
-      // order by the last update date and filter against isComplete == false
-      if ( isForwardCursor ) {
-        query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-      } else {
-        query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
-      }
-      query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-      break;
-    case ALL_SUBMISSIONS:
-      // order by the last update date
-      if ( isForwardCursor ) {
-        query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
-      } else {
-        query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
-      }
-      query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
-      break;
-    default:
+        // order by the last update date and filter against isComplete == false
+        if (isForwardCursor) {
+          query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+        } else {
+          query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
+        }
+        query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+        break;
+      case ALL_SUBMISSIONS:
+        // order by the last update date
+        if (isForwardCursor) {
+          query.addSort(tbl.lastUpdateDate, Query.Direction.ASCENDING);
+        } else {
+          query.addSort(tbl.lastUpdateDate, Query.Direction.DESCENDING);
+        }
+        query.addFilter(tbl.lastUpdateDate, Query.FilterOperation.GREATER_THAN, BasicConsts.EPOCH);
+        break;
+      default:
         throw new IllegalStateException("unhandled case");
     }
 
     fetchLimit = filterGroup.getQueryFetchLimit();
 
     UIQueryResumePoint uiCursor = filterGroup.getCursor();
-    if(uiCursor != null) {
+    if (uiCursor != null) {
       cursor = QueryResumePoint.transform(uiCursor);
     } else {
       cursor = null;
@@ -167,36 +141,36 @@ public class QueryByUIFilterGroup extends QueryBase {
         String value = rf.getInput();
         Object compareValue = null;
         switch (fem.getElementType()) {
-        case BOOLEAN:
-          compareValue = WebUtils.parseBoolean(value);
-          break;
-        case JRDATETIME:
-          compareValue = WebUtils.parseDate(value);
-          break;
-        case JRDATE:
-          compareValue = WebUtils.parseDate(value);
-          break;
-        case JRTIME:
-          compareValue = WebUtils.parseDate(value);
-          break;
-        case INTEGER:
-          compareValue = Long.valueOf(value);
-          break;
-        case DECIMAL:
-          compareValue = new BigDecimal(value);
-          break;
-        case SELECT1:
-        case STRING:
-          compareValue = value;
-          break;
-        case GEOPOINT:
-          compareValue = new BigDecimal(value);
-          super.addFilterGeoPoint(fem, column.getGeopointColumnCode(), op, compareValue);
-          continue;
-        default:
-          // e.g., SELECTN
-          // can't apply a filter to this type
-          continue;
+          case BOOLEAN:
+            compareValue = WebUtils.parseBoolean(value);
+            break;
+          case JRDATETIME:
+            compareValue = WebUtils.parseDate(value);
+            break;
+          case JRDATE:
+            compareValue = WebUtils.parseDate(value);
+            break;
+          case JRTIME:
+            compareValue = WebUtils.parseDate(value);
+            break;
+          case INTEGER:
+            compareValue = Long.valueOf(value);
+            break;
+          case DECIMAL:
+            compareValue = new BigDecimal(value);
+            break;
+          case SELECT1:
+          case STRING:
+            compareValue = value;
+            break;
+          case GEOPOINT:
+            compareValue = new BigDecimal(value);
+            super.addFilterGeoPoint(fem, column.getGeopointColumnCode(), op, compareValue);
+            continue;
+          default:
+            // e.g., SELECTN
+            // can't apply a filter to this type
+            continue;
         }
 
         super.addFilter(fem, op, compareValue);
@@ -205,13 +179,30 @@ public class QueryByUIFilterGroup extends QueryBase {
 
   }
 
+  public void addFilterByPrimaryDate(Query.FilterOperation operation, Date dateToFilter) {
+
+    switch (completionFlag) {
+      case ONLY_COMPLETE_SUBMISSIONS:
+        query.addFilter(tbl.markedAsCompleteDate, operation, dateToFilter);
+        break;
+      case ONLY_INCOMPLETE_SUBMISSIONS:
+        query.addFilter(tbl.lastUpdateDate, operation, dateToFilter);
+        break;
+      case ALL_SUBMISSIONS:
+        query.addFilter(tbl.lastUpdateDate, operation, dateToFilter);
+        break;
+      default:
+        throw new IllegalStateException("unhandled case");
+    }
+
+  }
+
   /**
    * Silently skip the submissions that are not retrievable due to malformations
    * of some kind.
-   * 
    */
   public List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException {
-    
+
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
 
     // retrieve submissions
@@ -224,17 +215,17 @@ public class QueryByUIFilterGroup extends QueryBase {
       try {
         Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
         retrievedSubmissions.add(sub);
-      } catch (ODKDatastoreException e ) {
+      } catch (ODKDatastoreException e) {
         Logger logger = LoggerFactory.getLogger(QueryByUIFilterGroup.class);
         e.printStackTrace();
-        logger.error("Unable to reconstruct submission for " + 
+        logger.error("Unable to reconstruct submission for " +
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
-        
-        if ( (e instanceof ODKEntityNotFoundException) ||
-            (e instanceof ODKEnumeratedElementException) ) {
+
+        if ((e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException)) {
           // see if we should throw an error or skip processing...
           Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
-          if ( skip ) {
+          if (skip) {
             continue;
           } else {
             throw e;
@@ -250,22 +241,17 @@ public class QueryByUIFilterGroup extends QueryBase {
     return retrievedSubmissions;
   }
 
-  public static final class PartialResults {
-    public List<Submission> retrievedSubmissions;
-    public List<TopLevelDynamicBase> badTopLevelEntities;
-  }
-  
   /**
    * Try to construct whatever portion of a submission we can from a fractional record.
-   * 
+   *
    * @param cc
    * @return
    * @throws ODKDatastoreException
    */
   public List<TopLevelDynamicBase> getTopLevelSubmissionObjects(CallingContext cc) throws ODKDatastoreException {
-    
+
     List<TopLevelDynamicBase> topLevelEntities = new ArrayList<TopLevelDynamicBase>();
-    
+
     // retrieve submissions
     QueryResult results = getQueryResult(cursor, fetchLimit);
     List<? extends CommonFieldsBase> submissionEntities = results.getResultList();
@@ -282,8 +268,8 @@ public class QueryByUIFilterGroup extends QueryBase {
   }
 
   public void populateSubmissions(SubmissionUISummary summary,
-      List<FormElementModel> filteredElements, ElementFormatter elemFormatter,
-      List<FormElementNamespace> elementTypes, CallingContext cc) throws ODKDatastoreException {
+                                  List<FormElementModel> filteredElements, ElementFormatter elemFormatter,
+                                  List<FormElementNamespace> elementTypes, CallingContext cc) throws ODKDatastoreException {
 
     // retrieve submissions
     QueryResult results = getQueryResult(cursor, fetchLimit);
@@ -299,27 +285,27 @@ public class QueryByUIFilterGroup extends QueryBase {
     //
     // Determine whether we are going forward or backward...
     boolean isForwardCursor = true;
-    if(startCursor != null) {
+    if (startCursor != null) {
       isForwardCursor = startCursor.isForwardCursor();
     }
 
-    if ( isForwardCursor ) {
+    if (isForwardCursor) {
       // everything matches across the UI and query layer...
       summary.setHasPriorResults(results.hasPriorResults());
       summary.setHasMoreResults(results.hasMoreResults());
-      if(startCursor != null) {
+      if (startCursor != null) {
         summary.setStartCursor(startCursor.transform());
       } else {
         summary.setStartCursor(null);
       }
 
-      if(resumeCursor != null) {
+      if (resumeCursor != null) {
         summary.setResumeCursor(resumeCursor.transform());
       } else {
         summary.setResumeCursor(null);
       }
 
-      if(backwardCursor != null) {
+      if (backwardCursor != null) {
         summary.setBackwardCursor(backwardCursor.transform());
       } else {
         summary.setBackwardCursor(null);
@@ -333,21 +319,21 @@ public class QueryByUIFilterGroup extends QueryBase {
       summary.setHasMoreResults(results.hasPriorResults());
 
       // SubmissionUISummary.startCursor is unchanged
-      if(startCursor != null) {
+      if (startCursor != null) {
         summary.setStartCursor(startCursor.transform());
       } else {
         summary.setStartCursor(null);
       }
 
       // SubmissionUISummary.resumeCursor is query backwardCursor
-      if(backwardCursor != null) {
+      if (backwardCursor != null) {
         summary.setResumeCursor(backwardCursor.transform());
       } else {
         summary.setResumeCursor(null);
       }
 
       // SubmissionUISummary.backwardCursor is query resumeCursor
-      if(resumeCursor != null) {
+      if (resumeCursor != null) {
         summary.setBackwardCursor(resumeCursor.transform());
       } else {
         summary.setBackwardCursor(null);
@@ -363,20 +349,20 @@ public class QueryByUIFilterGroup extends QueryBase {
         Submission sub = new Submission((TopLevelDynamicBase) subEntity, getForm(), cc);
         Row row = sub.getFormattedValuesAsRow(elementTypes, filteredElements, elemFormatter, false,
             cc);
-  
+
         SubmissionKey subKey = sub.constructSubmissionKey(fem);
         submissionList.add(new SubmissionUI(row.getFormattedValues(), subKey.toString()));
-      } catch ( ODKDatastoreException e ) {
+      } catch (ODKDatastoreException e) {
         Logger logger = LoggerFactory.getLogger(QueryByUIFilterGroup.class);
         e.printStackTrace();
-        logger.error("Unable to reconstruct submission for " + 
+        logger.error("Unable to reconstruct submission for " +
             subEntity.getSchemaName() + "." + subEntity.getTableName() + " uri " + subEntity.getUri());
 
-        if ( (e instanceof ODKEntityNotFoundException) ||
-            (e instanceof ODKEnumeratedElementException) ) {
+        if ((e instanceof ODKEntityNotFoundException) ||
+            (e instanceof ODKEnumeratedElementException)) {
           // see if we should throw an error or skip processing...
           Boolean skip = ServerPreferencesProperties.getSkipMalformedSubmissions(cc);
-          if ( skip ) {
+          if (skip) {
             continue;
           } else {
             throw e;
@@ -386,12 +372,23 @@ public class QueryByUIFilterGroup extends QueryBase {
         }
       }
     }
-    if ( !isForwardCursor ) {
+    if (!isForwardCursor) {
       // query has the results in the reverse order.
       // invert them to get them properly ordered.
       Collections.reverse(submissionList);
     }
     summary.getSubmissions().addAll(submissionList);
+  }
+
+  public enum CompletionFlag {
+    ONLY_COMPLETE_SUBMISSIONS,
+    ONLY_INCOMPLETE_SUBMISSIONS,
+    ALL_SUBMISSIONS
+  }
+
+  public static final class PartialResults {
+    public List<Submission> retrievedSubmissions;
+    public List<TopLevelDynamicBase> badTopLevelEntities;
   }
 
 }

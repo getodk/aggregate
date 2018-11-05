@@ -33,7 +33,6 @@ import org.opendatakit.common.web.CallingContext;
  * is based on BlobRelationSetTest.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class DbTableFiles extends AbstractBlobRelationSet {
 

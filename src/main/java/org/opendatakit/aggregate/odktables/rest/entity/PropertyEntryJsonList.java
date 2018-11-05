@@ -21,16 +21,15 @@ import java.util.ArrayList;
 /**
  * This holds a list of {@link PropertyEntryJson}.
  * This holds the full JSON serialization of the properties.csv
- * 
+ * <p>
  * See {@link PropertyEntryXmlList} for the XML variant of this.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class PropertyEntryJsonList extends ArrayList<PropertyEntryJson> {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = -922490204257676096L;
 

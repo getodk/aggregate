@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.odktables.security;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.lang3.Validate;
 import org.opendatakit.aggregate.odktables.TableAclManager;
 import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
@@ -45,7 +44,7 @@ public class AuthFilter {
 
     permissions = new HashSet<TablePermission>();
 
-    for ( Scope scope : scopes ) {
+    for (Scope scope : scopes) {
       TableAcl def = am.getAclForTablesUserPermissions(scope);
       if (def != null) {
         permissions.addAll(def.getRole().getPermissions());
@@ -56,11 +55,9 @@ public class AuthFilter {
   /**
    * Checks that the current user has the given permission.
    *
-   * @param permission
-   *          the permission to check
+   * @param permission the permission to check
    * @throws ODKDatastoreException
-   * @throws PermissionDeniedException
-   *           if the current user does not have the permission
+   * @throws PermissionDeniedException if the current user does not have the permission
    */
   public void checkPermission(TablePermission permission) throws ODKDatastoreException,
       PermissionDeniedException {
@@ -74,8 +71,7 @@ public class AuthFilter {
    * Check if the current user has the given permission. An exception-safe
    * alternative to {@link #checkPermission(TablePermission)}
    *
-   * @param permission
-   *          the permission to check
+   * @param permission the permission to check
    * @return true if the user has the given permission, false otherwise
    * @throws ODKDatastoreException
    */
@@ -87,19 +83,17 @@ public class AuthFilter {
   /**
    * Check that the user either has the given permission or is within the scope
    * of the filter on the given row.
-   *
+   * <p>
    * In other words, if the user has the given permission, then they pass the
    * check and the method returns. However, if the user does not have the given
    * permission, then they must fall within the scope of the filter on the given
    * row.
    *
-   * @param permission
-   *          the permission that guards access to the row. Should be one of
-   *          {@link TablePermission#UNFILTERED_READ},
-   *          {@link TablePermission#UNFILTERED_WRITE}, or
-   *          {@link TablePermission#UNFILTERED_DELETE}.
-   * @param row
-   *          the row to check
+   * @param permission the permission that guards access to the row. Should be one of
+   *                   {@link TablePermission#UNFILTERED_READ},
+   *                   {@link TablePermission#UNFILTERED_WRITE}, or
+   *                   {@link TablePermission#UNFILTERED_DELETE}.
+   * @param row        the row to check
    * @throws ODKDatastoreException
    */
   public boolean hasFilterScope(TablePermission permission, String rowId, Scope filter)

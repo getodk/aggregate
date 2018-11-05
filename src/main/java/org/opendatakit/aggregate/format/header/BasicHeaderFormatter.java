@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.format.header;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.form.IForm;
@@ -25,10 +24,8 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class BasicHeaderFormatter extends AbstractHeaderFormatter implements HeaderFormatter {
 
@@ -50,17 +47,14 @@ public class BasicHeaderFormatter extends AbstractHeaderFormatter implements Hea
 
   /**
    * Construct a Header Formatter
-   * 
-   * @param separateGpsCoordinates
-   *          separate the GPS coordinates of latitude and longitude into
-   *          columns
-   * @param includeGpsAltitude
-   *          include GPS altitude data
-   * @param includeGpsAccuracy
-   *          include GPS accuracy data
+   *
+   * @param separateGpsCoordinates separate the GPS coordinates of latitude and longitude into
+   *                               columns
+   * @param includeGpsAltitude     include GPS altitude data
+   * @param includeGpsAccuracy     include GPS accuracy data
    */
   public BasicHeaderFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-      boolean includeGpsAccuracy) {
+                              boolean includeGpsAccuracy) {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
@@ -69,19 +63,16 @@ public class BasicHeaderFormatter extends AbstractHeaderFormatter implements Hea
   /**
    * Iterates the forms and creates the headers and types based off the passed
    * in FormElementModel
-   * 
-   * @param formDefinition
-   *          the xform that is being used to create the header
-   * @param rootGroup
-   *          the group of the xform that contains several values that will be
-   *          used to generate the headers. The node should correspond to a
-   *          SubmissionSet, not a SubmissionValue.
-   * @param propertyNames
-   *          list of properties to include in headers, if null is passed will
-   *          return all properties for the SubmissionSet
+   *
+   * @param formDefinition the xform that is being used to create the header
+   * @param rootGroup      the group of the xform that contains several values that will be
+   *                       used to generate the headers. The node should correspond to a
+   *                       SubmissionSet, not a SubmissionValue.
+   * @param propertyNames  list of properties to include in headers, if null is passed will
+   *                       return all properties for the SubmissionSet
    */
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
-      List<FormElementModel> propertyNamesArg) {
+                                      List<FormElementModel> propertyNamesArg) {
     propertyNames = propertyNamesArg;
     headers = new ArrayList<String>();
     types = new ArrayList<ElementType>();
@@ -112,7 +103,5 @@ public class BasicHeaderFormatter extends AbstractHeaderFormatter implements Hea
     }
   }
 
-
-  
 
 }

@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.server;
 
 import java.util.List;
-
 import org.opendatakit.aggregate.client.form.GeopointElementList;
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -24,9 +23,9 @@ import org.opendatakit.aggregate.form.IForm;
 
 public class GenerateGeopointElementList {
 
+  boolean ignoreRepeats;
   private GeopointElementList geopoints;
   private IForm form;
-  boolean ignoreRepeats;
 
   public GenerateGeopointElementList(IForm form, boolean ignoreRepeats) {
     this.form = form;
@@ -43,7 +42,6 @@ public class GenerateGeopointElementList {
   /**
    * Helper function to recursively go through the element tree and create the
    * FormElementKeys
-   *
    */
   private void processElementForColumnHead(IForm form, FormElementModel node, FormElementModel root) {
     if (node == null)
@@ -52,15 +50,15 @@ public class GenerateGeopointElementList {
     FormElementKey key = node.constructFormElementKey(form);
     String nodeName = key.userFriendlyString(form);
     switch (node.getElementType()) {
-    case GEOPOINT:
-      geopoints.addGeopointElement(nodeName, key.toString());
-      break;
-   case REPEAT:
-      if (ignoreRepeats) {
-        return;
-      }
-    default:
-      break;
+      case GEOPOINT:
+        geopoints.addGeopointElement(nodeName, key.toString());
+        break;
+      case REPEAT:
+        if (ignoreRepeats) {
+          return;
+        }
+      default:
+        break;
     }
 
     List<FormElementModel> childDataElements = node.getChildren();

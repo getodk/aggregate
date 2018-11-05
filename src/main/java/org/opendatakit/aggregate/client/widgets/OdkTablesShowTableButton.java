@@ -16,13 +16,12 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.OdkTablesViewTableSubTab;
 import org.opendatakit.aggregate.client.table.OdkTablesTableList;
 import org.opendatakit.aggregate.constants.common.SubTabs;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 
 /**
  * This button should move the UI to the view table subtab and display the
@@ -34,7 +33,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
  * button should handle all of that.
  *
  * @author sudars
- *
  */
 /*
  * Started by copying from OdkTablesDeleteTableButton
@@ -46,7 +44,7 @@ public class OdkTablesShowTableButton extends AggregateButton
       "<img src=\"images/green_right_arrow.png\" /> Table Data";
   private static final String TOOLTIP_TXT = "Display Table Contents";
   private static final String HELP_BALLOON_TXT = "View the contents of this" +
-        " table.";
+      " table.";
 
   /**
    * This is the parent table to which this button belongs.
@@ -57,7 +55,7 @@ public class OdkTablesShowTableButton extends AggregateButton
   private String tableId;
 
   public OdkTablesShowTableButton(OdkTablesTableList parentTable,
-      String tableId) {
+                                  String tableId) {
     super(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     this.parentTable = parentTable;
     this.tableId = tableId;
@@ -70,7 +68,7 @@ public class OdkTablesShowTableButton extends AggregateButton
 
     OdkTablesViewTableSubTab viewTableSubTab =
         (OdkTablesViewTableSubTab) AggregateUI.getUI()
-        .getSubTab(SubTabs.VIEWTABLE);
+            .getSubTab(SubTabs.VIEWTABLE);
     viewTableSubTab.setCurrentTable(tableId);
     viewTableSubTab.update();
     AggregateUI.getUI().redirectToSubTab(SubTabs.VIEWTABLE);

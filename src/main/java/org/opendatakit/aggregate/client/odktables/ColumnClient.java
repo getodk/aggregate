@@ -22,7 +22,6 @@ import java.io.Serializable;
  * This is the client-side code of the Column class under odktables rest entity.
  *
  * @author sudar.sam@gmail.com
- *
  */
 public class ColumnClient implements Serializable {
 
@@ -52,8 +51,8 @@ public class ColumnClient implements Serializable {
    * @param type
    */
   public ColumnClient(final String elementKey, final String elementName,
-      final String elementType, final String listChildElementKeys, final int isPersisted,
-      final String joins) {
+                      final String elementType, final String listChildElementKeys, final int isPersisted,
+                      final String joins) {
     // ss: not sure what this was.leaving it out for now.
     // String nameToBeEntered = displayName.toLowerCase().replace(" ", "_");
     this.elementKey = elementKey;

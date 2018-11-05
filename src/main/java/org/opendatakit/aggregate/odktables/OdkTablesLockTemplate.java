@@ -18,42 +18,24 @@ package org.opendatakit.aggregate.odktables;
 
 import java.util.Random;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Make datastore locks a little easier. NOT threadsafe.
  *
  * @author the.dylan.price@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public class OdkTablesLockTemplate {
-  public enum DelayStrategy {
-    SHORT(200), MEDIUM(1200), LONG(2500);
-
-    private final long baseBackOffTime;
-
-    private DelayStrategy(long baseBackOffTime) {
-      this.baseBackOffTime = baseBackOffTime;
-    }
-
-    public long getBaseBackOffTime() {
-      return baseBackOffTime;
-    }
-
-  }
-
   // At 4 tries and 250 baseBackOffTime, the maximum amount of time a single
   // acquire or release can take is: 250 + 500 + 1000 + 2000 = 3750
   private static final int TRIES = 5;
-
   private String tableId;
   private ODKTablesTaskLockType type;
   private Datastore ds;
@@ -63,23 +45,21 @@ public class OdkTablesLockTemplate {
   private long maxBackoffMs;
   private Random rand;
   private Logger log;
-
   /**
    * File-manager-specific lock for accessing app-level, table-level and
    * instance-level files and manifests. For app-level and table-level files,
    * the rowId should be an empty string or null. For instance-level files, the
    * rowId is mapped into one of 256 buckets to allow for multiple simultaneous
    * instance-level file accesses.
-   * 
+   *
    * @param tableId
    * @param rowId
    * @param type
-   * @param delay
-   *          TODO
+   * @param delay   TODO
    * @param cc
    */
   public OdkTablesLockTemplate(String tableId, String rowId, ODKTablesTaskLockType type,
-      DelayStrategy delay, CallingContext cc) {
+                               DelayStrategy delay, CallingContext cc) {
     String tmpTableId;
     if (rowId == null || rowId.length() == 0) {
       if (tableId.length() == 0) {
@@ -95,12 +75,12 @@ public class OdkTablesLockTemplate {
   }
 
   public OdkTablesLockTemplate(String tableId, ODKTablesTaskLockType type, DelayStrategy delay,
-      CallingContext cc) {
+                               CallingContext cc) {
     constructorHelper(tableId, type, cc, delay);
   }
 
   private void constructorHelper(String tableId, ODKTablesTaskLockType type, CallingContext cc,
-      DelayStrategy delay) {
+                                 DelayStrategy delay) {
     this.tableId = tableId;
     this.type = type;
     this.ds = cc.getDatastore();
@@ -178,6 +158,21 @@ public class OdkTablesLockTemplate {
     backoff += maxBackoffMs;
     maxBackoffMs *= 2;
     return backoff;
+  }
+
+  public enum DelayStrategy {
+    SHORT(200), MEDIUM(1200), LONG(2500);
+
+    private final long baseBackOffTime;
+
+    private DelayStrategy(long baseBackOffTime) {
+      this.baseBackOffTime = baseBackOffTime;
+    }
+
+    public long getBaseBackOffTime() {
+      return baseBackOffTime;
+    }
+
   }
 
 }

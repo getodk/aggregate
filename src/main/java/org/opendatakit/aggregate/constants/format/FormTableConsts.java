@@ -18,10 +18,8 @@ package org.opendatakit.aggregate.constants.format;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public final class FormTableConsts {
 
@@ -35,7 +33,7 @@ public final class FormTableConsts {
   public static final String FT_HEADER_KML = "KML File";
   public static final String FT_HEADER_EXTERNAL_SERVICE = "Send Submissions to External Service";
   public static final String FT_HEADER_QUERY = "Query Results";
- 
+
   // button text
   public static final String XML_BUTTON_TXT = "View XML";
   public static final String CSV_BUTTON_TXT = "Create CSV File";
@@ -54,5 +52,5 @@ public final class FormTableConsts {
   public static final String END_FORMS_TAG = HtmlUtil.createEndTag(FORMS_TAG);
   public static final String END_FORM_TAG = HtmlUtil.createEndTag(FORM_TAG);
 
-  
+
 }

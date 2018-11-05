@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,45 +18,40 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.opendatakit.common.web.constants.HtmlConsts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Simple servlet for the initial local login. It is needed to get GAE to
  * process the Spring security restrictions to the page.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public class LocalLoginPageServlet extends ServletUtilBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(LocalLoginPageServlet.class);
+  public static final String ADDR = "local_login.html";
 
   /*
    * Standard fields
    */
-
+  private static final Logger logger = LoggerFactory.getLogger(LocalLoginPageServlet.class);
   private static final long serialVersionUID = 629046684126101849L;
-
-  public static final String ADDR = "local_login.html";
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
       IOException {
 
     String redirectParamString = getRedirectUrl(req, AggregateHtmlServlet.ADDR);
-    
+
     // check for XSS attacks. The redirect string is emitted within single and double
     // quotes. It is a URL with :, /, ? and # characters. But it should not contain 
     // quotes, parentheses or semicolons.
     String cleanString = redirectParamString.replaceAll(BAD_PARAMETER_CHARACTERS, "");
-    if ( !cleanString.equals(redirectParamString) ) {
+    if (!cleanString.equals(redirectParamString)) {
       logger.warn("XSS cleanup -- redirectParamString has forbidden characters: " + redirectParamString);
       redirectParamString = cleanString;
     }
