@@ -75,8 +75,6 @@ public class ConfirmDeleteTablesAdminPopup extends AbstractPopupBase {
           AggregateUI.getUI().getTimer().refreshNow();
         }
       };
-      // Make the call to the form service.
-      SecureGWT.getOdkTablesAdminService().deleteAdmin(uriUser, callback);
       hide();
     }
   }

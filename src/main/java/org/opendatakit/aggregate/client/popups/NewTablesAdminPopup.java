@@ -153,8 +153,6 @@ public final class NewTablesAdminPopup extends AbstractPopupBase {
           enabledUsers.add(user);
         }
       }
-      // Make the call to the odk tables user admin service.
-      SecureGWT.getOdkTablesAdminService().setAdmins(enabledUsers, callback);
       hide();
     }
   }

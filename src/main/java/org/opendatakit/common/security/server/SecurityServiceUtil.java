@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import org.opendatakit.aggregate.odktables.rest.entity.PrivilegesInfo;
-import org.opendatakit.aggregate.odktables.rest.entity.UserInfo;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
@@ -157,60 +155,6 @@ public class SecurityServiceUtil {
     }
     Collections.sort(roleNames);
     return roleNames;
-  }
-
-  /**
-   * Constructor to extract content from UserSecurityInfo
-   *
-   * @param userSecurityInfo
-   */
-  public static final UserInfo createUserInfo(CallingContext cc, UserSecurityInfo userSecurityInfo) {
-    ArrayList<String> roles;
-
-    UserIdFullName fields = new UserIdFullName(userSecurityInfo);
-    RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
-    Set<GrantedAuthority> grants = new HashSet<GrantedAuthority>();
-    for (GrantedAuthorityName grant : userSecurityInfo.getGrantedAuthorities()) {
-      grants.add(new SimpleGrantedAuthority(grant.name()));
-    }
-    for (GrantedAuthorityName grant : userSecurityInfo.getAssignedUserGroups()) {
-      grants.add(new SimpleGrantedAuthority(grant.name()));
-    }
-    Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
-    grants.addAll(auths);
-    grants.removeAll(tablesExclusions);
-
-    roles = processRoles(grants);
-
-    return new UserInfo(fields.user_id, fields.full_name, roles);
-  }
-
-  public static PrivilegesInfo getRolesAndDefaultGroup(CallingContext cc) throws ODKDatastoreException {
-
-    User user = cc.getCurrentUser();
-    Set<GrantedAuthority> grants = new HashSet<GrantedAuthority>();
-    grants.addAll(user.getAuthorities());
-    RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
-    Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(user.getDirectAuthorities());
-    grants.addAll(auths);
-    grants.removeAll(tablesExclusions);
-
-    String defaultGroup = null;
-    boolean matchesMembershipGroup = (defaultGroup == null);
-
-    ArrayList<String> roleNames = new ArrayList<String>();
-    for (GrantedAuthority a : grants) {
-      String authName = a.getAuthority();
-      roleNames.add(authName);
-      matchesMembershipGroup = matchesMembershipGroup || authName.equals(defaultGroup);
-    }
-    Collections.sort(roleNames);
-    UserIdFullName fields = new UserIdFullName(cc, user);
-
-    PrivilegesInfo info = new PrivilegesInfo(fields.user_id, fields.full_name,
-        roleNames, (matchesMembershipGroup ? defaultGroup : null));
-
-    return info;
   }
 
   /**

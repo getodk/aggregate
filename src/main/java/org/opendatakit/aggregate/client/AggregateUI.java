@@ -329,11 +329,6 @@ public class AggregateUI implements EntryPoint {
       }
       for (int i = 0; i < mainNav.getWidgetCount(); i++) {
         Widget w = mainNav.getWidget(i);
-        if (w != null && w instanceof OdkTablesTabUI) {
-          w.setVisible(odkTablesVisible);
-          ((Widget) mainNav.getTabBar().getTab(i)).setVisible(odkTablesVisible);
-          ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
-        }
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
@@ -356,11 +351,6 @@ public class AggregateUI implements EntryPoint {
       }
       for (int i = 0; i < mainNav.getWidgetCount(); i++) {
         Widget w = mainNav.getWidget(i);
-        if (w != null && w instanceof OdkTablesTabUI) {
-          w.setVisible(false);
-          ((Widget) mainNav.getTabBar().getTab(i)).setVisible(false);
-          ((OdkTablesTabUI) w).updateVisibilityOdkTablesSubTabs();
-        }
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {
@@ -384,9 +374,6 @@ public class AggregateUI implements EntryPoint {
     ManageTabUI management = new ManageTabUI(this);
     addTabToDatastructures(management, Tabs.MANAGEMENT);
 
-    OdkTablesTabUI odkTables = new OdkTablesTabUI(this);
-    addTabToDatastructures(odkTables, Tabs.ODKTABLES);
-
     AdminTabUI admin = new AdminTabUI(this);
     addTabToDatastructures(admin, Tabs.ADMIN);
 
@@ -401,15 +388,6 @@ public class AggregateUI implements EntryPoint {
       if (authorizedForTab(Tabs.MANAGEMENT)) {
         mainNav.add(management, Tabs.MANAGEMENT.getTabLabel());
         manageVisible = true;
-      }
-
-      if (authorizedForTab(Tabs.ODKTABLES)) {
-        mainNav.add(odkTables, Tabs.ODKTABLES.getTabLabel());
-        if (!authorizedForTab(Tabs.SUBMISSIONS)) {
-          // If submissions is not visible, mark it as the tab to use to size the screen
-          mainNav.getElement().getFirstChildElement().getFirstChildElement()
-              .addClassName("tab_measure_1");
-        }
       }
 
       if (authorizedForTab(Tabs.ADMIN)) {

@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.constants.common.Tabs;
 public class AdminTabUI extends AggregateTabBase {
 
   private PermissionsSubTab permissionsSubTab;
-  private OdkTablesAdminSubTab odkTablesAdminTab;
 
   public AdminTabUI(AggregateUI baseUI) {
     super();
@@ -33,9 +32,6 @@ public class AdminTabUI extends AggregateTabBase {
     permissionsSubTab = new PermissionsSubTab();
     addSubTab(permissionsSubTab, SubTabs.PERMISSIONS);
     addSubTab(new PreferencesSubTab(), SubTabs.PREFERENCES);
-
-    odkTablesAdminTab = new OdkTablesAdminSubTab();
-    addSubTab(odkTablesAdminTab, SubTabs.TABLES);
 
     // show panel by default, so need to hide it
     if (!Preferences.getOdkTablesEnabled()) {
@@ -47,11 +43,6 @@ public class AdminTabUI extends AggregateTabBase {
   }
 
   private void changeVisibilityOdkTablesSubTab(boolean outcome) {
-    SubTabInterface odkTablesAdmin = getSubTab(SubTabs.TABLES);
-    OdkTablesAdminSubTab subTab = ((OdkTablesAdminSubTab) odkTablesAdmin);
-    if (subTab != null) {
-      subTab.setVisible(outcome);
-    }
     for (int i = 0; i < subTabPosition.size(); i++) {
       if (subTabPosition.get(i).equals(SubTabs.TABLES)) {
         Widget w = ((Widget) this.getTabBar().getTab(i));

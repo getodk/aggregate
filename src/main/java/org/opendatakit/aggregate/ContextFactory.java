@@ -22,9 +22,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -64,14 +61,6 @@ public class ContextFactory {
 
   public static CallingContext duplicateContext(CallingContext context) {
     return new CallingContextImpl(context);
-  }
-
-  public static TablesUserPermissions getTablesUserPermissions(CallingContext cc) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
-    return new TablesUserPermissionsImpl(cc);
-  }
-
-  public static String getOdkTablesAppId(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    return ServerPreferencesProperties.getOdkTablesAppId(cc);
   }
 
   /**
