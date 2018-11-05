@@ -25,45 +25,19 @@ package org.opendatakit.aggregate.exception;
  * @author mitchellsundt@gmail.com
  */
 public class ODKFormNotFoundException extends Exception {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = -5783254963331115468L;
-
-  /**
-   * Default constructor
-   */
   public ODKFormNotFoundException() {
     super();
   }
 
-  /**
-   * Construct exception with the error message
-   *
-   * @param message exception message
-   */
   public ODKFormNotFoundException(String message) {
     super(message);
   }
 
-  /**
-   * Construction exception with error message and throwable cause
-   *
-   * @param message exception message
-   * @param cause   throwable cause
-   */
   public ODKFormNotFoundException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  /**
-   * Construction exception with throwable cause
-   *
-   * @param cause throwable cause
-   */
   public ODKFormNotFoundException(Throwable cause) {
     super(cause);
   }
-
 }

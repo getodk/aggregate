@@ -24,45 +24,11 @@ package org.opendatakit.aggregate.exception;
  * @author mitchellsundt@gmail.com
  */
 public class ODKFormAlreadyExistsException extends Exception {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = -5169305644093039120L;
-
-  /**
-   * Default constructor
-   */
   public ODKFormAlreadyExistsException() {
     super();
   }
 
-  /**
-   * Construct exception with the error message
-   *
-   * @param message exception message
-   */
   public ODKFormAlreadyExistsException(String message) {
     super(message);
   }
-
-  /**
-   * Construction exception with error message and throwable cause
-   *
-   * @param message exception message
-   * @param cause   throwable cause
-   */
-  public ODKFormAlreadyExistsException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  /**
-   * Construction exception with throwable cause
-   *
-   * @param cause throwable cause
-   */
-  public ODKFormAlreadyExistsException(Throwable cause) {
-    super(cause);
-  }
-
 }

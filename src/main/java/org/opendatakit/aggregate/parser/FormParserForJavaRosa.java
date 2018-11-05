@@ -291,7 +291,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     /* true if we are modifying this form definition. */
     boolean updateForm;
     /* true if the form definition changes, but is compatible */
-    @SuppressWarnings("unused")
     boolean differentForm = false;
     IForm formInfo = null;
     /*

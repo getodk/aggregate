@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -123,25 +122,6 @@ public class PurgeOlderSubmissionsTaskServlet extends ServletUtilBase {
 
     PurgeOlderSubmissionsWorkerImpl formDelete = new PurgeOlderSubmissionsWorkerImpl(form,
         miscTasksKey, attemptCount, cc);
-    try {
-      formDelete.purgeOlderSubmissions();
-    } catch (ODKDatastoreException e) {
-      logger.error("Unable to purge older submissions formId: " + formId + " exception: "
-          + e.toString());
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    } catch (ODKFormNotFoundException e) {
-      logger.error("Unable to purge older submissions formId: " + formId + " exception: "
-          + e.toString());
-      odkIdNotFoundError(resp);
-      return;
-    } catch (ODKExternalServiceDependencyException e) {
-      logger.error("Unable to purge older submissions formId: " + formId + " exception: "
-          + e.toString());
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    }
+    formDelete.purgeOlderSubmissions();
   }
 }

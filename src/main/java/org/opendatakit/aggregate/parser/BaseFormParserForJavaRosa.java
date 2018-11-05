@@ -850,7 +850,6 @@ public class BaseFormParserForJavaRosa {
     // Otherwise, if you have specified the jr:template attribute,
     // it appears only as an INDEX_TEMPLATE element.
 
-    @SuppressWarnings("unused")
     int template1DropCount = 0;
     // get non-template entries for treeElement1
     List<TreeElement> element1ExcludingRepeatIndex0Children = new ArrayList<TreeElement>();
@@ -868,7 +867,6 @@ public class BaseFormParserForJavaRosa {
       element1ExcludingRepeatIndex0Children.add(child);
     }
 
-    @SuppressWarnings("unused")
     int template2DropCount = 0;
     // get non-template entries for treeElement2
     Map<String, TreeElement> element2ExcludingRepeatIndex0Children = new HashMap<String, TreeElement>();
@@ -1081,7 +1079,6 @@ public class BaseFormParserForJavaRosa {
     return "/" + nodeset;
   }
 
-  @SuppressWarnings("unused")
   private void printTreeElementInfo(TreeElement treeElement) {
     System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.getDataType()
         + " repeatable: " + treeElement.isRepeatable());

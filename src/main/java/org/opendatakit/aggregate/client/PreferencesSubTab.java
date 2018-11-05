@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.Label;
 import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
-import org.opendatakit.aggregate.client.widgets.ChangeAppNameButton;
 import org.opendatakit.aggregate.client.widgets.DisableFasterBackgroundActionsCheckbox;
 import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
@@ -88,7 +87,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private Label enketoApiToken;
   private EnableOdkTablesCheckbox odkTablesEnable;
   private Label appName;
-  private ChangeAppNameButton changeAppNameButton;
   private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
   private SkipMalformedSubmissionsCheckbox skipMalformedSubmissions;
 
@@ -219,10 +217,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     HTML labelAppNameInfo = new HTML(ODK_TABLES_APP_NAME_INFO);
     labelAppNameInfo.setStylePrimaryName(INDENTED_STYLE);
     add(labelAppNameInfo);
-
-    changeAppNameButton = new ChangeAppNameButton(settingsChange);
-    changeAppNameButton.setStylePrimaryName(INDENTED_STYLE);
-    add(changeAppNameButton);
 
     HTML features = new HTML(FEATURES_LABEL);
     add(features);

@@ -24,43 +24,11 @@ package org.opendatakit.aggregate.exception;
  * @author mitchellsundt@gmail.com
  */
 public class ODKParseException extends Exception {
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = -1568945851458095879L;
-
-  /**
-   * Default constructor
-   */
-  public ODKParseException() {
-    super();
-  }
-
-  /**
-   * Construct exception with the error message
-   *
-   * @param message exception message
-   */
   public ODKParseException(String message) {
     super(message);
   }
 
-  /**
-   * Construction exception with error message and throwable cause
-   *
-   * @param message exception message
-   * @param cause   throwable cause
-   */
   public ODKParseException(String message, Throwable cause) {
     super(message, cause);
-  }
-
-  /**
-   * Construction exception with throwable cause
-   *
-   * @param cause throwable cause
-   */
-  public ODKParseException(Throwable cause) {
-    super(cause);
   }
 }

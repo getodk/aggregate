@@ -238,7 +238,6 @@ public class SubmissionParser {
   private Node findMetaTag(Node parent) {
     if (parent.getNodeType() != Node.ELEMENT_NODE)
       return null;
-    @SuppressWarnings("unused")
     String parentName = parent.getLocalName();
     NodeList nl = parent.getChildNodes();
     for (int i = 0; i < nl.getLength(); ++i) {
@@ -654,7 +653,6 @@ public class SubmissionParser {
    *
    * @param node xml node to be recursively printed
    */
-  @SuppressWarnings("unused")
   private void printNode(Element node) {
     System.out.println(ParserConsts.NODE_FORMATTED + node.getTagName());
     if (node.hasAttributes()) {

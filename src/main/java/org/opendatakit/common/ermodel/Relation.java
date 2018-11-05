@@ -52,7 +52,6 @@ public class Relation {
   private static final int MAX_DELETE_COUNT = 100;
 
   /** the table namespace of this relation */
-  @SuppressWarnings("unused")
   private final TableNamespace namespace;
   /** name of the actual backing table in the persistence layer */
   private final String backingTableName;

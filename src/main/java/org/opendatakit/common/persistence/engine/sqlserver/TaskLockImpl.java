@@ -378,12 +378,10 @@ public class TaskLockImpl implements TaskLock {
       }
     }
 
-    @SuppressWarnings("unused")
     Date getExpirationDateTime() {
       return getDateField(expirationDateTime);
     }
 
-    @SuppressWarnings("unused")
     void setExpirationDateTime(Date value) {
       setDateField(expirationDateTime, value);
     }

@@ -270,7 +270,6 @@ public class BinaryContentManipulator {
                                                                               String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
       throws ODKDatastoreException {
 
-    @SuppressWarnings("unused")
     Long contentLength = (byteArray == null) ? null : Long.valueOf(byteArray.length);
     // search for a matching entry for unrootedFilePath
     BinaryContent matchedBc = null;
@@ -358,7 +357,6 @@ public class BinaryContentManipulator {
 
         // Step (3)
         // persist the binary data
-        @SuppressWarnings("unused")
         BlobManipulator subBlob = new BlobManipulator(byteArray, matchedBc.getUri(), vrefRelation,
             blbRelation, topLevelKey, cc);
 
@@ -394,7 +392,6 @@ public class BinaryContentManipulator {
 
         // Step (3)
         // persist the binary data
-        @SuppressWarnings("unused")
         BlobManipulator subBlob = new BlobManipulator(byteArray, matchedBc.getUri(), vrefRelation,
             blbRelation, topLevelKey, cc);
 

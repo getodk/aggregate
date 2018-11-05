@@ -41,7 +41,6 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
   private static final String BLOB_SUFFIX = "_blb";
   private static final String VREF_SUFFIX = "_ref";
   private static final String CTNT_SUFFIX = "_bin";
-  @SuppressWarnings("unused")
   private final TableNamespace namespace;
   private final String backingBaseTableName;
   private BinaryContent ctntRelation;

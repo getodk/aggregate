@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -121,21 +120,10 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
       FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, miscTasksKey, attemptCount,
           cc);
       formDelete.deleteForm();
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      logger.error("delete form failed: " + e.toString());
-      return;
-    } catch (ODKExternalServiceDependencyException e) {
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      logger.error("delete form failed: " + e.toString());
-      return;
     } catch (Exception e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       logger.error("delete form failed: " + e.toString());
-      return;
     }
   }
 }

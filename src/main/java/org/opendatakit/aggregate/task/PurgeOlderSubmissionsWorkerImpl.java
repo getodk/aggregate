@@ -25,7 +25,6 @@ import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
@@ -73,8 +72,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
     pFormIdLockId = UUID.randomUUID().toString();
   }
 
-  public final void purgeOlderSubmissions() throws ODKDatastoreException, ODKFormNotFoundException,
-      ODKExternalServiceDependencyException {
+  public final void purgeOlderSubmissions() {
 
     Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsWorkerImpl.class);
     logger.info("Beginning Submissions Purge: " + miscTasksKey.toString() + " form "

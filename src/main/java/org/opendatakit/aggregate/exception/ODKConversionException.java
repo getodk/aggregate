@@ -25,45 +25,19 @@ package org.opendatakit.aggregate.exception;
  * @author mitchellsundt@gmail.com
  */
 public class ODKConversionException extends Exception {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 3594878466197692145L;
-
-  /**
-   * Default constructor
-   */
   public ODKConversionException() {
     super();
   }
 
-  /**
-   * Construct exception with the error message
-   *
-   * @param message exception message
-   */
   public ODKConversionException(String message) {
     super(message);
   }
 
-  /**
-   * Construction exception with error message and throwable cause
-   *
-   * @param message exception message
-   * @param cause   throwable cause
-   */
   public ODKConversionException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  /**
-   * Construction exception with throwable cause
-   *
-   * @param cause throwable cause
-   */
   public ODKConversionException(Throwable cause) {
     super(cause);
   }
-
 }

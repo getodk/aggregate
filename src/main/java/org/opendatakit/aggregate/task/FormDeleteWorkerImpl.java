@@ -22,7 +22,6 @@ import java.util.UUID;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -73,7 +72,7 @@ public class FormDeleteWorkerImpl {
     pFormIdLockId = UUID.randomUUID().toString();
   }
 
-  public final void deleteForm() throws ODKDatastoreException, ODKExternalServiceDependencyException {
+  public final void deleteForm() throws ODKDatastoreException {
 
 
     logger.info("Beginning Form Deletion: " + miscTasksKey.toString() +

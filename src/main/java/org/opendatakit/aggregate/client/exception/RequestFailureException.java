@@ -28,42 +28,23 @@ import java.io.Serializable;
  * @author mitchellsundt@gmail.com
  */
 public class RequestFailureException extends Exception implements Serializable {
-
-  /**
-   *
-   */
-  private static final long serialVersionUID = -2361548638923668909L;
-
   private String message;
 
-  /**
-   *
-   */
   public RequestFailureException() {
     super();
     message = "RequestFailureException";
   }
 
-  /**
-   * @param arg0
-   * @param arg1
-   */
   public RequestFailureException(String arg0, Throwable arg1) {
     super(arg0, arg1);
     message = arg0 + "(" + arg1.getMessage() + ")";
   }
 
-  /**
-   * @param arg0
-   */
   public RequestFailureException(String arg0) {
     super(arg0);
     message = arg0;
   }
 
-  /**
-   * @param arg0
-   */
   public RequestFailureException(Throwable arg0) {
     super(arg0);
     message = "RequestFailureException (" + arg0.getMessage() + ")";

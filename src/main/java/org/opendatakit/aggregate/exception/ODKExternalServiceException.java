@@ -21,42 +21,18 @@ package org.opendatakit.aggregate.exception;
  * @author mitchellsundt@gmail.com
  */
 public class ODKExternalServiceException extends Exception {
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 2319914089199375319L;
-
-  /**
-   * Default constructor
-   */
   public ODKExternalServiceException() {
     super();
   }
 
-  /**
-   * Construct exception with the error message
-   *
-   * @param message exception message
-   */
   public ODKExternalServiceException(String message) {
     super(message);
   }
 
-  /**
-   * Construction exception with error message and throwable cause
-   *
-   * @param message exception message
-   * @param cause   throwable cause
-   */
   public ODKExternalServiceException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  /**
-   * Construction exception with throwable cause
-   *
-   * @param cause throwable cause
-   */
   public ODKExternalServiceException(Throwable cause) {
     super(cause);
   }
