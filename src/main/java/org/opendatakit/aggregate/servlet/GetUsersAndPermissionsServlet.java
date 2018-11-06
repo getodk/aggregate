@@ -27,7 +27,7 @@ import org.apache.commons.lang3.CharEncoding;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.odktables.rest.RFC4180CsvWriter;
+import org.opendatakit.aggregate.rest.RFC4180CsvWriter;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;

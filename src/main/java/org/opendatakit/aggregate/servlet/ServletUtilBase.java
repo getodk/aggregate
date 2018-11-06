@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.odktables.rest.ApiConstants;
+import org.opendatakit.aggregate.rest.ApiConstants;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.servlet.CommonServletBase;

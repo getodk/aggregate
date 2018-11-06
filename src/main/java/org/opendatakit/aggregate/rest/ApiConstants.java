@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.rest;
+package org.opendatakit.aggregate.rest;
 
 /**
  * HTTP Header fields and values for those fields. Some of these are here so

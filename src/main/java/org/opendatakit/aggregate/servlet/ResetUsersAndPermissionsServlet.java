@@ -35,7 +35,7 @@ import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.odktables.rest.RFC4180CsvReader;
+import org.opendatakit.aggregate.rest.RFC4180CsvReader;
 import org.opendatakit.aggregate.parser.MultiPartFormData;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;

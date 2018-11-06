@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.odktables.rest;
+package org.opendatakit.aggregate.rest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,13 +40,10 @@ public class RFC4180CsvReader {
 
   private final BufferedReader br;
 
-  private final char cr = 13;
-
-  private final char lf = 10;
-
-  private final char separator = ',';
-
-  private final char quotechar = '"';
+  private static final char CR_CHAR_INDEX = 13;
+  private static final char LF_CHAR_INDEX = 10;
+  private static final char SEPARATOR_CHAR = ',';
+  private static final char QUOTE_CHAR = '"';
 
 
   /**
@@ -57,15 +54,12 @@ public class RFC4180CsvReader {
    * @param quotechar the character to use for quoted elements
    * @param escape    the character to use for escaping a separator or quote
    */
-
   public RFC4180CsvReader(Reader reader) {
     this.br = new BufferedReader(reader);
     if (!br.markSupported()) {
       throw new IllegalStateException("Unable to support mark!");
     }
   }
-
-  ;
 
   /**
    * Reads the next line from the buffer and converts to a string array.
@@ -107,16 +101,16 @@ public class RFC4180CsvReader {
           // no more lines in file
           return null;
         }
-        if (ch == cr) {
+        if (ch == CR_CHAR_INDEX) {
           // special case -- if we have an immediate CR LF, return an empty array
           br.mark(1);
           ch = br.read();
-          if (ch != lf && ch != -1) {
+          if (ch != LF_CHAR_INDEX && ch != -1) {
             // Excel for Mac silliness
             br.reset();
           }
           return results.toArray(new String[results.size()]);
-        } else if (ch == lf) {
+        } else if (ch == LF_CHAR_INDEX) {
           // alternate line terminator (no cr, just lf)
           return results.toArray(new String[results.size()]);
         }
@@ -128,25 +122,25 @@ public class RFC4180CsvReader {
         // If we are expecting the start of a field and
         // encounter a CR LF, then we emit a null value
         // and return the results array.
-        if (ch == cr) {
+        if (ch == CR_CHAR_INDEX) {
           br.mark(1);
           ch = br.read();
-          if (ch != lf && ch != -1) {
+          if (ch != LF_CHAR_INDEX && ch != -1) {
             // Excel for Mac silliness
             br.reset();
           }
           results.add(null);
           return results.toArray(new String[results.size()]);
-        } else if (ch == lf || ch == -1) {
+        } else if (ch == LF_CHAR_INDEX || ch == -1) {
           // alternate line terminator
           results.add(null);
           return results.toArray(new String[results.size()]);
-        } else if (ch == separator) {
+        } else if (ch == SEPARATOR_CHAR) {
           // no value in cell
           results.add(null);
           // the separator advances us to the next field
           state = ParseState.atStartOfField;
-        } else if (ch == quotechar) {
+        } else if (ch == QUOTE_CHAR) {
           // start of a quoted string
           state = ParseState.quoted;
           b.setLength(0);
@@ -161,20 +155,20 @@ public class RFC4180CsvReader {
           // allow the last line to not have a terminator
           // this is legal w.r.t. RFC4180, and is what Excel does on a Mac.
           return results.toArray(new String[results.size()]);
-        } else if (ch == cr) {
+        } else if (ch == CR_CHAR_INDEX) {
           // We are expecting a comma but hit a CR LF
           // return the current results array.
           br.mark(1);
           ch = br.read();
-          if (ch != lf && ch != -1) {
+          if (ch != LF_CHAR_INDEX && ch != -1) {
             // Excel for Mac silliness
             br.reset();
           }
           return results.toArray(new String[results.size()]);
-        } else if (ch == lf) {
+        } else if (ch == LF_CHAR_INDEX) {
           // alternate line terminator
           return results.toArray(new String[results.size()]);
-        } else if (ch == separator) {
+        } else if (ch == SEPARATOR_CHAR) {
           // found the comma -- transition to look for the start of the next field
           state = ParseState.atStartOfField;
         } else {
@@ -187,22 +181,22 @@ public class RFC4180CsvReader {
           results.add(b.toString());
           b.setLength(0);
           return results.toArray(new String[results.size()]);
-        } else if (ch == cr) {
+        } else if (ch == CR_CHAR_INDEX) {
           // marks the end of this naked field (and the end of the line)
           br.mark(1);
           ch = br.read();
-          if (ch != lf && ch != -1) {
+          if (ch != LF_CHAR_INDEX && ch != -1) {
             // Excel for Mac silliness
             br.reset();
           }
           results.add(b.toString());
           b.setLength(0);
           return results.toArray(new String[results.size()]);
-        } else if (ch == lf) {
+        } else if (ch == LF_CHAR_INDEX) {
           results.add(b.toString());
           b.setLength(0);
           return results.toArray(new String[results.size()]);
-        } else if (ch == separator) {
+        } else if (ch == SEPARATOR_CHAR) {
           // marks the end of this naked field
           String field = b.toString();
           if (field.length() == 0) {
@@ -213,7 +207,7 @@ public class RFC4180CsvReader {
           b.setLength(0);
           // look for the start of the next field
           state = ParseState.atStartOfField;
-        } else if (ch == quotechar) {
+        } else if (ch == QUOTE_CHAR) {
           throw new IllegalStateException("Unexpected double-quote in an unquoted field value");
         } else {
           // anything else is just added to the field
@@ -222,10 +216,10 @@ public class RFC4180CsvReader {
       } else if (state == ParseState.quoted) {
         if (ch == -1) {
           throw new IllegalStateException("Unexpected end of file in quoted field value");
-        } else if (ch == quotechar) {
+        } else if (ch == QUOTE_CHAR) {
           // read the next character to see of it is an escaped quote
           ch = br.read();
-          if (ch != quotechar) {
+          if (ch != QUOTE_CHAR) {
             // nope -- we are done with this quoted field
             // and expect a comma (or CR LF).
             String field = b.toString();
@@ -248,19 +242,19 @@ public class RFC4180CsvReader {
           //
           // If we have a cr, cr/lf, lf or nl, always emit
           // a cr/lf combination.
-          if (ch == cr) {
+          if (ch == CR_CHAR_INDEX) {
             // marks the end of this naked field (and the end of the line)
             br.mark(1);
             ch = br.read();
-            if (ch != lf && ch != -1) {
+            if (ch != LF_CHAR_INDEX && ch != -1) {
               // Excel for Mac silliness
               br.reset();
             }
-            b.append((char) cr);
-            b.append((char) lf);
-          } else if (ch == lf) {
-            b.append((char) cr);
-            b.append((char) lf);
+            b.append((char) CR_CHAR_INDEX);
+            b.append((char) LF_CHAR_INDEX);
+          } else if (ch == LF_CHAR_INDEX) {
+            b.append((char) CR_CHAR_INDEX);
+            b.append((char) LF_CHAR_INDEX);
           } else {
             b.append((char) ch);
           }
