@@ -45,7 +45,6 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
   /**
    * Constructor
    *
-   * @param propertyName Name of submission element
    */
   public GeoPointSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);

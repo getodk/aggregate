@@ -31,21 +31,10 @@ import org.opendatakit.common.web.CallingContext;
  * @author mitchellsundt@gmail.com
  */
 public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date> {
-  /**
-   * Constructor
-   *
-   * @param propertyName Name of submission element
-   */
   protected DateSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);
   }
 
-  /**
-   * Parse the value from string format and convert to Date
-   *
-   * @param value string form of the value
-   * @throws ODKConversionException
-   */
   @Override
   public void setValueFromString(String value) throws ODKConversionException {
     Date d;
@@ -63,9 +52,6 @@ public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date>
     setValue(value);
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof DateSubmissionType)) {
@@ -82,11 +68,6 @@ public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date>
     return backingObject.getDateField(element.getFormDataModel().getBackingKey());
   }
 
-  /**
-   * Set the value of submission field
-   *
-   * @param value value to set
-   */
   protected void setValue(Date value) {
     backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
   }

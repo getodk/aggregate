@@ -18,12 +18,10 @@
 package org.opendatakit.aggregate.submission.type;
 
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -33,22 +31,10 @@ import org.opendatakit.common.web.CallingContext;
  * @author mitchellsundt@gmail.com
  */
 public class StringSubmissionType extends SubmissionSingleValueBase<String> {
-  /**
-   * Constructor
-   *
-   * @param propertyName Name of submission element
-   */
-  public StringSubmissionType(DynamicCommonFieldsBase backingObject,
-                              FormElementModel element) {
+  public StringSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);
   }
 
-  /**
-   * Save the string value.
-   *
-   * @param value string form of the value
-   * @throws ODKConversionException
-   */
   @Override
   public void setValueFromString(String value) {
     setValue(value);
@@ -60,20 +46,11 @@ public class StringSubmissionType extends SubmissionSingleValueBase<String> {
     setValue(value);
   }
 
-  /**
-   * Format value for output
-   *
-   * @param elemFormatter the element formatter that will convert the value to the
-   *                      proper format for output
-   */
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
     elemFormatter.formatString(getValue(), element, ordinalValue, row);
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof StringSubmissionType)) {
@@ -90,11 +67,6 @@ public class StringSubmissionType extends SubmissionSingleValueBase<String> {
     return backingObject.getStringField(element.getFormDataModel().getBackingKey());
   }
 
-  /**
-   * Set the value of submission field.  Silently truncate longer strings.
-   *
-   * @param value value to set
-   */
   protected void setValue(String value) {
     DataField f = element.getFormDataModel().getBackingKey();
     if (value != null && value.length() > f.getMaxCharLen().intValue()) {

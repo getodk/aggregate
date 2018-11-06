@@ -100,7 +100,6 @@ public class UIEnabledActionCell<T> extends AbstractCell<T> {
   /**
    * The delegate that will handle events from the cell.
    *
-   * @param <T> the type that this delegate acts on
    */
   public static interface Delegate<C> {
     /**

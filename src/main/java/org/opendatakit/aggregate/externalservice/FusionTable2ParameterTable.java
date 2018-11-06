@@ -22,32 +22,22 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Modified for use under OAuth2 using a service account (vs. OAuth).
- *
+ * <p>
  * A critical piece of information is the user e-mail account that should
  * be granted ownership rights to the table, its sub-tables, and overall view.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class FusionTable2ParameterTable extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_fusion_table_2";
 
-  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField("FUSION_TABLE_ID",
-      DataField.DataType.STRING, true, 4096L);
-  private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL",
-      DataField.DataType.STRING, true, 4096L);
-  private static final DataField FUSION_TABLE_VIEW_ID_PROPERTY = new DataField("FUSION_TABLE_VIEW_ID",
-      DataField.DataType.STRING, true, 4096L);
+  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField("FUSION_TABLE_ID", DataField.DataType.STRING, true, 4096L);
+  private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL", DataField.DataType.STRING, true, 4096L);
+  private static final DataField FUSION_TABLE_VIEW_ID_PROPERTY = new DataField("FUSION_TABLE_VIEW_ID", DataField.DataType.STRING, true, 4096L);
   private static FusionTable2ParameterTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   FusionTable2ParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(FUSION_TABLE_ID_PROPERTY);
@@ -55,18 +45,11 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
     fieldList.add(FUSION_TABLE_VIEW_ID_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private FusionTable2ParameterTable(FusionTable2ParameterTable ref, User user) {
     super(ref, user);
   }
 
-  public static synchronized final FusionTable2ParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  public static synchronized final FusionTable2ParameterTable assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       Datastore ds = cc.getDatastore();
       User user = cc.getUserService().getDaemonAccountUser();

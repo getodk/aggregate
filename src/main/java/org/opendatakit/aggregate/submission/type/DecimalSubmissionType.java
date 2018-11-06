@@ -36,7 +36,6 @@ public class DecimalSubmissionType extends
   /**
    * Constructor
    *
-   * @param propertyName Name of submission element
    */
   public DecimalSubmissionType(DynamicCommonFieldsBase backingObject,
                                FormElementModel element) {

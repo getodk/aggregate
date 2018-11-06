@@ -38,7 +38,6 @@ public class JRDateType extends DateSubmissionType {
   /**
    * Constructor
    *
-   * @param propertyName Name of submission element
    */
   public JRDateType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);

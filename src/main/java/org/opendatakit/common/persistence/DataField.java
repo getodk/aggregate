@@ -52,8 +52,6 @@ public final class DataField {
    *          is underscore-delimited all-upper-case names.  E.g.,
    *          in Java, you might name a variable "descriptiveDataValue".
    *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
-   * @param dataType
-   * @param nullable
    */
   public DataField(String name, DataType dataType, boolean nullable) {
     this(name, dataType, nullable, null, null, null);
@@ -67,9 +65,6 @@ public final class DataField {
    *          is underscore-delimited all-upper-case names.  E.g.,
    *          in Java, you might name a variable "descriptiveDataValue".
    *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
-   * @param dataType
-   * @param nullable
-   * @param maxCharLen
    */
   public DataField(String name, DataType dataType, boolean nullable, Long maxCharLen) {
     this(name, dataType, nullable, maxCharLen, null, null);

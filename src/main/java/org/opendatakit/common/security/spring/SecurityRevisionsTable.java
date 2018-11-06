@@ -14,41 +14,19 @@ public class SecurityRevisionsTable extends CommonFieldsBase {
   private static final String REGISTERED_USERS_ROW_ID = "rid:registered_users";
   private static final String SUPER_USER_ID_ROW_ID = "rid:super_user_id";
   private static final String PERMISSIONS_VIEW_ROW_ID = "rid:permissions_view";
-
   private static final String TABLE_NAME = "_security_revisions";
-
-  private static final DataField LAST_REVISION_DATE = new DataField(
-      "LAST_REVISION", DataField.DataType.DATETIME, true);
+  private static final DataField LAST_REVISION_DATE = new DataField("LAST_REVISION", DataField.DataType.DATETIME, true);
   private static SecurityRevisionsTable relation = null;
 
-  /**
-   * Construct a relation prototype.  Only called via {@link #assertRelation(Datastore, User)}
-   *
-   * @param schemaName
-   */
   protected SecurityRevisionsTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(LAST_REVISION_DATE);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   protected SecurityRevisionsTable(SecurityRevisionsTable ref, User user) {
     super(ref, user);
   }
 
-  /**
-   * This is private because this table implements a singleton pattern.
-   *
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
   private static synchronized final SecurityRevisionsTable assertRelation(Datastore datastore, User user) throws ODKDatastoreException {
     if (relation == null) {
       SecurityRevisionsTable relationPrototype;
@@ -59,15 +37,6 @@ public class SecurityRevisionsTable extends CommonFieldsBase {
     return relation;
   }
 
-  /**
-   * This retrieves the singleton record.
-   *
-   * @param uri
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
   private static synchronized final SecurityRevisionsTable getSingletonRecord(String uri, Datastore datastore, User user) throws ODKDatastoreException {
     SecurityRevisionsTable prototype = assertRelation(datastore, user);
     SecurityRevisionsTable record = null;
@@ -126,7 +95,6 @@ public class SecurityRevisionsTable extends CommonFieldsBase {
     datastore.putEntity(t, user);
   }
 
-  // Only called from within the persistence layer.
   @Override
   public CommonFieldsBase getEmptyRow(User user) {
     SecurityRevisionsTable t = new SecurityRevisionsTable(this, user);

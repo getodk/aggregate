@@ -26,15 +26,8 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 @RemoteServiceRelativePath("filterservice")
 public interface FilterService extends RemoteService {
 
-  FilterSet getFilterSet(String formId) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  FilterSet getFilterSet(String formId) throws RequestFailureException, DatastoreFailureException;
 
-  /**
-   * Saves the supplied filter group in the database
-   *
-   * @param group the filter group to be saved in the DB
-   * @return uid of the filter group on success, null on failure
-   * @throws AccessDeniedException
-   */
   String updateFilterGroup(FilterGroup group) throws RequestFailureException, DatastoreFailureException;
 
   Boolean deleteFilterGroup(FilterGroup group) throws RequestFailureException, DatastoreFailureException;

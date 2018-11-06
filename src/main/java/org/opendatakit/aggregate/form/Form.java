@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.form;
 
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,7 +31,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.parser.MultiPartFormItem;
 import org.opendatakit.aggregate.servlet.FormXmlServlet;
-import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
@@ -68,14 +66,7 @@ class Form implements IForm {
 
   private final BinaryContentManipulator manifest;
 
-  /**
-   * Definition of the database representation of the form submission.
-   */
   private final FormDefinition formDefinition;
-
-  /**
-   * NOT persisted
-   */
 
   private final Map<String, FormElementModel> repeatElementMap;
 
@@ -183,12 +174,6 @@ class Form implements IForm {
     }
   }
 
-  /**
-   * Deletes the Form including FormElements and Remote Services
-   *
-   * @param ds Datastore
-   * @throws ODKDatastoreException
-   */
   public synchronized void deleteForm(CallingContext cc) throws ODKDatastoreException {
     FormFactory.clearForm(this);
     if (formDefinition != null) {
@@ -208,11 +193,6 @@ class Form implements IForm {
     ds.deleteEntity(infoRow.getEntityKey(), user);
   }
 
-  /**
-   * Get the datastore key that uniquely identifies the form entity
-   *
-   * @return datastore key
-   */
   public EntityKey getEntityKey() {
     return infoRow.getEntityKey();
   }
@@ -250,11 +230,6 @@ class Form implements IForm {
     return (formDefinition != null);
   }
 
-  /**
-   * Get the ODK identifier that identifies the form
-   *
-   * @return odk identifier
-   */
   public String getFormId() {
     return infoRow.getStringField(FormInfoTable.FORM_ID);
   }
@@ -267,11 +242,6 @@ class Form implements IForm {
     return manifest;
   }
 
-  /**
-   * Get the name that is viewable on ODK Aggregate
-   *
-   * @return viewable name
-   */
   public String getViewableName() {
     return filesetRow.getStringField(FormInfoFilesetTable.FORM_NAME);
   }
@@ -303,29 +273,14 @@ class Form implements IForm {
     return filesetRow.getStringField(FormInfoFilesetTable.DESCRIPTION_URL);
   }
 
-  /**
-   * Get the date the form was created
-   *
-   * @return creation date
-   */
   public Date getCreationDate() {
     return infoRow.getCreationDate();
   }
 
-  /**
-   * Get the last date the form was updated
-   *
-   * @return last date form was updated
-   */
   public Date getLastUpdateDate() {
     return infoRow.getLastUpdateDate();
   }
 
-  /**
-   * Get the user who uploaded/created the form
-   *
-   * @return user name
-   */
   public String getCreationUser() {
     return infoRow.getCreatorUriUser();
   }
@@ -334,11 +289,6 @@ class Form implements IForm {
     return xform;
   }
 
-  /**
-   * Get the file name to be used when generating the XML file describing from
-   *
-   * @return xml file name
-   */
   public String getFormFilename(CallingContext cc) throws ODKDatastoreException {
     if (xform.getAttachmentCount(cc) == 1) {
       return xform.getUnrootedFilename(1, cc);
@@ -348,11 +298,6 @@ class Form implements IForm {
     return null;
   }
 
-  /**
-   * Get the original XML that specified the form
-   *
-   * @return get XML definition of XForm
-   */
   public String getFormXml(CallingContext cc) throws ODKDatastoreException {
     if (xform.getAttachmentCount(cc) == 1) {
       if (xform.getContentHash(1, cc) == null) {
@@ -371,38 +316,18 @@ class Form implements IForm {
     return null;
   }
 
-  /**
-   * Gets whether the form is encrypted
-   *
-   * @return true if form is encrypted, false otherwise
-   */
   public Boolean isEncryptedForm() {
     return filesetRow.getBooleanField(FormInfoFilesetTable.IS_ENCRYPTED_FORM);
   }
 
-  /**
-   * Gets whether the form can be downloaded
-   *
-   * @return true if form can be downloaded, false otherwise
-   */
   public Boolean getDownloadEnabled() {
     return filesetRow.getBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED);
   }
 
-  /**
-   * Sets a boolean value of whether the form can be downloaded
-   *
-   * @param downloadEnabled set to true if form can be downloaded, false otherwise
-   */
   public void setDownloadEnabled(Boolean downloadEnabled) {
     filesetRow.setBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED, downloadEnabled);
   }
 
-  /**
-   * Gets whether a new submission can be received
-   *
-   * @return true if a new submission can be received, false otherwise
-   */
   public Boolean getSubmissionEnabled() {
     // if the form definition doesn't exist, we can't accept submissions
     // this is a transient condition when in the midst of deleting a form or
@@ -413,11 +338,6 @@ class Form implements IForm {
     return formDefinition.getIsSubmissionAllowed();
   }
 
-  /**
-   * Sets a boolean value of whether a new submission can be received
-   *
-   * @param submissionEnabled set to true if a new submission can be received, false otherwise
-   */
   public void setSubmissionEnabled(Boolean submissionEnabled) {
     formDefinition.setIsSubmissionAllowed(submissionEnabled);
   }
@@ -535,9 +455,6 @@ class Form implements IForm {
     }
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof Form)) {
@@ -550,9 +467,6 @@ class Form implements IForm {
     return (infoRow.getUri().equals(other.infoRow.getUri()));
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 13;
@@ -561,9 +475,6 @@ class Form implements IForm {
     return hashCode;
   }
 
-  /**
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString() {
     return getViewableName();
@@ -616,17 +527,6 @@ class Form implements IForm {
     return infoRow.getEntityKey();
   }
 
-  /**
-   * Media files are assumed to be in a directory one level deeper than the xml
-   * definition. So the filename reported on the mime item has an extra leading
-   * directory. Strip that off.
-   *
-   * @param item
-   * @param overwriteOK
-   * @param cc
-   * @return true if a file should be overwritten (updated); false if the file is completely new or unchanged.
-   * @throws ODKDatastoreException
-   */
   public boolean setXFormMediaFile(MultiPartFormItem item, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
     String filePath = item.getFilename();
     if (filePath.indexOf("/") != -1) {

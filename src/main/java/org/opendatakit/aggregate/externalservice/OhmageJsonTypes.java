@@ -17,6 +17,7 @@ import org.opendatakit.common.utils.WebUtils;
  *
  * @author the.dylan.price@gmail.com
  */
+@SuppressWarnings("unused")
 public class OhmageJsonTypes {
 
   public static final class Survey implements JsonSerializer<Survey> {
@@ -201,7 +202,6 @@ public class OhmageJsonTypes {
 
   }
 
-  @SuppressWarnings("unused")
   public static final class Location {
     /**
      * a double representing latitude.
@@ -265,11 +265,6 @@ public class OhmageJsonTypes {
       this.responses = null;
     }
 
-    /**
-     * @param repeatable_set_id
-     * @param skipped
-     * @param not_displayed
-     */
     public RepeatableSet(String repeatable_set_id, boolean skipped, boolean not_displayed) {
       this.repeatable_set_id = repeatable_set_id;
       this.skipped = skipped;
@@ -348,7 +343,6 @@ public class OhmageJsonTypes {
     }
   }
 
-  @SuppressWarnings("unused")
   public static final class timestamp extends PromptResponse {
     private final String value;
 
@@ -364,7 +358,6 @@ public class OhmageJsonTypes {
     }
   }
 
-  @SuppressWarnings("unused")
   public static final class number extends PromptResponse {
     private final Long value;
 
@@ -392,18 +385,11 @@ public class OhmageJsonTypes {
       this.value = null;
     }
 
-    /**
-     * @param prompt_id
-     * @param value
-     */
     public text(String prompt_id, String value) {
       super(prompt_id);
       this.value = value;
     }
 
-    /**
-     * @return the value
-     */
     public String getValue() {
       return value;
     }
@@ -436,7 +422,6 @@ public class OhmageJsonTypes {
 
   }
 
-  @SuppressWarnings("unused")
   public static final class single_choice_custom extends PromptResponse {
     private final Integer value;
     private final custom_choice[] custom_choices;
@@ -460,10 +445,6 @@ public class OhmageJsonTypes {
     }
   }
 
-  /**
-   * Used by multi_choice_custom and single_choice_custom.
-   */
-  @SuppressWarnings("unused")
   private static final class custom_choice {
     private final Integer choice_id;
     private final String choice_value;
@@ -480,7 +461,6 @@ public class OhmageJsonTypes {
     }
   }
 
-  @SuppressWarnings("unused")
   public static final class photo extends PromptResponse {
     private final String value;
 
@@ -516,10 +496,6 @@ public class OhmageJsonTypes {
 
   }
 
-  /**
-   * Used by server_response.
-   */
-  @SuppressWarnings("unused")
   private static final class error {
     private Integer code;
     private String text;

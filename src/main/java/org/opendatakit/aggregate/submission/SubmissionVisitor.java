@@ -17,11 +17,5 @@ package org.opendatakit.aggregate.submission;
 
 public interface SubmissionVisitor {
 
-  /**
-   * Invoke the traversal action on this element.
-   *
-   * @param element
-   * @return true if the traversal should immediately stop.
-   */
-  public boolean traverse(SubmissionElement element);
+  boolean traverse(SubmissionElement element);
 }

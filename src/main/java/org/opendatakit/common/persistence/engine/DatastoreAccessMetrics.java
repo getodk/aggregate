@@ -64,11 +64,8 @@ public final class DatastoreAccessMetrics {
   }
 
   /**
-   * Synchronized - this is the ONLY method that should manipulate the
+   * this is the ONLY method that should manipulate the
    * RingBufferCountArray or log usage statistics.
-   *
-   * @param fullyQualifiedName
-   * @param rbc
    */
   private synchronized void synchronizedRecordUsage(String fullyQualifiedName,
                                                     RingBufferCountArray rbc, int incCount) {
@@ -150,8 +147,6 @@ public final class DatastoreAccessMetrics {
     RingBufferCountArray() {
       clear();
     }
-
-    ;
 
     private void resizeArray(short arrayIdx) {
       if (arrayIdx >= countArray.length) {

@@ -63,7 +63,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -81,70 +80,19 @@ public class SubmissionParser {
   private static final String OPEN_ROSA_NAMESPACE_SLASH = "http://openrosa.org/xforms/";
   private static final String OPEN_ROSA_METADATA_TAG = "meta";
   private static final String OPEN_ROSA_INSTANCE_ID = "instanceID";
-  /**
-   * form Id of submission
-   */
   private String formId;
   private IForm form;
-  /**
-   * Root of XML submission
-   */
   private Element root;
-  /**
-   * Submission object created from xml submission
-   */
   private Submission submission;
-  /**
-   * Track whether this submission was already present and complete.
-   */
   private boolean preExistingComplete = false;
-  /**
-   * Data items obtained from a multipart submission
-   */
   private MultiPartFormData submissionFormItems;
   private EntityKey topLevelTableKey = null;
 
-  /**
-   * Construct an ODK submission by processing XML submission to extract values.
-   * The submission is persisted to the database before returning.
-   *
-   * @param inputStreamXML xml submission input stream
-   * @param cc             the CallingContext of this request
-   * @throws IOException
-   * @throws ODKFormNotFoundException            thrown if a form is not found with a matching ODK ID
-   * @throws ODKParseException
-   * @throws ODKIncompleteSubmissionData
-   * @throws ODKConversionException
-   * @throws ODKDatastoreException
-   * @throws ODKFormSubmissionsDisabledException
-   * @throws ODKTaskLockException
-   */
-  public SubmissionParser(InputStream inputStreamXML, CallingContext cc) throws IOException,
-      ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData,
-      ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
+  public SubmissionParser(InputStream inputStreamXML, CallingContext cc) throws IOException, ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData, ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
     constructorHelper(inputStreamXML, false, cc);
   }
-  /**
-   * Construct an ODK submission by processing XML submission to extract values.
-   * The submission is persisted to the database before returning.
-   *
-   * @param submissionFormParser multipart data submission that includes XML submission & possibly
-   *                             other data
-   * @param isIncomplete
-   * @param cc                   the CallingContext of this request
-   * @throws IOException
-   * @throws ODKFormNotFoundException            thrown if a form is not found with a matching ODK ID
-   * @throws ODKParseException
-   * @throws ODKIncompleteSubmissionData
-   * @throws ODKConversionException
-   * @throws ODKDatastoreException
-   * @throws ODKFormSubmissionsDisabledException
-   * @throws ODKTaskLockException
-   */
-  public SubmissionParser(MultiPartFormData submissionFormParser, boolean isIncomplete,
-                          CallingContext cc) throws IOException, ODKFormNotFoundException, ODKParseException,
-      ODKIncompleteSubmissionData, ODKConversionException, ODKDatastoreException,
-      ODKFormSubmissionsDisabledException, ODKTaskLockException {
+
+  public SubmissionParser(MultiPartFormData submissionFormParser, boolean isIncomplete, CallingContext cc) throws IOException, ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData, ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
     if (submissionFormParser == null) {
       // TODO: review best error handling strategy
       throw new IOException("DID NOT GET A MULTIPARTFORMPARSER");
@@ -165,11 +113,6 @@ public class SubmissionParser {
     }
   }
 
-  /**
-   * Get submission object from parse
-   *
-   * @return submission
-   */
   public Submission getSubmission() {
     return submission;
   }
@@ -178,20 +121,10 @@ public class SubmissionParser {
     return preExistingComplete;
   }
 
-  /**
-   * Get the form corresponding to the parsed submission.
-   *
-   * @return
-   */
   public IForm getForm() {
     return form;
   }
 
-  /**
-   * Find the OpenRosa instanceID defined for this record, if any.
-   *
-   * @return
-   */
   private String getOpenRosaInstanceId() {
     Node n = findMetaTag(root);
     if (n != null) {
@@ -228,13 +161,6 @@ public class SubmissionParser {
     return null;
   }
 
-  /**
-   * Traverse submission looking for OpenRosa metadata tag (with or without
-   * namespace).
-   *
-   * @param parent
-   * @return
-   */
   private Node findMetaTag(Node parent) {
     if (parent.getNodeType() != Node.ELEMENT_NODE)
       return null;
@@ -260,24 +186,7 @@ public class SubmissionParser {
     return null;
   }
 
-  /**
-   * Helper Constructor an ODK submission by processing XML submission to
-   * extract values
-   *
-   * @param inputStreamXML xml submission input stream
-   * @param isIncomplete
-   * @throws IOException
-   * @throws ODKFormNotFoundException            thrown if a form is not found with a matching ODK ID
-   * @throws ODKParseException
-   * @throws ODKIncompleteSubmissionData
-   * @throws ODKConversionException
-   * @throws ODKDatastoreException
-   * @throws ODKFormSubmissionsDisabledException
-   * @throws ODKTaskLockException
-   */
-  private void constructorHelper(InputStream inputStreamXML, boolean isIncomplete, CallingContext cc)
-      throws IOException, ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData,
-      ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
+  private void constructorHelper(InputStream inputStreamXML, boolean isIncomplete, CallingContext cc) throws IOException, ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData, ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
@@ -419,27 +328,7 @@ public class SubmissionParser {
     }
   }
 
-  /**
-   * Helper function to process submission by taking the form element and
-   * extracting the corresponding value from the XML submission. Recursively
-   * applies itself to children of the form element.
-   *
-   * @param node                     form data model of the group or repeat group being parsed.
-   * @param currentSubmissionElement xml document element that marks the start of this submission set.
-   * @param submissionSet            the submission set to add the submission values to.
-   * @param repeatGroupIndicies      tracks the ordinal number of the last stored repeat group of this
-   *                                 name.
-   * @param preExisting              true if this submission already existed in the database. If so, do
-   *                                 not update fields.
-   * @throws ODKParseException
-   * @throws ODKIncompleteSubmissionData
-   * @throws ODKConversionException
-   * @throws ODKDatastoreException
-   */
-  private boolean processSubmissionElement(FormElementModel node, Element currentSubmissionElement,
-                                           SubmissionSet submissionSet, Map<String, Integer> repeatGroupIndicies, boolean preExisting,
-                                           CallingContext cc) throws ODKParseException,
-      ODKConversionException, ODKDatastoreException {
+  private boolean processSubmissionElement(FormElementModel node, Element currentSubmissionElement, SubmissionSet submissionSet, Map<String, Integer> repeatGroupIndicies, boolean preExisting, CallingContext cc) throws ODKParseException, ODKConversionException, ODKDatastoreException {
 
     if (node == null || currentSubmissionElement == null) {
       return true;
@@ -556,8 +445,7 @@ public class SubmissionParser {
     return complete;
   }
 
-  private boolean processBinarySubmission(FormElementModel m, SubmissionField<?> submissionElement,
-                                          String value, CallingContext cc) throws ODKDatastoreException {
+  private boolean processBinarySubmission(FormElementModel m, SubmissionField<?> submissionElement, String value, CallingContext cc) throws ODKDatastoreException {
 
     // value will either be a byte array (if not a multipart/form-data
     // submission)
@@ -620,13 +508,6 @@ public class SubmissionParser {
     return elements;
   }
 
-  /**
-   * Extracts value from the XML submission element by getting value from the
-   * text node
-   *
-   * @param element element that has text child node that will contain the value
-   * @return value contained in the XML submission
-   */
   private String getSubmissionValue(Element element) {
     // could not find element, return null
     if (element == null) {

@@ -31,13 +31,11 @@ import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.SecurityBeanDefs;
-import org.opendatakit.common.security.SecurityUtils;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
-import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.spring.GrantedAuthorityHierarchyTable;
 import org.opendatakit.common.security.spring.RegisteredUsersTable;
@@ -68,7 +66,6 @@ public class SecurityServiceUtil {
   public static final GrantedAuthority anonAuth = new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_ANONYMOUS.name());
   // special grants for Google Earth work-around
   public static final List<String> anonAttachmentViewerGrants;
-  private static final Set<String> specialNames = new HashSet<String>();
 
   static {
     List<String> isiteAdministratorGrants = new ArrayList<String>();
@@ -100,17 +97,7 @@ public class SecurityServiceUtil {
     anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
   }
 
-  /**
-   * Return all registered users and the Anonymous user.
-   *
-   * @param withAuthorities
-   * @param cc
-   * @return
-   * @throws AccessDeniedException
-   * @throws DatastoreFailureException
-   */
-  public static ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities, CallingContext cc)
-      throws DatastoreFailureException {
+  public static ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities, CallingContext cc) throws DatastoreFailureException {
 
     ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
     try {
@@ -155,24 +142,14 @@ public class SecurityServiceUtil {
     return name;
   }
 
-  /**
-   * During upgrades or other operations, we may change the set of granted
-   * authorities (the valid set are identified by GrantedAuthorityNames). Remove
-   * the bad grants wherever we find them...
-   *
-   * @param badGrants
-   * @throws ODKDatastoreException
-   */
-  static void removeBadGrantedAuthorities(Set<GrantedAuthority> badGrants, CallingContext cc)
-      throws ODKDatastoreException {
+  static void removeBadGrantedAuthorities(Set<GrantedAuthority> badGrants, CallingContext cc) throws ODKDatastoreException {
     ArrayList<String> empty = new ArrayList<String>();
     for (GrantedAuthority auth : badGrants) {
       UserGrantedAuthority.assertGrantedAuthorityMembers(auth, empty, cc);
     }
   }
 
-  static void setAuthenticationLists(UserSecurityInfo userInfo, String uriUser, CallingContext cc)
-      throws ODKDatastoreException {
+  static void setAuthenticationLists(UserSecurityInfo userInfo, String uriUser, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
@@ -202,8 +179,7 @@ public class SecurityServiceUtil {
     removeBadGrantedAuthorities(badGrants, cc);
   }
 
-  public static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo,
-                                                          GrantedAuthorityName specialGroup, CallingContext cc) throws DatastoreFailureException {
+  public static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo, GrantedAuthorityName specialGroup, CallingContext cc) throws DatastoreFailureException {
     RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
     Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
     // The assigned groups are the specialGroup that this user defines
@@ -245,22 +221,7 @@ public class SecurityServiceUtil {
     }
   }
 
-  /**
-   * Given a collection of users, ensure that each user is a registered user
-   * (creating a registered user if one doesn't exist). </p>
-   * <p>
-   * The collection is assumed to be exhaustive. Users not in the list will be
-   * deleted.
-   * </p>
-   *
-   * @param users
-   * @param cc
-   * @return map of users to their Uri strings
-   * @throws DatastoreFailureException
-   * @throws AccessDeniedException
-   */
-  private static Map<UserSecurityInfo, String> setUsers(ArrayList<UserSecurityInfo> users,
-                                                        CallingContext cc) throws DatastoreFailureException {
+  private static Map<UserSecurityInfo, String> setUsers(ArrayList<UserSecurityInfo> users, CallingContext cc) throws DatastoreFailureException {
     List<UserSecurityInfo> allUsersList = getAllUsers(false, cc);
 
     Set<UserSecurityInfo> removedUsers = new TreeSet<UserSecurityInfo>();
@@ -302,24 +263,7 @@ public class SecurityServiceUtil {
     return pkMap;
   }
 
-  /**
-   * Given a collection of users, ensure that each user is a registered user
-   * (creating a registered user if one doesn't exist) and assign those users to
-   * the granted authority.
-   * <p>
-   * The collection is assumed to be exhaustive. If there are other e-mails
-   * already assigned to the granted authority, they will be removed so that
-   * exactly the passed-in set of users are assigned to the authority, no more,
-   * no less.
-   * </p>
-   *
-   * @param users
-   * @param auth
-   * @param cc
-   * @throws DatastoreFailureException
-   */
-  private static void setUsersOfGrantedAuthority(Map<UserSecurityInfo, String> pkMap,
-                                                 GrantedAuthority auth, CallingContext cc) throws DatastoreFailureException {
+  private static void setUsersOfGrantedAuthority(Map<UserSecurityInfo, String> pkMap, GrantedAuthority auth, CallingContext cc) throws DatastoreFailureException {
     Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
     GrantedAuthorityName name = mapName(auth, badGrants);
     if (name != null) {
@@ -353,22 +297,7 @@ public class SecurityServiceUtil {
     }
   }
 
-  /**
-   * Method to enforce an access configuration constraining only registered
-   * users, authenticated users and anonymous access.
-   * <p>
-   * Add additional checks of the incoming parameters and patch things up
-   * if the incoming list of users omits the super-user.
-   *
-   * @param users
-   * @param anonGrants
-   * @param allGroups
-   * @param cc
-   * @throws DatastoreFailureException
-   */
-  public static final void setStandardSiteAccessConfiguration(ArrayList<UserSecurityInfo> users,
-                                                              ArrayList<GrantedAuthorityName> allGroups, CallingContext cc)
-      throws DatastoreFailureException {
+  public static final void setStandardSiteAccessConfiguration(ArrayList<UserSecurityInfo> users, ArrayList<GrantedAuthorityName> allGroups, CallingContext cc) throws DatastoreFailureException {
 
     // remove anonymousUser from the set of users and collect its
     // permissions (anonGrantStrings) which will be placed in
@@ -574,8 +503,7 @@ public class SecurityServiceUtil {
     }
   }
 
-  public static final void setUserCredentials(CredentialsInfo credential, CallingContext cc)
-      throws AccessDeniedException, DatastoreFailureException {
+  public static final void setUserCredentials(CredentialsInfo credential, CallingContext cc) throws AccessDeniedException, DatastoreFailureException {
     Datastore ds = cc.getDatastore();
     User user = cc.getUserService().getCurrentUser();
     RegisteredUsersTable userDefinition = null;
@@ -595,14 +523,7 @@ public class SecurityServiceUtil {
     }
   }
 
-  /**
-   * Configures the server to have the default role names and role hierarchy.
-   *
-   * @param cc
-   * @throws DatastoreFailureException
-   */
-  public static final void setDefaultRoleNamesAndHierarchy(CallingContext cc)
-      throws DatastoreFailureException {
+  public static final void setDefaultRoleNamesAndHierarchy(CallingContext cc) throws DatastoreFailureException {
 
     ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
     ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
@@ -621,19 +542,7 @@ public class SecurityServiceUtil {
     setStandardSiteAccessConfiguration(users, allGroups, cc);
   }
 
-  /**
-   * Ensures that a (single) registered user record exists for the superUser,
-   * adds that user to the list of site administrators, establishes that user as
-   * the sole user with permanent access to the permissions management tab, and,
-   * if the user is new, it sets a flag to force the user to visit the
-   * permissions tab upon first access to the site (this is done inside
-   * assertSuperUser).
-   *
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  public static final synchronized void superUserBootstrap(CallingContext cc)
-      throws ODKDatastoreException {
+  public static final synchronized void superUserBootstrap(CallingContext cc) throws ODKDatastoreException {
     // assert that the superuser exists...
     MessageDigestPasswordEncoder mde = null;
     try {

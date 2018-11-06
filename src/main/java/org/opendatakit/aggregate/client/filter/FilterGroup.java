@@ -56,12 +56,6 @@ public final class FilterGroup implements Serializable {
     }
   }
 
-  /**
-   * This constructor should only be used by the server
-   *
-   * @param uri
-   * @param metadata -- whether or not to include metadata in the output
-   */
   public FilterGroup(String uri, boolean metadata) {
     this.uri = uri;
     this.includeMetadata = metadata;
@@ -116,20 +110,10 @@ public final class FilterGroup implements Serializable {
     this.uri = uri;
   }
 
-  /**
-   * This should add the filter to the group
-   *
-   * @param filter the filter to be added
-   */
   public void addFilter(Filter filter) {
     filters.add(filter);
   }
 
-  /**
-   * This should remove the filter from the group
-   *
-   * @param filter the filter to be removed
-   */
   public void removeFilter(Filter filter) {
     filters.remove(filter);
   }
@@ -150,9 +134,6 @@ public final class FilterGroup implements Serializable {
     this.cursor = cursor;
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof FilterGroup)) {
@@ -164,9 +145,6 @@ public final class FilterGroup implements Serializable {
         && (formId == null ? (other.formId == null) : (formId.equals(other.formId)));
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 101;

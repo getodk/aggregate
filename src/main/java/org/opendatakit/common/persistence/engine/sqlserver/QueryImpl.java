@@ -16,15 +16,11 @@ package org.opendatakit.common.persistence.engine.sqlserver;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
@@ -37,10 +33,8 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class QueryImpl implements Query {
 
@@ -53,8 +47,6 @@ public class QueryImpl implements Query {
   private static final String K_FROM = " FROM ";
   private static final String K_WHERE = " WHERE ";
   private static final String K_AND = " AND ";
-  private static final String K_IN_OPEN = " IN (";
-  private static final String K_IN_CLOSE = ")";
   private static final String K_BIND_VALUE = " ? ";
   private static final String K_ORDER_BY = " ORDER BY ";
 
@@ -84,8 +76,7 @@ public class QueryImpl implements Query {
   private Direction dominantSortDirection = null;
   private boolean isSortedByUri = false;
 
-  public QueryImpl(CommonFieldsBase relation, String loggingContextTag,
-                   DatastoreImpl dataStoreImpl, User user) {
+  public QueryImpl(CommonFieldsBase relation, String loggingContextTag, DatastoreImpl dataStoreImpl, User user) {
     this.queryStringLogger = LoggerFactory.getLogger("org.opendatakit.common.persistence.LogQueryString." + relation.getSchemaName() + "." + relation.getTableName());
     this.relation = relation;
     this.dataStoreImpl = dataStoreImpl;
@@ -166,16 +157,7 @@ public class QueryImpl implements Query {
     }
   }
 
-  /**
-   * Constructs the necessary filter clause to append to the Query filters to
-   * support continuation cursors.
-   *
-   * @param queryContinuationBindBuilder
-   * @param continuationValue
-   * @return the updated bindArgs
-   */
-  private ArrayList<Object> addContinuationFilter(StringBuilder queryContinuationBindBuilder,
-                                                  Object continuationValue) {
+  private ArrayList<Object> addContinuationFilter(StringBuilder queryContinuationBindBuilder, Object continuationValue) {
     if (dominantSortAttr == null) {
       throw new IllegalStateException("unexpected state");
     }
@@ -268,8 +250,7 @@ public class QueryImpl implements Query {
   }
 
   @Override
-  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit)
-      throws ODKDatastoreException {
+  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
 
     // we must have at least one sort column defined
     if (dominantSortDirection == null) {

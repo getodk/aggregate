@@ -27,31 +27,11 @@ import java.io.ByteArrayOutputStream;
  */
 public final class MultiPartFormItem {
 
-  /**
-   * form data field name
-   */
   private final String name;
-  /**
-   * form data content type
-   */
   private final String contentType;
-  /**
-   * form data's stream
-   */
   private final ByteArrayOutputStream stream;
-  /**
-   * form data file name
-   */
   private String filename;
 
-  /**
-   * Constructor of a multi part of data
-   *
-   * @param fieldName   form data field name
-   * @param fileName    form data file name
-   * @param contentType form data content type
-   * @param byteStream  form data's stream
-   */
   public MultiPartFormItem(String fieldName, String fileName, String contentType, ByteArrayOutputStream byteStream) {
     this.name = fieldName;
     this.filename = fileName;
@@ -59,40 +39,18 @@ public final class MultiPartFormItem {
     this.stream = byteStream;
   }
 
-  /**
-   * Get form data file name
-   *
-   * @return file name
-   */
   public String getFilename() {
     return filename;
   }
 
-  /**
-   * Only used during construction of the MultiPartFormData
-   * to strip the common leading directory elements off the
-   * file path.  Needed for uploading of data from a PC directory.
-   *
-   * @param fileName
-   */
   public void setFilename(String fileName) {
     this.filename = fileName;
   }
 
-  /**
-   * Get form data content type
-   *
-   * @return content type
-   */
   public String getContentType() {
     return contentType;
   }
 
-  /**
-   * Get form data's stream
-   *
-   * @return stream
-   */
   public ByteArrayOutputStream getStream() {
     return stream;
   }

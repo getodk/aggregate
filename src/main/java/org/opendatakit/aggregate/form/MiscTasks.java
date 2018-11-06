@@ -52,20 +52,12 @@ public class MiscTasks {
   // delete any successful or abandoned misc tasks older than 30 days
   private static final long MANY_DAYS_AGO = 30 * 24 * 60 * 60 * 1000L;
 
-  ;
   private final MiscTasksTable row;
 
   private MiscTasks(MiscTasksTable row) {
     this.row = row;
   }
 
-  /**
-   * Constructor when retrieving a MiscTasks entry from the datastore.
-   *
-   * @param miscTask -- submission key of the task to retrieve.
-   * @param cc
-   * @throws ODKDatastoreException
-   */
   public MiscTasks(SubmissionKey miscTask, CallingContext cc) throws ODKDatastoreException {
     List<SubmissionKeyPart> parts = miscTask.splitSubmissionKey();
     if (parts == null || parts.size() == 0) {
@@ -95,17 +87,6 @@ public class MiscTasks {
     row = ds.getEntity(relation, tlg.getAuri(), user);
   }
 
-  /**
-   * Constructor for a new task.  Note that the created task
-   * is not yet persisted.  To persist it, you must call persist(cc)
-   *
-   * @param requestingUser
-   * @param requestDate
-   * @param status
-   * @param datastore
-   * @param user
-   * @throws ODKDatastoreException
-   */
   public MiscTasks(TaskType type, IForm formRequested, Map<String, String> parameters, CallingContext cc) throws ODKDatastoreException {
     MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
 
@@ -247,14 +228,6 @@ public class MiscTasks {
     return getFormDeletionStatusTimestampOfAllFormIds(null, cc);
   }
 
-  /**
-   * Returns the full map or filters it to just the entry matching the formId
-   *
-   * @param formId
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
   private static Map<String, FormActionStatusTimestamp> getFormDeletionStatusTimestampOfAllFormIds(String formId, CallingContext cc) throws ODKDatastoreException {
     Map<String, FormActionStatusTimestamp> statusSet = new HashMap<String, FormActionStatusTimestamp>();
     MiscTasksTable relation = MiscTasksTable.assertRelation(cc);
@@ -430,13 +403,6 @@ public class MiscTasks {
     return new SubmissionKey(FORM_ID_MISC_TASKS + "[@version=null and @uiVersion=null]/" + MiscTasksTable.TABLE_NAME + "[@key=" + row.getUri() + "]");
   }
 
-  /**
-   * Enumerated values that appear in the TaskType column of the
-   * MiscTasks table.  This has a tie-in to the TaskLockType,
-   * which defines the work time limit of a task, etc.
-   *
-   * @author mitchellsundt@gmail.com
-   */
   public enum TaskType {
     DELETE_FORM(TaskLockType.FORM_DELETION, 10),
     WORKSHEET_CREATE(TaskLockType.WORKSHEET_CREATION, 10),
@@ -471,11 +437,6 @@ public class MiscTasks {
     }
   }
 
-  /**
-   * Underlying top-level persistent object for the PerisistentResults form.
-   *
-   * @author mitchellsundt@gmail.com
-   */
   private static final class MiscTasksTable extends CommonFieldsBase {
 
     static final String TABLE_NAME = "_misc_tasks";
@@ -510,8 +471,6 @@ public class MiscTasks {
 
     /**
      * Construct a relation prototype.
-     *
-     * @param databaseSchema
      */
     private MiscTasksTable(String databaseSchema) {
       super(databaseSchema, TABLE_NAME);
@@ -528,9 +487,6 @@ public class MiscTasks {
 
     /**
      * Construct an empty entity.
-     *
-     * @param ref
-     * @param user
      */
     private MiscTasksTable(MiscTasksTable ref, User user) {
       super(ref, user);

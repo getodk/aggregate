@@ -274,7 +274,6 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
   /**
    * Update the rolesReachableInOneOrMoreStepsMap with a clean fetch from the database.
    *
-   * @throws ODKDatastoreException
    */
   public void refreshReachableGrantedAuthorities() throws ODKDatastoreException {
     logger.info("Executing: refreshReachableGrantedAuthorities");
@@ -296,7 +295,6 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
   /**
    * Atomically swap out the rolesReachableInOneOrMoreStepsMap.
    *
-   * @param localRolesReachableInOneOrMoreStepsMap
    */
   private synchronized void updateRolesMap(Map<GrantedAuthority, Set<GrantedAuthority>> localRolesReachableInOneOrMoreStepsMap) {
     rolesReachableInOneOrMoreStepsMap = localRolesReachableInOneOrMoreStepsMap;
@@ -305,7 +303,6 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
   /**
    * Atomically fetch the rolesReachableInOneOrMoreStepsMap.
    *
-   * @return
    */
   private synchronized Map<GrantedAuthority, Set<GrantedAuthority>> getRolesMap() {
     return rolesReachableInOneOrMoreStepsMap;
@@ -459,7 +456,6 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
    * Parse input and build the map for the roles reachable in one step: the higher role will become a key that
    * references a set of the reachable lower roles.
    *
-   * @throws ODKDatastoreException
    */
   private synchronized Map<GrantedAuthority, Set<GrantedAuthority>> buildRolesReachableInOneStepMap() throws ODKDatastoreException {
     Map<GrantedAuthority, Set<GrantedAuthority>> rolesReachableInOneStepMap = new HashMap<GrantedAuthority, Set<GrantedAuthority>>();

@@ -25,9 +25,6 @@ import org.opendatakit.aggregate.constants.common.Visibility;
 
 public final class ColumnFilter extends Filter implements Serializable {
 
-  /**
-   * Id for Serialization
-   */
   private static final long serialVersionUID = -1045936241685471645L;
 
   private ArrayList<Column> columns;
@@ -41,11 +38,6 @@ public final class ColumnFilter extends Filter implements Serializable {
     this.columns = columns;
   }
 
-  /**
-   * This constructor should only be used by the server
-   *
-   * @param uri
-   */
   public ColumnFilter(String uri) {
     super(uri);
     this.columns = new ArrayList<Column>();
@@ -71,9 +63,6 @@ public final class ColumnFilter extends Filter implements Serializable {
   }
 
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof ColumnFilter)) {
@@ -88,9 +77,6 @@ public final class ColumnFilter extends Filter implements Serializable {
     return (columns == null ? (other.columns == null) : (columns.equals(other.columns)));
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 11;

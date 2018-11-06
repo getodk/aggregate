@@ -18,35 +18,19 @@ package org.opendatakit.common.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.constants.HtmlStrUtil;
 
 public class HtmlUtil extends HtmlStrUtil {
 
-  public static final String createHrefWithProperties(String urlBase, Map<String, String> properties,
-                                                      String displayText, boolean openInNewWindow) {
+  public static final String createHrefWithProperties(String urlBase, Map<String, String> properties, String displayText, boolean openInNewWindow) {
     return createHref(HtmlUtil.createLinkWithProperties(urlBase, properties), displayText, openInNewWindow);
   }
 
-  /**
-   * Helper function that creates an html button with the following parameters
-   *
-   * @param httpMethod  one of GET, POST
-   * @param servletAddr http action
-   * @param label       button's label
-   * @param properties  key/value pairs to be encoded as hidden input types to be used as
-   *                    parameters
-   * @return html to generate specified button
-   * @throws UnsupportedEncodingException
-   */
-  public static final String createHtmlButtonToHttpMethodServlet(String httpMethod,
-                                                                 String servletAddr, String label,
-                                                                 Map<String, String> properties) throws UnsupportedEncodingException {
+  public static final String createHtmlButtonToHttpMethodServlet(String httpMethod, String servletAddr, String label, Map<String, String> properties) throws UnsupportedEncodingException {
     StringBuilder html = new StringBuilder();
     html.append(HtmlStrUtil.createFormBeginTag(servletAddr, null, httpMethod));
 
@@ -95,18 +79,7 @@ public class HtmlUtil extends HtmlStrUtil {
     return urlBuilder.toString();
   }
 
-  /**
-   * Helper function that creates an html button with the following parameters
-   *
-   * @param servletAddr http action
-   * @param label       button's label
-   * @param properties  key/value pairs to be encoded as hidden input types to be used as
-   *                    parameters
-   * @return html to generate specified button
-   * @throws UnsupportedEncodingException
-   */
-  public static final String createHtmlButtonToGetServlet(String servletAddr, String label,
-                                                          Map<String, String> properties) throws UnsupportedEncodingException {
+  public static final String createHtmlButtonToGetServlet(String servletAddr, String label, Map<String, String> properties) throws UnsupportedEncodingException {
     return createHtmlButtonToHttpMethodServlet(HtmlConsts.GET,
         servletAddr, label, properties);
   }

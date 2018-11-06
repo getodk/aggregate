@@ -167,12 +167,6 @@ public class DatastoreImpl implements Datastore {
     }
   }
 
-  /**
-   * Determine whether this relation already exists.
-   *
-   * @return false because we don't care about naming collisions.
-   * @throws ODKDatastoreException
-   */
   @Override
   public boolean hasRelation(String schema, String tableName, User user) throws ODKDatastoreException {
     List<com.google.appengine.api.datastore.Entity> gaeKeys = null;

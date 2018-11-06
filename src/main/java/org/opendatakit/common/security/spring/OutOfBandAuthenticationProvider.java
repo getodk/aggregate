@@ -118,7 +118,6 @@ public class OutOfBandAuthenticationProvider implements AuthenticationProvider, 
    * The default implementation just creates a new OutOfBandAuthenticationToken from the original, but with the
    * UserDetails as the principal and including the authorities loaded by the UserDetailsService.
    *
-   * @param userDetails the loaded UserDetails object
    * @param auth        the token passed to the authenticate method, containing
    * @return the token which will represent the authenticated user.
    */

@@ -45,16 +45,7 @@ public class SubmissionLockTemplate {
   private String lockId;
   private long maxBackoffMs;
   private Random rand;
-  /**
-   * Lock for updating a submission.
-   * The instanceId is mapped into one of 256 buckets to allow for multiple simultaneous instance-level file
-   * accesses.
-   *
-   * @param formId
-   * @param rowId
-   * @param type
-   * @param cc
-   */
+
   public SubmissionLockTemplate(String formId, String instanceId, CallingContext cc) {
     if (instanceId == null || instanceId.length() == 0) {
       throw new IllegalArgumentException("instanceId cannot be null or blank");
@@ -69,12 +60,6 @@ public class SubmissionLockTemplate {
     this.rand = new Random();
   }
 
-  /**
-   * Tries up to 5 times to acquire the lock. If unsuccessful, throws an
-   * ODKTaskLockException.
-   *
-   * @throws ODKTaskLockException
-   */
   public void acquire() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
     boolean acquired = false;
@@ -99,12 +84,6 @@ public class SubmissionLockTemplate {
     }
   }
 
-  /**
-   * Tries up to 5 times to release lock, then gives up. In this case the lock
-   * will eventually timeout and be forced to release.
-   *
-   * @throws ODKTaskLockException
-   */
   public void release() throws ODKTaskLockException {
     TaskLock lock = ds.createTaskLock(user);
     maxBackoffMs = INITIAL_MAX_BACKOFF;

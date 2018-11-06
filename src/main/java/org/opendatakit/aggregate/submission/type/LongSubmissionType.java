@@ -34,7 +34,6 @@ public class LongSubmissionType extends SubmissionSingleValueBase<Long> {
   /**
    * Constructor
    *
-   * @param propertyName Name of submission element
    */
   public LongSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);

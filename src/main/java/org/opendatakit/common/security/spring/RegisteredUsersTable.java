@@ -78,40 +78,20 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
   public static final String UID_PREFIX = "uid:";
   private static final Logger logger = LoggerFactory.getLogger(RegisteredUsersTable.class);
   private static final String TABLE_NAME = "_registered_users";
-
   // Unique key (disregarding removed) or null
-  private static final DataField LOCAL_USERNAME = new DataField("LOCAL_USERNAME",
-      DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED);
-
+  private static final DataField LOCAL_USERNAME = new DataField("LOCAL_USERNAME", DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED);
   // Unique key (disregarding removed) or null
   // NOTE: the column name in the database is not changed. This was 
   // used for OpenID authentication originally, but now is used for 
   // OAuth2 authentication.
-  private static final DataField OAUTH2_EMAIL = new DataField("OPENID_EMAIL",
-      DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED);
-
-  private static final DataField FULL_NAME = new DataField("FULL_NAME", DataField.DataType.STRING,
-      true);
-
-  private static final DataField BASIC_AUTH_PASSWORD = new DataField("BASIC_AUTH_PASSWORD",
-      DataField.DataType.STRING, true);
-
-  private static final DataField BASIC_AUTH_SALT = new DataField("BASIC_AUTH_SALT",
-      DataField.DataType.STRING, true, 8L);
-
-  private static final DataField DIGEST_AUTH_PASSWORD = new DataField("DIGEST_AUTH_PASSWORD",
-      DataField.DataType.STRING, true);
-
-  private static final DataField IS_REMOVED = new DataField("IS_REMOVED",
-      DataField.DataType.BOOLEAN, false);
+  private static final DataField OAUTH2_EMAIL = new DataField("OPENID_EMAIL", DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED);
+  private static final DataField FULL_NAME = new DataField("FULL_NAME", DataField.DataType.STRING, true);
+  private static final DataField BASIC_AUTH_PASSWORD = new DataField("BASIC_AUTH_PASSWORD", DataField.DataType.STRING, true);
+  private static final DataField BASIC_AUTH_SALT = new DataField("BASIC_AUTH_SALT", DataField.DataType.STRING, true, 8L);
+  private static final DataField DIGEST_AUTH_PASSWORD = new DataField("DIGEST_AUTH_PASSWORD", DataField.DataType.STRING, true);
+  private static final DataField IS_REMOVED = new DataField("IS_REMOVED", DataField.DataType.BOOLEAN, false);
   private static RegisteredUsersTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via
-   * {@link #assertRelation(Datastore, User)}
-   *
-   * @param schemaName
-   */
   protected RegisteredUsersTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(LOCAL_USERNAME);
@@ -123,18 +103,11 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     fieldList.add(IS_REMOVED);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   protected RegisteredUsersTable(RegisteredUsersTable ref, User user) {
     super(ref, user);
   }
 
-  public static Query createQuery(Datastore ds, String loggingContextTag, User user)
-      throws ODKDatastoreException {
+  public static Query createQuery(Datastore ds, String loggingContextTag, User user) throws ODKDatastoreException {
     Query q = ds
         .createQuery(RegisteredUsersTable.assertRelation(ds, user), loggingContextTag, user);
     q.addFilter(IS_REMOVED, FilterOperation.EQUAL, false);
@@ -147,19 +120,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     q.addSort(prototype.primaryKey, Direction.ASCENDING);
   }
 
-  /**
-   * This is private because this table has a no-deletions policy represented by
-   * the IS_REMOVED flag. Depending upon the semantics of the usage, return
-   * values should be filtered by the value of that flag to retrieve only the
-   * active users in the system.
-   *
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
-  private static synchronized final RegisteredUsersTable assertRelation(Datastore datastore,
-                                                                        User user) throws ODKDatastoreException {
+  private static synchronized final RegisteredUsersTable assertRelation(Datastore datastore, User user) throws ODKDatastoreException {
     if (relation == null) {
       RegisteredUsersTable relationPrototype;
       relationPrototype = new RegisteredUsersTable(datastore.getDefaultSchemaName());
@@ -169,18 +130,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     return relation;
   }
 
-  /**
-   * This retrieves the given user record. NOTE: the user may have been
-   * "deleted" from the system, as indicated by IS_REMOVED = true.
-   *
-   * @param uri
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static final RegisteredUsersTable getUserByUri(String uri, Datastore datastore, User user)
-      throws ODKDatastoreException {
+  public static final RegisteredUsersTable getUserByUri(String uri, Datastore datastore, User user) throws ODKDatastoreException {
     RegisteredUsersTable prototype = assertRelation(datastore, user);
     return datastore.getEntity(prototype, uri, user);
   }
@@ -196,19 +146,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     return uri;
   }
 
-  /**
-   * Used in the bowels of the security layer. Others should call
-   * getUserByUsername. Returns null if there is not exactly one record for the
-   * specified username.
-   *
-   * @param username
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static final RegisteredUsersTable getUniqueUserByUsername(String username,
-                                                                   Datastore datastore, User user) throws ODKDatastoreException {
+  public static final RegisteredUsersTable getUniqueUserByUsername(String username, Datastore datastore, User user) throws ODKDatastoreException {
     RegisteredUsersTable prototype = assertRelation(datastore, user);
     Query q = RegisteredUsersTable.createQuery(datastore,
         "RegisteredUsersTable.getUniqueUserByUsername", user);
@@ -225,22 +163,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     }
   }
 
-  /**
-   * Retrieve the user identified by the specified username.
-   * <p>
-   * This is generally a read-only activity, but if the datastore is corrupted
-   * by the presence of two or more active records for this one username, the
-   * older records will be marked with IS_REMOVED=true and any privileges
-   * assigned to them will be removed.
-   *
-   * @param username
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static final RegisteredUsersTable getUserByUsername(String username,
-                                                             UserService userService, Datastore datastore) throws ODKDatastoreException {
+  public static final RegisteredUsersTable getUserByUsername(String username, UserService userService, Datastore datastore) throws ODKDatastoreException {
     User user = userService.getDaemonAccountUser();
     RegisteredUsersTable prototype = assertRelation(datastore, user);
     Query q = RegisteredUsersTable.createQuery(datastore, "RegisteredUsersTable.getUserByUsername",
@@ -277,19 +200,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     }
   }
 
-  /**
-   * Used in the bowels of the security layer. Others should call
-   * getUserByEmail. Returns null if there is not exactly one record for the
-   * specified email.
-   *
-   * @param email
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static final RegisteredUsersTable getUniqueUserByEmail(String email, Datastore datastore,
-                                                                User user) throws ODKDatastoreException {
+  public static final RegisteredUsersTable getUniqueUserByEmail(String email, Datastore datastore, User user) throws ODKDatastoreException {
     RegisteredUsersTable prototype = assertRelation(datastore, user);
     Query q = RegisteredUsersTable.createQuery(datastore,
         "RegisteredUsersTable.getUniqueUserByEmail", user);
@@ -306,8 +217,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     }
   }
 
-  public static final RegisteredUsersTable getUserByEmail(String email, UserService userService,
-                                                          Datastore datastore) throws ODKDatastoreException {
+  public static final RegisteredUsersTable getUserByEmail(String email, UserService userService, Datastore datastore) throws ODKDatastoreException {
     User user = userService.getDaemonAccountUser();
     RegisteredUsersTable prototype = assertRelation(datastore, user);
     Query q = datastore.createQuery(prototype, "RegisteredUsersTable.getUserByEmail", user);
@@ -343,29 +253,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     }
   }
 
-  /**
-   * If the given username is not present, this will create a record for the
-   * user, marking them as active (able to log in via OAuth2 or Aggregate
-   * password). Otherwise, this will just update the nickname and e-mail address
-   * of the existing record and return it.</p>
-   * <p>
-   * NOTE: Once a user is defined, changing the active status of the user (their
-   * ability to log in using OAuth2 or their Aggregate password) must be done as
-   * a separate step.
-   * </p>
-   * <p>
-   * NOTE: users won't be able to log in with OAuth2 if no e-mail address is
-   * supplied; and they won't be able to log in with an Aggregate password until
-   * one is defined.
-   * </p>
-   *
-   * @param u
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static RegisteredUsersTable assertActiveUserByUserSecurityInfo(UserSecurityInfo u,
-                                                                        CallingContext cc) throws ODKDatastoreException {
+  public static RegisteredUsersTable assertActiveUserByUserSecurityInfo(UserSecurityInfo u, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     RegisteredUsersTable prototype = RegisteredUsersTable.assertRelation(ds, user);
@@ -393,9 +281,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     }
   }
 
-  private static final boolean resetSuperUserPasswordIfNecessary(RegisteredUsersTable t,
-                                                                 boolean newUser, MessageDigestPasswordEncoder mde, CallingContext cc)
-      throws ODKEntityPersistException, ODKOverQuotaException, ODKEntityNotFoundException {
+  private static final boolean resetSuperUserPasswordIfNecessary(RegisteredUsersTable t, boolean newUser, MessageDigestPasswordEncoder mde, CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException, ODKEntityNotFoundException {
     String localSuperUser = t.getUsername();
     String currentRealmString = cc.getUserService().getCurrentRealm().getRealmString();
     String lastKnownRealmString = ServerPreferencesProperties.getLastKnownRealmString(cc);
@@ -428,25 +314,7 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     return true;
   }
 
-  /**
-   * Attempts to find user records matching the local ODK Aggregate username and
-   * the e-mail address of the super-user. There can only be at most one of
-   * each. For each case:
-   * <ol>
-   * <li>If it finds a single such record, returns that user.</li>
-   * <li>If it finds multiple records, it removes all but the most recently
-   * created one, sets a flag to drive the super-user to the permissions page
-   * upon first login, and returns that user.</li>
-   * <li>If it finds no records, it creates one and sets a flag to drive the
-   * super-user to the permissions page upon first login.</li>
-   * </ol>
-   *
-   * @param cc
-   * @return list of the superUsers of record.
-   * @throws ODKDatastoreException
-   */
-  public static final List<RegisteredUsersTable> assertSuperUsers(MessageDigestPasswordEncoder mde,
-                                                                  CallingContext cc) throws ODKDatastoreException {
+  public static final List<RegisteredUsersTable> assertSuperUsers(MessageDigestPasswordEncoder mde, CallingContext cc) throws ODKDatastoreException {
     List<RegisteredUsersTable> tList = new ArrayList<RegisteredUsersTable>();
 
     UserService userService = cc.getUserService();
@@ -512,7 +380,6 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     return tList;
   }
 
-  // Only called from within the persistence layer.
   @Override
   public CommonFieldsBase getEmptyRow(User user) {
     RegisteredUsersTable t = new RegisteredUsersTable(this, user);

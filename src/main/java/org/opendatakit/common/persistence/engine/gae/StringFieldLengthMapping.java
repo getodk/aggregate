@@ -32,16 +32,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class manages accesses to the _STRING_FIELD_LENGTHS_ table.
- * That table has a PK of the gaeEntityKind of a table managed by 
+ * That table has a PK of the gaeEntityKind of a table managed by
  * the persistence layer.  The LENGTH_MAPPING column is a Text object
  * that contains a space-separated list of (field-name,length) pairs,
  * with an extra space at the end.  It is parsed to return the lengths
- * of the various fields.  
- *
+ * of the various fields.
+ * <p>
  * Provides equivalent functionality to DESCRIBE in RDBMS.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class StringFieldLengthMapping {
 
@@ -53,18 +52,7 @@ public class StringFieldLengthMapping {
   public StringFieldLengthMapping() {
   }
 
-  /**
-   * Called when a table is dropped to remove the lengths record
-   * from the datastore.
-   *
-   * @param gaeEntityKind -- entity kind whose column lengths are to be forgotten.
-   * @param dam
-   * @param datastore
-   * @param user
-   * @throws ODKDatastoreException
-   */
-  public synchronized void removeStringFieldLengths(String gaeEntityKind,
-                                                    DatastoreAccessMetrics dam, DatastoreImpl datastore, User user) throws ODKDatastoreException {
+  public synchronized void removeStringFieldLengths(String gaeEntityKind, DatastoreAccessMetrics dam, DatastoreImpl datastore, User user) throws ODKDatastoreException {
 
     logger.info(gaeEntityKind);
     Key key = KeyFactory.createKey(TABLE_NAME, gaeEntityKind);
@@ -76,15 +64,6 @@ public class StringFieldLengthMapping {
     dam.recordDeleteUsage(TABLE_NAME);
   }
 
-  /**
-   * Internal routine to serialize and save the column lengths map.
-   *
-   * @param e
-   * @param lenMap
-   * @param dam
-   * @param datastore
-   * @param user
-   */
   private void putEntity(Entity e, Map<String, Long> lenMap, DatastoreAccessMetrics dam, DatastoreImpl datastore, User user) {
     logger.info(e.getKey().getName());
 
@@ -101,20 +80,7 @@ public class StringFieldLengthMapping {
     dam.recordPutUsage(TABLE_NAME);
   }
 
-  /**
-   * Called when asserting the existence of a table.
-   * Upon completion, the maximum lengths of all STRING
-   * and URI columns will have been set.
-   *
-   * @param gaeEntityKind -- entity kind being asserted 
-   * @param relation
-   * @param dam
-   * @param datastore
-   * @param user
-   * @throws ODKDatastoreException
-   */
-  public synchronized void assertStringFieldLengths(String gaeEntityKind,
-                                                    CommonFieldsBase relation, DatastoreAccessMetrics dam, DatastoreImpl datastore, User user) throws ODKDatastoreException {
+  public synchronized void assertStringFieldLengths(String gaeEntityKind, CommonFieldsBase relation, DatastoreAccessMetrics dam, DatastoreImpl datastore, User user) throws ODKDatastoreException {
 
     Map<String, Long> lenMap = new HashMap<String, Long>();
 

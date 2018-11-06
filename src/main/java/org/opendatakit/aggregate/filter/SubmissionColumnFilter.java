@@ -27,8 +27,6 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
@@ -36,22 +34,12 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_multi_column_filter";
 
-  private static final DataField URI_PARENT_FILTER_PROPERTY = new DataField("URI_PARENT_FILTER_",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING,
-      true, 80L); // TODO: determine length
-  private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING,
-      true, 1000L); // TODO: determine length
-  private static final DataField COL_GPS_ORD_PROPERTY = new DataField("GPS_ORD", DataField.DataType.INTEGER,
-      true);
+  private static final DataField URI_PARENT_FILTER_PROPERTY = new DataField("URI_PARENT_FILTER_", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING, true, 80L); // TODO: determine length
+  private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING, true, 1000L); // TODO: determine length
+  private static final DataField COL_GPS_ORD_PROPERTY = new DataField("GPS_ORD", DataField.DataType.INTEGER, true);
   private static SubmissionColumnFilter relation = null;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   private SubmissionColumnFilter(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(URI_PARENT_FILTER_PROPERTY);
@@ -60,18 +48,11 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     fieldList.add(COL_GPS_ORD_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private SubmissionColumnFilter(SubmissionColumnFilter ref, User user) {
     super(ref, user);
   }
 
-  private static synchronized final SubmissionColumnFilter assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  private static synchronized final SubmissionColumnFilter assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       SubmissionColumnFilter relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -84,8 +65,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     return relation;
   }
 
-  static final SubmissionColumnFilter transform(Column column, SubmissionFilter parentFilter,
-                                                CallingContext cc) throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
+  static final SubmissionColumnFilter transform(Column column, SubmissionFilter parentFilter, CallingContext cc) throws ODKDatastoreException {
 
     SubmissionColumnFilter relation = assertRelation(cc);
     String uri = column.getUri();
@@ -105,8 +85,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     return columnFilter;
   }
 
-  static final List<SubmissionColumnFilter> getFilterList(String uriFilter, CallingContext cc)
-      throws ODKDatastoreException {
+  static final List<SubmissionColumnFilter> getFilterList(String uriFilter, CallingContext cc) throws ODKDatastoreException {
     SubmissionColumnFilter relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, "SubmissionColumnFilter.getFilterList", cc.getCurrentUser());
     query.addFilter(SubmissionColumnFilter.URI_PARENT_FILTER_PROPERTY,

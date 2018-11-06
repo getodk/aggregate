@@ -40,11 +40,6 @@ public abstract class Filter implements Serializable {
     this.visibility = visibility;
   }
 
-  /**
-   * This constructor should only be used by the server
-   *
-   * @param uri
-   */
   public Filter(String uri) {
     this.uri = uri;
   }
@@ -83,9 +78,6 @@ public abstract class Filter implements Serializable {
     this.visibility = kr;
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof Filter)) {
@@ -98,9 +90,6 @@ public abstract class Filter implements Serializable {
         && (ordinal == null ? (other.ordinal == null) : (ordinal.equals(other.ordinal)));
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 131;

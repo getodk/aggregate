@@ -392,11 +392,6 @@ public class FormDefinition {
   /**
    * Traverse the form data model and assertRelation() on all the backing objects.
    * Called from within the synchronized getFormDefinition() static method.
-   *
-   * @param m
-   * @param objs
-   * @param cc
-   * @throws ODKDatastoreException
    */
   private static synchronized final void assertBackingObjects(FormDataModel m,
                                                               Set<CommonFieldsBase> objs, CallingContext cc) throws ODKDatastoreException {
@@ -415,9 +410,6 @@ public class FormDefinition {
    * Synchronized access to the formDefinitions map.  Synchronization is only required for the
    * put operation on the map, but also aids in efficient quota usage during periods of intense start-up.
    *
-   * @param xformParameters  -- the form id, version and ui version of a form definition.
-   * @param uriSubmissionDataModel -- the uri of the definition specification.
-   * @param cc
    * @return The definition.  The uriSubmissionDataModel is used to ensure that the
    *          currently valid definition of a form is being used (should the form be
    *          deleted then reloaded).
@@ -606,11 +598,6 @@ public class FormDefinition {
     submissionAssociation.setIsSubmissionAllowed(value);
   }
 
-  /**
-   * Get the top-level group for this form.
-   *
-   * @return
-   */
   public final FormDataModel getTopLevelGroup() {
     return topLevelGroup;
   }

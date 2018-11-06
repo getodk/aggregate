@@ -25,8 +25,6 @@ import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.process.DeleteSubmissions;
@@ -56,7 +54,6 @@ import org.slf4j.LoggerFactory;
  * @author mitchellsundt@gmail.com
  */
 public class PurgeOlderSubmissionsWorkerImpl {
-
   private static final int MAX_QUERY_LIMIT = 100;
 
   private final IForm form;
@@ -64,8 +61,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
   private final CallingContext cc;
   private final String pFormIdLockId;
 
-  public PurgeOlderSubmissionsWorkerImpl(IForm form, SubmissionKey miscTasksKey, long attemptCount,
-                                         CallingContext cc) {
+  public PurgeOlderSubmissionsWorkerImpl(IForm form, SubmissionKey miscTasksKey, long attemptCount, CallingContext cc) {
     this.form = form;
     this.miscTasksKey = miscTasksKey;
     this.cc = cc;
@@ -134,8 +130,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
     }
   }
 
-  private List<TopLevelDynamicBase> querySubmissionsDateRange(Date startDate, Date endDate)
-      throws ODKDatastoreException {
+  private List<TopLevelDynamicBase> querySubmissionsDateRange(Date startDate, Date endDate) throws ODKDatastoreException {
 
     // fetch completed submissions, ascending.  Stop before the endDate.
     FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
@@ -148,8 +143,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
     return query.getTopLevelSubmissionObjects(cc);
   }
 
-  private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException,
-      ODKOverQuotaException {
+  private void doMarkAsComplete(MiscTasks t) throws ODKEntityPersistException, ODKOverQuotaException {
 
     Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsWorkerImpl.class);
     logger.info("Submissions Purge: " + miscTasksKey.toString() + " form "
@@ -161,14 +155,6 @@ public class PurgeOlderSubmissionsWorkerImpl {
     t.persist(cc);
   }
 
-  /**
-   * we have gained a lock on the form. Now go through and try to delete all
-   * submissions older than the given date under this form.
-   *
-   * @return true if form is fully deleted...
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   */
   private boolean doPurgeOlderSubmissions(MiscTasks t) throws Exception {
 
     CommonFieldsBase relation = null;

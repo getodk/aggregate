@@ -49,42 +49,18 @@ public class ServletUtilBase extends CommonServletBase {
     super(ServletConsts.APPLICATION_NAME);
   }
 
-  /**
-   * Generate error response for ODK ID not found
-   *
-   * @param resp The HTTP response to be sent to client
-   * @throws IOException caused by problems writing error information to response
-   */
   protected void odkIdNotFoundError(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_NOT_FOUND, ErrorConsts.ODKID_NOT_FOUND);
   }
 
-  /**
-   * Generate error response for quota exceeded.
-   *
-   * @param resp
-   * @throws IOException caused by problems writing error information to response
-   */
   protected void quotaExceededError(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, ErrorConsts.QUOTA_EXCEEDED);
   }
 
-  /**
-   * Generate error response for datastore access issues.
-   *
-   * @param resp
-   * @throws IOException caused by problems writing error information to response
-   */
   protected void datastoreError(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, ErrorConsts.PERSISTENCE_LAYER_PROBLEM);
   }
 
-  /**
-   * Generate error response for missing the Key parameter
-   *
-   * @param resp The HTTP response to be sent to client
-   * @throws IOException caused by problems writing error information to response
-   */
   protected void errorMissingKeyParam(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.ODK_KEY_PROBLEM);
   }
@@ -93,32 +69,14 @@ public class ServletUtilBase extends CommonServletBase {
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_PARAMS);
   }
 
-  /**
-   * Generate error response for invalid parameters
-   *
-   * @param resp The HTTP response to be sent to client
-   * @throws IOException caused by problems writing error information to response
-   */
   protected void errorBadParam(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INVALID_PARAMS);
   }
 
-  /**
-   * Generate error response for missing the Key parameter
-   *
-   * @param resp The HTTP response to be sent to client
-   * @throws IOException caused by problems writing error information to response
-   */
   protected void errorRetreivingData(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorConsts.INCOMPLETE_DATA);
   }
 
-  /**
-   * Determine the OpenRosa version number on this request.
-   *
-   * @param req
-   * @return null if unspecified (1.1.5 and earlier); otherwise, e.g., "1.0"
-   */
   protected final Double getOpenRosaVersion(HttpServletRequest req) {
     String value = req.getHeader(ServletConsts.OPEN_ROSA_VERSION_HEADER);
     if (value == null || value.length() == 0) return null;
@@ -137,8 +95,7 @@ public class ServletUtilBase extends CommonServletBase {
   }
 
   @Override
-  protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
-                                        CallingContext cc) throws IOException {
+  protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp, CallingContext cc) throws IOException {
 
     StringBuilder headerString = new StringBuilder();
     headerString.append("<link type=\"text/css\" rel=\"stylesheet\" href=\"");

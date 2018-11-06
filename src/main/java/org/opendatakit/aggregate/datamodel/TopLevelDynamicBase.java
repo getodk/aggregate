@@ -22,9 +22,9 @@ import org.opendatakit.common.security.User;
 
 
 /**
- * All instance data for an xform is stored in tables derived from 
- * InstanceDataBase or TopLevelInstanceDataBase tables.  The 
- * TopLevelInstanceDataBase table holds the metadata about the 
+ * All instance data for an xform is stored in tables derived from
+ * InstanceDataBase or TopLevelInstanceDataBase tables.  The
+ * TopLevelInstanceDataBase table holds the metadata about the
  * submission, whereas the repeat groups (the InstanceDataBase tables)
  * do not.
  * <p>
@@ -35,33 +35,15 @@ import org.opendatakit.common.security.User;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 
-  /* top level dynamic */
   public static final int ADDITIONAL_COLUMN_COUNT = 5 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
-
   public static final String FIELD_NAME_MARKED_AS_COMPLETE_DATE = "_MARKED_AS_COMPLETE_DATE";
-
-  /** (data model) version from submission */
   private static final DataField MODEL_VERSION = new DataField("_MODEL_VERSION", DataField.DataType.INTEGER, true);
-  /** uiVersion from submission */
   private static final DataField UI_VERSION = new DataField("_UI_VERSION", DataField.DataType.INTEGER, true);
-  /** whether or not the submission is complete.
-   *
-   * Because submissions may be uploaded across multiple transport requests, we need
-   * a flag to say whether the submission has been fully uploaded w.r.t. the transport.
-   *
-   * Only completed submissions appear in reports and are forwarded to external services
-   *
-   * Note that the metadata block of a submission is available for implementing workflow
-   * state transitions, if you want to do that.
-   */
   private static final DataField IS_COMPLETE = new DataField("_IS_COMPLETE", DataField.DataType.BOOLEAN, true);
-
   private static final DataField MARKED_AS_COMPLETE_DATE = new DataField(FIELD_NAME_MARKED_AS_COMPLETE_DATE, DataField.DataType.DATETIME, true).setIndexable(IndexType.ORDERED);
-
   private static final DataField SUBMISSION_DATE = new DataField("_SUBMISSION_DATE", DataField.DataType.DATETIME, true);
 
   public final DataField modelVersion;
@@ -70,12 +52,6 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
   public final DataField markedAsCompleteDate;
   public final DataField submissionDate;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   protected TopLevelDynamicBase(String databaseSchema, String tableName) {
     super(databaseSchema, tableName);
     fieldList.add(modelVersion = new DataField(MODEL_VERSION));
@@ -85,12 +61,6 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
     fieldList.add(markedAsCompleteDate = new DataField(MARKED_AS_COMPLETE_DATE));
   }
 
-  /**
-   * Construct an empty entity.
-   *
-   * @param ref
-   * @param user
-   */
   protected TopLevelDynamicBase(TopLevelDynamicBase ref, User user) {
     super(ref, user);
     modelVersion = ref.modelVersion;

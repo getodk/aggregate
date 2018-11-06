@@ -52,11 +52,6 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   private final SubmissionKey submissionKey;
   private final BinaryContentManipulator bcm;
 
-  /**
-   * Constructor
-   *
-   * @param propertyName Name of submission element
-   */
   public BlobSubmissionType(FormElementModel element, String parentKey, EntityKey topLevelTableKey,
                             SubmissionKey submissionKey) {
     super(element);
@@ -108,14 +103,8 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
    * and if it is different than the supplied byte array, the existing value will
    * not be changed unless overwiteOK is true.
    *
-   * @param byteArray        byte form of the value
-   * @param contentType      type of binary data (NOTE: only used for binary data)
-   * @param unrootedFilePath the filename for this byte array
-   * @param overwriteOK      true if overwriting an existing value is OK.
-   * @param cc               calling context
    * @return the outcome of the storage attempt. md5 hashes are used to
    *     determine file equivalence.
-   * @throws ODKDatastoreException
    */
   @Override
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
@@ -125,12 +114,6 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
     return bcm.setValueFromByteArray(byteArray, contentType, unrootedFilePath, overwriteOK, cc);
   }
 
-  /**
-   * Cannot convert blob from a string
-   *
-   * @param value
-   * @throws ODKConversionException
-   */
   @Override
   public void setValueFromString(String value) throws ODKConversionException {
     throw new ODKConversionException(ErrorConsts.NO_STRING_TO_BLOB_CONVERT);
@@ -146,32 +129,16 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
     bcm.persist(cc);
   }
 
-  /**
-   * Restore to a BlobSubmissionType with no attachments at all.
-   *
-   * @param datastore
-   * @param user
-   * @throws ODKDatastoreException
-   */
   public void deleteAll(CallingContext cc) throws ODKDatastoreException {
     bcm.deleteAll(cc);
   }
 
-  /**
-   * Format value for output
-   *
-   * @param elemFormatter the element formatter that will convert the value to the proper
-   *                      format for output
-   */
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue,
                           CallingContext cc) throws ODKDatastoreException {
     elemFormatter.formatBinary(this, element, ordinalValue, row, cc);
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof BlobSubmissionType)) {
@@ -198,17 +165,11 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
     return submissionKey;
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     return super.hashCode() + parentKey.hashCode() + bcm.hashCode();
   }
 
-  /**
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString() {
     SubmissionKey value = getValue();

@@ -37,20 +37,11 @@ public final class GoogleSpreadsheet2RepeatParameterTable extends CommonFieldsBa
 
   private static final String TABLE_NAME = "_google_spreadsheet_2_repeat";
 
-  private static final DataField URI_GOOGLE_SPREADSHEET = new DataField("URI_GOOGLE_SPREADSHEET",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  private static final DataField WORKSHEET_ID = new DataField("WORKSHEET_ID",
-      DataField.DataType.STRING, true, 4096L);
-  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY",
-      DataField.DataType.STRING, true, 4096L);
+  private static final DataField URI_GOOGLE_SPREADSHEET = new DataField("URI_GOOGLE_SPREADSHEET", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField WORKSHEET_ID = new DataField("WORKSHEET_ID", DataField.DataType.STRING, true, 4096L);
+  private static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY", DataField.DataType.STRING, true, 4096L);
   private static GoogleSpreadsheet2RepeatParameterTable relation = null;
 
-  /**
-   * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   GoogleSpreadsheet2RepeatParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(URI_GOOGLE_SPREADSHEET);
@@ -58,18 +49,11 @@ public final class GoogleSpreadsheet2RepeatParameterTable extends CommonFieldsBa
     fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private GoogleSpreadsheet2RepeatParameterTable(GoogleSpreadsheet2RepeatParameterTable ref, User user) {
     super(ref, user);
   }
 
-  public static synchronized final GoogleSpreadsheet2RepeatParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  public static synchronized final GoogleSpreadsheet2RepeatParameterTable assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       GoogleSpreadsheet2RepeatParameterTable relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -82,8 +66,7 @@ public final class GoogleSpreadsheet2RepeatParameterTable extends CommonFieldsBa
     return relation;
   }
 
-  public static List<GoogleSpreadsheet2RepeatParameterTable> getRepeatGroupAssociations(String uri,
-                                                                                        CallingContext cc) throws ODKDatastoreException {
+  public static List<GoogleSpreadsheet2RepeatParameterTable> getRepeatGroupAssociations(String uri, CallingContext cc) throws ODKDatastoreException {
     List<GoogleSpreadsheet2RepeatParameterTable> list = new ArrayList<GoogleSpreadsheet2RepeatParameterTable>();
     GoogleSpreadsheet2RepeatParameterTable frpt = assertRelation(cc);
 
@@ -99,7 +82,6 @@ public final class GoogleSpreadsheet2RepeatParameterTable extends CommonFieldsBa
     return list;
   }
 
-  // Only called from within the persistence layer.
   @Override
   public GoogleSpreadsheet2RepeatParameterTable getEmptyRow(User user) {
     return new GoogleSpreadsheet2RepeatParameterTable(this, user);

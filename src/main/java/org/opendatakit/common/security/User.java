@@ -15,10 +15,6 @@
  */
 package org.opendatakit.common.security;
 
-import java.util.Set;
-import org.springframework.security.core.GrantedAuthority;
-
-
 /**
  * Minimal features of a user.  Note that the security permissions granted a
  * user are not defined here.  That is a security aspect that doesn't get
@@ -28,26 +24,15 @@ import org.springframework.security.core.GrantedAuthority;
  * @author mitchellsundt@gmail.com
  */
 public interface User {
-  public static final String ANONYMOUS_USER = "anonymousUser";
-  public static final String ANONYMOUS_USER_NICKNAME = "Anonymous Access";
+  String ANONYMOUS_USER = "anonymousUser";
+  String ANONYMOUS_USER_NICKNAME = "Anonymous Access";
 
-  public static final String DAEMON_USER = "aggregate.opendatakit.org:web-service";
-  public static final String DAEMON_USER_NICKNAME = "Background Task Account";
+  String DAEMON_USER = "aggregate.opendatakit.org:web-service";
+  String DAEMON_USER_NICKNAME = "Background Task Account";
 
-  /**
-   * @return user id of the form "uid:username|timestamp"
-   *     or "mailto:user@domain.com" (authenticated but not registered)
-   *     or ANONYMOUS_USER or DAEMON_USER
-   */
-  public String getUriUser();
+  String getUriUser();
 
-  /**
-   * @return true if this user is the anonymous user.
-   */
-  public boolean isAnonymous();
+  boolean isAnonymous();
 
-  /**
-   * @return
-   */
-  public boolean isRegistered();
+  boolean isRegistered();
 }

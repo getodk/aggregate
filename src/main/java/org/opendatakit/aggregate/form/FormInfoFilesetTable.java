@@ -68,11 +68,6 @@ public class FormInfoFilesetTable extends DynamicBase {
   private static BinaryContentRefBlob manifestBinaryRefBlobRelation = null;
   private static RefBlob manifestRefBlobRelation = null;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   */
   private FormInfoFilesetTable(String databaseSchema) {
     super(databaseSchema, TABLE_NAME);
     fieldList.add(ROOT_ELEMENT_MODEL_VERSION);
@@ -85,12 +80,6 @@ public class FormInfoFilesetTable extends DynamicBase {
 
     fieldValueMap.put(primaryKey, FormInfoFilesetTable.URI_FORM_ID_VALUE_FORM_INFO_FILESET);
   }
-  /**
-   * Construct an empty entity.
-   *
-   * @param ref
-   * @param user
-   */
   private FormInfoFilesetTable(FormInfoFilesetTable ref, User user) {
     super(ref, user);
   }

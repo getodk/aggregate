@@ -54,10 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QueryByUIFilterGroup extends QueryBase {
-
   private static final String MISSING_ARGS = "Missing either Form or FilterGroup making it impossible to query";
-
-  ;
   private final CompletionFlag completionFlag;
   private final TopLevelDynamicBase tbl;
   private int fetchLimit;
@@ -197,10 +194,6 @@ public class QueryByUIFilterGroup extends QueryBase {
 
   }
 
-  /**
-   * Silently skip the submissions that are not retrievable due to malformations
-   * of some kind.
-   */
   public List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();
@@ -241,13 +234,6 @@ public class QueryByUIFilterGroup extends QueryBase {
     return retrievedSubmissions;
   }
 
-  /**
-   * Try to construct whatever portion of a submission we can from a fractional record.
-   *
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
   public List<TopLevelDynamicBase> getTopLevelSubmissionObjects(CallingContext cc) throws ODKDatastoreException {
 
     List<TopLevelDynamicBase> topLevelEntities = new ArrayList<TopLevelDynamicBase>();
@@ -267,9 +253,7 @@ public class QueryByUIFilterGroup extends QueryBase {
     return topLevelEntities;
   }
 
-  public void populateSubmissions(SubmissionUISummary summary,
-                                  List<FormElementModel> filteredElements, ElementFormatter elemFormatter,
-                                  List<FormElementNamespace> elementTypes, CallingContext cc) throws ODKDatastoreException {
+  public void populateSubmissions(SubmissionUISummary summary, List<FormElementModel> filteredElements, ElementFormatter elemFormatter, List<FormElementNamespace> elementTypes, CallingContext cc) throws ODKDatastoreException {
 
     // retrieve submissions
     QueryResult results = getQueryResult(cursor, fetchLimit);
@@ -384,11 +368,6 @@ public class QueryByUIFilterGroup extends QueryBase {
     ONLY_COMPLETE_SUBMISSIONS,
     ONLY_INCOMPLETE_SUBMISSIONS,
     ALL_SUBMISSIONS
-  }
-
-  public static final class PartialResults {
-    public List<Submission> retrievedSubmissions;
-    public List<TopLevelDynamicBase> badTopLevelEntities;
   }
 
 }

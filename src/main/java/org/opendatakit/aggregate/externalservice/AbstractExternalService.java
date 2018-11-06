@@ -66,10 +66,8 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public abstract class AbstractExternalService implements ExternalService {
 
@@ -105,10 +103,6 @@ public abstract class AbstractExternalService implements ExternalService {
     this.fsc = formServiceCursor;
   }
 
-  /**
-   * Helper function for constructors.
-   *
-   */
   protected static FormServiceCursor createFormServiceCursor(IForm form, CommonFieldsBase entity, ExternalServicePublicationOption externalServiceOption, ExternalServiceType type, CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor formServiceCursor = FormServiceCursor.createFormServiceCursor(form, type, entity, cc);
     formServiceCursor.setExternalServiceOption(externalServiceOption);
@@ -119,29 +113,12 @@ public abstract class AbstractExternalService implements ExternalService {
     return formServiceCursor;
   }
 
-  /**
-   * Helper function for constructors.
-   *
-   * @param parameterTableRelation
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
   protected static final <T extends CommonFieldsBase> T newEntity(T parameterTableRelation, CallingContext cc) {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     return ds.createEntityUsingRelation(parameterTableRelation, user);
   }
 
-  /**
-   * Helper function for constructors.
-   *
-   * @param parameterTableRelation
-   * @param fsc
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
   protected static final <T extends CommonFieldsBase> T retrieveEntity(T parameterTableRelation, FormServiceCursor fsc, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -318,9 +295,6 @@ public abstract class AbstractExternalService implements ExternalService {
         getDescriptiveTargetString());
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 13;

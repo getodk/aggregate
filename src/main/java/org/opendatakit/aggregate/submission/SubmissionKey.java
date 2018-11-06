@@ -35,15 +35,6 @@ public class SubmissionKey {
     this.key = key;
   }
 
-  /**
-   * Used by form deletion.
-   *
-   * @param formId
-   * @param modelVersion
-   * @param uiVersion
-   * @param topLevelGroupElementName
-   * @param uri
-   */
   public SubmissionKey(String formId, String topLevelGroupElementName, String uri) {
     StringBuilder b = new StringBuilder();
     b.append(formId);
@@ -64,16 +55,6 @@ public class SubmissionKey {
     return key;
   }
 
-  /**
-   * Parse the SubmissionKey into its individual parts.
-   * This is complicated by:
-   * <ol>
-   * <li>formId may contain slashes</li>
-   * <li>key may contain slashes</li>
-   * </ol>
-   *
-   * @return List&lt;SubmissionKeyPart&gt; of the parts of the key
-   */
   public final List<SubmissionKeyPart> splitSubmissionKey() {
     List<SubmissionKeyPart> parts = new ArrayList<SubmissionKeyPart>();
     List<String> stringParts = new ArrayList<String>();

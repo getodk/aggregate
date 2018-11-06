@@ -19,7 +19,6 @@ import java.util.List;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.DataField;
@@ -39,20 +38,11 @@ public abstract class QueryBase {
   private final IForm form;
   protected Query query;
 
-
   protected QueryBase(IForm form) {
     this.form = form;
   }
 
-  /**
-   * CAUTION: the attribute must be in the top-level record!
-   *
-   * @param attribute
-   * @param op
-   * @param value
-   */
-  public void addFilter(FormElementModel attribute, FilterOperation op,
-                        Object value) {
+  public void addFilter(FormElementModel attribute, FilterOperation op, Object value) {
     if (attribute.isMetadata()) {
       DataField metaField;
       TopLevelDynamicBase tlb = ((TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype());
@@ -83,8 +73,7 @@ public abstract class QueryBase {
     }
   }
 
-  public void addFilterGeoPoint(FormElementModel attr, Long ordinal, FilterOperation op,
-                                Object value) {
+  public void addFilterGeoPoint(FormElementModel attr, Long ordinal, FilterOperation op, Object value) {
 
     List<FormDataModel> geoList = attr.getFormDataModel().getChildren();
 
@@ -97,18 +86,10 @@ public abstract class QueryBase {
 
   public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException;
 
-
   public final IForm getForm() {
     return form;
   }
 
-  /**
-   * Generates a QueryResultthat contains all the submission data
-   * of the form specified by the ODK ID
-   *
-   * @return
-   * @throws ODKDatastoreException
-   */
   protected QueryResult getQueryResult(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
     return query.executeQuery(startCursor, fetchLimit);
 

@@ -34,21 +34,12 @@ import org.opendatakit.common.web.CallingContext;
  */
 public final class FusionTable2RepeatParameterTable extends CommonFieldsBase {
 
-  static final DataField URI_FUSION_TABLE_PROPERTY = new DataField(
-      "URI_FUSION_TABLE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
-  static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField(
-      "FORM_ELEMENT_KEY", DataField.DataType.STRING, true, 4096L);
+  static final DataField URI_FUSION_TABLE_PROPERTY = new DataField("URI_FUSION_TABLE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
+  static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField("FORM_ELEMENT_KEY", DataField.DataType.STRING, true, 4096L);
   private static final String TABLE_NAME = "_fusion_table_2_repeat";
-  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField(
-      "FUSION_TABLE_ID", DataField.DataType.STRING, true, 4096L);
+  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField("FUSION_TABLE_ID", DataField.DataType.STRING, true, 4096L);
   private static FusionTable2RepeatParameterTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   FusionTable2RepeatParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(URI_FUSION_TABLE_PROPERTY);
@@ -56,18 +47,11 @@ public final class FusionTable2RepeatParameterTable extends CommonFieldsBase {
     fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private FusionTable2RepeatParameterTable(FusionTable2RepeatParameterTable ref, User user) {
     super(ref, user);
   }
 
-  public static synchronized final FusionTable2RepeatParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  public static synchronized final FusionTable2RepeatParameterTable assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       FusionTable2RepeatParameterTable relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -80,8 +64,7 @@ public final class FusionTable2RepeatParameterTable extends CommonFieldsBase {
     return relation;
   }
 
-  public static List<FusionTable2RepeatParameterTable> getRepeatGroupAssociations(String uri,
-                                                                                  CallingContext cc) throws ODKDatastoreException {
+  public static List<FusionTable2RepeatParameterTable> getRepeatGroupAssociations(String uri, CallingContext cc) throws ODKDatastoreException {
     List<FusionTable2RepeatParameterTable> list = new ArrayList<FusionTable2RepeatParameterTable>();
     FusionTable2RepeatParameterTable frpt = assertRelation(cc);
 
@@ -95,7 +78,6 @@ public final class FusionTable2RepeatParameterTable extends CommonFieldsBase {
     return list;
   }
 
-  // Only called from within the persistence layer.
   @Override
   public FusionTable2RepeatParameterTable getEmptyRow(User user) {
     return new FusionTable2RepeatParameterTable(this, user);

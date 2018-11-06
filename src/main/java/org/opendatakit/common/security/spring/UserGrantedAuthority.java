@@ -47,38 +47,21 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_user_granted_authority";
 
-  /*
-   * Property Names for datastore
-   */
-  private static final DataField USER = new DataField(
-      "USER", DataField.DataType.URI, false).setIndexable(IndexType.ORDERED);
-  private static final DataField GRANTED_AUTHORITY = new DataField(
-      "GRANTED_AUTHORITY", DataField.DataType.URI, false);
+  private static final DataField USER = new DataField("USER", DataField.DataType.URI, false).setIndexable(IndexType.ORDERED);
+  private static final DataField GRANTED_AUTHORITY = new DataField("GRANTED_AUTHORITY", DataField.DataType.URI, false);
   private static UserGrantedAuthority reference = null;
 
-  /**
-   * Construct a relation prototype.  Only called via {@link #assertRelation(Datastore, User)}
-   *
-   * @param schemaName
-   */
   UserGrantedAuthority(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(USER);
     fieldList.add(GRANTED_AUTHORITY);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   UserGrantedAuthority(UserGrantedAuthority ref, User user) {
     super(ref, user);
   }
 
-  public static synchronized final UserGrantedAuthority assertRelation(Datastore ds, User user)
-      throws ODKDatastoreException {
+  public static synchronized final UserGrantedAuthority assertRelation(Datastore ds, User user) throws ODKDatastoreException {
     if (reference == null) {
       UserGrantedAuthority referencePrototype;
       // create the reference prototype using the schema of the form data
@@ -104,15 +87,6 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
     return authorized;
   }
 
-  /**
-   * Only infrequently used for group membership management.
-   *
-   * @param auth
-   * @param ds
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
   public static final Set<String> getUriUsers(GrantedAuthority auth, Datastore ds, User user) throws ODKDatastoreException {
     Set<String> users = new HashSet<String>();
     if (auth != null) {
@@ -126,17 +100,7 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
     return users;
   }
 
-  /**
-   * Asserts that the given group has exactly the list of desired members and
-   * no additional members.
-   *
-   * @param group
-   * @param desiredMembers
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  public static final void assertGrantedAuthorityMembers(GrantedAuthority group,
-                                                         Collection<String> desiredMembers, CallingContext cc) throws ODKDatastoreException {
+  public static final void assertGrantedAuthorityMembers(GrantedAuthority group, Collection<String> desiredMembers, CallingContext cc) throws ODKDatastoreException {
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -208,7 +172,6 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
     }
   }
 
-  // Only called from within the persistence layer.
   @Override
   public UserGrantedAuthority getEmptyRow(User user) {
     return new UserGrantedAuthority(this, user);

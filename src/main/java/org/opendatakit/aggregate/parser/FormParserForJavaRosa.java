@@ -85,23 +85,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   private int elementCount = 0;
   private int phantomCount = 0;
 
-  /**
-   * Constructor that parses and xform from the input stream supplied and
-   * creates the proper ODK Aggregate Form definition.
-   *
-   * @param formName
-   * @param formXmlData
-   * @param inputXml
-   * @param fileName
-   * @param uploadedFormItems
-   * @param warnings          -- the builder that will hold all the non-fatal form-creation
-   *                          warnings
-   * @param cc
-   * @throws ODKFormAlreadyExistsException
-   * @throws ODKIncompleteSubmissionData
-   * @throws ODKDatastoreException
-   * @throws ODKParseException
-   */
   public FormParserForJavaRosa(String formName, MultiPartFormItem formXmlData, String inputXml,
                                String fileName, MultiPartFormData uploadedFormItems, StringBuilder warnings,
                                CallingContext cc) throws ODKFormAlreadyExistsException, ODKIncompleteSubmissionData,
@@ -150,8 +133,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     // update the uiVersion and the form definition file...
     thisForm.setFormXml(thisForm.getFormFilename(cc), revisedXml, modelVersion, cc);
   }
-
-  ;
 
   private String generatePhantomKey(String uriSubmissionFormModel) {
     return String.format("elem+%1$s(%2$08d-phantom:%3$08d)", uriSubmissionFormModel, elementCount,
@@ -261,8 +242,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
    * creation to track the mapping from datastore tables to CommonFieldsBase
    * objects.
    *
-   * @param tbl
-   * @return
    */
   private String tableKey(CommonFieldsBase tbl) {
     return tbl.getSchemaName() + "." + tbl.getTableName();
@@ -772,10 +751,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
    * The creation of the tbl relation has failed. We need to split it into
    * multiple sub-tables and try again.
    *
-   * @param fdmList
-   * @param fdmRelation
-   * @param tbl
-   * @param newPhantomTableName
    */
   private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdmRelation,
                                   CommonFieldsBase tbl, NamingSet opaque, CallingContext cc) {
@@ -1158,14 +1133,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   /**
    * Used to recursively process the xform definition tree to create the form
    * data model.
-   *
-   * @param treeElement java rosa tree element
-   * @param parentKey   key from the parent form for proper entity group usage in gae
-   * @param parent      parent form element
-   * @throws ODKEntityPersistException
-   * @throws ODKParseException
    */
-
   private void constructDataModel(final NamingSet opaque, final EntityKey k,
                                   final List<FormDataModel> dmList, final FormDataModel fdm, String parent, int ordinal,
                                   String tablePrefix, String nrGroupPrefix, String tableName, TreeElement treeElement,

@@ -33,36 +33,15 @@ import org.opendatakit.common.web.CallingContext;
  */
 public final class SubmissionAssociationTable extends CommonFieldsBase {
   private static final String TABLE_NAME = "_form_info_submission_association";
+  private static final DataField URI_MD5_SUBMISSION_FORM_ID = new DataField("URI_MD5_SUBMISSION_FORM_ID", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField URI_MD5_FORM_ID = new DataField("URI_MD5_FORM_ID", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField SUBMISSION_FORM_ID = new DataField("SUBMISSION_FORM_ID", DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
+  private static final DataField IS_PERSISTENCE_MODEL_COMPLETE = new DataField("IS_PERSISTENCE_MODEL_COMPLETE", DataField.DataType.BOOLEAN, true);
+  private static final DataField IS_SUBMISSION_ALLOWED = new DataField("IS_SUBMISSION_ALLOWED", DataField.DataType.BOOLEAN, true);
+  private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL", DataField.DataType.URI, true);
 
-  private static final DataField URI_MD5_SUBMISSION_FORM_ID = new DataField("URI_MD5_SUBMISSION_FORM_ID",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-
-  private static final DataField URI_MD5_FORM_ID = new DataField("URI_MD5_FORM_ID",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-
-  private static final DataField SUBMISSION_FORM_ID = new DataField("SUBMISSION_FORM_ID",
-      DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
-
-  private static final DataField IS_PERSISTENCE_MODEL_COMPLETE = new DataField("IS_PERSISTENCE_MODEL_COMPLETE",
-      DataField.DataType.BOOLEAN, true);
-
-  private static final DataField IS_SUBMISSION_ALLOWED = new DataField("IS_SUBMISSION_ALLOWED",
-      DataField.DataType.BOOLEAN, true);
-
-  private static final DataField URI_SUBMISSION_DATA_MODEL = new DataField("URI_SUBMISSION_DATA_MODEL",
-      DataField.DataType.URI, true);
-
-  /**
-   * DOM_AURI (md5 of submission form_id)
-   * SUB_AURI (URI_FORM_INFO)
-   */
   private static SubmissionAssociationTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   */
   private SubmissionAssociationTable(String databaseSchema) {
     super(databaseSchema, TABLE_NAME);
 
@@ -74,12 +53,6 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
     fieldList.add(URI_SUBMISSION_DATA_MODEL);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private SubmissionAssociationTable(SubmissionAssociationTable ref, User user) {
     super(ref, user);
   }
@@ -140,7 +113,6 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
     return saList;
   }
 
-  // Only called from within the persistence layer.
   @Override
   public SubmissionAssociationTable getEmptyRow(User user) {
     return new SubmissionAssociationTable(this, user);

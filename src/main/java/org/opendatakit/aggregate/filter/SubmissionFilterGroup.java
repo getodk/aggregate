@@ -45,25 +45,14 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_filter_group";
 
-  private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
-      DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
-  private static final DataField NAME_PROPERTY = new DataField("NAME", DataField.DataType.STRING,
-      true, FormDataModel.MAX_ELEMENT_NAME_LENGTH);
-  private static final DataField URI_USER_PROPERTY = new DataField("URI_USER",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  private static final DataField IS_PUBLIC = new DataField("IS_PUBLIC", DataField.DataType.BOOLEAN,
-      true);
-  private static final DataField INCLUDE_METADATA = new DataField("INCLUDE_METADATA", DataField.DataType.BOOLEAN,
-      true);
+  private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID", DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
+  private static final DataField NAME_PROPERTY = new DataField("NAME", DataField.DataType.STRING, true, FormDataModel.MAX_ELEMENT_NAME_LENGTH);
+  private static final DataField URI_USER_PROPERTY = new DataField("URI_USER", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField IS_PUBLIC = new DataField("IS_PUBLIC", DataField.DataType.BOOLEAN, true);
+  private static final DataField INCLUDE_METADATA = new DataField("INCLUDE_METADATA", DataField.DataType.BOOLEAN, true);
   private static SubmissionFilterGroup relation = null;
   private List<SubmissionFilter> filters;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   private SubmissionFilterGroup(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(FORM_ID_PROPERTY);
@@ -73,18 +62,11 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     fieldList.add(INCLUDE_METADATA);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private SubmissionFilterGroup(SubmissionFilterGroup ref, User user) {
     super(ref, user);
   }
 
-  private static synchronized final SubmissionFilterGroup assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  private static synchronized final SubmissionFilterGroup assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       SubmissionFilterGroup relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -97,8 +79,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     return relation;
   }
 
-  public static final SubmissionFilterGroup getFilterGroup(String uri, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static final SubmissionFilterGroup getFilterGroup(String uri, CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     try {
       SubmissionFilterGroup relation = assertRelation(cc);
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
@@ -117,8 +98,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     }
   }
 
-  public static final SubmissionFilterGroup transform(FilterGroup filterGroup, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException, ODKDatastoreException {
+  public static final SubmissionFilterGroup transform(FilterGroup filterGroup, CallingContext cc) throws ODKDatastoreException {
 
     SubmissionFilterGroup relation = assertRelation(cc);
     String uri = filterGroup.getUri();
@@ -145,8 +125,7 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     return subFilterGroup;
   }
 
-  public static final List<SubmissionFilterGroup> getFilterGroupList(String formId,
-                                                                     CallingContext cc) throws ODKDatastoreException {
+  public static final List<SubmissionFilterGroup> getFilterGroupList(String formId, CallingContext cc) throws ODKDatastoreException {
     SubmissionFilterGroup relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, "SubmissionFilterGroup.getFilterGroupList", cc.getCurrentUser());
     query.addFilter(SubmissionFilterGroup.FORM_ID_PROPERTY, FilterOperation.EQUAL, formId);

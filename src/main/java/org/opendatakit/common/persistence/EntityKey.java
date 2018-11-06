@@ -37,8 +37,6 @@ public class EntityKey {
   /**
    * Construct an EntityKey using the given relation name and key.
    *
-   * @param relationName
-   *            the name of the relation to which the Entity belongs
    * @param key
    *            the key which corresponds to the Entity
    */

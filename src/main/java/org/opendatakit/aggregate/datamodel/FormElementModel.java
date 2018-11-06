@@ -29,13 +29,8 @@ import org.opendatakit.common.web.CallingContext;
  * @author wbrunette@gmail.com
  */
 public final class FormElementModel {
-
   private static final String K_SL = "/";
-
-  ;
   private static final String K_COLON = ":";
-
-  ;
   private final Metadata type;
   private final FormDataModel fdm;
   private final List<FormElementModel> children = new ArrayList<FormElementModel>();
@@ -86,15 +81,6 @@ public final class FormElementModel {
     }
   }
 
-  /**
-   * Given a form definition and a FormElementKey, retrieves the
-   * FormElementModel corresponding to the key.
-   *
-   * @param form
-   * @param key
-   * @return the form element model corresponding to the key.
-   * @throws IllegalArgumentException
-   */
   public static final FormElementModel retrieveFormElementModel(IForm form, FormElementKey key) {
     String[] slashParts = key.toString().split(K_SL);
     int slashPosition = 0;
@@ -342,8 +328,6 @@ public final class FormElementModel {
    * they are different construction methodologies, so there is a risk of
    * divergence).
    *
-   * @param form
-   * @return string representation of this FormElementModel
    */
   private final String getFullyQualifiedElementName(IForm form) {
 
@@ -366,24 +350,10 @@ public final class FormElementModel {
     return b.toString();
   }
 
-  /**
-   * Construct the FormElementKey that holds the abstract XPath expression
-   * defining this FormElementModel.
-   *
-   * @param form the form containing this FormElementModel
-   * @return the FormElementKey describing the FormElementModel
-   */
   public final FormElementKey constructFormElementKey(IForm form) {
     return new FormElementKey(getFullyQualifiedElementName(form));
   }
 
-  /**
-   * Search the children of this element and return the one that has the name
-   * that matches.
-   *
-   * @param elementName - name to match
-   * @return the element or null if not found.
-   */
   public final FormElementModel findElementByName(String elementName) {
     if (elementName == null) {
       throw new IllegalArgumentException("null elementName passed in!");
@@ -397,11 +367,6 @@ public final class FormElementModel {
     return null;
   }
 
-  // //////////////////////////////////////////////////////////////////////////////
-  // Static methods
-  // //////////////////////////////////////////////////////////////////////////////
-
-  /* xform element types */
   public static enum ElementType {
     // xform tag types
     STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,

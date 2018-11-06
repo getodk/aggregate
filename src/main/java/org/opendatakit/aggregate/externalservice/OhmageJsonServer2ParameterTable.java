@@ -21,37 +21,21 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class OhmageJsonServer2ParameterTable extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_ohmage_json_server2";
 
-  private static final DataField CAMPAIGN_URN_PROPERTY = new DataField("CAMPAIGN_URN",
-      DataField.DataType.STRING, true, 4096L);
-  private static final DataField CAMPAIGN_TIMESTAMP_PROPERTY = new DataField("CAMPAIGN_TIMESTAMP",
-      DataField.DataType.STRING, true);
-  private static final DataField OHMAGE_USERNAME_PROPERTY = new DataField("OHMAGE_USERNAME",
-      DataField.DataType.STRING, true);
-  private static final DataField OHMAGE_HASHED_PASSWORD_PROPERTY = new DataField("OHMAGE_HASHED_PASSWORD",
-      DataField.DataType.STRING, true);
-  private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL",
-      DataField.DataType.STRING, true, 4096L);
-
-  private static final DataField SERVER_URL_PROPERTY = new DataField("SERVER_URL",
-      DataField.DataType.STRING, true, 4096L);
+  private static final DataField CAMPAIGN_URN_PROPERTY = new DataField("CAMPAIGN_URN", DataField.DataType.STRING, true, 4096L);
+  private static final DataField CAMPAIGN_TIMESTAMP_PROPERTY = new DataField("CAMPAIGN_TIMESTAMP", DataField.DataType.STRING, true);
+  private static final DataField OHMAGE_USERNAME_PROPERTY = new DataField("OHMAGE_USERNAME", DataField.DataType.STRING, true);
+  private static final DataField OHMAGE_HASHED_PASSWORD_PROPERTY = new DataField("OHMAGE_HASHED_PASSWORD", DataField.DataType.STRING, true);
+  private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL", DataField.DataType.STRING, true, 4096L);
+  private static final DataField SERVER_URL_PROPERTY = new DataField("SERVER_URL", DataField.DataType.STRING, true, 4096L);
   private static OhmageJsonServer2ParameterTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via
-   * {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   OhmageJsonServer2ParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(CAMPAIGN_URN_PROPERTY);
@@ -62,18 +46,11 @@ public final class OhmageJsonServer2ParameterTable extends CommonFieldsBase {
     fieldList.add(SERVER_URL_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private OhmageJsonServer2ParameterTable(OhmageJsonServer2ParameterTable ref, User user) {
     super(ref, user);
   }
 
-  public static synchronized final OhmageJsonServer2ParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  public static synchronized final OhmageJsonServer2ParameterTable assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       OhmageJsonServer2ParameterTable relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -86,7 +63,6 @@ public final class OhmageJsonServer2ParameterTable extends CommonFieldsBase {
     return relation;
   }
 
-  // Only called from within the persistence layer.
   @Override
   public OhmageJsonServer2ParameterTable getEmptyRow(User user) {
     return new OhmageJsonServer2ParameterTable(this, user);

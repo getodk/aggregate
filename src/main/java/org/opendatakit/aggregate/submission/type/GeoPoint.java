@@ -33,7 +33,6 @@ public class GeoPoint {
   public static final String ALTITUDE = "Altitude";
   public static final String ACCURACY = "Accuracy";
 
-
   private WrappedBigDecimal latitude;
 
   private WrappedBigDecimal longitude;
@@ -42,14 +41,6 @@ public class GeoPoint {
 
   private WrappedBigDecimal accuracy;
 
-  /**
-   * Constructs a GeoPoint with given latitude and longitude coordinates
-   *
-   * @param latitudeCoordinate
-   * @param longitudeCoordinate
-   * @param altitudeValue
-   * @param accuracyValue
-   */
   public GeoPoint(WrappedBigDecimal latitudeCoordinate, WrappedBigDecimal longitudeCoordinate, WrappedBigDecimal altitudeValue, WrappedBigDecimal accuracyValue) {
     latitude = latitudeCoordinate;
     longitude = longitudeCoordinate;
@@ -57,73 +48,34 @@ public class GeoPoint {
     accuracy = accuracyValue;
   }
 
-  /**
-   * Constructs a GeoPoint with given latitude and longitude coordinates
-   *
-   * @param latitudeCoordinate
-   * @param longitudeCoordinate
-   * @param altitudeValue
-   */
   public GeoPoint(WrappedBigDecimal latitudeCoordinate, WrappedBigDecimal longitudeCoordinate, WrappedBigDecimal altitudeValue) {
     this(latitudeCoordinate, longitudeCoordinate, altitudeValue, null);
   }
 
-  /**
-   * Constructs a GeoPoint with given latitude and longitude coordinates
-   *
-   * @param latitudeCoordinate
-   * @param longitudeCoordinate
-   */
   public GeoPoint(WrappedBigDecimal latitudeCoordinate, WrappedBigDecimal longitudeCoordinate) {
     this(latitudeCoordinate, longitudeCoordinate, null, null);
   }
 
-  /**
-   * Constructs a GeoPoint with all null values.
-   */
   public GeoPoint() {
     this(null, null, null, null);
   }
 
-  /**
-   * Returns the latitude of the GeoPoint
-   *
-   * @return the latitude
-   */
   public WrappedBigDecimal getLatitude() {
     return latitude;
   }
 
-  /**
-   * Returns the longitude of the GeoPoint
-   *
-   * @return the longitude
-   */
   public WrappedBigDecimal getLongitude() {
     return longitude;
   }
 
-  /**
-   * Returns the altitude of the GeoPoint
-   *
-   * @return the altitude
-   */
   public WrappedBigDecimal getAltitude() {
     return altitude;
   }
 
-  /**
-   * Returns the accuracy of the GeoPoint
-   *
-   * @return the accuracy
-   */
   public WrappedBigDecimal getAccuracy() {
     return accuracy;
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof GeoPoint)) {
@@ -141,9 +93,6 @@ public class GeoPoint {
         && (accuracy == null ? (other.accuracy == null) : (accuracy.equals(other.accuracy)));
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 11;
@@ -158,9 +107,6 @@ public class GeoPoint {
     return hashCode;
   }
 
-  /**
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString() {
     String str = GeoPoint.GEO_POINT + BasicConsts.COLON + BasicConsts.SPACE;

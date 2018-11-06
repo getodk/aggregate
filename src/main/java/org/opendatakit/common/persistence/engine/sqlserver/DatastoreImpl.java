@@ -368,9 +368,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   }
 
-  /**
-   * Relation manipulation APIs
-   */
   @Override
   public void assertRelation(CommonFieldsBase relation, User user) throws ODKDatastoreException {
     JdbcTemplate jc = getJdbcConnection();
@@ -543,9 +540,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   /**
    * Construct a 3-character or more prefix for use in the index name.
-   *
-   * @param name
-   * @return
    */
   private String shortPrefix(String name) {
     StringBuilder b = new StringBuilder();
@@ -628,11 +622,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       throw new ODKDatastoreException(e);
     }
   }
-
-  /***************************************************************************
-   * Entity manipulation APIs
-   *
-   */
 
   @SuppressWarnings("unchecked")
   @Override

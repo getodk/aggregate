@@ -30,25 +30,18 @@ public class RFC4180CsvWriter {
 
   private final BufferedWriter bw;
 
-  private final char cr = 13;
+  private static final char CR_CHAR_INDEX = 13;
 
-  private final char lf = 10;
+  private static final char LF_CHAR_INDEX = 10;
 
-  private final char separator = ',';
+  private static final char SEPARATOR_CHAR = ',';
 
-  private final char quotechar = '"';
+  private static final char QUOTE_CHAR = '"';
 
   public RFC4180CsvWriter(Writer writer) {
     this.bw = new BufferedWriter(writer);
   }
 
-  /**
-   * Writes the next line to the file. All non-null fields
-   * are written surrounded by
-   *
-   * @param nextLine a string array with each comma-separated element as a separate entry.
-   * @throws IOException
-   */
   public void writeNext(String[] nextLine) throws IOException {
 
     if (nextLine == null)
@@ -57,49 +50,39 @@ public class RFC4180CsvWriter {
     boolean first = true;
     for (String term : nextLine) {
       if (!first) {
-        bw.write(separator);
+        bw.write(SEPARATOR_CHAR);
       }
       first = false;
       if (term != null) {
         // wrap an empty string in double-quotes to
         // distinguish between null and empty string
         if (term.length() == 0 ||
-            term.indexOf(cr) != -1 ||
-            term.indexOf(lf) != -1 ||
-            term.indexOf(separator) != -1 ||
-            term.indexOf(quotechar) != -1) {
+            term.indexOf(CR_CHAR_INDEX) != -1 ||
+            term.indexOf(LF_CHAR_INDEX) != -1 ||
+            term.indexOf(SEPARATOR_CHAR) != -1 ||
+            term.indexOf(QUOTE_CHAR) != -1) {
           // this string needs to be quoted
-          bw.write(quotechar);
+          bw.write(QUOTE_CHAR);
           // and any quotes within need to be doubled-up
           term = term.replaceAll("\"", "\"\"");
           bw.write(term);
-          bw.write(quotechar);
+          bw.write(QUOTE_CHAR);
         } else {
           // simple string -- just emit it
           bw.write(term);
         }
       }
     }
-    bw.write(cr);
-    bw.write(lf);
+    bw.write(CR_CHAR_INDEX);
+    bw.write(LF_CHAR_INDEX);
   }
 
-  /**
-   * Flush underlying stream to writer.
-   *
-   * @throws IOException if bad things happen
-   */
   public void flush() throws IOException {
 
     bw.flush();
 
   }
 
-  /**
-   * Close the underlying stream writer flushing any buffered content.
-   *
-   * @throws IOException if bad things happen
-   */
   public void close() throws IOException {
     flush();
     bw.close();

@@ -18,8 +18,8 @@ import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.security.User;
 
 /**
- * Selection choices are stored in separate tables for each 
- * instance data field. Multiple-choice selections have 
+ * Selection choices are stored in separate tables for each
+ * instance data field. Multiple-choice selections have
  * multiple values for a given <code>PARENT_AURI</code>.
  * The order of these values as they were submitted is given
  * by the <code>ORDINAL_NUMBER</code> of the selection.
@@ -28,42 +28,28 @@ import org.opendatakit.common.security.User;
  * order is just a side-effect of the serialization mechanism).
  * Having all selections, even single-choice selections broken
  * out into separate tables allows for transparent modification
- * of a selection from a select-1 to a select-many, or an 
- * ordered selection as revisions occur without impacting the 
+ * of a selection from a select-1 to a select-many, or an
+ * ordered selection as revisions occur without impacting the
  * data representation (note, however, that data interpretation
  * would need to account for the changing value-set of the field).
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public final class SelectChoice extends DynamicBase {
   private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, false);
   public final DataField value;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   public SelectChoice(String databaseSchema, String tableName) {
     super(databaseSchema, tableName);
     fieldList.add(value = new DataField(VALUE));
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private SelectChoice(SelectChoice ref, User user) {
     super(ref, user);
     value = ref.value;
   }
 
-  // Only called from within the persistence layer.
   @Override
   public SelectChoice getEmptyRow(User user) {
     return new SelectChoice(this, user);

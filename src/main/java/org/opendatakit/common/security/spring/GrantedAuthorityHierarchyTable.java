@@ -49,35 +49,21 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
   private static final String TABLE_NAME = "_granted_authority_hierarchy";
 
-  private static final DataField DOMINATING_GRANTED_AUTHORITY = new DataField(
-      "DOMINATING_GRANTED_AUTHORITY", DataField.DataType.URI, false).setIndexable(IndexType.HASH);
-  private static final DataField SUBORDINATE_GRANTED_AUTHORITY = new DataField(
-      "SUBORDINATE_GRANTED_AUTHORITY", DataField.DataType.URI, false);
+  private static final DataField DOMINATING_GRANTED_AUTHORITY = new DataField("DOMINATING_GRANTED_AUTHORITY", DataField.DataType.URI, false).setIndexable(IndexType.HASH);
+  private static final DataField SUBORDINATE_GRANTED_AUTHORITY = new DataField("SUBORDINATE_GRANTED_AUTHORITY", DataField.DataType.URI, false);
   private static GrantedAuthorityHierarchyTable reference = null;
 
-  /**
-   * Construct a relation prototype. Only called via {@link #assertRelation(Datastore, User)}
-   *
-   * @param schemaName
-   */
   GrantedAuthorityHierarchyTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(DOMINATING_GRANTED_AUTHORITY);
     fieldList.add(SUBORDINATE_GRANTED_AUTHORITY);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   public GrantedAuthorityHierarchyTable(GrantedAuthorityHierarchyTable ref, User user) {
     super(ref, user);
   }
 
-  public static final synchronized GrantedAuthorityHierarchyTable assertRelation(Datastore ds, User user)
-      throws ODKDatastoreException {
+  public static final synchronized GrantedAuthorityHierarchyTable assertRelation(Datastore ds, User user) throws ODKDatastoreException {
     if (reference == null) {
       GrantedAuthorityHierarchyTable referencePrototype;
       // create the reference prototype using the schema of the form data
@@ -89,8 +75,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
     return reference;
   }
 
-  public static final Set<GrantedAuthority> getSubordinateGrantedAuthorities(
-      GrantedAuthority dominantGrant, CallingContext cc) throws ODKDatastoreException {
+  public static final Set<GrantedAuthority> getSubordinateGrantedAuthorities(GrantedAuthority dominantGrant, CallingContext cc) throws ODKDatastoreException {
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -177,8 +162,7 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
     return inheritFrom;
   }
 
-  public static final void assertGrantedAuthorityHierarchy(GrantedAuthority dominantGrant,
-                                                           Collection<String> desiredGrants, CallingContext cc) throws ODKDatastoreException {
+  public static final void assertGrantedAuthorityHierarchy(GrantedAuthority dominantGrant, Collection<String> desiredGrants, CallingContext cc) throws ODKDatastoreException {
 
     if (!GrantedAuthorityName.permissionsCanBeAssigned(dominantGrant.getAuthority())) {
       throw new IllegalArgumentException("Dominant grant must be permissions-assignable!");
@@ -254,7 +238,6 @@ public final class GrantedAuthorityHierarchyTable extends CommonFieldsBase {
     }
   }
 
-  // Only called from within the persistence layer.
   @Override
   public GrantedAuthorityHierarchyTable getEmptyRow(User user) {
     return new GrantedAuthorityHierarchyTable(this, user);

@@ -38,7 +38,7 @@ import org.opendatakit.common.security.User;
  */
 public abstract class DynamicBase extends DynamicCommonFieldsBase {
 
-  /* dynamic */
+  /** dynamic */
   public static final int ADDITIONAL_COLUMN_COUNT = 3 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
 
   /** key into the dynamic table that is our parent container */
@@ -52,12 +52,6 @@ public abstract class DynamicBase extends DynamicCommonFieldsBase {
   public final DataField ordinalNumber;
   public final DataField topLevelAuri;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   protected DynamicBase(String databaseSchema, String tableName) {
     super(databaseSchema, tableName);
     fieldList.add(parentAuri = new DataField(PARENT_AURI));
@@ -65,12 +59,6 @@ public abstract class DynamicBase extends DynamicCommonFieldsBase {
     fieldList.add(topLevelAuri = new DataField(TOP_LEVEL_AURI));
   }
 
-  /**
-   * Construct an empty entity.
-   *
-   * @param ref
-   * @param user
-   */
   protected DynamicBase(DynamicBase ref, User user) {
     super(ref, user);
     parentAuri = ref.parentAuri;

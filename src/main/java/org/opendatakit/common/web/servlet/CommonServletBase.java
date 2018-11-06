@@ -17,13 +17,10 @@
 
 package org.opendatakit.common.web.servlet;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,7 +30,6 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.constants.HtmlStrUtil;
-import org.slf4j.Logger;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
 /**
@@ -43,10 +39,6 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 public abstract class CommonServletBase extends HttpServlet {
   public static final String INSUFFIECENT_PARAMS = "Insuffiecent Parameters Received";
 
-  protected static final String LOGOUT = "Log off ";
-  protected static final String LOG_IN = "log in";
-  protected static final String PLEASE = "Please ";
-  protected static final String LOGIN_REQUIRED = "Login Required";
   protected static final String HOST_HEADER = "Host";
 
   private final String applicationName;
@@ -91,11 +83,6 @@ public abstract class CommonServletBase extends HttpServlet {
    * beginBasicHtmlResponse should be called first before adding other
    * information to the http response. When response is finished
    * finishBasicHtmlResponse should be called.
-   *
-   * @param pageName name that should appear on the top of the page
-   * @param resp     http response to have the information appended to
-   * @param req      request
-   * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, HttpServletResponse resp,
                                         CallingContext cc) throws IOException {
@@ -124,12 +111,6 @@ public abstract class CommonServletBase extends HttpServlet {
    * beginBasicHtmlResponse should be called first before adding other
    * information to the http response. When response is finished
    * finishBasicHtmlResponse should be called.
-   *
-   * @param pageName    name that should appear on the top of the page
-   * @param headContent additional head content emitted before title
-   * @param resp        http response to have the information appended to
-   * @param req         request
-   * @throws IOException
    */
   protected void beginBasicHtmlResponse(String pageName, String headContent, HttpServletResponse resp,
                                         CallingContext cc) throws IOException {
@@ -141,9 +122,6 @@ public abstract class CommonServletBase extends HttpServlet {
 
   /**
    * Generate HTML footer string for web responses
-   *
-   * @param resp http response to have the information appended to
-   * @throws IOException
    */
   protected final void finishBasicHtmlResponse(HttpServletResponse resp) throws IOException {
     resp.getWriter().write(HtmlConsts.BODY_CLOSE + HtmlConsts.HTML_CLOSE);
@@ -151,10 +129,6 @@ public abstract class CommonServletBase extends HttpServlet {
 
   /**
    * Generate error response for missing parameters in request
-   *
-   * @param resp The HTTP response to be sent to client
-   * @throws IOException caused by problems writing error information to
-   *                     response
    */
   protected final void sendErrorNotEnoughParams(HttpServletResponse resp) throws IOException {
     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, INSUFFIECENT_PARAMS);
@@ -163,11 +137,6 @@ public abstract class CommonServletBase extends HttpServlet {
   /**
    * Extract the parameter from HTTP request and return the decoded value.
    * Returns null if parameter not present
-   *
-   * @param req           HTTP request that contains the parameter
-   * @param parameterName the name of the parameter to be retrieved
-   * @return Parameter's decoded value or null if not found
-   * @throws UnsupportedEncodingException
    */
   protected final String getParameter(HttpServletRequest req, String parameterName) {
     String parameter = req.getParameter(parameterName);

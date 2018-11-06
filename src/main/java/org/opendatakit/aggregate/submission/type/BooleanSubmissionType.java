@@ -35,7 +35,6 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
   /**
    * Constructor
    *
-   * @param propertyName Name of submission element
    */
   public BooleanSubmissionType(DynamicCommonFieldsBase backingObject,
                                FormElementModel element) {

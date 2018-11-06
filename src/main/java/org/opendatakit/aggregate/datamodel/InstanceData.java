@@ -62,27 +62,14 @@ import org.opendatakit.common.security.User;
  */
 public final class InstanceData extends DynamicBase {
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   public InstanceData(String databaseSchema, String tableName) {
     super(databaseSchema, tableName);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private InstanceData(InstanceData ref, User user) {
     super(ref, user);
   }
 
-  // Only called from within the persistence layer.
   @Override
   public InstanceData getEmptyRow(User user) {
     return new InstanceData(this, user);

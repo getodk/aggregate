@@ -57,12 +57,6 @@ public final class BinaryContent extends DynamicBase {
   public final DataField contentLength;
   public final DataField contentHash;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   public BinaryContent(String databaseSchema, String tableName) {
     super(databaseSchema, tableName);
     fieldList.add(unrootedFilePath = new DataField(UNROOTED_FILE_PATH));
@@ -70,13 +64,6 @@ public final class BinaryContent extends DynamicBase {
     fieldList.add(contentLength = new DataField(CONTENT_LENGTH));
     fieldList.add(contentHash = new DataField(CONTENT_HASH));
   }
-
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private BinaryContent(BinaryContent ref, User user) {
     super(ref, user);
     unrootedFilePath = ref.unrootedFilePath;

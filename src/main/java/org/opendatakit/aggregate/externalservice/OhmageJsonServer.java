@@ -20,7 +20,6 @@ package org.opendatakit.aggregate.externalservice;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -45,8 +43,6 @@ import org.opendatakit.aggregate.format.header.BasicHeaderFormatter;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
@@ -62,43 +58,32 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
   static {
     GsonBuilder builder = new GsonBuilder();
     builder.registerTypeAdapter(OhmageJsonTypes.Survey.class, new OhmageJsonTypes.Survey());
-    builder.registerTypeAdapter(OhmageJsonTypes.RepeatableSet.class,
-        new OhmageJsonTypes.RepeatableSet());
+    builder.registerTypeAdapter(OhmageJsonTypes.RepeatableSet.class, new OhmageJsonTypes.RepeatableSet());
     builder.serializeNulls();
     builder.setPrettyPrinting();
     gson = builder.create();
   }
 
-  /**
-   * Datastore entity specific to this type of external service
-   */
   private final OhmageJsonServer2ParameterTable objectEntity;
 
-  private OhmageJsonServer(OhmageJsonServer2ParameterTable entity,
-                           FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
+  private OhmageJsonServer(OhmageJsonServer2ParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
     super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
 
-  private OhmageJsonServer(OhmageJsonServer2ParameterTable entity, IForm form,
-                           ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
-      throws ODKDatastoreException {
+  private OhmageJsonServer(OhmageJsonServer2ParameterTable entity, IForm form, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException {
     this(entity, createFormServiceCursor(form, entity, externalServiceOption,
         ExternalServiceType.OHMAGE_JSON_SERVER, cc), form, cc);
     objectEntity.setOwnerEmail(ownerEmail);
   }
 
-  public OhmageJsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
-      throws ODKDatastoreException {
+  public OhmageJsonServer(FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKDatastoreException {
     this(retrieveEntity(OhmageJsonServer2ParameterTable.assertRelation(cc), formServiceCursor, cc),
         formServiceCursor, form, cc);
   }
 
-  public OhmageJsonServer(IForm form, String campaignUrn, String campaignTimestamp, String user,
-                          String hashedPassword, String serverURL,
-                          ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
-      throws ODKDatastoreException {
+  public OhmageJsonServer(IForm form, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String serverURL, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException {
     this(newEntity(OhmageJsonServer2ParameterTable.assertRelation(cc), cc), form,
         externalServiceOption, ownerEmail, cc);
 
@@ -113,8 +98,7 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
   }
 
   @Override
-  public void initiate(CallingContext cc) throws
-      ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
+  public void initiate(CallingContext cc) throws ODKDatastoreException {
     fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
 
@@ -146,16 +130,7 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
     return objectEntity.getOhmageHashedPassword();
   }
 
-  /**
-   * Uploads a set of submissions to the ohmage system.
-   *
-   * @throws IOException
-   * @throws ClientProtocolException
-   * @throws ODKExternalServiceException
-   * @throws URISyntaxException
-   */
-  public void uploadSurveys(List<OhmageJsonTypes.Survey> surveys, Map<UUID, ByteArrayBody> photos,
-                            CallingContext cc) throws ClientProtocolException, IOException, ODKExternalServiceException {
+  public void uploadSurveys(List<OhmageJsonTypes.Survey> surveys, Map<UUID, ByteArrayBody> photos, CallingContext cc) throws IOException, ODKExternalServiceException {
 
 
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -203,9 +178,6 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
     }
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof OhmageJsonServer)) {
@@ -218,8 +190,7 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
   }
 
   @Override
-  protected void insertData(Submission submission, CallingContext cc)
-      throws ODKExternalServiceException {
+  protected void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException {
     try {
       OhmageJsonTypes.Survey survey = new OhmageJsonTypes.Survey();
       // TODO: figure out these values

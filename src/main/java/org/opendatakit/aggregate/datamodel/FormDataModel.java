@@ -111,8 +111,6 @@ public final class FormDataModel extends CommonFieldsBase {
    * {@link #assertRelation(CallingContext)}
    *
    * Note that the backing relation is not created by this constructor.
-   *
-   * @param schemaName
    */
   FormDataModel(String schemaName) {
     super(schemaName, TABLE_NAME);
@@ -129,9 +127,6 @@ public final class FormDataModel extends CommonFieldsBase {
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
    *
    * Note that the backing relation is not created by this constructor.
-   *
-   * @param ref
-   * @param user
    */
   private FormDataModel(FormDataModel ref, User user) {
     super(ref, user);
@@ -144,9 +139,6 @@ public final class FormDataModel extends CommonFieldsBase {
    *
    * This predicate function is used to determine if a parent FormDataModel is
    * divided across multiple data tables.
-   *
-   * @param t
-   * @return
    */
   public static boolean isFieldStoredWithinDataTable(ElementType t) {
     switch (t) {
@@ -282,8 +274,6 @@ public final class FormDataModel extends CommonFieldsBase {
    * or top-level group name is not part of the constructed qualified name.
    * <p>
    * For many uses, the SubmissionKey is likely more appropriate.
-   *
-   * @return the colon-separated qualified name for this element.
    */
   public final String getGroupQualifiedElementName() {
     return getGroupQualifiedElementNameCommon(false);
@@ -482,7 +472,6 @@ public final class FormDataModel extends CommonFieldsBase {
     }
   }
 
-  /* xform element types */
   public static enum ElementType {
     // xform tag types
     STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
@@ -500,9 +489,6 @@ public final class FormDataModel extends CommonFieldsBase {
   /**
    * Class wrapping the persisted object name. Used when dealing with backing
    * object maps.
-   *
-   * @author mitchellsundt@gmail.com
-   *
    */
   public final class DDRelationName {
 

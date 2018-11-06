@@ -44,10 +44,6 @@ public class DeleteHelper {
    * of the keys in the supplied list (the supplied list is easier to construct
    * in retrieval order, and we generally want to delete using a
    * reverse-retrieval order).
-   *
-   * @param keys
-   * @param cc
-   * @throws ODKDatastoreException
    */
   public static void deleteEntities(List<EntityKey> keys, CallingContext cc)
       throws ODKDatastoreException {

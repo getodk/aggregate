@@ -21,33 +21,20 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class GoogleSpreadsheet2ParameterTable extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_google_spreadsheet_2";
 
-  private static final DataField SPREADSHEET_NAME_PROPERTY = new DataField(
-      "SPREADSHEET_NAME", DataField.DataType.STRING, true, 4096L);
-  private static final DataField SPREADSHEET_KEY_PROPERTY = new DataField(
-      "SPREADSHEET_KEY", DataField.DataType.STRING, true, 4096L);
-  private static final DataField TOP_LEVEL_WORKSHEET_ID_PROPERTY = new DataField(
-      "TOP_LEVEL_WORKSHEET_ID", DataField.DataType.STRING, true, 4096L);
-  private static final DataField OWNER_EMAIL_PROPERTY = new DataField(
-      "OWNER_EMAIL", DataField.DataType.STRING, true, 4096L);
-  private static final DataField READY_PROPERTY = new DataField("READY",
-      DataField.DataType.BOOLEAN, true);
+  private static final DataField SPREADSHEET_NAME_PROPERTY = new DataField("SPREADSHEET_NAME", DataField.DataType.STRING, true, 4096L);
+  private static final DataField SPREADSHEET_KEY_PROPERTY = new DataField("SPREADSHEET_KEY", DataField.DataType.STRING, true, 4096L);
+  private static final DataField TOP_LEVEL_WORKSHEET_ID_PROPERTY = new DataField("TOP_LEVEL_WORKSHEET_ID", DataField.DataType.STRING, true, 4096L);
+  private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL", DataField.DataType.STRING, true, 4096L);
+  private static final DataField READY_PROPERTY = new DataField("READY", DataField.DataType.BOOLEAN, true);
   private static GoogleSpreadsheet2ParameterTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   GoogleSpreadsheet2ParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(SPREADSHEET_NAME_PROPERTY);
@@ -57,18 +44,11 @@ public final class GoogleSpreadsheet2ParameterTable extends CommonFieldsBase {
     fieldList.add(READY_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private GoogleSpreadsheet2ParameterTable(GoogleSpreadsheet2ParameterTable ref, User user) {
     super(ref, user);
   }
 
-  public static synchronized final GoogleSpreadsheet2ParameterTable assertRelation(
-      CallingContext cc) throws ODKDatastoreException {
+  public static synchronized final GoogleSpreadsheet2ParameterTable assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       GoogleSpreadsheet2ParameterTable relationPrototype;
       Datastore ds = cc.getDatastore();

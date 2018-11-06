@@ -32,13 +32,9 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
  */
 public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializable {
 
-  /**
-   *
-   */
   private static final long serialVersionUID = 758102181896882604L;
   private static final String UID_PREFIX = "uid:";
 
-  ;
   String username; // null if email is non-null
   String fullname; // tie-back to whatever the site admin wants to know.
   String email; // null if username is non-null
@@ -59,15 +55,6 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
     }
   }
 
-  /**
-   * Simple converter of user's primary key to a display name.
-   * The actual user record at the time of the storage is identified by the
-   * uriUser.  The user's display name is encoded in that as well as a
-   * creation timestamp.
-   *
-   * @param uriUser
-   * @return
-   */
   public static final String getDisplayName(String uriUser) {
     String displayName;
     if (uriUser.startsWith(EmailParser.K_MAILTO)) {

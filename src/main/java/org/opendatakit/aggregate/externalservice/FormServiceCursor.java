@@ -43,53 +43,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class FormServiceCursor extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_form_service_cursor_2";
 
-  private static final DataField URI_MD5_FORM_ID_PROPERTY = new DataField("URI_MD5_FORM_ID",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  private static final DataField AURI_SERVICE_PROPERTY = new DataField("AURI_SERVICE",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField URI_MD5_FORM_ID_PROPERTY = new DataField("URI_MD5_FORM_ID", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField AURI_SERVICE_PROPERTY = new DataField("AURI_SERVICE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
 
-  private static final DataField EXT_SERVICE_TYPE_PROPERTY = new DataField("EXT_SERVICE_TYPE",
-      DataField.DataType.STRING, false, 200L);
-  private static final DataField EXTERNAL_SERVICE_OPTION = new DataField("EXTERNAL_SERVICE_OPTION",
-      DataField.DataType.STRING, false, 80L);
+  private static final DataField EXT_SERVICE_TYPE_PROPERTY = new DataField("EXT_SERVICE_TYPE", DataField.DataType.STRING, false, 200L);
+  private static final DataField EXTERNAL_SERVICE_OPTION = new DataField("EXTERNAL_SERVICE_OPTION", DataField.DataType.STRING, false, 80L);
   // some external services need to be prepared before they can receive data...
-  private static final DataField IS_EXTERNAL_SERVICE_PREPARED = new DataField("IS_EXTERNAL_SERVICE_PREPARED",
-      DataField.DataType.BOOLEAN, true);
-  private static final DataField OPERATIONAL_STATUS = new DataField("OPERATIONAL_STATUS",
-      DataField.DataType.STRING, true, 80L);
-  private static final DataField RETRY_STATUS = new DataField("RETRY_STATUS",
-      DataField.DataType.STRING, true, 80L);
-  private static final DataField ESTABLISHMENT_DATETIME = new DataField("ESTABLISHMENT_DATETIME",
-      DataField.DataType.DATETIME, false);
-  private static final DataField UPLOAD_COMPLETED_PROPERTY = new DataField("UPLOAD_COMPLETED",
-      DataField.DataType.BOOLEAN, true);
-  private static final DataField LAST_UPLOAD_CURSOR_DATE_PROPERTY = new DataField(
-      "LAST_UPLOAD_PERSISTENCE_CURSOR", DataField.DataType.DATETIME, true);
-  private static final DataField LAST_UPLOAD_KEY_PROPERTY = new DataField("LAST_UPLOAD_KEY",
-      DataField.DataType.STRING, true, 4096L);
-  private static final DataField LAST_STREAMING_CURSOR_DATE_PROPERTY = new DataField(
-      "LAST_STREAMING_PERSISTENCE_CURSOR", DataField.DataType.DATETIME, true);
-  private static final DataField LAST_STREAMING_KEY_PROPERTY = new DataField("LAST_STREAMING_KEY",
-      DataField.DataType.STRING, true, 4096L);
-  private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID",
-      DataField.DataType.STRING, true, 4096L);
+  private static final DataField IS_EXTERNAL_SERVICE_PREPARED = new DataField("IS_EXTERNAL_SERVICE_PREPARED", DataField.DataType.BOOLEAN, true);
+  private static final DataField OPERATIONAL_STATUS = new DataField("OPERATIONAL_STATUS", DataField.DataType.STRING, true, 80L);
+  private static final DataField RETRY_STATUS = new DataField("RETRY_STATUS", DataField.DataType.STRING, true, 80L);
+  private static final DataField ESTABLISHMENT_DATETIME = new DataField("ESTABLISHMENT_DATETIME", DataField.DataType.DATETIME, false);
+  private static final DataField UPLOAD_COMPLETED_PROPERTY = new DataField("UPLOAD_COMPLETED", DataField.DataType.BOOLEAN, true);
+  private static final DataField LAST_UPLOAD_CURSOR_DATE_PROPERTY = new DataField("LAST_UPLOAD_PERSISTENCE_CURSOR", DataField.DataType.DATETIME, true);
+  private static final DataField LAST_UPLOAD_KEY_PROPERTY = new DataField("LAST_UPLOAD_KEY", DataField.DataType.STRING, true, 4096L);
+  private static final DataField LAST_STREAMING_CURSOR_DATE_PROPERTY = new DataField("LAST_STREAMING_PERSISTENCE_CURSOR", DataField.DataType.DATETIME, true);
+  private static final DataField LAST_STREAMING_KEY_PROPERTY = new DataField("LAST_STREAMING_KEY", DataField.DataType.STRING, true, 4096L);
+  private static final DataField FORM_ID_PROPERTY = new DataField("FORM_ID", DataField.DataType.STRING, true, 4096L);
   private static FormServiceCursor relation = null;
 
-  /**
-   * Construct a relation prototype.  Only called via {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   private FormServiceCursor(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(URI_MD5_FORM_ID_PROPERTY);
@@ -108,18 +86,11 @@ public final class FormServiceCursor extends CommonFieldsBase {
     fieldList.add(FORM_ID_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private FormServiceCursor(FormServiceCursor ref, User user) {
     super(ref, user);
   }
 
-  private static synchronized final FormServiceCursor assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  private static synchronized final FormServiceCursor assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       FormServiceCursor relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -132,9 +103,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return relation;
   }
 
-  public static final FormServiceCursor createFormServiceCursor(IForm form,
-                                                                ExternalServiceType type, CommonFieldsBase service, CallingContext cc)
-      throws ODKDatastoreException {
+  public static final FormServiceCursor createFormServiceCursor(IForm form, ExternalServiceType type, CommonFieldsBase service, CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
 
     FormServiceCursor c = cc.getDatastore().createEntityUsingRelation(relation, cc.getCurrentUser());
@@ -154,11 +123,6 @@ public final class FormServiceCursor extends CommonFieldsBase {
    * database while the underlying Publisher records
    * (e.g., FusionTable2ParameterTable, GoogleSpreadsheet2ParameterTable)
    * are deleted.
-   *
-   * @param service
-   * @param cc
-   * @return true if the deletion was successful
-   * @throws ODKDatastoreException
    */
   public static final boolean deleteExternalServiceTask(ExternalService service, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
@@ -198,8 +162,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return deleted;
   }
 
-  public static final List<ExternalService> getExternalServicesForForm(IForm form,
-                                                                       CallingContext cc) throws ODKDatastoreException {
+  public static final List<ExternalService> getExternalServicesForForm(IForm form, CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, "FormServiceCursor.getExternalServicesForForm[" + form.getFormId() + "]", cc.getCurrentUser());
     // filter on the Form's Uri. We cannot filter on the FORM_ID since it is a
@@ -221,7 +184,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return esList;
   }
 
-  public static final FormServiceCursor getFormServiceCursor(String uri, CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException, ODKDatastoreException {
+  public static final FormServiceCursor getFormServiceCursor(String uri, CallingContext cc) throws ODKDatastoreException {
     try {
       FormServiceCursor relation = assertRelation(cc);
       CommonFieldsBase entity = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
@@ -239,15 +202,8 @@ public final class FormServiceCursor extends CommonFieldsBase {
    * Retrieve the list of FormServiceCursor objects that have not been updated
    * more recently than the olderThanDate.  I.e., old ones that might need to
    * be kicked into action.
-   *
-   * @param olderThanDate
-   * @param cc
-   * @return
-   * @throws ODKEntityNotFoundException
-   * @throws ODKOverQuotaException
    */
-  public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate,
-                                                                             CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static final List<FormServiceCursor> queryFormServiceCursorRelation(Date olderThanDate, CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     List<FormServiceCursor> fscList = new ArrayList<FormServiceCursor>();
     try {
       FormServiceCursor relation = assertRelation(cc);
@@ -267,8 +223,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     return fscList;
   }
 
-  public static final ExternalService constructExternalService(FormServiceCursor fsc, IForm form,
-                                                               CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static final ExternalService constructExternalService(FormServiceCursor fsc, IForm form, CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     try {
       switch (fsc.getExternalServiceType()) {
         case GOOGLE_FUSIONTABLES:
@@ -299,25 +254,10 @@ public final class FormServiceCursor extends CommonFieldsBase {
     }
   }
 
-  // Only called from within the persistence layer.
   @Override
   public FormServiceCursor getEmptyRow(User user) {
     return new FormServiceCursor(this, user);
   }
-// TODO: implement failure after N retries (TBD)
-// RetryStatus is added to support that determination.
-//
-//  public String getRetryStatus() {
-//     String value = getStringField(RETRY_STATUS);
-//     if ( value == null ) return null;
-//     return value;
-//  }
-//
-//  public void setRetryStatus(String value) {
-//    if (!setStringField(RETRY_STATUS, value)) {
-//      throw new IllegalArgumentException("overflow retryStatus");
-//    }
-//  }
 
   public ExternalServiceType getExternalServiceType() {
     String type = getStringField(EXT_SERVICE_TYPE_PROPERTY);
@@ -438,7 +378,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
     }
   }
 
-  public ExternalService getExternalService(CallingContext cc) throws ODKEntityNotFoundException, ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
+  public ExternalService getExternalService(CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
     IForm form = FormFactory.retrieveFormByFormId(getFormId(), cc);
     return constructExternalService(this, form, cc);
   }

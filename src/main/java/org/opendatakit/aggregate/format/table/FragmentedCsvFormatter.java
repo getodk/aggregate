@@ -68,7 +68,6 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
   /**
    * Create the comma separated row with proper doubling of embedded quotes.
    *
-   * @param itr string values to be separated by commas
    * @return string containing comma separated values
    */
   private String generateCommaSeperatedElements(List<String> elements) {

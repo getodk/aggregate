@@ -70,7 +70,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
@@ -86,9 +85,6 @@ import org.opendatakit.aggregate.task.WorksheetCreator;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
@@ -110,8 +106,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   /**
    * Global instance of the JSON factory.
    */
-  private static final JsonFactory JSON_FACTORY =
-      JacksonFactory.getDefaultInstance();
+  private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static ObjectMapper mapper = new ObjectMapper();
   /**
    * Datastore entity specific to this type of external service
@@ -124,19 +119,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   private final Sheets spreadsheetService;
   private Map<String, SheetInfo> sheetInfoMap = null;
 
-  /**
-   * Common base constructor that initializes final values.
-   *
-   * @param form
-   * @param fpObject
-   * @param cc
-   * @throws ODKExternalServiceException
-   * @throws IOException
-   * @throws GeneralSecurityException
-   */
-
-  private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable gsObject,
-                            FormServiceCursor formServiceCursor, CallingContext cc) throws ODKExternalServiceException {
+  private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable gsObject, FormServiceCursor formServiceCursor, CallingContext cc) throws ODKExternalServiceException {
     super(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, form, formServiceCursor, new LinkElementFormatter(
             cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true, true),
         new GoogleSpreadsheetHeaderFormatter(true, true, true), cc);
@@ -156,17 +139,13 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     objectEntity = gsObject;
   }
 
-  private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable entity,
-                            ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
-      throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException {
+  private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable entity, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
     this(form, entity, createFormServiceCursor(form, entity, externalServiceOption,
         ExternalServiceType.GOOGLE_SPREADSHEET, cc), cc);
     objectEntity.setOwnerEmail(ownerEmail);
   }
 
-  public GoogleSpreadsheet(FormServiceCursor fsc, IForm form, CallingContext cc)
-      throws ODKEntityNotFoundException, ODKDatastoreException, ODKOverQuotaException,
-      ODKExternalServiceException {
+  public GoogleSpreadsheet(FormServiceCursor fsc, IForm form, CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
     this(form, retrieveEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), fsc, cc), fsc,
         cc);
 
@@ -175,10 +154,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
 
   }
 
-  public GoogleSpreadsheet(IForm form, String name,
-                           ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc)
-      throws ODKDatastoreException, ODKOverQuotaException, ODKExternalServiceException,
-      ODKEntityPersistException {
+  public GoogleSpreadsheet(IForm form, String name, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
     this(form, newEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), cc),
         externalServiceOption, ownerEmail, cc);
 
@@ -186,9 +162,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     persist(cc);
   }
 
-  protected String executeDriveStmt(String spreadsheetTitle, String spreadsheetDescription,
-                                    CallingContext cc) throws
-      IOException, ODKExternalServiceException {
+  protected String executeDriveStmt(String spreadsheetTitle, String spreadsheetDescription, CallingContext cc) throws IOException, ODKExternalServiceException {
 
     HashMap<String, String> requestBody = new HashMap<String, String>();
     requestBody.put("title", spreadsheetTitle);
@@ -275,8 +249,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     return objectEntity.getOwnerEmail().substring(EmailParser.K_MAILTO.length());
   }
 
-  private void sharePublishedFiles(String ownerEmail, CallingContext cc)
-      throws ODKExternalServiceException {
+  private void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException {
     executeDrivePermission(objectEntity.getSpreadsheetKey(), ownerEmail);
   }
 
@@ -294,8 +267,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     return objectEntity.getSpreadsheetName();
   }
 
-  public void generateWorksheets(CallingContext cc) throws ODKDatastoreException, IOException,
-      ODKExternalServiceException {
+  public void generateWorksheets(CallingContext cc) throws ODKDatastoreException, IOException, ODKExternalServiceException {
 
     // TODO: throw meaningful credentials-failure exception
     // TODO: throw meaningful credentials-failure exception
@@ -576,8 +548,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   }
 
   @Override
-  protected void insertData(Submission submission, CallingContext cc)
-      throws ODKExternalServiceException {
+  protected void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException {
     if (getReady()) {
       try {
         buildSheetInfoMap(cc);
@@ -632,18 +603,8 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   /**
    * Creates the request to append the data in the given submissionSet as a new entry (i.e. a new row)
    * in the given worksheet, including only the data specified by headers.
-   *
-   * @param submissionSet the set of data from a single submission
-   * @param sheetInfo     encapsulates information about the Sheet (worksheet) and the
-   *                      list of headers we are publishing into, and the mapping between the two.
-   * @param cc            the calling context
-   * @throws ODKDatastoreException if there was a problem in the datastore
-   * @throws IOException           if there was a problem communicating over the internet with the
-   *                               Google Spreadsheet
-   * @throws ServiceException      if there was a problem with the GData service
    */
-  private AppendCellsRequest createAppendCellsRequest(SubmissionSet submissionSet, SheetInfo sheetInfo,
-                                                      CallingContext cc) throws ODKDatastoreException {
+  private AppendCellsRequest createAppendCellsRequest(SubmissionSet submissionSet, SheetInfo sheetInfo, CallingContext cc) throws ODKDatastoreException {
 
     Row row = submissionSet.getFormattedValuesAsRow(null, formatter, true, cc);
     List<String> formattedValues = row.getFormattedValues();
@@ -715,9 +676,6 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     return acr;
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof GoogleSpreadsheet)) {

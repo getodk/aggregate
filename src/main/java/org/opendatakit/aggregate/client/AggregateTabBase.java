@@ -52,9 +52,6 @@ public class AggregateTabBase extends TabPanel {
 
   /**
    * register handler to manage tab selection change (and selecting our tab)
-   *
-   * @param tab
-   * @param baseUI
    */
   protected void registerClickHandlers(Tabs tab, AggregateUI baseUI) {
     baseUI.setSubMenuSelectionHandler(this, tab, subTabPosition.toArray(new SubTabs[subTabPosition.size()]));

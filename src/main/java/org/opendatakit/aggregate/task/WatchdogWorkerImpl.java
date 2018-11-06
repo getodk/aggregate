@@ -32,7 +32,6 @@ import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -59,21 +58,9 @@ import org.slf4j.LoggerFactory;
 public class WatchdogWorkerImpl {
 
   private Logger logger = LoggerFactory.getLogger(WatchdogWorkerImpl.class);
-  // accessed only by getLastSubmissionMetadata
   private Map<String, SubmissionMetadata> formSubmissionsMap = new HashMap<String, SubmissionMetadata>();
 
-  /**
-   * Determine and return the metadata for the last submission against this
-   * form. That metadata consists of the marked-as-complete date and uri of the
-   * submission. Used to determine whether to launch an upload task.
-   *
-   * @param form
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  private synchronized SubmissionMetadata getLastSubmissionMetadata(IForm form, CallingContext cc)
-      throws ODKDatastoreException {
+  private synchronized SubmissionMetadata getLastSubmissionMetadata(IForm form, CallingContext cc) throws ODKDatastoreException {
 
     // use cached value -- prevents excessive queries against the form tables
     // during Watchdog verification of streaming publishers.
@@ -108,8 +95,7 @@ public class WatchdogWorkerImpl {
     return null;
   }
 
-  public void checkTasks(CallingContext cc) throws ODKExternalServiceException,
-      ODKFormNotFoundException, ODKDatastoreException {
+  public void checkTasks(CallingContext cc) throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException {
     logger.info("---------------------BEGIN Watchdog");
     boolean cullThisWatchdog = false;
     boolean activeTasks = true;
@@ -144,8 +130,7 @@ public class WatchdogWorkerImpl {
     }
   }
 
-  private boolean checkFormServiceCursors(UploadSubmissions uploadSubmissions, CallingContext cc)
-      throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException {
+  private boolean checkFormServiceCursors(UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException {
 
     Date olderThanDate = new Date(System.currentTimeMillis()
         - BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
@@ -234,8 +219,7 @@ public class WatchdogWorkerImpl {
     return activeTasks;
   }
 
-  private boolean checkUpload(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
-                              CallingContext cc) throws ODKExternalServiceException {
+  private boolean checkUpload(FormServiceCursor fsc, UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKExternalServiceException {
     logger.info("Checking upload for " + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
     boolean activeTask = false;
     if (!fsc.getUploadCompleted()) {
@@ -251,24 +235,7 @@ public class WatchdogWorkerImpl {
     return activeTask;
   }
 
-  /**
-   * Determine whether the form has recently-completed submissions that have not
-   * yet been published. Use a cache of SubmissionMetadata to minimize queries
-   * against the database in the case where there are many publishers for a
-   * given table.
-   *
-   * @param fsc
-   * @param uploadSubmissions
-   * @param cc
-   * @return
-   * @throws ODKFormNotFoundException
-   * @throws ODKDatastoreException
-   * @throws ODKExternalServiceException
-   * @throws ODKIncompleteSubmissionData
-   */
-  private boolean checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
-                                 CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException,
-      ODKExternalServiceException {
+  private boolean checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException, ODKExternalServiceException {
     logger.info("Checking streaming for " + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
     // get the last submission sent to the external service
     IForm form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);
@@ -315,9 +282,7 @@ public class WatchdogWorkerImpl {
     return BackendActionsTable.mayHaveRecentPublisherRevision(fsc.getUri(), cc);
   }
 
-  private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator,
-                                         JsonFileGenerator jsonGenerator, CallingContext cc) throws ODKDatastoreException,
-      ODKFormNotFoundException {
+  private boolean checkPersistentResults(CsvGenerator csvGenerator, KmlGenerator kmlGenerator, JsonFileGenerator jsonGenerator, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
     try {
       logger.info("Checking all persistent results");
       boolean activeTasks = false;
@@ -357,9 +322,7 @@ public class WatchdogWorkerImpl {
     }
   }
 
-  private boolean checkMiscTasks(WorksheetCreator wsCreator, FormDelete formDelete,
-                                 PurgeOlderSubmissions purgeSubmissions, CallingContext cc) throws ODKDatastoreException,
-      ODKFormNotFoundException {
+  private boolean checkMiscTasks(WorksheetCreator wsCreator, FormDelete formDelete, PurgeOlderSubmissions purgeSubmissions, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
     try {
       logger.info("Checking miscellaneous tasks");
       boolean activeTasks = false;
