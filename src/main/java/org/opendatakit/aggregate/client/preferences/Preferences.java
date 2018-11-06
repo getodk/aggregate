@@ -31,8 +31,6 @@ public class Preferences {
   private static String googleApiClientId;
   private static String enketoApiUrl;
   private static String enketoApiToken;
-  private static Boolean odkTablesEnabled;
-  private static String appName;
   private static Boolean fasterBackgroundActionsDisabled;
   private static Boolean skipMalformedSubmissions;
   private static int nesting = 0;
@@ -63,7 +61,6 @@ public class Preferences {
       googleApiClientId = summary.getGoogleApiClientId();
       enketoApiUrl = summary.getEnketoApiUrl();
       enketoApiToken = summary.getEnketoApiToken();
-      appName = summary.getAppName();
       fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
       skipMalformedSubmissions = summary.getSkipMalformedSubmissions();
 
@@ -76,8 +73,6 @@ public class Preferences {
           uc.refreshFromUpdatedPreferences();
         }
       }
-
-      AggregateUI.getUI().updateOdkTablesFeatureVisibility();
     }
   };
 
@@ -123,20 +118,6 @@ public class Preferences {
       return enketoApiToken;
     }
     return "";
-  }
-
-  public static Boolean getOdkTablesEnabled() {
-    if (odkTablesEnabled != null) {
-      return odkTablesEnabled;
-    }
-    return Boolean.FALSE;
-  }
-
-  public static String getAppName() {
-    if (appName != null && appName.length() != 0) {
-      return appName;
-    }
-    return "default";
   }
 
   public static Boolean getFasterBackgroundActionsDisabled() {

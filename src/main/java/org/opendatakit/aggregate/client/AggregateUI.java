@@ -65,7 +65,6 @@ public class AggregateUI implements EntryPoint {
   // session variables for tab visibility
   private static boolean manageVisible = false;
   private static boolean adminVisible = false;
-  private static boolean odkTablesVisible = false;
   private UrlHash hash;
   private Label notSecureMsgLabel;
   private FlowPanel notSecurePanel;
@@ -320,51 +319,6 @@ public class AggregateUI implements EntryPoint {
         });
   }
 
-  public void updateOdkTablesFeatureVisibility() {
-    if (authorizedForTab(Tabs.ODKTABLES)) {
-      odkTablesVisible = Preferences.getOdkTablesEnabled();
-      AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
-      if (odkTables != null) {
-        odkTables.setVisible(odkTablesVisible);
-      }
-      for (int i = 0; i < mainNav.getWidgetCount(); i++) {
-        Widget w = mainNav.getWidget(i);
-      }
-
-      if (authorizedForTab(Tabs.ADMIN)) {
-        AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
-        if (AminTab != null && AminTab instanceof AdminTabUI) {
-          AdminTabUI adminTab = (AdminTabUI) AminTab;
-          if (odkTablesVisible) {
-            adminTab.displayOdkTablesSubTab();
-          } else {
-            adminTab.hideOdkTablesSubTab();
-          }
-        } else {
-          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
-        }
-      }
-    } else {
-      AggregateTabBase odkTables = getTab(Tabs.ODKTABLES);
-      if (odkTables != null) {
-        odkTables.setVisible(false);
-      }
-      for (int i = 0; i < mainNav.getWidgetCount(); i++) {
-        Widget w = mainNav.getWidget(i);
-      }
-
-      if (authorizedForTab(Tabs.ADMIN)) {
-        AggregateTabBase AminTab = AggregateUI.getUI().getTab(Tabs.ADMIN);
-        if (AminTab != null && AminTab instanceof AdminTabUI) {
-          AdminTabUI adminTab = (AdminTabUI) AminTab;
-          adminTab.hideOdkTablesSubTab();
-        } else {
-          AggregateUI.getUI().reportError(new Throwable("ERROR: SOME HOW CAN'T FIND ADMIN TAB"));
-        }
-      }
-    }
-  }
-
   private void commonUserInfoUpdateCompleteAction() {
     settingsBar.update();
 
@@ -406,8 +360,6 @@ public class AggregateUI implements EntryPoint {
       mainNav.selectTab(selected);
 
     }
-
-    updateOdkTablesFeatureVisibility();
 
     // AND schedule an async operation to
     // refresh the tabs that are not selected.
@@ -556,10 +508,6 @@ public class AggregateUI implements EntryPoint {
         return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER);
       case ADMIN:
         return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN);
-      case ODKTABLES:
-        return userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES) ||
-            userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SUPER_USER_TABLES) ||
-            userInfo.getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_ADMINISTER_TABLES);
       default:
         return false;
     }

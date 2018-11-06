@@ -57,61 +57,27 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  */
 public class SecurityServiceUtil {
 
-  public static final GrantedAuthority siteAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.GROUP_SITE_ADMINS.name());
+  public static final GrantedAuthority siteAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_SITE_ADMINS.name());
   public static final List<String> siteAdministratorGrants;
-  public static final GrantedAuthority dataOwnerAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.GROUP_FORM_MANAGERS.name());
+  public static final GrantedAuthority dataOwnerAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_FORM_MANAGERS.name());
   public static final List<String> dataOwnerGrants;
-  public static final GrantedAuthority administerTablesAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.GROUP_ADMINISTER_TABLES.name());
-  public static final List<String> administerTablesGrants;
-  public static final GrantedAuthority superUserTablesAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.GROUP_SUPER_USER_TABLES.name());
-  public static final List<String> superUserTablesGrants;
-  public static final GrantedAuthority synchronizeTablesAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
-  public static final List<String> synchronizeTablesGrants;
-  public static final GrantedAuthority dataViewerAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
+  public static final GrantedAuthority dataViewerAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
   public static final List<String> dataViewerGrants;
-  public static final GrantedAuthority dataCollectorAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.GROUP_DATA_COLLECTORS.name());
+  public static final GrantedAuthority dataCollectorAuth = new SimpleGrantedAuthority(GrantedAuthorityName.GROUP_DATA_COLLECTORS.name());
   public static final List<String> dataCollectorGrants;
-  public static final GrantedAuthority anonAuth = new SimpleGrantedAuthority(
-      GrantedAuthorityName.USER_IS_ANONYMOUS.name());
+  public static final GrantedAuthority anonAuth = new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_ANONYMOUS.name());
   // special grants for Google Earth work-around
   public static final List<String> anonAttachmentViewerGrants;
-  public static final Set<GrantedAuthority> tablesExclusions;
   private static final Set<String> specialNames = new HashSet<String>();
 
   static {
     List<String> isiteAdministratorGrants = new ArrayList<String>();
     isiteAdministratorGrants.add(GrantedAuthorityName.ROLE_USER.name());
     isiteAdministratorGrants.add(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.name());
-    isiteAdministratorGrants.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES.name());
-    isiteAdministratorGrants.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
     isiteAdministratorGrants.add(GrantedAuthorityName.GROUP_FORM_MANAGERS.name());
     isiteAdministratorGrants.add(GrantedAuthorityName.GROUP_DATA_VIEWERS.name());
     siteAdministratorGrants = Collections.unmodifiableList(isiteAdministratorGrants);
 
-    List<String> iadministerTablesGrants = new ArrayList<String>();
-    iadministerTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
-    iadministerTablesGrants.add(GrantedAuthorityName.ROLE_ADMINISTER_TABLES.name());
-    iadministerTablesGrants.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES.name());
-    administerTablesGrants = Collections.unmodifiableList(iadministerTablesGrants);
-
-
-    List<String> isuperUserTablesGrants = new ArrayList<String>();
-    isuperUserTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
-    isuperUserTablesGrants.add(GrantedAuthorityName.ROLE_SUPER_USER_TABLES.name());
-    isuperUserTablesGrants.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.name());
-    superUserTablesGrants = Collections.unmodifiableList(isuperUserTablesGrants);
-
-    List<String> isynchronizeTablesGrants = new ArrayList<String>();
-    isynchronizeTablesGrants.add(GrantedAuthorityName.ROLE_USER.name());
-    isynchronizeTablesGrants.add(GrantedAuthorityName.ROLE_SYNCHRONIZE_TABLES.name());
-    synchronizeTablesGrants = Collections.unmodifiableList(isynchronizeTablesGrants);
 
     List<String> idataOwnerGrants = new ArrayList<String>();
     idataOwnerGrants.add(GrantedAuthorityName.ROLE_USER.name());
@@ -132,20 +98,6 @@ public class SecurityServiceUtil {
     List<String> ianonAttachmentViewerGrants = new ArrayList<String>();
     ianonAttachmentViewerGrants.add(GrantedAuthorityName.ROLE_ATTACHMENT_VIEWER.name());
     anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
-
-    // after we complete the set of roles and groups, exclude these from ODK Tables REST APIs
-    Set<GrantedAuthority> odkTablesExclusions = new HashSet<GrantedAuthority>();
-    odkTablesExclusions.add(siteAuth);
-    odkTablesExclusions.add(administerTablesAuth);
-    odkTablesExclusions.add(superUserTablesAuth);
-    odkTablesExclusions.add(synchronizeTablesAuth);
-    odkTablesExclusions.add(new SimpleGrantedAuthority(
-        GrantedAuthorityName.ROLE_DATA_OWNER.name()));
-    odkTablesExclusions.add(new SimpleGrantedAuthority(
-        GrantedAuthorityName.ROLE_DATA_VIEWER.name()));
-    odkTablesExclusions.add(new SimpleGrantedAuthority(
-        GrantedAuthorityName.ROLE_DATA_COLLECTOR.name()));
-    tablesExclusions = Collections.unmodifiableSet(odkTablesExclusions);
   }
 
   private static final ArrayList<String> processRoles(Set<GrantedAuthority> grants) {
@@ -575,9 +527,7 @@ public class SecurityServiceUtil {
             // those all give access to the full set of users on the system
             // and giving that information to Anonymous is a security
             // risk.
-            if (GrantedAuthorityName.GROUP_SITE_ADMINS.equals(a) ||
-                GrantedAuthorityName.GROUP_ADMINISTER_TABLES.equals(a) ||
-                GrantedAuthorityName.GROUP_SUPER_USER_TABLES.equals(a)) {
+            if (GrantedAuthorityName.GROUP_SITE_ADMINS.equals(a)) {
               continue;
             }
             anonGrantStrings.add(a.name());
@@ -688,12 +638,6 @@ public class SecurityServiceUtil {
       // this is generally a no-op during normal operations.
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(siteAuth,
           SecurityServiceUtil.siteAdministratorGrants, cc);
-      GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(administerTablesAuth,
-          SecurityServiceUtil.administerTablesGrants, cc);
-      GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(superUserTablesAuth,
-          SecurityServiceUtil.superUserTablesGrants, cc);
-      GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(synchronizeTablesAuth,
-          SecurityServiceUtil.synchronizeTablesGrants, cc);
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataOwnerAuth,
           SecurityServiceUtil.dataOwnerGrants, cc);
       GrantedAuthorityHierarchyTable.assertGrantedAuthorityHierarchy(dataViewerAuth,
@@ -710,9 +654,6 @@ public class SecurityServiceUtil {
           .getAllPermissionsAssignableGrantedAuthorities(cc.getDatastore(), cc.getCurrentUser());
       // remove the groups that have structure (i.e., those defined above).
       authorities.remove(siteAuth.getAuthority());
-      authorities.remove(administerTablesAuth.getAuthority());
-      authorities.remove(superUserTablesAuth.getAuthority());
-      authorities.remove(synchronizeTablesAuth.getAuthority());
       authorities.remove(dataOwnerAuth.getAuthority());
       authorities.remove(dataViewerAuth.getAuthority());
       authorities.remove(dataCollectorAuth.getAuthority());
@@ -734,9 +675,6 @@ public class SecurityServiceUtil {
       // now, for each GROUP_..., update the user granted authority
       // table with the users that have that GROUP_... assignment.
       setUsersOfGrantedAuthority(pkMap, siteAuth, cc);
-      setUsersOfGrantedAuthority(pkMap, administerTablesAuth, cc);
-      setUsersOfGrantedAuthority(pkMap, superUserTablesAuth, cc);
-      setUsersOfGrantedAuthority(pkMap, synchronizeTablesAuth, cc);
       setUsersOfGrantedAuthority(pkMap, dataOwnerAuth, cc);
       setUsersOfGrantedAuthority(pkMap, dataViewerAuth, cc);
       setUsersOfGrantedAuthority(pkMap, dataCollectorAuth, cc);

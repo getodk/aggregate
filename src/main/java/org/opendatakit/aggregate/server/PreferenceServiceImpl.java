@@ -59,46 +59,6 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    try {
-      ServerPreferencesProperties.setOdkTablesEnabled(cc, enabled);
-
-      log.info("setOdkTablesEnabled as: " + Boolean.toString(enabled));
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(e);
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    }
-
-  }
-
-  @Override
-  public void setOdkAppName(String appName) throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    try {
-      ServerPreferencesProperties.setOdkTablesAppId(cc, appName);
-
-      log.info("setOdkAppName as: " + appName);
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(e);
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    }
-
-  }
-
-  @Override
   public void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException,
       RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();

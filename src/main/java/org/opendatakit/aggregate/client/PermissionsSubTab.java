@@ -46,12 +46,6 @@ public class PermissionsSubTab extends AggregateSubTabBase {
     return true;
   }
 
-  public void changeTablesPrivilegesVisibility(boolean visible) {
-    if (accessConfig != null) {
-      accessConfig.changeTablesPrivilegesVisibility(visible);
-    }
-  }
-
   @Override
   public void update() {
 

@@ -123,9 +123,6 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
       columnContent[3] = grants.contains(GrantedAuthorityName.GROUP_DATA_COLLECTORS) ? "X" : null;
       columnContent[4] = grants.contains(GrantedAuthorityName.GROUP_DATA_VIEWERS) ? "X" : null;
       columnContent[5] = grants.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS) ? "X" : null;
-      columnContent[6] = grants.contains(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES) ? "X" : null;
-      columnContent[7] = grants.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES) ? "X" : null;
-      columnContent[8] = grants.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES) ? "X" : null;
       columnContent[9] = grants.contains(GrantedAuthorityName.GROUP_SITE_ADMINS) ? "X" : null;
       writer.writeNext(columnContent);
     }

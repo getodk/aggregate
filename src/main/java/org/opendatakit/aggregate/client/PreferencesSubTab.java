@@ -25,7 +25,6 @@ import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
 import org.opendatakit.aggregate.client.widgets.DisableFasterBackgroundActionsCheckbox;
-import org.opendatakit.aggregate.client.widgets.EnableOdkTablesCheckbox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.SkipMalformedSubmissionsCheckbox;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
@@ -78,7 +77,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   private Label enketoApiUrl;
   private Label enketoApiToken;
-  private EnableOdkTablesCheckbox odkTablesEnable;
   private Label appName;
   private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
   private SkipMalformedSubmissionsCheckbox skipMalformedSubmissions;
@@ -89,8 +87,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
       setCredentialValues();
       disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
       skipMalformedSubmissions.updateValue(Preferences.getSkipMalformedSubmissions());
-      odkTablesEnable.updateValue(Preferences.getOdkTablesEnabled());
-      appName.setText(Preferences.getAppName());
+      appName.setText("default");
     }
 
     @Override

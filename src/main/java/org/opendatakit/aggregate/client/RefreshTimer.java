@@ -183,12 +183,6 @@ public class RefreshTimer extends Timer {
 
       switch (currentSubTab) {
         case FORMS:
-        case TABLES:
-          if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
-            GWT.log("forms/tables Refresh");
-            tabPanel.update();
-          }
-          break;
         case SUBMISSION_ADMIN:
         case FILTER:
           if ((intervalsCount % SUBMISSIONS_REFRESH_MULTIPLIER) == 0) {
@@ -212,16 +206,6 @@ public class RefreshTimer extends Timer {
             GWT.log("permissions Refresh");
             // update this ONLY if we are forcing a refreshNow().
             // otherwise, let the entries be stale w.r.t. server.
-            tabPanel.update();
-          }
-          break;
-        case CURRENTTABLES:
-        case VIEWTABLE:
-        case MANAGE_INSTANCE_FILES:
-        case MANAGE_TABLE_ID_FILES:
-        case MANAGE_APP_LEVEL_FILES:
-          if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
-            GWT.log("manage files refresh");
             tabPanel.update();
           }
           break;

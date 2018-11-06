@@ -56,23 +56,14 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   // other keys...
   private static final String SITE_KEY = "SITE_KEY";
   private static final String LAST_KNOWN_REALM_STRING = "LAST_KNOWN_REALM_STRING";
-  private static final String ODK_TABLES_ENABLED = "ODK_TABLES_ENABLED";
   private static final String FASTER_WATCHDOG_CYCLE_ENABLED = "FASTER_WATCHDOG_CYCLE_ENABLED";
   private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
   private static final String SKIP_MALFORMED_SUBMISSIONS = "SKIP_MALFORMED_SUBMISSIONS";
 
-  private static final String ODK_TABLES_SEQUENCER_BASE = "ODK_TABLES_SEQUENCER_BASE";
-  // there can be only one APP_ID per ODK Aggregate. Store the app name here.
-  // The main impact on this is validity checking on sync when the appId is
-  // checked.
-  private static final String ODK_TABLES_APP_ID = "ODK_TABLES_APP_ID";
   private static ServerPreferencesProperties relation = null;
 
   /**
    * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
    */
   private ServerPreferencesProperties(String schemaName) {
     super(schemaName, TABLE_NAME);
@@ -93,8 +84,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static PreferenceSummary getPreferenceSummary(CallingContext cc)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
-        getEnketoApiUrl(cc), getEnketoApiToken(cc), getOdkTablesEnabled(cc),
-        getOdkTablesAppId(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
+        getEnketoApiUrl(cc), getEnketoApiToken(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
   }
 
   public static String getSiteKey(CallingContext cc) throws ODKEntityNotFoundException,
@@ -161,60 +151,6 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static void setEnketoApiToken(CallingContext cc, String enketoApiToken)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, ENKETO_API_TOKEN, enketoApiToken);
-  }
-
-  public static Boolean getOdkTablesEnabled(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, ODK_TABLES_ENABLED);
-    if (value != null) {
-      return Boolean.valueOf(value);
-    }
-    // null value should be treated as false
-    return false;
-  }
-
-  public static void setOdkTablesEnabled(CallingContext cc, Boolean enabled)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, ODK_TABLES_ENABLED, enabled.toString());
-  }
-
-  public static String getOdkTablesAppId(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, ODK_TABLES_APP_ID);
-    if (value == null || value.length() == 0) {
-      value = "default";
-    }
-    return value;
-  }
-
-  public static void setOdkTablesAppId(CallingContext cc, String appId)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, ODK_TABLES_APP_ID, appId);
-  }
-
-  public static String unsafeIncOdkTablesSequencerBase(CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, ODK_TABLES_SEQUENCER_BASE);
-    String newValue = WebUtils.iso8601Date(new Date());
-    if (value != null && value.compareTo(newValue) >= 0) {
-      // the saved value String-compares greater
-      // than the current time string.
-
-      // parse the current time string...
-      Date d = WebUtils.parseDate(value);
-      if (d == null) {
-        throw new IllegalStateException(
-            "The saved ODK_TABLES_SEQUENCER_BASE value could not be parsed!");
-      }
-      // add 1 millisecond and retry...
-      newValue = WebUtils.iso8601Date(new Date(d.getTime() + 1));
-      if (value.compareTo(newValue) >= 0) {
-        throw new IllegalStateException(
-            "The new ODK_TABLES_SEQUENCER_BASE value was not greater than the saved value.");
-      }
-    }
-    setServerPreferencesProperty(cc, ODK_TABLES_SEQUENCER_BASE, newValue);
-    return newValue;
   }
 
   public static Boolean getFasterWatchdogCycleEnabled(CallingContext cc)

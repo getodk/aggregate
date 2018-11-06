@@ -47,7 +47,6 @@ import org.opendatakit.aggregate.client.PermissionsSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.popups.ChangePasswordPopup;
 import org.opendatakit.aggregate.client.popups.ConfirmUserDeletePopup;
-import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.security.SecurityUtils;
 import org.opendatakit.aggregate.client.widgets.UploadUsersAndPermsServletPopupButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
@@ -105,9 +104,6 @@ public class AccessConfigurationSheet extends Composite {
   private PermissionsSubTab permissionsTab;
   private boolean changesHappened = false;
   private GroupMembershipColumn formsAdmin;
-  private GroupMembershipColumn synchronizeTables;
-  private GroupMembershipColumn superUserTables;
-  private GroupMembershipColumn administerTables;
   private GroupMembershipColumn siteAdmin;
 
   public AccessConfigurationSheet(PermissionsSubTab permissionsTab) {
@@ -157,25 +153,6 @@ public class AccessConfigurationSheet extends Composite {
     columnSortHandler.setComparator(dv, dv.getComparator());
     columnSortHandler.setComparator(formsAdmin, formsAdmin.getComparator());
 
-    synchronizeTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
-    if (Preferences.getOdkTablesEnabled()) {
-      userTable.addColumn(synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
-    }
-
-    superUserTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
-    if (Preferences.getOdkTablesEnabled()) {
-      userTable.addColumn(superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
-    }
-
-    administerTables = new GroupMembershipColumn(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
-    if (Preferences.getOdkTablesEnabled()) {
-      userTable.addColumn(administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
-    }
-
-    columnSortHandler.setComparator(synchronizeTables, synchronizeTables.getComparator());
-    columnSortHandler.setComparator(superUserTables, superUserTables.getComparator());
-    columnSortHandler.setComparator(administerTables, administerTables.getComparator());
-
     siteAdmin = new GroupMembershipColumn(GrantedAuthorityName.GROUP_SITE_ADMINS);
     userTable.addColumn(siteAdmin, GrantedAuthorityName.GROUP_SITE_ADMINS.getDisplayText());
     columnSortHandler.setComparator(siteAdmin, siteAdmin.getComparator());
@@ -205,9 +182,6 @@ public class AccessConfigurationSheet extends Composite {
   public void updateUsersOnServer() {
     final ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();
     allGroups.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
-    allGroups.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
-    allGroups.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
-    allGroups.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
     allGroups.add(GrantedAuthorityName.GROUP_FORM_MANAGERS);
     allGroups.add(GrantedAuthorityName.GROUP_DATA_VIEWERS);
     allGroups.add(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
@@ -237,46 +211,6 @@ public class AccessConfigurationSheet extends Composite {
         cause -> AggregateUI.getUI().reportError("Incomplete security update: ", cause)
     );
 
-  }
-
-  public void changeTablesPrivilegesVisibility(boolean isVisible) {
-    int idxNow;
-
-    // insert or remove the synchronizeTables permissions
-    idxNow = userTable.getColumnIndex(synchronizeTables);
-    if (isVisible && idxNow == -1) {
-      idxNow = userTable.getColumnIndex(formsAdmin);
-      if (idxNow != -1) {
-        userTable.insertColumn(idxNow + 1, synchronizeTables, GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES.getDisplayText());
-        // make idxNow point to the synchronizeTables column
-        ++idxNow;
-      }
-    } else if (!isVisible && idxNow != -1) {
-      userTable.removeColumn(idxNow);
-    }
-
-    // insert or remove the superUserTables permissions
-    int idxPrior = idxNow;
-    idxNow = userTable.getColumnIndex(superUserTables);
-    if (isVisible && idxNow == -1) {
-      idxNow = idxPrior;
-      if (idxNow != -1) {
-        userTable.insertColumn(idxNow + 1, superUserTables, GrantedAuthorityName.GROUP_SUPER_USER_TABLES.getDisplayText());
-      }
-    } else if (!isVisible && idxNow != -1) {
-      userTable.removeColumn(idxNow);
-    }
-
-    // insert or remove the administerTables permissions
-    idxNow = userTable.getColumnIndex(administerTables);
-    if (isVisible && idxNow == -1) {
-      idxNow = userTable.getColumnIndex(siteAdmin);
-      if (idxNow != -1) {
-        userTable.insertColumn(idxNow, administerTables, GrantedAuthorityName.GROUP_ADMINISTER_TABLES.getDisplayText());
-      }
-    } else if (!isVisible && idxNow != -1) {
-      userTable.removeColumn(idxNow);
-    }
   }
 
   @Override
@@ -361,13 +295,7 @@ public class AccessConfigurationSheet extends Composite {
       // site admin must not be the anonymous user
       boolean badSiteAdmin = auth.equals(GrantedAuthorityName.GROUP_SITE_ADMINS)
           && (key.getType() == UserType.ANONYMOUS);
-      // tables admin must not be the anonymous user
-      boolean badTablesAdmin = auth.equals(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-          && (key.getType() == UserType.ANONYMOUS);
-      // tables super-user must not be the anonymous user
-      boolean badTablesSuperUser = auth.equals(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
-          && (key.getType() == UserType.ANONYMOUS);
-      return !(badCollector || badSiteAdmin || badTablesAdmin || badTablesSuperUser);
+      return !(badCollector || badSiteAdmin);
     }
   }
 
@@ -383,16 +311,6 @@ public class AccessConfigurationSheet extends Composite {
     public boolean isVisible(UserSecurityInfo key) {
       if (auth == GrantedAuthorityName.GROUP_SITE_ADMINS) {
         // anonymous user should not be able to be a site admin
-        return (key.getType() != UserType.ANONYMOUS);
-      }
-
-      if (auth == GrantedAuthorityName.GROUP_ADMINISTER_TABLES) {
-        // anonymous user should not be able to be a tables admin
-        return (key.getType() != UserType.ANONYMOUS);
-      }
-
-      if (auth == GrantedAuthorityName.GROUP_SUPER_USER_TABLES) {
-        // anonymous user should not be able to be a tables super-user
         return (key.getType() != UserType.ANONYMOUS);
       }
 
@@ -426,24 +344,6 @@ public class AccessConfigurationSheet extends Composite {
         case GROUP_DATA_VIEWERS:
           if (assignedGroups.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS)
               || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
-            return false;
-          }
-          return true;
-        case GROUP_SYNCHRONIZE_TABLES:
-          if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-              || assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
-              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
-            return false;
-          }
-          return true;
-        case GROUP_SUPER_USER_TABLES:
-          if (assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
-            return false;
-          }
-          return true;
-        case GROUP_ADMINISTER_TABLES:
-          if (assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)) {
             return false;
           }
           return true;
@@ -557,8 +457,7 @@ public class AccessConfigurationSheet extends Composite {
         return 0;
 
       if (arg0 != null) {
-        return (arg1 != null) ? arg0.getCanonicalName()
-            .compareToIgnoreCase(arg1.getCanonicalName()) : 1;
+        return (arg1 != null) ? arg0.getCanonicalName().compareToIgnoreCase(arg1.getCanonicalName()) : 1;
       }
       return -1;
     }
@@ -653,18 +552,6 @@ public class AccessConfigurationSheet extends Composite {
               || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
               || assignedGroups.contains(auth);
         case GROUP_FORM_MANAGERS:
-          return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-              || assignedGroups.contains(auth);
-        case GROUP_SYNCHRONIZE_TABLES:
-          return assignedGroups.contains(GrantedAuthorityName.GROUP_SUPER_USER_TABLES)
-              || assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-              || assignedGroups.contains(auth);
-        case GROUP_SUPER_USER_TABLES:
-          return assignedGroups.contains(GrantedAuthorityName.GROUP_ADMINISTER_TABLES)
-              || assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
-              || assignedGroups.contains(auth);
-        case GROUP_ADMINISTER_TABLES:
           return assignedGroups.contains(GrantedAuthorityName.GROUP_SITE_ADMINS)
               || assignedGroups.contains(auth);
         case GROUP_SITE_ADMINS:

@@ -289,9 +289,6 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         int idxDataCollector = -1;
         int idxDataViewer = -1;
         int idxFormManager = -1;
-        int idxSyncTables = -1;
-        int idxTablesSU = -1;
-        int idxTablesAdmin = -1;
         int idxSiteAdmin = -1;
 
         for (int i = 0; i < columns.length; ++i) {
@@ -355,30 +352,6 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
               return;
             }
             idxFormManager = i;
-          } else if ("Synchronize Tables".compareToIgnoreCase(heading) == 0) {
-            if (idxSyncTables != -1) {
-              logger.error("users and capabilities .csv upload - invalid csv file -- column header 'Synchronize Tables' is repeated");
-              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- column header 'Synchronize Tables' is repeated");
-              return;
-            }
-            idxSyncTables = i;
-          } else if ("Tables Super-user".compareToIgnoreCase(heading) == 0) {
-            if (idxTablesSU != -1) {
-              logger.error("users and capabilities .csv upload - invalid csv file -- column header 'Tables Super-user' is repeated");
-              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- column header 'Tables Super-user' is repeated");
-              return;
-            }
-            idxTablesSU = i;
-          } else if ("Administer Tables".compareToIgnoreCase(heading) == 0) {
-            if (idxTablesAdmin != -1) {
-              logger.error("users and capabilities .csv upload - invalid csv file -- column header 'Administer Tables' is repeated");
-              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- column header 'Administer Tables' is repeated");
-              return;
-            }
-            idxTablesAdmin = i;
           } else if ("Site Administrator".compareToIgnoreCase(heading) == 0) {
             if (idxSiteAdmin != -1) {
               logger.error("users and capabilities .csv upload - invalid csv file -- column header 'Site Administrator' is repeated");
@@ -532,15 +505,6 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
           }
           if (idxFormManager != -1 && columns.length > idxFormManager && columns[idxFormManager] != null && columns[idxFormManager].trim().length() != 0) {
             authorities.add(GrantedAuthorityName.GROUP_FORM_MANAGERS);
-          }
-          if (idxSyncTables != -1 && columns.length > idxSyncTables && columns[idxSyncTables] != null && columns[idxSyncTables].trim().length() != 0) {
-            authorities.add(GrantedAuthorityName.GROUP_SYNCHRONIZE_TABLES);
-          }
-          if (idxTablesSU != -1 && columns.length > idxTablesSU && columns[idxTablesSU] != null && columns[idxTablesSU].trim().length() != 0) {
-            authorities.add(GrantedAuthorityName.GROUP_SUPER_USER_TABLES);
-          }
-          if (idxTablesAdmin != -1 && columns.length > idxTablesAdmin && columns[idxTablesAdmin] != null && columns[idxTablesAdmin].trim().length() != 0) {
-            authorities.add(GrantedAuthorityName.GROUP_ADMINISTER_TABLES);
           }
           if (idxSiteAdmin != -1 && columns.length > idxSiteAdmin && columns[idxSiteAdmin] != null && columns[idxSiteAdmin].trim().length() != 0) {
             authorities.add(GrantedAuthorityName.GROUP_SITE_ADMINS);
