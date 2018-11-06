@@ -97,10 +97,7 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
     columnContent[3] = "Data Collector";
     columnContent[4] = "Data Viewer";
     columnContent[5] = "Form Manager";
-    columnContent[6] = "Synchronize Tables";
-    columnContent[7] = "Tables Super-user";
-    columnContent[8] = "Administer Tables";
-    columnContent[9] = "Site Administrator";
+    columnContent[6] = "Site Administrator";
 
     writer.writeNext(columnContent);
     for (UserSecurityInfo i : allUsers) {
@@ -123,7 +120,7 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
       columnContent[3] = grants.contains(GrantedAuthorityName.GROUP_DATA_COLLECTORS) ? "X" : null;
       columnContent[4] = grants.contains(GrantedAuthorityName.GROUP_DATA_VIEWERS) ? "X" : null;
       columnContent[5] = grants.contains(GrantedAuthorityName.GROUP_FORM_MANAGERS) ? "X" : null;
-      columnContent[9] = grants.contains(GrantedAuthorityName.GROUP_SITE_ADMINS) ? "X" : null;
+      columnContent[6] = grants.contains(GrantedAuthorityName.GROUP_SITE_ADMINS) ? "X" : null;
       writer.writeNext(columnContent);
     }
     writer.close();

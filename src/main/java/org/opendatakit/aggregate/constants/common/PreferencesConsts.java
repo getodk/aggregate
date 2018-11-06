@@ -22,8 +22,7 @@ public enum PreferencesConsts implements HelpSliderConsts {
   ENKETO("Enketo Credentials", "These credentials are used for Enketo webforms integration."),
   FEATURES("Aggregate Features",
       "These settings affect the operations of the server.<br>" +
-          "1. Disable faster background actions - check this to reduce AppEngine quota usage.<br>" +
-          "2. ODK Tables Synchronization Functionality - check this to enable ODK Tables functionality.");
+          "1. Disable faster background actions - check this to reduce AppEngine quota usage");
 
   private String title;
   private String content;

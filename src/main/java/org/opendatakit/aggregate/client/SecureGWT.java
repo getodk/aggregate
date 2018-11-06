@@ -80,6 +80,7 @@ public class SecureGWT {
    * site admin...
    */
   private SecurityAdminServiceAsync securityAdminServiceAsync = null;
+
   private SecureGWT() {
     preferenceServiceAsync = (PreferenceServiceAsync) create(ServiceType.PREFERENCE);
     securityServiceAsync = (SecurityServiceAsync) create(ServiceType.SECURITY);
@@ -224,7 +225,6 @@ public class SecureGWT {
   }
 
   public enum ServiceType {
-    FILTER, FORM, FORM_ADMIN, PREFERENCE, SECURITY, SECURITY_ADMIN, SERVICES_ADMIN, SUBMISSION,
-    ODK_TABLES_ADMIN, ODK_TABLES_DATA, ODK_TABLES_DIFF, ODK_TABLES_ACL, ODK_TABLES_TABLE;
+    FILTER, FORM, FORM_ADMIN, PREFERENCE, SECURITY, SECURITY_ADMIN, SERVICES_ADMIN, SUBMISSION
   }
 }
