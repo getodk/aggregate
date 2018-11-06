@@ -222,7 +222,7 @@ public class SecurityServiceUtil {
     User user = cc.getCurrentUser();
     RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
     Set<GrantedAuthority> grants = UserGrantedAuthority.getGrantedAuthorities(uriUser, ds, user);
-    Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
+    Set<GrantedAuthority> badGrants = new HashSet<>();
     TreeSet<GrantedAuthorityName> groups = new TreeSet<GrantedAuthorityName>();
     TreeSet<GrantedAuthorityName> authorities = new TreeSet<GrantedAuthorityName>();
     for (GrantedAuthority grant : grants) {
