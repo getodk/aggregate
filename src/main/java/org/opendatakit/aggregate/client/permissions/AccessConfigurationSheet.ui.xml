@@ -7,41 +7,39 @@
     <h1>Configure Site Access</h1>
     <h4>Users access the site either</h4>
     <ul>
-      <li>anonymously (i.e., as the <em>anonymousUser</em>), or
+      <li><strong>anonymously</strong>, for example as the <em>anonymousUser</em>)
       </li>
-      <li>via an Oauth 2.0 token (requires an Email account (e.g., user@gmail.com) and an Oauth 2.0
-        token issued by Google with access to userInfo.email), or
+      <li>via an <strong>ODK account</strong>, with a username and password that a site
+        administrator has configured for them.
       </li>
-      <li>via an ODK account, with a username and password that a site administrator has configured
-        for them.
+      <li>via an <strong>Oauth 2.0 token</strong> (requires an Email account (e.g., user@gmail.com)
+        and an Oauth 2.0 token issued by Google with access to userInfo.email)
       </li>
     </ul>
     <h4>Capabilities are as follows:</h4>
     <ul>
-      <li>Data Collector - able to download forms to ODK Collect and submit data from ODK Collect to
-        ODK Aggregate.
-        <br/>Only ODK accounts and the <em>anonymousUser</em> can be granted Data Collector rights.
-        <br/>The <em>anonymousUser</em> must be granted Data Collector rights to accept submissions
-        from unidentified sources (e.g., from ODK Collect 1.1.5 and earlier,
-        or from ODK Collect 1.1.7 and later if not authenticating).
+      <li>
+        <strong>Data Collector</strong>
+        able to download forms to ODK Collect and submit data
+        from ODK Collect to ODK Aggregate.<br/>Only ODK accounts and the <em>anonymousUser</em> can
+        be granted Data Collector rights.<br/>The <em>anonymousUser</em> must be granted Data
+        Collector rights to accept submissions from unidentified sources (e.g., from ODK Collect
+        1.1.5 and earlier, or from ODK Collect 1.1.7 and later if not authenticating).
       </li>
-      <li>Data Viewer - able to log onto the ODK Aggregate website, filter and view submissions, and
-        generate
-        csv or kml files for download.
+      <li>
+        <strong>Data Viewer</strong>
+        able to log onto the ODK Aggregate website, filter and view submissions, and generate csv or
+        kml files for download.
       </li>
-      <li>Form Manager - all the capabilities of a Data Viewer plus the abilities to upload a form
-        definition,
-        delete a form and its data, and upload submissions manually through the ODK Aggregate
-        website.
+      <li>
+        <strong>Form Manager</strong>
+        all the capabilities of a Data Viewer plus the abilities to upload a form definition, delete
+        a form and its data, and upload submissions manually through the ODK Aggregate website.
       </li>
-      <li>Synchronize Tables - able to download, upload and alter data records within ODK Tables as
-        restricted by table-access privileges granted to the user.
-      </li>
-      <li>Tables Super-user - able to administer row-level and table-access privileges.</li>
-      <li>Administer Tables - able to administer tables and row-level and table-access privileges.
-      </li>
-      <li>Site Administrator - all the capabilities of a Form Manager plus the ability to add users,
-        set passwords, and grant these capabilities to other users.
+      <li>
+        <strong>Site Administrator</strong>
+        all the capabilities of a Form Manager plus the ability to add users, set passwords, and
+        grant these capabilities to other users.
       </li>
     </ul>
     <h3>Configure Users and Capabilities using .csv file</h3>

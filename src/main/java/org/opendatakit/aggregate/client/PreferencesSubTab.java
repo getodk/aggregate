@@ -69,13 +69,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private static final String NEW_ENKETO_SERVICE_ACCOUNT_BUTTON_TEXT = "<img src=\"images/yellow_plus.png\" /> "
       + NEW_ENKETO_SERVICE_ACCOUNT_TXT;
 
-  private static final String ODK_TABLES_FEATURES_LABEL = "<h2>ODK 2.0 Features</h2>";
-
-  //external: enable 2.0 features checkbox
-
-  private static final String ODK_TABLES_APP_NAME_LABEL = "<h3>ODK 2.0 Application Name</h3>";
-  private static final String ODK_TABLES_APP_NAME_INFO = "<p>The Application Name used by the ODK 2.0 client application -- the name of the Android directory under <tt>/sdcard/opendatakit</tt>.</p>";
-
   private static final String FEATURES_LABEL = "<h2>Aggregate Features</h2>";
 
   // external: slower background publishing checkbox
@@ -196,27 +189,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
     // add(new UpdateGMapsKeyButton(mapsApiKey));
     // add(new
     // UpdateGoogleClientCredentialsButton(googleApiClientId.getText()));
-
-    HTML tablesFeatures = new HTML(ODK_TABLES_FEATURES_LABEL);
-    add(tablesFeatures);
-
-    odkTablesEnable = new EnableOdkTablesCheckbox(Preferences.getOdkTablesEnabled(), settingsChange);
-    add(odkTablesEnable);
-
-    HTML br = new HTML("<br>");
-    add(br);
-
-    HTML labelAppName = new HTML(ODK_TABLES_APP_NAME_LABEL);
-    labelAppName.setStylePrimaryName(INDENTED_STYLE);
-    add(labelAppName);
-
-    appName = new Label();
-    appName.setStylePrimaryName(INDENTED_ENTRY_STYLE);
-    add(appName);
-
-    HTML labelAppNameInfo = new HTML(ODK_TABLES_APP_NAME_INFO);
-    labelAppNameInfo.setStylePrimaryName(INDENTED_STYLE);
-    add(labelAppNameInfo);
 
     HTML features = new HTML(FEATURES_LABEL);
     add(features);
