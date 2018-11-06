@@ -216,10 +216,10 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
     String filename = blob_value.getUnrootedFilename(1, cc);
     filename = fileField + filename.substring(filename.lastIndexOf('.'));
 
-    /**
-     * REDCap server appears to be highly irregular in the structure of the
-     * form-data submission it will accept from the client. The following should
-     * work, but either resets the socket or returns a 403 error.
+    /*
+      REDCap server appears to be highly irregular in the structure of the
+      form-data submission it will accept from the client. The following should
+      work, but either resets the socket or returns a 403 error.
      */
     ContentType utf8Text = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), UTF_CHARSET);
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();

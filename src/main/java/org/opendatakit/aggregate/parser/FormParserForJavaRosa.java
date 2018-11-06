@@ -1183,45 +1183,45 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
 
     switch (treeElement.getDataType()) {
       case org.javarosa.core.model.Constants.DATATYPE_TEXT:
-        /**
-         * Text question type.
+        /*
+          Text question type.
          */
         et = FormDataModel.ElementType.STRING;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_INTEGER:
-        /**
-         * Numeric question type. These are numbers without decimal points
+        /*
+          Numeric question type. These are numbers without decimal points
          */
         et = FormDataModel.ElementType.INTEGER;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_DECIMAL:
-        /**
-         * Decimal question type. These are numbers with decimals
+        /*
+          Decimal question type. These are numbers with decimals
          */
         et = FormDataModel.ElementType.DECIMAL;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_DATE:
-        /**
-         * Date question type. This has only date component without time.
+        /*
+          Date question type. This has only date component without time.
          */
         et = FormDataModel.ElementType.JRDATE;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_TIME:
-        /**
-         * Time question type. This has only time element without date
+        /*
+          Time question type. This has only time element without date
          */
         et = FormDataModel.ElementType.JRTIME;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_DATE_TIME:
-        /**
-         * Date and Time question type. This has both the date and time components
+        /*
+          Date and Time question type. This has both the date and time components
          */
         et = FormDataModel.ElementType.JRDATETIME;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_CHOICE:
-        /**
-         * This is a question with alist of options where not more than one option
-         * can be selected at a time.
+        /*
+          This is a question with alist of options where not more than one option
+          can be selected at a time.
          */
         et = FormDataModel.ElementType.STRING;
         // et = FormDataModel.ElementType.SELECT1;
@@ -1230,9 +1230,9 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         // tablePrefix, nrGroupPrefix, treeElement.getName());
         break;
       case org.javarosa.core.model.Constants.DATATYPE_CHOICE_LIST:
-        /**
-         * This is a question with alist of options where more than one option can
-         * be selected at a time.
+        /*
+          This is a question with alist of options where more than one option can
+          be selected at a time.
          */
         et = FormDataModel.ElementType.SELECTN;
         opaque.removeColumnName(persistAsTable, persistAsColumn);
@@ -1241,40 +1241,40 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
             treeElement.getName());
         break;
       case org.javarosa.core.model.Constants.DATATYPE_BOOLEAN:
-        /**
-         * Question with true and false answers.
+        /*
+          Question with true and false answers.
          */
         et = FormDataModel.ElementType.BOOLEAN;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_GEOPOINT:
-        /**
-         * Question with location answer.
+        /*
+          Question with location answer.
          */
         et = FormDataModel.ElementType.GEOPOINT;
         opaque.removeColumnName(persistAsTable, persistAsColumn);
         persistAsColumn = null; // structured field
         break;
       case org.javarosa.core.model.Constants.DATATYPE_GEOTRACE:
-        /**
-         * Question with location trace.
+        /*
+          Question with location trace.
          */
         et = FormDataModel.ElementType.GEOTRACE;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_GEOSHAPE:
-        /**
-         * Question with location trace.
+        /*
+          Question with location trace.
          */
         et = FormDataModel.ElementType.GEOSHAPE;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_BARCODE:
-        /**
-         * Question with barcode string answer.
+        /*
+          Question with barcode string answer.
          */
         et = FormDataModel.ElementType.STRING;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_BINARY:
-        /**
-         * Question with external binary answer.
+        /*
+          Question with external binary answer.
          */
         et = FormDataModel.ElementType.BINARY;
         opaque.removeColumnName(persistAsTable, persistAsColumn);

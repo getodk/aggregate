@@ -71,11 +71,11 @@ import org.opendatakit.common.web.constants.BasicConsts;
  */
 public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionElement {
 
-  /**
-   * Submission set fields may be split across multiple backing tables due to
-   * limitations in the storage capacities of the underlying persistence layer.
-   * These manifest as phantom tables and subordinate structures in the data
-   * model. Abstract that all away at this level.
+  /*
+    Submission set fields may be split across multiple backing tables due to
+    limitations in the storage capacities of the underlying persistence layer.
+    These manifest as phantom tables and subordinate structures in the data
+    model. Abstract that all away at this level.
    */
 
   /**
