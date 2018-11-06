@@ -356,14 +356,6 @@ public class FormDefinition {
     topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
   }
 
-  static final FormElementModel findElement(FormElementModel group, DataField backingKey) {
-    for (FormElementModel m : group.getChildren()) {
-      if (m.isMetadata()) continue;
-      if (m.getFormDataModel().getBackingKey() == backingKey) return m;
-    }
-    return null;
-  }
-
   private static final SubmissionAssociationTable getSubmissionAssociation(String formId, boolean canBeIncomplete, CallingContext cc) {
     try {
       SubmissionAssociationTable sa = null;
@@ -627,67 +619,7 @@ public class FormDefinition {
     return topLevelGroupElement;
   }
 
-  public final FormElementModel getElementByName(String name) {
-    String[] path = name.split("/");
-    FormElementModel m = topLevelGroupElement;
-    boolean first = true;
-    for (String p : path) {
-      if (first) {
-        first = false;
-        // first entry can be form id...
-        if (formId.equals(p)) continue;
-      }
-
-      m = getElementByNameHelper(m, p);
-      if (m == null) return null;
-    }
-    return m;
-  }
-
-  private final FormElementModel getElementByNameHelper(FormElementModel group, String name) {
-    if (group.getElementName() != null && group.getElementName().equals(name)) {
-      return group;
-    }
-    for (FormElementModel m : group.getChildren()) {
-      // depth first traversal...
-      FormElementModel tmp = getElementByNameHelper(m, name);
-      if (tmp != null) return tmp;
-    }
-    return null;
-  }
-
-  public final String getQualifiedTopLevelTable() {
-    return qualifiedTopLevelTable;
-  }
-
-  public CommonFieldsBase getQualifiedTable(String qualifiedTableName) {
-    return backingTableMap.get(qualifiedTableName);
-  }
-
   public Collection<? extends CommonFieldsBase> getBackingTableSet() {
     return backingTableMap.values();
-  }
-
-  public SubmissionAssociationTable getSubmissionAssociation() {
-    return submissionAssociation;
-  }
-
-  public String getFormId() {
-    return formId;
-  }
-
-  public String getElementKey(String keyString) {
-    // TODO pick apart an "odkId" to return the key within... steal code from 0.9.3
-    throw new IllegalStateException("unimplemented");
-  }
-
-  public static final class OrdinalSequence {
-    Long ordinal;
-    int sequenceCounter;
-
-    OrdinalSequence() {
-      ordinal = 1L;
-      sequenceCounter = 1;
-    }
   }
 }

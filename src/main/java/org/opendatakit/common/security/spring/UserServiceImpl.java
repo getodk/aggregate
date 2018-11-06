@@ -211,11 +211,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   }
 
   @Override
-  public String createLoginURL() {
-    return "login.html";
-  }
-
-  @Override
   public String createLogoutURL() {
     return "j_spring_security_logout";
   }

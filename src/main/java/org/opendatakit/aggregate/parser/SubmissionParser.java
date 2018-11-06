@@ -648,35 +648,4 @@ public class SubmissionParser {
     return null;
   }
 
-  /**
-   * Recursive function that prints the nodes from an XML tree
-   *
-   * @param node xml node to be recursively printed
-   */
-  private void printNode(Element node) {
-    System.out.println(ParserConsts.NODE_FORMATTED + node.getTagName());
-    if (node.hasAttributes()) {
-      NamedNodeMap attributes = node.getAttributes();
-      for (int i = 0; i < attributes.getLength(); i++) {
-        Node attr = attributes.item(i);
-        System.out.println(ParserConsts.ATTRIBUTE_FORMATTED + attr.getNodeName()
-            + BasicConsts.EQUALS + attr.getNodeValue());
-      }
-    }
-    if (node.hasChildNodes()) {
-      NodeList children = node.getChildNodes();
-      for (int i = 0; i < children.getLength(); i++) {
-        Node child = children.item(i);
-        if (child.getNodeType() == Node.ELEMENT_NODE) {
-          printNode((Element) child);
-        } else if (child.getNodeType() == Node.TEXT_NODE) {
-          String value = child.getNodeValue().trim();
-          if (value.length() > 0) {
-            System.out.println(ParserConsts.VALUE_FORMATTED + value);
-          }
-        }
-      }
-    }
-
-  }
 }

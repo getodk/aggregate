@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.rest.ApiConstants;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.opendatakit.common.web.servlet.CommonServletBase;
@@ -133,17 +132,8 @@ public class ServletUtilBase extends CommonServletBase {
     g.setTime(new Date());
     SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
     formatter.setCalendar(g);
-    resp.setHeader(ApiConstants.DATE_HEADER, formatter.format(new Date()));
+    resp.setHeader("Date", formatter.format(new Date()));
     resp.setHeader(ServletConsts.OPEN_ROSA_ACCEPT_CONTENT_LENGTH_HEADER, "10485760"); // 10MB
-  }
-
-  protected final void addOpenDataKitHeaders(HttpServletResponse resp) {
-    resp.setHeader(ApiConstants.OPEN_DATA_KIT_VERSION_HEADER, ApiConstants.OPEN_DATA_KIT_VERSION);
-    GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-    g.setTime(new Date());
-    SimpleDateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zz");
-    formatter.setCalendar(g);
-    resp.setHeader(ApiConstants.DATE_HEADER, formatter.format(new Date()));
   }
 
   @Override

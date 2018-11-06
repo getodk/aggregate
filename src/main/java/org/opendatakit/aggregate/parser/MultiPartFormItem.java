@@ -60,15 +60,6 @@ public final class MultiPartFormItem {
   }
 
   /**
-   * Get form data field name
-   *
-   * @return field name
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
    * Get form data file name
    *
    * @return file name

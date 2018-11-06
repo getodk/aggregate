@@ -194,17 +194,6 @@ public class FormFactory {
   }
 
   /**
-   * Called during the startup action to load the Form table and eventually
-   * handle migrations of forms from older table formats to newer ones.
-   *
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  public static final void initialize(CallingContext cc) throws ODKDatastoreException {
-    internalGetForms(null, cc);
-  }
-
-  /**
    * Clean up the incoming string to extract just the formId from it.
    *
    * @param submissionKey

@@ -105,10 +105,6 @@ public final class GoogleSpreadsheet2RepeatParameterTable extends CommonFieldsBa
     return new GoogleSpreadsheet2RepeatParameterTable(this, user);
   }
 
-  public String getUriGoogleSpreadsheet() {
-    return getStringField(URI_GOOGLE_SPREADSHEET);
-  }
-
   public void setUriGoogleSpreadsheet(String value) {
     if (!setStringField(URI_GOOGLE_SPREADSHEET, value)) {
       throw new IllegalArgumentException("overflow uriGoogleSpreadsheet");

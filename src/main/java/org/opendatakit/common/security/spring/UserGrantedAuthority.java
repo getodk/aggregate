@@ -188,58 +188,6 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
     }
   }
 
-  public static final void assertUserGrantedAuthorities(String uriUser, Collection<String> desiredGroups, CallingContext cc) throws ODKDatastoreException {
-
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    boolean hasNotChanged = true;
-
-    try {
-      UserGrantedAuthority relation = UserGrantedAuthority.assertRelation(ds, user);
-
-      // get the members as currently defined for this group
-      List<? extends CommonFieldsBase> groupsList;
-      Query query = ds.createQuery(relation, "UserGrantedAuthority.assertUserGrantedAuthorities", user);
-      query.addFilter(UserGrantedAuthority.USER, FilterOperation.EQUAL, uriUser);
-      groupsList = query.executeQuery();
-
-      // OK we have the desired and actual groups lists for this username.
-      // find the set of groups to remove...
-      List<EntityKey> deleted = new ArrayList<EntityKey>();
-      for (CommonFieldsBase b : groupsList) {
-        UserGrantedAuthority t = (UserGrantedAuthority) b;
-        String groupName = t.getGrantedAuthority().getAuthority();
-        if (desiredGroups.contains(groupName)) {
-          desiredGroups.remove(groupName);
-        } else {
-          deleted.add(t.getEntityKey());
-        }
-      }
-      // we now have the list of desiredGroups to insert, and the list of
-      // existing records to delete...
-      List<UserGrantedAuthority> added = new ArrayList<UserGrantedAuthority>();
-      for (String group : desiredGroups) {
-        UserGrantedAuthority t = ds.createEntityUsingRelation(relation, user);
-        t.setUser(uriUser);
-        t.setGrantedAuthority(new SimpleGrantedAuthority(group));
-        added.add(t);
-      }
-
-      // nothing has changed if there are no adds and no deletes.
-      hasNotChanged = added.isEmpty() && deleted.isEmpty();
-
-      // we now have the list of EntityKeys to delete, and the list of records to add -- do it.
-      ds.putEntities(added, user);
-      ds.deleteEntities(deleted, user);
-    } finally {
-      if (!hasNotChanged) {
-        // we've changed, so we need to reload permissions tree
-        cc.getUserService().reloadPermissions();
-      }
-    }
-  }
-
   public static final void deleteGrantedAuthoritiesForUser(String uriUser, UserService userService, Datastore datastore, User user) throws ODKDatastoreException {
 
     try {
@@ -274,10 +222,6 @@ public final class UserGrantedAuthority extends CommonFieldsBase {
     if (!this.setStringField(USER, value)) {
       throw new IllegalStateException("overflow user");
     }
-  }
-
-  private final GrantedAuthority getGrantedAuthority() {
-    return new SimpleGrantedAuthority(this.getStringField(GRANTED_AUTHORITY));
   }
 
   private final void setGrantedAuthority(GrantedAuthority value) {

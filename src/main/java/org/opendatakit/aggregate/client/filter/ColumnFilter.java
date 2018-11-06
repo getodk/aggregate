@@ -66,10 +66,6 @@ public final class ColumnFilter extends Filter implements Serializable {
     return columns;
   }
 
-  public void setColumnFilterHeaders(ArrayList<Column> columns) {
-    this.columns = columns;
-  }
-
   public void addColumnFilterHeader(Column column) {
     this.columns.add(column);
   }

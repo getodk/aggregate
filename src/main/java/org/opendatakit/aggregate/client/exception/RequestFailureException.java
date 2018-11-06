@@ -35,11 +35,6 @@ public class RequestFailureException extends Exception implements Serializable {
     message = "RequestFailureException";
   }
 
-  public RequestFailureException(String arg0, Throwable arg1) {
-    super(arg0, arg1);
-    message = arg0 + "(" + arg1.getMessage() + ")";
-  }
-
   public RequestFailureException(String arg0) {
     super(arg0);
     message = arg0;

@@ -177,10 +177,6 @@ public class SubmissionFilter extends CommonFieldsBase {
     return new SubmissionFilter(this, user);
   }
 
-  public String getFilterGroup() {
-    return getStringField(URI_FILTER_GROUP_PROPERTY);
-  }
-
   public void setFilterGroup(String groupUri) {
     if (!setStringField(URI_FILTER_GROUP_PROPERTY, groupUri)) {
       throw new IllegalArgumentException("overflow filterGroup");

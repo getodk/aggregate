@@ -233,18 +233,10 @@ public class PersistentResults {
     return r;
   }
 
-  public String getRequestingUser() {
-    return row.getStringField(PersistentResultsTable.REQUESTING_USER);
-  }
-
   public void setRequestingUser(String value) throws ODKEntityPersistException {
     if (!row.setStringField(PersistentResultsTable.REQUESTING_USER, value)) {
       throw new IllegalStateException("overflow requestingUser");
     }
-  }
-
-  public Date getRequestDate() {
-    return row.getDateField(PersistentResultsTable.REQUEST_DATE);
   }
 
   public void setRequestDate(Date value) {
@@ -265,10 +257,6 @@ public class PersistentResults {
         PropertyMapSerializer.serializeRequestParameters(value))) {
       throw new IllegalStateException("overflow requestParameters");
     }
-  }
-
-  public Date getLastRetryDate() {
-    return row.getDateField(PersistentResultsTable.LAST_RETRY_DATE);
   }
 
   public void setLastRetryDate(Date value) {

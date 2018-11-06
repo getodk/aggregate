@@ -52,9 +52,4 @@ public class TomcatHttpClientFactoryImpl implements HttpClientFactory {
     return builder.build();
   }
 
-  @Override
-  public HttpTransport getGoogleOAuth2Transport() throws GeneralSecurityException, IOException {
-    return GoogleApacheHttpTransport.newTrustedTransport();
-  }
-
 }

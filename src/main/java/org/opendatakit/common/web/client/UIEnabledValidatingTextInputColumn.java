@@ -30,12 +30,6 @@ public abstract class UIEnabledValidatingTextInputColumn<T> extends Column<T, St
   final Comparator<T> comparator;
 
   protected UIEnabledValidatingTextInputColumn(StringValidationPredicate<T> validationPredicate,
-                                               UIVisiblePredicate<T> isVisiblePredicate,
-                                               Comparator<T> comparator) {
-    this(validationPredicate, isVisiblePredicate, null, comparator);
-  }
-
-  protected UIEnabledValidatingTextInputColumn(StringValidationPredicate<T> validationPredicate,
                                                UIEnabledPredicate<T> isEnabledPredicate,
                                                Comparator<T> comparator) {
     this(validationPredicate, null, isEnabledPredicate, comparator);

@@ -41,15 +41,6 @@ public class AccessDeniedException extends Exception implements Serializable {
 
   /**
    * @param arg0
-   * @param arg1
-   */
-  public AccessDeniedException(String arg0, Throwable arg1) {
-    super(arg0, arg1);
-    message = arg0 + "(" + arg1.getMessage() + ")";
-  }
-
-  /**
-   * @param arg0
    */
   public AccessDeniedException(String arg0) {
     super(arg0);

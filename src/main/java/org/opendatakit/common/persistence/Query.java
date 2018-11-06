@@ -47,17 +47,6 @@ public interface Query {
    */
   public void addFilter(DataField attributeName, FilterOperation op, Object value);
 
-  ;
-
-  /**
-   * Adds a filter to the query using the given attribute name, filtered by the values
-   * IN the value set.
-   *
-   * @param attributeName
-   * @param valueSet
-   */
-  public void addValueSetFilter(DataField attributeName, Collection<?> valueSet);
-
   /**
    * Returns a list of all the entities which are the results of executing the query.
    *
@@ -77,19 +66,6 @@ public interface Query {
    * @throws ODKOverQuotaException if the usage quota was exceeded
    */
   public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException, ODKOverQuotaException;
-
-  /**
-   * Returns a list of distinct EntityKeys of the topLevelAuri for the set of records
-   * returned by the query.  This should always be an empty or singleton set.
-   *
-   * @param topLevelTable - the relation that the topLevelAuri corresponds to.
-   * @param foreignKeyField - the topLevelAuri DataField in the table being queried.
-   * @return
-   * @throws ODKDatastoreException
-   * @throws ODKOverQuotaException if the usage quota was exceeded
-   */
-  public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable, DataField foreignKeyField)
-      throws ODKDatastoreException, ODKOverQuotaException;
 
   /**
    * Returns the list of all distinct values for a given field with any given filter

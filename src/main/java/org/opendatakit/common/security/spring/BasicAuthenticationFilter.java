@@ -55,18 +55,6 @@ public class BasicAuthenticationFilter implements Filter,
     impl = new org.springframework.security.web.authentication.www.BasicAuthenticationFilter(authenticationManager, authenticationEntryPoint);
   }
 
-  public void setAuthenticationDetailsSource(AuthenticationDetailsSource<javax.servlet.http.HttpServletRequest, ?> authenticationDetailsSource) {
-    impl.setAuthenticationDetailsSource(authenticationDetailsSource);
-  }
-
-  public void setCredentialsCharset(String credentialsCharset) {
-    impl.setCredentialsCharset(credentialsCharset);
-  }
-
-  public void setRememberMeServices(RememberMeServices rememberMeServices) {
-    impl.setRememberMeServices(rememberMeServices);
-  }
-
   @Override
   public void afterPropertiesSet() {
     impl.afterPropertiesSet();

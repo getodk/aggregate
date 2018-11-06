@@ -29,8 +29,6 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 
 public class FilterSubTab extends AggregateSubTabBase {
 
-  public static final int DEFAULT_FETCH_LIMIT = 100;
-
   private FilterNavigationTable navTable;
 
   private FiltersDataPanel filtersPanel;

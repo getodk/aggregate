@@ -59,10 +59,6 @@ public class QueryResumePoint {
         qrp.getUriLastReturnedValue(), qrp.getIsForwardCursor());
   }
 
-  public static final QueryResumePoint fromWebsafeCursor(String cursor) {
-    return WebCursorUtils.parseCursorParameter(cursor);
-  }
-
   public String getAttributeName() {
     return attributeName;
   }

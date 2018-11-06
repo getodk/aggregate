@@ -424,10 +424,6 @@ public final class FormServiceCursor extends CommonFieldsBase {
     }
   }
 
-  public String getUriMd5FormId() {
-    return getStringField(URI_MD5_FORM_ID_PROPERTY);
-  }
-
   public void setUriMd5FormId(String value) {
     if (!setStringField(URI_MD5_FORM_ID_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow uriMd5FormId");

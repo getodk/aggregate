@@ -263,14 +263,6 @@ public abstract class AbstractExternalService implements ExternalService {
   }
 
   @Override
-  public void abandon(CallingContext cc) throws ODKDatastoreException {
-    if (fsc.getOperationalStatus() != OperationalStatus.COMPLETED) {
-      fsc.setOperationalStatus(OperationalStatus.ABANDONED);
-      persist(cc);
-    }
-  }
-
-  @Override
   public void delete(CallingContext cc) throws ODKDatastoreException {
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
     List<? extends CommonFieldsBase> repeats = retrieveRepeatElementEntities();

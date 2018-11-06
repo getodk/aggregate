@@ -557,14 +557,6 @@ public final class EmailParser {
       return type;
     }
 
-    public String getUri() {
-      return uri;
-    }
-
-    public void setUri(String value) {
-      uri = value;
-    }
-
     public String getFullName() {
       return fullname;
     }

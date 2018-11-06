@@ -85,10 +85,6 @@ public class SubmissionUISummary implements Serializable {
     return submissions;
   }
 
-  public UIQueryResumePoint getStartCursor() {
-    return startCursor;
-  }
-
   public void setStartCursor(UIQueryResumePoint startCursor) {
     this.startCursor = startCursor;
   }

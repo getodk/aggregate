@@ -22,7 +22,7 @@ import org.opendatakit.aggregate.constants.common.FormActionStatusTimestamp;
 
 public final class FormSummary implements Serializable {
 
-  private static final long serialVersionUID = 5320217439717436812L;
+  private static final long serialVersionUID = 5320217439717436813L;
   private String title;
   private String id;
   // creation date is the date the form was uploaded to Aggregate...
@@ -35,8 +35,6 @@ public final class FormSummary implements Serializable {
   private int mediaFileCount = 0;
   // if the form is marked for deletion
   private FormActionStatusTimestamp mostRecentDeletionRequestStatus = null;
-  // if the form has a purge-submissions action in progress.
-  private FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus = null;
 
 
   public FormSummary() {
@@ -94,15 +92,6 @@ public final class FormSummary implements Serializable {
   public void setMostRecentDeletionRequestStatus(
       FormActionStatusTimestamp mostRecentDeletionRequestStatus) {
     this.mostRecentDeletionRequestStatus = mostRecentDeletionRequestStatus;
-  }
-
-  public FormActionStatusTimestamp getMostRecentPurgeSubmissionsRequestStatus() {
-    return mostRecentPurgeSubmissionsRequestStatus;
-  }
-
-  public void setMostRecentPurgeSubmissionsRequestStatus(
-      FormActionStatusTimestamp mostRecentPurgeSubmissionsRequestStatus) {
-    this.mostRecentPurgeSubmissionsRequestStatus = mostRecentPurgeSubmissionsRequestStatus;
   }
 
   /**

@@ -32,26 +32,4 @@ public final class SecurityUtils {
   private SecurityUtils() {
   }
 
-  ;
-
-  public static final String getDigestAuthenticationPasswordHash(String username, String password,
-                                                                 Realm realm) {
-    String fullDigestAuth = username + ":" + realm.getRealmString() + ":" + password;
-    try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      byte[] asBytes = fullDigestAuth.getBytes();
-      md.update(asBytes);
-
-      byte[] messageDigest = md.digest();
-
-      BigInteger number = new BigInteger(1, messageDigest);
-      String md5 = number.toString(16);
-      while (md5.length() < 32) {
-        md5 = "0" + md5;
-      }
-      return md5;
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("Unexpected problem computing md5 hash", e);
-    }
-  }
 }

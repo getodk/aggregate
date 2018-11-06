@@ -27,13 +27,6 @@ public class ODKTaskLockException extends Exception {
   private static final long serialVersionUID = 8885994216437564799L;
 
   /**
-   * Default constructor
-   */
-  public ODKTaskLockException() {
-    super();
-  }
-
-  /**
    * Construct exception with the error message
    *
    * @param message exception message

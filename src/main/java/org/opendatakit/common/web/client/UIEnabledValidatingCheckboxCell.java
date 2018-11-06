@@ -70,19 +70,6 @@ public class UIEnabledValidatingCheckboxCell<T> extends
 
   /**
    * Construct a new {@link UIEnabledValidatingCheckboxCell}.
-   */
-  public UIEnabledValidatingCheckboxCell(BooleanValidationPredicate<T> validationPredicate,
-                                         UIVisiblePredicate<T> isVisiblePredicate) {
-    this(validationPredicate, isVisiblePredicate, null);
-  }
-
-  public UIEnabledValidatingCheckboxCell(BooleanValidationPredicate<T> validationPredicate,
-                                         UIEnabledPredicate<T> isEnabledPredicate) {
-    this(validationPredicate, null, isEnabledPredicate);
-  }
-
-  /**
-   * Construct a new {@link UIEnabledValidatingCheckboxCell}.
    *
    * @param validationPredicate true if the supplied value is OK (will reset to the inverse if fails).
    *                            If null, will the supplied value is always be accepted.

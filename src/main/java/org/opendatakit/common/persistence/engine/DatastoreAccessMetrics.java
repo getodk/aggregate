@@ -50,25 +50,6 @@ public final class DatastoreAccessMetrics {
   public DatastoreAccessMetrics() {
   }
 
-  public synchronized void logUsage() {
-    long now = System.currentTimeMillis();
-    lastLogging = now;
-    String gmtDate = WebUtils.iso8601Date(new java.util.Date(now));
-    logger.info("---------- " + gmtDate + " @ " + readCount + " ------------");
-    for (Map.Entry<String, Short> entry : tableMap.entrySet()) {
-      Short idx = entry.getValue();
-      logger.info(entry.getKey() + "," + countQueryArray.getUsage(idx) + ","
-          + countQueryResultArray.getUsage(idx) + "," + countGetArray.getUsage(idx) + ","
-          + countPutArray.getUsage(idx) + "," + countDeleteArray.getUsage(idx));
-    }
-    logger.info("-----------------------------------------");
-    countQueryArray.clear();
-    countQueryResultArray.clear();
-    countGetArray.clear();
-    countPutArray.clear();
-    countDeleteArray.clear();
-  }
-
   /**
    * NOTE: This method is NOT thread-safe. Call only from within a synchronized
    * method!
@@ -192,13 +173,6 @@ public final class DatastoreAccessMetrics {
       resizeArray(countArrayIdx);
 
       countArray[countArrayIdx] = countArray[countArrayIdx] + incCount;
-    }
-
-    private Integer getUsage(short countArrayIdx) {
-      // make sure our count array is sized big enough...
-      resizeArray(countArrayIdx);
-
-      return countArray[countArrayIdx];
     }
 
     private void clear() {

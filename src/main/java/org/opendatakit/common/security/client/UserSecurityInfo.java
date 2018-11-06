@@ -84,10 +84,6 @@ public class UserSecurityInfo implements Comparable<UserSecurityInfo>, Serializa
     return type;
   }
 
-  public void setType(UserType type) {
-    this.type = type;
-  }
-
   public String getUsername() {
     return username;
   }

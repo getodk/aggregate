@@ -23,10 +23,6 @@ public enum BinaryOption implements Serializable {
     descriptionOfOption = desc;
   }
 
-  public String getDescriptionOfOption() {
-    return descriptionOfOption;
-  }
-
   public String toString() {
     return descriptionOfOption;
   }

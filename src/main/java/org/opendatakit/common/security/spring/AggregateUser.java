@@ -46,10 +46,6 @@ public class AggregateUser extends User {
     this.mailtoDomain = mailToDomain;
   }
 
-  public String getMailtoDomain() {
-    return mailtoDomain;
-  }
-
   public String getSalt() {
     return salt;
   }

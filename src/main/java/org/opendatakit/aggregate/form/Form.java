@@ -217,10 +217,6 @@ class Form implements IForm {
     return infoRow.getEntityKey();
   }
 
-  public SubmissionKey getSubmissionKey() {
-    return FormInfo.getSubmissionKey(infoRow.getUri());
-  }
-
   public FormElementModel getTopLevelGroupElement() {
     return formDefinition.getTopLevelGroupElement();
   }
@@ -426,29 +422,6 @@ class Form implements IForm {
     formDefinition.setIsSubmissionAllowed(submissionEnabled);
   }
 
-  private FormElementModel findElementByNameHelper(FormElementModel current, String name) {
-    if (current.getElementName().equals(name))
-      return current;
-    FormElementModel m = null;
-    for (FormElementModel c : current.getChildren()) {
-      m = findElementByNameHelper(c, name);
-      if (m != null)
-        break;
-    }
-    return m;
-  }
-
-  /**
-   * Relies on getElementName() to determine the match of the FormElementModel.
-   * Does a depth-first traversal of the list.
-   *
-   * @param name
-   * @return the found element or null if not found.
-   */
-  public FormElementModel findElementByName(String name) {
-    return findElementByNameHelper(getTopLevelGroupElement(), name);
-  }
-
   public FormElementModel getFormElementModel(List<SubmissionKeyPart> submissionKeyParts) {
     FormElementModel m = null;
     boolean formIdElement = true;
@@ -512,10 +485,6 @@ class Form implements IForm {
     return list;
   }
 
-  public Map<String, FormElementModel> getRepeatElementModels() {
-    return repeatElementMap;
-  }
-
   private void populateRepeatElementMap(FormElementModel node) {
     if (node == null) {
       return;
@@ -563,36 +532,6 @@ class Form implements IForm {
       int mediaFileCount = (getManifestFileset() == null) ? 0 : getManifestFileset().getAttachmentCount(cc);
       return new FormSummary(viewableName, getFormId(), getCreationDate(), getCreationUser(),
           false, false, viewableURL, mediaFileCount);
-    }
-  }
-
-  /**
-   * Prints the data element definitions to the print stream specified
-   *
-   * @param out Print stream to send the output to
-   */
-  public void printDataTree(PrintStream out) {
-    printTreeHelper(formDefinition.getTopLevelGroupElement(), out);
-  }
-
-  /**
-   * Recursive helper function that prints the data elements definitions to the
-   * print stream specified
-   *
-   * @param node node to be processed
-   * @param out  Print stream to send the output to
-   */
-  private void printTreeHelper(FormElementModel node, PrintStream out) {
-    if (node == null) {
-      return;
-    }
-    out.println(node.toString());
-    List<FormElementModel> children = node.getChildren();
-    if (children == null) {
-      return;
-    }
-    for (FormElementModel child : children) {
-      printTreeHelper(child, out);
     }
   }
 

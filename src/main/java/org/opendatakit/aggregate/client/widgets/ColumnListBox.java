@@ -25,11 +25,6 @@ public final class ColumnListBox extends AggregateListBox {
   private final ArrayList<Column> headers;
 
   public ColumnListBox(ArrayList<Column> headers, boolean multipleValueSelection,
-                       boolean onlyIncludeTextColumns, String tooltipText) {
-    this(headers, multipleValueSelection, onlyIncludeTextColumns, tooltipText, null);
-  }
-
-  public ColumnListBox(ArrayList<Column> headers, boolean multipleValueSelection,
                        boolean onlyIncludeTextColumns, String tooltipText, String helpBalloonTxt) {
     super(tooltipText, multipleValueSelection, helpBalloonTxt);
     this.headers = headers;

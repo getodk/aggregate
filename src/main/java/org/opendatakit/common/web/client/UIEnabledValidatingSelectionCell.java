@@ -49,17 +49,6 @@ public class UIEnabledValidatingSelectionCell<T> extends /* SelectionCell */
   private final ArrayList<String> options;
   private final UIVisiblePredicate<T> isVisiblePredicate;
   private HashMap<String, Integer> indexForOption = new HashMap<String, Integer>();
-  public UIEnabledValidatingSelectionCell(
-      StringValidationPredicate<T> validationPredicate,
-      UIEnabledPredicate<T> isEnabledPredicate, ArrayList<String> options) {
-    this(validationPredicate, null, isEnabledPredicate, options);
-  }
-
-  public UIEnabledValidatingSelectionCell(
-      StringValidationPredicate<T> validationPredicate,
-      UIVisiblePredicate<T> isVisiblePredicate, ArrayList<String> options) {
-    this(validationPredicate, isVisiblePredicate, null, options);
-  }
 
   /**
    * Construct a new {@link SelectionCell} with the specified options.

@@ -202,16 +202,6 @@ public interface Datastore {
       throws ODKOverQuotaException, ODKDatastoreException;
 
   /**
-   * Back-port from Mezuri -- functionality to do a bulk alteration of data.
-   * Everything in this list is either an update or an insert. DatastoreImpl
-   * discovers which it is and implements the appropriate update.
-   *
-   * @param changes
-   */
-  public void batchAlterData(List<? extends CommonFieldsBase> changes, User user)
-      throws ODKEntityPersistException, ODKOverQuotaException;
-
-  /**
    * Create a task lock object.  A database-mediated global mutex.
    *
    * @param user

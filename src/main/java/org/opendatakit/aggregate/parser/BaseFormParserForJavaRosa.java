@@ -447,18 +447,6 @@ public class BaseFormParserForJavaRosa {
   }
 
   /**
-   * Determine whether or not a field is encrypted. Field-level encryption
-   * plumbing.
-   *
-   * @param element
-   * @return
-   */
-  public final static boolean isEncryptedField(TreeElement element) {
-    String v = getBindAttribute(element, "encrypted");
-    return (v != null && ("true".equalsIgnoreCase(v) || "true()".equalsIgnoreCase(v)));
-  }
-
-  /**
    * Field-level encryption requires an extended Javarosa library that expose an
    * "encrypted" bind attribute that identifies the fields that are to be
    * encrypted and a BASE64_RSA_PUBLIC_KEY bind attribute on the
@@ -1067,21 +1055,6 @@ public class BaseFormParserForJavaRosa {
           binding.getAttributeValue(i));
     }
     bindElements.add(copy);
-  }
-
-  private String getNodeset(Element e) {
-    String nodeset = e.getName();
-    Object current = e.getParent();
-    while (current instanceof Element && ((Element) current).getName() != null) {
-      nodeset = ((Element) current).getName() + "/" + nodeset;
-      current = ((Element) current).getParent();
-    }
-    return "/" + nodeset;
-  }
-
-  private void printTreeElementInfo(TreeElement treeElement) {
-    System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.getDataType()
-        + " repeatable: " + treeElement.isRepeatable());
   }
 
   public String getTreeElementPath(AbstractTreeElement<?> e) {

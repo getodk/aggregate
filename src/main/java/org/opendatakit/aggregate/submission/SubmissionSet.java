@@ -150,11 +150,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     buildSubmissionFields(group, cc);
   }
 
-  public SubmissionSet(Long modelVersion, Long uiVersion, IForm form, CallingContext cc)
-      throws ODKDatastoreException {
-    this(modelVersion, uiVersion, null, form, cc);
-  }
-
   public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, IForm form,
                        CallingContext cc) throws ODKDatastoreException {
     this.form = form;
@@ -737,22 +732,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     return getGroupBackingObject(group);
   }
 
-  public Date getCreationDate() {
-    return getGroupBackingObject().getCreationDate();
-  }
-
-  public Date getLastUpdateDate() {
-    return getGroupBackingObject().getLastUpdateDate();
-  }
-
-  public String getCreatorUriUser() {
-    return getGroupBackingObject().getCreatorUriUser();
-  }
-
-  public String getLastUpdateUriUser() {
-    return getGroupBackingObject().getLastUpdateUriUser();
-  }
-
   protected void populateFormattedValueInRow(Row row, FormElementModel propertyName,
                                              ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
     SubmissionValue value = elementsToValues.get(propertyName);
@@ -798,14 +777,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
 
   public SubmissionSet getEnclosingSet() {
     return enclosingSet;
-  }
-
-  public void printSubmission(PrintWriter out) {
-
-    List<SubmissionValue> values = getSubmissionValues();
-    for (SubmissionValue value : values) {
-      out.println(value.toString());
-    }
   }
 
   public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)

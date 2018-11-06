@@ -426,10 +426,6 @@ public class AggregateUI implements EntryPoint {
     return subTab;
   }
 
-  public AggregateTabBase getTab(Tabs tabType) {
-    return tabMap.get(tabType);
-  }
-
   void setSubMenuSelectionHandler(final TabPanel menuTab, final Tabs menu, final SubTabs[] subMenus) {
     // add the mainNav selection handler for this menu...
     mainNav.addSelectionHandler(new SelectionHandler<Integer>() {

@@ -39,10 +39,6 @@ public enum FilterOperation implements Serializable {
     displayText = display;
   }
 
-  public String getDisplayText() {
-    return displayText;
-  }
-
   public String toString() {
     return displayText;
   }

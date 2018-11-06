@@ -57,15 +57,6 @@ public abstract class DateSubmissionType extends SubmissionSingleValueBase<Date>
     setValue(d);
   }
 
-  /**
-   * Helper for updating dates in predefined forms...
-   *
-   * @param date
-   */
-  public void setValueFromDate(Date date) {
-    setValue(date);
-  }
-
   @Override
   public void getValueFromEntity(CallingContext cc) {
     Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());

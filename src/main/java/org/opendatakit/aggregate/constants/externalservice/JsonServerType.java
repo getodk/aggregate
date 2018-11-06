@@ -34,8 +34,4 @@ public enum JsonServerType {
     jsonServerType = value;
   }
 
-  public String getJsonServerTypeValue() {
-    return jsonServerType;
-  }
-
 }

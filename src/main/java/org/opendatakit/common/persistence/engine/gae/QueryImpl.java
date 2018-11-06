@@ -199,37 +199,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   @Override
-  public void addValueSetFilter(DataField attribute, Collection<?> valueSet) {
-    // do everything locally except the first one (later)...
-    // TODO: this is not correct for WrappedDecimal filters
-    // TODO: fortunately, there are no uses of that pathway.
-    if (attribute.getDataType() == DataType.DECIMAL) {
-      List<BigDecimal> bdList = new ArrayList<BigDecimal>();
-      for (Object value : valueSet) {
-        if (value != null) {
-          // ensure the value is always a BigDecimal and always rounded to scale
-          BigDecimal bd;
-          if (value instanceof BigDecimal) {
-            bd = (BigDecimal) value;
-          } else {
-            bd = new BigDecimal(value.toString());
-          }
-          if (!attribute.isDoublePrecision()) {
-            bd = bd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
-          }
-          bdList.add(bd);
-        } else {
-          bdList.add(null);
-        }
-      }
-      filterList.add(new ValueSetFilterTracker(attribute, bdList));
-      throw new IllegalStateException("addValueSetFilter for DECIMAL is not correctly implemented");
-    } else {
-      filterList.add(new ValueSetFilterTracker(attribute, valueSet));
-    }
-  }
-
-  @Override
   public void addSort(DataField attribute, Direction direction) {
     // do the sort locally -- later...
     sortList.add(new SortTracker(attribute, direction));
@@ -928,29 +897,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
       establishDominantSort();
       CoreResult result = coreExecuteQuery(null, 0);
       return result.results;
-    } finally {
-      gaeCostLogger.wrapUp();
-    }
-  }
-
-  @Override
-  public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable,
-                                               DataField topLevelAuri) throws ODKDatastoreException, ODKOverQuotaException {
-
-    try {
-      List<?> keys = doExecuteDistinctValueForDataField(topLevelAuri);
-
-      Set<EntityKey> keySet = new HashSet<EntityKey>();
-      for (Object o : keys) {
-        String key = (String) o;
-        // we don't have the top level records themselves. Construct the entity
-        // keys
-        // from the supplied relation and the value of the AURI fields in the
-        // records
-        // we do have.
-        keySet.add(new EntityKey(topLevelTable, key));
-      }
-      return keySet;
     } finally {
       gaeCostLogger.wrapUp();
     }

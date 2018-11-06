@@ -54,10 +54,6 @@ public class StringSubmissionType extends SubmissionSingleValueBase<String> {
     setValue(value);
   }
 
-  public void setStringValue(String value) throws ODKConversionException {
-    setValue(value);
-  }
-
   @Override
   public void getValueFromEntity(CallingContext cc) {
     String value = backingObject.getStringField(element.getFormDataModel().getBackingKey());

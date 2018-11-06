@@ -25,10 +25,6 @@ public class AggregateImageToggleButton extends ToggleButton implements ClickHan
 
   private final AggregateBaseHandlers handlers;
 
-  public AggregateImageToggleButton(Image img, String tooltipText) {
-    this(img, tooltipText, null);
-  }
-
   public AggregateImageToggleButton(Image img, String tooltipText, String helpBalloonText) {
     super(img);
 

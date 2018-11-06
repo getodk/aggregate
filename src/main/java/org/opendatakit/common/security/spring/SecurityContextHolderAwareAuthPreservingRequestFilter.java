@@ -47,11 +47,6 @@ public class SecurityContextHolderAwareAuthPreservingRequestFilter extends Gener
 
   //~ Methods ========================================================================================================
 
-  public void setRolePrefix(String rolePrefix) {
-    Assert.notNull(rolePrefix, "Role prefix must not be null");
-    this.rolePrefix = rolePrefix.trim();
-  }
-
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
       throws IOException, ServletException {
     SecurityContextHolderAwareRequestWrapper wrapper =

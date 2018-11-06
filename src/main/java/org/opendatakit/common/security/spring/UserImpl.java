@@ -53,31 +53,6 @@ public class UserImpl implements org.opendatakit.common.security.User {
   }
 
   @Override
-  public String getNickname() {
-    return nickName;
-  }
-
-  @Override
-  public String getEmail() {
-    return email;
-  }
-
-  public Set<GrantedAuthority> getAuthorities() {
-    HashSet<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
-    auths.addAll(groups);
-    auths.addAll(directAuthorities);
-    return Collections.unmodifiableSet(auths);
-  }
-
-  public Set<GrantedAuthority> getGroups() {
-    return Collections.unmodifiableSet(groups);
-  }
-
-  public Set<GrantedAuthority> getDirectAuthorities() {
-    return Collections.unmodifiableSet(directAuthorities);
-  }
-
-  @Override
   public String getUriUser() {
     return uriUser;
   }

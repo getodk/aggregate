@@ -29,6 +29,7 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author mitchellsundt@gmail.com
  */
+@SuppressWarnings("unused")
 public class SitePreferencesBean {
 
   private Datastore datastore;
@@ -111,6 +112,7 @@ public class SitePreferencesBean {
     this.userService = userService;
   }
 
+  @SuppressWarnings("unused")
   public synchronized String getSiteKey() throws ODKEntityNotFoundException, ODKOverQuotaException {
     if (siteKey == null) {
       siteKey = ServerPreferencesProperties.getSiteKey(ccHack);

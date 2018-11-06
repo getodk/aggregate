@@ -101,10 +101,6 @@ public final class FusionTable2RepeatParameterTable extends CommonFieldsBase {
     return new FusionTable2RepeatParameterTable(this, user);
   }
 
-  public String getUriFusionTable() {
-    return getStringField(URI_FUSION_TABLE_PROPERTY);
-  }
-
   public void setUriFusionTable(String value) {
     if (!setStringField(URI_FUSION_TABLE_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow uriFusionTable");

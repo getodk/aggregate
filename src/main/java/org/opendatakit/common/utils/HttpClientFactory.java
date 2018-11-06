@@ -44,5 +44,4 @@ public interface HttpClientFactory {
    */
   public CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig);
 
-  public HttpTransport getGoogleOAuth2Transport() throws GeneralSecurityException, IOException;
 }

@@ -39,14 +39,7 @@ public class UIEnabledActionCell<T> extends AbstractCell<T> {
   private final SafeHtml htmlDisabled;
   private final UIEnabledPredicate<T> isEnabledPredicate;
   private final UIVisiblePredicate<T> isVisiblePredicate;
-  public UIEnabledActionCell(String text, UIEnabledPredicate<T> isEnabledPredicate,
-                             UIEnabledActionCell.Delegate<T> delegate) {
-    this(SafeHtmlUtils.fromString(text), null, isEnabledPredicate, delegate);
-  }
-  public UIEnabledActionCell(String text, UIVisiblePredicate<T> isVisiblePredicate,
-                             UIEnabledActionCell.Delegate<T> delegate) {
-    this(SafeHtmlUtils.fromString(text), isVisiblePredicate, null, delegate);
-  }
+
   public UIEnabledActionCell(String text, UIVisiblePredicate<T> isVisiblePredicate,
                              UIEnabledPredicate<T> isEnabledPredicate,
                              UIEnabledActionCell.Delegate<T> delegate) {

@@ -64,10 +64,6 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
     setValue(b);
   }
 
-  public void setBooleanValue(Boolean value) {
-    setValue(value);
-  }
-
   @Override
   public void getValueFromEntity(CallingContext cc) {
     Boolean value = backingObject.getBooleanField(element.getFormDataModel().getBackingKey());

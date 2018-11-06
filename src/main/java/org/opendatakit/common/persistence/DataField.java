@@ -75,24 +75,6 @@ public final class DataField {
     this(name, dataType, nullable, maxCharLen, null, null);
   }
 
-  /**
-   * Constructor for extended-precision integer or numeric fields.
-   * The default corresponds to 32-bit integers and double-precision
-   * floating point.  It is not useful to shorten these, as this
-   * generally slows down your code.
-   *
-   * @param name The standard naming convention for database persistence layers
-   *          is underscore-delimited all-upper-case names.  E.g.,
-   *          in Java, you might name a variable "descriptiveDataValue".
-   *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
-   * @param dataType
-   * @param nullable
-   * @param maxCharLen
-   */
-  public DataField(String name, DataType dataType, boolean nullable, Integer numericScale, Integer numericPrecision) {
-    this(name, dataType, nullable, null, numericScale, numericPrecision);
-  }
-
   private DataField(String name, DataType dataType, boolean nullable, Long maxCharLen, Integer numericScale, Integer numericPrecision) {
     this.name = name;
     this.dataType = dataType;

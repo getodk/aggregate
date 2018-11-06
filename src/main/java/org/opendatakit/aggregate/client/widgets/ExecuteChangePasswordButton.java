@@ -133,7 +133,4 @@ public final class ExecuteChangePasswordButton extends AggregateButton implement
     AggregateUI.getUI().forceUpdateNotSecureInfo();
   }
 
-  public void onError(String echo, String error) {
-    Window.alert("Unable to change passwored for " + echo + " error: " + error);
-  }
 }

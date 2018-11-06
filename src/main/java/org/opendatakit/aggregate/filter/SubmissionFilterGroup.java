@@ -190,10 +190,6 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
     }
   }
 
-  public String getUriUser() {
-    return getStringField(URI_USER_PROPERTY);
-  }
-
   public void setUriUser(String uriUser) {
     if (!setStringField(URI_USER_PROPERTY, uriUser)) {
       throw new IllegalArgumentException("overflow uriUser");
@@ -220,10 +216,6 @@ public class SubmissionFilterGroup extends CommonFieldsBase {
 
   public void setIncludeMetadata(Boolean value) {
     setBooleanField(INCLUDE_METADATA, value);
-  }
-
-  List<SubmissionFilter> getFilters() {
-    return filters;
   }
 
   void addFilter(SubmissionFilter filter) {

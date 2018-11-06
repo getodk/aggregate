@@ -128,10 +128,6 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     return new SubmissionColumnFilter(this, user);
   }
 
-  public String getParentFilterUri() {
-    return getStringField(URI_PARENT_FILTER_PROPERTY);
-  }
-
   public void setParentFilterUri(String parentUri) {
     if (!setStringField(URI_PARENT_FILTER_PROPERTY, parentUri)) {
       throw new IllegalArgumentException("overflow parent uri");

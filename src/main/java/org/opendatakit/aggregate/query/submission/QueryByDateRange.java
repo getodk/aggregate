@@ -70,30 +70,6 @@ public class QueryByDateRange extends QueryBase {
     this(form, maxFetchLimit, startDate, new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS), uriLast, cc);
   }
 
-  /**
-   * Fetch the record with the most recent markedAsCompleteDate, excluding
-   * records that arrived within the MAX_SETTLE of now.
-   *
-   * @param form
-   * @param cc
-   */
-  public QueryByDateRange(IForm form, CallingContext cc) {
-    super(form);
-    this.fetchLimit = 1;
-    this.startCursor = null;
-
-    TopLevelDynamicBase tbl = (TopLevelDynamicBase) form.getTopLevelGroupElement().getFormDataModel().getBackingObjectPrototype();
-
-    // Query by lastUpdateDate, filtering by isCompleted.
-    // Submissions may be partially uploaded and are marked completed once they 
-    // are fully uploaded.  We want the query to be aware of that and to not 
-    // report anything that is not yet fully loaded.
-    query = cc.getDatastore().createQuery(tbl, "QueryByDateRange.constructor", cc.getCurrentUser());
-    query.addSort(tbl.markedAsCompleteDate, Query.Direction.DESCENDING);
-    query.addFilter(tbl.markedAsCompleteDate, Query.FilterOperation.LESS_THAN, new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS));
-    query.addFilter(tbl.isComplete, Query.FilterOperation.EQUAL, Boolean.TRUE);
-  }
-
   @Override
   public List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData,
       ODKDatastoreException {

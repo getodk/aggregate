@@ -588,10 +588,6 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
     }
   }
 
-  public Boolean getIsRemoved() {
-    return getBooleanField(IS_REMOVED);
-  }
-
   public void setIsRemoved(Boolean value) {
     setBooleanField(IS_REMOVED, value);
   }

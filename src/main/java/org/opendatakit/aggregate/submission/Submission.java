@@ -151,23 +151,6 @@ public class Submission extends SubmissionSet {
         .getFormDataModel().getBackingObjectPrototype(), tlg.getAuri(), user);
   }
 
-  /**
-   * Get the time that the submission was created/received
-   *
-   * @return date of submission
-   */
-  public Date getSubmissionDate() {
-    return ((TopLevelDynamicBase) getGroupBackingObject()).getSubmissionDate();
-  }
-
-  public Long getModelVersion() {
-    return ((TopLevelDynamicBase) getGroupBackingObject()).getModelVersion();
-  }
-
-  public Long getUiVersion() {
-    return ((TopLevelDynamicBase) getGroupBackingObject()).getUiVersion();
-  }
-
   public void setIsComplete(Boolean value) {
     ((TopLevelDynamicBase) getGroupBackingObject()).setIsComplete(value);
   }

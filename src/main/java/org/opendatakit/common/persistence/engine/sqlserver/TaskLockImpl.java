@@ -378,14 +378,6 @@ public class TaskLockImpl implements TaskLock {
       }
     }
 
-    Date getExpirationDateTime() {
-      return getDateField(expirationDateTime);
-    }
-
-    void setExpirationDateTime(Date value) {
-      setDateField(expirationDateTime, value);
-    }
-
     @Override
     public CommonFieldsBase getEmptyRow(User user) {
       return new TaskLockTable(this, user);

@@ -100,16 +100,8 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
     markedAsCompleteDate = ref.markedAsCompleteDate;
   }
 
-  public final Long getModelVersion() {
-    return getLongField(modelVersion);
-  }
-
   public final void setModelVersion(Long value) {
     setLongField(modelVersion, value);
-  }
-
-  public final Long getUiVersion() {
-    return getLongField(uiVersion);
   }
 
   public final void setUiVersion(Long value) {
@@ -122,10 +114,6 @@ public abstract class TopLevelDynamicBase extends DynamicCommonFieldsBase {
 
   public final void setIsComplete(Boolean value) {
     setBooleanField(isComplete, value);
-  }
-
-  public final Date getSubmissionDate() {
-    return getDateField(submissionDate);
   }
 
   public final void setSubmissionDate(Date value) {

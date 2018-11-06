@@ -58,10 +58,6 @@ public abstract class DynamicDocumentBase extends DynamicCommonFieldsBase {
     topLevelAuri = ref.topLevelAuri;
   }
 
-  public final String getTopLevelAuri() {
-    return getStringField(topLevelAuri);
-  }
-
   public final void setTopLevelAuri(String value) {
     if (!setStringField(topLevelAuri, value)) {
       throw new IllegalStateException("overflow on topLevelAuri");

@@ -100,15 +100,6 @@ public class SecurityServiceUtil {
     anonAttachmentViewerGrants = Collections.unmodifiableList(ianonAttachmentViewerGrants);
   }
 
-  private static final ArrayList<String> processRoles(Set<GrantedAuthority> grants) {
-    ArrayList<String> roleNames = new ArrayList<String>();
-    for (GrantedAuthority grant : grants) {
-      roleNames.add(grant.getAuthority());
-    }
-    Collections.sort(roleNames);
-    return roleNames;
-  }
-
   /**
    * Return all registered users and the Anonymous user.
    *
@@ -151,42 +142,6 @@ public class SecurityServiceUtil {
       throw new DatastoreFailureException(e);
     }
     // the natural ordering (above) produces a sorted list...
-    return users;
-  }
-
-  public static HashMap<String, UserSecurityInfo> getUriUserSecurityInfoMap(
-      boolean withAuthorities, CallingContext cc) throws AccessDeniedException,
-      DatastoreFailureException {
-
-    HashMap<String, UserSecurityInfo> users = new HashMap<String, UserSecurityInfo>();
-    try {
-      Query q = RegisteredUsersTable.createQuery(cc.getDatastore(),
-          "SecurityServiceUtil.getAllUsers", cc.getCurrentUser());
-      RegisteredUsersTable.applyNaturalOrdering(q, cc);
-
-      List<? extends CommonFieldsBase> l = q.executeQuery();
-
-      for (CommonFieldsBase cb : l) {
-        RegisteredUsersTable t = (RegisteredUsersTable) cb;
-        UserSecurityInfo i = new UserSecurityInfo(t.getUsername(), t.getFullName(), t.getEmail(),
-            UserSecurityInfo.UserType.REGISTERED);
-        if (withAuthorities) {
-          SecurityServiceUtil.setAuthenticationLists(i, t.getUri(), cc);
-        }
-        users.put(t.getUri(), i);
-      }
-      // TODO: why doesn't this work?
-      UserSecurityInfo anonymous = new UserSecurityInfo(User.ANONYMOUS_USER,
-          User.ANONYMOUS_USER_NICKNAME, null, UserSecurityInfo.UserType.ANONYMOUS);
-      if (withAuthorities) {
-        SecurityServiceUtil.setAuthenticationListsForSpecialUser(anonymous,
-            GrantedAuthorityName.USER_IS_ANONYMOUS, cc);
-      }
-      users.put(User.ANONYMOUS_USER, anonymous);
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      throw new DatastoreFailureException(e);
-    }
     return users;
   }
 
@@ -288,92 +243,6 @@ public class SecurityServiceUtil {
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
     }
-  }
-
-  /**
-   * Get the complete set of granted authorities (ROLE and RUN_AS grants) this user possesses.
-   *
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public static TreeSet<GrantedAuthorityName> getCurrentUserSecurityInfo(CallingContext cc)
-      throws ODKDatastoreException {
-    User user = cc.getCurrentUser();
-    TreeSet<GrantedAuthorityName> authorities = new TreeSet<GrantedAuthorityName>();
-    if (user.isAnonymous()) {
-      RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
-      Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
-      // The assigned groups are the specialGroup that this user defines
-      // (i.e., anonymous or daemon) plus all directly-assigned assignable
-      // permissions.
-      GrantedAuthority specialAuth = new SimpleGrantedAuthority(GrantedAuthorityName.USER_IS_ANONYMOUS.name());
-
-      Collection<? extends GrantedAuthority> auths = hierarchy
-          .getReachableGrantedAuthorities(Collections.singletonList(specialAuth));
-      for (GrantedAuthority auth : auths) {
-        GrantedAuthorityName name = mapName(auth, badGrants);
-        if (name != null && !GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority())) {
-          authorities.add(name);
-        }
-      }
-      removeBadGrantedAuthorities(badGrants, cc);
-    } else {
-      RegisteredUsersTable t;
-      t = RegisteredUsersTable.getUserByUri(user.getUriUser(), cc.getDatastore(), user);
-
-      Datastore ds = cc.getDatastore();
-      RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
-      Set<GrantedAuthority> grants = UserGrantedAuthority.getGrantedAuthorities(user.getUriUser(), ds, user);
-      Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
-      TreeSet<GrantedAuthorityName> groups = new TreeSet<GrantedAuthorityName>();
-      for (GrantedAuthority grant : grants) {
-        GrantedAuthorityName name = mapName(grant, badGrants);
-        if (name != null) {
-          if (GrantedAuthorityName.permissionsCanBeAssigned(grant.getAuthority())) {
-            groups.add(name);
-          } else {
-            authorities.add(name);
-          }
-        }
-      }
-      Collection<? extends GrantedAuthority> auths = hierarchy.getReachableGrantedAuthorities(grants);
-      for (GrantedAuthority auth : auths) {
-        GrantedAuthorityName name = mapName(auth, badGrants);
-        if (name != null && !GrantedAuthorityName.permissionsCanBeAssigned(auth.getAuthority())) {
-          authorities.add(name);
-        }
-      }
-      removeBadGrantedAuthorities(badGrants, cc);
-    }
-    return authorities;
-  }
-
-  public static final synchronized boolean isSpecialName(String authority) {
-    if (SecurityServiceUtil.specialNames.isEmpty()) {
-      for (GrantedAuthorityName n : GrantedAuthorityName.values()) {
-        SecurityServiceUtil.specialNames.add(n.name());
-      }
-    }
-
-    return SecurityServiceUtil.specialNames.contains(authority)
-        || authority.startsWith(GrantedAuthorityName.RUN_AS_PREFIX)
-        || authority.startsWith(GrantedAuthorityName.ROLE_PREFIX);
-  }
-
-  /**
-   * Construct and return the Email object for the superUser.
-   *
-   * @param cc
-   * @return
-   */
-  public static final EmailParser.Email getSuperUserEmail(CallingContext cc) {
-    String suEmail = cc.getUserService().getSuperUserEmail();
-    if (suEmail == null) {
-      return null;
-    }
-    return new EmailParser.Email(suEmail.substring(SecurityUtils.MAILTO_COLON.length(),
-        suEmail.indexOf(SecurityUtils.AT_SIGN)), suEmail);
   }
 
   /**
@@ -797,57 +666,4 @@ public class SecurityServiceUtil {
     UserGrantedAuthority.assertGrantedAuthorityMembers(new SimpleGrantedAuthority(
         GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN.name()), uriUsers, cc);
   }
-
-  private static final class UserIdFullName {
-    final String user_id;
-    final String full_name;
-
-    UserIdFullName(UserSecurityInfo userSecurityInfo) {
-      if (userSecurityInfo.getType() == UserType.ANONYMOUS) {
-        user_id = "anonymous";
-        full_name = User.ANONYMOUS_USER_NICKNAME;
-      } else if (userSecurityInfo.getEmail() == null) {
-        user_id = "username:" + userSecurityInfo.getUsername();
-        if (userSecurityInfo.getFullName() == null) {
-          full_name = userSecurityInfo.getUsername();
-        } else {
-          full_name = userSecurityInfo.getFullName();
-        }
-      } else {
-        // already has the mailto: prefix
-        user_id = userSecurityInfo.getEmail();
-        if (userSecurityInfo.getFullName() == null) {
-          full_name = userSecurityInfo.getEmail().substring(EmailParser.K_MAILTO.length());
-        } else {
-          full_name = userSecurityInfo.getFullName();
-        }
-      }
-    }
-
-    UserIdFullName(CallingContext cc, User user) throws ODKDatastoreException {
-      if (user.isAnonymous()) {
-        user_id = "anonymous";
-        full_name = User.ANONYMOUS_USER_NICKNAME;
-      } else if (user.getEmail() == null) {
-        // TODO: fix this in Aggregate back-port
-        RegisteredUsersTable entry;
-        entry = RegisteredUsersTable.getUserByUri(user.getUriUser(), cc.getDatastore(), cc.getCurrentUser());
-        user_id = "username:" + entry.getUsername();
-        if (user.getNickname() == null) {
-          full_name = entry.getUsername();
-        } else {
-          full_name = user.getNickname();
-        }
-      } else {
-        user_id = user.getEmail();
-        if (user.getNickname() == null) {
-          full_name = user.getEmail().substring(EmailParser.K_MAILTO.length());
-        } else {
-          full_name = user.getNickname();
-        }
-      }
-
-    }
-  }
-
 }

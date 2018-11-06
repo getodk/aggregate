@@ -92,10 +92,6 @@ public class DatastoreImpl implements Datastore {
     return ds;
   }
 
-  public DatastoreAccessMetrics getDam() {
-    return dam;
-  }
-
   void recordQueryUsage(CommonFieldsBase relation, int recCount) {
     dam.recordQueryUsage(relation, recCount);
   }
@@ -424,12 +420,6 @@ public class DatastoreImpl implements Datastore {
     } catch (Exception ex) {
       throw new ODKEntityPersistException(ex);
     }
-  }
-
-  @Override
-  public void batchAlterData(List<? extends CommonFieldsBase> changes, User user)
-      throws ODKEntityPersistException, ODKOverQuotaException {
-    putEntities(changes, user);
   }
 
   @Override

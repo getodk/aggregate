@@ -40,13 +40,6 @@ public interface ExternalService {
   public void setUploadCompleted(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 
   /**
-   * Abandon the action.
-   *
-   * @throws ODKDatastoreException
-   */
-  public void abandon(CallingContext cc) throws ODKDatastoreException;
-
-  /**
    * Delete the external service connection record.
    *
    * @throws ODKDatastoreException

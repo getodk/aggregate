@@ -25,16 +25,8 @@ package org.opendatakit.aggregate.exception;
  * @author mitchellsundt@gmail.com
  */
 public class ODKConversionException extends Exception {
-  public ODKConversionException() {
-    super();
-  }
-
   public ODKConversionException(String message) {
     super(message);
-  }
-
-  public ODKConversionException(String message, Throwable cause) {
-    super(message, cause);
   }
 
   public ODKConversionException(Throwable cause) {

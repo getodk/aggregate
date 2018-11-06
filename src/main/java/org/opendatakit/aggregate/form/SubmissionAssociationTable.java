@@ -146,18 +146,10 @@ public final class SubmissionAssociationTable extends CommonFieldsBase {
     return new SubmissionAssociationTable(this, user);
   }
 
-  public String getUriMd5FormId() {
-    return getStringField(URI_MD5_FORM_ID);
-  }
-
   public void setUriMd5FormId(String value) {
     if (!setStringField(URI_MD5_FORM_ID, value)) {
       throw new IllegalStateException("overflow uriMd5FormId");
     }
-  }
-
-  public String getUriMd5SubmissionFormId() {
-    return getStringField(URI_MD5_SUBMISSION_FORM_ID);
   }
 
   public void setUriMd5SubmissionFormId(String value) {

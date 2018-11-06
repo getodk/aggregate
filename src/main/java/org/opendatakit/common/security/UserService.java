@@ -28,8 +28,6 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface UserService {
 
-  public String createLoginURL();
-
   public String createLogoutURL();
 
   public Realm getCurrentRealm();

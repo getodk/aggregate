@@ -38,13 +38,6 @@ public final class ServletPopupButton extends AggregateButton implements ClickHa
     this.basePanel = basePanel;
   }
 
-  public ServletPopupButton(String buttonText, String title, String url, String tooltipText) {
-    super(buttonText, tooltipText);
-    this.title = title;
-    this.url = url;
-    this.basePanel = null;
-  }
-
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);

@@ -289,10 +289,6 @@ public final class FormDataModel extends CommonFieldsBase {
     return getGroupQualifiedElementNameCommon(false);
   }
 
-  public final String getGroupQualifiedXpathElementName() {
-    return getGroupQualifiedElementNameCommon(true);
-  }
-
   private final String getGroupQualifiedElementNameCommon(boolean xpath) {
     String groupPrefix;
     // find our "real" parent (one that is not a phantom)
@@ -393,24 +389,6 @@ public final class FormDataModel extends CommonFieldsBase {
     if (table == null)
       return null;
     return getPersistAsSchema() + "." + table;
-  }
-
-  public final FormDataModel findElementByName(String elementName) {
-    if (elementName == null) {
-      throw new IllegalArgumentException("null elementName passed in!");
-    }
-
-    for (FormDataModel m : children) {
-      if (m.getElementName() == null) {
-        // phantom...
-        FormDataModel t = m.findElementByName(elementName);
-        if (t != null)
-          return t;
-      } else if (m.getElementName().equals(elementName)) {
-        return m;
-      }
-    }
-    return null;
   }
 
   public final FormDataModel getParent() {

@@ -25,18 +25,6 @@ package org.opendatakit.aggregate.exception;
  * @author mitchellsundt@gmail.com
  */
 public class ODKFormNotFoundException extends Exception {
-  public ODKFormNotFoundException() {
-    super();
-  }
-
-  public ODKFormNotFoundException(String message) {
-    super(message);
-  }
-
-  public ODKFormNotFoundException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
   public ODKFormNotFoundException(Throwable cause) {
     super(cause);
   }

@@ -55,43 +55,6 @@ public abstract class CommonServletBase extends HttpServlet {
     this.applicationName = applicationName;
   }
 
-  protected Map<String, String> parseParameterMap(HttpServletRequest request, Logger logger) {
-
-    Map<String, String> parameters = new HashMap<String, String>();
-    @SuppressWarnings("rawtypes")
-    Map m = request.getParameterMap();
-    for (Object eo : m.entrySet()) {
-      @SuppressWarnings("unchecked")
-      Map.Entry<Object, Object> e = (Map.Entry<Object, Object>) eo;
-      Object k = e.getKey();
-      Object v = e.getValue();
-      String key = null;
-      String value = null;
-      if (k instanceof String) {
-        key = (String) k;
-      } else {
-        logger.error("key is not a string: " + k.getClass().getCanonicalName());
-      }
-      if (v instanceof String[]) {
-        String[] va = (String[]) v;
-        if (va.length == 1) {
-          value = va[0];
-        } else if (va.length != 0) {
-          logger.error("v is an array of string of length: " + va.length);
-          value = va[0];
-        }
-      } else if (v instanceof String) {
-        value = (String) v;
-      } else {
-        logger.error("v is not a string: " + v.getClass().getCanonicalName());
-      }
-      if (key != null && value != null) {
-        parameters.put(key, value);
-      }
-    }
-    return parameters;
-  }
-
   protected String getRedirectUrl(HttpServletRequest request) {
     HttpSession session = request.getSession(false);
     if (session != null) {
@@ -120,27 +83,6 @@ public abstract class CommonServletBase extends HttpServlet {
       }
     }
     return redirectParamString;
-  }
-
-  /**
-   * Takes the request and displays request in plain text in the response
-   *
-   * @param req  The HTTP request received at the server
-   * @param resp The HTTP response to be sent to client
-   * @throws IOException
-   */
-  protected final void printRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    try {
-      BufferedReader received = req.getReader();
-
-      String line = received.readLine();
-      while (line != null) {
-        resp.getWriter().println(line);
-        line = received.readLine();
-      }
-    } catch (Exception e) {
-      e.printStackTrace(resp.getWriter());
-    }
   }
 
   /**

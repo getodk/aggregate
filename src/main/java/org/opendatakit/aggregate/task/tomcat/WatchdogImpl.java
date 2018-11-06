@@ -255,10 +255,6 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     this.worksheetCreator = worksheetCreator;
   }
 
-  public HttpClientFactory HttpClientFactory() {
-    return httpClientFactory;
-  }
-
   public void setHttpClientFactory(HttpClientFactory httpClientFactory) {
     this.httpClientFactory = httpClientFactory;
   }

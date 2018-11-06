@@ -95,13 +95,6 @@ public class KmlGeoTraceNGeoShapeGenerator extends AbstractKmlElementBase {
     return points;
   }
 
-  boolean childVerifyFieldsArePresent(List<FormElementModel> elements) {
-    if (nameElement != null && !elements.contains(nameElement)) {
-      return false;
-    }
-    return true;
-  }
-
   @Override
   String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
                                      CallingContext cc) throws ODKDatastoreException {

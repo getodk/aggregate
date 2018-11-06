@@ -94,10 +94,6 @@ public class RepeatSubmissionType implements SubmissionRepeat {
     return repeatGroup;
   }
 
-  public SubmissionSet getEnclosingSet() {
-    return enclosingSet;
-  }
-
   public String getUniqueKeyStr() {
     EntityKey key = enclosingSet.getKey();
     return key.getKey();

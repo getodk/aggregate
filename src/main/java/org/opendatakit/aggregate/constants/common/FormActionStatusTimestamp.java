@@ -41,15 +41,8 @@ public class FormActionStatusTimestamp implements Serializable {
     return status;
   }
 
-  public void setStatus(FormActionStatus status) {
-    this.status = status;
-  }
-
   public Date getTimestamp() {
     return timestamp;
   }
 
-  public void setTimestamp(Date timestamp) {
-    this.timestamp = timestamp;
-  }
 }

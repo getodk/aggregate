@@ -31,6 +31,7 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
+@SuppressWarnings("unused")
 public class ServerPreferencesProperties extends CommonFieldsBase {
 
   // these values are set in the ServiceAccountPrivateKeyUploadServlet
@@ -98,6 +99,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     return value;
   }
 
+  @SuppressWarnings("unused")
   public static void setSiteKey(CallingContext cc, String siteKey)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, SITE_KEY, siteKey);

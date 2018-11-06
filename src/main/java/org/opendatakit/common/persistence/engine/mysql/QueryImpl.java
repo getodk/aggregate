@@ -204,29 +204,6 @@ public class QueryImpl implements Query {
   }
 
   @Override
-  public void addValueSetFilter(DataField attributeName, Collection<?> valueSet) {
-    if (queryBindBuilder.length() == 0) {
-      queryBindBuilder.append(K_WHERE);
-    } else {
-      queryBindBuilder.append(K_AND);
-    }
-    queryBindBuilder.append(K_BQ);
-    queryBindBuilder.append(attributeName.getName());
-    queryBindBuilder.append(K_BQ);
-    queryBindBuilder.append(K_IN_OPEN);
-    boolean first = true;
-    for (Object o : valueSet) {
-      if (!first) {
-        queryBindBuilder.append(K_CS);
-      }
-      first = false;
-      queryBindBuilder.append(K_BIND_VALUE);
-      bindValues.add(DatastoreImpl.getBindValue(attributeName, o));
-    }
-    queryBindBuilder.append(K_IN_CLOSE);
-  }
-
-  @Override
   public void addSort(DataField attributeName, Direction direction) {
     if (querySortBuilder.length() == 0) {
       querySortBuilder.append(K_ORDER_BY);
@@ -288,25 +265,6 @@ public class QueryImpl implements Query {
       throw new ODKDatastoreException(e);
     }
     return keys;
-  }
-
-  @Override
-  public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable,
-                                               DataField topLevelAuri) throws ODKDatastoreException {
-
-    List<?> keys = executeDistinctValueForDataField(topLevelAuri);
-
-    Set<EntityKey> keySet = new HashSet<EntityKey>();
-    for (Object o : keys) {
-      String key = (String) o;
-      // we don't have the top level records themselves. Construct the entity
-      // keys
-      // from the supplied relation and the value of the AURI fields in the
-      // records
-      // we do have.
-      keySet.add(new EntityKey(topLevelTable, key));
-    }
-    return keySet;
   }
 
   @Override

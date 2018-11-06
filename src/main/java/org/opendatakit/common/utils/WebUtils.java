@@ -85,70 +85,6 @@ public class WebUtils {
   private WebUtils() {
   }
 
-  ;
-
-  /**
-   * Safely encode a string for use as a query parameter.
-   *
-   * @param rawString
-   * @return encoded string
-   */
-  public static String safeEncode(String rawString) {
-    if (rawString == null || rawString.length() == 0) {
-      return null;
-    }
-
-    try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      GZIPOutputStream gzip = new GZIPOutputStream(out);
-      gzip.write(rawString.getBytes(CharEncoding.UTF_8));
-      gzip.finish();
-      gzip.close();
-      String candidate = Base64.encodeBase64URLSafeString(out.toByteArray());
-      return candidate;
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    }
-  }
-
-  /**
-   * Decode a safeEncode() string.
-   *
-   * @param encodedWebsafeString
-   * @return rawString
-   */
-  public static String safeDecode(String encodedWebsafeString) {
-    if (encodedWebsafeString == null || encodedWebsafeString.length() == 0) {
-      return encodedWebsafeString;
-    }
-
-    try {
-      ByteArrayInputStream in = new ByteArrayInputStream(Base64.decodeBase64(encodedWebsafeString
-          .getBytes(CharEncoding.UTF_8)));
-      GZIPInputStream gzip = new GZIPInputStream(in);
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      int ch = gzip.read();
-      while (ch >= 0) {
-        out.write(ch);
-        ch = gzip.read();
-      }
-      gzip.close();
-      out.flush();
-      out.close();
-      return new String(out.toByteArray(), CharEncoding.UTF_8);
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    }
-  }
-
   /**
    * Parse a string into a boolean value. Any of:
    * <ul>
@@ -322,42 +258,6 @@ public class WebUtils {
   }
 
   /**
-   * Useful static method for constructing a UPPER_CASE persistence layer name
-   * from a camelCase name. This inserts an underscore before a leading capital
-   * letter and toUpper()s the resulting string. The transformation maps
-   * multiple camelCase names to the same UPPER_CASE name so it is not
-   * reversible.
-   * <ul>
-   * <li>thisURL => THIS_URL</li>
-   * <li>thisUrl => THIS_URL</li>
-   * <li>myFirstObject => MY_FIRST_OBJECT</li>
-   * </ul>
-   *
-   * @param name
-   * @return
-   */
-  public static final String unCamelCase(String name) {
-    StringBuilder b = new StringBuilder();
-    boolean lastCap = true;
-    for (int i = 0; i < name.length(); ++i) {
-      char ch = name.charAt(i);
-      if (Character.isUpperCase(ch)) {
-        if (!lastCap) {
-          b.append('_');
-        }
-        lastCap = true;
-        b.append(ch);
-      } else if (Character.isLetterOrDigit(ch)) {
-        lastCap = false;
-        b.append(Character.toUpperCase(ch));
-      } else {
-        throw new IllegalArgumentException("Argument is not a valid camelCase name: " + name);
-      }
-    }
-    return b.toString();
-  }
-
-  /**
    * Return the GoogleDocs datetime string representation of a datetime.
    *
    * @param d
@@ -434,30 +334,6 @@ public class WebUtils {
     // SDF is not thread-safe
     SimpleDateFormat purgeDateFormat = new SimpleDateFormat(PURGE_DATE_FORMAT);
     return purgeDateFormat.parse(str);
-  }
-
-  /**
-   * Return a string with utf-8 characters replaced with backslash-uxxxx codes.
-   * Useful for debugging.
-   *
-   * @param str
-   * @return printable rendition of non-ASCII utf-8 characters.
-   */
-  public static final String escapeUTF8String(String str) {
-    StringBuilder b = new StringBuilder();
-    for (int i = 0; i < str.length(); ++i) {
-      int code = str.codePointAt(i);
-      if (code < 127) {
-        b.append(str.charAt(i));
-      } else {
-        String val = Integer.toHexString(code);
-        while (val.length() < 4) {
-          val = '0' + val;
-        }
-        b.append("\\u" + val);
-      }
-    }
-    return b.toString();
   }
 
   public static String readResponse(HttpResponse resp) throws IOException {

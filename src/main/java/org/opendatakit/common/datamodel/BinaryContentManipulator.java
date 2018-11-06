@@ -100,48 +100,6 @@ public class BinaryContentManipulator {
 
   /**
    * @param ordinal
-   * @return the uri User performing the last update of this attachment.
-   */
-  public String getLastUpdateUriUser(int ordinal, CallingContext cc) throws ODKDatastoreException {
-    updateAttachments(cc);
-    BinaryContent b = attachments.get(Long.valueOf(ordinal));
-    if (b == null) {
-      // we are somehow out of sync!
-      throw new IllegalStateException("missing attachment declaration");
-    }
-    return b.getLastUpdateUriUser();
-  }
-
-  /**
-   * @param ordinal
-   * @return the creation date of this attachment.
-   */
-  public Date getCreationDate(int ordinal, CallingContext cc) throws ODKDatastoreException {
-    updateAttachments(cc);
-    BinaryContent b = attachments.get(Long.valueOf(ordinal));
-    if (b == null) {
-      // we are somehow out of sync!
-      throw new IllegalStateException("missing attachment declaration");
-    }
-    return b.getCreationDate();
-  }
-
-  /**
-   * @param ordinal
-   * @return the uri User who created this attachment.
-   */
-  public String getCreatorUriUser(int ordinal, CallingContext cc) throws ODKDatastoreException {
-    updateAttachments(cc);
-    BinaryContent b = attachments.get(Long.valueOf(ordinal));
-    if (b == null) {
-      // we are somehow out of sync!
-      throw new IllegalStateException("missing attachment declaration");
-    }
-    return b.getCreatorUriUser();
-  }
-
-  /**
-   * @param ordinal
    * @return the attachment's unrooted file path.
    */
   public String getUnrootedFilename(int ordinal, CallingContext cc) throws ODKDatastoreException {
@@ -626,22 +584,6 @@ public class BinaryContentManipulator {
       }
     }
 
-    public String getTopLevelAuri() {
-      if (dbBcbEntityList.size() == 0) {
-        // blob does not exist!
-        return null;
-      }
-      return dbBcbEntityList.get(0).getTopLevelAuri();
-    }
-
-    public String getVersionedContentKey() {
-      if (dbBcbEntityList.size() == 0) {
-        return null;
-      }
-      // by construction these should all have the same parent...
-      return dbBcbEntityList.get(0).getDomAuri();
-    }
-
     public byte[] getBlob() {
       ByteArrayOutputStream reconstructedBlob = new ByteArrayOutputStream();
       for (RefBlob partialBlob : dbRefBlobList) {
@@ -679,13 +621,6 @@ public class BinaryContentManipulator {
       for (RefBlob r : blobs.values()) {
         keyList.add(r.getEntityKey());
       }
-    }
-
-    public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
-      List<CommonFieldsBase> rows = new ArrayList<CommonFieldsBase>();
-      rows.addAll(dbRefBlobList);
-      rows.addAll(dbBcbEntityList);
-      cc.getDatastore().putEntities(rows, cc.getCurrentUser());
     }
 
   }

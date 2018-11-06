@@ -16,10 +16,6 @@ public enum GmePhotoHostType implements Serializable {
     serviceName = name;
   }
 
-  public String GmePhotoType() {
-    return serviceName;
-  }
-
   public String toString() {
     return serviceName;
   }

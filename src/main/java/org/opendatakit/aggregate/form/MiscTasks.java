@@ -336,10 +336,6 @@ public class MiscTasks {
     }
   }
 
-  public String getRequestingUser() {
-    return row.getStringField(MiscTasksTable.REQUESTING_USER);
-  }
-
   public void setRequestingUser(String value) throws ODKEntityPersistException {
     if (!row.setStringField(MiscTasksTable.REQUESTING_USER, value)) {
       throw new IllegalArgumentException("requestingUser is too long");

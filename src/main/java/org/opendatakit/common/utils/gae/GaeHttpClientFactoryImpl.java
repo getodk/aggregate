@@ -41,10 +41,4 @@ public class GaeHttpClientFactoryImpl implements HttpClientFactory {
 
     return HttpClientBuilder.create().setConnectionManager(new GaeHttpClientConnectionManager(socketConfig, connectionConfig, requestConfig)).build();
   }
-
-  @Override
-  public HttpTransport getGoogleOAuth2Transport() {
-    return new UrlFetchTransport();
-  }
-
 }

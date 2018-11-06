@@ -196,10 +196,6 @@ public abstract class CommonFieldsBase {
     return getDateField(creationDate);
   }
 
-  public final String getLastUpdateUriUser() {
-    return getStringField(lastUpdateUriUser);
-  }
-
   public final Date getLastUpdateDate() {
     return getDateField(lastUpdateDate);
   }

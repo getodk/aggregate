@@ -64,8 +64,6 @@ public interface IForm {
    */
   public EntityKey getEntityKey();
 
-  public SubmissionKey getSubmissionKey();
-
   public FormElementModel getTopLevelGroupElement();
 
   public XFormParameters getRootElementDefn();
@@ -216,8 +214,6 @@ public interface IForm {
    * @param name
    * @return the found element or null if not found.
    */
-  public FormElementModel findElementByName(String name);
-
   public FormElementModel getFormElementModel(List<SubmissionKeyPart> submissionKeyParts);
 
   /**
@@ -229,16 +225,7 @@ public interface IForm {
 
   public List<FormElementModel> getRepeatGroupsInModel();
 
-  public Map<String, FormElementModel> getRepeatElementModels();
-
   public FormSummary generateFormSummary(CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException;
-
-  /**
-   * Prints the data element definitions to the print stream specified
-   *
-   * @param out Print stream to send the output to
-   */
-  public void printDataTree(PrintStream out);
 
   public void setIsComplete(Boolean value);
 

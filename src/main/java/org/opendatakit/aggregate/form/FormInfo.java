@@ -41,10 +41,6 @@ public class FormInfo {
     return URI_FORM_ID_VALUE_FORM_INFO.equals(formId);
   }
 
-  public static SubmissionKey getSubmissionKey(String uri) {
-    return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" + FormInfoTable.TABLE_NAME + "[@key=" + uri + "]");
-  }
-
   public static boolean validFormKey(List<SubmissionKeyPart> parts) {
 
     // only allow retrieval of binary data from within the FormInfo definition.
@@ -124,10 +120,4 @@ public class FormInfo {
         ELEMENT_NAME_MANIFEST_FILESET + "[@ordinal=" + i + "]");
   }
 
-  public static SubmissionKey getXformSubmissionKey(String uri, int i) {
-    return new SubmissionKey(URI_FORM_ID_VALUE_FORM_INFO + "[@version=1 and @uiVersion=0]/" +
-        FormInfoTable.TABLE_NAME + "[@key=" + uri + "]/" +
-        FormInfoFilesetTable.TABLE_NAME + "[@ordinal=1]/" +
-        ELEMENT_NAME_XFORM_DEFINITION + "[@ordinal=" + i + "]");
-  }
 }
