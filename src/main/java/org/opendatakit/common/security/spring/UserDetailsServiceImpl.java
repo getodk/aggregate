@@ -51,6 +51,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
   private PasswordType passwordType = PasswordType.Random;
   private CredentialType credentialType = CredentialType.Username;
   private Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+
   UserDetailsServiceImpl() {
   }
 

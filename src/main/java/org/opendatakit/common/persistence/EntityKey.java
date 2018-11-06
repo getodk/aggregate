@@ -20,7 +20,6 @@ package org.opendatakit.common.persistence;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class EntityKey {
 
@@ -37,8 +36,7 @@ public class EntityKey {
   /**
    * Construct an EntityKey using the given relation name and key.
    *
-   * @param key
-   *            the key which corresponds to the Entity
+   * @param key the key which corresponds to the Entity
    */
   public EntityKey(CommonFieldsBase b, String key) {
     this.relation = b;
@@ -49,7 +47,7 @@ public class EntityKey {
    * Returns the relation which this EntityKey refers to.
    *
    * @return a String representing the relation name which this EntityKey
-   *         refers to
+   *     refers to
    */
   public CommonFieldsBase getRelation() {
     return relation;

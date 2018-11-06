@@ -19,7 +19,6 @@ package org.opendatakit.common.persistence;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public interface ITaskLockType {
 

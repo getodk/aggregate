@@ -45,10 +45,8 @@ import org.opendatakit.common.security.User;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class DatastoreImpl implements Datastore {
 

@@ -35,10 +35,8 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCallbackFormatter {
 
@@ -138,8 +136,7 @@ public class JsonFormatterWithFilters implements SubmissionFormatter, RepeatCall
    * Helper function used to convert row to a JSON object and append to the
    * stream
    *
-   * @param itr
-   *          string values to be separated by commas
+   * @param itr string values to be separated by commas
    */
   private void appendJsonObject(Iterator<String> itr) {
     output.append(BasicConsts.LEFT_BRACE);

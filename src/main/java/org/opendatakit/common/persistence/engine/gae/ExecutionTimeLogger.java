@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
  * Logs that time if the execution exceeds the cost logging threshold.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 final class ExecutionTimeLogger {
 

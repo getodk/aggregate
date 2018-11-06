@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOpti
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.ExternalServiceUtils;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;

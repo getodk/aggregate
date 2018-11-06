@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.task;
 
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;

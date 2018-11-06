@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 @RemoteServiceRelativePath("submissionservice")
 public interface SubmissionService extends RemoteService {

@@ -37,7 +37,6 @@ import org.opendatakit.common.utils.WebCursorUtils;
  * preceding the resume point.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class QueryResumePoint {
 

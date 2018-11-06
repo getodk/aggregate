@@ -41,7 +41,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -51,10 +50,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
@@ -823,6 +820,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     private Integer numericPrecision = null;
     private boolean isDoublePrecision = false;
     private DataField.DataType dataType;
+
     TableDefinition(ResultSet rs) throws SQLException {
       columnName = rs.getString(COLUMN_NAME);
       String s = rs.getString(IS_NULLABLE);

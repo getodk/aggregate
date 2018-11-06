@@ -64,7 +64,6 @@ import java.util.regex.Pattern;
  * <p>
  *
  * @author mitchellsundt@gmail.com
- *
  */
 class Naming {
 
@@ -80,8 +79,7 @@ class Naming {
   /**
    * Converts the string to a SQL naming
    *
-   * @param xmlString
-   *            the xml tag name
+   * @param xmlString the xml tag name
    */
   public static final String toPersistenceNaming(final String xmlString) {
     final StringBuilder sb = new StringBuilder();

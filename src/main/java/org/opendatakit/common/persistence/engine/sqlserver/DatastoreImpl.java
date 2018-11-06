@@ -44,7 +44,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -54,10 +53,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
@@ -842,11 +839,11 @@ public class DatastoreImpl implements Datastore, InitializingBean {
         + "c.object_id = tn.object_id and tn.schema_id = s.schema_id and "
         + "c.system_type_id = t.system_type_id and c.user_type_id = t.user_type_id and "
         + " s.name = " + K_BIND_VALUE + " and tn.name = " + K_BIND_VALUE;
-    public static final String TABLE_DEF_QUERY = "select s.name as \"schema_name\", tn.name as table_name, c.name as column_name, "
-        + "c.is_nullable, c.max_length as \"character_maximum_length\", "
-        + "c.precision as \"numeric_precision\", c.scale as \"numeric_scale\", t.name as \"data_type\" "
+    public static final String TABLE_DEF_QUERY = "SELECT s.name AS \"schema_name\", tn.name AS table_name, c.name AS column_name, "
+        + "c.is_nullable, c.max_length AS \"character_maximum_length\", "
+        + "c.precision AS \"numeric_precision\", c.scale AS \"numeric_scale\", t.name AS \"data_type\" "
         + TABLE_DEF_FROM_WHERE_CLAUSE;
-    public static final String TABLE_EXISTS_QUERY = "select count(1) "
+    public static final String TABLE_EXISTS_QUERY = "SELECT count(1) "
         + TABLE_DEF_FROM_WHERE_CLAUSE;
     private static final String BIT = "bit";
     private static final String VARBINARY = "varbinary";
@@ -863,6 +860,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     private Integer numericPrecision = null;
     private boolean isDoublePrecision = false;
     private DataField.DataType dataType;
+
     TableDefinition(ResultSet rs) throws SQLException {
       columnName = rs.getString(COLUMN_NAME);
       int i = rs.getInt(IS_NULLABLE);

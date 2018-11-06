@@ -25,10 +25,8 @@ import org.opendatakit.common.security.User;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class RelationRowMapper implements RowMapper<CommonFieldsBase> {
 

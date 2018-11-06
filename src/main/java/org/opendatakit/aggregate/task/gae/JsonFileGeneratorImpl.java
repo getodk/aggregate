@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.JsonFileGenerator;
 import org.opendatakit.aggregate.task.gae.servlet.JsonGeneratorTaskServlet;
 import org.opendatakit.common.persistence.PersistConsts;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**

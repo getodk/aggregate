@@ -71,7 +71,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public final class FormDataModel extends CommonFieldsBase {
 
@@ -85,7 +84,9 @@ public final class FormDataModel extends CommonFieldsBase {
   private static final String TABLE_NAME = "_form_data_model";
   private static final DataField PARENT_URI_FORM_DATA_MODEL = new DataField(
       "PARENT_URI_FORM_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
-  /** ordinal (1st, 2nd, ... ) of this item in the form element */
+  /**
+   * ordinal (1st, 2nd, ... ) of this item in the form element
+   */
   private static final DataField ORDINAL_NUMBER = new DataField("ORDINAL_NUMBER",
       DataField.DataType.INTEGER, false);
   private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE",
@@ -106,10 +107,11 @@ public final class FormDataModel extends CommonFieldsBase {
   ;
   private CommonFieldsBase backingObject = null;
   private DataField backingKey = null;
+
   /**
    * Constructor to create the relation prototype. Only called via
    * {@link #assertRelation(CallingContext)}
-   *
+   * <p>
    * Note that the backing relation is not created by this constructor.
    */
   FormDataModel(String schemaName) {
@@ -123,9 +125,10 @@ public final class FormDataModel extends CommonFieldsBase {
     fieldList.add(PERSIST_AS_TABLE_NAME);
     fieldList.add(PERSIST_AS_SCHEMA_NAME);
   }
+
   /**
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
+   * <p>
    * Note that the backing relation is not created by this constructor.
    */
   private FormDataModel(FormDataModel ref, User user) {
@@ -136,7 +139,7 @@ public final class FormDataModel extends CommonFieldsBase {
    * Predicate function for determining whether a given field is one that is
    * expected to be stored within a data table, vs. in a special auxiliary
    * table. Returns true if it is stored in a data table.
-   *
+   * <p>
    * This predicate function is used to determine if a parent FormDataModel is
    * divided across multiple data tables.
    */
@@ -177,7 +180,7 @@ public final class FormDataModel extends CommonFieldsBase {
 
   /**
    * Reset the linked up values so FormDefinition can construct a new model.
-   *
+   * <p>
    * Called by the FormParserForJavaRosa to reset the FDM prior to trying once
    * again to create the relations it describes.
    */

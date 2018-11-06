@@ -23,7 +23,6 @@ import org.opendatakit.common.persistence.WrappedBigDecimal;
  * Track the attributes that we are querying and sorting on...
  *
  * @author mitchellsundt@gmail.com
- *
  */
 abstract class Tracker {
   final DataField attribute;

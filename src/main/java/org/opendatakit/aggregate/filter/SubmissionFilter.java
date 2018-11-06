@@ -33,7 +33,6 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
@@ -77,7 +76,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     super(ref, user);
   }
 
-  private static synchronized final SubmissionFilter assertRelation(CallingContext cc)      throws ODKDatastoreException {
+  private static synchronized final SubmissionFilter assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       SubmissionFilter relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -90,7 +89,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     return relation;
   }
 
-  static final SubmissionFilter transform(Filter filter, SubmissionFilterGroup filterGroup,                                          CallingContext cc) throws ODKDatastoreException {
+  static final SubmissionFilter transform(Filter filter, SubmissionFilterGroup filterGroup, CallingContext cc) throws ODKDatastoreException {
 
     SubmissionFilter relation = assertRelation(cc);
     String uri = filter.getUri();
@@ -129,7 +128,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     return subFilter;
   }
 
-  static final List<SubmissionFilter> getFilterList(String uriFilterGroup, CallingContext cc)      throws ODKDatastoreException {
+  static final List<SubmissionFilter> getFilterList(String uriFilterGroup, CallingContext cc) throws ODKDatastoreException {
     SubmissionFilter relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, "SubmissionFilter.getFilterList", cc.getCurrentUser());
     query.addFilter(SubmissionFilter.URI_FILTER_GROUP_PROPERTY,

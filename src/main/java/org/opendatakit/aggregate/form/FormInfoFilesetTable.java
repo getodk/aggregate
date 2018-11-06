@@ -80,6 +80,7 @@ public class FormInfoFilesetTable extends DynamicBase {
 
     fieldValueMap.put(primaryKey, FormInfoFilesetTable.URI_FORM_ID_VALUE_FORM_INFO_FILESET);
   }
+
   private FormInfoFilesetTable(FormInfoFilesetTable ref, User user) {
     super(ref, user);
   }

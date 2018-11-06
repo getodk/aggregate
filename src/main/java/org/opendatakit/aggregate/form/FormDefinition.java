@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public class FormDefinition {
 
@@ -68,22 +67,34 @@ public class FormDefinition {
    * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.
    * If forms are deleted and reloaded, they get a different key each time.
    * The key is defined in the SubmissionAssociationTable.
-   *
+   * <p>
    * NOTE: should only be accessed via synchronized methods to get or remove forms.
    */
   private static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
 
-  /** the entity that defines the mapping of the form id to this data model */
+  /**
+   * the entity that defines the mapping of the form id to this data model
+   */
   private final SubmissionAssociationTable submissionAssociation;
-  /** list of all the elements in this submission definition */
+  /**
+   * list of all the elements in this submission definition
+   */
   private final List<FormDataModel> elementList = new ArrayList<FormDataModel>();
-  /** list of all tables (form, repeat group and auxillary) */
+  /**
+   * list of all tables (form, repeat group and auxillary)
+   */
   private final List<FormDataModel> tableList = new ArrayList<FormDataModel>();
-  /** list of non-repeat groups in xform */
+  /**
+   * list of non-repeat groups in xform
+   */
   private final List<FormDataModel> groupList = new ArrayList<FormDataModel>();
-  /** list of structured fields in xform */
+  /**
+   * list of structured fields in xform
+   */
   private final List<FormDataModel> geopointList = new ArrayList<FormDataModel>();
-  /** map from fully qualified tableName to CFB definition */
+  /**
+   * map from fully qualified tableName to CFB definition
+   */
   private final Map<String, DynamicCommonFieldsBase> backingTableMap;
   private final String qualifiedTopLevelTable;
   private final String formId;
@@ -411,8 +422,8 @@ public class FormDefinition {
    * put operation on the map, but also aids in efficient quota usage during periods of intense start-up.
    *
    * @return The definition.  The uriSubmissionDataModel is used to ensure that the
-   *          currently valid definition of a form is being used (should the form be
-   *          deleted then reloaded).
+   *     currently valid definition of a form is being used (should the form be
+   *     deleted then reloaded).
    */
   public static synchronized final FormDefinition getFormDefinition(String formId, CallingContext cc) {
 

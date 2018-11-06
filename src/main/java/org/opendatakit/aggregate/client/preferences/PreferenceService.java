@@ -20,8 +20,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 /**
  * These actions require the ROLE_USER privilege, which is the least capable

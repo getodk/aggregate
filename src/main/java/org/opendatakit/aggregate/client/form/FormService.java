@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 /**
  * These are the APIs available to users with the ROLE_DATA_VIEWER privilege.

@@ -28,15 +28,11 @@ import java.io.Writer;
  */
 public class RFC4180CsvWriter {
 
-  private final BufferedWriter bw;
-
   private static final char CR_CHAR_INDEX = 13;
-
   private static final char LF_CHAR_INDEX = 10;
-
   private static final char SEPARATOR_CHAR = ',';
-
   private static final char QUOTE_CHAR = '"';
+  private final BufferedWriter bw;
 
   public RFC4180CsvWriter(Writer writer) {
     this.bw = new BufferedWriter(writer);

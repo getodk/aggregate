@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.task.gae;
 
 import java.util.Map;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.task.KmlGenerator;

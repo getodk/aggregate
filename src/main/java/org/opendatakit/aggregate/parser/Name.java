@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.parser;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 final class Name {
   final String schema;

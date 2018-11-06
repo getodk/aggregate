@@ -13,7 +13,6 @@
  */
 package org.opendatakit.common.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.persistence.PersistConsts;
@@ -21,9 +20,9 @@ import org.opendatakit.common.security.User;
 
 
 /**
- * All instance data for an xform is stored in tables derived from 
- * InstanceDataBase or TopLevelInstanceDataBase tables.  The 
- * TopLevelInstanceDataBase table holds the metadata about the 
+ * All instance data for an xform is stored in tables derived from
+ * InstanceDataBase or TopLevelInstanceDataBase tables.  The
+ * TopLevelInstanceDataBase table holds the metadata about the
  * submission, whereas the repeat groups (the InstanceDataBase tables)
  * do not.
  * <p>
@@ -34,15 +33,20 @@ import org.opendatakit.common.security.User;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public abstract class DynamicAssociationBase extends DynamicCommonFieldsBase {
 
-  /** key into the dynamic table for the dominant relation */
+  /**
+   * key into the dynamic table for the dominant relation
+   */
   private static final DataField DOM_AURI = new DataField("_DOM_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  /** key into the dynamic table for the subordinate relation */
+  /**
+   * key into the dynamic table for the subordinate relation
+   */
   private static final DataField SUB_AURI = new DataField("_SUB_AURI", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
-  /** key into the top level dynamic table that is our ancestor */
+  /**
+   * key into the top level dynamic table that is our ancestor
+   */
   private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 
   public final DataField domAuri;

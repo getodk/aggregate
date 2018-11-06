@@ -57,7 +57,6 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -241,7 +240,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
    * This is the schema name concatenated with the table name. Used during table
    * creation to track the mapping from datastore tables to CommonFieldsBase
    * objects.
-   *
    */
   private String tableKey(CommonFieldsBase tbl) {
     return tbl.getSchemaName() + "." + tbl.getTableName();
@@ -750,7 +748,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   /**
    * The creation of the tbl relation has failed. We need to split it into
    * multiple sub-tables and try again.
-   *
    */
   private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdmRelation,
                                   CommonFieldsBase tbl, NamingSet opaque, CallingContext cc) {

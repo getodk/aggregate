@@ -21,9 +21,9 @@ import org.opendatakit.common.security.User;
 
 
 /**
- * All instance data for an xform is stored in tables derived from 
- * InstanceDataBase or TopLevelInstanceDataBase tables.  The 
- * TopLevelInstanceDataBase table holds the metadata about the 
+ * All instance data for an xform is stored in tables derived from
+ * InstanceDataBase or TopLevelInstanceDataBase tables.  The
+ * TopLevelInstanceDataBase table holds the metadata about the
  * submission, whereas the repeat groups (the InstanceDataBase tables)
  * do not.
  * <p>
@@ -34,18 +34,25 @@ import org.opendatakit.common.security.User;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public abstract class DynamicBase extends DynamicCommonFieldsBase {
 
-  /** dynamic */
+  /**
+   * dynamic
+   */
   public static final int ADDITIONAL_COLUMN_COUNT = 3 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
 
-  /** key into the dynamic table that is our parent container */
+  /**
+   * key into the dynamic table that is our parent container
+   */
   private static final DataField PARENT_AURI = new DataField("_PARENT_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  /** ordinal (1st, 2nd, ... ) of this item in the form element */
+  /**
+   * ordinal (1st, 2nd, ... ) of this item in the form element
+   */
   private static final DataField ORDINAL_NUMBER = new DataField("_ORDINAL_NUMBER", DataField.DataType.INTEGER, false);
-  /** key into the top level dynamic table that is our ancestor */
+  /**
+   * key into the top level dynamic table that is our ancestor
+   */
   private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 
   public final DataField parentAuri;

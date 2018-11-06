@@ -21,7 +21,6 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
  * Accumulates the results into a list of values.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 final class CoreResultContainer implements ResultContainer {
   private List<CommonFieldsBase> odkEntities = new ArrayList<CommonFieldsBase>();

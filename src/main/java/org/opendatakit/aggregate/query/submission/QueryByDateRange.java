@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.submission.Submission;

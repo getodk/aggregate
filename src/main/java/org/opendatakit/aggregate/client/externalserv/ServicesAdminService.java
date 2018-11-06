@@ -24,7 +24,6 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 /**
  * These are the actions requiring the ROLE_DATA_OWNER privilege.  They

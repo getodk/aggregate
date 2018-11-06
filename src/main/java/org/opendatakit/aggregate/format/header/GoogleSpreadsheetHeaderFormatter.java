@@ -43,10 +43,9 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
    * but additionally includes the parent UID of the form as the first header,
    * and removes all unsafe characters from the headers.
    *
-   * @param rootGroup
-   *          the group of the xform that contains several values that will be
-   *          used to generate the headers. The node should correspond to a
-   *          SubmissionSet, not a SubmissionValue.
+   * @param rootGroup the group of the xform that contains several values that will be
+   *                  used to generate the headers. The node should correspond to a
+   *                  SubmissionSet, not a SubmissionValue.
    */
   @Override
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup,

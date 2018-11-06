@@ -19,7 +19,6 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
  * Common interface for list and distinct-value result containers.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 interface ResultContainer {
   public void add(CommonFieldsBase record);

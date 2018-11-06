@@ -19,7 +19,6 @@ import java.io.Serializable;
  * Wrapper object for communicating a resume point up to the GWT UI layer.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class UIQueryResumePoint implements Serializable {
   /**

@@ -49,7 +49,6 @@ import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
 public class SubmissionServiceImpl extends RemoteServiceServlet implements

@@ -15,10 +15,6 @@
  */
 package org.opendatakit.common.security;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 /**
  * Helpful utilities used by presentation layer and security services layers.
  *

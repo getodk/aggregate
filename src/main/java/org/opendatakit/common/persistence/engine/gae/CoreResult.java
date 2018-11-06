@@ -18,12 +18,11 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 
 /**
  * Returns results from QueryImpl.coreExecuteQuery(...).
- * The returned results are then used to build the value 
+ * The returned results are then used to build the value
  * list and QueryResumePoint values of the QueryResult
  * object.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 final class CoreResult {
   final List<CommonFieldsBase> results;

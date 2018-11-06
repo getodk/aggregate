@@ -118,7 +118,7 @@ public class Oauth2AuthenticationProvider implements AuthenticationProvider, Ini
    * The default implementation just creates a new OutOfBandAuthenticationToken from the original, but with the
    * UserDetails as the principal and including the authorities loaded by the UserDetailsService.
    *
-   * @param auth        the token passed to the authenticate method, containing
+   * @param auth the token passed to the authenticate method, containing
    * @return the token which will represent the authenticated user.
    */
   protected Authentication createSuccessfulAuthentication(

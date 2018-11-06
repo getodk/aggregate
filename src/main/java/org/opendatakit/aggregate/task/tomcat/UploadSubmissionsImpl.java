@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;

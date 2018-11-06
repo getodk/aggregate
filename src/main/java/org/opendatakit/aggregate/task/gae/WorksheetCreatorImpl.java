@@ -19,7 +19,6 @@ import java.util.Map;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.task.WorksheetCreator;

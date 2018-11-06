@@ -26,7 +26,6 @@ import org.opendatakit.common.persistence.WrappedBigDecimal;
  * Tracks the simple comparison filters to apply to the result set.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 final class SimpleFilterTracker extends Tracker {
   final FilterOperation op;

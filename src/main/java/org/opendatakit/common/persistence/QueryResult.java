@@ -28,7 +28,6 @@ import java.util.List;
  * QueryResult into that new query object to obtain the preceding elements.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class QueryResult {
 

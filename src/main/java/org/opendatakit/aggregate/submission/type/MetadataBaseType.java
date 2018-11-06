@@ -18,15 +18,12 @@ package org.opendatakit.aggregate.submission.type;
 
 import java.util.List;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.aggregate.submission.SubmissionVisitor;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
 
 public abstract class MetadataBaseType<T> implements SubmissionField<T> {

@@ -47,9 +47,7 @@ import org.opendatakit.common.web.CallingContext;
  * example, each binary form element gets its own set of 3 attachment relations.
  * <p>
  *
- *
  * @author mitchellsundt@gmail.com
- *
  */
 public class BinaryContentManipulator {
 
@@ -62,6 +60,7 @@ public class BinaryContentManipulator {
   private final Map<Long, BinaryContent> attachments = new HashMap<Long, BinaryContent>();
   // implement lazy access to the attachment fields
   private boolean refreshBeforeUse = true;
+
   public BinaryContentManipulator(String parentKey, String topLevelKey, BinaryContent ctntRelation,
                                   BinaryContentRefBlob vrefRelation, RefBlob blbRelation) {
     this.parentKey = parentKey;
@@ -200,7 +199,7 @@ public class BinaryContentManipulator {
    * Everything non-null or unrootedFilePath non-null and everything else null.
    *
    * @return COMPLETELY_NEW_FILE on successful save; FILE_UNCHANGED on hash
-   *         equivalence; NEW_FILE_VERSION on updating existing file (save not allowed unless overwriteOK).
+   *     equivalence; NEW_FILE_VERSION on updating existing file (save not allowed unless overwriteOK).
    */
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
                                                                               String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)

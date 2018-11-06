@@ -13,15 +13,12 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
-import java.sql.SQLException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.security.User;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class EntityRowMapper {
 

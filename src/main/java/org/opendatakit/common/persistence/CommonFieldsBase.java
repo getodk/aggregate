@@ -34,7 +34,6 @@ import org.opendatakit.common.security.User;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public abstract class CommonFieldsBase {
 
@@ -48,20 +47,30 @@ public abstract class CommonFieldsBase {
 
   /* standard audit fields */
 
-  /** creator */
+  /**
+   * creator
+   */
   private static final DataField CREATOR_URI_USER = new DataField(CREATOR_URI_USER_COLUMN_NAME,
       DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
-  /** creation date */
+  /**
+   * creation date
+   */
   private static final DataField CREATION_DATE = new DataField(CREATION_DATE_COLUMN_NAME,
       DataField.DataType.DATETIME, false);
-  /** last user to update record */
+  /**
+   * last user to update record
+   */
   private static final DataField LAST_UPDATE_URI_USER = new DataField(
       LAST_UPDATE_URI_USER_COLUMN_NAME, DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
-  /** last update date */
+  /**
+   * last update date
+   */
   private static final DataField LAST_UPDATE_DATE = new DataField(LAST_UPDATE_DATE_COLUMN_NAME,
       DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);
 
-  /** primary key for all tables */
+  /**
+   * primary key for all tables
+   */
   private static final DataField URI = new DataField(URI_COLUMN_NAME, DataField.DataType.URI,
       false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   public final DataField primaryKey;
@@ -69,7 +78,9 @@ public abstract class CommonFieldsBase {
   public final DataField creationDate;
   public final DataField lastUpdateUriUser;
   public final DataField lastUpdateDate;
-  /** member variables */
+  /**
+   * member variables
+   */
   protected final String schemaName;
   protected final String tableName;
   protected final List<DataField> fieldList = new ArrayList<DataField>();

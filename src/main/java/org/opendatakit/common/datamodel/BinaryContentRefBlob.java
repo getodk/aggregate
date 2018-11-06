@@ -25,13 +25,12 @@ import org.opendatakit.common.security.User;
  * <p>
  * The handling of parts supports massive binary objects that are too big
  * to store as a single blob.  The blob parts aren't stored in this table
- * so that the full index of blob parts can be retrieved at once, without 
+ * so that the full index of blob parts can be retrieved at once, without
  * also requiring that all the blob parts be in memory at the same time.
  * This supports the future streaming of attachments.
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public final class BinaryContentRefBlob extends DynamicAssociationBase {
 

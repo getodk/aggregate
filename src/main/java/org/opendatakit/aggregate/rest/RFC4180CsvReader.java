@@ -49,7 +49,7 @@ public class RFC4180CsvReader {
   /**
    * Constructs CSVReader with supplied separator and quote char.
    *
-   * @param reader    the reader to an underlying CSV source.
+   * @param reader the reader to an underlying CSV source.
    */
   public RFC4180CsvReader(Reader reader) {
     this.br = new BufferedReader(reader);

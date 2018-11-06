@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;

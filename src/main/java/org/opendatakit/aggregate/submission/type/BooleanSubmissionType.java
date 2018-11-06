@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
@@ -34,7 +33,6 @@ import org.opendatakit.common.web.CallingContext;
 public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
   /**
    * Constructor
-   *
    */
   public BooleanSubmissionType(DynamicCommonFieldsBase backingObject,
                                FormElementModel element) {

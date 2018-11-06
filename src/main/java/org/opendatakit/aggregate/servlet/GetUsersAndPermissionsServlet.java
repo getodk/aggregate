@@ -20,7 +20,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeSet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.CharEncoding;
@@ -32,7 +31,6 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;

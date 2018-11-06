@@ -14,21 +14,20 @@
 package org.opendatakit.common.persistence;
 
 /**
- * DataField bridges the layer between the persistence implementation and 
+ * DataField bridges the layer between the persistence implementation and
  * the upper layers of the Entity.  The upper layers assume immutable
  * properties of:
  * <ul><li>name</li><li>dataType</li></ul>
- * The underlying layers handle treatments to adjust for the maximum 
- * character length that can be stored in the field.  Precision of 
+ * The underlying layers handle treatments to adjust for the maximum
+ * character length that can be stored in the field.  Precision of
  * retained values is handled by whatever rounding is enforced at the
  * database layer.  So if you put in a 10-significant-digit number but
- * only 8 digits of precision are configured, rounding will occur. 
+ * only 8 digits of precision are configured, rounding will occur.
  * <p>Note that DATETIME values may be rounded to the nearest second.
  * See {@link PersistConsts} for limitations.
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public final class DataField {
 
@@ -40,31 +39,33 @@ public final class DataField {
   private Integer numericPrecision;
   private IndexType indexable = IndexType.NONE; // clue for persistence layer to define index.
   private boolean isDoublePrecision = false;
+
   /**
    * Constructor for most uses.
    * <ul>
    * <li>Strings default to 250 characters.</li>
    * <li>Integers to 32-bit values.</li>
    * <li>Decimals to double-precision values.</li></ul>
-   *  If you are looking for blobs or long text, see the BinaryContentManipulator class.
+   * If you are looking for blobs or long text, see the BinaryContentManipulator class.
    *
    * @param name The standard naming convention for database persistence layers
-   *          is underscore-delimited all-upper-case names.  E.g.,
-   *          in Java, you might name a variable "descriptiveDataValue".
-   *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
+   *             is underscore-delimited all-upper-case names.  E.g.,
+   *             in Java, you might name a variable "descriptiveDataValue".
+   *             in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
    */
   public DataField(String name, DataType dataType, boolean nullable) {
     this(name, dataType, nullable, null, null, null);
   }
+
   /**
    * Constructor for string fields that are longer than 250 characters.
    * The underlying datastore does not allow any one entity to be larger than
    * about 65000 bytes.  Documents should use binary content tables.
    *
    * @param name The standard naming convention for database persistence layers
-   *          is underscore-delimited all-upper-case names.  E.g.,
-   *          in Java, you might name a variable "descriptiveDataValue".
-   *          in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
+   *             is underscore-delimited all-upper-case names.  E.g.,
+   *             in Java, you might name a variable "descriptiveDataValue".
+   *             in the perisistence layer, this would typically be named "DESCRIPTIVE_DATA_VALUE".
    */
   public DataField(String name, DataType dataType, boolean nullable, Long maxCharLen) {
     this(name, dataType, nullable, maxCharLen, null, null);
@@ -145,10 +146,8 @@ public final class DataField {
   }
 
   public static enum DataType {
-    BINARY /* blobs -- see BinaryContentManipulator */
-    ,
-    LONG_STRING /* text -- i.e., utf-8 blob */
-    ,
+    BINARY /* blobs -- see BinaryContentManipulator */,
+    LONG_STRING /* text -- i.e., utf-8 blob */,
     STRING, INTEGER, DECIMAL, BOOLEAN, DATETIME,
     URI /* URI is a string of length 80 characters */
   }

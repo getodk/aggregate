@@ -154,6 +154,7 @@ public class BaseFormParserForJavaRosa {
   private final Map<String, Integer> stringLengths = new HashMap<String, Integer>();
   // original bindings from parse-time for later comparison
   private final List<Element> bindElements = new ArrayList<Element>();
+
   /**
    * Alternate constructor for internally comparing whether two form definitions
    * share the same data elements and storage models. This just parses the

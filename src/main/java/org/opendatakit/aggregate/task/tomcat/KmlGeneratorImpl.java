@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.submission.SubmissionKey;

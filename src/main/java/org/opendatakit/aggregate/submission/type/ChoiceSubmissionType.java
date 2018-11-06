@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.SelectChoice;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;

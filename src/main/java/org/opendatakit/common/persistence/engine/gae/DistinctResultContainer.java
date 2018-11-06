@@ -19,11 +19,10 @@ import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 
 /**
- * Implementation of a result container that uses a Set to 
+ * Implementation of a result container that uses a Set to
  * accumulate the distinct values returned from a Query.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 final class DistinctResultContainer implements ResultContainer {
   private final DataField dataField;

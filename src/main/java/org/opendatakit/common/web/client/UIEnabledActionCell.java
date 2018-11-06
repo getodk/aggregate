@@ -45,6 +45,7 @@ public class UIEnabledActionCell<T> extends AbstractCell<T> {
                              UIEnabledActionCell.Delegate<T> delegate) {
     this(SafeHtmlUtils.fromString(text), isVisiblePredicate, isEnabledPredicate, delegate);
   }
+
   public UIEnabledActionCell(SafeHtml text, UIVisiblePredicate<T> isVisiblePredicate,
                              UIEnabledPredicate<T> isEnabledPredicate,
                              UIEnabledActionCell.Delegate<T> delegate) {
@@ -99,7 +100,6 @@ public class UIEnabledActionCell<T> extends AbstractCell<T> {
 
   /**
    * The delegate that will handle events from the cell.
-   *
    */
   public static interface Delegate<C> {
     /**

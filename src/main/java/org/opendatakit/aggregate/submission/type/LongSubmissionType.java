@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -33,7 +32,6 @@ import org.opendatakit.common.web.CallingContext;
 public class LongSubmissionType extends SubmissionSingleValueBase<Long> {
   /**
    * Constructor
-   *
    */
   public LongSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);

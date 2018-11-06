@@ -16,9 +16,7 @@
 package org.opendatakit.aggregate.datamodel;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.web.CallingContext;
 
@@ -35,11 +33,13 @@ public final class FormElementModel {
   private final FormDataModel fdm;
   private final List<FormElementModel> children = new ArrayList<FormElementModel>();
   private final FormElementModel parent;
+
   FormElementModel(FormElementModel parent, Metadata type) {
     fdm = null;
     this.parent = parent;
     this.type = type;
   }
+
   FormElementModel(final FormDataModel fdm, final FormElementModel parent) {
     this.fdm = fdm;
     this.parent = parent;
@@ -327,7 +327,6 @@ public final class FormElementModel {
    * the collapsed entity sets of the SubmissionSet for its construction (i.e.,
    * they are different construction methodologies, so there is a risk of
    * divergence).
-   *
    */
   private final String getFullyQualifiedElementName(IForm form) {
 

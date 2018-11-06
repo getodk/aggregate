@@ -82,7 +82,6 @@ public class FormTable extends FlexTable {
 
   /**
    * Update the list of forms
-   *
    */
   public void updateFormTable(ArrayList<FormSummary> forms) {
     int i = 0;

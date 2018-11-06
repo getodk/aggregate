@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.utils.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +24,11 @@ import org.slf4j.LoggerFactory;
  * Tracks the access patterns for the datastore layer. Useful for identifying
  * inefficient datastore access patterns and minimizing excessive read/write
  * actions.
- *
+ * <p>
  * Note that if you create and delete many tables and don't reuse table names,
  * the tableMap and count arrays will grow without bounds.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public final class DatastoreAccessMetrics {
 
@@ -47,6 +45,7 @@ public final class DatastoreAccessMetrics {
   private short nextCountIdx = 0;
   private int readCount = 0;
   private long lastLogging = 0L;
+
   public DatastoreAccessMetrics() {
   }
 
@@ -136,7 +135,7 @@ public final class DatastoreAccessMetrics {
 
   /**
    * Maintain a tally of which tables those actions were against.
-   *
+   * <p>
    * NOTE: this is NOT thread-safe. All accesses should occur only from within
    * synchronized methods.
    */

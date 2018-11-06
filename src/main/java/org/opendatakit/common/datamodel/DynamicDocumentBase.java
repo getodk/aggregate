@@ -15,7 +15,6 @@
  */
 package org.opendatakit.common.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.security.User;

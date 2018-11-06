@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.JsonFileGenerator;
 import org.opendatakit.aggregate.task.JsonFileWorkerImpl;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**

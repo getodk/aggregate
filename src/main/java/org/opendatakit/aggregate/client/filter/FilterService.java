@@ -18,10 +18,8 @@ package org.opendatakit.aggregate.client.filter;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 @RemoteServiceRelativePath("filterservice")
 public interface FilterService extends RemoteService {

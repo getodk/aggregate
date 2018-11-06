@@ -28,6 +28,7 @@ public final class KmlGeoTraceNShapeOption implements Serializable {
   private GeoTraceNShapeType type;
   private KmlOptionSetting geoElement;
   private ArrayList<KmlOptionSetting> nameNodes = new ArrayList<KmlOptionSetting>();
+
   // default constructor required
   public KmlGeoTraceNShapeOption() {
 

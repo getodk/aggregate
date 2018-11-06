@@ -28,7 +28,6 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -44,7 +43,6 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
 
   /**
    * Constructor
-   *
    */
   public GeoPointSubmissionType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);

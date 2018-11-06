@@ -32,7 +32,6 @@ import org.xmlpull.v1.XmlPullParser;
  * Useful methods for parsing boolean and date values and formatting dates.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class WebCursorUtils {
 

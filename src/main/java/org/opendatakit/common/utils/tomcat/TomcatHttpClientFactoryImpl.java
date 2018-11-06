@@ -15,10 +15,6 @@
  */
 package org.opendatakit.common.utils.tomcat;
 
-import com.google.api.client.googleapis.apache.GoogleApacheHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.SocketConfig;
