@@ -109,7 +109,7 @@ public class WatchdogWorkerImpl {
   }
 
   public void checkTasks(CallingContext cc) throws ODKExternalServiceException,
-      ODKFormNotFoundException, ODKDatastoreException, ODKIncompleteSubmissionData {
+      ODKFormNotFoundException, ODKDatastoreException {
     logger.info("---------------------BEGIN Watchdog");
     boolean cullThisWatchdog = false;
     boolean activeTasks = true;
@@ -145,8 +145,7 @@ public class WatchdogWorkerImpl {
   }
 
   private boolean checkFormServiceCursors(UploadSubmissions uploadSubmissions, CallingContext cc)
-      throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException,
-      ODKIncompleteSubmissionData {
+      throws ODKExternalServiceException, ODKFormNotFoundException, ODKDatastoreException {
 
     Date olderThanDate = new Date(System.currentTimeMillis()
         - BackendActionsTable.PUBLISHING_DELAY_MILLISECONDS);
@@ -269,7 +268,7 @@ public class WatchdogWorkerImpl {
    */
   private boolean checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions,
                                  CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException,
-      ODKExternalServiceException, ODKIncompleteSubmissionData {
+      ODKExternalServiceException {
     logger.info("Checking streaming for " + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
     // get the last submission sent to the external service
     IForm form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);

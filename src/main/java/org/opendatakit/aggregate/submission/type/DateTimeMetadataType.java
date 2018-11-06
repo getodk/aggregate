@@ -39,8 +39,7 @@ public class DateTimeMetadataType extends MetadataBaseType<Date> {
 
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row,
-                          String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+                          String ordinalValue, CallingContext cc) {
     elemFormatter.formatDateTime(getValue(), metadataType, ordinalValue, row);
   }
 }

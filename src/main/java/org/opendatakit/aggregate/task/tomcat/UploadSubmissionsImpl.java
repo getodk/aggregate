@@ -33,8 +33,7 @@ import org.opendatakit.common.web.CallingContext;
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
-      throws ODKExternalServiceException {
+  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc) {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getFasterWatchdogCycleEnabled(), wd.getCallingContext());

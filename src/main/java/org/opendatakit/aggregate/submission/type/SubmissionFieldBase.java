@@ -76,7 +76,7 @@ public abstract class SubmissionFieldBase<T> implements SubmissionField<T> {
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    */
-  public abstract void setValueFromString(String value) throws ODKConversionException, ODKDatastoreException;
+  public abstract void setValueFromString(String value) throws ODKConversionException;
 
 
   /**

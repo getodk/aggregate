@@ -54,7 +54,7 @@ public interface SubmissionField<T> extends SubmissionValue {
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    */
-  public void setValueFromString(String value) throws ODKConversionException, ODKDatastoreException;
+  public void setValueFromString(String value) throws ODKConversionException;
 
   /**
    * Convert value from byte array to data store blob type. Store blob in blob

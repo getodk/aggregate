@@ -162,9 +162,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
       return exports;
 
-    } catch (ODKFormNotFoundException e) {
-      e.printStackTrace();
-      throw new FormNotAvailableException(e);
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);

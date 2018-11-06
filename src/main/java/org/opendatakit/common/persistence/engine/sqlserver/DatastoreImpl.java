@@ -114,7 +114,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   private DataSourceTransactionManager tm = null;
   private String schemaName = null;
 
-  public DatastoreImpl() throws ODKDatastoreException {
+  public DatastoreImpl() {
   }
 
   static SqlParameterValue getBindValue(DataField f, Object value) {
@@ -241,7 +241,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     if (dataSource == null) {
       throw new IllegalStateException("dataSource property must be set!");
     }

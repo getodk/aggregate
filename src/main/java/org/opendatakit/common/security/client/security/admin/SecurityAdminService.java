@@ -41,7 +41,7 @@ public interface SecurityAdminService extends RemoteService {
    * @throws AccessDeniedException
    * @throws DatastoreFailureException
    */
-  ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws AccessDeniedException, DatastoreFailureException;
+  ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws DatastoreFailureException;
 
   @XsrfProtect
   void setUsersAndGrantedAuthorities(String xsrfString, ArrayList<UserSecurityInfo> users, ArrayList<GrantedAuthorityName> allGroups) throws AccessDeniedException, DatastoreFailureException;

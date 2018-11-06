@@ -32,5 +32,5 @@ public interface WorksheetCreator {
   public void createWorksheetTask(IForm form,
                                   MiscTasks miscTasks, long attemptCount,
                                   CallingContext cc)
-      throws ODKDatastoreException, ODKFormNotFoundException;
+      throws ODKDatastoreException;
 }

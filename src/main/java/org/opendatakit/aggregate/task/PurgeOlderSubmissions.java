@@ -31,5 +31,5 @@ public interface PurgeOlderSubmissions {
   public static final String PURGE_DATE = "purgeBefore";
 
   public void createPurgeOlderSubmissionsTask(IForm form, SubmissionKey miscTasksKey,
-                                              long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
+                                              long attemptCount, CallingContext cc);
 }

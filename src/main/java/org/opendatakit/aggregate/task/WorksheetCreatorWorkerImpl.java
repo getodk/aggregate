@@ -118,15 +118,11 @@ public class WorksheetCreatorWorkerImpl {
     TaskLock formIdTaskLock = ds.createTaskLock(user);
 
     boolean locked = false;
-    try {
-      if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
-          TaskLockType.WORKSHEET_CREATION)) {
-        locked = true;
-      }
-      formIdTaskLock = null;
-    } catch (ODKTaskLockException e1) {
-      e1.printStackTrace(); // Occasionally expected...
+    if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName,
+        TaskLockType.WORKSHEET_CREATION)) {
+      locked = true;
     }
+    formIdTaskLock = null;
 
     if (!locked) {
       return;

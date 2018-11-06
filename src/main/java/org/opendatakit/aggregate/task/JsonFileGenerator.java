@@ -30,6 +30,6 @@ import org.opendatakit.common.web.CallingContext;
 public interface JsonFileGenerator {
 
   public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey,
-                                 long attemptCount, CallingContext cc) throws ODKDatastoreException;
+                                 long attemptCount, CallingContext cc);
 
 }

@@ -42,8 +42,7 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
   private static final long serialVersionUID = -489283284844600170L;
 
   @Override
-  public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException {
+  public PreferenceSummary getPreferences() throws RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -59,8 +58,8 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException {
+  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws
+      RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -87,7 +86,7 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions)
-      throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+      throws RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

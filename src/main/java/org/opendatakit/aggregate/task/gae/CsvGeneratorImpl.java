@@ -36,7 +36,7 @@ public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
   public void createCsvTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-                            CallingContext cc) throws ODKDatastoreException {
+                            CallingContext cc) {
     TaskOptionsBuilder b = new TaskOptionsBuilder(CsvGeneratorTaskServlet.ADDR);
     b.countdownMillis(PersistConsts.MAX_SETTLE_MILLISECONDS);
     b.param(ServletConsts.FORM_ID, form.getFormId());

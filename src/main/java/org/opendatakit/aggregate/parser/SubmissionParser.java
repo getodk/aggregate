@@ -438,7 +438,7 @@ public class SubmissionParser {
    */
   private boolean processSubmissionElement(FormElementModel node, Element currentSubmissionElement,
                                            SubmissionSet submissionSet, Map<String, Integer> repeatGroupIndicies, boolean preExisting,
-                                           CallingContext cc) throws ODKParseException, ODKIncompleteSubmissionData,
+                                           CallingContext cc) throws ODKParseException,
       ODKConversionException, ODKDatastoreException {
 
     if (node == null || currentSubmissionElement == null) {

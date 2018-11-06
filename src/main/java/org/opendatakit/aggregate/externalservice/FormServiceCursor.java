@@ -173,8 +173,6 @@ public final class FormServiceCursor extends CommonFieldsBase {
         service.delete(cc);
         deleted = true;
       }
-    } catch (ODKTaskLockException e1) {
-      e1.printStackTrace();
     } finally {
       if (!deleted) {
         Logger logger = LoggerFactory.getLogger(FormServiceCursor.class);

@@ -135,12 +135,7 @@ public class UploadSubmissionsWorkerImpl {
     User user = cc.getCurrentUser();
     TaskLock taskLock = ds.createTaskLock(user);
 
-    try {
-      taskLock.obtainLock(lockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION);
-    } catch (ODKTaskLockException e) {
-      logger.warn("Error while trying to obtain a task lock", e);
-      return;
-    }
+    taskLock.obtainLock(lockId, getUploadSubmissionsTaskLockName(), TaskLockType.UPLOAD_SUBMISSION);
 
     try {
       if (!formServiceCursor.isExternalServicePrepared()) {
@@ -257,7 +252,7 @@ public class UploadSubmissionsWorkerImpl {
     return true;
   }
 
-  private boolean streamSubmissions() throws ODKIncompleteSubmissionData, ODKDatastoreException, ODKExternalServiceException {
+  private boolean streamSubmissions() throws ODKDatastoreException, ODKExternalServiceException {
 
     Date startDate = formServiceCursor.getLastStreamingCursorDate();
     if (startDate == null) {
@@ -335,7 +330,7 @@ public class UploadSubmissionsWorkerImpl {
     }
   }
 
-  private int renewTaskLock(int counter) throws ODKTaskLockException, ODKExternalServiceException {
+  private int renewTaskLock(int counter) throws ODKExternalServiceException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
@@ -359,13 +354,13 @@ public class UploadSubmissionsWorkerImpl {
     return counter;
   }
 
-  private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate, String uriLast) throws ODKIncompleteSubmissionData, ODKDatastoreException {
+  private List<Submission> querySubmissionsDateRange(Date startDate, Date endDate, String uriLast) throws ODKDatastoreException {
     // query for next set of submissions
     QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, endDate, uriLast, cc);
     return query.getResultSubmissions(cc);
   }
 
-  private List<Submission> querySubmissionsStartDate(Date startDate, String uriLast) throws ODKIncompleteSubmissionData, ODKDatastoreException {
+  private List<Submission> querySubmissionsStartDate(Date startDate, String uriLast) throws ODKDatastoreException {
     // query for next set of submissions
     // (excluding the very recent submissions that haven't settled yet).
     QueryByDateRange query = new QueryByDateRange(form, getQueryLimit(), startDate, uriLast, cc);

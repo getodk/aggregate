@@ -36,7 +36,7 @@ public class JsonFileGeneratorImpl implements JsonFileGenerator {
 
   @Override
   public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-                                 CallingContext cc) throws ODKDatastoreException {
+                                 CallingContext cc) {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     JsonRunner runner = new JsonRunner(form, persistentResultsKey, attemptCount, wd.getCallingContext());

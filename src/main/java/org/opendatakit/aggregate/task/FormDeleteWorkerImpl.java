@@ -103,14 +103,10 @@ public class FormDeleteWorkerImpl {
     TaskLock formIdTaskLock = ds.createTaskLock(user);
 
     boolean locked = false;
-    try {
-      if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName, TaskLockType.FORM_DELETION)) {
-        locked = true;
-      }
-      formIdTaskLock = null;
-    } catch (ODKTaskLockException e) {
-      e.printStackTrace();
+    if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName, TaskLockType.FORM_DELETION)) {
+      locked = true;
     }
+    formIdTaskLock = null;
 
     if (!locked) {
       logger.warn("Unable to acquire lock");
@@ -202,8 +198,6 @@ public class FormDeleteWorkerImpl {
             task.delete(cc);
             deleted = true;
           }
-        } catch (ODKTaskLockException e1) {
-          e1.printStackTrace();
         } finally {
           if (!deleted) {
             outcome = false;
@@ -311,7 +305,7 @@ public class FormDeleteWorkerImpl {
    * @throws ODKOverQuotaException
    * @throws ODKFormNotFoundException
    */
-  private boolean doDeletion(MiscTasks t) throws ODKOverQuotaException, ODKFormNotFoundException, ODKDatastoreException, ODKTaskLockException {
+  private boolean doDeletion(MiscTasks t) throws ODKOverQuotaException, ODKFormNotFoundException, ODKDatastoreException {
 
     if (!deleteMiscTasks(t))
       return false;

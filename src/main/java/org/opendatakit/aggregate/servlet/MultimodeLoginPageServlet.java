@@ -47,7 +47,7 @@ public class MultimodeLoginPageServlet extends ServletUtilBase {
   private static final Logger logger = LoggerFactory.getLogger(MultimodeLoginPageServlet.class);
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

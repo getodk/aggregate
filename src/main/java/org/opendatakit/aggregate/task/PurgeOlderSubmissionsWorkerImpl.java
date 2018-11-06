@@ -95,14 +95,10 @@ public class PurgeOlderSubmissionsWorkerImpl {
     TaskLock formIdTaskLock = ds.createTaskLock(user);
 
     boolean locked = false;
-    try {
-      if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName, TaskLockType.FORM_DELETION)) {
-        locked = true;
-      }
-      formIdTaskLock = null;
-    } catch (ODKTaskLockException e1) {
-      e1.printStackTrace();
+    if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName, TaskLockType.FORM_DELETION)) {
+      locked = true;
     }
+    formIdTaskLock = null;
 
     if (!locked) {
       return;
@@ -139,7 +135,7 @@ public class PurgeOlderSubmissionsWorkerImpl {
   }
 
   private List<TopLevelDynamicBase> querySubmissionsDateRange(Date startDate, Date endDate)
-      throws ODKFormNotFoundException, ODKIncompleteSubmissionData, ODKDatastoreException {
+      throws ODKDatastoreException {
 
     // fetch completed submissions, ascending.  Stop before the endDate.
     FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);

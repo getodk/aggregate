@@ -268,7 +268,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     logger.trace("afterPropertiesSet()");
     if (taskScheduler == null)
       throw new IllegalStateException("no task scheduler specified");

@@ -225,16 +225,12 @@ public class RoleHierarchyImpl implements RoleHierarchy, InitializingBean {
           // we remain in the loop even if we get kicked out.
         }
       }
-      try {
-        TaskLock startupTaskLock = ds.createTaskLock(user);
-        if (startupTaskLock.obtainLock(startupLockId, lockedResourceName,
-            TaskLockType.STARTUP_SERIALIZATION)) {
-          locked = true;
-        }
-        startupTaskLock = null;
-      } catch (ODKTaskLockException e) {
-        e.printStackTrace();
+      TaskLock startupTaskLock = ds.createTaskLock(user);
+      if (startupTaskLock.obtainLock(startupLockId, lockedResourceName,
+          TaskLockType.STARTUP_SERIALIZATION)) {
+        locked = true;
       }
+      startupTaskLock = null;
     }
 
     // we hold the lock while we initialize stuff here...

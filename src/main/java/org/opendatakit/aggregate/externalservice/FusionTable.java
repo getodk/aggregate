@@ -275,7 +275,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   }
 
   private void sharePublishedFiles(String ownerEmail, CallingContext cc)
-      throws ODKExternalServiceException, ODKDatastoreException {
+      throws ODKExternalServiceException {
 
     executeDrivePermission(objectEntity.getFusionTableId(), objectEntity.getOwnerEmail());
     if (objectEntity.getFusionTableViewId() != null) {
@@ -606,7 +606,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     private final Map<String, String> formattedSubmissionStrings;
 
     FusionTableFormattedSubmission(Submission submission, CallingContext cc)
-        throws ODKExternalServiceException, ODKDatastoreException {
+        throws ODKDatastoreException {
       this.submission = submission;
       this.formattedSubmissionStrings = new HashMap<String, String>();
 
@@ -706,7 +706,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     private FusionTableFormattedSubmission lastProccessedSubmission;
 
     SubmissionBatcher(List<Submission> submissions, int maxStringSize, CallingContext cc)
-        throws ODKExternalServiceException, ODKDatastoreException {
+        throws ODKDatastoreException {
       this.maxStringSize = maxStringSize;
       this.needToProcess = new LinkedList<FusionTableFormattedSubmission>();
       this.currentSet = new LinkedList<FusionTableFormattedSubmission>();

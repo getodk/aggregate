@@ -50,7 +50,7 @@ public class StringSubmissionType extends SubmissionSingleValueBase<String> {
    * @throws ODKConversionException
    */
   @Override
-  public void setValueFromString(String value) throws ODKConversionException {
+  public void setValueFromString(String value) {
     setValue(value);
   }
 
@@ -67,8 +67,7 @@ public class StringSubmissionType extends SubmissionSingleValueBase<String> {
    *                      proper format for output
    */
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
     elemFormatter.formatString(getValue(), element, ordinalValue, row);
   }
 

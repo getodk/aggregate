@@ -104,8 +104,7 @@ public class GeoPointSubmissionType extends SubmissionSingleValueBase<GeoPoint> 
    *                      proper format for output
    */
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
     elemFormatter.formatGeoPoint(coordinates, element, ordinalValue, row);
   }
 

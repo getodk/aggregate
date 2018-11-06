@@ -209,7 +209,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
   }
 
   public void submitFile(String recordID, String fileField, BlobSubmissionType blob_value,
-                         CallingContext cc) throws MalformedURLException, IOException,
+                         CallingContext cc) throws
       ODKDatastoreException {
 
     String contentType = blob_value.getContentType(1, cc);

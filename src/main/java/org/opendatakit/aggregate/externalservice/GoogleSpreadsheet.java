@@ -166,7 +166,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
 
   public GoogleSpreadsheet(FormServiceCursor fsc, IForm form, CallingContext cc)
       throws ODKEntityNotFoundException, ODKDatastoreException, ODKOverQuotaException,
-      ODKExternalServiceException, ODKFormNotFoundException {
+      ODKExternalServiceException {
     this(form, retrieveEntity(GoogleSpreadsheet2ParameterTable.assertRelation(cc), fsc, cc), fsc,
         cc);
 
@@ -188,7 +188,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
 
   protected String executeDriveStmt(String spreadsheetTitle, String spreadsheetDescription,
                                     CallingContext cc) throws
-      IOException, ODKExternalServiceException, GeneralSecurityException {
+      IOException, ODKExternalServiceException {
 
     HashMap<String, String> requestBody = new HashMap<String, String>();
     requestBody.put("title", spreadsheetTitle);
@@ -240,8 +240,6 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
 
       } catch (IOException e) {
         throw new ODKExternalServiceException(e);
-      } catch (GeneralSecurityException e) {
-        throw new ODKExternalServiceCredentialsException(e);
       }
 
       objectEntity.setSpreadsheetKey(spreadKey);
@@ -251,25 +249,21 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     persist(cc);
 
     if (newlyCreated || !getReady()) {
-      try {
-        // create worksheet
-        WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
+      // create worksheet
+      WorksheetCreator ws = (WorksheetCreator) cc.getBean(BeanDefs.WORKSHEET_BEAN);
 
-        Map<String, String> parameters = new HashMap<String, String>();
+      Map<String, String> parameters = new HashMap<String, String>();
 
-        parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, getSpreadsheetName());
-        parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc
-            .getExternalServicePublicationOption().name());
+      parameters.put(ExternalServiceConsts.EXT_SERV_ADDRESS, getSpreadsheetName());
+      parameters.put(ServletConsts.EXTERNAL_SERVICE_TYPE, fsc
+          .getExternalServicePublicationOption().name());
 
-        MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
-        m.persist(cc);
+      MiscTasks m = new MiscTasks(TaskType.WORKSHEET_CREATE, form, parameters, cc);
+      m.persist(cc);
 
-        CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
-        ccDaemon.setAsDaemon(true);
-        ws.createWorksheetTask(form, m, 1L, ccDaemon);
-      } catch (ODKFormNotFoundException e) {
-        logger.error("Google spreadsheet error", e);
-      }
+      CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
+      ccDaemon.setAsDaemon(true);
+      ws.createWorksheetTask(form, m, 1L, ccDaemon);
     } else {
       // upload data to external service
       postUploadTask(cc);
@@ -455,8 +449,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
     persist(cc);
   }
 
-  private UpdateCellsRequest writeColumnHeadingsCells(String title, List<String> headers, Integer sheetId)
-      throws IOException {
+  private UpdateCellsRequest writeColumnHeadingsCells(String title, List<String> headers, Integer sheetId) {
 
     // build the update request.
     UpdateCellsRequest req = new UpdateCellsRequest();
@@ -650,7 +643,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
    * @throws ServiceException      if there was a problem with the GData service
    */
   private AppendCellsRequest createAppendCellsRequest(SubmissionSet submissionSet, SheetInfo sheetInfo,
-                                                      CallingContext cc) throws ODKDatastoreException, IOException {
+                                                      CallingContext cc) throws ODKDatastoreException {
 
     Row row = submissionSet.getFormattedValuesAsRow(null, formatter, true, cc);
     List<String> formattedValues = row.getFormattedValues();

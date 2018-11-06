@@ -41,7 +41,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 
   @Override
   public void createKmlTask(IForm form, PersistentResults persistentResults, long attemptCount,
-                            CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                            CallingContext cc) throws ODKDatastoreException {
 
     List<KmlSelection> kmlElementsToInclude = new ArrayList<KmlSelection>();
 

@@ -88,7 +88,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
   private static final long serialVersionUID = 5811797423869654357L;
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     User user = cc.getCurrentUser();

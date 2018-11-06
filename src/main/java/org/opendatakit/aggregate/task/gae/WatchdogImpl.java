@@ -133,7 +133,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     System.out.println("afterPropertiesSet WATCHDOG TASK IN GAE");
     if (datastore == null) throw new IllegalStateException("no datastore specified");
     if (userService == null) throw new IllegalStateException("no user service specified");

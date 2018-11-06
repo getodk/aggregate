@@ -40,7 +40,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
   public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
-                                        CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
+                                        CallingContext cc) throws ODKDatastoreException {
     Map<String, String> params = miscTasks.getRequestParameters();
 
     TaskOptionsBuilder b = new TaskOptionsBuilder(WorksheetServlet.ADDR);

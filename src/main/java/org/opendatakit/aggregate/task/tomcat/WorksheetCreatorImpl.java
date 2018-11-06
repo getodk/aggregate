@@ -41,7 +41,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
   public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
-                                        CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                                        CallingContext cc) throws ODKDatastoreException {
     Map<String, String> params = miscTasks.getRequestParameters();
     String esTypeString = params.get(ServletConsts.EXTERNAL_SERVICE_TYPE);
     if (esTypeString == null) {

@@ -61,7 +61,7 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
   private static final Logger logger = LoggerFactory.getLogger(GetUsersAndPermissionsServlet.class);
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     if (req.getScheme().equals("http")) {
       logger.warn("Retrieving users and capabilities over http");
@@ -77,12 +77,6 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.toString());
-      return;
-    } catch (AccessDeniedException e) {
-      logger.error("Retrieving users and capabilities .csv access denied error: " + e.toString());
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          e.toString());
       return;
     }
 

@@ -92,7 +92,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     if (realm == null) {
       throw new IllegalStateException("realm must be configured");
     }

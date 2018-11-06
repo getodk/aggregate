@@ -86,6 +86,6 @@ public abstract class SubmissionSingleValueBase<T> extends SubmissionFieldBase<T
   }
 
   @Override
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) {
   }
 }

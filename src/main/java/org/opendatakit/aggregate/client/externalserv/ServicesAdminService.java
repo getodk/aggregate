@@ -37,29 +37,29 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 @RemoteServiceRelativePath("servicesadminservice")
 public interface ServicesAdminService extends RemoteService {
 
-  ExternServSummary[] getExternalServices(String formid) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  ExternServSummary[] getExternalServices(String formid) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  Boolean deletePublisher(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  Boolean deletePublisher(String uri) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  void restartPublisher(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void restartPublisher(String uri) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws RequestFailureException, DatastoreFailureException;
 }

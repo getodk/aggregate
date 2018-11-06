@@ -296,9 +296,6 @@ public class FragmentedCsvServlet extends ServletUtilBase {
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       errorRetreivingData(resp);
-    } catch (ODKIncompleteSubmissionData e) {
-      e.printStackTrace();
-      errorRetreivingData(resp);
     }
   }
 }

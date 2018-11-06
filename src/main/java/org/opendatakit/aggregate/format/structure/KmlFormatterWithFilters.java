@@ -121,7 +121,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter {
   }
 
   @Override
-  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public void beforeProcessSubmissions(CallingContext cc) {
     output.write(String.format(KmlConsts.KML_PREAMBLE_TEMPLATE,
         StringEscapeUtils.escapeXml10(form.getFormId()),
         StringEscapeUtils.escapeXml10(form.getViewableName()),
@@ -142,7 +142,7 @@ public class KmlFormatterWithFilters implements SubmissionFormatter {
   }
 
   @Override
-  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public void afterProcessSubmissions(CallingContext cc) {
 
     // output postamble
     output.write(KmlConsts.KML_POSTAMBLE_TEMPLATE);

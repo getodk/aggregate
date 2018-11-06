@@ -108,16 +108,12 @@ public class TaskLockTest {
                   // we remain in the loop even if we get kicked out.
                 }
               }
-              try {
-                TaskLock formCreationTaskLock = ds.createTaskLock(user);
-                if (formCreationTaskLock.obtainLock(creationLockId, lockedResourceName,
-                    TaskLockType.CREATE_FORM)) {
-                  locked = true;
-                }
-                formCreationTaskLock = null;
-              } catch (ODKTaskLockException e) {
-                e.printStackTrace();
+              TaskLock formCreationTaskLock = ds.createTaskLock(user);
+              if (formCreationTaskLock.obtainLock(creationLockId, lockedResourceName,
+                  TaskLockType.CREATE_FORM)) {
+                locked = true;
               }
+              formCreationTaskLock = null;
             }
             declinedEntryCount += i;
             System.out.println("Entered " + j + " Thread " + getId());
@@ -169,7 +165,7 @@ public class TaskLockTest {
   }
 
   @Test
-  public void verifyLock() throws ODKDatastoreException {
+  public void verifyLock() {
 
     int MAX_THREADS = 8;
     CyclicBarrier launchBarrier = new CyclicBarrier(MAX_THREADS);

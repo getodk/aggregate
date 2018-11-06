@@ -131,8 +131,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
   }
 
   @Override
-  protected void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc)
-      throws ODKDatastoreException {
+  protected void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) {
     formattedElements.clear();
 
     headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
@@ -170,8 +169,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
   }
 
   @Override
-  protected void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc)
-      throws ODKDatastoreException {
+  protected void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) {
     try {
       emitXmlWrappedCsv(formattedElements, headers);
     } catch (IOException e) {

@@ -31,12 +31,12 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
  */
 @RemoteServiceRelativePath("preferenceservice")
 public interface PreferenceService extends RemoteService {
-  PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  PreferenceSummary getPreferences() throws RequestFailureException;
 
   @XsrfProtect
-  void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws RequestFailureException;
 
   @XsrfProtect
-  void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void setFasterBackgroundActionsDisabled(Boolean disabled) throws RequestFailureException;
 
 }

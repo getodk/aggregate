@@ -149,7 +149,7 @@ public class PersistentResults {
   }
 
   public static final List<PersistentResults> getAvailablePersistentResults(CallingContext cc)
-      throws ODKFormNotFoundException, ODKDatastoreException {
+      throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     PersistentResultsTable relation = PersistentResultsTable.assertRelation(cc);
@@ -233,7 +233,7 @@ public class PersistentResults {
     return r;
   }
 
-  public void setRequestingUser(String value) throws ODKEntityPersistException {
+  public void setRequestingUser(String value) {
     if (!row.setStringField(PersistentResultsTable.REQUESTING_USER, value)) {
       throw new IllegalStateException("overflow requestingUser");
     }
@@ -252,7 +252,7 @@ public class PersistentResults {
     }
   }
 
-  public void setRequestParameters(Map<String, String> value) throws ODKEntityPersistException {
+  public void setRequestParameters(Map<String, String> value) {
     if (!row.setStringField(PersistentResultsTable.REQUEST_PARAMETERS,
         PropertyMapSerializer.serializeRequestParameters(value))) {
       throw new IllegalStateException("overflow requestParameters");
@@ -275,7 +275,7 @@ public class PersistentResults {
     return ExportStatus.valueOf(row.getStringField(PersistentResultsTable.STATUS));
   }
 
-  public void setStatus(ExportStatus value) throws ODKEntityPersistException {
+  public void setStatus(ExportStatus value) {
     if (!row.setStringField(PersistentResultsTable.STATUS, value.name())) {
       throw new IllegalStateException("overflow status");
     }
@@ -285,7 +285,7 @@ public class PersistentResults {
     return ExportType.valueOf(row.getStringField(PersistentResultsTable.RESULT_TYPE));
   }
 
-  public void setResultType(ExportType value) throws ODKEntityPersistException {
+  public void setResultType(ExportType value) {
     if (!row.setStringField(PersistentResultsTable.RESULT_TYPE, value.name())) {
       throw new IllegalStateException("overflow resultType");
     }
@@ -341,7 +341,7 @@ public class PersistentResults {
     return row.getStringField(PersistentResultsTable.FORM_ID);
   }
 
-  public void setFormId(String value) throws ODKEntityPersistException {
+  public void setFormId(String value) {
     if (!row.setStringField(PersistentResultsTable.FORM_ID, value)) {
       throw new IllegalStateException("overflow formId");
     }
@@ -351,7 +351,7 @@ public class PersistentResults {
     return row.getStringField(PersistentResultsTable.URI_FILTER_GROUP_PROPERTY);
   }
 
-  public void setFilterGroupUri(String value) throws ODKEntityPersistException {
+  public void setFilterGroupUri(String value) {
     if (!row.setStringField(PersistentResultsTable.URI_FILTER_GROUP_PROPERTY, value)) {
       throw new IllegalStateException("overflow Uri of the filter group");
     }

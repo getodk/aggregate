@@ -78,7 +78,7 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
   }
 
   @Override
-  public String updateFilterGroup(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public String updateFilterGroup(FilterGroup group) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -96,7 +96,7 @@ public class FilterServiceImpl extends RemoteServiceServlet implements FilterSer
   }
 
   @Override
-  public Boolean deleteFilterGroup(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public Boolean deleteFilterGroup(FilterGroup group) throws RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

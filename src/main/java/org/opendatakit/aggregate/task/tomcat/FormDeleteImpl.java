@@ -36,7 +36,7 @@ public class FormDeleteImpl implements FormDelete {
 
   @Override
   public final void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey,
-                                         long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                                         long attemptCount, CallingContext cc) {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     FormDeleteRunner dr = new FormDeleteRunner(form, miscTasksKey, attemptCount, wd.getCallingContext());

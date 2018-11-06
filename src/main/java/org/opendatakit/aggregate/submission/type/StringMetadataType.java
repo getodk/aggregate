@@ -38,8 +38,7 @@ public class StringMetadataType extends MetadataBaseType<String> {
 
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row,
-                          String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+                          String ordinalValue, CallingContext cc) {
     elemFormatter.formatString(getValue(), metadataType, ordinalValue, row);
   }
 

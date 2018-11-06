@@ -154,7 +154,7 @@ public class XmlAttributeFormatter implements ElementFormatter {
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
-                            CallingContext cc) throws ODKDatastoreException {
+                            CallingContext cc) {
     throw new IllegalStateException("unimplemented");
   }
 

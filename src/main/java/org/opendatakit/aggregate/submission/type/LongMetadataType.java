@@ -38,8 +38,7 @@ public class LongMetadataType extends MetadataBaseType<Long> {
 
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row,
-                          String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+                          String ordinalValue, CallingContext cc) {
     elemFormatter.formatLong(getValue(), metadataType, ordinalValue, row);
   }
 

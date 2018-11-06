@@ -137,7 +137,7 @@ public class BlobSubmissionType extends SubmissionFieldBase<SubmissionKey> {
   }
 
   @Override
-  public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
+  public void getValueFromEntity(CallingContext cc) {
     // lazy access when retrieving data from the database
   }
 

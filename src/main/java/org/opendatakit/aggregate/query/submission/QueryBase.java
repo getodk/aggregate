@@ -95,7 +95,7 @@ public abstract class QueryBase {
     }
   }
 
-  public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData, ODKDatastoreException;
+  public abstract List<Submission> getResultSubmissions(CallingContext cc) throws ODKDatastoreException;
 
 
   public final IForm getForm() {

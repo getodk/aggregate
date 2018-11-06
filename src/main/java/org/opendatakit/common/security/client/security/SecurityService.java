@@ -38,7 +38,7 @@ public interface SecurityService extends RemoteService {
    * @throws AccessDeniedException
    * @throws DatastoreFailureException
    */
-  UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException;
+  UserSecurityInfo getUserInfo() throws DatastoreFailureException;
 
   /**
    * @param xsrfString

@@ -71,7 +71,7 @@ public class QueryByDateRange extends QueryBase {
   }
 
   @Override
-  public List<Submission> getResultSubmissions(CallingContext cc) throws ODKIncompleteSubmissionData,
+  public List<Submission> getResultSubmissions(CallingContext cc) throws
       ODKDatastoreException {
 
     List<Submission> retrievedSubmissions = new ArrayList<Submission>();

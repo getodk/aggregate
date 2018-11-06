@@ -74,7 +74,7 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
    * </ul>
    */
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     if (req.getScheme().equals("http")) {
       LoggerFactory.getLogger(UserManagePasswordsServlet.class).warn("Setting user passwords over http");

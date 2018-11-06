@@ -50,7 +50,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements
   private static final long serialVersionUID = -7360632450727200941L;
 
   @Override
-  public UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException {
+  public UserSecurityInfo getUserInfo() throws DatastoreFailureException {
 
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);

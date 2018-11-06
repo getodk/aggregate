@@ -70,7 +70,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
   }
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
 

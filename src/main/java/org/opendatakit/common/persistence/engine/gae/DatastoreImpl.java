@@ -72,7 +72,7 @@ public class DatastoreImpl implements Datastore {
 
   private DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
 
-  public DatastoreImpl() throws Exception {
+  public DatastoreImpl() {
     ds = DatastoreServiceFactory.getDatastoreService();
     schemaName = "opendatakit";
 

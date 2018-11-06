@@ -330,13 +330,13 @@ public class MiscTasks {
     return row.getStringField(MiscTasksTable.FORM_ID);
   }
 
-  public void setFormId(String value) throws ODKEntityPersistException {
+  public void setFormId(String value) {
     if (!row.setStringField(MiscTasksTable.FORM_ID, value)) {
       throw new IllegalArgumentException("formId is too long");
     }
   }
 
-  public void setRequestingUser(String value) throws ODKEntityPersistException {
+  public void setRequestingUser(String value) {
     if (!row.setStringField(MiscTasksTable.REQUESTING_USER, value)) {
       throw new IllegalArgumentException("requestingUser is too long");
     }
@@ -359,7 +359,7 @@ public class MiscTasks {
     }
   }
 
-  public void setRequestParameters(Map<String, String> value) throws ODKEntityPersistException {
+  public void setRequestParameters(Map<String, String> value) {
     if (!row.setStringField(MiscTasksTable.REQUEST_PARAMETERS,
         PropertyMapSerializer.serializeRequestParameters(value))) {
       throw new IllegalStateException("overflowed requestParameters");
@@ -386,7 +386,7 @@ public class MiscTasks {
     return FormActionStatus.valueOf(row.getStringField(MiscTasksTable.STATUS));
   }
 
-  public void setStatus(FormActionStatus value) throws ODKEntityPersistException {
+  public void setStatus(FormActionStatus value) {
     if (!row.setStringField(MiscTasksTable.STATUS, value.name())) {
       throw new IllegalStateException("overflow status");
     }
@@ -396,7 +396,7 @@ public class MiscTasks {
     return TaskType.valueOf(row.getStringField(MiscTasksTable.TASK_TYPE));
   }
 
-  public void setTaskType(TaskType value) throws ODKEntityPersistException {
+  public void setTaskType(TaskType value) {
     if (!row.setStringField(MiscTasksTable.TASK_TYPE, value.name())) {
       throw new IllegalStateException("overflow taskType");
     }

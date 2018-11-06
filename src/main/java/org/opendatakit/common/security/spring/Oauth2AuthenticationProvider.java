@@ -78,7 +78,7 @@ public class Oauth2AuthenticationProvider implements AuthenticationProvider, Ini
     this.wrappingUserDetailsService = wrappingUserDetailsService;
   }
 
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     if (wrappingUserDetailsService == null) {
       throw new IllegalStateException("wrappingUserDetailsService must be defined");
     }

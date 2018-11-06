@@ -51,7 +51,7 @@ public class XmlAttachmentFormatter implements SubmissionFormatter, RepeatCallba
 
 
   @Override
-  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public void beforeProcessSubmissions(CallingContext cc) {
   }
 
   @Override
@@ -69,7 +69,7 @@ public class XmlAttachmentFormatter implements SubmissionFormatter, RepeatCallba
   }
 
   @Override
-  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public void afterProcessSubmissions(CallingContext cc) {
   }
 
   @Override

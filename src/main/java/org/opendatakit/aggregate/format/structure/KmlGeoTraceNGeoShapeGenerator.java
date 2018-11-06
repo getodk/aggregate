@@ -97,7 +97,7 @@ public class KmlGeoTraceNGeoShapeGenerator extends AbstractKmlElementBase {
 
   @Override
   String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
-                                     CallingContext cc) throws ODKDatastoreException {
+                                     CallingContext cc) {
 
     StringBuilder placemarks = new StringBuilder();
 

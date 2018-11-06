@@ -235,7 +235,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
    * @return null if no records in table; otherwise, produce the needed filter.
    * @throws ODKDatastoreException
    */
-  private SimpleFilterTracker getImpliedDominantAttributeFilter() throws ODKDatastoreException {
+  private SimpleFilterTracker getImpliedDominantAttributeFilter() {
     // GAE production throws an exception when a query with equality
     // filters and a sort on a column not constrained by any filter
     // is issued.
@@ -275,12 +275,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
     Object dominantFilterValue = null;
     // and apply the filter...
-    try {
-      CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, values.get(0), 0);
-      dominantFilterValue = EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr);
-    } catch (SQLException e) {
-      throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
-    }
+    CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, values.get(0), 0);
+    dominantFilterValue = EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr);
 
     SimpleFilterTracker impliedDominantFilter = constructFilter(dominantSortAttr,
         dominantSort.direction.equals(Direction.ASCENDING)
@@ -670,10 +666,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         return false;
       }
       logger.debug("hqrLoop: done with one batch fetch!");
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: "
-          + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
     } catch (OverQuotaException e) {
       throw new ODKOverQuotaException("[" + loggingContextTag + "] Quota exceeded", e);
     } catch (Exception e) {

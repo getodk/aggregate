@@ -62,8 +62,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public SubmissionUISummary getSubmissions(FilterGroup filterGroup)
-      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException,
-      AccessDeniedException {
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -103,8 +102,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public SubmissionUISummary getRepeatSubmissions(String keyString)
-      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException,
-      AccessDeniedException {
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -161,7 +159,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public String getSubmissionAuditCSV(String keyString) throws RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

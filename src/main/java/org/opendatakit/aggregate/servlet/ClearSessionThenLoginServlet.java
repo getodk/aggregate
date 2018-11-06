@@ -42,7 +42,7 @@ public class ClearSessionThenLoginServlet extends ServletUtilBase {
   private static final long serialVersionUID = 629046684126101848L;
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     UserService userService = cc.getUserService();

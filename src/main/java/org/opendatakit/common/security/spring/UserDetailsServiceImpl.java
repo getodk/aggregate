@@ -102,7 +102,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     if (datastore == null) {
       throw new IllegalStateException("datastore must be specified");
     }

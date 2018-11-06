@@ -48,8 +48,7 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
   }
 
   @Override
-  protected void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc)
-      throws ODKDatastoreException {
+  protected void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) {
     formattedElements.clear();
     headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
   }
@@ -65,8 +64,7 @@ public class HtmlFormatter extends TableFormatterBase implements SubmissionForma
   }
 
   @Override
-  protected void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc)
-      throws ODKDatastoreException {
+  protected void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) {
     // format into html table
     output.append(HtmlUtil.wrapResultTableWithHtmlTags(checkboxes, ServletConsts.RECORD_KEY, headers, formattedElements));
     formattedElements.clear();

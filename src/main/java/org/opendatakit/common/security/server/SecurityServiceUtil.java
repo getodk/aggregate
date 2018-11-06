@@ -110,7 +110,7 @@ public class SecurityServiceUtil {
    * @throws DatastoreFailureException
    */
   public static ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities, CallingContext cc)
-      throws AccessDeniedException, DatastoreFailureException {
+      throws DatastoreFailureException {
 
     ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
     try {
@@ -260,7 +260,7 @@ public class SecurityServiceUtil {
    * @throws AccessDeniedException
    */
   private static Map<UserSecurityInfo, String> setUsers(ArrayList<UserSecurityInfo> users,
-                                                        CallingContext cc) throws DatastoreFailureException, AccessDeniedException {
+                                                        CallingContext cc) throws DatastoreFailureException {
     List<UserSecurityInfo> allUsersList = getAllUsers(false, cc);
 
     Set<UserSecurityInfo> removedUsers = new TreeSet<UserSecurityInfo>();
@@ -365,11 +365,10 @@ public class SecurityServiceUtil {
    * @param allGroups
    * @param cc
    * @throws DatastoreFailureException
-   * @throws AccessDeniedException
    */
   public static final void setStandardSiteAccessConfiguration(ArrayList<UserSecurityInfo> users,
                                                               ArrayList<GrantedAuthorityName> allGroups, CallingContext cc)
-      throws DatastoreFailureException, AccessDeniedException {
+      throws DatastoreFailureException {
 
     // remove anonymousUser from the set of users and collect its
     // permissions (anonGrantStrings) which will be placed in
@@ -601,10 +600,9 @@ public class SecurityServiceUtil {
    *
    * @param cc
    * @throws DatastoreFailureException
-   * @throws AccessDeniedException
    */
   public static final void setDefaultRoleNamesAndHierarchy(CallingContext cc)
-      throws DatastoreFailureException, AccessDeniedException {
+      throws DatastoreFailureException {
 
     ArrayList<UserSecurityInfo> users = new ArrayList<UserSecurityInfo>();
     ArrayList<GrantedAuthorityName> allGroups = new ArrayList<GrantedAuthorityName>();

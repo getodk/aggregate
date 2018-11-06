@@ -50,18 +50,17 @@ public abstract class MetadataBaseType<T> implements SubmissionField<T> {
   }
 
   @Override
-  public void getValueFromEntity(CallingContext cc) throws ODKDatastoreException {
+  public void getValueFromEntity(CallingContext cc) {
     // no-op
   }
 
   @Override
-  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
-      throws ODKDatastoreException {
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) {
     // no-op
   }
 
   @Override
-  public void persist(CallingContext cc) throws ODKEntityPersistException {
+  public void persist(CallingContext cc) {
     // no-op
   }
 
@@ -81,13 +80,13 @@ public abstract class MetadataBaseType<T> implements SubmissionField<T> {
   }
 
   @Override
-  public void setValueFromString(String value) throws ODKConversionException, ODKDatastoreException {
+  public void setValueFromString(String value) {
     throw new IllegalStateException("unexpected call to setValueFromString");
   }
 
   @Override
   public BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray, String contentType,
-                                                     String unrootedFilePath, boolean overwriteOK, CallingContext cc) throws ODKDatastoreException {
+                                                     String unrootedFilePath, boolean overwriteOK, CallingContext cc) {
     throw new IllegalStateException("unexpected call to setValueFromByteArray");
   }
 

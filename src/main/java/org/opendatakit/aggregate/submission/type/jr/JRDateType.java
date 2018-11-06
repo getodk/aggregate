@@ -64,8 +64,7 @@ public class JRDateType extends DateSubmissionType {
    *                      proper format for output
    */
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
     elemFormatter.formatDate(getValue(), element, ordinalValue, row);
   }
 

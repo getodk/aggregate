@@ -33,8 +33,7 @@ public class EntityRowMapper {
     this.user = user;
   }
 
-  public Object mapRow(DatastoreImpl ds, com.google.appengine.api.datastore.Entity rs, int rowNum)
-      throws SQLException {
+  public Object mapRow(DatastoreImpl ds, com.google.appengine.api.datastore.Entity rs, int rowNum) {
 
     CommonFieldsBase row;
     try {

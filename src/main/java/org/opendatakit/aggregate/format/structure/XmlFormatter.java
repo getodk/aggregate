@@ -66,12 +66,11 @@ public class XmlFormatter implements SubmissionFormatter {
   }
 
   @Override
-  public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public void beforeProcessSubmissions(CallingContext cc) {
   }
 
   @Override
-  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc)
-      throws ODKDatastoreException {
+  public void processSubmissionSegment(List<Submission> submissions, CallingContext cc) {
 
     // format row elements
     for (Submission sub : submissions) {
@@ -83,12 +82,11 @@ public class XmlFormatter implements SubmissionFormatter {
   }
 
   @Override
-  public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public void afterProcessSubmissions(CallingContext cc) {
   }
 
   @Override
-  public void processSubmissions(List<Submission> submissions, CallingContext cc)
-      throws ODKDatastoreException {
+  public void processSubmissions(List<Submission> submissions, CallingContext cc) {
     beforeProcessSubmissions(cc);
     processSubmissionSegment(submissions, cc);
     afterProcessSubmissions(cc);

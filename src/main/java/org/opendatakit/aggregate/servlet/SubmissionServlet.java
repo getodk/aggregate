@@ -189,7 +189,7 @@ public class SubmissionServlet extends ServletUtilBase {
    * and authentication have been properly established.
    */
   @Override
-  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+  protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     logger.info("Inside doHead");
 

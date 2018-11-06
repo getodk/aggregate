@@ -283,9 +283,6 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
     } catch (ODKDatastoreException e) {
       e.printStackTrace();
       throw new DatastoreFailureException(e);
-    } catch (ODKExternalServiceException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(e);
     }
   }
 

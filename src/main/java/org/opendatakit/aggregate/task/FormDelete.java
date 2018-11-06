@@ -28,5 +28,5 @@ import org.opendatakit.common.web.CallingContext;
 public interface FormDelete {
 
   public void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey,
-                                   long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
+                                   long attemptCount, CallingContext cc);
 }

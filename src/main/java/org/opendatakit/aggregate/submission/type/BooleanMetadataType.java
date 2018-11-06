@@ -38,8 +38,7 @@ public class BooleanMetadataType extends MetadataBaseType<Boolean> {
 
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row,
-                          String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+                          String ordinalValue, CallingContext cc) {
     elemFormatter.formatBoolean(getValue(), metadataType, ordinalValue, row);
   }
 

@@ -58,7 +58,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
 
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue,
-                          CallingContext cc) throws ODKDatastoreException {
+                          CallingContext cc) {
     elemFormatter.formatChoices(values, element, ordinalValue, row);
   }
 
@@ -98,8 +98,7 @@ public class ChoiceSubmissionType extends SubmissionFieldBase<List<String>> {
   }
 
   @Override
-  public void setValueFromString(String concatenatedValues) throws ODKConversionException,
-      ODKDatastoreException {
+  public void setValueFromString(String concatenatedValues) {
     isChanged = true;
     values.clear();
     if (concatenatedValues != null) {

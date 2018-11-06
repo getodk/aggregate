@@ -130,7 +130,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
   private static final Logger logger = LoggerFactory.getLogger(ResetUsersAndPermissionsServlet.class);
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     if (req.getScheme().equals("http")) {
       logger.warn("Resetting users and capabilities over http");
@@ -180,7 +180,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
    * permission definitions via a program (e.g., Briefcase).
    */
   @Override
-  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+  protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     logger.info("Inside doHead");
 
@@ -197,7 +197,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
    * been applied; false otherwise.
    */
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     if (req.getScheme().equals("http")) {
       logger.warn("Resetting users and capabilities over http");
@@ -676,11 +676,6 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         e.printStackTrace();
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
             ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.toString());
-      } catch (AccessDeniedException e) {
-        logger.error("users and capabilities .csv upload access denied error: " + e.toString());
-        e.printStackTrace();
-        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-            e.toString());
       } finally {
         if (csvReader != null) {
           csvReader.close();

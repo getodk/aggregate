@@ -174,7 +174,7 @@ public class BasicElementFormatter implements ElementFormatter {
     basicStringConversion(string, row);
   }
 
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
 

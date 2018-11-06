@@ -113,7 +113,7 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
   }
 
   @Override
-  public void initiate(CallingContext cc) throws ODKExternalServiceException,
+  public void initiate(CallingContext cc) throws
       ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException {
     fsc.setIsExternalServicePrepared(true);
     fsc.setOperationalStatus(OperationalStatus.ACTIVE);
@@ -155,8 +155,7 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
    * @throws URISyntaxException
    */
   public void uploadSurveys(List<OhmageJsonTypes.Survey> surveys, Map<UUID, ByteArrayBody> photos,
-                            CallingContext cc) throws ClientProtocolException, IOException, ODKExternalServiceException,
-      URISyntaxException {
+                            CallingContext cc) throws ClientProtocolException, IOException, ODKExternalServiceException {
 
 
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();

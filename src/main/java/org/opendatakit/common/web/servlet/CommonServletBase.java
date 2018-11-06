@@ -169,8 +169,7 @@ public abstract class CommonServletBase extends HttpServlet {
    * @return Parameter's decoded value or null if not found
    * @throws UnsupportedEncodingException
    */
-  protected final String getParameter(HttpServletRequest req, String parameterName)
-      throws UnsupportedEncodingException {
+  protected final String getParameter(HttpServletRequest req, String parameterName) {
     String parameter = req.getParameter(parameterName);
 
     // TODO: consider if aggregate should really be passing nulls in parameters

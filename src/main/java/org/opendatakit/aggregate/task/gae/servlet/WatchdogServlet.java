@@ -76,11 +76,6 @@ public class WatchdogServlet extends ServletUtilBase {
       logger.error(e.toString());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       return;
-    } catch (ODKIncompleteSubmissionData e) {
-      e.printStackTrace();
-      logger.error(e.toString());
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
     }
   }
 }

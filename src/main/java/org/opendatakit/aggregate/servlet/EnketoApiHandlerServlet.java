@@ -40,8 +40,7 @@ public class EnketoApiHandlerServlet extends ServletUtilBase {
   private static final String RESPONSE_ERROR = "Please verify the Enketo Webform Integration settings on the Preferences tab and try again.";
   private final String USER_AGENT = "Mozilla/5.0";
 
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
-      IOException {
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
 
     String enketo_api_url = null;
     HttpURLConnection con = null;

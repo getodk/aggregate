@@ -220,16 +220,12 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
           // we remain in the loop even if we get kicked out.
         }
       }
-      try {
-        TaskLock formCreationTaskLock = ds.createTaskLock(user);
-        if (formCreationTaskLock.obtainLock(creationLockId, lockedResourceName,
-            TaskLockType.CREATE_FORM)) {
-          locked = true;
-        }
-        formCreationTaskLock = null;
-      } catch (ODKTaskLockException e) {
-        e.printStackTrace();
+      TaskLock formCreationTaskLock = ds.createTaskLock(user);
+      if (formCreationTaskLock.obtainLock(creationLockId, lockedResourceName,
+          TaskLockType.CREATE_FORM)) {
+        locked = true;
       }
+      formCreationTaskLock = null;
     }
 
     // we hold the lock while we create the form here...
@@ -1173,8 +1169,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   private void constructDataModel(final NamingSet opaque, final EntityKey k,
                                   final List<FormDataModel> dmList, final FormDataModel fdm, String parent, int ordinal,
                                   String tablePrefix, String nrGroupPrefix, String tableName, TreeElement treeElement,
-                                  StringBuilder warnings, CallingContext cc) throws ODKEntityPersistException,
-      ODKParseException {
+                                  StringBuilder warnings, CallingContext cc) {
 
     // for debugging: printTreeElementInfo(treeElement);
 

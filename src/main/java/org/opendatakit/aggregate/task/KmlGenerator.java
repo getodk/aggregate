@@ -33,5 +33,5 @@ public interface KmlGenerator {
   public static final String KML_SELECTIONS_DELIMITER = "###";
 
   public void createKmlTask(IForm form, PersistentResults persistentResult,
-                            long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
+                            long attemptCount, CallingContext cc) throws ODKDatastoreException;
 }
