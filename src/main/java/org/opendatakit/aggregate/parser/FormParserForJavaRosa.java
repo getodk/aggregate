@@ -1182,6 +1182,8 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
           Date and Time question type. This has both the date and time components
          */
         et = FormDataModel.ElementType.JRDATETIME;
+        opaque.removeColumnName(persistAsTable, persistAsColumn);
+        persistAsColumn = null; // structured field
         break;
       case org.javarosa.core.model.Constants.DATATYPE_CHOICE:
         /*
@@ -1309,7 +1311,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
       case DECIMAL:
       case INTEGER:
       case JRDATE:
-      case JRDATETIME:
       case JRTIME:
       case PHANTOM:
       case REF_BLOB:
@@ -1361,6 +1362,38 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         d.setPersistAsColumn(null);
         d.setPersistAsTable(persistAsTable);
         d.setPersistAsSchema(fdm.getSchemaName());
+        break;
+
+      case JRDATETIME:
+        // dateTimes require an extra field to store incoming data in its raw format (_RAW)
+        persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName());
+
+        d = ds.createEntityUsingRelation(fdm, user);
+        setPrimaryKey(d, fdmSubmissionUri, AuxType.TEMPORAL_PARSED);
+        dmList.add(d);
+        d.setOrdinalNumber(1L);
+        d.setUriSubmissionDataModel(k.getKey());
+        d.setParentUriFormDataModel(groupURI);
+        d.setElementName(treeElement.getName());
+        d.setElementType(FormDataModel.ElementType.JRDATETIME);
+        d.setPersistAsColumn(persistAsColumn);
+        d.setPersistAsTable(persistAsTable);
+        d.setPersistAsSchema(fdm.getSchemaName());
+
+        persistAsColumn = opaque.getColumnName(persistAsTable, nrGroupPrefix, treeElement.getName() + "_RAW");
+
+        d = ds.createEntityUsingRelation(fdm, user);
+        setPrimaryKey(d, fdmSubmissionUri, AuxType.TEMPORAL_RAW);
+        dmList.add(d);
+        d.setOrdinalNumber(2L);
+        d.setUriSubmissionDataModel(k.getKey());
+        d.setParentUriFormDataModel(groupURI);
+        d.setElementName(treeElement.getName());
+        d.setElementType(FormDataModel.ElementType.STRING);
+        d.setPersistAsColumn(persistAsColumn);
+        d.setPersistAsTable(persistAsTable);
+        d.setPersistAsSchema(fdm.getSchemaName());
+
         break;
 
       case GEOPOINT:
@@ -1496,7 +1529,7 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   }
 
   enum AuxType {
-    NONE, BC_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT
+    NONE, BC_REF, REF_BLOB, GEO_LAT, GEO_LNG, GEO_ALT, GEO_ACC, LONG_STRING_REF, REF_TEXT, TEMPORAL_PARSED, TEMPORAL_RAW
   }
 
 }

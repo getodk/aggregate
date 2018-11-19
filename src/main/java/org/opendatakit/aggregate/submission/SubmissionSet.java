@@ -166,9 +166,12 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   private boolean isPhantomOfSubmissionSet(FormDataModel m) {
-    return (m.getPersistAsColumn() == null)
-        && ((m.getElementType() == ElementType.PHANTOM)
-        || (m.getElementType() == ElementType.GEOPOINT) || (m.getElementType() == ElementType.GROUP));
+    return (m.getPersistAsColumn() == null) && (
+        (m.getElementType() == ElementType.PHANTOM) ||
+            (m.getElementType() == ElementType.JRDATETIME) ||
+            (m.getElementType() == ElementType.GEOPOINT) ||
+            (m.getElementType() == ElementType.GROUP)
+    );
   }
 
   private void recursivelyCreateEntities(FormDataModel groupDataModel, Datastore datastore, User user) {
@@ -583,7 +586,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
         valueList.add(v);
       } else {
         if (isPhantomOfSubmissionSet(m.getFormDataModel())) {
-          if (m.getFormDataModel().getElementType() != ElementType.GEOPOINT) {
+          if ((m.getFormDataModel().getElementType() != ElementType.JRDATETIME) ||
+              (m.getFormDataModel().getElementType() != ElementType.GEOPOINT)) {
             recursivelyGetSubmissionValues(m, valueList);
           } else {
             SubmissionValue v = elementsToValues.get(m);
@@ -609,7 +613,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
         keyList.add(m);
       } else {
         if (isPhantomOfSubmissionSet(m.getFormDataModel())) {
-          if (m.getFormDataModel().getElementType() != ElementType.GEOPOINT) {
+          if ((m.getFormDataModel().getElementType() != ElementType.JRDATETIME) ||
+              (m.getFormDataModel().getElementType() != ElementType.GEOPOINT)) {
             recursivelyGetFormElements(m, keyList);
           } else {
             keyList.add(m); // geopoints are structured fields

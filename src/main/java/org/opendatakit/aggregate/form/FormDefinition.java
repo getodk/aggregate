@@ -92,6 +92,7 @@ public class FormDefinition {
    * list of structured fields in xform
    */
   private final List<FormDataModel> geopointList = new ArrayList<FormDataModel>();
+  private final List<FormDataModel> dateTimeList = new ArrayList<FormDataModel>();
   /**
    * map from fully qualified tableName to CFB definition
    */
@@ -125,6 +126,9 @@ public class FormDefinition {
         if (table == null) {
           // should be structured field (e.g., geopoint) or form name.
           switch (type) {
+            case JRDATETIME:
+              dateTimeList.add(m);
+              break;
             case GEOPOINT:
               geopointList.add(m);
               break;
@@ -137,6 +141,9 @@ public class FormDefinition {
           // one of the auxiliary table types.
           // assume it is for now; will throw an exception later...
           switch (type) {
+            case JRDATETIME:
+              dateTimeList.add(m);
+              break;
             case GEOPOINT:
               geopointList.add(m);
               break;
@@ -281,6 +288,24 @@ public class FormDefinition {
         } else {
           b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
         }
+        backingTableMap.put(tableName, b);
+      }
+      m.setBackingObject(b);
+    }
+
+    // set the backing object for the dateTimeList.
+    // DateTime value fields are all stored within the same table...
+    // if the backing table was not yet defined by the groupList loop
+    // above, then the backing table will never be equivalent to
+    // a top-level group.
+    for (FormDataModel m : dateTimeList) {
+      if (m.getPersistAsTable() == null) {
+        throw new IllegalStateException("dateTimes should identify their backing table");
+      }
+      String tableName = m.getPersistAsQualifiedTableName();
+      DynamicCommonFieldsBase b = backingTableMap.get(tableName);
+      if (b == null) {
+        b = new InstanceData(m.getPersistAsSchema(), m.getPersistAsTable());
         backingTableMap.put(tableName, b);
       }
       m.setBackingObject(b);
