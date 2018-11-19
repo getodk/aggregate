@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,28 +23,15 @@ import org.javarosa.core.model.utils.DateUtils;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.submission.type.DateSubmissionType;
+import org.opendatakit.aggregate.submission.type.SubmissionSingleValueBase;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.web.CallingContext;
 
-/**
- * Data Storage Converter for Java Rosa Data Type
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
-public class JRDateType extends DateSubmissionType {
-
-  /**
-   * Constructor
-   */
+public class JRDateType extends SubmissionSingleValueBase<Date> {
   public JRDateType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);
   }
 
-  /**
-   * Convert string value to date format
-   */
   @Override
   public void setValueFromString(String value) {
     if (value == null) {
@@ -54,15 +42,35 @@ public class JRDateType extends DateSubmissionType {
     }
   }
 
-  /**
-   * Format value for output
-   *
-   * @param elemFormatter the element formatter that will convert the value to the
-   *                      proper format for output
-   */
+  @Override
+  public void getValueFromEntity(CallingContext cc) {
+    Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
+    setValue(value);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof JRDateType)) {
+      return false;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public Date getValue() {
+    return backingObject.getDateField(element.getFormDataModel().getBackingKey());
+  }
+
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
     elemFormatter.formatDate(getValue(), element, ordinalValue, row);
+  }
+
+  private void setValue(Date value) {
+    backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
   }
 
 }
