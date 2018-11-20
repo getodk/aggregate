@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.codec.binary.Base64;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -35,6 +36,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
@@ -239,6 +241,16 @@ public class JsonElementFormatter implements ElementFormatter {
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(dub, false, element.getElementName(), row);
 
+  }
+
+  @Override
+  public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
+    addToJsonValueToRow(
+        Optional.ofNullable(value).map(JRDateTime::getRaw).orElse(null),
+        true,
+        element.getElementName(),
+        row
+    );
   }
 
   @Override

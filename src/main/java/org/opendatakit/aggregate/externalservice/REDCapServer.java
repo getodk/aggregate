@@ -59,6 +59,7 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.aggregate.submission.type.GeoPointSubmissionType;
 import org.opendatakit.aggregate.submission.type.LongSubmissionType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
+import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
 import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
@@ -280,11 +281,11 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
 
             case JRDATETIME: {
               JRDateTimeType dt = (JRDateTimeType) value;
-              Date dtValue = dt.getValue();
+              JRDateTime dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-                g.setTime(dtValue);
+                g.setTime(dtValue.getParsed());
 
                 String strValue = String.format(FormatConsts.REDCAP_DATE_TIME_FORMAT_STRING,
                     g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH),

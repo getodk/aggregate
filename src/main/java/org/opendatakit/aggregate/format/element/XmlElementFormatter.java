@@ -25,6 +25,7 @@ import org.opendatakit.aggregate.format.structure.XmlFormatter;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
@@ -117,6 +118,11 @@ public class XmlElementFormatter implements ElementFormatter {
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     addToXmlValueToRow(dub, element.getElementName(), row);
 
+  }
+
+  @Override
+  public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
+    addToXmlValueToRow(value.getRaw(), element.getElementName(), row);
   }
 
   @Override

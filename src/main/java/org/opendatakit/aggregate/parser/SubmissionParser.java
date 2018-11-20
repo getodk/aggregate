@@ -410,7 +410,6 @@ public class SubmissionParser {
               preExisting, cc);
           break;
         case STRING:
-        case JRDATETIME:
         case JRDATE:
         case JRTIME:
         case INTEGER:
@@ -424,6 +423,12 @@ public class SubmissionParser {
             String value = getSubmissionValue(e);
             SubmissionField<?> subField = (SubmissionField<?>) submissionSet.getElementValue(m);
             subField.setValueFromString(value);
+          }
+          break;
+        case JRDATETIME:
+          if (!preExisting) {
+            String value = getSubmissionValue(e);
+            ((SubmissionField<?>) submissionSet.getElementValue(m)).setValueFromString(value);
           }
           break;
         case GEOPOINT:

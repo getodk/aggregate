@@ -73,11 +73,11 @@ public abstract class QueryBase {
     }
   }
 
-  public void addFilterGeoPoint(FormElementModel attr, Long ordinal, FilterOperation op, Object value) {
+  public void addFilterChildren(FormElementModel attr, Long ordinal, FilterOperation op, Object value) {
 
-    List<FormDataModel> geoList = attr.getFormDataModel().getChildren();
+    List<FormDataModel> children = attr.getFormDataModel().getChildren();
 
-    for (FormDataModel m : geoList) {
+    for (FormDataModel m : children) {
       if (m.getOrdinalNumber().equals(Long.valueOf(ordinal))) {
         query.addFilter(m.getBackingKey(), op, value);
       }

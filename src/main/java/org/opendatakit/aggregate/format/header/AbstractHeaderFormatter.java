@@ -37,6 +37,8 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
 
   protected abstract void processGeoPoint(FormElementModel node, String nodeName);
 
+  protected abstract void processJRDateTime(FormElementModel node, String nodeName);
+
   /**
    * Helper function to recursively go through the element tree and create the
    * column headings
@@ -75,6 +77,9 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
       case GEOPOINT:
         processGeoPoint(node, nodeName);
         break;
+      case JRDATETIME:
+        processJRDateTime(node, nodeName);
+        break;
       default:
         if ((propertyNames == null) || propertyNames.contains(node)) {
           headers.add(node.getElementName());
@@ -83,10 +88,11 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
     }
 
     // only recurse into the elements that are not binary, geopoint,
-    // repeat or choice elements
+    // dateTime, repeat or choice elements
     if ((node.getElementType() != ElementType.BINARY)
         && (node.getElementType() != ElementType.REPEAT)
         && (node.getElementType() != ElementType.GEOPOINT)
+        && (node.getElementType() != ElementType.JRDATETIME)
         && (node.getElementType() != ElementType.SELECT1)
         && (node.getElementType() != ElementType.SELECTN)) {
 

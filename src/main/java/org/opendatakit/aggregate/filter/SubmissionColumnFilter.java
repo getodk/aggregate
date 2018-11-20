@@ -80,7 +80,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     columnFilter.setParentFilterUri(parentFilter.getUri());
     columnFilter.setColumnTitle(column.getDisplayHeader());
     columnFilter.setColumnEncoding(column.getColumnEncoding());
-    columnFilter.setGpsColumnCode(column.getGeopointColumnCode());
+    columnFilter.setGpsColumnCode(column.getChildColumnCode());
 
     return columnFilter;
   }

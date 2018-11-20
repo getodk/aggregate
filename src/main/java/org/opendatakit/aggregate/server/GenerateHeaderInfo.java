@@ -33,6 +33,7 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 public class GenerateHeaderInfo {
@@ -126,7 +127,7 @@ public class GenerateHeaderInfo {
                 geopointFlags.put(fem, geopoint);
               }
 
-              Long gpsColumnIndex = columnHeader.getGeopointColumnCode();
+              Long gpsColumnIndex = columnHeader.getChildColumnCode();
 
               // add to appropriate keep or remove
               if (cf.getVisibility().equals(Visibility.DISPLAY)) {
@@ -189,6 +190,7 @@ public class GenerateHeaderInfo {
     if ((node.getElementType() != ElementType.BINARY)
         && (node.getElementType() != ElementType.REPEAT)
         && (node.getElementType() != ElementType.GEOPOINT)
+        && (node.getElementType() != ElementType.JRDATETIME)
         && (node.getElementType() != ElementType.SELECT1)
         && (node.getElementType() != ElementType.SELECTN)) {
 
@@ -216,7 +218,9 @@ public class GenerateHeaderInfo {
     if (removes != null && keeps != null) {
       if (keeps.contains(node) && !removes.contains(node)) {
         addNodeToHeader(nodeName, node);
-      } else if (keeps.contains(node) && node.getElementType().equals(ElementType.GEOPOINT)) {
+      } else if (keeps.contains(node) && (
+          node.getElementType().equals(ElementType.GEOPOINT) ||
+          node.getElementType().equals(ElementType.JRDATETIME))) {
         addNodeToHeader(nodeName, node);
       }
     } else if (keeps != null) {
@@ -224,7 +228,9 @@ public class GenerateHeaderInfo {
         addNodeToHeader(nodeName, node);
       }
     } else if (removes != null) {
-      if (!removes.contains(node) || node.getElementType().equals(ElementType.GEOPOINT)) {
+      if (!removes.contains(node) || (
+          node.getElementType().equals(ElementType.GEOPOINT) ||
+          node.getElementType().equals(ElementType.JRDATETIME))) {
         addNodeToHeader(nodeName, node);
       }
     } else {
@@ -235,7 +241,9 @@ public class GenerateHeaderInfo {
   void addNodeToHeader(String nodeName, FormElementModel node) {
     FormElementKey key = node.constructFormElementKey(form);
 
-    if (node.getElementType().equals(ElementType.GEOPOINT)) {
+    if (node.getElementType().equals(ElementType.JRDATETIME)) {
+      summary.addChildColumnHeader(nodeName, key.toString(), 1L);
+    } else if (node.getElementType().equals(ElementType.GEOPOINT)) {
       GeopointColumn gpsColumns = null;
 
       if (geopointFlags != null) {
@@ -243,29 +251,29 @@ public class GenerateHeaderInfo {
       }
 
       if (gpsColumns == null) {
-        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, key.toString(),
+        summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE, key.toString(),
             Long.valueOf(GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
-        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
+        summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
             key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
-        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE, key.toString(),
+        summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE, key.toString(),
             Long.valueOf(GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
-        summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY, key.toString(),
+        summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY, key.toString(),
             Long.valueOf(GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
       } else {
         if (gpsColumns.includeLatitude()) {
-          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE,
+          summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.LATITUDE,
               key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER));
         }
         if (gpsColumns.includeLongitude()) {
-          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
+          summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.LONGITUDE,
               key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER));
         }
         if (gpsColumns.includeAltitude()) {
-          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE,
+          summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.ALTITUDE,
               key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER));
         }
         if (gpsColumns.includeAccuracy()) {
-          summary.addGeopointHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY,
+          summary.addChildColumnHeader(nodeName + BasicConsts.COLON + GeoPoint.ACCURACY,
               key.toString(), Long.valueOf(GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER));
         }
 

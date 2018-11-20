@@ -77,8 +77,8 @@ public class SubmissionUISummary implements Serializable {
     headers.add(new Column(displayHeader, columnName, UIDisplayType.REPEAT));
   }
 
-  public void addGeopointHeader(String displayHeader, String columnName, Long geopointColumnCode) {
-    headers.add(new Column(displayHeader, columnName, geopointColumnCode));
+  public void addChildColumnHeader(String displayHeader, String columnName, long childColumnCode) {
+    headers.add(new Column(displayHeader, columnName, childColumnCode));
   }
 
   public ArrayList<SubmissionUI> getSubmissions() {
@@ -124,5 +124,4 @@ public class SubmissionUISummary implements Serializable {
   public void setHasPriorResults(boolean hasPriorResults) {
     this.hasPriorResults = hasPriorResults;
   }
-
 }

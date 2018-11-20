@@ -23,6 +23,7 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
@@ -79,5 +80,11 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
     types.add(ElementType.DECIMAL);
   }
 
+  @Override
+  protected void processJRDateTime(FormElementModel node, String nodeName) {
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    headers.add(nodeName);
+    types.add(ElementType.STRING);
+  }
 
 }

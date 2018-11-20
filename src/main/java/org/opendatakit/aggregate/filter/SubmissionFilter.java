@@ -122,7 +122,7 @@ public class SubmissionFilter extends CommonFieldsBase {
       Column column = rf.getColumn();
       subFilter.setColumnTitle(column.getDisplayHeader());
       subFilter.setColumnEncoding(column.getColumnEncoding());
-      subFilter.setGpsColumnCode(column.getGeopointColumnCode());
+      subFilter.setGpsColumnCode(column.getChildColumnCode());
     }
 
     return subFilter;

@@ -18,34 +18,61 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
+import static org.opendatakit.aggregate.OptionalProduct.all;
+
 import java.util.Date;
-import org.javarosa.core.model.utils.DateUtils;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.type.SubmissionSingleValueBase;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.web.CallingContext;
 
-public class JRDateTimeType extends SubmissionSingleValueBase<Date> {
+public class JRDateTimeType extends SubmissionSingleValueBase<JRDateTime> {
+  private Optional<JRDateTime> value = Optional.empty();
+
   public JRDateTimeType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);
   }
 
   @Override
   public void setValueFromString(String value) {
-    if (value == null) {
-      setValue(null);
-    } else {
-      Date newDate = DateUtils.parseDateTime(value);
-      setValue(newDate);
-    }
+    this.value = Optional.ofNullable(value).map(JRDateTime::from);
+    updateBackingObject(this.value);
+  }
+
+  @Override
+  public JRDateTime getValue() {
+    return value.orElse(null);
+  }
+
+  @Override
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
+    elemFormatter.formatJRDateTime(value.orElse(null), element, ordinalValue, row);
   }
 
   @Override
   public void getValueFromEntity(CallingContext cc) {
-    Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
-    setValue(value);
+    Optional<Date> parsed = Optional.empty();
+    Optional<String> raw = Optional.empty();
+    // TODO What happens if data is in old format? Could we if the getChildren().size()?
+    for (FormDataModel m : element.getFormDataModel().getChildren()) {
+      switch (m.getOrdinalNumber().intValue()) {
+        case 1:
+          parsed = Optional.ofNullable(backingObject.getDateField(m.getBackingKey()));
+          break;
+        case 2:
+          raw = Optional.ofNullable(backingObject.getStringField(m.getBackingKey()));
+          break;
+      }
+    }
+    value = all(parsed, raw).map(JRDateTime::of);
+    updateBackingObject(value);
   }
 
   @Override
@@ -56,21 +83,41 @@ public class JRDateTimeType extends SubmissionSingleValueBase<Date> {
     if (!super.equals(obj)) {
       return false;
     }
-    return true;
+    JRDateTimeType other = (JRDateTimeType) obj;
+    return Objects.equals(this.value, other.value);
   }
 
   @Override
-  public Date getValue() {
-    return backingObject.getDateField(element.getFormDataModel().getBackingKey());
+  public int hashCode() {
+    return super.hashCode() + Objects.hashCode(this.value);
   }
 
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
-    elemFormatter.formatDateTime(getValue(), element, ordinalValue, row);
+  public String toString() {
+    return "JRDateTimeType{" + this.value.map(JRDateTime::getRaw).orElse("null") + "}";
   }
 
-  private void setValue(Date value) {
-    backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
+  @Override
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) {
+    // JRDateTime storage is handled by SubmissionSet
+  }
+
+  @Override
+  public void persist(CallingContext cc) {
+    // JRDateTime persistence is handled by SubmissionSet
+  }
+
+  private void updateBackingObject(Optional<JRDateTime> value) {
+    for (FormDataModel m : element.getFormDataModel().getChildren()) {
+      switch (m.getOrdinalNumber().intValue()) {
+        case 1:
+          backingObject.setDateField(m.getBackingKey(), value.map(JRDateTime::getParsed).orElse(null));
+          break;
+        case 2:
+          backingObject.setStringField(m.getBackingKey(), value.map(JRDateTime::getRaw).orElse(null));
+          break;
+      }
+    }
   }
 
 }
