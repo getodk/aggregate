@@ -20,6 +20,9 @@ package org.opendatakit.aggregate.submission.type.jr;
 
 import static org.opendatakit.aggregate.OptionalProduct.all;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -60,17 +63,24 @@ public class JRDateTimeType extends SubmissionSingleValueBase<JRDateTime> {
   public void getValueFromEntity(CallingContext cc) {
     Optional<Date> parsed = Optional.empty();
     Optional<String> raw = Optional.empty();
-    // TODO What happens if data is in old format? Could we if the getChildren().size()?
-    for (FormDataModel m : element.getFormDataModel().getChildren()) {
-      switch (m.getOrdinalNumber().intValue()) {
-        case 1:
-          parsed = Optional.ofNullable(backingObject.getDateField(m.getBackingKey()));
-          break;
-        case 2:
-          raw = Optional.ofNullable(backingObject.getStringField(m.getBackingKey()));
-          break;
+    if (element.getFormDataModel().getChildren().isEmpty()) {
+      // This is an old date field
+      parsed = Optional.ofNullable(backingObject.getDateField(element.getFormDataModel().getBackingKey()));
+      raw = parsed
+          .map(Date::toInstant)
+          .map(i -> OffsetDateTime.ofInstant(i, ZoneId.systemDefault()))
+          .map(odt -> odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+    } else
+      for (FormDataModel m : element.getFormDataModel().getChildren()) {
+        switch (m.getOrdinalNumber().intValue()) {
+          case 1:
+            parsed = Optional.ofNullable(backingObject.getDateField(m.getBackingKey()));
+            break;
+          case 2:
+            raw = Optional.ofNullable(backingObject.getStringField(m.getBackingKey()));
+            break;
+        }
       }
-    }
     value = all(parsed, raw).map(JRDateTime::of);
     updateBackingObject(value);
   }
@@ -108,16 +118,19 @@ public class JRDateTimeType extends SubmissionSingleValueBase<JRDateTime> {
   }
 
   private void updateBackingObject(Optional<JRDateTime> value) {
-    for (FormDataModel m : element.getFormDataModel().getChildren()) {
-      switch (m.getOrdinalNumber().intValue()) {
-        case 1:
-          backingObject.setDateField(m.getBackingKey(), value.map(JRDateTime::getParsed).orElse(null));
-          break;
-        case 2:
-          backingObject.setStringField(m.getBackingKey(), value.map(JRDateTime::getRaw).orElse(null));
-          break;
+    if (element.getFormDataModel().getChildren().isEmpty())
+      backingObject.setDateField(element.getFormDataModel().getBackingKey(), value.map(JRDateTime::getParsed).orElse(null));
+    else
+      for (FormDataModel m : element.getFormDataModel().getChildren()) {
+        switch (m.getOrdinalNumber().intValue()) {
+          case 1:
+            backingObject.setDateField(m.getBackingKey(), value.map(JRDateTime::getParsed).orElse(null));
+            break;
+          case 2:
+            backingObject.setStringField(m.getBackingKey(), value.map(JRDateTime::getRaw).orElse(null));
+            break;
+        }
       }
-    }
   }
 
 }
