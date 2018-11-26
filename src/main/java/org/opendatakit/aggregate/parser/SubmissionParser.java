@@ -410,8 +410,6 @@ public class SubmissionParser {
               preExisting, cc);
           break;
         case STRING:
-        case JRDATE:
-        case JRTIME:
         case INTEGER:
         case DECIMAL:
         case BOOLEAN:
@@ -423,6 +421,18 @@ public class SubmissionParser {
             String value = getSubmissionValue(e);
             SubmissionField<?> subField = (SubmissionField<?>) submissionSet.getElementValue(m);
             subField.setValueFromString(value);
+          }
+          break;
+        case JRDATE:
+          if (!preExisting) {
+            String value = getSubmissionValue(e);
+            ((SubmissionField<?>) submissionSet.getElementValue(m)).setValueFromString(value);
+          }
+          break;
+        case JRTIME:
+          if (!preExisting) {
+            String value = getSubmissionValue(e);
+            ((SubmissionField<?>) submissionSet.getElementValue(m)).setValueFromString(value);
           }
           break;
         case JRDATETIME:

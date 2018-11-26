@@ -33,7 +33,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel.ElementType;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
-import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 public class GenerateHeaderInfo {
@@ -190,6 +189,8 @@ public class GenerateHeaderInfo {
     if ((node.getElementType() != ElementType.BINARY)
         && (node.getElementType() != ElementType.REPEAT)
         && (node.getElementType() != ElementType.GEOPOINT)
+        && (node.getElementType() != ElementType.JRDATE)
+        && (node.getElementType() != ElementType.JRTIME)
         && (node.getElementType() != ElementType.JRDATETIME)
         && (node.getElementType() != ElementType.SELECT1)
         && (node.getElementType() != ElementType.SELECTN)) {
@@ -220,7 +221,9 @@ public class GenerateHeaderInfo {
         addNodeToHeader(nodeName, node);
       } else if (keeps.contains(node) && (
           node.getElementType().equals(ElementType.GEOPOINT) ||
-          node.getElementType().equals(ElementType.JRDATETIME))) {
+              node.getElementType().equals(ElementType.JRDATE) ||
+              node.getElementType().equals(ElementType.JRTIME) ||
+              node.getElementType().equals(ElementType.JRDATETIME))) {
         addNodeToHeader(nodeName, node);
       }
     } else if (keeps != null) {
@@ -230,7 +233,9 @@ public class GenerateHeaderInfo {
     } else if (removes != null) {
       if (!removes.contains(node) || (
           node.getElementType().equals(ElementType.GEOPOINT) ||
-          node.getElementType().equals(ElementType.JRDATETIME))) {
+              node.getElementType().equals(ElementType.JRDATE) ||
+              node.getElementType().equals(ElementType.JRTIME) ||
+              node.getElementType().equals(ElementType.JRDATETIME))) {
         addNodeToHeader(nodeName, node);
       }
     } else {
@@ -241,7 +246,11 @@ public class GenerateHeaderInfo {
   void addNodeToHeader(String nodeName, FormElementModel node) {
     FormElementKey key = node.constructFormElementKey(form);
 
-    if (node.getElementType().equals(ElementType.JRDATETIME)) {
+    if (node.getElementType().equals(ElementType.JRDATE)) {
+      summary.addChildColumnHeader(nodeName, key.toString(), 1L);
+    } else if (node.getElementType().equals(ElementType.JRTIME)) {
+      summary.addChildColumnHeader(nodeName, key.toString(), 1L);
+    } else if (node.getElementType().equals(ElementType.JRDATETIME)) {
       summary.addChildColumnHeader(nodeName, key.toString(), 1L);
     } else if (node.getElementType().equals(ElementType.GEOPOINT)) {
       GeopointColumn gpsColumns = null;

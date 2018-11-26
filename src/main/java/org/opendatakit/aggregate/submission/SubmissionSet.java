@@ -168,6 +168,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   private boolean isPhantomOfSubmissionSet(FormDataModel m) {
     return (m.getPersistAsColumn() == null) && (
         (m.getElementType() == ElementType.PHANTOM) ||
+            (m.getElementType() == ElementType.JRDATE) ||
+            (m.getElementType() == ElementType.JRTIME) ||
             (m.getElementType() == ElementType.JRDATETIME) ||
             (m.getElementType() == ElementType.GEOPOINT) ||
             (m.getElementType() == ElementType.GROUP)
@@ -586,7 +588,9 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
         valueList.add(v);
       } else {
         if (isPhantomOfSubmissionSet(m.getFormDataModel())) {
-          if ((m.getFormDataModel().getElementType() != ElementType.JRDATETIME) ||
+          if ((m.getFormDataModel().getElementType() != ElementType.JRDATE) ||
+              (m.getFormDataModel().getElementType() != ElementType.JRTIME) ||
+              (m.getFormDataModel().getElementType() != ElementType.JRDATETIME) ||
               (m.getFormDataModel().getElementType() != ElementType.GEOPOINT)) {
             recursivelyGetSubmissionValues(m, valueList);
           } else {
@@ -613,7 +617,9 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
         keyList.add(m);
       } else {
         if (isPhantomOfSubmissionSet(m.getFormDataModel())) {
-          if ((m.getFormDataModel().getElementType() != ElementType.JRDATETIME) ||
+          if ((m.getFormDataModel().getElementType() != ElementType.JRDATE) ||
+              (m.getFormDataModel().getElementType() != ElementType.JRTIME) ||
+              (m.getFormDataModel().getElementType() != ElementType.JRDATETIME) ||
               (m.getFormDataModel().getElementType() != ElementType.GEOPOINT)) {
             recursivelyGetFormElements(m, keyList);
           } else {

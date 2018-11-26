@@ -28,7 +28,9 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRDate;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
+import org.opendatakit.aggregate.submission.type.jr.JRTime;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
@@ -135,6 +137,23 @@ public class BasicElementFormatter implements ElementFormatter {
 
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     formatBigDecimalToString(dub, row);
+  }
+
+  public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
+    // TODO This is being used by the web client *and* the CSV exports. We can't use the same format in both
+    basicStringConversion(Optional.ofNullable(value).map(JRDate::getParsed).orElse(null), row);
+  }
+
+  public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
+    // TODO This is being used by the web client *and* the CSV exports. We can't use the same format in both
+    Optional.ofNullable(value).map(JRTime::getParsed).ifPresent(date -> {
+      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+      g.setTime(date);
+      row.addFormattedValue(String.format(FormatConsts.TIME_FORMAT_STRING,
+          g.get(Calendar.HOUR_OF_DAY),
+          g.get(Calendar.MINUTE),
+          g.get(Calendar.SECOND)));
+    });
   }
 
   public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {

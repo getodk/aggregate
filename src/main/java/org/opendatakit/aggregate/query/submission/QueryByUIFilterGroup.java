@@ -147,10 +147,12 @@ public class QueryByUIFilterGroup extends QueryBase {
             continue;
           case JRDATE:
             compareValue = WebUtils.parseDate(value);
-            break;
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            continue;
           case JRTIME:
             compareValue = WebUtils.parseDate(value);
-            break;
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            continue;
           case INTEGER:
             compareValue = Long.valueOf(value);
             break;

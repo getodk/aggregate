@@ -37,6 +37,10 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
 
   protected abstract void processGeoPoint(FormElementModel node, String nodeName);
 
+  protected abstract void processJRDate(FormElementModel node, String nodeName);
+
+  protected abstract void processJRTime(FormElementModel node, String nodeName);
+
   protected abstract void processJRDateTime(FormElementModel node, String nodeName);
 
   /**
@@ -77,6 +81,12 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
       case GEOPOINT:
         processGeoPoint(node, nodeName);
         break;
+      case JRDATE:
+        processJRDate(node, nodeName);
+        break;
+      case JRTIME:
+        processJRTime(node, nodeName);
+        break;
       case JRDATETIME:
         processJRDateTime(node, nodeName);
         break;
@@ -92,6 +102,8 @@ public abstract class AbstractHeaderFormatter implements HeaderFormatter {
     if ((node.getElementType() != ElementType.BINARY)
         && (node.getElementType() != ElementType.REPEAT)
         && (node.getElementType() != ElementType.GEOPOINT)
+        && (node.getElementType() != ElementType.JRDATE)
+        && (node.getElementType() != ElementType.JRTIME)
         && (node.getElementType() != ElementType.JRDATETIME)
         && (node.getElementType() != ElementType.SELECT1)
         && (node.getElementType() != ElementType.SELECTN)) {

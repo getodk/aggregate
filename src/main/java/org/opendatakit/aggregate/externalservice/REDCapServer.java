@@ -59,9 +59,11 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.aggregate.submission.type.GeoPointSubmissionType;
 import org.opendatakit.aggregate.submission.type.LongSubmissionType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
+import org.opendatakit.aggregate.submission.type.jr.JRDate;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
+import org.opendatakit.aggregate.submission.type.jr.JRTime;
 import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -301,11 +303,11 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
 
             case JRDATE: {
               JRDateType dt = (JRDateType) value;
-              Date dtValue = dt.getValue();
+              JRDate dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-                g.setTime(dtValue);
+                g.setTime(dtValue.getParsed());
 
                 String strValue = String.format(FormatConsts.REDCAP_DATE_ONLY_FORMAT_STRING,
                     g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH));
@@ -319,11 +321,11 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
 
             case JRTIME: {
               JRTimeType dt = (JRTimeType) value;
-              Date dtValue = dt.getValue();
+              JRTime dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-                g.setTime(dtValue);
+                g.setTime(dtValue.getParsed());
 
                 String strValue = String.format(FormatConsts.REDCAP_TIME_FORMAT_STRING,
                     g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE));

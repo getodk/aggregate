@@ -18,34 +18,72 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
+import static org.opendatakit.aggregate.OptionalProduct.all;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import org.javarosa.core.model.utils.DateUtils;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.submission.type.SubmissionSingleValueBase;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
+import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.web.CallingContext;
 
-public class JRTimeType extends SubmissionSingleValueBase<Date> {
+public class JRTimeType extends SubmissionSingleValueBase<JRTime> {
+  private Optional<JRTime> value = Optional.empty();
+
   public JRTimeType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);
   }
 
   @Override
   public void setValueFromString(String value) {
-    if (value == null) {
-      setValue(null);
-    } else {
-      Date newDate = DateUtils.parseTime(value);
-      setValue(newDate);
-    }
+    this.value = Optional.ofNullable(value).map(JRTime::from);
+    updateBackingObject(this.value);
+  }
+
+  @Override
+  public JRTime getValue() {
+    return value.orElse(null);
+  }
+
+  @Override
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
+    elemFormatter.formatJRTime(value.orElse(null), element, ordinalValue, row);
   }
 
   @Override
   public void getValueFromEntity(CallingContext cc) {
-    Date value = backingObject.getDateField(element.getFormDataModel().getBackingKey());
-    setValue(value);
+    Optional<Date> parsed = Optional.empty();
+    Optional<String> raw = Optional.empty();
+    if (element.getFormDataModel().getChildren().isEmpty()) {
+      // This is an old date field
+      parsed = Optional.ofNullable(backingObject.getDateField(element.getFormDataModel().getBackingKey()));
+      raw = parsed
+          .map(Date::toInstant)
+          .map(i -> OffsetDateTime.ofInstant(i, ZoneId.systemDefault()))
+          .map(odt -> odt.format(DateTimeFormatter.ISO_OFFSET_TIME));
+    } else
+      for (FormDataModel m : element.getFormDataModel().getChildren()) {
+        switch (m.getOrdinalNumber().intValue()) {
+          case 1:
+            parsed = Optional.ofNullable(backingObject.getDateField(m.getBackingKey()));
+            break;
+          case 2:
+            raw = Optional.ofNullable(backingObject.getStringField(m.getBackingKey()));
+            break;
+        }
+      }
+    value = all(parsed, raw).map(JRTime::of);
+    updateBackingObject(value);
   }
 
   @Override
@@ -56,21 +94,44 @@ public class JRTimeType extends SubmissionSingleValueBase<Date> {
     if (!super.equals(obj)) {
       return false;
     }
-    return true;
+    JRTimeType other = (JRTimeType) obj;
+    return Objects.equals(this.value, other.value);
   }
 
   @Override
-  public Date getValue() {
-    return backingObject.getDateField(element.getFormDataModel().getBackingKey());
+  public int hashCode() {
+    return super.hashCode() + Objects.hashCode(this.value);
   }
 
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
-    elemFormatter.formatTime(getValue(), element, ordinalValue, row);
+  public String toString() {
+    return "JRTimeType{" + this.value.map(JRTime::getRaw).orElse("null") + "}";
   }
 
-  protected void setValue(Date value) {
-    backingObject.setDateField(element.getFormDataModel().getBackingKey(), (Date) value);
+  @Override
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) {
+    // JRTime storage is handled by SubmissionSet
+  }
+
+  @Override
+  public void persist(CallingContext cc) {
+    // JRTime persistence is handled by SubmissionSet
+  }
+
+  private void updateBackingObject(Optional<JRTime> value) {
+    if (element.getFormDataModel().getChildren().isEmpty())
+      backingObject.setDateField(element.getFormDataModel().getBackingKey(), value.map(JRTime::getParsed).orElse(null));
+    else
+      for (FormDataModel m : element.getFormDataModel().getChildren()) {
+        switch (m.getOrdinalNumber().intValue()) {
+          case 1:
+            backingObject.setDateField(m.getBackingKey(), value.map(JRTime::getParsed).orElse(null));
+            break;
+          case 2:
+            backingObject.setStringField(m.getBackingKey(), value.map(JRTime::getRaw).orElse(null));
+            break;
+        }
+      }
   }
 
 }
