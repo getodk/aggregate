@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.format.element;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -111,17 +112,17 @@ public class XmlAttributeFormatter implements ElementFormatter {
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(WebUtils.asSubmissionDateOnlyString(date), asAttributeName(element), row);
+    addToXmlValueToRow(Optional.ofNullable(date).map(JRDate::from).map(JRDate::getRaw).orElse(null), asAttributeName(element), row);
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(WebUtils.asSubmissionDateTimeString(date), asAttributeName(element), row);
+    addToXmlValueToRow(Optional.ofNullable(date).map(JRDateTime::from).map(JRDateTime::getRaw).orElse(null), asAttributeName(element), row);
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(WebUtils.asSubmissionTimeOnlyString(date), asAttributeName(element), row);
+    addToXmlValueToRow(Optional.ofNullable(date).map(JRTime::from).map(JRTime::getRaw).orElse(null), asAttributeName(element), row);
   }
 
   @Override
@@ -131,17 +132,17 @@ public class XmlAttributeFormatter implements ElementFormatter {
 
   @Override
   public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(value.getRaw(), asAttributeName(element), row);
+    addToXmlValueToRow(Optional.ofNullable(value).map(JRDate::getRaw).orElse(null), asAttributeName(element), row);
   }
 
   @Override
   public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(value.getRaw(), asAttributeName(element), row);
+    addToXmlValueToRow(Optional.ofNullable(value).map(JRTime::getRaw).orElse(null), asAttributeName(element), row);
   }
 
   @Override
   public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(value.getRaw(), asAttributeName(element), row);
+    addToXmlValueToRow(Optional.ofNullable(value).map(JRDateTime::getRaw).orElse(null), asAttributeName(element), row);
   }
 
   @Override
