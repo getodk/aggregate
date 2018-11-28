@@ -30,7 +30,7 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
-import org.opendatakit.aggregate.format.element.CsvLinkElementFormatter;
+import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.servlet.FragmentedCsvServlet;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
@@ -61,7 +61,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
                                 String webServerUrl, String websafeCursorString, PrintWriter printWriter) {
     super(xform, printWriter, null);
     this.websafeCursorString = websafeCursorString;
-    elemFormatter = new CsvLinkElementFormatter(webServerUrl, FragmentedCsvServlet.ADDR, true, true,
+    elemFormatter = new LinkElementFormatter(webServerUrl, FragmentedCsvServlet.ADDR, true, true,
         true, false);
   }
 
@@ -158,10 +158,10 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
       Row row = sub.getFormattedValuesAsRow(propertyNames, elemFormatter, false, cc);
 
       if (includeParentKey) {
-        ((CsvLinkElementFormatter) elemFormatter).addFormattedLink(sub.getEnclosingSet()
+        ((LinkElementFormatter) elemFormatter).addFormattedLink(sub.getEnclosingSet()
             .constructSubmissionKey(null), FragmentedCsvServlet.ADDR, ServletConsts.FORM_ID, row); // PARENT_KEY
       }
-      ((CsvLinkElementFormatter) elemFormatter).addFormattedLink(sub.constructSubmissionKey(null),
+      ((LinkElementFormatter) elemFormatter).addFormattedLink(sub.constructSubmissionKey(null),
           FragmentedCsvServlet.ADDR, ServletConsts.FORM_ID, row); // KEY
       formattedElements.add(row);
     }
