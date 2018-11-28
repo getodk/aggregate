@@ -21,6 +21,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -113,26 +114,29 @@ public class KmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(date, element.getGroupQualifiedElementName() + ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(date).map(JRDate::from).map(JRDate::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(date, element.getGroupQualifiedElementName() + ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(date).map(JRDateTime::from).map(JRDateTime::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (date != null) {
-      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-      g.setTime(date);
-      generateDataElement(String.format(FormatConsts.TIME_FORMAT_STRING,
-          g.get(Calendar.HOUR_OF_DAY),
-          g.get(Calendar.MINUTE),
-          g.get(Calendar.SECOND)), element.getGroupQualifiedElementName() + ordinalValue, row);
-    } else {
-      generateDataElement(null, element.getGroupQualifiedElementName() + ordinalValue, row);
-    }
+    generateDataElement(
+        Optional.ofNullable(date).map(JRTime::from).map(JRTime::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
@@ -142,17 +146,29 @@ public class KmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(value.getRaw(), element + FormatConsts.HEADER_CONCAT + ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(value).map(JRDate::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
   public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(value.getRaw(), element + FormatConsts.HEADER_CONCAT + ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(value).map(JRTime::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
   public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(value.getRaw(), element + FormatConsts.HEADER_CONCAT + ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(value).map(JRDateTime::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
