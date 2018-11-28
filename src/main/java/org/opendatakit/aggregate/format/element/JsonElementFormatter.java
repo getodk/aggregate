@@ -218,25 +218,32 @@ public class JsonElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    // date in ISO8601 Javarosa format
-    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionDateOnlyString(date), true,
-        element.getElementName(), row);
-
+    addToJsonValueToRow(
+        Optional.ofNullable(date).map(JRDate::from).map(JRDate::getRaw).orElse(null),
+        true,
+        element.getElementName(),
+        row
+    );
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    // dateTime in ISO8601 Javarosa format
-    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionDateTimeString(date), true,
-        element.getElementName(), row);
-
+    addToJsonValueToRow(
+        Optional.ofNullable(date).map(JRDateTime::from).map(JRDateTime::getRaw).orElse(null),
+        true,
+        element.getElementName(),
+        row
+    );
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    // time in ISO8601 Javarosa format
-    addToJsonValueToRow((date == null) ? null : WebUtils.asSubmissionTimeOnlyString(date), true,
-        element.getElementName(), row);
+    addToJsonValueToRow(
+        Optional.ofNullable(date).map(JRTime::from).map(JRTime::getRaw).orElse(null),
+        true,
+        element.getElementName(),
+        row
+    );
   }
 
   @Override
