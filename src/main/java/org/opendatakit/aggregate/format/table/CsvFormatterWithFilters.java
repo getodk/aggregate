@@ -28,8 +28,8 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.SubmissionFormatter;
+import org.opendatakit.aggregate.format.element.CsvLinkElementFormatter;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.element.LinkElementFormatter;
 import org.opendatakit.aggregate.server.GenerateHeaderInfo;
 import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.Submission;
@@ -62,7 +62,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
     for (Column col : summary.getHeaders()) {
       headers.add(col.getDisplayHeader());
     }
-    elemFormatter = new LinkElementFormatter(webServerUrl, FormMultipleValueServlet.ADDR, true,
+    elemFormatter = new CsvLinkElementFormatter(webServerUrl, FormMultipleValueServlet.ADDR, true,
         true, true, false);
   }
 
