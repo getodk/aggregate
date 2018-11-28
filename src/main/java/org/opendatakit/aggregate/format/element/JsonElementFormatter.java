@@ -36,12 +36,9 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
-import org.opendatakit.aggregate.submission.type.jr.JRDate;
-import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
-import org.opendatakit.aggregate.submission.type.jr.JRTime;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -219,7 +216,7 @@ public class JsonElementFormatter implements ElementFormatter {
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(
-        Optional.ofNullable(date).map(JRDate::from).map(JRDate::getRaw).orElse(null),
+        Optional.ofNullable(date).map(JRTemporal::date).map(JRTemporal::getRaw).orElse(null),
         true,
         element.getElementName(),
         row
@@ -229,7 +226,7 @@ public class JsonElementFormatter implements ElementFormatter {
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(
-        Optional.ofNullable(date).map(JRDateTime::from).map(JRDateTime::getRaw).orElse(null),
+        Optional.ofNullable(date).map(JRTemporal::dateTime).map(JRTemporal::getRaw).orElse(null),
         true,
         element.getElementName(),
         row
@@ -239,7 +236,7 @@ public class JsonElementFormatter implements ElementFormatter {
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(
-        Optional.ofNullable(date).map(JRTime::from).map(JRTime::getRaw).orElse(null),
+        Optional.ofNullable(date).map(JRTemporal::time).map(JRTemporal::getRaw).orElse(null),
         true,
         element.getElementName(),
         row
@@ -253,9 +250,9 @@ public class JsonElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(
-        Optional.ofNullable(value).map(JRDate::getRaw).orElse(null),
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
         true,
         element.getElementName(),
         row
@@ -263,9 +260,9 @@ public class JsonElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(
-        Optional.ofNullable(value).map(JRTime::getRaw).orElse(null),
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
         true,
         element.getElementName(),
         row
@@ -273,9 +270,9 @@ public class JsonElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(
-        Optional.ofNullable(value).map(JRDateTime::getRaw).orElse(null),
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
         true,
         element.getElementName(),
         row

@@ -30,9 +30,7 @@ import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
-import org.opendatakit.aggregate.submission.type.jr.JRDate;
-import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
-import org.opendatakit.aggregate.submission.type.jr.JRTime;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -126,19 +124,19 @@ public class OhmageJsonElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     OhmageJsonTypes.text resp = new OhmageJsonTypes.text(element.getElementName(), value.getRaw());
     responses.add(resp);
   }
 
   @Override
-  public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     OhmageJsonTypes.text resp = new OhmageJsonTypes.text(element.getElementName(), value.getRaw());
     responses.add(resp);
   }
 
   @Override
-  public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     OhmageJsonTypes.text resp = new OhmageJsonTypes.text(element.getElementName(), value.getRaw());
     responses.add(resp);
   }

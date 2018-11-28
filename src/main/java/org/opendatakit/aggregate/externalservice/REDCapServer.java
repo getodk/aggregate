@@ -58,11 +58,9 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.aggregate.submission.type.GeoPointSubmissionType;
 import org.opendatakit.aggregate.submission.type.LongSubmissionType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
-import org.opendatakit.aggregate.submission.type.jr.JRDate;
-import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
-import org.opendatakit.aggregate.submission.type.jr.JRTime;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -281,8 +279,9 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             break;
 
             case JRDATETIME: {
+              // TODO review this use of the JRTemporal subclass
               JRDateTimeType dt = (JRDateTimeType) value;
-              JRDateTime dtValue = dt.getValue();
+              JRTemporal dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
@@ -301,8 +300,9 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             break;
 
             case JRDATE: {
+              // TODO review this use of the JRTemporal subclass
               JRDateType dt = (JRDateType) value;
-              JRDate dtValue = dt.getValue();
+              JRTemporal dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
@@ -319,8 +319,9 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             break;
 
             case JRTIME: {
+              // TODO review this use of the JRTemporal subclass
               JRTimeType dt = (JRTimeType) value;
-              JRTime dtValue = dt.getValue();
+              JRTemporal dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));

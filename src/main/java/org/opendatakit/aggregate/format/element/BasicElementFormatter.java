@@ -27,9 +27,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
-import org.opendatakit.aggregate.submission.type.jr.JRDate;
-import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
-import org.opendatakit.aggregate.submission.type.jr.JRTime;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
@@ -101,21 +99,21 @@ public class BasicElementFormatter implements ElementFormatter {
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(Optional.ofNullable(date)
-        .map(JRDate::from)
+        .map(JRTemporal::date)
         .map(v -> WebUtils.rfc1123Date(v.getParsed()))
         .orElse(null), row);
   }
 
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(Optional.ofNullable(date)
-        .map(JRDateTime::from)
+        .map(JRTemporal::dateTime)
         .map(v -> WebUtils.rfc1123Date(v.getParsed()))
         .orElse(null), row);
   }
 
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(Optional.ofNullable(date)
-        .map(JRTime::from)
+        .map(JRTemporal::time)
         .map(v -> OffsetTime.parse(v.getRaw()).format(ISO_LOCAL_TIME))
         .orElse(null), row);
   }
@@ -124,19 +122,20 @@ public class BasicElementFormatter implements ElementFormatter {
     formatBigDecimalToString(dub, row);
   }
 
-  public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(Optional.ofNullable(value)
         .map(v -> WebUtils.rfc1123Date(v.getParsed()))
         .orElse(null), row);
   }
 
-  public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(Optional.ofNullable(value)
-        .map(v -> v.getValue().format(ISO_LOCAL_TIME))
+        // TODO Migrate this to JRTemporal::getRaw as soon as we discuss changes on the UI
+        .map(v -> ((OffsetTime) v.getValue()).format(ISO_LOCAL_TIME))
         .orElse(null), row);
   }
 
-  public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     basicStringConversion(Optional.ofNullable(value)
         .map(v -> WebUtils.rfc1123Date(v.getParsed()))
         .orElse(null), row);

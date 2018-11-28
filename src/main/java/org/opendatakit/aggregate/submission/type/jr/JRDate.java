@@ -16,46 +16,32 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
-import static java.time.ZoneId.systemDefault;
-import static java.time.format.DateTimeFormatter.ISO_DATE;
-import static java.util.Objects.requireNonNull;
-
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
 import java.util.Date;
-import java.util.Optional;
-import org.javarosa.core.model.utils.DateUtils;
 
-public class JRDate {
+public class JRDate implements JRTemporal<LocalDate> {
   private final Date parsed;
+  private final LocalDate value;
   private final String raw;
 
-  public JRDate(Date parsed, String raw) {
+  public JRDate(Date parsed, LocalDate value, String raw) {
     this.parsed = parsed;
+    this.value = value;
     this.raw = raw;
   }
 
-  public static JRDate from(String value) {
-    return new JRDate(
-        Optional.ofNullable(DateUtils.parseDate(value)).orElseThrow(IllegalArgumentException::new),
-        value
-    );
-  }
-
-  public static JRDate from(Date parsed) {
-    OffsetDateTime odt = OffsetDateTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault()).truncatedTo(ChronoUnit.DAYS);
-    return new JRDate(Date.from(odt.toInstant()), odt.format(ISO_DATE));
-  }
-
-  public static JRDate of(Date parsed, String raw) {
-    return new JRDate(parsed, raw);
-  }
-
+  @Override
   public Date getParsed() {
     return parsed;
   }
 
+  @Override
   public String getRaw() {
     return raw;
+  }
+
+  @Override
+  public LocalDate getValue() {
+    return value;
   }
 }

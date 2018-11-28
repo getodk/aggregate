@@ -16,16 +16,10 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
-import static java.time.ZoneId.systemDefault;
-import static java.time.format.DateTimeFormatter.ISO_OFFSET_TIME;
-import static java.util.Objects.requireNonNull;
-
-import java.time.LocalDate;
 import java.time.OffsetTime;
 import java.util.Date;
-import java.util.Objects;
 
-public class JRTime {
+public class JRTime implements JRTemporal<OffsetTime> {
   private final Date parsed;
   private final OffsetTime value;
   private final String raw;
@@ -36,34 +30,17 @@ public class JRTime {
     this.raw = raw;
   }
 
-  public static JRTime from(String raw) {
-    if (raw.charAt(raw.length() - 3) == '+' || raw.charAt(raw.length() - 3) == '-')
-      raw += ":00";
-    OffsetTime value = OffsetTime.parse(Objects.requireNonNull(raw));
-    Date parsed = Date.from(value.atDate(LocalDate.of(1970, 1, 1)).toInstant());
-    return new JRTime(parsed, value, raw);
-  }
-
-  public static JRTime from(Date parsed) {
-    OffsetTime value = OffsetTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault());
-    return new JRTime(parsed, value, value.format(ISO_OFFSET_TIME));
-  }
-
-  public static JRTime of(Date parsed, String raw) {
-    if (raw.charAt(raw.length() - 3) == '+' || raw.charAt(raw.length() - 3) == '-')
-      raw += ":00";
-    OffsetTime value = OffsetTime.parse(Objects.requireNonNull(raw));
-    return new JRTime(parsed, value, raw);
-  }
-
+  @Override
   public Date getParsed() {
     return parsed;
   }
 
+  @Override
   public String getRaw() {
     return raw;
   }
 
+  @Override
   public OffsetTime getValue() {
     return value;
   }

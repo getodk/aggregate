@@ -22,7 +22,6 @@ import static org.opendatakit.aggregate.OptionalProduct.all;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -37,8 +36,8 @@ import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.web.CallingContext;
 
-public class JRTimeType extends SubmissionSingleValueBase<JRTime> {
-  private Optional<JRTime> value = Optional.empty();
+public class JRTimeType extends SubmissionSingleValueBase<JRTemporal> {
+  private Optional<JRTemporal> value = Optional.empty();
 
   public JRTimeType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);
@@ -46,12 +45,12 @@ public class JRTimeType extends SubmissionSingleValueBase<JRTime> {
 
   @Override
   public void setValueFromString(String value) {
-    this.value = Optional.ofNullable(value).map(JRTime::from);
+    this.value = Optional.ofNullable(value).map(JRTemporal::time);
     updateBackingObject(this.value);
   }
 
   @Override
-  public JRTime getValue() {
+  public JRTemporal getValue() {
     return value.orElse(null);
   }
 
@@ -82,7 +81,7 @@ public class JRTimeType extends SubmissionSingleValueBase<JRTime> {
             break;
         }
       }
-    value = all(parsed, raw).map(JRTime::of);
+    value = all(parsed, raw).map(JRTemporal::time);
     updateBackingObject(value);
   }
 
@@ -105,7 +104,7 @@ public class JRTimeType extends SubmissionSingleValueBase<JRTime> {
 
   @Override
   public String toString() {
-    return "JRTimeType{" + this.value.map(JRTime::getRaw).orElse("null") + "}";
+    return "JRTimeType{" + this.value.map(JRTemporal::getRaw).orElse("null") + "}";
   }
 
   @Override
@@ -118,17 +117,17 @@ public class JRTimeType extends SubmissionSingleValueBase<JRTime> {
     // JRTime persistence is handled by SubmissionSet
   }
 
-  private void updateBackingObject(Optional<JRTime> value) {
+  private void updateBackingObject(Optional<JRTemporal> value) {
     if (element.getFormDataModel().getChildren().isEmpty())
-      backingObject.setDateField(element.getFormDataModel().getBackingKey(), value.map(JRTime::getParsed).orElse(null));
+      backingObject.setDateField(element.getFormDataModel().getBackingKey(), value.map(JRTemporal::getParsed).orElse(null));
     else
       for (FormDataModel m : element.getFormDataModel().getChildren()) {
         switch (m.getOrdinalNumber().intValue()) {
           case 1:
-            backingObject.setDateField(m.getBackingKey(), value.map(JRTime::getParsed).orElse(null));
+            backingObject.setDateField(m.getBackingKey(), value.map(JRTemporal::getParsed).orElse(null));
             break;
           case 2:
-            backingObject.setStringField(m.getBackingKey(), value.map(JRTime::getRaw).orElse(null));
+            backingObject.setStringField(m.getBackingKey(), value.map(JRTemporal::getRaw).orElse(null));
             break;
         }
       }
