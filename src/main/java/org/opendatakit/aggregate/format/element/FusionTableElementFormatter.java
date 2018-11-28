@@ -28,7 +28,7 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  */
-public class FusionTableElementFormatter extends LinkElementFormatter {
+public class FusionTableElementFormatter extends CsvLinkElementFormatter {
 
   private static final String FT_PLACEMARK_POINT_TEMPLATE = "<Point><coordinates>%s</coordinates></Point>";
 

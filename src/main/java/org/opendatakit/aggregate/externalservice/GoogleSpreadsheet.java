@@ -74,7 +74,7 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.form.MiscTasks.TaskType;
 import org.opendatakit.aggregate.format.Row;
-import org.opendatakit.aggregate.format.element.LinkElementFormatter;
+import org.opendatakit.aggregate.format.element.CsvLinkElementFormatter;
 import org.opendatakit.aggregate.format.header.GoogleSpreadsheetHeaderFormatter;
 import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.Submission;
@@ -120,7 +120,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
   private Map<String, SheetInfo> sheetInfoMap = null;
 
   private GoogleSpreadsheet(IForm form, GoogleSpreadsheet2ParameterTable gsObject, FormServiceCursor formServiceCursor, CallingContext cc) throws ODKExternalServiceException {
-    super(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, form, formServiceCursor, new LinkElementFormatter(
+    super(GOOGLE_SPREADSHEET_OAUTH2_SCOPE, form, formServiceCursor, new CsvLinkElementFormatter(
             cc.getServerURL(), FormMultipleValueServlet.ADDR, true, true, true, true),
         new GoogleSpreadsheetHeaderFormatter(true, true, true), cc);
 

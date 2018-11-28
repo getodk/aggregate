@@ -582,6 +582,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   private void recursivelyGetSubmissionValues(FormElementModel group, List<SubmissionValue> valueList) {
+    if (group.getChildren().isEmpty()) {
+      SubmissionValue v = elementsToValues.get(group);
+      valueList.add(v);
+    }
     for (FormElementModel m : group.getChildren()) {
       if (m.isMetadata()) {
         SubmissionValue v = elementsToValues.get(m);
