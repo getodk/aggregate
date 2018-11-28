@@ -16,9 +16,11 @@
 
 package org.opendatakit.aggregate.format.element;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -28,6 +30,9 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
+import org.opendatakit.aggregate.submission.type.jr.JRDate;
+import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
+import org.opendatakit.aggregate.submission.type.jr.JRTime;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
@@ -61,6 +66,36 @@ public class CsvLinkElementFormatter extends BasicElementFormatter {
 
     addFormattedLink(blobSubmission.getValue(), BinaryDataServlet.ADDR,
         ServletConsts.BLOB_KEY, row);
+  }
+
+  @Override
+  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
+    basicStringConversion(Optional.ofNullable(date).map(JRTime::from).map(JRTime::getRaw).orElse(null), row);
+  }
+
+  @Override
+  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
+    basicStringConversion(Optional.ofNullable(date).map(JRDate::from).map(JRDate::getRaw).orElse(null), row);
+  }
+
+  @Override
+  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
+    basicStringConversion(Optional.ofNullable(date).map(JRDateTime::from).map(JRDateTime::getRaw).orElse(null), row);
+  }
+
+  @Override
+  public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
+    basicStringConversion(Optional.ofNullable(value).map(JRDate::getRaw).orElse(null), row);
+  }
+
+  @Override
+  public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
+    basicStringConversion(Optional.ofNullable(value).map(JRTime::getRaw).orElse(null), row);
+  }
+
+  @Override
+  public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
+    basicStringConversion(Optional.ofNullable(value).map(JRDateTime::getRaw).orElse(null), row);
   }
 
   @Override

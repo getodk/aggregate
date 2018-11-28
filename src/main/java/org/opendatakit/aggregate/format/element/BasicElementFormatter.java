@@ -107,32 +107,15 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (googleDocsDate) {
-      basicStringConversion(WebUtils.googleDocsDateOnly(date), row);
-    } else {
-      basicStringConversion(date, row);
-    }
+    basicStringConversion(Optional.ofNullable(date).map(JRDate::from).map(JRDate::getParsed).orElse(null), row);
   }
 
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (googleDocsDate) {
-      basicStringConversion(WebUtils.googleDocsDateTime(date), row);
-    } else {
-      basicStringConversion(date, row);
-    }
+    basicStringConversion(Optional.ofNullable(date).map(JRDateTime::from).map(JRDateTime::getParsed).orElse(null), row);
   }
 
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (date != null) {
-      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-      g.setTime(date);
-      row.addFormattedValue(String.format(FormatConsts.TIME_FORMAT_STRING,
-          g.get(Calendar.HOUR_OF_DAY),
-          g.get(Calendar.MINUTE),
-          g.get(Calendar.SECOND)));
-    } else {
-      row.addFormattedValue(null);
-    }
+    basicStringConversion(Optional.ofNullable(date).map(JRTime::from).map(JRTime::getParsed).orElse(null), row);
   }
 
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
@@ -140,24 +123,14 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
-    // TODO This is being used by the web client *and* the CSV exports. We can't use the same format in both
     basicStringConversion(Optional.ofNullable(value).map(JRDate::getParsed).orElse(null), row);
   }
 
   public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
-    // TODO This is being used by the web client *and* the CSV exports. We can't use the same format in both
-    Optional.ofNullable(value).map(JRTime::getParsed).ifPresent(date -> {
-      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-      g.setTime(date);
-      row.addFormattedValue(String.format(FormatConsts.TIME_FORMAT_STRING,
-          g.get(Calendar.HOUR_OF_DAY),
-          g.get(Calendar.MINUTE),
-          g.get(Calendar.SECOND)));
-    });
+    basicStringConversion(Optional.ofNullable(value).map(JRTime::getParsed).orElse(null), row);
   }
 
   public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
-    // TODO This is being used by the web client *and* the CSV exports. We can't use the same format in both
     basicStringConversion(Optional.ofNullable(value).map(JRDateTime::getParsed).orElse(null), row);
   }
 

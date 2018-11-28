@@ -16,6 +16,11 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
+import static java.time.ZoneId.systemDefault;
+import static java.util.Objects.requireNonNull;
+
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 import org.javarosa.core.model.utils.DateUtils;
@@ -34,6 +39,11 @@ public class JRDateTime {
         Optional.ofNullable(DateUtils.parseDateTime(value)).orElseThrow(IllegalArgumentException::new),
         value
     );
+  }
+
+  public static JRDateTime from(Date parsed) {
+    OffsetDateTime odt = OffsetDateTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault());
+    return new JRDateTime(Date.from(odt.toInstant()), odt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
   }
 
   public static JRDateTime of(Date parsed, String raw) {
