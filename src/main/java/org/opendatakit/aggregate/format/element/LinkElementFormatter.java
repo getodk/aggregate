@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -68,32 +69,32 @@ public class LinkElementFormatter extends BasicElementFormatter {
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date).map(JRTemporal::time).map(JRTemporal::getRaw).orElse(null), row);
+    temporalConversion(date, JRTemporal::time, row);
   }
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date).map(JRTemporal::date).map(JRTemporal::getRaw).orElse(null), row);
+    temporalConversion(date, JRTemporal::date, row);
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date).map(JRTemporal::dateTime).map(JRTemporal::getRaw).orElse(null), row);
+    temporalConversion(date, JRTemporal::dateTime, row);
   }
 
   @Override
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null), row);
+    temporalConversion(value, row);
   }
 
   @Override
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null), row);
+    temporalConversion(value, row);
   }
 
   @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null), row);
+    temporalConversion(value, row);
   }
 
   @Override
@@ -111,5 +112,17 @@ public class LinkElementFormatter extends BasicElementFormatter {
 
     addFormattedLink(repeat.constructSubmissionKey(), repeatServlet,
         ServletConsts.FORM_ID, row);
+  }
+
+  private void temporalConversion(Date value, Function<Date, JRTemporal> mapper, Row row) {
+    temporalConversion(Optional.ofNullable(value).map(mapper), row);
+  }
+
+  private void temporalConversion(JRTemporal value, Row row) {
+    temporalConversion(Optional.ofNullable(value), row);
+  }
+
+  private void temporalConversion(Optional<JRTemporal> value, Row row) {
+    basicStringConversion(value.map(JRTemporal::getRaw).orElse(null), row);
   }
 }

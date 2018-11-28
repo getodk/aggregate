@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import org.apache.commons.codec.binary.Base64;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -215,68 +216,37 @@ public class JsonElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonValueToRow(
-        Optional.ofNullable(date).map(JRTemporal::date).map(JRTemporal::getRaw).orElse(null),
-        true,
-        element.getElementName(),
-        row
-    );
+    addToJsonTemporal(date, JRTemporal::date, element, row);
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonValueToRow(
-        Optional.ofNullable(date).map(JRTemporal::dateTime).map(JRTemporal::getRaw).orElse(null),
-        true,
-        element.getElementName(),
-        row
-    );
+    addToJsonTemporal(date, JRTemporal::dateTime, element, row);
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonValueToRow(
-        Optional.ofNullable(date).map(JRTemporal::time).map(JRTemporal::getRaw).orElse(null),
-        true,
-        element.getElementName(),
-        row
-    );
+    addToJsonTemporal(date, JRTemporal::time, element, row);
   }
 
   @Override
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(dub, false, element.getElementName(), row);
-
   }
 
   @Override
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonValueToRow(
-        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
-        true,
-        element.getElementName(),
-        row
-    );
+    addToJsonTemporal(value, element, row);
   }
 
   @Override
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonValueToRow(
-        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
-        true,
-        element.getElementName(),
-        row
-    );
+    addToJsonTemporal(value, element, row);
   }
 
   @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonValueToRow(
-        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
-        true,
-        element.getElementName(),
-        row
-    );
+    addToJsonTemporal(value, element, row);
   }
 
   @Override
@@ -332,6 +302,18 @@ public class JsonElementFormatter implements ElementFormatter {
   @Override
   public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
     addToJsonValueToRow(string, true, element.getElementName(), row);
+  }
+
+  private void addToJsonTemporal(Date value, Function<Date, JRTemporal> mapper, FormElementModel element, Row row) {
+    addToJsonTemporal(Optional.ofNullable(value).map(mapper).map(JRTemporal::getRaw), element, row);
+  }
+
+  private void addToJsonTemporal(JRTemporal value, FormElementModel element, Row row) {
+    addToJsonTemporal(Optional.ofNullable(value).map(JRTemporal::getRaw), element, row);
+  }
+
+  private void addToJsonTemporal(Optional<String> value, FormElementModel element, Row row) {
+    addToJsonValueToRow(value.orElse(null), true, element.getElementName(), row);
   }
 
   private void addToJsonValueToRow(Object value, boolean quoted, String propertyName, Row row) {

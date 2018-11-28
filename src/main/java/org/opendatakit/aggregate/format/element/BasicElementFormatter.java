@@ -16,11 +16,13 @@
 package org.opendatakit.aggregate.format.element;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+import static org.opendatakit.common.utils.WebUtils.*;
 
 import java.time.OffsetTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -98,24 +100,15 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date)
-        .map(JRTemporal::date)
-        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
-        .orElse(null), row);
+    rfc1123Conversion(date, JRTemporal::date, row);
   }
 
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date)
-        .map(JRTemporal::dateTime)
-        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
-        .orElse(null), row);
+    rfc1123Conversion(date, JRTemporal::dateTime, row);
   }
 
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date)
-        .map(JRTemporal::time)
-        .map(v -> OffsetTime.parse(v.getRaw()).format(ISO_LOCAL_TIME))
-        .orElse(null), row);
+    isoLocalTimeConversion(date, row);
   }
 
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
@@ -123,22 +116,15 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value)
-        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
-        .orElse(null), row);
+    rfc1123Conversion(value, row);
   }
 
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value)
-        // TODO Migrate this to JRTemporal::getRaw as soon as we discuss changes on the UI
-        .map(v -> ((OffsetTime) v.getValue()).format(ISO_LOCAL_TIME))
-        .orElse(null), row);
+    isoLocalTimeConversion(Optional.ofNullable(value), row);
   }
 
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value)
-        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
-        .orElse(null), row);
+    rfc1123Conversion(value, row);
   }
 
   public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
@@ -184,7 +170,31 @@ public class BasicElementFormatter implements ElementFormatter {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
 
-  protected void basicStringConversion(Object value, Row row) {
+  private void isoLocalTimeConversion(Date value, Row row) {
+    isoLocalTimeConversion(Optional.ofNullable(value).map(JRTemporal::time), row);
+  }
+
+  private void isoLocalTimeConversion(Optional<JRTemporal> value, Row row) {
+    basicStringConversion(value
+        .map(v -> OffsetTime.parse(v.getRaw()).format(ISO_LOCAL_TIME))
+        .orElse(null), row);
+  }
+
+  private void rfc1123Conversion(Date value, Function<Date, JRTemporal> mapper, Row row) {
+    rfc1123Conversion(Optional.ofNullable(value).map(mapper), row);
+  }
+
+  private void rfc1123Conversion(JRTemporal value, Row row) {
+    rfc1123Conversion(Optional.ofNullable(value), row);
+  }
+
+  private void rfc1123Conversion(Optional<JRTemporal> value, Row row) {
+    basicStringConversion(value
+        .map(v -> rfc1123Date(v.getParsed()))
+        .orElse(null), row);
+  }
+
+  void basicStringConversion(Object value, Row row) {
     if (value != null) {
       row.addFormattedValue(value.toString());
     } else {
@@ -192,7 +202,7 @@ public class BasicElementFormatter implements ElementFormatter {
     }
   }
 
-  protected void formatBigDecimalToString(WrappedBigDecimal dub, Row row) {
+  void formatBigDecimalToString(WrappedBigDecimal dub, Row row) {
     basicStringConversion(dub, row);
   }
 }
