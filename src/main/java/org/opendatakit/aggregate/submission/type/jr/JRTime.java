@@ -20,34 +20,40 @@ import static java.time.ZoneId.systemDefault;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_TIME;
 import static java.util.Objects.requireNonNull;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.OffsetTime;
 import java.util.Date;
-import java.util.Optional;
-import org.javarosa.core.model.utils.DateUtils;
+import java.util.Objects;
 
 public class JRTime {
   private final Date parsed;
+  private final OffsetTime value;
   private final String raw;
 
-  public JRTime(Date parsed, String raw) {
+  public JRTime(Date parsed, OffsetTime value, String raw) {
     this.parsed = parsed;
+    this.value = value;
     this.raw = raw;
   }
 
-  public static JRTime from(String value) {
-    return new JRTime(
-        Optional.ofNullable(DateUtils.parseTime(value)).orElseThrow(IllegalArgumentException::new),
-        value
-    );
+  public static JRTime from(String raw) {
+    if (raw.charAt(raw.length() - 3) == '+' || raw.charAt(raw.length() - 3) == '-')
+      raw += ":00";
+    OffsetTime value = OffsetTime.parse(Objects.requireNonNull(raw));
+    Date parsed = Date.from(value.atDate(LocalDate.of(1970, 1, 1)).toInstant());
+    return new JRTime(parsed, value, raw);
   }
 
   public static JRTime from(Date parsed) {
-    OffsetDateTime odt = OffsetDateTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault());
-    return new JRTime(Date.from(odt.toInstant()), odt.format(ISO_OFFSET_TIME));
+    OffsetTime value = OffsetTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault());
+    return new JRTime(parsed, value, value.format(ISO_OFFSET_TIME));
   }
 
   public static JRTime of(Date parsed, String raw) {
-    return new JRTime(parsed, raw);
+    if (raw.charAt(raw.length() - 3) == '+' || raw.charAt(raw.length() - 3) == '-')
+      raw += ":00";
+    OffsetTime value = OffsetTime.parse(Objects.requireNonNull(raw));
+    return new JRTime(parsed, value, raw);
   }
 
   public Date getParsed() {
@@ -56,5 +62,9 @@ public class JRTime {
 
   public String getRaw() {
     return raw;
+  }
+
+  public OffsetTime getValue() {
+    return value;
   }
 }

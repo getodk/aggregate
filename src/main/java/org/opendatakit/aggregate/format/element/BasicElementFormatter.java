@@ -15,6 +15,9 @@
  */
 package org.opendatakit.aggregate.format.element;
 
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+
+import java.time.OffsetTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +32,7 @@ import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.aggregate.submission.type.jr.JRTime;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
+import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -96,15 +100,24 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date).map(JRDate::from).map(JRDate::getParsed).orElse(null), row);
+    basicStringConversion(Optional.ofNullable(date)
+        .map(JRDate::from)
+        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
+        .orElse(null), row);
   }
 
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date).map(JRDateTime::from).map(JRDateTime::getParsed).orElse(null), row);
+    basicStringConversion(Optional.ofNullable(date)
+        .map(JRDateTime::from)
+        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
+        .orElse(null), row);
   }
 
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(date).map(JRTime::from).map(JRTime::getParsed).orElse(null), row);
+    basicStringConversion(Optional.ofNullable(date)
+        .map(JRTime::from)
+        .map(v -> OffsetTime.parse(v.getRaw()).format(ISO_LOCAL_TIME))
+        .orElse(null), row);
   }
 
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
@@ -112,15 +125,21 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatJRDate(JRDate value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value).map(JRDate::getParsed).orElse(null), row);
+    basicStringConversion(Optional.ofNullable(value)
+        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
+        .orElse(null), row);
   }
 
   public void formatJRTime(JRTime value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value).map(JRTime::getParsed).orElse(null), row);
+    basicStringConversion(Optional.ofNullable(value)
+        .map(v -> v.getValue().format(ISO_LOCAL_TIME))
+        .orElse(null), row);
   }
 
   public void formatJRDateTime(JRDateTime value, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(Optional.ofNullable(value).map(JRDateTime::getParsed).orElse(null), row);
+    basicStringConversion(Optional.ofNullable(value)
+        .map(v -> WebUtils.rfc1123Date(v.getParsed()))
+        .orElse(null), row);
   }
 
   public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {

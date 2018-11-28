@@ -21,6 +21,7 @@ import static java.time.format.DateTimeFormatter.ISO_DATE;
 import static java.util.Objects.requireNonNull;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
 import org.javarosa.core.model.utils.DateUtils;
@@ -42,7 +43,7 @@ public class JRDate {
   }
 
   public static JRDate from(Date parsed) {
-    OffsetDateTime odt = OffsetDateTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault());
+    OffsetDateTime odt = OffsetDateTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault()).truncatedTo(ChronoUnit.DAYS);
     return new JRDate(Date.from(odt.toInstant()), odt.format(ISO_DATE));
   }
 
