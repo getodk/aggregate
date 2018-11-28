@@ -15,13 +15,9 @@
  */
 package org.opendatakit.aggregate.format.element;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
-import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -33,7 +29,6 @@ import org.opendatakit.aggregate.submission.type.jr.JRDateTime;
 import org.opendatakit.aggregate.submission.type.jr.JRTime;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -59,11 +54,6 @@ public class BasicElementFormatter implements ElementFormatter {
   private boolean includeAccuracy;
 
   /**
-   * Format dates appropriately for googleDocs
-   */
-  private boolean googleDocsDate;
-
-  /**
    * Construct a Basic Element Formatter
    *
    * @param separateGpsCoordinates separate the GPS coordinates of latitude and longitude into
@@ -72,11 +62,10 @@ public class BasicElementFormatter implements ElementFormatter {
    * @param includeGpsAccuracy     include GPS accuracy data
    */
   public BasicElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-                               boolean includeGpsAccuracy, boolean googleDocsDate) {
+                               boolean includeGpsAccuracy) {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
-    this.googleDocsDate = googleDocsDate;
   }
 
   public void formatUid(String uri, String propertyName, Row row) {

@@ -52,7 +52,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
    */
   public LinkElementFormatter(String baseWebServerUrl, String repeatServlet,
                               boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean googleDocsDate) {
-    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, googleDocsDate);
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
     this.baseWebServerUrl = baseWebServerUrl;
     this.repeatServlet = repeatServlet;
   }

@@ -42,7 +42,7 @@ public class CsvLinkElementFormatter extends BasicElementFormatter {
   private final String repeatServlet;
 
   public CsvLinkElementFormatter(String baseWebServerUrl, String repeatServlet, boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean googleDocsDate) {
-    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, googleDocsDate);
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
     this.baseWebServerUrl = baseWebServerUrl;
     this.repeatServlet = repeatServlet;
   }

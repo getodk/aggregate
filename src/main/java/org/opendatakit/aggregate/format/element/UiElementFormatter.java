@@ -41,7 +41,7 @@ public class UiElementFormatter extends BasicElementFormatter {
    * Construct a UI Element Formatter
    */
   public UiElementFormatter(String webServerUrl, Map<String, GeopointHeaderIncludes> gpsFormatter) {
-    super(false, false, false, false);
+    super(false, false, false);
     this.baseWebServerUrl = webServerUrl;
     this.gpsFormatters = gpsFormatter;
   }

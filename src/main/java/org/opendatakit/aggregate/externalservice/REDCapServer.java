@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +89,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
 
   private REDCapServer(REDCapServerParameterTable entity, FormServiceCursor formServiceCursor,
                        IForm form, CallingContext cc) {
-    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
+    super(form, formServiceCursor, new BasicElementFormatter(true, true, true),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
