@@ -70,7 +70,7 @@ def versions = [
     gson          : '2.8.0',
     kxml2         : '2.3.0',
     odk           : [
-        javarosa     : '2.11.0',
+        javarosa     : '2.12.1',
         httpclientGae: '4.5.2-1',
         tomcatUtil   : '1.0.1'
     ],
