@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -22,7 +22,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
@@ -41,10 +40,9 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Generates an OpenRosa-compliant xml description of forms for the servlet
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class XFormsXmlTable {
 
@@ -120,9 +118,9 @@ public class XFormsXmlTable {
 
     Element hashElement = d.createElement(XML_TAG_NAMESPACE, XFormsTableConsts.HASH_TAG);
     xformElement.addChild(xfIdx++, Node.ELEMENT, hashElement);
-    hashElement.addChild(0,  Node.TEXT, form.getXFormFileHash(cc));
+    hashElement.addChild(0, Node.TEXT, form.getXFormFileHash(cc));
     xformElement.addChild(xfIdx++, Node.IGNORABLE_WHITESPACE, BasicConsts.NEW_LINE);
-    
+
     String description = form.getDescription();
     if (description != null && verbose) {
       Element descriptionElement = d.createElement(XML_TAG_NAMESPACE,

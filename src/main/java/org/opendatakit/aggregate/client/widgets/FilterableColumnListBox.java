@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
 

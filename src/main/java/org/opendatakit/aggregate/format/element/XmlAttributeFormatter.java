@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.format.element;
 
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -37,37 +36,35 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * Used for metadata fields.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class XmlAttributeFormatter implements ElementFormatter {
 
   /**
    * Construct a XML Element Formatter
-   *
    */
   public XmlAttributeFormatter() {
   }
 
   private String asAttributeName(FormElementModel m) {
-    if ( m.isMetadata() ) {
-        switch( m.getType()) {
+    if (m.isMetadata()) {
+      switch (m.getType()) {
         case META_MODEL_VERSION:
-            return ParserConsts.MODEL_VERSION_ATTRIBUTE_NAME;
+          return ParserConsts.MODEL_VERSION_ATTRIBUTE_NAME;
         case META_UI_VERSION:
-            return ParserConsts.UI_VERSION_ATTRIBUTE_NAME;
+          return ParserConsts.UI_VERSION_ATTRIBUTE_NAME;
         case META_INSTANCE_ID:
-            return ParserConsts.INSTANCE_ID_ATTRIBUTE_NAME;
+          return ParserConsts.INSTANCE_ID_ATTRIBUTE_NAME;
         case META_SUBMISSION_DATE:
-            return ParserConsts.SUBMISSION_DATE_ATTRIBUTE_NAME;
+          return ParserConsts.SUBMISSION_DATE_ATTRIBUTE_NAME;
         case META_IS_COMPLETE:
-            return ParserConsts.IS_COMPLETE_ATTRIBUTE_NAME;
+          return ParserConsts.IS_COMPLETE_ATTRIBUTE_NAME;
         case META_DATE_MARKED_AS_COMPLETE:
-            return ParserConsts.MARKED_AS_COMPLETE_DATE_ATTRIBUTE_NAME;
+          return ParserConsts.MARKED_AS_COMPLETE_DATE_ATTRIBUTE_NAME;
         default:
-            throw new IllegalStateException("Unrecognized metadata");
-        }
+          throw new IllegalStateException("Unrecognized metadata");
+      }
     } else {
-        return m.getElementName();
+      return m.getElementName();
     }
   }
 
@@ -78,13 +75,13 @@ public class XmlAttributeFormatter implements ElementFormatter {
 
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
-      Row row, CallingContext cc) throws ODKDatastoreException {
-    if( blobSubmission == null ||
+                           Row row, CallingContext cc) throws ODKDatastoreException {
+    if (blobSubmission == null ||
         (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null) ) {
-        addToXmlValueToRow(null, asAttributeName(element), row);
+        (blobSubmission.getContentHash(1, cc) == null)) {
+      addToXmlValueToRow(null, asAttributeName(element), row);
     } else {
-        addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), asAttributeName(element), row);
+      addToXmlValueToRow(blobSubmission.getUnrootedFilename(1, cc), asAttributeName(element), row);
     }
   }
 
@@ -157,7 +154,7 @@ public class XmlAttributeFormatter implements ElementFormatter {
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
-      CallingContext cc) throws ODKDatastoreException {
+                            CallingContext cc) throws ODKDatastoreException {
     throw new IllegalStateException("unimplemented");
   }
 

@@ -16,23 +16,22 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateSubTabBase;
-import org.opendatakit.aggregate.client.popups.ViewServletPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
+import org.opendatakit.aggregate.client.AggregateSubTabBase;
+import org.opendatakit.aggregate.client.popups.ViewServletPopup;
 
 public final class ServletPopupButton extends AggregateButton implements ClickHandler {
-  
+
   private final String url;
   private final String title;
   private final AggregateSubTabBase basePanel;
 
-  public ServletPopupButton(String buttonText, String title, String url, AggregateSubTabBase basePanel, 
-          String tooltipText, String balloonText) {
+  public ServletPopupButton(String buttonText, String title, String url, AggregateSubTabBase basePanel,
+                            String tooltipText, String balloonText) {
     super(buttonText, tooltipText, balloonText);
     this.title = title;
     this.url = url;
@@ -45,18 +44,18 @@ public final class ServletPopupButton extends AggregateButton implements ClickHa
     this.url = url;
     this.basePanel = null;
   }
-  
+
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     ViewServletPopup servletPopup = new ViewServletPopup(title, url);
     servletPopup.setPopupPositionAndShow(servletPopup.getPositionCallBack());
     servletPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
 
       @Override
       public void onClose(CloseEvent<PopupPanel> event) {
-        if(basePanel != null) {
+        if (basePanel != null) {
           basePanel.update();
         }
       }

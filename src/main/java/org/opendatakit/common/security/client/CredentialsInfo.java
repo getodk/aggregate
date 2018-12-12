@@ -16,27 +16,36 @@
 
 package org.opendatakit.common.security.client;
 
-import java.io.Serializable;
-
 import com.google.gwt.http.client.URL;
+import java.io.Serializable;
 
 /**
  * Transport object for communicating password changes between GWT client and
  * server.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public class CredentialsInfo implements Serializable {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = -8984148650618368023L;
   String username;
   String digestAuthHash;
   String basicAuthHash;
   String basicAuthSalt;
+
+  public CredentialsInfo() {
+  }
+
+  public CredentialsInfo(String username, String digestAuthHash, String basicAuthHash,
+                         String basicAuthSalt) {
+    this.username = username;
+    this.digestAuthHash = digestAuthHash;
+    this.basicAuthHash = basicAuthHash;
+    this.basicAuthSalt = basicAuthSalt;
+  }
 
   public String getRequestParameters() {
     StringBuilder postData = new StringBuilder();
@@ -52,17 +61,6 @@ public class CredentialsInfo implements Serializable {
       postData.append("basicAuthSalt=").append(URL.encode(basicAuthSalt));
     }
     return postData.toString();
-  }
-
-  public CredentialsInfo() {
-  }
-
-  public CredentialsInfo(String username, String digestAuthHash, String basicAuthHash,
-      String basicAuthSalt) {
-    this.username = username;
-    this.digestAuthHash = digestAuthHash;
-    this.basicAuthHash = basicAuthHash;
-    this.basicAuthSalt = basicAuthSalt;
   }
 
   public String getUsername() {

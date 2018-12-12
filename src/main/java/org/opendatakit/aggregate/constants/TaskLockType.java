@@ -19,10 +19,8 @@ import org.opendatakit.common.persistence.ITaskLockType;
 import org.opendatakit.common.persistence.PersistConsts;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public enum TaskLockType implements ITaskLockType {
   UPLOAD_SUBMISSION(60000, PersistConsts.MIN_SETTLE_MILLISECONDS),
@@ -30,8 +28,8 @@ public enum TaskLockType implements ITaskLockType {
   FORM_DELETION(120000, PersistConsts.MIN_SETTLE_MILLISECONDS),
   PURGE_OLDER_SUBMISSIONS(120000, PersistConsts.MIN_SETTLE_MILLISECONDS),
   STARTUP_SERIALIZATION(120000, PersistConsts.MIN_SETTLE_MILLISECONDS),
-  CREATE_FORM(60000+2*PersistConsts.MAX_SETTLE_MILLISECONDS, PersistConsts.MIN_SETTLE_MILLISECONDS); // 60 second request timeout, 2x settle for replication delay
-  
+  CREATE_FORM(60000 + 2 * PersistConsts.MAX_SETTLE_MILLISECONDS, PersistConsts.MIN_SETTLE_MILLISECONDS); // 60 second request timeout, 2x settle for replication delay
+
   private long timeout;
   private long minSettleTime;
 
@@ -39,7 +37,7 @@ public enum TaskLockType implements ITaskLockType {
     this.timeout = timeout;
     this.minSettleTime = minSettle;
   }
- 
+
   @Override
   public long getLockExpirationTimeout() {
     return timeout;
@@ -49,7 +47,7 @@ public enum TaskLockType implements ITaskLockType {
   public String getName() {
     return name();
   }
-  
+
   @Override
   public long getMinSettleTime() {
     return minSettleTime;

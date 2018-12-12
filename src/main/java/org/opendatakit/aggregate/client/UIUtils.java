@@ -16,18 +16,20 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.user.client.Window;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-import com.google.gwt.user.client.Window;
-
 public class UIUtils {
 
-  public static String promptForFilterName( ArrayList<FilterGroup> currentFilters) throws Exception{
+  public static final String CONFIRM_OWNER_EMAIL_TXT = "Please confirm that this e-mail address: ";
+  public static final String CONFIRM_OWNER_EMAIL_TXT2 = " is accurate and contains no mispellings. " +
+      "This account will become the owner of the published tables.";
+
+  public static String promptForFilterName(ArrayList<FilterGroup> currentFilters) throws Exception {
     boolean match = false;
     String newFilterName = Window.prompt(UIConsts.PROMPT_FOR_NAME_TXT, BasicConsts.EMPTY_STRING);
 
@@ -53,7 +55,7 @@ public class UIUtils {
     return newFilterName;
   }
 
-  public static String promptForREDCapApiKey() throws Exception{
+  public static String promptForREDCapApiKey() throws Exception {
     String newApiKey = Window.prompt(UIConsts.PROMPT_FOR_REDCAP_APIKEY_TXT, BasicConsts.EMPTY_STRING);
 
     while (true) {
@@ -67,12 +69,7 @@ public class UIUtils {
     }
   }
 
-
-  public static final String CONFIRM_OWNER_EMAIL_TXT = "Please confirm that this e-mail address: ";
-  public static final String CONFIRM_OWNER_EMAIL_TXT2 = " is accurate and contains no mispellings. " +
-        "This account will become the owner of the published tables.";
-
-  public static String promptForEmailAddress() throws Exception{
+  public static String promptForEmailAddress() throws Exception {
     String newEmailName = Window.prompt(UIConsts.PROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
 
     while (true) {
@@ -82,8 +79,8 @@ public class UIUtils {
         newEmailName = Window.prompt(UIConsts.REPROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
       } else {
         String email = EmailParser.parseEmail(newEmailName);
-        if ( email != null ) {
-          if ( Window.confirm(CONFIRM_OWNER_EMAIL_TXT + email.substring(EmailParser.K_MAILTO.length()) + CONFIRM_OWNER_EMAIL_TXT2) ) {
+        if (email != null) {
+          if (Window.confirm(CONFIRM_OWNER_EMAIL_TXT + email.substring(EmailParser.K_MAILTO.length()) + CONFIRM_OWNER_EMAIL_TXT2)) {
             return email;
           }
         }

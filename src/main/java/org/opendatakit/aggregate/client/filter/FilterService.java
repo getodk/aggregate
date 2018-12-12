@@ -16,29 +16,26 @@
 
 package org.opendatakit.aggregate.client.filter;
 
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
 @RemoteServiceRelativePath("filterservice")
 public interface FilterService extends RemoteService {
 
   FilterSet getFilterSet(String formId) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
+
   /**
    * Saves the supplied filter group in the database
-   * 
+   *
    * @param group the filter group to be saved in the DB
-   * 
    * @return uid of the filter group on success, null on failure
-   * 
    * @throws AccessDeniedException
    */
   String updateFilterGroup(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-  
+
   Boolean deleteFilterGroup(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
 }

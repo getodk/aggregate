@@ -16,9 +16,8 @@
 
 package org.opendatakit.aggregate.client.submission;
 
-import org.opendatakit.aggregate.client.filter.FilterGroup;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
 
 public interface SubmissionServiceAsync {
 

@@ -28,39 +28,38 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean.  It cannot have any per-request state.
  * It uses a static inner class to encapsulate the per-request state
  * of a running background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class FormDeleteImpl implements FormDelete {
 
-    static class FormDeleteRunner implements Runnable {
-        final FormDeleteWorkerImpl impl;
-
-        public FormDeleteRunner(IForm form, SubmissionKey miscTasksKey,
-                long attemptCount, CallingContext cc) {
-            impl = new FormDeleteWorkerImpl( form, miscTasksKey, attemptCount, cc);
-        }
-
-        @Override
-        public void run() {
-            try {
-                impl.deleteForm();
-            } catch (Exception e) {
-                e.printStackTrace();
-                // TODO: Problem - decide what to do if an exception occurs
-            }
-        }
-    }
-
   @Override
   public final void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey,
-            long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                                         long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     FormDeleteRunner dr = new FormDeleteRunner(form, miscTasksKey, attemptCount, wd.getCallingContext());
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(dr);
+  }
+
+  static class FormDeleteRunner implements Runnable {
+    final FormDeleteWorkerImpl impl;
+
+    public FormDeleteRunner(IForm form, SubmissionKey miscTasksKey,
+                            long attemptCount, CallingContext cc) {
+      impl = new FormDeleteWorkerImpl(form, miscTasksKey, attemptCount, cc);
+    }
+
+    @Override
+    public void run() {
+      try {
+        impl.deleteForm();
+      } catch (Exception e) {
+        e.printStackTrace();
+        // TODO: Problem - decide what to do if an exception occurs
+      }
+    }
   }
 }

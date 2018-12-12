@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.filter;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -44,10 +43,12 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
   private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING,
       true, 1000L); // TODO: determine length
   private static final DataField COL_GPS_ORD_PROPERTY = new DataField("GPS_ORD", DataField.DataType.INTEGER,
-      true); 
+      true);
+  private static SubmissionColumnFilter relation = null;
+
   /**
    * Construct a relation prototype.
-   * 
+   *
    * @param databaseSchema
    * @param tableName
    */
@@ -61,62 +62,13 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
 
   /**
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   * 
+   *
    * @param ref
    * @param user
    */
   private SubmissionColumnFilter(SubmissionColumnFilter ref, User user) {
     super(ref, user);
   }
-
-  @Override
-  public SubmissionColumnFilter getEmptyRow(User user) {
-    return new SubmissionColumnFilter(this, user);
-  }
-
-  public String getParentFilterUri() {
-    return getStringField(URI_PARENT_FILTER_PROPERTY);
-  }
-
-  public String getColumnTitle() {
-    return getStringField(COL_TITLE_PROPERTY);
-  }
-
-  public String getColumnEncoding() {
-    return getStringField(COL_ENCODING_PROPERTY);
-  }
-
-  public Long getGpsColumnCode() {
-    return getLongField(COL_GPS_ORD_PROPERTY);
-  }
-  
-  public void setGpsColumnCode(Long gpsColumnCode) {
-    setLongField(COL_GPS_ORD_PROPERTY, gpsColumnCode); 
-  }
-  
-  public void setParentFilterUri(String parentUri) {
-    if (!setStringField(URI_PARENT_FILTER_PROPERTY, parentUri)) {
-      throw new IllegalArgumentException("overflow parent uri");
-    }
-  }
-
-  public void setColumnTitle(String name) {
-    if (!setStringField(COL_TITLE_PROPERTY, name)) {
-      throw new IllegalArgumentException("overflow name");
-    }
-  }
-  
-  public void setColumnEncoding(String name) {
-    if (!setStringField(COL_ENCODING_PROPERTY, name)) {
-      throw new IllegalArgumentException("overflow column encoding");
-    }
-  }
-
-  public Column transform() {    
-    return new Column(this.getUri(), getColumnTitle(), getColumnEncoding(), getGpsColumnCode());
-  }
-  
-  private static SubmissionColumnFilter relation = null;
 
   private static synchronized final SubmissionColumnFilter assertRelation(CallingContext cc)
       throws ODKDatastoreException {
@@ -133,7 +85,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
   }
 
   static final SubmissionColumnFilter transform(Column column, SubmissionFilter parentFilter,
-      CallingContext cc) throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
+                                                CallingContext cc) throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
 
     SubmissionColumnFilter relation = assertRelation(cc);
     String uri = column.getUri();
@@ -144,7 +96,7 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
     } else {
       columnFilter = cc.getDatastore().getEntity(relation, uri, cc.getCurrentUser());
     }
-    
+
     columnFilter.setParentFilterUri(parentFilter.getUri());
     columnFilter.setColumnTitle(column.getDisplayHeader());
     columnFilter.setColumnEncoding(column.getColumnEncoding());
@@ -169,5 +121,52 @@ public class SubmissionColumnFilter extends CommonFieldsBase {
       }
     }
     return column;
+  }
+
+  @Override
+  public SubmissionColumnFilter getEmptyRow(User user) {
+    return new SubmissionColumnFilter(this, user);
+  }
+
+  public String getParentFilterUri() {
+    return getStringField(URI_PARENT_FILTER_PROPERTY);
+  }
+
+  public void setParentFilterUri(String parentUri) {
+    if (!setStringField(URI_PARENT_FILTER_PROPERTY, parentUri)) {
+      throw new IllegalArgumentException("overflow parent uri");
+    }
+  }
+
+  public String getColumnTitle() {
+    return getStringField(COL_TITLE_PROPERTY);
+  }
+
+  public void setColumnTitle(String name) {
+    if (!setStringField(COL_TITLE_PROPERTY, name)) {
+      throw new IllegalArgumentException("overflow name");
+    }
+  }
+
+  public String getColumnEncoding() {
+    return getStringField(COL_ENCODING_PROPERTY);
+  }
+
+  public void setColumnEncoding(String name) {
+    if (!setStringField(COL_ENCODING_PROPERTY, name)) {
+      throw new IllegalArgumentException("overflow column encoding");
+    }
+  }
+
+  public Long getGpsColumnCode() {
+    return getLongField(COL_GPS_ORD_PROPERTY);
+  }
+
+  public void setGpsColumnCode(Long gpsColumnCode) {
+    setLongField(COL_GPS_ORD_PROPERTY, gpsColumnCode);
+  }
+
+  public Column transform() {
+    return new Column(this.getUri(), getColumnTitle(), getColumnEncoding(), getGpsColumnCode());
   }
 }

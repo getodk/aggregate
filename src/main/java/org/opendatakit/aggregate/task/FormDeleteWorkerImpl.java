@@ -19,13 +19,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.TaskLockType;
 import org.opendatakit.aggregate.constants.common.FormActionStatus;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.externalservice.ExternalService;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
@@ -49,13 +45,14 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common worker implementation for the deletion of a form.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class FormDeleteWorkerImpl {
 
@@ -68,18 +65,18 @@ public class FormDeleteWorkerImpl {
   private final Logger logger = LoggerFactory.getLogger(FormDeleteWorkerImpl.class);
 
   public FormDeleteWorkerImpl(IForm form, SubmissionKey miscTasksKey, long attemptCount,
-      CallingContext cc) {
+                              CallingContext cc) {
     this.form = form;
     this.miscTasksKey = miscTasksKey;
     this.cc = cc;
     pFormIdLockId = UUID.randomUUID().toString();
   }
 
-  public final void deleteForm() throws ODKDatastoreException, ODKExternalServiceDependencyException {
+  public final void deleteForm() throws ODKDatastoreException {
 
 
     logger.info("Beginning Form Deletion: " + miscTasksKey.toString() +
-                  " form " + form.getFormId());
+        " form " + form.getFormId());
 
     MiscTasks t;
     try {
@@ -253,7 +250,7 @@ public class FormDeleteWorkerImpl {
         task.delete(cc);
         deleted = true;
       } finally {
-        if ( !deleted ) {
+        if (!deleted) {
           logger.error("Unable to delete PersistentResults: " + task.getUri());
         }
       }
@@ -273,7 +270,7 @@ public class FormDeleteWorkerImpl {
     boolean allDeleted = true;
     for (ExternalService service : services) {
       boolean deleted = FormServiceCursor.deleteExternalServiceTask(service, cc);
-      if ( !deleted ) {
+      if (!deleted) {
         allDeleted = false;
       }
     }
@@ -290,7 +287,7 @@ public class FormDeleteWorkerImpl {
         group.delete(cc);
         deleted = true;
       } finally {
-        if ( !deleted ) {
+        if (!deleted) {
           logger.error("Unable to delete SubmissionFilterGroup: " + group.getUri());
         }
       }
@@ -340,7 +337,7 @@ public class FormDeleteWorkerImpl {
 
     if (relation != null) {
       QueryResumePoint startCursor = null;
-      for (;;) {
+      for (; ; ) {
         // retrieve submissions
         Query surveyQuery = ds.createQuery(relation, "FormDeleteWorkerImpl.doDeletion", user);
         surveyQuery.addSort(relation.lastUpdateDate, Query.Direction.DESCENDING);

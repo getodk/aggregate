@@ -16,8 +16,9 @@
 
 package org.opendatakit.aggregate.client;
 
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.table.FilterNavigationTable;
 import org.opendatakit.aggregate.client.table.SubmissionTable;
@@ -25,9 +26,6 @@ import org.opendatakit.aggregate.constants.common.FilterConsts;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class FilterSubTab extends AggregateSubTabBase {
 
@@ -57,7 +55,7 @@ public class FilterSubTab extends AggregateSubTabBase {
     filtersPanel = new FiltersDataPanel(this);
     filtersNSubmissions.add(filtersPanel);
     filtersNSubmissions.getElement().getFirstChildElement().getFirstChildElement()
-    .getFirstChildElement().setId("filters_panel"); // TODO: improve this
+        .getFirstChildElement().setId("filters_panel"); // TODO: improve this
 
     submissionPanel = new SubmissionPanel();
 
@@ -76,7 +74,7 @@ public class FilterSubTab extends AggregateSubTabBase {
   }
 
   public FilterGroup getDisplayedFilterGroup() {
-    if(currentlyDisplayedFilterGroup == null) {
+    if (currentlyDisplayedFilterGroup == null) {
       return new FilterGroup(UIConsts.FILTER_NONE, null, null);
     }
     return currentlyDisplayedFilterGroup;
@@ -90,7 +88,7 @@ public class FilterSubTab extends AggregateSubTabBase {
 
   public void switchFilterGroup(FilterGroup filterGroup) {
     // check if filter group is changed, if the same no need to do anything
-    if(getDisplayedFilterGroup().equals(filterGroup)) {
+    if (getDisplayedFilterGroup().equals(filterGroup)) {
       return;
     }
     setCurrentlyDisplayedFilterGroup(filterGroup);
@@ -112,12 +110,12 @@ public class FilterSubTab extends AggregateSubTabBase {
   @Override
   public void update() {
     if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities()
-            .contains(GrantedAuthorityName.ROLE_DATA_VIEWER)) {
-        navTable.update();
-        
-        FilterGroup filterGroup = getDisplayedFilterGroup();
-        filtersPanel.update(filterGroup);
-        submissionPanel.update(filterGroup);
+        .contains(GrantedAuthorityName.ROLE_DATA_VIEWER)) {
+      navTable.update();
+
+      FilterGroup filterGroup = getDisplayedFilterGroup();
+      filtersPanel.update(filterGroup);
+      submissionPanel.update(filterGroup);
     }
   }
 

@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -57,51 +57,51 @@ import java.util.regex.Pattern;
  * If <code>\p{Lu}</code> stands for all uppercase UTF-8 characters and
  * <code>\p{Ll}</code> stands for all lowercase UTF-8 characters, then the
  * allowed format for an XML tag name (per the standard) is roughly:
- * 
+ *
  * <pre>
  * ^[_\p{Lu}\p{Ll}][-.0-9_\p{Lu}\p{Ll}]*$
  * </pre>
  * <p>
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 class Naming {
 
-    // what a legal persistence naming should be...
-    private static final String utf8String = "^[\\p{Lu}\\p{Lo}_][0-9\\p{Lu}\\p{Lo}_]*$";
-    private static final Pattern p = Pattern.compile(utf8String);
+  // what a legal persistence naming should be...
+  private static final String utf8String = "^[\\p{Lu}\\p{Lo}_][0-9\\p{Lu}\\p{Lo}_]*$";
+  private static final Pattern p = Pattern.compile(utf8String);
 
-    public static final boolean isValidString(final String xmlString) {
-        Matcher m = p.matcher(xmlString);
-        return m.matches();
-    }
+  public static final boolean isValidString(final String xmlString) {
+    Matcher m = p.matcher(xmlString);
+    return m.matches();
+  }
 
-    /**
-     * Converts the string to a SQL naming
-     * 
-     * @param xmlString
-     *            the xml tag name
-     */
-    public static final String toPersistenceNaming(final String xmlString) {
-        final StringBuilder sb = new StringBuilder();
-        boolean priorUnderscoreOrCap = true;
-        for (int i = 0; i < xmlString.length(); ++i) {
-            final char ch = xmlString.charAt(i);
-            if (Character.isUpperCase(ch)) {
-                if (!priorUnderscoreOrCap)
-                    sb.append('_');
-                sb.append(ch);
-                priorUnderscoreOrCap = true;
-            } else if (ch == '-' || ch == '.' || ch == '_') {
-                sb.append('_');
-                priorUnderscoreOrCap = true;
-            } else {
-                sb.append(Character.toUpperCase(ch));
-                priorUnderscoreOrCap = false;
-            }
-        }
-        assert isValidString(sb.toString());
-        return sb.toString();
+  /**
+   * Converts the string to a SQL naming
+   *
+   * @param xmlString
+   *            the xml tag name
+   */
+  public static final String toPersistenceNaming(final String xmlString) {
+    final StringBuilder sb = new StringBuilder();
+    boolean priorUnderscoreOrCap = true;
+    for (int i = 0; i < xmlString.length(); ++i) {
+      final char ch = xmlString.charAt(i);
+      if (Character.isUpperCase(ch)) {
+        if (!priorUnderscoreOrCap)
+          sb.append('_');
+        sb.append(ch);
+        priorUnderscoreOrCap = true;
+      } else if (ch == '-' || ch == '.' || ch == '_') {
+        sb.append('_');
+        priorUnderscoreOrCap = true;
+      } else {
+        sb.append(Character.toUpperCase(ch));
+        priorUnderscoreOrCap = false;
+      }
     }
+    assert isValidString(sb.toString());
+    return sb.toString();
+  }
 }

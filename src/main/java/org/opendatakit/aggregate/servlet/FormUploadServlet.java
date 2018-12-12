@@ -19,15 +19,11 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.HtmlUtil;
@@ -45,26 +41,25 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Servlet to upload, parse, and save an XForm
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class FormUploadServlet extends ServletUtilBase {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = -3784460108221008112L;
 
   /**
    * URI from base
    */
   public static final String ADDR = UIConsts.FORM_UPLOAD_SERVLET_ADDR;
-
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = -3784460108221008112L;
   /**
    * Title for generated webpage
    */
@@ -72,12 +67,12 @@ public class FormUploadServlet extends ServletUtilBase {
 
   private static final String UPLOAD_PAGE_BODY_START =
 
-  "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Upload one form into ODK Aggregate</h2></p>"
-      + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
-      + "<![endif] -->"
-      + "<form id=\"ie_backward_compatible_form\""
-      + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
-      + " action=\"";// emit the ADDR
+      "<div style=\"overflow: auto;\"><p id=\"subHeading\"><h2>Upload one form into ODK Aggregate</h2></p>"
+          + "<!--[if true]><p style=\"color: red;\">For a better user experience, use Chrome, Firefox or Safari</p>"
+          + "<![endif] -->"
+          + "<form id=\"ie_backward_compatible_form\""
+          + " accept-charset=\"UTF-8\" method=\"POST\" encoding=\"multipart/form-data\" enctype=\"multipart/form-data\""
+          + " action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE = "\">"
       + "     <table id=\"uploadTable\">"
       + "       <tr>"
@@ -143,7 +138,7 @@ public class FormUploadServlet extends ServletUtilBase {
    * Handler for HTTP Get request to create xform upload page
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -208,7 +203,7 @@ public class FormUploadServlet extends ServletUtilBase {
    * parsed version in the datastore
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -339,30 +334,30 @@ public class FormUploadServlet extends ServletUtilBase {
       } catch (ODKIncompleteSubmissionData e) {
         logger.warn("Form upload parsing error: " + e.toString());
         switch (e.getReason()) {
-        case TITLE_MISSING:
-          createTitleQuestionWebpage(resp, inputXml, xmlFileName, cc);
-          return;
-        case ID_MALFORMED:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + "\n" + e.toString());
-          return;
-        case ID_MISSING:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
-          return;
-        case MISSING_XML:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
-          return;
-        case BAD_JR_PARSE:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
-              + "\n" + e.toString());
-          return;
-        case MISMATCHED_SUBMISSION_ELEMENT:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-              ErrorConsts.FORM_INVALID_SUBMISSION_ELEMENT);
-          return;
-        default:
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INVALID_PARAMS);
-          return;
+          case TITLE_MISSING:
+            createTitleQuestionWebpage(resp, inputXml, xmlFileName, cc);
+            return;
+          case ID_MALFORMED:
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
+                + "\n" + e.toString());
+            return;
+          case ID_MISSING:
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_ID);
+            return;
+          case MISSING_XML:
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.MISSING_FORM_INFO);
+            return;
+          case BAD_JR_PARSE:
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.JAVA_ROSA_PARSING_PROBLEM
+                + "\n" + e.toString());
+            return;
+          case MISMATCHED_SUBMISSION_ELEMENT:
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                ErrorConsts.FORM_INVALID_SUBMISSION_ELEMENT);
+            return;
+          default:
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ErrorConsts.INVALID_PARAMS);
+            return;
         }
       } catch (ODKEntityPersistException e) {
         // TODO NEED TO FIGURE OUT PROPER ACTION FOR ERROR
@@ -391,7 +386,7 @@ public class FormUploadServlet extends ServletUtilBase {
   }
 
   private void createTitleQuestionWebpage(HttpServletResponse resp, String formXml,
-      String xmlFileName, CallingContext cc) throws IOException {
+                                          String xmlFileName, CallingContext cc) throws IOException {
     beginBasicHtmlResponse(OBTAIN_TITLE_INFO, resp, cc); // header info
 
     PrintWriter out = resp.getWriter();

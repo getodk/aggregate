@@ -15,12 +15,14 @@
  */
 package org.opendatakit.aggregate.format.element;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.codec.binary.Base64;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -39,15 +41,9 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class JsonElementFormatter implements ElementFormatter {
   private static final String JSON_NULL = "null";
@@ -83,19 +79,15 @@ public class JsonElementFormatter implements ElementFormatter {
   /**
    * Construct a JSON Element Formatter
    *
-   * @param separateGpsCoordinates
-   *          separate the GPS coordinates of latitude and longitude into
-   *          columns
-   * @param includeGpsAltitude
-   *          include GPS altitude data
-   * @param includeGpsAccuracy
-   *          include GPS accuracy data
-   * @param expressMultipleChoiceListsAsArrays
-   *          if true, express the multiple-choice fields as arrays of strings
+   * @param separateGpsCoordinates             separate the GPS coordinates of latitude and longitude into
+   *                                           columns
+   * @param includeGpsAltitude                 include GPS altitude data
+   * @param includeGpsAccuracy                 include GPS accuracy data
+   * @param expressMultipleChoiceListsAsArrays if true, express the multiple-choice fields as arrays of strings
    */
   public JsonElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-      boolean includeGpsAccuracy, boolean expressMultipleChoiceListsAsArrays,
-      RepeatCallbackFormatter formatter) {
+                              boolean includeGpsAccuracy, boolean expressMultipleChoiceListsAsArrays,
+                              RepeatCallbackFormatter formatter) {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
@@ -107,22 +99,17 @@ public class JsonElementFormatter implements ElementFormatter {
   /**
    * Construct a JSON Element Formatter with links
    *
-   * @param webServerUrl
-   *          base url for the web app (e.g.,
-   *          localhost:8080/ODKAggregatePlatform)
-   * @param separateGpsCoordinates
-   *          separate the GPS coordinates of latitude and longitude into
-   *          columns
-   * @param includeGpsAltitude
-   *          include GPS altitude data
-   * @param includeGpsAccuracy
-   *          include GPS accuracy data
-   * @param expressMultipleChoiceListsAsArrays
-   *          if true, express the multiple-choice fields as arrays of strings
+   * @param webServerUrl                       base url for the web app (e.g.,
+   *                                           localhost:8080/ODKAggregatePlatform)
+   * @param separateGpsCoordinates             separate the GPS coordinates of latitude and longitude into
+   *                                           columns
+   * @param includeGpsAltitude                 include GPS altitude data
+   * @param includeGpsAccuracy                 include GPS accuracy data
+   * @param expressMultipleChoiceListsAsArrays if true, express the multiple-choice fields as arrays of strings
    */
   public JsonElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
-      boolean includeGpsAltitude, boolean includeGpsAccuracy,
-      boolean expressMultipleChoiceListsAsArrays, RepeatCallbackFormatter formatter) {
+                              boolean includeGpsAltitude, boolean includeGpsAccuracy,
+                              boolean expressMultipleChoiceListsAsArrays, RepeatCallbackFormatter formatter) {
     this(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy,
         expressMultipleChoiceListsAsArrays, formatter);
     baseWebServerUrl = webServerUrl;
@@ -135,7 +122,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element,
-      String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
+                           String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
     if (blobSubmission == null || (blobSubmission.getAttachmentCount(cc) == 0)
         || (blobSubmission.getContentHash(1, cc) == null)) {
       addToJsonValueToRow(null, true, element.getElementName(), row);
@@ -147,7 +134,7 @@ public class JsonElementFormatter implements ElementFormatter {
       imageBlob = blobSubmission.getBlob(1, cc);
     }
     if (imageBlob != null && imageBlob.length > 0) {
-      Map<String,String> obj = new HashMap<String,String>();
+      Map<String, String> obj = new HashMap<String, String>();
       obj.put("filename", blobSubmission.getUnrootedFilename(1, cc));
       obj.put("type", blobSubmission.getContentType(1, cc));
       if (baseWebServerUrl == null) {
@@ -185,7 +172,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   @Override
   public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue,
-      Row row) {
+                            Row row) {
     StringBuilder b = new StringBuilder();
 
     if (choices.size() == 0) {
@@ -256,7 +243,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   @Override
   public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue,
-      Row row) {
+                             Row row) {
     if (separateCoordinates) {
       addToJsonValueToRow(coordinate.getLatitude(), false, element.getElementName()
           + FormatConsts.HEADER_CONCAT + GeoPoint.LATITUDE, row);
@@ -299,7 +286,7 @@ public class JsonElementFormatter implements ElementFormatter {
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
-      CallingContext cc) throws ODKDatastoreException {
+                            CallingContext cc) throws ODKDatastoreException {
     callbackFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(),
         repeatElement, row, cc);
   }

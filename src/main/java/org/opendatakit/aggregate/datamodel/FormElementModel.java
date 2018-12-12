@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.datamodel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.web.CallingContext;
@@ -28,46 +27,24 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public final class FormElementModel {
 
-  /* xform element types */
-  public static enum ElementType {
-    // xform tag types
-    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
-    BINARY, // identifies BinaryContent table
-    BOOLEAN, SELECT1, // identifies SelectChoice table
-    SELECTN, // identifies SelectChoice table
-    REPEAT, GROUP, METADATA
-  };
-
-  public static enum Metadata {
-    /**
-     * NOTE: the order here is the order in which these are listed. DO NOT
-     * CHANGE!!!
-     */
-    META_INSTANCE_ID, META_MODEL_VERSION, META_UI_VERSION, META_SUBMISSION_DATE, META_IS_COMPLETE, META_DATE_MARKED_AS_COMPLETE;
-
-    public String toString() {
-      return "*" + this.name().toLowerCase().replaceAll("_", "-") + "*";
-    }
-  };
-
   private static final String K_SL = "/";
+
+  ;
   private static final String K_COLON = ":";
 
+  ;
   private final Metadata type;
   private final FormDataModel fdm;
   private final List<FormElementModel> children = new ArrayList<FormElementModel>();
   private final FormElementModel parent;
-
   FormElementModel(FormElementModel parent, Metadata type) {
     fdm = null;
     this.parent = parent;
     this.type = type;
   }
-
   FormElementModel(final FormDataModel fdm, final FormElementModel parent) {
     this.fdm = fdm;
     this.parent = parent;
@@ -81,63 +58,118 @@ public final class FormElementModel {
     }
 
     switch (fdm.getElementType()) {
-    // xform tag types
-    case STRING:
-    case JRDATETIME:
-    case JRDATE:
-    case JRTIME:
-    case INTEGER:
-    case DECIMAL:
-    case GEOPOINT:
-    case GEOTRACE:
-    case GEOSHAPE:
-    case BINARY: // identifies BinaryContent table
-    case BOOLEAN:
-    case SELECT1: // identifies SelectChoice table
-    case SELECTN: // identifies SelectChoice table
-      // no children for these...
-      break;
-    case GROUP:
-    case REPEAT:
-      // these have children...
-      for (FormDataModel f : fdm.getChildren()) {
-        addChildHelper(f);
-      }
-      break;
-    default:
-      throw new IllegalStateException("Unexpectedly traversing hidden datatypes");
+      // xform tag types
+      case STRING:
+      case JRDATETIME:
+      case JRDATE:
+      case JRTIME:
+      case INTEGER:
+      case DECIMAL:
+      case GEOPOINT:
+      case GEOTRACE:
+      case GEOSHAPE:
+      case BINARY: // identifies BinaryContent table
+      case BOOLEAN:
+      case SELECT1: // identifies SelectChoice table
+      case SELECTN: // identifies SelectChoice table
+        // no children for these...
+        break;
+      case GROUP:
+      case REPEAT:
+        // these have children...
+        for (FormDataModel f : fdm.getChildren()) {
+          addChildHelper(f);
+        }
+        break;
+      default:
+        throw new IllegalStateException("Unexpectedly traversing hidden datatypes");
     }
+  }
+
+  /**
+   * Given a form definition and a FormElementKey, retrieves the
+   * FormElementModel corresponding to the key.
+   *
+   * @param form
+   * @param key
+   * @return the form element model corresponding to the key.
+   * @throws IllegalArgumentException
+   */
+  public static final FormElementModel retrieveFormElementModel(IForm form, FormElementKey key) {
+    String[] slashParts = key.toString().split(K_SL);
+    int slashPosition = 0;
+    if (!form.getFormId().equals(slashParts[slashPosition])) {
+      throw new IllegalArgumentException("FormElementKey is not appropriate for this Form");
+    }
+    ++slashPosition;
+    FormElementModel currentElement = form.getTopLevelGroupElement();
+    boolean first = true;
+    while (slashParts.length > slashPosition) {
+      String[] colonParts = slashParts[slashPosition].split(K_COLON);
+      int colonPosition = 0;
+      if (first) {
+        // first time through, the top level group element is the first colon
+        // part
+        // all other times, we need to search to find a match for this first
+        // part.
+        if (!currentElement.getElementName().equals(colonParts[colonPosition])) {
+          throw new IllegalArgumentException("FormElementKey is not well formed!");
+        }
+        ++colonPosition;
+        first = false;
+      }
+      while (colonParts.length > colonPosition) {
+        boolean found = false;
+        for (FormElementModel m : currentElement.getChildren()) {
+          if (m.getElementName().equals(colonParts[colonPosition])) {
+            found = true;
+            currentElement = m;
+            break;
+          }
+        }
+        if (!found) {
+          throw new IllegalArgumentException("FormElementKey is not well formed!");
+        }
+        ++colonPosition;
+      }
+      ++slashPosition;
+    }
+    return currentElement;
+  }
+
+  public static final FormElementModel buildFormElementModelTree(FormDataModel topLevelGroup) {
+    return new FormElementModel(topLevelGroup, null);
   }
 
   private final void addChildHelper(FormDataModel f) {
     switch (f.getElementType()) {
-    // xform tag types
-    case STRING:
-    case JRDATETIME:
-    case JRDATE:
-    case JRTIME:
-    case INTEGER:
-    case DECIMAL:
-    case GEOPOINT:
-    case GEOTRACE:
-    case GEOSHAPE:
-    case BINARY: // identifies BinaryContent table
-    case BOOLEAN:
-    case SELECT1: // identifies SelectChoice table
-    case SELECTN: // identifies SelectChoice table
-    case GROUP:
-    case REPEAT:
-      // these are individual children...
-      children.add(new FormElementModel(f, this));
-      break;
-    case PHANTOM:
-      // phantom children are ours!
-      for (FormDataModel ff : f.getChildren()) {
-        addChildHelper(ff);
-      }
-      break;
-    default:
-      throw new IllegalStateException("Unexpectedly traversing hidden datatypes");
+      // xform tag types
+      case STRING:
+      case JRDATETIME:
+      case JRDATE:
+      case JRTIME:
+      case INTEGER:
+      case DECIMAL:
+      case GEOPOINT:
+      case GEOTRACE:
+      case GEOSHAPE:
+      case BINARY: // identifies BinaryContent table
+      case BOOLEAN:
+      case SELECT1: // identifies SelectChoice table
+      case SELECTN: // identifies SelectChoice table
+      case GROUP:
+      case REPEAT:
+        // these are individual children...
+        children.add(new FormElementModel(f, this));
+        break;
+      case PHANTOM:
+        // phantom children are ours!
+        for (FormDataModel ff : f.getChildren()) {
+          addChildHelper(ff);
+        }
+        break;
+      default:
+        throw new IllegalStateException("Unexpectedly traversing hidden datatypes");
     }
   }
 
@@ -148,15 +180,14 @@ public final class FormElementModel {
 
     return ((fdm == null) ? (ref.fdm == null) : ((ref.fdm != null) && fdm.equals(ref.fdm)))
         && ((parent == null) ? (ref.parent == null) : ((ref.parent != null) && parent
-            .equals(ref.parent))) && (type == ref.type);
+        .equals(ref.parent))) && (type == ref.type);
   }
 
   /**
    * Returns the list of children that are in the specified form element
    * namespaces.
    *
-   * @param namespaces
-   *          -- collection of form element namespaces to filter against.
+   * @param namespaces -- collection of form element namespaces to filter against.
    * @return list of children contained in the collection of namespaces.
    */
   public final List<FormElementModel> getChildren(Collection<FormElementNamespace> namespaces) {
@@ -228,56 +259,56 @@ public final class FormElementModel {
   public final ElementType getElementType() {
     if (fdm == null) {
       switch (type) {
-      case META_INSTANCE_ID:
-        return ElementType.STRING;
-      case META_SUBMISSION_DATE:
-        return ElementType.JRDATETIME;
-      case META_UI_VERSION:
-        return ElementType.INTEGER;
-      case META_MODEL_VERSION:
-        return ElementType.INTEGER;
-      case META_IS_COMPLETE:
-        return ElementType.BOOLEAN;
-      case META_DATE_MARKED_AS_COMPLETE:
-        return ElementType.JRDATETIME;
-      default:
-        throw new IllegalStateException("unhandled metadata type");
+        case META_INSTANCE_ID:
+          return ElementType.STRING;
+        case META_SUBMISSION_DATE:
+          return ElementType.JRDATETIME;
+        case META_UI_VERSION:
+          return ElementType.INTEGER;
+        case META_MODEL_VERSION:
+          return ElementType.INTEGER;
+        case META_IS_COMPLETE:
+          return ElementType.BOOLEAN;
+        case META_DATE_MARKED_AS_COMPLETE:
+          return ElementType.JRDATETIME;
+        default:
+          throw new IllegalStateException("unhandled metadata type");
       }
     }
     switch (fdm.getElementType()) {
-    // xform tag types
-    case STRING:
-      return ElementType.STRING;
-    case JRDATETIME:
-      return ElementType.JRDATETIME;
-    case JRDATE:
-      return ElementType.JRDATE;
-    case JRTIME:
-      return ElementType.JRTIME;
-    case INTEGER:
-      return ElementType.INTEGER;
-    case DECIMAL:
-      return ElementType.DECIMAL;
-    case GEOPOINT:
-      return ElementType.GEOPOINT;
-    case GEOTRACE:
-      return ElementType.GEOTRACE;
-    case GEOSHAPE:
-      return ElementType.GEOSHAPE;
-    case BINARY: // identifies BinaryContent table
-      return ElementType.BINARY;
-    case BOOLEAN:
-      return ElementType.BOOLEAN;
-    case SELECT1: // identifies SelectChoice table
-      return ElementType.SELECT1;
-    case SELECTN: // identifies SelectChoice table
-      return ElementType.SELECTN;
-    case GROUP:
-      return ElementType.GROUP;
-    case REPEAT:
-      return ElementType.REPEAT;
-    default:
-      throw new IllegalStateException("hidden type exists within FormElementModel!");
+      // xform tag types
+      case STRING:
+        return ElementType.STRING;
+      case JRDATETIME:
+        return ElementType.JRDATETIME;
+      case JRDATE:
+        return ElementType.JRDATE;
+      case JRTIME:
+        return ElementType.JRTIME;
+      case INTEGER:
+        return ElementType.INTEGER;
+      case DECIMAL:
+        return ElementType.DECIMAL;
+      case GEOPOINT:
+        return ElementType.GEOPOINT;
+      case GEOTRACE:
+        return ElementType.GEOTRACE;
+      case GEOSHAPE:
+        return ElementType.GEOSHAPE;
+      case BINARY: // identifies BinaryContent table
+        return ElementType.BINARY;
+      case BOOLEAN:
+        return ElementType.BOOLEAN;
+      case SELECT1: // identifies SelectChoice table
+        return ElementType.SELECT1;
+      case SELECTN: // identifies SelectChoice table
+        return ElementType.SELECTN;
+      case GROUP:
+        return ElementType.GROUP;
+      case REPEAT:
+        return ElementType.REPEAT;
+      default:
+        throw new IllegalStateException("hidden type exists within FormElementModel!");
     }
   }
 
@@ -381,8 +412,7 @@ public final class FormElementModel {
    * Construct the FormElementKey that holds the abstract XPath expression
    * defining this FormElementModel.
    *
-   * @param form
-   *          the form containing this FormElementModel
+   * @param form the form containing this FormElementModel
    * @return the FormElementKey describing the FormElementModel
    */
   public final FormElementKey constructFormElementKey(IForm form) {
@@ -393,8 +423,7 @@ public final class FormElementModel {
    * Search the children of this element and return the one that has the name
    * that matches.
    *
-   * @param elementName
-   *          - name to match
+   * @param elementName - name to match
    * @return the element or null if not found.
    */
   public final FormElementModel findElementByName(String elementName) {
@@ -414,58 +443,25 @@ public final class FormElementModel {
   // Static methods
   // //////////////////////////////////////////////////////////////////////////////
 
-  /**
-   * Given a form definition and a FormElementKey, retrieves the
-   * FormElementModel corresponding to the key.
-   *
-   * @param form
-   * @param key
-   * @return the form element model corresponding to the key.
-   * @throws IllegalArgumentException
-   */
-  public static final FormElementModel retrieveFormElementModel(IForm form, FormElementKey key) {
-    String[] slashParts = key.toString().split(K_SL);
-    int slashPosition = 0;
-    if (!form.getFormId().equals(slashParts[slashPosition])) {
-      throw new IllegalArgumentException("FormElementKey is not appropriate for this Form");
-    }
-    ++slashPosition;
-    FormElementModel currentElement = form.getTopLevelGroupElement();
-    boolean first = true;
-    while (slashParts.length > slashPosition) {
-      String[] colonParts = slashParts[slashPosition].split(K_COLON);
-      int colonPosition = 0;
-      if (first) {
-        // first time through, the top level group element is the first colon
-        // part
-        // all other times, we need to search to find a match for this first
-        // part.
-        if (!currentElement.getElementName().equals(colonParts[colonPosition])) {
-          throw new IllegalArgumentException("FormElementKey is not well formed!");
-        }
-        ++colonPosition;
-        first = false;
-      }
-      while (colonParts.length > colonPosition) {
-        boolean found = false;
-        for (FormElementModel m : currentElement.getChildren()) {
-          if (m.getElementName().equals(colonParts[colonPosition])) {
-            found = true;
-            currentElement = m;
-            break;
-          }
-        }
-        if (!found) {
-          throw new IllegalArgumentException("FormElementKey is not well formed!");
-        }
-        ++colonPosition;
-      }
-      ++slashPosition;
-    }
-    return currentElement;
+  /* xform element types */
+  public static enum ElementType {
+    // xform tag types
+    STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
+    BINARY, // identifies BinaryContent table
+    BOOLEAN, SELECT1, // identifies SelectChoice table
+    SELECTN, // identifies SelectChoice table
+    REPEAT, GROUP, METADATA
   }
 
-  public static final FormElementModel buildFormElementModelTree(FormDataModel topLevelGroup) {
-    return new FormElementModel(topLevelGroup, null);
+  public static enum Metadata {
+    /**
+     * NOTE: the order here is the order in which these are listed. DO NOT
+     * CHANGE!!!
+     */
+    META_INSTANCE_ID, META_MODEL_VERSION, META_UI_VERSION, META_SUBMISSION_DATE, META_IS_COMPLETE, META_DATE_MARKED_AS_COMPLETE;
+
+    public String toString() {
+      return "*" + this.name().toLowerCase().replaceAll("_", "-") + "*";
+    }
   }
 }

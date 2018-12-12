@@ -22,9 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -37,6 +34,8 @@ import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.Authentication;
@@ -48,17 +47,48 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
     InitializingBean {
 
   private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
+  final Map<String, User> activeUsers = new HashMap<String, User>();
   // configured by bean definition...
   Datastore datastore;
   Realm realm;
   String superUserEmail;
   String superUserUsername;
   RegisteredUsersTable superUserUsernameRecord;
-  
-  final Map<String, User> activeUsers = new HashMap<String, User>();
 
   public UserServiceImpl() {
+  }
+
+  private static final String getNickname(String uriUser) {
+    String name = uriUser;
+    if (name.startsWith(SecurityUtils.MAILTO_COLON)) {
+      name = name.substring(SecurityUtils.MAILTO_COLON.length());
+      int idxTimestamp = name.indexOf("|");
+      if (idxTimestamp != -1) {
+        name = name.substring(0, idxTimestamp);
+      }
+    } else if (name.startsWith(RegisteredUsersTable.UID_PREFIX)) {
+      name = name.substring(RegisteredUsersTable.UID_PREFIX.length());
+      int idxTimestamp = name.indexOf("|");
+      if (idxTimestamp != -1) {
+        name = name.substring(0, idxTimestamp);
+      }
+    }
+    return name;
+  }
+
+  private static final String getEmail(String uriUser, String oauth2Email) {
+    if (oauth2Email != null) {
+      return oauth2Email;
+    }
+    if (uriUser.startsWith(SecurityUtils.MAILTO_COLON)) {
+      String n = uriUser;
+      int idxTimestamp = n.indexOf("|");
+      if (idxTimestamp != -1) {
+        return n.substring(0, idxTimestamp);
+      }
+      return n;
+    }
+    return null;
   }
 
   @Override
@@ -72,12 +102,12 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
     if (superUserEmail == null) {
       throw new IllegalStateException("superUserEmail must be configured");
     }
-    if ( superUserEmail.length() == 0 ) {
+    if (superUserEmail.length() == 0) {
       superUserEmail = null;
     }
-    if ( superUserEmail != null &&
+    if (superUserEmail != null &&
         (!superUserEmail.startsWith(SecurityUtils.MAILTO_COLON)
-          || !superUserEmail.contains(SecurityUtils.AT_SIGN))) {
+            || !superUserEmail.contains(SecurityUtils.AT_SIGN))) {
       throw new IllegalStateException("superUserEmail is malformed. "
           + "Must be of the form 'mailto:user@gmail.com' or other supported OAuth2 provider.");
     }
@@ -123,16 +153,16 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 
   @Override
   public boolean isSuperUsernamePasswordSet(CallingContext cc) throws ODKDatastoreException {
-    if ( superUserUsername == null ) {
+    if (superUserUsername == null) {
       return true;
     }
 
-    if ( superUserUsernameRecord == null ) {
+    if (superUserUsernameRecord == null) {
       // retrieve the underlying record
       superUserUsernameRecord = RegisteredUsersTable.getUserByUsername(superUserUsername, this, cc.getDatastore());
     }
-    
-    if ( superUserUsernameRecord != null ) {
+
+    if (superUserUsernameRecord != null) {
       MessageDigestPasswordEncoder mde = null;
       try {
         Object obj = cc.getBean(SecurityBeanDefs.BASIC_AUTH_PASSWORD_ENCODER);
@@ -149,10 +179,10 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
 
       CredentialsInfo credential;
       try {
-         credential = CredentialsInfoBuilderInternal.build(superUserUsername, r, "aggregate");
+        credential = CredentialsInfoBuilderInternal.build(superUserUsername, r, "aggregate");
       } catch (NoSuchAlgorithmException e) {
-         e.printStackTrace();
-         throw new IllegalStateException("unrecognized algorithm");
+        e.printStackTrace();
+        throw new IllegalStateException("unrecognized algorithm");
       }
       return !credential.getDigestAuthHash().equals(superUserUsernameRecord.getDigestAuthPassword());
     }
@@ -239,7 +269,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   }
 
   private synchronized User internalGetUser(String uriUser,
-      Collection<? extends GrantedAuthority> authorities) {
+                                            Collection<? extends GrantedAuthority> authorities) {
     User match = activeUsers.get(uriUser);
     if (match != null) {
       return match;
@@ -296,38 +326,5 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   @Override
   public User getDaemonAccountUser() {
     return internalGetUser(User.DAEMON_USER, null);
-  }
-
-  private static final String getNickname(String uriUser) {
-    String name = uriUser;
-    if (name.startsWith(SecurityUtils.MAILTO_COLON)) {
-      name = name.substring(SecurityUtils.MAILTO_COLON.length());
-      int idxTimestamp = name.indexOf("|");
-      if (idxTimestamp != -1) {
-        name = name.substring(0, idxTimestamp);
-      }
-    } else if (name.startsWith(RegisteredUsersTable.UID_PREFIX)) {
-      name = name.substring(RegisteredUsersTable.UID_PREFIX.length());
-      int idxTimestamp = name.indexOf("|");
-      if (idxTimestamp != -1) {
-        name = name.substring(0, idxTimestamp);
-      }
-    }
-    return name;
-  }
-
-  private static final String getEmail(String uriUser, String oauth2Email) {
-    if (oauth2Email != null) {
-      return oauth2Email;
-    }
-    if (uriUser.startsWith(SecurityUtils.MAILTO_COLON)) {
-      String n = uriUser;
-      int idxTimestamp = n.indexOf("|");
-      if (idxTimestamp != -1) {
-        return n.substring(0, idxTimestamp);
-      }
-      return n;
-    }
-    return null;
   }
 }

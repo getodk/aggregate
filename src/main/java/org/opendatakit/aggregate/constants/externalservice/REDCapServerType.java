@@ -17,10 +17,8 @@
 package org.opendatakit.aggregate.constants.externalservice;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public enum REDCapServerType {
   STRING("string"),

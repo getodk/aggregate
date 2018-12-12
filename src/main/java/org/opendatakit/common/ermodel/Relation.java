@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.Datastore;
@@ -53,7 +52,6 @@ public class Relation {
   private static final int MAX_DELETE_COUNT = 100;
 
   /** the table namespace of this relation */
-  @SuppressWarnings("unused")
   private final TableNamespace namespace;
   /** name of the actual backing table in the persistence layer */
   private final String backingTableName;
@@ -146,7 +144,7 @@ public class Relation {
    * @throws ODKDatastoreException
    */
   protected Relation(TableNamespace type, String tableName, List<DataField> fields,
-      CallingContext cc) throws ODKDatastoreException {
+                     CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
@@ -159,43 +157,119 @@ public class Relation {
     }
 
     switch (type) {
-    case SUBMISSIONS:
-      // submissions tables never start with a leading underscore.
-      if (tableName.charAt(0) == '_') {
-        throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
-      }
-      backingTableName = tableName;
-      namespace = TableNamespace.SUBMISSIONS;
-      // don't proceed if the table doesn't exist
-      if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName, user)) {
-        throw new IllegalArgumentException("Submissions table does not exist");
-      }
-      break;
-    case INTERNALS:
-      // internal tables to Aggregate start with an underscore
-      // followed by an alphanumeric character.
-      if (tableName.charAt(0) != '_' || tableName.charAt(1) == '_') {
-        throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
-      }
-      backingTableName = tableName;
-      namespace = TableNamespace.INTERNALS;
-      // don't proceed if the table doesn't exist
-      if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName, user)) {
-        throw new IllegalArgumentException("Submissions table does not exist");
-      }
-      break;
-    case EXTENSION:
-      // extensions start with at least two underscores...
-      if (tableName.charAt(0) != '_' || tableName.charAt(1) != '_') {
-        throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
-      }
-      backingTableName = tableName;
-      namespace = TableNamespace.EXTENSION;
-      break;
-    default:
-      throw new IllegalStateException("Unexpected TableNamespace value");
+      case SUBMISSIONS:
+        // submissions tables never start with a leading underscore.
+        if (tableName.charAt(0) == '_') {
+          throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
+        }
+        backingTableName = tableName;
+        namespace = TableNamespace.SUBMISSIONS;
+        // don't proceed if the table doesn't exist
+        if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName, user)) {
+          throw new IllegalArgumentException("Submissions table does not exist");
+        }
+        break;
+      case INTERNALS:
+        // internal tables to Aggregate start with an underscore
+        // followed by an alphanumeric character.
+        if (tableName.charAt(0) != '_' || tableName.charAt(1) == '_') {
+          throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
+        }
+        backingTableName = tableName;
+        namespace = TableNamespace.INTERNALS;
+        // don't proceed if the table doesn't exist
+        if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName, user)) {
+          throw new IllegalArgumentException("Submissions table does not exist");
+        }
+        break;
+      case EXTENSION:
+        // extensions start with at least two underscores...
+        if (tableName.charAt(0) != '_' || tableName.charAt(1) != '_') {
+          throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
+        }
+        backingTableName = tableName;
+        namespace = TableNamespace.EXTENSION;
+        break;
+      default:
+        throw new IllegalStateException("Unexpected TableNamespace value");
     }
     initialize(fields, cc);
+  }
+
+  /**
+   * This is just a convenience method.
+   *
+   * @param e
+   * @param cc
+   * @throws ODKEntityPersistException
+   * @throws ODKOverQuotaException
+   */
+  public static void putEntity(Entity e, CallingContext cc)
+      throws ODKEntityPersistException, ODKOverQuotaException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    EntityImpl ei = (EntityImpl) e;
+    ds.putEntity(ei.backingObject, user);
+  }
+
+  /**
+   * This is just a convenience method. It may fail midway through saving the
+   * list of entities.
+   *
+   * @param eList
+   * @param cc
+   * @throws ODKEntityPersistException
+   * @throws ODKOverQuotaException
+   */
+  public static void putEntities(List<Entity> eList, CallingContext cc)
+      throws ODKEntityPersistException, ODKOverQuotaException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    List<RelationImpl> backingObjects = new ArrayList<RelationImpl>();
+    for (Entity e : eList) {
+      EntityImpl ei = (EntityImpl) e;
+      backingObjects.add(ei.backingObject);
+    }
+    ds.putEntities(backingObjects, user);
+  }
+
+  /**
+   * This is just a convenience function.
+   *
+   * @param e
+   * @param cc
+   * @throws ODKDatastoreException
+   */
+  public static void deleteEntity(Entity e, CallingContext cc)
+      throws ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    EntityImpl ei = (EntityImpl) e;
+    ds.deleteEntity(ei.backingObject.getEntityKey(), user);
+  }
+
+  /**
+   * This is just a convenience function. It can fail after having deleted only
+   * some of the entities.
+   *
+   * @param eList
+   * @param cc
+   * @throws ODKDatastoreException
+   */
+  public static void deleteEntities(List<Entity> eList, CallingContext cc)
+      throws ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    List<EntityKey> keys = new ArrayList<EntityKey>();
+    for (Entity e : eList) {
+      EntityImpl ei = (EntityImpl) e;
+      keys.add(ei.backingObject.getEntityKey());
+    }
+    ds.deleteEntities(keys, user);
   }
 
   /**
@@ -272,6 +346,8 @@ public class Relation {
     return new Query(this, emptyQuery);
   }
 
+  ;
+
   /**
    * This deletes all records in your table and drops it from the datastore. The
    * deletion step is non-optimal for MySQL/Postgresql, but is required for
@@ -292,7 +368,7 @@ public class Relation {
       // we don't ahve the individual records, just the PKs for them
       // construct the entity keys from the relation and those PKs
       keys.add(new EntityKey(prototype, (String) key));
-      if ( keys.size() > MAX_DELETE_COUNT ) {
+      if (keys.size() > MAX_DELETE_COUNT) {
         ds.deleteEntities(keys, user);
         keys.clear();
       }
@@ -341,6 +417,108 @@ public class Relation {
   }
 
   /**
+   * Complete the initialization of the relation with the UPPER_CASE fieldNames.
+   * Note that the fields: _URI, _LAST_UPDATE_DATE, _LAST_UPDATE_URI_USER,
+   * _CREATION_DATE, _CREATOR_URI_USER are always present and should not be
+   * passed into the fields list.
+   *
+   * @param fields
+   * @param cc
+   * @throws ODKDatastoreException
+   */
+  private void initialize(List<DataField> fields, CallingContext cc) throws ODKDatastoreException {
+
+    List<DataField> definedFields = new ArrayList<DataField>();
+    for (DataField f : fields) {
+      String name = f.getName();
+      if (!name.matches(VALID_UPPER_CASE_NAME_REGEX)) {
+        throw new IllegalArgumentException("Field name is not a valid UPPER_CASE name: " + name);
+      }
+      if (name.length() > MAX_PERSISTENCE_NAME_LENGTH) {
+        throw new IllegalArgumentException("Field name is too long: " + name);
+      }
+      if (nameMap.containsKey(name)) {
+        throw new IllegalArgumentException("Field name: " + name + " is already specified!");
+      }
+      nameMap.put(name, f);
+      fieldSet.add(f);
+      definedFields.add(f);
+    }
+
+    // the 5 reserved column names should not be in the DataField list.
+    // If you need access the DataField for them, use the
+    // Relation.getDataField() API to
+    // obtain them, or just use the Entity.getCreationDate(), etc. APIs.
+    if (nameMap.containsKey(CommonFieldsBase.CREATION_DATE_COLUMN_NAME)
+        || nameMap.containsKey(CommonFieldsBase.CREATOR_URI_USER_COLUMN_NAME)
+        || nameMap.containsKey(CommonFieldsBase.LAST_UPDATE_DATE_COLUMN_NAME)
+        || nameMap.containsKey(CommonFieldsBase.LAST_UPDATE_URI_USER_COLUMN_NAME)
+        || nameMap.containsKey(CommonFieldsBase.URI_COLUMN_NAME)) {
+      throw new IllegalArgumentException("One of the 5 reserved DataField names is "
+          + "errorneously supplied in the DataField list");
+    }
+
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    String schema = ds.getDefaultSchemaName();
+    synchronized (Relation.class) {
+      RelationImpl candidate = new RelationImpl(schema, backingTableName, definedFields);
+      ds.assertRelation(candidate, user);
+      prototype = candidate;
+    }
+  }
+
+  /**
+   * Execute a set of commands sharing the same SQL but with different bind parameters.
+   * This may either insert or update data (one or the other, across all alterations).
+   * I.e., you cannot mix updates and inserts -- they are either all updates or all inserts.
+   *
+   * @param bulkAlterEntities
+   * @param cc
+   * @throws ODKDatastoreException
+   * @throws ODKEntityPersistException
+   * @throws ODKOverQuotaException
+   */
+  public void bulkAlterEntities(List<Entity> bulkAlterEntities, CallingContext cc)
+      throws ODKDatastoreException, ODKEntityPersistException, ODKOverQuotaException {
+
+    if (bulkAlterEntities == null) {
+      throw new ODKDatastoreException("No bulk update list provided");
+    }
+
+    if (bulkAlterEntities.size() < 1) {
+      throw new ODKDatastoreException("Bulk update list MUST contain at least one item");
+    }
+
+    ArrayList<CommonFieldsBase> changes = new ArrayList<CommonFieldsBase>();
+
+    EntityImpl lastUpdate = (EntityImpl) bulkAlterEntities.get(0);
+    for (Entity entity : bulkAlterEntities) {
+      EntityImpl update = (EntityImpl) entity;
+      if (!lastUpdate.isCompatible(update)) {
+        throw new ODKDatastoreException(
+            "INCOMPATIBLE BULK UPDATES were found inside an attempted bulk update");
+      }
+      changes.add(update.backingObject);
+    }
+    cc.getDatastore().batchAlterData(changes, cc.getCurrentUser());
+  }
+
+  /**
+   * Helper function to verify that DataField values are not getting confounded.
+   *
+   * @param field
+   * @return field
+   */
+  public final DataField verify(DataField field) {
+    if (prototype != null && !prototype.getFieldList().contains(field)) {
+      throw new IllegalArgumentException("FieldName: " + field.getName()
+          + " is not identical to the one specified in this relation " + field.toString());
+    }
+    return field;
+  }
+
+  /**
    * The backing object for the Entity.
    *
    * @author mitchellsundt@gmail.com
@@ -361,7 +539,7 @@ public class Relation {
     public CommonFieldsBase getEmptyRow(User user) {
       return new RelationImpl(this, user);
     }
-  };
+  }
 
   /**
    * Implementation of the Entity interface.
@@ -420,7 +598,7 @@ public class Relation {
 
     @Override
     public Double getDouble(DataField field) {
-        WrappedBigDecimal d = backingObject.getNumericField(verify(field));
+      WrappedBigDecimal d = backingObject.getNumericField(verify(field));
       return (d == null) ? null : d.doubleValue();
     }
 
@@ -583,29 +761,29 @@ public class Relation {
         f = Relation.this.getDataField(WebUtils.unCamelCase(fieldName));
       }
       switch (f.getDataType()) {
-      case INTEGER:
-        Long l = backingObject.getLongField(f);
-        if (l == null)
-          return null;
-        return l.toString();
-      case DECIMAL:
-        WrappedBigDecimal v = backingObject.getNumericField(f);
-        if (v == null)
-          return null;
-        return v.toString();
-      case BOOLEAN:
-        Boolean b = backingObject.getBooleanField(f);
-        if (b == null)
-          return null;
-        return b.toString();
-      case STRING:
-      case URI:
-        return backingObject.getStringField(f);
-      case DATETIME:
-        Date d = backingObject.getDateField(f);
-        return WebUtils.iso8601Date(d);
-      default:
-        throw new IllegalArgumentException("Invalid type for field " + f.getName());
+        case INTEGER:
+          Long l = backingObject.getLongField(f);
+          if (l == null)
+            return null;
+          return l.toString();
+        case DECIMAL:
+          WrappedBigDecimal v = backingObject.getNumericField(f);
+          if (v == null)
+            return null;
+          return v.toString();
+        case BOOLEAN:
+          Boolean b = backingObject.getBooleanField(f);
+          if (b == null)
+            return null;
+          return b.toString();
+        case STRING:
+        case URI:
+          return backingObject.getStringField(f);
+        case DATETIME:
+          Date d = backingObject.getDateField(f);
+          return WebUtils.iso8601Date(d);
+        default:
+          throw new IllegalArgumentException("Invalid type for field " + f.getName());
       }
     }
 
@@ -622,42 +800,42 @@ public class Relation {
       }
 
       switch (f.getDataType()) {
-      case INTEGER:
-        try {
-          backingObject.setLongField(f, (value == null || value.length() == 0) ? null : Long.valueOf(value));
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
-              + f.getName());
-        }
-        break;
-      case DECIMAL:
-        try {
-          backingObject.setNumericField(f, (value == null || value.length() == 0) ? null : new WrappedBigDecimal(value));
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
-              + f.getName());
-        }
-        break;
-      case BOOLEAN:
-        Boolean b = WebUtils.parseBoolean(value);
-        backingObject.setBooleanField(f, b);
-        break;
-      case STRING:
-      case URI:
-        if (!backingObject.setStringField(f, value)) {
-          throw new IllegalArgumentException("Value is too long (" + value.length()
-              + ") for field " + f.getName());
-        }
-        break;
-      case DATETIME:
-        Date d = WebUtils.parseDate(value);
-        backingObject.setDateField(f, d);
-        break;
-      default:
-        throw new IllegalArgumentException("Invalid type for field " + f.getName());
+        case INTEGER:
+          try {
+            backingObject.setLongField(f, (value == null || value.length() == 0) ? null : Long.valueOf(value));
+          } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
+                + f.getName());
+          }
+          break;
+        case DECIMAL:
+          try {
+            backingObject.setNumericField(f, (value == null || value.length() == 0) ? null : new WrappedBigDecimal(value));
+          } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Unparsable integer value: " + value + " for field: "
+                + f.getName());
+          }
+          break;
+        case BOOLEAN:
+          Boolean b = WebUtils.parseBoolean(value);
+          backingObject.setBooleanField(f, b);
+          break;
+        case STRING:
+        case URI:
+          if (!backingObject.setStringField(f, value)) {
+            throw new IllegalArgumentException("Value is too long (" + value.length()
+                + ") for field " + f.getName());
+          }
+          break;
+        case DATETIME:
+          Date d = WebUtils.parseDate(value);
+          backingObject.setDateField(f, d);
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid type for field " + f.getName());
       }
     }
-    
+
     @Override
     public boolean isFromDatabase() {
       return backingObject.isFromDatabase();
@@ -721,189 +899,12 @@ public class Relation {
       }
       return f;
     }
-    
+
 
     boolean isCompatible(EntityImpl entityImpl) {
       return this.backingObject.getTableName().equals(entityImpl.backingObject.getTableName()) &&
           this.isFromDatabase() == entityImpl.isFromDatabase();
     }
-  }
-
-  /**
-   * Complete the initialization of the relation with the UPPER_CASE fieldNames.
-   * Note that the fields: _URI, _LAST_UPDATE_DATE, _LAST_UPDATE_URI_USER,
-   * _CREATION_DATE, _CREATOR_URI_USER are always present and should not be
-   * passed into the fields list.
-   *
-   * @param fields
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  private void initialize(List<DataField> fields, CallingContext cc) throws ODKDatastoreException {
-
-    List<DataField> definedFields = new ArrayList<DataField>();
-    for (DataField f : fields) {
-      String name = f.getName();
-      if (!name.matches(VALID_UPPER_CASE_NAME_REGEX)) {
-        throw new IllegalArgumentException("Field name is not a valid UPPER_CASE name: " + name);
-      }
-      if (name.length() > MAX_PERSISTENCE_NAME_LENGTH) {
-        throw new IllegalArgumentException("Field name is too long: " + name);
-      }
-      if (nameMap.containsKey(name)) {
-        throw new IllegalArgumentException("Field name: " + name + " is already specified!");
-      }
-      nameMap.put(name, f);
-      fieldSet.add(f);
-      definedFields.add(f);
-    }
-
-    // the 5 reserved column names should not be in the DataField list.
-    // If you need access the DataField for them, use the
-    // Relation.getDataField() API to
-    // obtain them, or just use the Entity.getCreationDate(), etc. APIs.
-    if (nameMap.containsKey(CommonFieldsBase.CREATION_DATE_COLUMN_NAME)
-        || nameMap.containsKey(CommonFieldsBase.CREATOR_URI_USER_COLUMN_NAME)
-        || nameMap.containsKey(CommonFieldsBase.LAST_UPDATE_DATE_COLUMN_NAME)
-        || nameMap.containsKey(CommonFieldsBase.LAST_UPDATE_URI_USER_COLUMN_NAME)
-        || nameMap.containsKey(CommonFieldsBase.URI_COLUMN_NAME)) {
-      throw new IllegalArgumentException("One of the 5 reserved DataField names is "
-          + "errorneously supplied in the DataField list");
-    }
-
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    String schema = ds.getDefaultSchemaName();
-    synchronized (Relation.class) {
-      RelationImpl candidate = new RelationImpl(schema, backingTableName, definedFields);
-      ds.assertRelation(candidate, user);
-      prototype = candidate;
-    }
-  }
-
-  /**
-   * This is just a convenience method.
-   *
-   * @param e
-   * @param cc
-   * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException
-   */
-  public static void putEntity(Entity e, CallingContext cc)
-      throws ODKEntityPersistException, ODKOverQuotaException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    EntityImpl ei = (EntityImpl) e;
-    ds.putEntity(ei.backingObject, user);
-  }
-
-  /**
-   * This is just a convenience method. It may fail midway through saving the
-   * list of entities.
-   *
-   * @param eList
-   * @param cc
-   * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException
-   */
-  public static void putEntities(List<Entity> eList, CallingContext cc)
-      throws ODKEntityPersistException, ODKOverQuotaException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    List<RelationImpl> backingObjects = new ArrayList<RelationImpl>();
-    for (Entity e : eList) {
-      EntityImpl ei = (EntityImpl) e;
-      backingObjects.add(ei.backingObject);
-    }
-    ds.putEntities(backingObjects, user);
-  }
-  /**
-   * Execute a set of commands sharing the same SQL but with different bind parameters.
-   * This may either insert or update data (one or the other, across all alterations).
-   * I.e., you cannot mix updates and inserts -- they are either all updates or all inserts.
-   * 
-   * @param bulkAlterEntities
-   * @param cc
-   * @throws ODKDatastoreException
-   * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException
-   */
-  public void bulkAlterEntities(List<Entity> bulkAlterEntities, CallingContext cc)
-      throws ODKDatastoreException, ODKEntityPersistException, ODKOverQuotaException {
- 
-    if (bulkAlterEntities == null) {
-      throw new ODKDatastoreException("No bulk update list provided");
-    }
-
-    if (bulkAlterEntities.size() < 1) {
-      throw new ODKDatastoreException("Bulk update list MUST contain at least one item");
-    }
-
-    ArrayList<CommonFieldsBase> changes = new ArrayList<CommonFieldsBase>();
-    
-    EntityImpl lastUpdate = (EntityImpl) bulkAlterEntities.get(0);
-    for ( Entity entity : bulkAlterEntities ) {
-      EntityImpl update = (EntityImpl) entity;
-      if ( !lastUpdate.isCompatible(update) ) {
-        throw new ODKDatastoreException(
-            "INCOMPATIBLE BULK UPDATES were found inside an attempted bulk update");
-      }
-      changes.add(update.backingObject);
-    }
-    cc.getDatastore().batchAlterData(changes, cc.getCurrentUser());
-  }
-
-  /**
-   * This is just a convenience function.
-   *
-   * @param e
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  public static void deleteEntity(Entity e, CallingContext cc)
-      throws ODKDatastoreException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    EntityImpl ei = (EntityImpl) e;
-    ds.deleteEntity(ei.backingObject.getEntityKey(), user);
-  }
-
-  /**
-   * This is just a convenience function. It can fail after having deleted only
-   * some of the entities.
-   *
-   * @param eList
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  public static void deleteEntities(List<Entity> eList, CallingContext cc)
-      throws ODKDatastoreException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    List<EntityKey> keys = new ArrayList<EntityKey>();
-    for (Entity e : eList) {
-      EntityImpl ei = (EntityImpl) e;
-      keys.add(ei.backingObject.getEntityKey());
-    }
-    ds.deleteEntities(keys, user);
-  }
-
-  /**
-   * Helper function to verify that DataField values are not getting confounded.
-   *
-   * @param field
-   * @return field
-   */
-  public final DataField verify(DataField field) {
-    if (prototype != null && !prototype.getFieldList().contains(field)) {
-      throw new IllegalArgumentException("FieldName: " + field.getName()
-          + " is not identical to the one specified in this relation " + field.toString());
-    }
-    return field;
   }
 
 }

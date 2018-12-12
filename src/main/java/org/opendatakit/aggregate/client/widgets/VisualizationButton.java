@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.FilterSubTab;
-import org.opendatakit.aggregate.client.popups.VisualizationPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.FilterSubTab;
+import org.opendatakit.aggregate.client.popups.VisualizationPopup;
 
 public final class VisualizationButton extends AggregateButton implements ClickHandler {
 
@@ -38,7 +37,7 @@ public final class VisualizationButton extends AggregateButton implements ClickH
 
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     VisualizationPopup vizPopup = new VisualizationPopup(filterSubTab);
     vizPopup.setPopupPositionAndShow(vizPopup.getPositionCallBack());
   }

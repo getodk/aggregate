@@ -18,14 +18,13 @@ package org.opendatakit.common.web.client;
 
 /**
  * Interface passed to ValidatingTextInputCell and other classes
- * to validate the prospective value before allowing the UI to 
+ * to validate the prospective value before allowing the UI to
  * update to that value.  If the predicate returns false, no
  * value change occurs.
- * 
- * @author mitchellsundt@gmail.com
  *
  * @param <T> type of the backing object for the row containing the cell.
+ * @author mitchellsundt@gmail.com
  */
 public interface StringValidationPredicate<T> {
-    public boolean isValid(String prospectiveValue, T key);
+  public boolean isValid(String prospectiveValue, T key);
 }

@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.task.gae;
 
 import java.util.Map;
-
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
@@ -33,16 +32,15 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean. It cannot have any per-request state. It uses a
  * static inner class to encapsulate the per-request state of a running
  * background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
   public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
-      CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
+                                        CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
     Map<String, String> params = miscTasks.getRequestParameters();
 
     TaskOptionsBuilder b = new TaskOptionsBuilder(WorksheetServlet.ADDR);

@@ -16,37 +16,35 @@
 
 package org.opendatakit.common.security.client.security;
 
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
 /**
  * These are the APIs available to users with the ROLE_USER privilege.
  * Because this interface includes the change-password API, it requires
  * an SSL connection on servers that support SSL.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 @RemoteServiceRelativePath("securityservice")
 public interface SecurityService extends RemoteService {
-    
-    /**
-     * @return information about the logged-in user, including the full set of groups and grants it has.
-     * @throws AccessDeniedException
-     * @throws DatastoreFailureException
-     */
-    UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException;
 
-    /**
-     * @param xsrfString
-     * @return information needed for building CredentialsInfo records and URLs.
-     * @throws AccessDeniedException
-     * @throws DatastoreFailureException 
-     */
-    RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException, DatastoreFailureException;
+  /**
+   * @return information about the logged-in user, including the full set of groups and grants it has.
+   * @throws AccessDeniedException
+   * @throws DatastoreFailureException
+   */
+  UserSecurityInfo getUserInfo() throws AccessDeniedException, DatastoreFailureException;
+
+  /**
+   * @param xsrfString
+   * @return information needed for building CredentialsInfo records and URLs.
+   * @throws AccessDeniedException
+   * @throws DatastoreFailureException
+   */
+  RealmSecurityInfo getRealmInfo(String xsrfString) throws AccessDeniedException, DatastoreFailureException;
 }

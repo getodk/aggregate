@@ -16,7 +16,6 @@
 package org.opendatakit.common.security.spring;
 
 import java.io.IOException;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -24,7 +23,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -38,47 +36,46 @@ import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.web.context.ServletContextAware;
 
 /**
- * Wraps the Spring class and ensures that if an Authentication is already 
+ * Wraps the Spring class and ensures that if an Authentication is already
  * determined for this request, that it isn't overridden.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class BasicAuthenticationFilter implements Filter,
     BeanNameAware, DisposableBean, InitializingBean, EnvironmentAware, ServletContextAware {
 
   org.springframework.security.web.authentication.www.BasicAuthenticationFilter impl;
-  
+
   public BasicAuthenticationFilter(AuthenticationManager authenticationManager) {
     impl = new org.springframework.security.web.authentication.www.BasicAuthenticationFilter(authenticationManager);
   }
-  
+
   public BasicAuthenticationFilter(AuthenticationManager authenticationManager,
-      AuthenticationEntryPoint authenticationEntryPoint) {
+                                   AuthenticationEntryPoint authenticationEntryPoint) {
     impl = new org.springframework.security.web.authentication.www.BasicAuthenticationFilter(authenticationManager, authenticationEntryPoint);
   }
-  
-  public void  setAuthenticationDetailsSource(AuthenticationDetailsSource<javax.servlet.http.HttpServletRequest,?> authenticationDetailsSource) {
+
+  public void setAuthenticationDetailsSource(AuthenticationDetailsSource<javax.servlet.http.HttpServletRequest, ?> authenticationDetailsSource) {
     impl.setAuthenticationDetailsSource(authenticationDetailsSource);
   }
-  
-  public void  setCredentialsCharset(String credentialsCharset) {
+
+  public void setCredentialsCharset(String credentialsCharset) {
     impl.setCredentialsCharset(credentialsCharset);
   }
-  
-  public void  setRememberMeServices(RememberMeServices rememberMeServices) {
+
+  public void setRememberMeServices(RememberMeServices rememberMeServices) {
     impl.setRememberMeServices(rememberMeServices);
   }
-  
+
   @Override
-  public void  afterPropertiesSet() {
+  public void afterPropertiesSet() {
     impl.afterPropertiesSet();
   }
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
-    if ( SecurityContextHolder.getContext().getAuthentication() == null ) {
+    if (SecurityContextHolder.getContext().getAuthentication() == null) {
       impl.doFilter(request, response, chain);
     } else {
       chain.doFilter(request, response);
@@ -88,7 +85,7 @@ public class BasicAuthenticationFilter implements Filter,
   @Override
   public void setServletContext(ServletContext servletContext) {
     impl.setServletContext(servletContext);
-    
+
   }
 
   @Override

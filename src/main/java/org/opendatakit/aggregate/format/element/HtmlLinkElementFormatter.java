@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.format.element;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -35,44 +34,40 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
-public class HtmlLinkElementFormatter extends BasicElementFormatter{
+public class HtmlLinkElementFormatter extends BasicElementFormatter {
 
   private final String baseWebServerUrl;
   private final boolean binariesAsDownloadLink;
 
   /**
    * Construct a Html Link Element Formatter
- * @param webServerUrl base url for the web app (e.g., localhost:8080/ODKAggregatePlatform)
- * @param separateGpsCoordinates
-   *          separate the GPS coordinates of latitude and longitude into
-   *          columns
- * @param includeGpsAltitude
-   *          include GPS altitude data
- * @param includeGpsAccuracy
-   *          include GPS accuracy data
+   *
+   * @param webServerUrl           base url for the web app (e.g., localhost:8080/ODKAggregatePlatform)
+   * @param separateGpsCoordinates separate the GPS coordinates of latitude and longitude into
+   *                               columns
+   * @param includeGpsAltitude     include GPS altitude data
+   * @param includeGpsAccuracy     include GPS accuracy data
    */
   public HtmlLinkElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
-      boolean includeGpsAltitude, boolean includeGpsAccuracy) {
-      this(webServerUrl, separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, false);
+                                  boolean includeGpsAltitude, boolean includeGpsAccuracy) {
+    this(webServerUrl, separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, false);
   }
 
   public HtmlLinkElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
-          boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean binariesAsDownloadLink) {
-        super(separateGpsCoordinates, includeGpsAltitude,includeGpsAccuracy, false);
-        baseWebServerUrl = webServerUrl;
-        this.binariesAsDownloadLink = binariesAsDownloadLink;
-      }
+                                  boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean binariesAsDownloadLink) {
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, false);
+    baseWebServerUrl = webServerUrl;
+    this.binariesAsDownloadLink = binariesAsDownloadLink;
+  }
 
   @Override
   public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-    if( blobSubmission == null ||
+    if (blobSubmission == null ||
         (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null) ) {
+        (blobSubmission.getContentHash(1, cc) == null)) {
       row.addFormattedValue(null);
       return;
     }
@@ -81,17 +76,17 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
     String linkText;
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
-    if ( binariesAsDownloadLink ) {
-        properties.put(ServletConsts.AS_ATTACHMENT, "yes");
-        linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
-        if ( blobSubmission.getAttachmentCount(cc) == 1 ) {
-            linkText = blobSubmission.getUnrootedFilename(1, cc);
-            if ( linkText == null || linkText.length() == 0 ) {
-                linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
-            }
+    if (binariesAsDownloadLink) {
+      properties.put(ServletConsts.AS_ATTACHMENT, "yes");
+      linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
+      if (blobSubmission.getAttachmentCount(cc) == 1) {
+        linkText = blobSubmission.getUnrootedFilename(1, cc);
+        if (linkText == null || linkText.length() == 0) {
+          linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
         }
+      }
     } else {
-        linkText = FormTableConsts.VIEW_LINK_TEXT;
+      linkText = FormTableConsts.VIEW_LINK_TEXT;
     }
     String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties, linkText, !binariesAsDownloadLink);
     row.addFormattedValue(url);
@@ -100,21 +95,21 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter{
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
-    if(repeat == null) {
+    if (repeat == null) {
       row.addFormattedValue(null);
       return;
     }
 
     List<SubmissionSet> sets = repeat.getSubmissionSets();
-    if ( sets.size() == 0 ) {
-        row.addFormattedValue(null);
-        return;
+    if (sets.size() == 0) {
+      row.addFormattedValue(null);
+      return;
     }
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.FORM_ID, repeat.constructSubmissionKey().toString());
 
-    String url = HtmlUtil.createHrefWithProperties( baseWebServerUrl + BasicConsts.FORWARDSLASH + FormMultipleValueServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT, false);
+    String url = HtmlUtil.createHrefWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + FormMultipleValueServlet.ADDR, properties, FormTableConsts.VIEW_LINK_TEXT, false);
     row.addFormattedValue(url);
   }
 

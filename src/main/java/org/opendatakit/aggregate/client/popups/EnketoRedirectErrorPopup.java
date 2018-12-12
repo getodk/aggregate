@@ -16,10 +16,9 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 public final class EnketoRedirectErrorPopup extends AbstractPopupBase {
 

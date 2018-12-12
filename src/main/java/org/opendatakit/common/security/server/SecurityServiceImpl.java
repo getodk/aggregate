@@ -16,8 +16,8 @@
 
 package org.opendatakit.common.security.server;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import javax.servlet.http.HttpServletRequest;
-
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.servlet.UserManagePasswordsServlet;
 import org.opendatakit.common.persistence.Datastore;
@@ -34,22 +34,19 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 /**
  * GWT Server implementation for the SecurityService interface. This provides
  * privileges context to the client and is therefore accessible to anyone with a
  * ROLE_USER privilege.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
  */
 public class SecurityServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.common.security.client.security.SecurityService {
 
   /**
-     * 
-     */
+   *
+   */
   private static final long serialVersionUID = -7360632450727200941L;
 
   @Override

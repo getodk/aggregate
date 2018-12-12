@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -15,93 +15,38 @@ package org.opendatakit.common.persistence.engine;
 
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.utils.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks the access patterns for the datastore layer. Useful for identifying
  * inefficient datastore access patterns and minimizing excessive read/write
  * actions.
- * 
+ *
  * Note that if you create and delete many tables and don't reuse table names,
  * the tableMap and count arrays will grow without bounds.
- * 
+ *
  * @author mitchellsundt@gmail.com
- * 
+ *
  */
 public final class DatastoreAccessMetrics {
 
   private static final Logger logger = LoggerFactory.getLogger(DatastoreAccessMetrics.class);
-
-  // map of fully qualified table name to index in counter array.
-  private final Map<String, Short> tableMap = new TreeMap<String, Short>();
-  private short nextCountIdx = 0;
-  private int readCount = 0;
-
-  /**
-   * Maintain a tally of which tables those actions were against.
-   * 
-   * NOTE: this is NOT thread-safe. All accesses should occur only from within
-   * synchronized methods.
-   */
-  private final static class RingBufferCountArray {
-    private static final int ARRAY_INCREMENT = 20;
-    private int[] countArray = new int[36];
-
-    RingBufferCountArray() {
-      clear();
-    };
-
-    private void resizeArray(short arrayIdx) {
-      if (arrayIdx >= countArray.length) {
-        int newLen = ((arrayIdx / ARRAY_INCREMENT) + 1) * ARRAY_INCREMENT;
-        int[] newArray = new int[newLen];
-        for (int i = 0; i < newLen; ++i) {
-          newArray[i] = 0;
-        }
-        for (int i = 0; i < countArray.length; ++i) {
-          newArray[i] = countArray[i];
-        }
-        countArray = newArray;
-        logger.info("Resizing metrics array to " + newLen);
-      }
-    }
-
-    private void recordUsage(short countArrayIdx, int incCount) {
-      // make sure our count array is sized big enough...
-      resizeArray(countArrayIdx);
-
-      countArray[countArrayIdx] = countArray[countArrayIdx] + incCount;
-    }
-
-    private Integer getUsage(short countArrayIdx) {
-      // make sure our count array is sized big enough...
-      resizeArray(countArrayIdx);
-
-      return countArray[countArrayIdx];
-    }
-
-    private void clear() {
-      for (int i = 0; i < countArray.length; ++i) {
-        countArray[i] = 0;
-      }
-    }
-  }
-
   // 20-second dump
   private static final long ACCESS_METRIC_DUMP_INTERVAL = 20 * 1000L;
-
-  private long lastLogging = 0L;
+  // map of fully qualified table name to index in counter array.
+  private final Map<String, Short> tableMap = new TreeMap<String, Short>();
   private final RingBufferCountArray countQueryArray = new RingBufferCountArray();
   private final RingBufferCountArray countQueryResultArray = new RingBufferCountArray();
   private final RingBufferCountArray countGetArray = new RingBufferCountArray();
   private final RingBufferCountArray countPutArray = new RingBufferCountArray();
   private final RingBufferCountArray countDeleteArray = new RingBufferCountArray();
-
+  private short nextCountIdx = 0;
+  private int readCount = 0;
+  private long lastLogging = 0L;
   public DatastoreAccessMetrics() {
   }
 
@@ -140,12 +85,12 @@ public final class DatastoreAccessMetrics {
   /**
    * Synchronized - this is the ONLY method that should manipulate the
    * RingBufferCountArray or log usage statistics.
-   * 
+   *
    * @param fullyQualifiedName
    * @param rbc
    */
   private synchronized void synchronizedRecordUsage(String fullyQualifiedName,
-      RingBufferCountArray rbc, int incCount) {
+                                                    RingBufferCountArray rbc, int incCount) {
     Short countArrayIdx = tableMap.get(fullyQualifiedName);
     if (countArrayIdx == null) {
       countArrayIdx = nextCountIdx++;
@@ -209,5 +154,57 @@ public final class DatastoreAccessMetrics {
 
   public void recordDeleteUsage(EntityKey key) {
     recordUsage(key.getRelation(), countDeleteArray);
+  }
+
+  /**
+   * Maintain a tally of which tables those actions were against.
+   *
+   * NOTE: this is NOT thread-safe. All accesses should occur only from within
+   * synchronized methods.
+   */
+  private final static class RingBufferCountArray {
+    private static final int ARRAY_INCREMENT = 20;
+    private int[] countArray = new int[36];
+
+    RingBufferCountArray() {
+      clear();
+    }
+
+    ;
+
+    private void resizeArray(short arrayIdx) {
+      if (arrayIdx >= countArray.length) {
+        int newLen = ((arrayIdx / ARRAY_INCREMENT) + 1) * ARRAY_INCREMENT;
+        int[] newArray = new int[newLen];
+        for (int i = 0; i < newLen; ++i) {
+          newArray[i] = 0;
+        }
+        for (int i = 0; i < countArray.length; ++i) {
+          newArray[i] = countArray[i];
+        }
+        countArray = newArray;
+        logger.info("Resizing metrics array to " + newLen);
+      }
+    }
+
+    private void recordUsage(short countArrayIdx, int incCount) {
+      // make sure our count array is sized big enough...
+      resizeArray(countArrayIdx);
+
+      countArray[countArrayIdx] = countArray[countArrayIdx] + incCount;
+    }
+
+    private Integer getUsage(short countArrayIdx) {
+      // make sure our count array is sized big enough...
+      resizeArray(countArrayIdx);
+
+      return countArray[countArrayIdx];
+    }
+
+    private void clear() {
+      for (int i = 0; i < countArray.length; ++i) {
+        countArray[i] = 0;
+      }
+    }
   }
 }

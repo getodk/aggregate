@@ -24,7 +24,6 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public interface UploadSubmissions {
 
@@ -32,11 +31,11 @@ public interface UploadSubmissions {
    * Fire off an action to publish data.  The onBackground argument
    * provides a hint to the implementation as to whether to run this
    * request using the background instance or the frontend instance.
-   *
+   * <p>
    * If this is triggered via a submission or is the result of
    * creating a streaming-only publisher, then the request should
    * be run on the frontend instance to minimize GAE quota.
-   *
+   * <p>
    * If it is publishing data from the beginning of time, then it
    * should be run on the background thread.
    *

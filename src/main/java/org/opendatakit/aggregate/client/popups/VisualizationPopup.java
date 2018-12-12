@@ -16,10 +16,41 @@
 
 package org.opendatakit.aggregate.client.popups;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.maps.client.HasMap;
+import com.google.gwt.maps.client.MapOptions;
+import com.google.gwt.maps.client.MapTypeId;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.InfoWindow;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.event.Event;
+import com.google.gwt.maps.client.event.HasMouseEvent;
+import com.google.gwt.maps.client.event.MouseEventCallback;
+import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
+import com.google.gwt.visualization.client.VisualizationUtils;
+import com.google.gwt.visualization.client.visualizations.Table;
+import com.google.gwt.visualization.client.visualizations.corechart.BarChart;
+import com.google.gwt.visualization.client.visualizations.corechart.Options;
+import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
+import com.google.gwt.visualization.client.visualizations.corechart.PieChart.PieOptions;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.FilterSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
@@ -39,39 +70,6 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.maps.client.HasMap;
-import com.google.gwt.maps.client.MapOptions;
-import com.google.gwt.maps.client.MapTypeId;
-import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.base.InfoWindow;
-import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.event.Event;
-import com.google.gwt.maps.client.event.HasMouseEvent;
-import com.google.gwt.maps.client.event.MouseEventCallback;
-import com.google.gwt.maps.client.overlay.Marker;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
-import com.google.gwt.visualization.client.DataTable;
-import com.google.gwt.visualization.client.VisualizationUtils;
-import com.google.gwt.visualization.client.visualizations.Table;
-import com.google.gwt.visualization.client.visualizations.corechart.BarChart;
-import com.google.gwt.visualization.client.visualizations.corechart.Options;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
-import com.google.gwt.visualization.client.visualizations.corechart.PieChart.PieOptions;
-
 public final class VisualizationPopup extends AbstractPopupBase {
 
   private static final String TABULATION_TXT = "<h4 id=\"form_name\">Tabulation Method:</h4>";
@@ -89,30 +87,22 @@ public final class VisualizationPopup extends AbstractPopupBase {
       + "Column to Visualize:</h2>";
   private static final String GPS_TXT = "<h2 id=\"form_name\">" + HtmlConsts.TAB
       + "GeoPoint to Map:</h2>";
-
+  private static final String RADIO_GROUP = "vizRadioGroup";
+  private static final String RESIZE_UNITS = "px";
+  private static final String VIZ_TYPE_TOOLTIP = "Type of Visualization";
+  private static final String VIZ_TYPE_BALLOON = "Choose whether you would like a pie chart, bar graph, or map.";
   private static int VIZ_TYPE_TEXT = 0;
   private static int VIZ_TYPE_LIST = 1;
   private static int COLUMN_TEXT = 2;
   private static int COLUMN_LIST = 3;
   private static int BUTTON = 5;
-
   private static int CLOSE = 4;
-
   private static int VALUE_TEXT = 0;
   private static int VALUE_LIST = 1;
-
   private static int TALLY_CHOICE = 0;
-
   private static int SUM_CHOICE = 0;
   private static int SUM_CHOICE_COLUMN = 1;
   private static int SUM_CHOICE_TXT = 2;
-
-  private static final String RADIO_GROUP = "vizRadioGroup";
-  private static final String RESIZE_UNITS = "px";
-
-  private static final String VIZ_TYPE_TOOLTIP = "Type of Visualization";
-  private static final String VIZ_TYPE_BALLOON = "Choose whether you would like a pie chart, bar graph, or map.";
-
   private final ArrayList<Column> headers;
   private final ArrayList<SubmissionUI> submissions;
 
@@ -122,14 +112,10 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private final ColumnListBox columnList;
   private final ColumnListBox dataList;
   private final KmlSettingListBox geoPoints;
-
-  private boolean chartApiLoaded;
-
   private final String formId;
-
   private final AggregateButton executeButton;
   private final SimplePanel chartPanel;
-
+  private boolean chartApiLoaded;
   private RadioButton tallyOccurRadio;
   private RadioButton sumColumnsRadio;
   private Label sumRadioTxt;
@@ -455,7 +441,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
           @Override
           public void callback(HasMouseEvent event) {
-            if ( infoWindow != null ) {
+            if (infoWindow != null) {
               infoWindow.close();
             }
             infoWindow = new InfoWindow();
@@ -464,20 +450,22 @@ public final class VisualizationPopup extends AbstractPopupBase {
             container.add(w);
             infoWindow.setContent(container.getElement().getInnerHTML());
             infoWindow.open(map, marker);
-          }});
+          }
+        });
 
         Event.addListener(marker, "mouseout", new MouseEventCallback() {
 
           @Override
           public void callback(HasMouseEvent event) {
-            if ( !mapMarkerClicked ) {
-              if ( infoWindow != null ) {
+            if (!mapMarkerClicked) {
+              if (infoWindow != null) {
                 infoWindow.close();
                 infoWindow = null;
               }
             }
             mapMarkerClicked = false;
-          }});
+          }
+        });
 
         Event.addListener(marker, "click", new MouseEventCallback() {
 
@@ -490,6 +478,10 @@ public final class VisualizationPopup extends AbstractPopupBase {
       }
     }
     return mapWidget;
+  }
+
+  private InfoContentSubmission createInfoWindowWidget(SubmissionUI submission) {
+    return new InfoContentSubmission(headers, submission);
   }
 
   public class InfoContentSubmission extends FlexTable {
@@ -510,28 +502,27 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
         String value = values.get(headerIndex);
         switch (column.getUiDisplayType()) {
-        case BINARY:
-          if (value == null) {
-            Label val = new Label(BasicConsts.EMPTY_STRING);
-            setWidget(headerIndex, 1, val);
-          } else {
-            Image image = new Image(value + UIConsts.PREVIEW_SET);
-            image.addClickHandler(new BinaryPopupClickHandler(value, false));
-            image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);
-            setWidget(headerIndex, 1, image);
-          }
-          break;
-        case REPEAT:
-          if (value == null) {
-            Label val = new Label(BasicConsts.EMPTY_STRING);
-            setWidget(headerIndex, 1, val);
-          } else {
-            RepeatViewButton repeat = new RepeatViewButton(value);
-            setWidget(headerIndex, 1, repeat);
-          }
-          break;
-        default:
-          {
+          case BINARY:
+            if (value == null) {
+              Label val = new Label(BasicConsts.EMPTY_STRING);
+              setWidget(headerIndex, 1, val);
+            } else {
+              Image image = new Image(value + UIConsts.PREVIEW_SET);
+              image.addClickHandler(new BinaryPopupClickHandler(value, false));
+              image.setStyleName(UIConsts.PREVIEW_IMAGE_STYLENAME);
+              setWidget(headerIndex, 1, image);
+            }
+            break;
+          case REPEAT:
+            if (value == null) {
+              Label val = new Label(BasicConsts.EMPTY_STRING);
+              setWidget(headerIndex, 1, val);
+            } else {
+              RepeatViewButton repeat = new RepeatViewButton(value);
+              setWidget(headerIndex, 1, repeat);
+            }
+            break;
+          default: {
             Label val = new Label(value);
             setWidget(headerIndex, 1, val);
           }
@@ -539,10 +530,6 @@ public final class VisualizationPopup extends AbstractPopupBase {
         getWidget(headerIndex, 1).addStyleName("infoTableData");
       }
     }
-  }
-
-  private InfoContentSubmission createInfoWindowWidget(SubmissionUI submission) {
-    return new InfoContentSubmission(headers, submission);
   }
 
   private class ExecuteVisualization implements ClickHandler {
@@ -561,17 +548,17 @@ public final class VisualizationPopup extends AbstractPopupBase {
 
       Widget chart;
       switch (selected) {
-      case MAP:
-        chart = createMap();
-        break;
-      case PIE_CHART:
-        chart = createPieChart();
-        break;
-      case BAR_GRAPH:
-        chart = createBarChart();
-        break;
-      default:
-        chart = null;
+        case MAP:
+          chart = createMap();
+          break;
+        case PIE_CHART:
+          chart = createPieChart();
+          break;
+        case BAR_GRAPH:
+          chart = createBarChart();
+          break;
+        default:
+          chart = null;
       }
       chartPanel.clear();
       chartPanel.add(chart);

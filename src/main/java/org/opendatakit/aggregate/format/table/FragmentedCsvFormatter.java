@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.kxml2.io.KXmlSerializer;
 import org.kxml2.kdom.Document;
 import org.kxml2.kdom.Element;
@@ -41,10 +40,8 @@ import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class FragmentedCsvFormatter extends TableFormatterBase implements SubmissionFormatter {
   private static final String PARENT_KEY_PROPERTY = "PARENT_KEY";
@@ -61,7 +58,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
   private boolean includeParentKey = false;
 
   public FragmentedCsvFormatter(IForm xform, List<SubmissionKeyPart> submissionParts,
-      String webServerUrl, String websafeCursorString, PrintWriter printWriter) {
+                                String webServerUrl, String websafeCursorString, PrintWriter printWriter) {
     super(xform, printWriter, null);
     this.websafeCursorString = websafeCursorString;
     elemFormatter = new LinkElementFormatter(webServerUrl, FragmentedCsvServlet.ADDR, true, true,
@@ -70,9 +67,8 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 
   /**
    * Create the comma separated row with proper doubling of embedded quotes.
-   * 
-   * @param itr
-   *          string values to be separated by commas
+   *
+   * @param itr string values to be separated by commas
    * @return string containing comma separated values
    */
   private String generateCommaSeperatedElements(List<String> elements) {
@@ -138,7 +134,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
   protected void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc)
       throws ODKDatastoreException {
     formattedElements.clear();
-    
+
     headers = headerFormatter.generateHeaders(form, rootGroup, propertyNames);
     includeParentKey = false;
     {
@@ -157,7 +153,7 @@ public class FragmentedCsvFormatter extends TableFormatterBase implements Submis
 
   @Override
   protected void processSubmissionSetSegment(Collection<? extends SubmissionSet> submissions,
-      FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
+                                             FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {
 
     // format row elements
     for (SubmissionSet sub : submissions) {

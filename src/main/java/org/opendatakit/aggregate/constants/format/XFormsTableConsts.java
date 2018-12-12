@@ -18,14 +18,13 @@ package org.opendatakit.aggregate.constants.format;
 
 /**
  * Constants for the OpenRosa-compliant FormList api.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public final class XFormsTableConsts {
 
-    // OpenRosa Compliant xforms list (discovery)
+  // OpenRosa Compliant xforms list (discovery)
   public static final String XFORMS_TAG = "xforms";
   public static final String XFORM_TAG = "xform";
   public static final String FORM_ID_TAG = "formID";
@@ -36,8 +35,8 @@ public final class XFormsTableConsts {
   public static final String DESCRIPTION_URL_TAG = "descriptionUrl";
   public static final String DOWNLOAD_URL_TAG = "downloadUrl";
   public static final String MANIFEST_URL_TAG = "manifestUrl";
-  
-    // OpenRosa Compliant xforms manifest list
+
+  // OpenRosa Compliant xforms manifest list
   public static final String MANIFEST_TAG = "manifest";
   public static final String MEDIA_FILE_TAG = "mediaFile";
   public static final String FILE_NAME_TAG = "filename";

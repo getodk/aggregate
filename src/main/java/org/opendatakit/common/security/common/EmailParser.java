@@ -26,7 +26,6 @@ import java.util.Map;
  * system.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public final class EmailParser {
 
@@ -34,6 +33,8 @@ public final class EmailParser {
    * E-mail parsing characters and constants
    */
 
+  public static final char K_AT = '@';
+  public static final String K_MAILTO = "mailto:";
   private static final char K_OPEN_PAREN = '(';
   private static final char K_ESCAPE = '\\';
   private static final char K_CLOSE_PAREN = ')';
@@ -46,12 +47,13 @@ public final class EmailParser {
   private static final char K_COLON = ':';
   private static final char K_COMMA = ',';
   private static final char K_SEMI = ';';
-  public static final char K_AT = '@';
   private static final String K_WHITESPACE_CHARS = " \t\n\r";
   private static final String K_SPECIAL_CHARS = "()<>[]:;@\\,.\"";
-  public static final String K_MAILTO = "mailto:";
-
   private static final String K_INVALID_EMAIL_CHARACTERS = " \t\n\r\",;()<>?/{}'[]";
+
+  // this is a static class
+  private EmailParser() {
+  }
 
   public static boolean hasInvalidEmailCharacters(String email) {
     for (int i = 0; i < K_INVALID_EMAIL_CHARACTERS.length(); ++i) {
@@ -125,7 +127,7 @@ public final class EmailParser {
    * @return
    */
   private static final int advanceAtomText(String emailText, int idx, int len,
-      boolean dotAtomAllowed) {
+                                           boolean dotAtomAllowed) {
     boolean first = true;
     while (idx < len) {
       char c = emailText.charAt(idx);
@@ -221,22 +223,6 @@ public final class EmailParser {
   }
 
   /**
-   * Simple return value tuple.
-   *
-   * @author mitchellsundt@gmail.com
-   *
-   */
-  private static class PositionString {
-    int idxEnd;
-    String cleanString;
-
-    PositionString(int idx) {
-      idxEnd = idx;
-      cleanString = null;
-    }
-  }
-
-  /**
    * Return a normalized domain string and the index of the next parse
    * character.
    *
@@ -289,16 +275,14 @@ public final class EmailParser {
    * Advance over an e-mail address specification (RFC 5322)
    *
    * @param emailText
-   * @param idx
-   *          position after the email 'localpart' (had better be '@')
+   * @param idx              position after the email 'localpart' (had better be '@')
    * @param len
-   * @param idxStart
-   *          starting position of email 'localpart' (username)
+   * @param idxStart         starting position of email 'localpart' (username)
    * @param expectCloseAngle
    * @return return e-mail address string and end position.
    */
   private static final PositionString advanceAddrSpec(String emailText, int idx, int len,
-      int idxStart, boolean expectCloseAngle) {
+                                                      int idxStart, boolean expectCloseAngle) {
     // this had better get a dot-phrase
     int idxEnd = idx;
     if (idxStart == idxEnd) {
@@ -351,7 +335,7 @@ public final class EmailParser {
 
     boolean allowRouting = true;
     boolean expectColon = false;
-    for (; idx < len;) {
+    for (; idx < len; ) {
       c = emailText.charAt(idx);
       if (allowRouting && c == K_AT) {
         expectColon = true;
@@ -398,67 +382,6 @@ public final class EmailParser {
   }
 
   /**
-   * Return value tuple. Returns the nickname in an e-mail address and the email
-   * address itself.
-   *
-   * @author mitchellsundt@gmail.com
-   *
-   */
-  public static class Email {
-    public static enum Form {
-      EMAIL, USERNAME
-    };
-
-    final Form type;
-    final String username;
-    final String email;
-    String fullname;
-    String uri;
-
-    public Email(String name) {
-      this.type = Form.USERNAME;
-      fullname = null;
-      username = name;
-      email = null;
-    }
-
-    public Email(String fullname, String email) {
-      this.type = Form.EMAIL;
-      this.fullname = fullname;
-      this.username = null;
-      this.email = email;
-    }
-
-    public Form getType() {
-      return type;
-    }
-    
-    public String getUri() {
-      return uri;
-    }
-
-    public void setUri(String value) {
-      uri = value;
-    }
-
-    public String getFullName() {
-      return fullname;
-    }
-
-    public void setFullName(String value) {
-      fullname = value;
-    }
-
-    public String getUsername() {
-      return username;
-    }
-
-    public String getEmail() {
-      return email;
-    }
-  };
-
-  /**
    * Trims the surrounding double qoutes from the email nickname and maintains a
    * map of e-mail addresses, resolving duplicates.
    *
@@ -498,14 +421,16 @@ public final class EmailParser {
     }
   }
 
+  ;
+
   public static final String parseEmail(String emailText) {
     try {
       Collection<Email> emails = parseEmails(emailText);
-      if ( emails.size() != 1 ) {
+      if (emails.size() != 1) {
         return null;
       }
-      for ( Email e : emails ) {
-        if ( e.type != Email.Form.EMAIL ) {
+      for (Email e : emails) {
+        if (e.type != Email.Form.EMAIL) {
           return null;
         }
         return e.email;
@@ -585,7 +510,81 @@ public final class EmailParser {
     return eMails.values();
   }
 
-  // this is a static class
-  private EmailParser() {
-  };
+  /**
+   * Simple return value tuple.
+   *
+   * @author mitchellsundt@gmail.com
+   */
+  private static class PositionString {
+    int idxEnd;
+    String cleanString;
+
+    PositionString(int idx) {
+      idxEnd = idx;
+      cleanString = null;
+    }
+  }
+
+  /**
+   * Return value tuple. Returns the nickname in an e-mail address and the email
+   * address itself.
+   *
+   * @author mitchellsundt@gmail.com
+   */
+  public static class Email {
+    final Form type;
+
+    ;
+    final String username;
+    final String email;
+    String fullname;
+    String uri;
+    public Email(String name) {
+      this.type = Form.USERNAME;
+      fullname = null;
+      username = name;
+      email = null;
+    }
+
+    public Email(String fullname, String email) {
+      this.type = Form.EMAIL;
+      this.fullname = fullname;
+      this.username = null;
+      this.email = email;
+    }
+
+    public Form getType() {
+      return type;
+    }
+
+    public String getUri() {
+      return uri;
+    }
+
+    public void setUri(String value) {
+      uri = value;
+    }
+
+    public String getFullName() {
+      return fullname;
+    }
+
+    public void setFullName(String value) {
+      fullname = value;
+    }
+
+    public String getUsername() {
+      return username;
+    }
+
+    public String getEmail() {
+      return email;
+    }
+
+    public static enum Form {
+      EMAIL, USERNAME
+    }
+  }
+
+  ;
 }

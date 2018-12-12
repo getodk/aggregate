@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -25,14 +25,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -63,6 +59,8 @@ import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -72,110 +70,79 @@ import org.xml.sax.SAXException;
 
 /**
  * Parsers submission xml and saves to datastore
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class SubmissionParser {
 
+  private static final String OPEN_ROSA_NAMESPACE_PRELIM = "http://openrosa.org/xforms/metadata";
+  private static final String OPEN_ROSA_NAMESPACE = "http://openrosa.org/xforms";
+  private static final String OPEN_ROSA_NAMESPACE_SLASH = "http://openrosa.org/xforms/";
+  private static final String OPEN_ROSA_METADATA_TAG = "meta";
+  private static final String OPEN_ROSA_INSTANCE_ID = "instanceID";
   /**
    * form Id of submission
    */
   private String formId;
-
   private IForm form;
-
   /**
    * Root of XML submission
    */
   private Element root;
-
   /**
    * Submission object created from xml submission
    */
   private Submission submission;
-
   /**
    * Track whether this submission was already present and complete.
    */
   private boolean preExistingComplete = false;
-
   /**
    * Data items obtained from a multipart submission
    */
   private MultiPartFormData submissionFormItems;
-
   private EntityKey topLevelTableKey = null;
-
-  /**
-   * Get submission object from parse
-   * 
-   * @return submission
-   */
-  public Submission getSubmission() {
-    return submission;
-  }
-
-  public boolean wasPreexistingComplete() {
-    return preExistingComplete;
-  }
-  
-  /**
-   * Get the form corresponding to the parsed submission.
-   * 
-   * @return
-   */
-  public IForm getForm() {
-    return form;
-  }
 
   /**
    * Construct an ODK submission by processing XML submission to extract values.
    * The submission is persisted to the database before returning.
-   * 
-   * @param inputStreamXML
-   *          xml submission input stream
-   * @param cc
-   *          the CallingContext of this request
+   *
+   * @param inputStreamXML xml submission input stream
+   * @param cc             the CallingContext of this request
    * @throws IOException
-   * @throws ODKFormNotFoundException
-   *           thrown if a form is not found with a matching ODK ID
+   * @throws ODKFormNotFoundException            thrown if a form is not found with a matching ODK ID
    * @throws ODKParseException
    * @throws ODKIncompleteSubmissionData
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKFormSubmissionsDisabledException
-   * @throws ODKTaskLockException 
+   * @throws ODKTaskLockException
    */
   public SubmissionParser(InputStream inputStreamXML, CallingContext cc) throws IOException,
       ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData,
       ODKConversionException, ODKDatastoreException, ODKFormSubmissionsDisabledException, ODKTaskLockException {
     constructorHelper(inputStreamXML, false, cc);
   }
-
   /**
    * Construct an ODK submission by processing XML submission to extract values.
    * The submission is persisted to the database before returning.
-   * 
-   * @param submissionFormParser
-   *          multipart data submission that includes XML submission & possibly
-   *          other data
+   *
+   * @param submissionFormParser multipart data submission that includes XML submission & possibly
+   *                             other data
    * @param isIncomplete
-   * @param cc
-   *          the CallingContext of this request
+   * @param cc                   the CallingContext of this request
    * @throws IOException
-   * @throws ODKFormNotFoundException
-   *           thrown if a form is not found with a matching ODK ID
+   * @throws ODKFormNotFoundException            thrown if a form is not found with a matching ODK ID
    * @throws ODKParseException
    * @throws ODKIncompleteSubmissionData
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKFormSubmissionsDisabledException
-   * @throws ODKTaskLockException 
+   * @throws ODKTaskLockException
    */
   public SubmissionParser(MultiPartFormData submissionFormParser, boolean isIncomplete,
-      CallingContext cc) throws IOException, ODKFormNotFoundException, ODKParseException,
+                          CallingContext cc) throws IOException, ODKFormNotFoundException, ODKParseException,
       ODKIncompleteSubmissionData, ODKConversionException, ODKDatastoreException,
       ODKFormSubmissionsDisabledException, ODKTaskLockException {
     if (submissionFormParser == null) {
@@ -198,15 +165,31 @@ public class SubmissionParser {
     }
   }
 
-  private static final String OPEN_ROSA_NAMESPACE_PRELIM = "http://openrosa.org/xforms/metadata";
-  private static final String OPEN_ROSA_NAMESPACE = "http://openrosa.org/xforms";
-  private static final String OPEN_ROSA_NAMESPACE_SLASH = "http://openrosa.org/xforms/";
-  private static final String OPEN_ROSA_METADATA_TAG = "meta";
-  private static final String OPEN_ROSA_INSTANCE_ID = "instanceID";
+  /**
+   * Get submission object from parse
+   *
+   * @return submission
+   */
+  public Submission getSubmission() {
+    return submission;
+  }
+
+  public boolean wasPreexistingComplete() {
+    return preExistingComplete;
+  }
+
+  /**
+   * Get the form corresponding to the parsed submission.
+   *
+   * @return
+   */
+  public IForm getForm() {
+    return form;
+  }
 
   /**
    * Find the OpenRosa instanceID defined for this record, if any.
-   * 
+   *
    * @return
    */
   private String getOpenRosaInstanceId() {
@@ -219,10 +202,10 @@ public class SubmissionParser {
         String cnName = cn.getLocalName();
         if (cn.getNodeType() == Node.ELEMENT_NODE
             && cnName.equals(OPEN_ROSA_INSTANCE_ID)
-            && (cnUri == null || 
-                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
-                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
-                cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
+            && (cnUri == null ||
+            cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
+            cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
+            cnUri.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
           NodeList cnl = cn.getChildNodes();
           boolean textFound = false;
           int idxText = -1;
@@ -248,14 +231,13 @@ public class SubmissionParser {
   /**
    * Traverse submission looking for OpenRosa metadata tag (with or without
    * namespace).
-   * 
+   *
    * @param parent
    * @return
    */
   private Node findMetaTag(Node parent) {
     if (parent.getNodeType() != Node.ELEMENT_NODE)
       return null;
-    @SuppressWarnings("unused")
     String parentName = parent.getLocalName();
     NodeList nl = parent.getChildNodes();
     for (int i = 0; i < nl.getLength(); ++i) {
@@ -264,10 +246,10 @@ public class SubmissionParser {
       String name = n.getLocalName();
       if (n.getNodeType() == Node.ELEMENT_NODE
           && name.equals(OPEN_ROSA_METADATA_TAG)
-          && (namespace == null || 
-              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
-              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
-              namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
+          && (namespace == null ||
+          namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE) ||
+          namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_SLASH) ||
+          namespace.equalsIgnoreCase(OPEN_ROSA_NAMESPACE_PRELIM))) {
         return n;
       } else {
         n = findMetaTag(n);
@@ -281,20 +263,17 @@ public class SubmissionParser {
   /**
    * Helper Constructor an ODK submission by processing XML submission to
    * extract values
-   * 
-   * @param inputStreamXML
-   *          xml submission input stream
+   *
+   * @param inputStreamXML xml submission input stream
    * @param isIncomplete
-   * 
    * @throws IOException
-   * @throws ODKFormNotFoundException
-   *           thrown if a form is not found with a matching ODK ID
+   * @throws ODKFormNotFoundException            thrown if a form is not found with a matching ODK ID
    * @throws ODKParseException
    * @throws ODKIncompleteSubmissionData
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    * @throws ODKFormSubmissionsDisabledException
-   * @throws ODKTaskLockException 
+   * @throws ODKTaskLockException
    */
   private void constructorHelper(InputStream inputStreamXML, boolean isIncomplete, CallingContext cc)
       throws IOException, ODKFormNotFoundException, ODKParseException, ODKIncompleteSubmissionData,
@@ -372,7 +351,7 @@ public class SubmissionParser {
     if (markedAsCompleteDateString != null && markedAsCompleteDateString.length() != 0) {
       markedAsCompleteDate = WebUtils.parseDate(markedAsCompleteDateString);
     }
-    
+
     SubmissionLockTemplate modificationLock = new SubmissionLockTemplate(formId, instanceId, cc);
     try {
       modificationLock.acquire();
@@ -396,8 +375,8 @@ public class SubmissionParser {
           e.printStackTrace();
           logger.error("Unable to reconstruct submission for " + fi.getSchemaName() + "."
               + fi.getTableName() + " uri " + fi.getUri());
-          if ( (e instanceof ODKEntityNotFoundException) ||
-              (e instanceof ODKEnumeratedElementException) ) {
+          if ((e instanceof ODKEntityNotFoundException) ||
+              (e instanceof ODKEnumeratedElementException)) {
             // this is a malformed submission...
             // try to clean this up...
             DeleteHelper.deleteDamagedSubmission(fi, form.getAllBackingObjects(), cc);
@@ -409,14 +388,14 @@ public class SubmissionParser {
       } catch (ODKEntityNotFoundException e) {
         submission = new Submission(modelVersion, uiVersion, instanceId, form, submissionDate, cc);
       }
-  
+
       topLevelTableKey = submission.getKey();
-  
+
       Map<String, Integer> repeatGroupIndices = new HashMap<String, Integer>();
       FormElementModel formRoot = form.getTopLevelGroupElement();
       // if the submission is pre-existing in the datastore, ONLY update binaries
       boolean uploadAllBinaries = processSubmissionElement(formRoot, root, submission,
-                                                            repeatGroupIndices, preExisting, cc);
+          repeatGroupIndices, preExisting, cc);
       submission.setIsComplete(uploadAllBinaries);
       if (uploadAllBinaries) {
         submission.setMarkedAsCompleteDate(markedAsCompleteDate);
@@ -441,31 +420,25 @@ public class SubmissionParser {
   }
 
   /**
-   * 
    * Helper function to process submission by taking the form element and
    * extracting the corresponding value from the XML submission. Recursively
    * applies itself to children of the form element.
-   * 
-   * @param node
-   *          form data model of the group or repeat group being parsed.
-   * @param currentSubmissionElement
-   *          xml document element that marks the start of this submission set.
-   * @param submissionSet
-   *          the submission set to add the submission values to.
-   * @param repeatGroupIndicies
-   *          tracks the ordinal number of the last stored repeat group of this
-   *          name.
-   * @param preExisting
-   *          true if this submission already existed in the database. If so, do
-   *          not update fields.
+   *
+   * @param node                     form data model of the group or repeat group being parsed.
+   * @param currentSubmissionElement xml document element that marks the start of this submission set.
+   * @param submissionSet            the submission set to add the submission values to.
+   * @param repeatGroupIndicies      tracks the ordinal number of the last stored repeat group of this
+   *                                 name.
+   * @param preExisting              true if this submission already existed in the database. If so, do
+   *                                 not update fields.
    * @throws ODKParseException
    * @throws ODKIncompleteSubmissionData
    * @throws ODKConversionException
    * @throws ODKDatastoreException
    */
   private boolean processSubmissionElement(FormElementModel node, Element currentSubmissionElement,
-      SubmissionSet submissionSet, Map<String, Integer> repeatGroupIndicies, boolean preExisting,
-      CallingContext cc) throws ODKParseException, ODKIncompleteSubmissionData,
+                                           SubmissionSet submissionSet, Map<String, Integer> repeatGroupIndicies, boolean preExisting,
+                                           CallingContext cc) throws ODKParseException, ODKIncompleteSubmissionData,
       ODKConversionException, ODKDatastoreException {
 
     if (node == null || currentSubmissionElement == null) {
@@ -500,77 +473,77 @@ public class SubmissionParser {
         // throw new ODKParseException();
       }
       switch (m.getElementType()) {
-      case METADATA:
-        // This keeps lint warnings down
-        break;
-      case GROUP:
-        // need to recurse on these elements keeping the same
-        // submissionSet...
-        complete = complete
-            & processSubmissionElement(m, e, submissionSet, repeatGroupIndicies, preExisting, cc);
-        break;
-      case REPEAT:
-        // get the field that will hold the repeats...
-        // get the repeat group...
-        RepeatSubmissionType repeats = (RepeatSubmissionType) submissionSet.getElementValue(m);
+        case METADATA:
+          // This keeps lint warnings down
+          break;
+        case GROUP:
+          // need to recurse on these elements keeping the same
+          // submissionSet...
+          complete = complete
+              & processSubmissionElement(m, e, submissionSet, repeatGroupIndicies, preExisting, cc);
+          break;
+        case REPEAT:
+          // get the field that will hold the repeats...
+          // get the repeat group...
+          RepeatSubmissionType repeats = (RepeatSubmissionType) submissionSet.getElementValue(m);
 
-        // determine the ordinal of the repeat group element we are processing.
-        // do this by constructing the submission key for the repeat group and
-        // seeing if that key is in the repeatGroupIndicies table. If not, the
-        // ordinal is 1L. Otherwise, it is the value in the table plus 1L.
-        String fullName = repeats.constructSubmissionKey().toString();
-        Integer idx = repeatGroupIndicies.get(fullName);
-        if (idx == null) {
-          idx = 1; // base case -- not yet in repeatGroupIndicies map
-        } else {
-          ++idx;
-        }
-        // save the updated index
-        repeatGroupIndicies.put(fullName, idx);
+          // determine the ordinal of the repeat group element we are processing.
+          // do this by constructing the submission key for the repeat group and
+          // seeing if that key is in the repeatGroupIndicies table. If not, the
+          // ordinal is 1L. Otherwise, it is the value in the table plus 1L.
+          String fullName = repeats.constructSubmissionKey().toString();
+          Integer idx = repeatGroupIndicies.get(fullName);
+          if (idx == null) {
+            idx = 1; // base case -- not yet in repeatGroupIndicies map
+          } else {
+            ++idx;
+          }
+          // save the updated index
+          repeatGroupIndicies.put(fullName, idx);
 
-        // get or create the instance's submission set for this ordinal
-        SubmissionSet repeatableSubmissionSet;
-        if (repeats.getNumberRepeats() >= idx) {
-          // we already have this set defined
-          repeatableSubmissionSet = repeats.getSubmissionSets().get(idx - 1);
-        } else if (repeats.getNumberRepeats() == idx - 1) {
-          // Create a submission set for a new instance...
-          long l = repeats.getNumberRepeats() + 1L;
-          repeatableSubmissionSet = new SubmissionSet(submissionSet, l, m, form, topLevelTableKey,
-              cc);
-          repeats.addSubmissionSet(repeatableSubmissionSet);
-        } else {
-          throw new IllegalStateException("incrementing repeats by more than one!");
-        }
-        // populate the instance's submission set with values from e...
-        complete = complete
-            & processSubmissionElement(m, e, repeatableSubmissionSet, repeatGroupIndicies,
-                preExisting, cc);
-        break;
-      case STRING:
-      case JRDATETIME:
-      case JRDATE:
-      case JRTIME:
-      case INTEGER:
-      case DECIMAL:
-      case BOOLEAN:
-      case GEOTRACE:
-      case GEOSHAPE:
-      case SELECT1: // identifies SelectChoice table
-      case SELECTN: // identifies SelectChoice table
-        if (!preExisting) {
-          String value = getSubmissionValue(e);
-          SubmissionField<?> subField = (SubmissionField<?>) submissionSet.getElementValue(m);
-          subField.setValueFromString(value);
-        }
-        break;
-      case GEOPOINT:
-        if (!preExisting) {
-          String value = getSubmissionValue(e);
-          ((SubmissionField<?>) submissionSet.getElementValue(m)).setValueFromString(value);
-        }
-        break;
-      case BINARY: // identifies BinaryContent table
+          // get or create the instance's submission set for this ordinal
+          SubmissionSet repeatableSubmissionSet;
+          if (repeats.getNumberRepeats() >= idx) {
+            // we already have this set defined
+            repeatableSubmissionSet = repeats.getSubmissionSets().get(idx - 1);
+          } else if (repeats.getNumberRepeats() == idx - 1) {
+            // Create a submission set for a new instance...
+            long l = repeats.getNumberRepeats() + 1L;
+            repeatableSubmissionSet = new SubmissionSet(submissionSet, l, m, form, topLevelTableKey,
+                cc);
+            repeats.addSubmissionSet(repeatableSubmissionSet);
+          } else {
+            throw new IllegalStateException("incrementing repeats by more than one!");
+          }
+          // populate the instance's submission set with values from e...
+          complete = complete
+              & processSubmissionElement(m, e, repeatableSubmissionSet, repeatGroupIndicies,
+              preExisting, cc);
+          break;
+        case STRING:
+        case JRDATETIME:
+        case JRDATE:
+        case JRTIME:
+        case INTEGER:
+        case DECIMAL:
+        case BOOLEAN:
+        case GEOTRACE:
+        case GEOSHAPE:
+        case SELECT1: // identifies SelectChoice table
+        case SELECTN: // identifies SelectChoice table
+          if (!preExisting) {
+            String value = getSubmissionValue(e);
+            SubmissionField<?> subField = (SubmissionField<?>) submissionSet.getElementValue(m);
+            subField.setValueFromString(value);
+          }
+          break;
+        case GEOPOINT:
+          if (!preExisting) {
+            String value = getSubmissionValue(e);
+            ((SubmissionField<?>) submissionSet.getElementValue(m)).setValueFromString(value);
+          }
+          break;
+        case BINARY: // identifies BinaryContent table
         {
           String value = getSubmissionValue(e);
           SubmissionField<?> submissionElement = ((SubmissionField<?>) submissionSet
@@ -584,7 +557,7 @@ public class SubmissionParser {
   }
 
   private boolean processBinarySubmission(FormElementModel m, SubmissionField<?> submissionElement,
-      String value, CallingContext cc) throws ODKDatastoreException {
+                                          String value, CallingContext cc) throws ODKDatastoreException {
 
     // value will either be a byte array (if not a multipart/form-data
     // submission)
@@ -650,10 +623,8 @@ public class SubmissionParser {
   /**
    * Extracts value from the XML submission element by getting value from the
    * text node
-   * 
-   * @param element
-   *          element that has text child node that will contain the value
-   * 
+   *
+   * @param element element that has text child node that will contain the value
    * @return value contained in the XML submission
    */
   private String getSubmissionValue(Element element) {
@@ -679,11 +650,9 @@ public class SubmissionParser {
 
   /**
    * Recursive function that prints the nodes from an XML tree
-   * 
-   * @param node
-   *          xml node to be recursively printed
+   *
+   * @param node xml node to be recursively printed
    */
-  @SuppressWarnings("unused")
   private void printNode(Element node) {
     System.out.println(ParserConsts.NODE_FORMATTED + node.getTagName());
     if (node.hasAttributes()) {

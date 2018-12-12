@@ -16,55 +16,35 @@
 
 package org.opendatakit.aggregate.client.preferences;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.ArrayList;
 import java.util.TreeSet;
-
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 public class Preferences {
 
-  public static interface PreferencesCompletionCallback {
-    public void refreshFromUpdatedPreferences();
-
-    public void failedRefresh();
-  }
-
   private static final String NULL_PREFERENCES_ERROR = "ERROR: somehow got a null preference summary";
-
   private static String googleSimpleApiKey;
-
   private static String googleApiClientId;
-
   private static String enketoApiUrl;
-
   private static String enketoApiToken;
-
-  private static Boolean odkTablesEnabled;
-  
-  private static String appName;
-
   private static Boolean fasterBackgroundActionsDisabled;
-  
   private static Boolean skipMalformedSubmissions;
-
   private static int nesting = 0;
   private static ArrayList<PreferencesCompletionCallback> userCallbacks = new ArrayList<PreferencesCompletionCallback>();
-
   private static AsyncCallback<PreferenceSummary> callback = new AsyncCallback<PreferenceSummary>() {
     @Override
     public void onFailure(Throwable caught) {
       AggregateUI.getUI().reportError(caught);
       --nesting;
-      if ( nesting <= 0 ) {
+      if (nesting <= 0) {
         nesting = 0;
         ArrayList<PreferencesCompletionCallback> local = userCallbacks;
         userCallbacks = new ArrayList<PreferencesCompletionCallback>();
-        for ( PreferencesCompletionCallback uc : local ) {
+        for (PreferencesCompletionCallback uc : local) {
           uc.failedRefresh();
         }
       }
@@ -81,24 +61,18 @@ public class Preferences {
       googleApiClientId = summary.getGoogleApiClientId();
       enketoApiUrl = summary.getEnketoApiUrl();
       enketoApiToken = summary.getEnketoApiToken();
-      @SuppressWarnings("unused")
-      Boolean oldTablesValue = odkTablesEnabled;
-      odkTablesEnabled = summary.getOdkTablesEnabled();
-      appName = summary.getAppName();
       fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
       skipMalformedSubmissions = summary.getSkipMalformedSubmissions();
 
       --nesting;
-      if ( nesting <= 0 ) {
+      if (nesting <= 0) {
         nesting = 0;
         ArrayList<PreferencesCompletionCallback> local = userCallbacks;
         userCallbacks = new ArrayList<PreferencesCompletionCallback>();
-        for ( PreferencesCompletionCallback uc : local ) {
+        for (PreferencesCompletionCallback uc : local) {
           uc.refreshFromUpdatedPreferences();
         }
       }
-
-      AggregateUI.getUI().updateOdkTablesFeatureVisibility();
     }
   };
 
@@ -146,21 +120,6 @@ public class Preferences {
     return "";
   }
 
-  public static Boolean getOdkTablesEnabled() {
-    if (odkTablesEnabled != null) {
-      return odkTablesEnabled;
-    }
-    return Boolean.FALSE;
-  }
-
-
-  public static String getAppName() {
-    if (appName != null && appName.length() != 0) {
-      return appName;
-    }
-    return "default";
-  }
-
   public static Boolean getFasterBackgroundActionsDisabled() {
     if (fasterBackgroundActionsDisabled != null) {
       return fasterBackgroundActionsDisabled;
@@ -175,6 +134,11 @@ public class Preferences {
     return Boolean.FALSE;
   }
 
+  public static interface PreferencesCompletionCallback {
+    public void refreshFromUpdatedPreferences();
+
+    public void failedRefresh();
+  }
 
 
 }

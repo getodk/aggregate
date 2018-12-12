@@ -16,7 +16,7 @@
 
 package org.opendatakit.aggregate.client;
 
-import static org.opendatakit.aggregate.client.LayoutUtils.*;
+import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;

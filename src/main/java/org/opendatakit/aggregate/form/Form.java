@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -53,7 +52,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
  * Form objects can be shared across multiple threads.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 class Form implements IForm {
 
@@ -118,13 +116,13 @@ class Form implements IForm {
     formDefinition = FormDefinition.getFormDefinition(infoRow.getStringField(FormInfoTable.FORM_ID), cc);
 
     repeatElementMap = new HashMap<String, FormElementModel>();
-    if ( formDefinition != null ) {
-        populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+    if (formDefinition != null) {
+      populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
     }
   }
 
   Form(XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled,
-      String title, CallingContext cc) throws ODKDatastoreException {
+       String title, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
@@ -166,9 +164,9 @@ class Form implements IForm {
     formDefinition = FormDefinition.getFormDefinition(rootElementDefn.formId, cc);
 
     repeatElementMap = new HashMap<String, FormElementModel>();
-     if ( formDefinition != null ) {
-        populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
-     }
+    if (formDefinition != null) {
+      populateRepeatElementMap(formDefinition.getTopLevelGroupElement());
+    }
   }
 
   public synchronized void persist(CallingContext cc) throws ODKDatastoreException {
@@ -188,8 +186,7 @@ class Form implements IForm {
   /**
    * Deletes the Form including FormElements and Remote Services
    *
-   * @param ds
-   *          Datastore
+   * @param ds Datastore
    * @throws ODKDatastoreException
    */
   public synchronized void deleteForm(CallingContext cc) throws ODKDatastoreException {
@@ -284,7 +281,7 @@ class Form implements IForm {
   }
 
   public void setViewableName(String title) {
-    if ( !filesetRow.setStringField(FormInfoFilesetTable.FORM_NAME, title) ) {
+    if (!filesetRow.setStringField(FormInfoFilesetTable.FORM_NAME, title)) {
       String str = "Overflow on " + FormInfoFilesetTable.FORM_NAME;
       throw new IllegalStateException(str);
     }
@@ -298,7 +295,7 @@ class Form implements IForm {
 
   public XFormParameters getRootElementDefn() {
     XFormParameters p = new XFormParameters(infoRow.getStringField(FormInfoTable.FORM_ID),
-            filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION));
+        filesetRow.getLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION));
     return p;
   }
 
@@ -399,9 +396,7 @@ class Form implements IForm {
   /**
    * Sets a boolean value of whether the form can be downloaded
    *
-   * @param downloadEnabled
-   *          set to true if form can be downloaded, false otherwise
-   *
+   * @param downloadEnabled set to true if form can be downloaded, false otherwise
    */
   public void setDownloadEnabled(Boolean downloadEnabled) {
     filesetRow.setBooleanField(FormInfoFilesetTable.IS_DOWNLOAD_ALLOWED, downloadEnabled);
@@ -425,9 +420,7 @@ class Form implements IForm {
   /**
    * Sets a boolean value of whether a new submission can be received
    *
-   * @param submissionEnabled
-   *          set to true if a new submission can be received, false otherwise
-   *
+   * @param submissionEnabled set to true if a new submission can be received, false otherwise
    */
   public void setSubmissionEnabled(Boolean submissionEnabled) {
     formDefinition.setIsSubmissionAllowed(submissionEnabled);
@@ -488,7 +481,7 @@ class Form implements IForm {
   }
 
   private void getRepeatGroupsInModelHelper(FormElementModel current,
-      List<FormElementModel> accumulation) {
+                                            List<FormElementModel> accumulation) {
     for (FormElementModel m : current.getChildren()) {
       if (m.getElementType() == FormElementModel.ElementType.REPEAT) {
         accumulation.add(m);
@@ -500,7 +493,7 @@ class Form implements IForm {
   public Set<DynamicCommonFieldsBase> getAllBackingObjects() {
     Set<DynamicCommonFieldsBase> set = new TreeSet<DynamicCommonFieldsBase>(
         DynamicCommonFieldsBase.sameTableName);
-    
+
     getAllBackingObjectsHelper(getTopLevelGroupElement(), set);
     return set;
   }
@@ -511,7 +504,7 @@ class Form implements IForm {
       getAllBackingObjectsHelper(m, set);
     }
   }
-  
+
   public List<FormElementModel> getRepeatGroupsInModel() {
     List<FormElementModel> list = new ArrayList<FormElementModel>();
 
@@ -542,7 +535,7 @@ class Form implements IForm {
   }
 
   public FormSummary generateFormSummary(CallingContext cc) throws ODKDatastoreException {
-    if ( hasValidFormDefinition() ) {
+    if (hasValidFormDefinition()) {
       boolean submit = getSubmissionEnabled();
       boolean downloadable = getDownloadEnabled();
       Map<String, String> xmlProperties = new HashMap<String, String>();
@@ -560,13 +553,13 @@ class Form implements IForm {
       xmlProperties.put(ServletConsts.HUMAN_READABLE, BasicConsts.TRUE);
 
       String viewableName = (filesetRow == null) ? getFormId() : getViewableName();
-      if ( viewableName == null ) {
+      if (viewableName == null) {
         viewableName = getFormId();
       }
       viewableName = "<<Broken>> " + viewableName;
       String viewableURL = HtmlUtil.createHrefWithProperties(
           cc.getWebApplicationURL(FormXmlServlet.WWW_ADDR), xmlProperties, viewableName, false);
-      
+
       int mediaFileCount = (getManifestFileset() == null) ? 0 : getManifestFileset().getAttachmentCount(cc);
       return new FormSummary(viewableName, getFormId(), getCreationDate(), getCreationUser(),
           false, false, viewableURL, mediaFileCount);
@@ -576,8 +569,7 @@ class Form implements IForm {
   /**
    * Prints the data element definitions to the print stream specified
    *
-   * @param out
-   *          Print stream to send the output to
+   * @param out Print stream to send the output to
    */
   public void printDataTree(PrintStream out) {
     printTreeHelper(formDefinition.getTopLevelGroupElement(), out);
@@ -587,10 +579,8 @@ class Form implements IForm {
    * Recursive helper function that prints the data elements definitions to the
    * print stream specified
    *
-   * @param node
-   *          node to be processed
-   * @param out
-   *          Print stream to send the output to
+   * @param node node to be processed
+   * @param out  Print stream to send the output to
    */
   private void printTreeHelper(FormElementModel node, PrintStream out) {
     if (node == null) {
@@ -652,7 +642,7 @@ class Form implements IForm {
     }
   }
 
-  public BlobSubmissionOutcome setFormXml( String formFilename, String xmlForm, Long modelVersion, CallingContext cc ) throws ODKDatastoreException {
+  public BlobSubmissionOutcome setFormXml(String formFilename, String xmlForm, Long modelVersion, CallingContext cc) throws ODKDatastoreException {
     byte[] bytes;
     try {
       bytes = xmlForm.getBytes("UTF-8");
@@ -661,17 +651,17 @@ class Form implements IForm {
       throw new IllegalStateException("unexpected", e);
     }
     filesetRow.setLongField(FormInfoFilesetTable.ROOT_ELEMENT_MODEL_VERSION, modelVersion);
-    if ( xform.getAttachmentCount(cc) == 0 ) {
+    if (xform.getAttachmentCount(cc) == 0) {
       return xform.setValueFromByteArray(bytes, "text/xml", formFilename, false, cc);
     } else {
       String curName = xform.getUnrootedFilename(1, cc);
       String newName = formFilename;
-      if ( (newName == null) ? (curName == null) : newName.equals(curName) ) {
+      if ((newName == null) ? (curName == null) : newName.equals(curName)) {
         return xform.setValueFromByteArray(bytes, "text/xml", curName, true, cc);
       } else {
         BlobSubmissionOutcome outcome;
         outcome = xform.setValueFromByteArray(bytes, "text/xml", curName, true, cc);
-        if ( !xform.renameFilePath(curName, newName, cc) ) {
+        if (!xform.renameFilePath(curName, newName, cc)) {
           throw new IllegalStateException("Unexpected failure persisting name change");
         }
         return outcome;

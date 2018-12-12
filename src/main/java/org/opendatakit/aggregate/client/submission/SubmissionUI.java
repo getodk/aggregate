@@ -29,16 +29,16 @@ public class SubmissionUI implements Serializable {
   private ArrayList<String> values;
 
   private String submissionKeyAsString;
-  
+
   public SubmissionUI() {
-      
+
   }
-  
+
   public SubmissionUI(ArrayList<String> values, String submissionKeyAsString) {
     this.values = values;
     this.submissionKeyAsString = submissionKeyAsString;
   }
-  
+
   public int getNumberOfFields() {
     return values.size();
   }
@@ -46,9 +46,9 @@ public class SubmissionUI implements Serializable {
   public ArrayList<String> getValues() {
     return values;
   }
-  
+
   public String getSubmissionKeyAsString() {
     return submissionKeyAsString;
   }
-  
+
 }

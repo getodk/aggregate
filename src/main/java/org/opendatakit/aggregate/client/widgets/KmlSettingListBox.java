@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client.widgets;
 
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.form.KmlOptionSetting;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 
@@ -32,8 +31,8 @@ public final class KmlSettingListBox extends AggregateListBox {
     for (KmlOptionSetting kSO : options) {
       addItem(kSO.getDisplayName(), kSO.getElementKey());
     }
-    
-    if(addNoneOption) {
+
+    if (addNoneOption) {
       addItem(UIConsts.KML_NONE_OPTION, UIConsts.KML_NONE_ENCODE_KEY);
     }
   }

@@ -16,44 +16,21 @@
 package org.opendatakit.aggregate.format;
 
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.submission.SubmissionKey;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class Row {
 
   private ArrayList<String> formattedValues;
-  
+
   private SubmissionKey submissionKey;
-  
+
   public Row(SubmissionKey key) {
     this.formattedValues = new ArrayList<String>();
     this.submissionKey = key;
-  }
-  
-  public void addFormattedValue(String formattedValue) {
-    formattedValues.add(formattedValue);
-  }
-  
-  public ArrayList<String> getFormattedValues() {
-    return formattedValues;
-  }
-
-  public SubmissionKey getSubmissionKey() {
-    return submissionKey;
-  }
-  
-  public void addDataFromRow(Row rowToAdd) {
-    formattedValues.addAll(rowToAdd.formattedValues);
-  }
-  
-  public int size() {
-    return formattedValues.size();
   }
 
   @SuppressWarnings("unchecked")
@@ -61,5 +38,25 @@ public class Row {
     Row newRow = new Row(row.submissionKey);
     newRow.formattedValues = (ArrayList<String>) row.formattedValues.clone();
     return newRow;
+  }
+
+  public void addFormattedValue(String formattedValue) {
+    formattedValues.add(formattedValue);
+  }
+
+  public ArrayList<String> getFormattedValues() {
+    return formattedValues;
+  }
+
+  public SubmissionKey getSubmissionKey() {
+    return submissionKey;
+  }
+
+  public void addDataFromRow(Row rowToAdd) {
+    formattedValues.addAll(rowToAdd.formattedValues);
+  }
+
+  public int size() {
+    return formattedValues.size();
   }
 }

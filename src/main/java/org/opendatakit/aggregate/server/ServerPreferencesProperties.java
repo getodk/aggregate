@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.server;
 
 import java.util.Date;
 import java.util.List;
-
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -34,66 +33,42 @@ import org.opendatakit.common.web.CallingContext;
 
 public class ServerPreferencesProperties extends CommonFieldsBase {
 
-  private static final String TABLE_NAME = "_server_preferences_properties";
-
-  private static final DataField KEY = new DataField("KEY", DataField.DataType.STRING, true, 128L);
-
-  private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, true,
-      20480L);
-
   // these values are set in the ServiceAccountPrivateKeyUploadServlet
   // and used everywhere else when requesting access
   public static final String GOOGLE_API_CLIENT_ID = "GOOGLE_CLIENT_ID";
   public static final String GOOGLE_API_SERVICE_ACCOUNT_EMAIL = "GOOGLE_SERVICE_ACCOUNT_EMAIL";
   public static final String PRIVATE_KEY_FILE_CONTENTS = "PRIVATE_KEY_FILE_CONTENTS";
-
-  private static final String GOOGLE_SIMPLE_API_KEY = "GOOG_SIMPLE_API_KEY"; // supplied
-                                                                             // to
-                                                                             // Google
-                                                                             // Maps
-                                                                             // only
-
-  private static final String ENKETO_API_URL = "ENKETO_API_URL";
-  private static final String ENKETO_API_TOKEN = "ENKETO_API_TOKEN";
-
-  // other keys...
-  private static final String SITE_KEY = "SITE_KEY";
-  private static final String LAST_KNOWN_REALM_STRING = "LAST_KNOWN_REALM_STRING";
-
   public static final String GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN = "GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN";
-
   public static final String OAUTH2_ACCESS_TOKEN_POSTFIX = "_OAUTH2_ACCESS_TOKEN";
   public static final String OAUTH2_REFRESH_TOKEN_POSTFIX = "_OAUTH2_REFRESH_TOKEN";
   public static final String OAUTH2_EXPIRATION_TIME_POSTFIX = "_OAUTH2_EXPIRATION_TIME";
-
-  private static final String ODK_TABLES_ENABLED = "ODK_TABLES_ENABLED";
+  // to
+  // Google
+  // Maps
+  // only
+  private static final String TABLE_NAME = "_server_preferences_properties";
+  private static final DataField KEY = new DataField("KEY", DataField.DataType.STRING, true, 128L);
+  private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, true,
+      20480L);
+  private static final String GOOGLE_SIMPLE_API_KEY = "GOOG_SIMPLE_API_KEY"; // supplied
+  private static final String ENKETO_API_URL = "ENKETO_API_URL";
+  private static final String ENKETO_API_TOKEN = "ENKETO_API_TOKEN";
+  // other keys...
+  private static final String SITE_KEY = "SITE_KEY";
+  private static final String LAST_KNOWN_REALM_STRING = "LAST_KNOWN_REALM_STRING";
   private static final String FASTER_WATCHDOG_CYCLE_ENABLED = "FASTER_WATCHDOG_CYCLE_ENABLED";
   private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
   private static final String SKIP_MALFORMED_SUBMISSIONS = "SKIP_MALFORMED_SUBMISSIONS";
 
-  private static final String ODK_TABLES_SEQUENCER_BASE = "ODK_TABLES_SEQUENCER_BASE";
-  // there can be only one APP_ID per ODK Aggregate. Store the app name here.
-  // The main impact on this is validity checking on sync when the appId is
-  // checked.
-  private static final String ODK_TABLES_APP_ID = "ODK_TABLES_APP_ID";
+  private static ServerPreferencesProperties relation = null;
 
   /**
    * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
    */
   private ServerPreferencesProperties(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(KEY);
     fieldList.add(VALUE);
-  }
-
-  public static PreferenceSummary getPreferenceSummary(CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
-        getEnketoApiUrl(cc), getEnketoApiToken(cc), getOdkTablesEnabled(cc),
-        getOdkTablesAppId(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
   }
 
   /**
@@ -106,9 +81,10 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     super(ref, user);
   }
 
-  @Override
-  public ServerPreferencesProperties getEmptyRow(User user) {
-    return new ServerPreferencesProperties(this, user);
+  public static PreferenceSummary getPreferenceSummary(CallingContext cc)
+      throws ODKEntityNotFoundException, ODKOverQuotaException {
+    return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
+        getEnketoApiUrl(cc), getEnketoApiToken(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
   }
 
   public static String getSiteKey(CallingContext cc) throws ODKEntityNotFoundException,
@@ -177,60 +153,6 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     setServerPreferencesProperty(cc, ENKETO_API_TOKEN, enketoApiToken);
   }
 
-  public static Boolean getOdkTablesEnabled(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, ODK_TABLES_ENABLED);
-    if (value != null) {
-      return Boolean.valueOf(value);
-    }
-    // null value should be treated as false
-    return false;
-  }
-
-  public static void setOdkTablesEnabled(CallingContext cc, Boolean enabled)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, ODK_TABLES_ENABLED, enabled.toString());
-  }
-
-  public static String getOdkTablesAppId(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, ODK_TABLES_APP_ID);
-    if ( value == null || value.length() == 0 ) {
-      value = "default";
-    }
-    return value;
-  }
-
-  public static void setOdkTablesAppId(CallingContext cc, String appId)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, ODK_TABLES_APP_ID, appId);
-  }
-
-  public static String unsafeIncOdkTablesSequencerBase(CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, ODK_TABLES_SEQUENCER_BASE);
-    String newValue = WebUtils.iso8601Date(new Date());
-    if (value != null && value.compareTo(newValue) >= 0) {
-      // the saved value String-compares greater
-      // than the current time string.
-
-      // parse the current time string...
-      Date d = WebUtils.parseDate(value);
-      if (d == null) {
-        throw new IllegalStateException(
-            "The saved ODK_TABLES_SEQUENCER_BASE value could not be parsed!");
-      }
-      // add 1 millisecond and retry...
-      newValue = WebUtils.iso8601Date(new Date(d.getTime() + 1));
-      if (value.compareTo(newValue) >= 0) {
-        throw new IllegalStateException(
-            "The new ODK_TABLES_SEQUENCER_BASE value was not greater than the saved value.");
-      }
-    }
-    setServerPreferencesProperty(cc, ODK_TABLES_SEQUENCER_BASE, newValue);
-    return newValue;
-  }
-
   public static Boolean getFasterWatchdogCycleEnabled(CallingContext cc)
       throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED);
@@ -276,15 +198,6 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     setServerPreferencesProperty(cc, SKIP_MALFORMED_SUBMISSIONS, skipMalformedSubmissions.toString());
   }
 
-  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    ds.putEntity(this, user);
-  }
-
-  private static ServerPreferencesProperties relation = null;
-
   public static synchronized final ServerPreferencesProperties assertRelation(CallingContext cc)
       throws ODKDatastoreException {
     if (relation == null) {
@@ -325,7 +238,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   }
 
   public static final void setServerPreferencesProperty(CallingContext cc, String keyName,
-      String value) throws ODKEntityNotFoundException, ODKOverQuotaException {
+                                                        String value) throws ODKEntityNotFoundException, ODKOverQuotaException {
     try {
       ServerPreferencesProperties relation = assertRelation(cc);
       Query query = cc.getDatastore().createQuery(relation,
@@ -362,5 +275,17 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     } catch (ODKDatastoreException e) {
       throw new ODKEntityNotFoundException(e);
     }
+  }
+
+  @Override
+  public ServerPreferencesProperties getEmptyRow(User user) {
+    return new ServerPreferencesProperties(this, user);
+  }
+
+  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    ds.putEntity(this, user);
   }
 }

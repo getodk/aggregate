@@ -16,36 +16,35 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-import org.opendatakit.aggregate.constants.common.UIConsts;
-
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.SimplePanel;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 public class BinaryPopup extends AbstractPopupBase {
 
   public BinaryPopup(String url, boolean larger) {
     super();
     setTitle("Binary");
-    
+
     int width = Window.getClientWidth() / 2;
     int height = Window.getClientHeight() / 2;
-    
-    if(larger) {
+
+    if (larger) {
       width = Window.getClientWidth() * 4 / 5;
       height = Window.getClientHeight() * 4 / 5;
     }
-    
+
     Frame frame = new Frame(url);
-    frame.setPixelSize(width, height); 
+    frame.setPixelSize(width, height);
 
     FlowPanel panel = new FlowPanel();
     panel.setStylePrimaryName(UIConsts.VERTICAL_FLOW_PANEL_STYLENAME);
-    panel.setPixelSize(width+6, height+30);
-    panel.add(new SimplePanel(new ClosePopupButton(this)));       
-    panel.add(frame);      
+    panel.setPixelSize(width + 6, height + 30);
+    panel.add(new SimplePanel(new ClosePopupButton(this)));
+    panel.add(frame);
     setWidget(panel);
   }
 }

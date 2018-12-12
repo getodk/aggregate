@@ -17,12 +17,9 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -32,28 +29,22 @@ import org.opendatakit.common.security.server.SecurityServiceUtil;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.LoggerFactory;
 
 /**
  * JSON servlet used by the GWT layer to send change password requests over
  * https if https is available, regardless of whether the GWT layer itself is
  * running under http.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class UserManagePasswordsServlet extends ServletUtilBase {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 3078038743780061473L;
 
   /**
    * URI from base
    */
   public static final String ADDR = "ssl/user-manage-passwords";
-
   public static final String CALLBACK = "callback";
   public static final String ECHO = "echo";
   public static final String USERNAME = "username";
@@ -61,15 +52,19 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
   public static final String BASIC_AUTH_HASH = "basicAuthHash";
   public static final String BASIC_AUTH_SALT = "basicAuthSalt";
   public static final String STATUS = "status";
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 3078038743780061473L;
 
   /**
    * Returns an object possibly wrapped by a callback method name. The return is
    * of the form:
-   * 
+   *
    * <pre>
    * cccc ({ "username" : "nnnn", "status" : "oooo", "echo" : "ssss" })
    * </pre>
-   * 
+   * <p>
    * Where:
    * <ul>
    * <li>cccc = callback parameter value</li>
@@ -77,7 +72,6 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
    * <li>oooo = outcome of change password action</li>
    * <li>ssss = echo parameter value</li>
    * </ul>
-   * 
    */
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
@@ -120,9 +114,9 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
 
       try {
         SecurityServiceUtil.setUserCredentials(credential, cc);
-        
+
         String superUsername = cc.getUserService().getSuperUserUsername();
-        if ( superUsername.equals(username) ) {
+        if (superUsername.equals(username)) {
           cc.getUserService().reloadPermissions();
         }
         outcome = "OK";
@@ -134,19 +128,19 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
     }
 
     username.replace(BasicConsts.QUOTE, BasicConsts.EMPTY_STRING); // shouldn't
-                                                                   // be
-                                                                   // allowed...
+    // be
+    // allowed...
     out.write(BasicConsts.QUOTE + USERNAME + BasicConsts.QUOTE + BasicConsts.COLON
         + BasicConsts.QUOTE + username + BasicConsts.QUOTE);
     outcome.replace(BasicConsts.QUOTE, BasicConsts.EMPTY_STRING); // shouldn't
-                                                                  // be
-                                                                  // allowed...
+    // be
+    // allowed...
     out.write(BasicConsts.COMMA);
     out.write(BasicConsts.QUOTE + STATUS + BasicConsts.QUOTE + BasicConsts.COLON
         + BasicConsts.QUOTE + outcome + BasicConsts.QUOTE);
     if (echo != null) {
       echo.replace(BasicConsts.QUOTE, BasicConsts.EMPTY_STRING); // shouldn't be
-                                                                 // allowed...
+      // allowed...
       out.write(BasicConsts.COMMA);
       out.write(BasicConsts.QUOTE + ECHO + BasicConsts.QUOTE + BasicConsts.COLON
           + BasicConsts.QUOTE + echo + BasicConsts.QUOTE);

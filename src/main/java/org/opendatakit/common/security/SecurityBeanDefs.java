@@ -16,15 +16,17 @@
 package org.opendatakit.common.security;
 
 /**
- * Static class defining bean names that must be in sync with the names in 
+ * Static class defining bean names that must be in sync with the names in
  * <pre>WEB-INF/applicationContext-security.xml</pre>.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public final class SecurityBeanDefs {
-    public static final String BASIC_AUTH_PASSWORD_ENCODER = "basicAuthenticationMessageDigestPasswordEncoder";
-    public static final String ROLE_HIERARCHY_MANAGER = "hierarchicalRoleRelationships";
-    
-    private SecurityBeanDefs() {};
+  public static final String BASIC_AUTH_PASSWORD_ENCODER = "basicAuthenticationMessageDigestPasswordEncoder";
+  public static final String ROLE_HIERARCHY_MANAGER = "hierarchicalRoleRelationships";
+
+  private SecurityBeanDefs() {
+  }
+
+  ;
 }

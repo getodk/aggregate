@@ -16,10 +16,8 @@
 
 package org.opendatakit.aggregate.server;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
@@ -31,8 +29,8 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PreferenceServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.preferences.PreferenceService {
@@ -58,46 +56,6 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
       e.printStackTrace();
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
     }
-  }
-
-  @Override
-  public void setOdkTablesEnabled(Boolean enabled) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    try {
-      ServerPreferencesProperties.setOdkTablesEnabled(cc, enabled);
-
-      log.info("setOdkTablesEnabled as: " + Boolean.toString(enabled));
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(e);
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    }
-
-  }
-
-  @Override
-  public void setOdkAppName(String appName) throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException {
-    HttpServletRequest req = this.getThreadLocalRequest();
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-    try {
-      ServerPreferencesProperties.setOdkTablesAppId(cc, appName);
-
-      log.info("setOdkAppName as: " + appName);
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(e);
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);
-    }
-
   }
 
   @Override

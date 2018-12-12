@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.format.structure;
 
 import java.util.List;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.format.KmlConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -27,9 +26,7 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- *
  * @author wbrunette@gmail.com
- *
  */
 abstract class AbstractKmlElementBase {
 
@@ -41,7 +38,7 @@ abstract class AbstractKmlElementBase {
     geoElement = element;
     geoElementParent = geoElement.getParent();
     rootElement = root;
-    
+
     // ignore semantically meaningless nesting groups
     while (geoElementParent.getParent() != null
         && geoElementParent.getElementType().equals(ElementType.GROUP)) {
@@ -66,7 +63,7 @@ abstract class AbstractKmlElementBase {
   abstract boolean childVerifyFieldsArePresent(List<FormElementModel> elements);
 
   abstract String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
-      CallingContext cc) throws ODKDatastoreException;
+                                              CallingContext cc) throws ODKDatastoreException;
 
   boolean verifyElementSameLevel(FormElementModel element) {
     if (element == null) {
@@ -99,9 +96,9 @@ abstract class AbstractKmlElementBase {
     return String.format(KmlConsts.KML_DATA_ELEMENT_TEMPLATE, StringEscapeUtils.escapeXml10(name),
         StringEscapeUtils.escapeXml10(value));
   }
-  
+
   boolean geoParentRootSubmissionElement() {
-      return (geoElementParent.equals(rootElement));
+    return (geoElementParent.equals(rootElement));
   }
 
 }

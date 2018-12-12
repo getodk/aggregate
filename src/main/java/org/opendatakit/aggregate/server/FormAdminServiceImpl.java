@@ -29,7 +29,6 @@ import static org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.Co
 import static org.opendatakit.aggregate.task.PurgeOlderSubmissions.PURGE_DATE;
 import static org.opendatakit.common.utils.WebUtils.purgeDateString;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import java.util.ArrayList;
 import java.util.Date;
@@ -317,103 +316,6 @@ public class FormAdminServiceImpl extends XsrfProtectedServiceServlet implements
     }
   }
 
-  private interface VisitorOutcome extends SubmissionVisitor {
-    boolean getSuccess();
-  }
-
-  private static final class RemoveIncompleteAttachmentVisitor implements VisitorOutcome {
-    final CallingContext cc;
-    boolean success = true; // assume it completes successfully...
-
-    RemoveIncompleteAttachmentVisitor(CallingContext cc) {
-      this.cc = cc;
-    }
-
-    @Override
-    public boolean getSuccess() {
-      return success;
-    }
-
-    @Override
-    public boolean traverse(SubmissionElement element) {
-      if (element instanceof SubmissionSet) {
-        SubmissionSet set = (SubmissionSet) element;
-        List<FormElementModel> elements = set.getFormElements();
-        for (FormElementModel e : elements) {
-          SubmissionValue v = set.getElementValue(e);
-          if (v instanceof BlobSubmissionType) {
-            BlobSubmissionType blob = (BlobSubmissionType) v;
-            try {
-              if (blob.getAttachmentCount(cc) == 1 && blob.getContentHash(1, cc) == null) {
-                // we have a missing attachment...
-                blob.deleteAll(cc);
-                set.removeElementValue(e);
-              }
-            } catch (ODKDatastoreException ex) {
-              ex.printStackTrace();
-              success = false;
-            }
-          }
-        }
-      }
-      return false;
-    }
-
-  }
-
-  private static final class ModifyIncompleteEncryptedAttachmentVisitor implements VisitorOutcome {
-
-    private static final String ENC_EXTENSION = ".enc";
-    private static final String MISSING_ENC_EXTENSION = ".missing.enc";
-    private static final String MIME_OCTET = "application/octet-stream";
-
-    final CallingContext cc;
-    boolean success = true; // assume it completes successfully...
-
-    ModifyIncompleteEncryptedAttachmentVisitor(CallingContext cc) {
-      this.cc = cc;
-    }
-
-    @Override
-    public boolean getSuccess() {
-      return success;
-    }
-
-    @Override
-    public boolean traverse(SubmissionElement element) {
-      if (element instanceof SubmissionSet) {
-        SubmissionSet set = (SubmissionSet) element;
-        List<FormElementModel> elements = set.getFormElements();
-        for (FormElementModel e : elements) {
-          SubmissionValue v = set.getElementValue(e);
-          if (v instanceof BlobSubmissionType) {
-            BlobSubmissionType blob = (BlobSubmissionType) v;
-            try {
-              if (blob.getAttachmentCount(cc) == 1 && blob.getContentHash(1, cc) == null) {
-
-                // we need to entirely delete the entry and re-create it
-                // so that we can change the filename to the suffix ".missing.enc"
-                String unrootedFilename = blob.getUnrootedFilename(1, cc);
-                if (unrootedFilename != null) {
-                  if (unrootedFilename.endsWith(ENC_EXTENSION)) {
-                    unrootedFilename = unrootedFilename.substring(0, unrootedFilename.lastIndexOf(".")) + MISSING_ENC_EXTENSION;
-                  }
-                }
-                blob.deleteAll(cc);
-                blob.setValueFromByteArray(new byte[]{}, MIME_OCTET, unrootedFilename, true, cc);
-              }
-            } catch (ODKDatastoreException ex) {
-              ex.printStackTrace();
-              success = false;
-            }
-          }
-        }
-      }
-      return false;
-    }
-
-  }
-
   @Override
   public void markSubmissionAsComplete(String submissionKeyAsString) throws DatastoreFailureException, RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
@@ -561,6 +463,103 @@ public class FormAdminServiceImpl extends XsrfProtectedServiceServlet implements
           "Unable to establish task to purge submitted data for form " + formId);
     }
     return value;
+  }
+
+  private interface VisitorOutcome extends SubmissionVisitor {
+    boolean getSuccess();
+  }
+
+  private static final class RemoveIncompleteAttachmentVisitor implements VisitorOutcome {
+    final CallingContext cc;
+    boolean success = true; // assume it completes successfully...
+
+    RemoveIncompleteAttachmentVisitor(CallingContext cc) {
+      this.cc = cc;
+    }
+
+    @Override
+    public boolean getSuccess() {
+      return success;
+    }
+
+    @Override
+    public boolean traverse(SubmissionElement element) {
+      if (element instanceof SubmissionSet) {
+        SubmissionSet set = (SubmissionSet) element;
+        List<FormElementModel> elements = set.getFormElements();
+        for (FormElementModel e : elements) {
+          SubmissionValue v = set.getElementValue(e);
+          if (v instanceof BlobSubmissionType) {
+            BlobSubmissionType blob = (BlobSubmissionType) v;
+            try {
+              if (blob.getAttachmentCount(cc) == 1 && blob.getContentHash(1, cc) == null) {
+                // we have a missing attachment...
+                blob.deleteAll(cc);
+                set.removeElementValue(e);
+              }
+            } catch (ODKDatastoreException ex) {
+              ex.printStackTrace();
+              success = false;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+  }
+
+  private static final class ModifyIncompleteEncryptedAttachmentVisitor implements VisitorOutcome {
+
+    private static final String ENC_EXTENSION = ".enc";
+    private static final String MISSING_ENC_EXTENSION = ".missing.enc";
+    private static final String MIME_OCTET = "application/octet-stream";
+
+    final CallingContext cc;
+    boolean success = true; // assume it completes successfully...
+
+    ModifyIncompleteEncryptedAttachmentVisitor(CallingContext cc) {
+      this.cc = cc;
+    }
+
+    @Override
+    public boolean getSuccess() {
+      return success;
+    }
+
+    @Override
+    public boolean traverse(SubmissionElement element) {
+      if (element instanceof SubmissionSet) {
+        SubmissionSet set = (SubmissionSet) element;
+        List<FormElementModel> elements = set.getFormElements();
+        for (FormElementModel e : elements) {
+          SubmissionValue v = set.getElementValue(e);
+          if (v instanceof BlobSubmissionType) {
+            BlobSubmissionType blob = (BlobSubmissionType) v;
+            try {
+              if (blob.getAttachmentCount(cc) == 1 && blob.getContentHash(1, cc) == null) {
+
+                // we need to entirely delete the entry and re-create it
+                // so that we can change the filename to the suffix ".missing.enc"
+                String unrootedFilename = blob.getUnrootedFilename(1, cc);
+                if (unrootedFilename != null) {
+                  if (unrootedFilename.endsWith(ENC_EXTENSION)) {
+                    unrootedFilename = unrootedFilename.substring(0, unrootedFilename.lastIndexOf(".")) + MISSING_ENC_EXTENSION;
+                  }
+                }
+                blob.deleteAll(cc);
+                blob.setValueFromByteArray(new byte[]{}, MIME_OCTET, unrootedFilename, true, cc);
+              }
+            } catch (ODKDatastoreException ex) {
+              ex.printStackTrace();
+              success = false;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
   }
 
 }

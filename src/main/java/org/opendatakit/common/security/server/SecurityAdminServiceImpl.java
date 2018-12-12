@@ -18,9 +18,7 @@ package org.opendatakit.common.security.server;
 
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import java.util.ArrayList;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.UserSecurityInfo;
@@ -28,46 +26,43 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.web.CallingContext;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 /**
  * GWT server request handler for the SecurityAdminService interface.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class SecurityAdminServiceImpl extends XsrfProtectedServiceServlet implements
-org.opendatakit.common.security.client.security.admin.SecurityAdminService {
+    org.opendatakit.common.security.client.security.admin.SecurityAdminService {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -5028277386314314356L;
+  /**
+   *
+   */
+  private static final long serialVersionUID = -5028277386314314356L;
 
-    @Override
-    public ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities ) throws AccessDeniedException, DatastoreFailureException {
+  @Override
+  public ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws AccessDeniedException, DatastoreFailureException {
 
-        HttpServletRequest req = this.getThreadLocalRequest();
-        CallingContext cc = ContextFactory.getCallingContext(this, req);
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-        return SecurityServiceUtil.getAllUsers(withAuthorities, cc);
+    return SecurityServiceUtil.getAllUsers(withAuthorities, cc);
+  }
+
+  @Override
+  public void setUsersAndGrantedAuthorities(String xsrfString,
+                                            ArrayList<UserSecurityInfo> users,
+                                            ArrayList<GrantedAuthorityName> allGroups)
+      throws AccessDeniedException, DatastoreFailureException {
+
+    HttpServletRequest req = this.getThreadLocalRequest();
+    CallingContext cc = ContextFactory.getCallingContext(this, req);
+
+    if (!req.getSession().getId().equals(xsrfString)) {
+      throw new AccessDeniedException("Invalid request");
     }
-    
-    @Override
-    public void setUsersAndGrantedAuthorities( String xsrfString, 
-                            ArrayList<UserSecurityInfo> users,  
-                            ArrayList<GrantedAuthorityName> allGroups)
-            throws AccessDeniedException, DatastoreFailureException {
 
-        HttpServletRequest req = this.getThreadLocalRequest();
-        CallingContext cc = ContextFactory.getCallingContext(this, req);
-
-        if ( !req.getSession().getId().equals(xsrfString) ) {
-            throw new AccessDeniedException("Invalid request");
-        }
-
-        SecurityServiceUtil.setStandardSiteAccessConfiguration( users, allGroups, cc ); 
-        // clear the cache of saved user identities as we don't know what has changed...
-        cc.getUserService().reloadPermissions();
-    }
+    SecurityServiceUtil.setStandardSiteAccessConfiguration(users, allGroups, cc);
+    // clear the cache of saved user identities as we don't know what has changed...
+    cc.getUserService().reloadPermissions();
+  }
 }

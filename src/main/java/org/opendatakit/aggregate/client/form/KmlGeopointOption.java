@@ -29,12 +29,12 @@ public final class KmlGeopointOption implements Serializable {
   private KmlOptionSetting geoElement;
   private ArrayList<KmlOptionSetting> binaryNodes = new ArrayList<KmlOptionSetting>();
   private ArrayList<KmlOptionSetting> titleNodes = new ArrayList<KmlOptionSetting>();
-  
-//default constructor required
-  public KmlGeopointOption(){
-    
+
+  //default constructor required
+  public KmlGeopointOption() {
+
   }
-  
+
   public KmlGeopointOption(String displayName, String elementKey) {
     this.geoElement = new KmlOptionSetting(displayName, elementKey);
   }
@@ -42,17 +42,17 @@ public final class KmlGeopointOption implements Serializable {
   public KmlOptionSetting getGeoElement() {
     return geoElement;
   }
-  
+
   public void addTitleNode(String displayName, String elementKey) {
     KmlOptionSetting node = new KmlOptionSetting(displayName, elementKey);
     titleNodes.add(node);
   }
-  
+
   public void addBinaryNode(String displayName, String elementKey) {
     KmlOptionSetting node = new KmlOptionSetting(displayName, elementKey);
     binaryNodes.add(node);
   }
-  
+
   public ArrayList<KmlOptionSetting> getBinaryNodes() {
     return binaryNodes;
   }

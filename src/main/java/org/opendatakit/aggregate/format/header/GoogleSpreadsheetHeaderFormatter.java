@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -16,7 +16,6 @@ package org.opendatakit.aggregate.format.header;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -34,7 +33,7 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
 
   // Specified by BasicHeaderFormatter's constructor.
   public GoogleSpreadsheetHeaderFormatter(boolean separateGpsCoordinates,
-      boolean includeGpsAltitude, boolean includeGpsAccuracy) {
+                                          boolean includeGpsAltitude, boolean includeGpsAccuracy) {
     super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
   }
 
@@ -56,7 +55,7 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
    */
   @Override
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
-      List<FormElementModel> propertyNamesArg) {
+                                      List<FormElementModel> propertyNamesArg) {
     propertyNames = propertyNamesArg;
     headers = new ArrayList<String>();
     types = new ArrayList<ElementType>();
@@ -69,11 +68,10 @@ public class GoogleSpreadsheetHeaderFormatter extends BasicHeaderFormatter imple
     processElementForColumnHead(rootGroup, rootGroup, BasicConsts.EMPTY_STRING);
 
     // remove bad characters from headers
-    for (int i = 0; i < headers.size(); i++)
-    {
+    for (int i = 0; i < headers.size(); i++) {
       String header = headers.get(i);
       header = header.replaceAll(SpreadsheetConsts.UNSAFE_CHAR_CLASS, "");
-      if ( Character.isDigit(header.charAt(0)) ) {
+      if (Character.isDigit(header.charAt(0))) {
         header = "n" + header;
       }
       headers.set(i, header);

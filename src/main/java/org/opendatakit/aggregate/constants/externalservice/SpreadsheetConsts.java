@@ -16,10 +16,8 @@
 package org.opendatakit.aggregate.constants.externalservice;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class SpreadsheetConsts {
   /**

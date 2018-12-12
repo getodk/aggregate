@@ -16,29 +16,28 @@
 
 package org.opendatakit.aggregate.client.popups;
 
-import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
-
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
+import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 
 public class ViewServletPopup extends AbstractPopupBase {
 
   public ViewServletPopup(String title, String url) {
     super();
     setTitle(title);
-    
+
     // so we can play with the dimensions...
-    int innerWidth = Window.getClientWidth()*2 / 3;
-    int innerHeight = Window.getClientHeight()*2 /3;
-    
+    int innerWidth = Window.getClientWidth() * 2 / 3;
+    int innerHeight = Window.getClientHeight() * 2 / 3;
+
     Frame frame = new Frame(url);
     frame.addStyleName("uploadFrame");
-    frame.setPixelSize(innerWidth - 30,innerHeight);
+    frame.setPixelSize(innerWidth - 30, innerHeight);
 
     FlowPanel panel = new FlowPanel();
-    panel.setPixelSize(innerWidth+6,innerHeight+30);
-    
+    panel.setPixelSize(innerWidth + 6, innerHeight + 30);
+
     ClosePopupButton closeButton = new ClosePopupButton(this);
     closeButton.addStyleName("uploadCloseButton");
     panel.add(closeButton);

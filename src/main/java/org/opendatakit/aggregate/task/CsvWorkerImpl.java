@@ -20,9 +20,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
@@ -39,13 +36,14 @@ import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common worker implementation for the generation of csv files.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class CsvWorkerImpl {
 
@@ -56,7 +54,7 @@ public class CsvWorkerImpl {
   private final CallingContext cc;
 
   public CsvWorkerImpl(IForm form, SubmissionKey persistentResultsKey, Long attemptCount,
-      CallingContext cc) {
+                       CallingContext cc) {
     this.form = form;
     this.persistentResultsKey = persistentResultsKey;
     this.attemptCount = attemptCount;
@@ -68,7 +66,7 @@ public class CsvWorkerImpl {
 
   public void generateCsv() {
     logger.info("Beginning CSV generation: " + persistentResultsKey.toString() +
-                " form " + form.getFormId());
+        " form " + form.getFormId());
 
     try {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -101,11 +99,11 @@ public class CsvWorkerImpl {
       formatter.beforeProcessSubmissions(cc);
       List<Submission> submissions;
       int count = 0;
-      for (;;) {
+      for (; ; ) {
         count++;
         logger.info("iteration " + Integer.toString(count) + " before issuing query for " + form.getFormId());
         submissions = query.getResultSubmissions(cc);
-        if ( submissions.isEmpty()) break;
+        if (submissions.isEmpty()) break;
         logger.info("iteration " + Integer.toString(count) + " before emitting csv for " + form.getFormId());
         formatter.processSubmissionSegment(submissions, cc);
       }
@@ -124,7 +122,7 @@ public class CsvWorkerImpl {
             form.getViewableFormNameSuitableAsFileName() + ServletConsts.CSV_FILENAME_APPEND, false, cc);
         r.setStatus(ExportStatus.AVAILABLE);
         r.setCompletionDate(new Date());
-        if(subFilterGroup != null) {
+        if (subFilterGroup != null) {
           subFilterGroup.delete(cc);
         }
         r.persist(cc);

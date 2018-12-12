@@ -18,14 +18,10 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -36,16 +32,16 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
-
-  private static final long serialVersionUID = -3784460108221008112L;
 
   /**
    * URI from base
    */
   public static final String ADDR = UIConsts.ENKETO_SERVICE_ACCOUNT_PRIVATE_KEY_UPLOAD_ADDR;
-
+  private static final long serialVersionUID = -3784460108221008112L;
   /**
    * Title for generated webpage
    */
@@ -82,7 +78,7 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
    * Handler for HTTP Get request to create xform upload page
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -132,11 +128,11 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
     out.write(UPLOAD_PAGE_BODY_START);
     out.write(cc.getWebApplicationURL(ADDR));
     out.write(UPLOAD_PAGE_BODY_MIDDLE_TO_URL);
-    if ( enketoApiUrl != null ) {
+    if (enketoApiUrl != null) {
       out.write(enketoApiUrl);
     }
     out.write(UPLOAD_PAGE_BODY_MIDDLE_URL_TO_TOKEN);
-    if ( enketoApiToken != null ) {
+    if (enketoApiToken != null) {
       out.write(enketoApiToken);
     }
     out.write(UPLOAD_PAGE_BODY_MIDDLE_TOKEN_ONWARD);
@@ -148,7 +144,7 @@ public class EnketoAccountPrivateKeyUploadServlet extends ServletUtilBase {
    * parsed version in the datastore
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {

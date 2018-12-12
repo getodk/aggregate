@@ -16,12 +16,11 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.popups.PublishPopup;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 
 public final class PublishButton extends AggregateButton implements ClickHandler {
 
@@ -42,7 +41,7 @@ public final class PublishButton extends AggregateButton implements ClickHandler
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     PublishPopup popup = new PublishPopup(formId);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -40,13 +40,14 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
       DataField.DataType.STRING, true, 4096L);
   private static final DataField FUSION_TABLE_VIEW_ID_PROPERTY = new DataField("FUSION_TABLE_VIEW_ID",
       DataField.DataType.STRING, true, 4096L);
+  private static FusionTable2ParameterTable relation = null;
 
-    /**
-     * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-     *
-     * @param databaseSchema
-     * @param tableName
-     */
+  /**
+   * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
+   *
+   * @param databaseSchema
+   * @param tableName
+   */
   FusionTable2ParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(FUSION_TABLE_ID_PROPERTY);
@@ -54,14 +55,28 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
     fieldList.add(FUSION_TABLE_VIEW_ID_PROPERTY);
   }
 
-    /**
-     * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-     *
-     * @param ref
-     * @param user
-     */
+  /**
+   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+   *
+   * @param ref
+   * @param user
+   */
   private FusionTable2ParameterTable(FusionTable2ParameterTable ref, User user) {
     super(ref, user);
+  }
+
+  public static synchronized final FusionTable2ParameterTable assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      FusionTable2ParameterTable relationPrototype;
+      relationPrototype = new FusionTable2ParameterTable(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
   }
 
   // Only called from within the persistence layer.
@@ -91,28 +106,12 @@ public final class FusionTable2ParameterTable extends CommonFieldsBase {
   }
 
   public String getFusionTableViewId() {
-      return getStringField(FUSION_TABLE_VIEW_ID_PROPERTY);
+    return getStringField(FUSION_TABLE_VIEW_ID_PROPERTY);
   }
 
   public void setFusionTableViewId(String value) {
-      if (!setStringField(FUSION_TABLE_VIEW_ID_PROPERTY, value)) {
-          throw new IllegalArgumentException("overflow fusionTableViewId");
-      }
-  }
-
-  private static FusionTable2ParameterTable relation = null;
-
-  public static synchronized final FusionTable2ParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      Datastore ds = cc.getDatastore();
-      User user = cc.getUserService().getDaemonAccountUser();
-      FusionTable2ParameterTable relationPrototype;
-      relationPrototype = new FusionTable2ParameterTable(ds.getDefaultSchemaName());
-      ds.assertRelation(relationPrototype, user); // may throw exception...
-      // at this point, the prototype has become fully populated
-      relation = relationPrototype; // set static variable only upon success...
+    if (!setStringField(FUSION_TABLE_VIEW_ID_PROPERTY, value)) {
+      throw new IllegalArgumentException("overflow fusionTableViewId");
     }
-    return relation;
   }
 }

@@ -21,50 +21,50 @@ import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.security.User;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public abstract class DynamicDocumentBase extends DynamicCommonFieldsBase {
 
-    /* dynamic and dynamic association tables */
-    public static final int ADDITIONAL_COLUMN_COUNT = 1 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
+  /* dynamic and dynamic association tables */
+  public static final int ADDITIONAL_COLUMN_COUNT = 1 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
 
-    /** key into the top level dynamic table that is our ancestor */
-    private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
+  /**
+   * key into the top level dynamic table that is our ancestor
+   */
+  private static final DataField TOP_LEVEL_AURI = new DataField("_TOP_LEVEL_AURI", DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
 
-    public final DataField topLevelAuri;
-    
-    /**
-     * Construct a relation prototype.
-     * 
-     * @param databaseSchema
-     * @param tableName
-     */
-    protected DynamicDocumentBase(String databaseSchema, String tableName) {
-        super(databaseSchema, tableName);
-        fieldList.add(topLevelAuri=new DataField(TOP_LEVEL_AURI));
-    }
+  public final DataField topLevelAuri;
 
-    /**
-     * Construct an empty entity.
-     * 
-     * @param ref
-     * @param user
-     */
-    protected DynamicDocumentBase(DynamicDocumentBase ref, User user) {
-        super(ref, user);
-        topLevelAuri = ref.topLevelAuri;
+  /**
+   * Construct a relation prototype.
+   *
+   * @param databaseSchema
+   * @param tableName
+   */
+  protected DynamicDocumentBase(String databaseSchema, String tableName) {
+    super(databaseSchema, tableName);
+    fieldList.add(topLevelAuri = new DataField(TOP_LEVEL_AURI));
+  }
+
+  /**
+   * Construct an empty entity.
+   *
+   * @param ref
+   * @param user
+   */
+  protected DynamicDocumentBase(DynamicDocumentBase ref, User user) {
+    super(ref, user);
+    topLevelAuri = ref.topLevelAuri;
+  }
+
+  public final String getTopLevelAuri() {
+    return getStringField(topLevelAuri);
+  }
+
+  public final void setTopLevelAuri(String value) {
+    if (!setStringField(topLevelAuri, value)) {
+      throw new IllegalStateException("overflow on topLevelAuri");
     }
-    
-    public final String getTopLevelAuri() {
-        return getStringField(topLevelAuri);
-    }
-    
-    public final void setTopLevelAuri(String value) {
-        if ( ! setStringField(topLevelAuri, value) ) {
-            throw new IllegalStateException("overflow on topLevelAuri");
-        }
-    }
+  }
 }

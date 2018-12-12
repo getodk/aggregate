@@ -23,7 +23,6 @@ import java.security.NoSuchAlgorithmException;
  * Helpful utilities used by presentation layer and security services layers.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public final class SecurityUtils {
   public static final String USERNAME_COLON = "username:";
@@ -31,10 +30,12 @@ public final class SecurityUtils {
   public static final String AT_SIGN = "@";
 
   private SecurityUtils() {
-  };
+  }
+
+  ;
 
   public static final String getDigestAuthenticationPasswordHash(String username, String password,
-      Realm realm) {
+                                                                 Realm realm) {
     String fullDigestAuth = username + ":" + realm.getRealmString() + ":" + password;
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");

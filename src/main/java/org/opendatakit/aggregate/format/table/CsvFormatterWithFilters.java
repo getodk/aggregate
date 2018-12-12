@@ -19,7 +19,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -40,15 +39,15 @@ import org.opendatakit.common.web.constants.BasicConsts;
 
 public class CsvFormatterWithFilters implements SubmissionFormatter {
 
+  private final IForm form;
+  private final PrintWriter output;
   private ElementFormatter elemFormatter;
   private List<FormElementModel> propertyNames;
   private List<String> headers;
-  private final IForm form;
-  private final PrintWriter output;
   private List<FormElementNamespace> namespaces;
 
   public CsvFormatterWithFilters(IForm xform, String webServerUrl, PrintWriter printWriter,
-      FilterGroup filterGroup) {
+                                 FilterGroup filterGroup) {
     form = xform;
     output = printWriter;
 
@@ -75,7 +74,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
 
   @Override
   public final void processSubmissionSegment(List<Submission> submissions,
-        CallingContext cc) throws ODKDatastoreException {
+                                             CallingContext cc) throws ODKDatastoreException {
     // format row elements
     for (Submission sub : submissions) {
       Row row = sub.getFormattedValuesAsRow(namespaces, propertyNames, elemFormatter, false, cc);
@@ -97,15 +96,13 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
   /**
    * Helper function used to append the comma separated value row
    *
-   * @param itr
-   *          string values to be separated by commas
-   *
+   * @param itr string values to be separated by commas
    */
   private void appendCsvRow(Iterator<String> itr) {
     output.append(BasicConsts.EMPTY_STRING);
     while (itr.hasNext()) {
       String value = itr.next();
-      if ( value != null) {
+      if (value != null) {
         // escape double quotes with another double quote per RFC 4180
         value = value.replaceAll(BasicConsts.QUOTE, BasicConsts.QUOTE_QUOTE);
         output.append(BasicConsts.QUOTE).append(value).append(BasicConsts.QUOTE);

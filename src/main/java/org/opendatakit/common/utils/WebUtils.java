@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -29,16 +29,15 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.CharEncoding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.javarosa.core.model.utils.DateUtils;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Useful methods for parsing boolean and date values and formatting dates.
@@ -84,11 +83,13 @@ public class WebUtils {
   private static final String PURGE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
   private WebUtils() {
-  };
+  }
+
+  ;
 
   /**
    * Safely encode a string for use as a query parameter.
-   * 
+   *
    * @param rawString
    * @return encoded string
    */
@@ -116,7 +117,7 @@ public class WebUtils {
 
   /**
    * Decode a safeEncode() string.
-   * 
+   *
    * @param encodedWebsafeString
    * @return rawString
    */
@@ -182,7 +183,7 @@ public class WebUtils {
   }
 
   private static final Date parseDateSubset(String value, String[] parsePatterns, Locale l,
-      TimeZone tz) {
+                                            TimeZone tz) {
     // borrowed from apache.commons.lang.DateUtils...
     Date d = null;
     SimpleDateFormat parser = null;
@@ -219,23 +220,23 @@ public class WebUtils {
     if (value == null || value.length() == 0)
       return null;
 
-    String[] iso8601Pattern = new String[] { PATTERN_ISO8601 };
+    String[] iso8601Pattern = new String[]{PATTERN_ISO8601};
 
-    String[] localizedParsePatterns = new String[] {
+    String[] localizedParsePatterns = new String[]{
         // try the common HTTP date formats that have time zones
-        PATTERN_RFC1123, PATTERN_RFC1036, PATTERN_DATE_TOSTRING };
+        PATTERN_RFC1123, PATTERN_RFC1036, PATTERN_DATE_TOSTRING};
 
-    String[] localizedNoTzParsePatterns = new String[] {
-    // ones without timezones... (will assume UTC)
-    PATTERN_ASCTIME };
+    String[] localizedNoTzParsePatterns = new String[]{
+        // ones without timezones... (will assume UTC)
+        PATTERN_ASCTIME};
 
-    String[] tzParsePatterns = new String[] { PATTERN_ISO8601, PATTERN_ISO8601_DATE,
-        PATTERN_ISO8601_TIME };
+    String[] tzParsePatterns = new String[]{PATTERN_ISO8601, PATTERN_ISO8601_DATE,
+        PATTERN_ISO8601_TIME};
 
-    String[] noTzParsePatterns = new String[] {
+    String[] noTzParsePatterns = new String[]{
         // ones without timezones... (will assume UTC)
         PATTERN_ISO8601_WITHOUT_ZONE, PATTERN_NO_DATE_TIME_ONLY,
-        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH, PATTERN_GOOGLE_DOCS };
+        PATTERN_YYYY_MM_DD_DATE_ONLY_NO_TIME_DASH, PATTERN_GOOGLE_DOCS};
 
     Date d = null;
     // iso8601 parsing is sometimes off-by-one when JR does it...
@@ -395,15 +396,15 @@ public class WebUtils {
       return null;
     // SDF is not thread-safe
     SimpleDateFormat asGMTiso8601 = new SimpleDateFormat(PATTERN_ISO8601); // with
-                                                                           // time
-                                                                           // zone
+    // time
+    // zone
     asGMTiso8601.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTiso8601.format(d);
   }
 
   /**
    * Return the RFC1123 string representation of a date.
-   * 
+   *
    * @param d
    * @return
    */
@@ -412,8 +413,8 @@ public class WebUtils {
       return null;
     // SDF is not thread-safe
     SimpleDateFormat asGMTrfc1123 = new SimpleDateFormat(PATTERN_RFC1123); // with
-                                                                           // time
-                                                                           // zone
+    // time
+    // zone
     asGMTrfc1123.setTimeZone(TimeZone.getTimeZone("GMT"));
     return asGMTrfc1123.format(d);
   }

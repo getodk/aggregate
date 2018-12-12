@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client.submission;
 
 import java.io.Serializable;
-
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.common.UIDisplayType;
 
@@ -104,13 +103,13 @@ public class Column implements Serializable {
     Column other = (Column) obj;
     return (uri == null ? (other.uri == null) : (uri.equals(other.uri)))
         && (displayHeader == null ? (other.displayHeader == null) : (displayHeader
-            .equals(other.displayHeader)))
+        .equals(other.displayHeader)))
         && (columnEncoding == null ? (other.columnEncoding == null) : (columnEncoding
-            .equals(other.columnEncoding)))
+        .equals(other.columnEncoding)))
         && (geopointColumnCode == null ? (other.geopointColumnCode == null) : (geopointColumnCode
-            .equals(other.geopointColumnCode)))
+        .equals(other.geopointColumnCode)))
         && (uiDisplayType == null ? (other.uiDisplayType == null) : (uiDisplayType
-            .equals(other.uiDisplayType)));
+        .equals(other.uiDisplayType)));
   }
 
   /**

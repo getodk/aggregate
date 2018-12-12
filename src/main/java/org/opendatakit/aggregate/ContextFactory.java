@@ -18,15 +18,10 @@ package org.opendatakit.aggregate;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.odktables.exception.PermissionDeniedException;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissions;
-import org.opendatakit.aggregate.odktables.security.TablesUserPermissionsImpl;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -47,9 +42,26 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class ContextFactory {
+
+  /**
+   * Private constructor
+   */
+  private ContextFactory() {
+  }
+
+  public static CallingContext getCallingContext(HttpServlet servlet, HttpServletRequest req) {
+    return new CallingContextImpl(servlet.getServletContext(), req);
+  }
+
+  public static CallingContext getCallingContext(ServletContext sc, HttpServletRequest req) {
+    return new CallingContextImpl(sc, req);
+  }
+
+  public static CallingContext duplicateContext(CallingContext context) {
+    return new CallingContextImpl(context);
+  }
 
   /**
    * Singleton of the application context
@@ -198,30 +210,4 @@ public class ContextFactory {
       return asDaemon ? userService.getDaemonAccountUser() : userService.getCurrentUser();
     }
   }
-
-  /**
-   * Private constructor
-   */
-  private ContextFactory() {
-  }
-
-  public static CallingContext getCallingContext(HttpServlet servlet, HttpServletRequest req) {
-    return new CallingContextImpl(servlet.getServletContext(), req);
-  }
-
-  public static CallingContext getCallingContext(ServletContext sc, HttpServletRequest req) {
-    return new CallingContextImpl(sc, req);
-  }
-
-  public static CallingContext duplicateContext(CallingContext context) {
-    return new CallingContextImpl(context);
-  }
-
-  public static TablesUserPermissions getTablesUserPermissions(CallingContext cc) throws PermissionDeniedException, ODKDatastoreException, ODKTaskLockException {
-    return new TablesUserPermissionsImpl(cc);
- }
-
- public static String getOdkTablesAppId(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    return ServerPreferencesProperties.getOdkTablesAppId(cc);
- }
 }

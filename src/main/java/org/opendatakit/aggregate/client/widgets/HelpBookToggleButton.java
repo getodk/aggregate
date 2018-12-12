@@ -16,10 +16,9 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.popups.HelpBookPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Image;
+import org.opendatakit.aggregate.client.popups.HelpBookPopup;
 
 public final class HelpBookToggleButton extends AggregateImageToggleButton {
 

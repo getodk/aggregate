@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.table;
 
-import org.opendatakit.aggregate.client.AggregateUI;
-import org.opendatakit.aggregate.client.popups.BinaryPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.AggregateUI;
+import org.opendatakit.aggregate.client.popups.BinaryPopup;
 
 public class BinaryPopupClickHandler implements ClickHandler {
   private final String value;

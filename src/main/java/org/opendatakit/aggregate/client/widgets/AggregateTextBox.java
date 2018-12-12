@@ -20,7 +20,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class AggregateTextBox extends TextBox implements ValueChangeHandler<String>{
+public class AggregateTextBox extends TextBox implements ValueChangeHandler<String> {
 
   private final AggregateBaseHandlers handlers;
 

@@ -29,27 +29,8 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class UploadSubmissionsImpl implements UploadSubmissions {
-
-    static class UploadSubmissionsRunner implements Runnable {
-        final UploadSubmissionsWorkerImpl impl;
-
-        public UploadSubmissionsRunner(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
-            impl = new UploadSubmissionsWorkerImpl(fsc, useLargerBatchSize, cc);
-        }
-
-        @Override
-        public void run() {
-            try {
-                impl.uploadAllSubmissions();
-            } catch (Exception e) {
-                e.printStackTrace();
-                // TODO: Problem - decide what to do if an exception occurs
-            }
-        }
-    }
 
   @Override
   public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
@@ -60,5 +41,23 @@ public class UploadSubmissionsImpl implements UploadSubmissions {
     System.out.println("UPLOAD TASK IN TOMCAT");
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(ur);
+  }
+
+  static class UploadSubmissionsRunner implements Runnable {
+    final UploadSubmissionsWorkerImpl impl;
+
+    public UploadSubmissionsRunner(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
+      impl = new UploadSubmissionsWorkerImpl(fsc, useLargerBatchSize, cc);
+    }
+
+    @Override
+    public void run() {
+      try {
+        impl.uploadAllSubmissions();
+      } catch (Exception e) {
+        e.printStackTrace();
+        // TODO: Problem - decide what to do if an exception occurs
+      }
+    }
   }
 }

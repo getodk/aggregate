@@ -19,17 +19,16 @@ import java.io.Serializable;
 
 /**
  * Form Element Model components come in 2 flavors.
- *    METADATA -- uiVersion, version, instanceID, submissionDateTime, isComplete.
- *    VALUES -- data within the form submission itself.
+ * METADATA -- uiVersion, version, instanceID, submissionDateTime, isComplete.
+ * VALUES -- data within the form submission itself.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public enum FormElementNamespace implements Serializable {
-    METADATA,
-    VALUES;
-    
-    private FormElementNamespace() {
-      // GWT
-    }
+  METADATA,
+  VALUES;
+
+  private FormElementNamespace() {
+    // GWT
+  }
 }

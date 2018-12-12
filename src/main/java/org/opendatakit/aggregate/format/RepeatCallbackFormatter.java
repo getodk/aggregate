@@ -16,18 +16,15 @@
 package org.opendatakit.aggregate.format;
 
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public interface RepeatCallbackFormatter {
-  public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException;  
+  public void processRepeatedSubmssionSetsIntoRow(List<SubmissionSet> repeats, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException;
 }

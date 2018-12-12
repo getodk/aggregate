@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.externalservice;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.datamodel.FormElementKey;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -30,111 +29,107 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class FusionTable2RepeatParameterTable extends CommonFieldsBase {
 
-      private static final String TABLE_NAME = "_fusion_table_2_repeat";
+  static final DataField URI_FUSION_TABLE_PROPERTY = new DataField(
+      "URI_FUSION_TABLE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
+  static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField(
+      "FORM_ELEMENT_KEY", DataField.DataType.STRING, true, 4096L);
+  private static final String TABLE_NAME = "_fusion_table_2_repeat";
+  private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField(
+      "FUSION_TABLE_ID", DataField.DataType.STRING, true, 4096L);
+  private static FusionTable2RepeatParameterTable relation = null;
 
-      static final DataField URI_FUSION_TABLE_PROPERTY = new DataField(
-              "URI_FUSION_TABLE", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
-      private static final DataField FUSION_TABLE_ID_PROPERTY = new DataField(
-              "FUSION_TABLE_ID", DataField.DataType.STRING, true, 4096L);
-      static final DataField FORM_ELEMENT_KEY_PROPERTY = new DataField(
-              "FORM_ELEMENT_KEY", DataField.DataType.STRING, true, 4096L);
+  /**
+   * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
+   *
+   * @param databaseSchema
+   * @param tableName
+   */
+  FusionTable2RepeatParameterTable(String schemaName) {
+    super(schemaName, TABLE_NAME);
+    fieldList.add(URI_FUSION_TABLE_PROPERTY);
+    fieldList.add(FUSION_TABLE_ID_PROPERTY);
+    fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
+  }
 
-        /**
-         * Construct a relation prototype. Only called via {@link #assertRelation(CallingContext)}
-         *
-         * @param databaseSchema
-         * @param tableName
-         */
-      FusionTable2RepeatParameterTable(String schemaName) {
-        super(schemaName, TABLE_NAME);
-        fieldList.add(URI_FUSION_TABLE_PROPERTY);
-        fieldList.add(FUSION_TABLE_ID_PROPERTY);
-        fieldList.add(FORM_ELEMENT_KEY_PROPERTY);
-      }
+  /**
+   * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
+   *
+   * @param ref
+   * @param user
+   */
+  private FusionTable2RepeatParameterTable(FusionTable2RepeatParameterTable ref, User user) {
+    super(ref, user);
+  }
 
-      /**
-       * Construct an empty entity.  Only called via {@link #getEmptyRow(User)}
-       *
-       * @param ref
-       * @param user
-       */
-      private FusionTable2RepeatParameterTable(FusionTable2RepeatParameterTable ref, User user) {
-        super(ref, user);
-      }
+  public static synchronized final FusionTable2RepeatParameterTable assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      FusionTable2RepeatParameterTable relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      relationPrototype = new FusionTable2RepeatParameterTable(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
+  }
 
-      // Only called from within the persistence layer.
-      @Override
-      public FusionTable2RepeatParameterTable getEmptyRow(User user) {
-        return new FusionTable2RepeatParameterTable(this, user);
-      }
+  public static List<FusionTable2RepeatParameterTable> getRepeatGroupAssociations(String uri,
+                                                                                  CallingContext cc) throws ODKDatastoreException {
+    List<FusionTable2RepeatParameterTable> list = new ArrayList<FusionTable2RepeatParameterTable>();
+    FusionTable2RepeatParameterTable frpt = assertRelation(cc);
 
-      public String getUriFusionTable() {
-        return getStringField(URI_FUSION_TABLE_PROPERTY);
-      }
+    Query query = cc.getDatastore().createQuery(frpt, "FusionTableRepeatParameterTable.getRepeatGroupAssociations", cc.getCurrentUser());
+    query.addFilter(URI_FUSION_TABLE_PROPERTY, FilterOperation.EQUAL, uri);
 
-      public void setUriFusionTable(String value) {
-        if (!setStringField(URI_FUSION_TABLE_PROPERTY, value)) {
-          throw new IllegalArgumentException("overflow uriFusionTable");
-        }
-      }
+    List<? extends CommonFieldsBase> results = query.executeQuery();
+    for (CommonFieldsBase b : results) {
+      list.add((FusionTable2RepeatParameterTable) b);
+    }
+    return list;
+  }
 
-      public String getFusionTableId() {
-        return getStringField(FUSION_TABLE_ID_PROPERTY);
-      }
+  // Only called from within the persistence layer.
+  @Override
+  public FusionTable2RepeatParameterTable getEmptyRow(User user) {
+    return new FusionTable2RepeatParameterTable(this, user);
+  }
 
-      public void setFusionTableId(String value) {
-        if (!setStringField(FUSION_TABLE_ID_PROPERTY, value)) {
-          throw new IllegalArgumentException("overflow fusionTableId");
-        }
-      }
+  public String getUriFusionTable() {
+    return getStringField(URI_FUSION_TABLE_PROPERTY);
+  }
 
-      public FormElementKey getFormElementKey() {
-        String key = getStringField(FORM_ELEMENT_KEY_PROPERTY);
-        if ( key == null ) return null;
-        return new FormElementKey(key);
-      }
+  public void setUriFusionTable(String value) {
+    if (!setStringField(URI_FUSION_TABLE_PROPERTY, value)) {
+      throw new IllegalArgumentException("overflow uriFusionTable");
+    }
+  }
 
-      public void setFormElementKey(FormElementKey value) {
-        if (!setStringField(FORM_ELEMENT_KEY_PROPERTY, value.toString())) {
-          throw new IllegalArgumentException("overflow formElementKey");
-        }
-      }
+  public String getFusionTableId() {
+    return getStringField(FUSION_TABLE_ID_PROPERTY);
+  }
 
-      private static FusionTable2RepeatParameterTable relation = null;
+  public void setFusionTableId(String value) {
+    if (!setStringField(FUSION_TABLE_ID_PROPERTY, value)) {
+      throw new IllegalArgumentException("overflow fusionTableId");
+    }
+  }
 
-      public static synchronized final FusionTable2RepeatParameterTable assertRelation(CallingContext cc)
-          throws ODKDatastoreException {
-        if (relation == null) {
-            FusionTable2RepeatParameterTable relationPrototype;
-            Datastore ds = cc.getDatastore();
-            User user = cc.getUserService().getDaemonAccountUser();
-            relationPrototype = new FusionTable2RepeatParameterTable(ds.getDefaultSchemaName());
-            ds.assertRelation(relationPrototype, user); // may throw exception...
-            // at this point, the prototype has become fully populated
-            relation = relationPrototype; // set static variable only upon success...
-        }
-        return relation;
-      }
+  public FormElementKey getFormElementKey() {
+    String key = getStringField(FORM_ELEMENT_KEY_PROPERTY);
+    if (key == null) return null;
+    return new FormElementKey(key);
+  }
 
-      public static List<FusionTable2RepeatParameterTable> getRepeatGroupAssociations(String uri,
-                                                            CallingContext cc) throws ODKDatastoreException {
-          List<FusionTable2RepeatParameterTable> list = new ArrayList<FusionTable2RepeatParameterTable> ();
-          FusionTable2RepeatParameterTable frpt = assertRelation(cc);
-
-          Query query = cc.getDatastore().createQuery(frpt, "FusionTableRepeatParameterTable.getRepeatGroupAssociations", cc.getCurrentUser());
-          query.addFilter(URI_FUSION_TABLE_PROPERTY, FilterOperation.EQUAL, uri);
-
-          List<? extends CommonFieldsBase> results = query.executeQuery();
-          for ( CommonFieldsBase b : results ) {
-              list.add((FusionTable2RepeatParameterTable) b);
-          }
-          return list;
-      }
+  public void setFormElementKey(FormElementKey value) {
+    if (!setStringField(FORM_ELEMENT_KEY_PROPERTY, value.toString())) {
+      throw new IllegalArgumentException("overflow formElementKey");
+    }
+  }
 }

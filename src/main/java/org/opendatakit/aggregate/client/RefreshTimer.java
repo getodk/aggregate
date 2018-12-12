@@ -16,10 +16,9 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.constants.common.SubTabs;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
+import org.opendatakit.aggregate.constants.common.SubTabs;
 
 /**
  * Background refresh timer that polls the server every 5 seconds for changes to
@@ -28,7 +27,6 @@ import com.google.gwt.user.client.Timer;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class RefreshTimer extends Timer {
 
@@ -184,53 +182,37 @@ public class RefreshTimer extends Timer {
       }
 
       switch (currentSubTab) {
-      case FORMS:
-      case TABLES:
-        if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
-          GWT.log("forms/tables Refresh");
+        case FORMS:
+        case SUBMISSION_ADMIN:
+        case FILTER:
+          if ((intervalsCount % SUBMISSIONS_REFRESH_MULTIPLIER) == 0) {
+            GWT.log("submissions Refresh");
+            tabPanel.update();
+          }
+          break;
+        case EXPORT:
+        case PUBLISH:
+          GWT.log("export/publish Refresh");
           tabPanel.update();
-        }
-        break;
-      case SUBMISSION_ADMIN:
-      case FILTER:
-        if ((intervalsCount % SUBMISSIONS_REFRESH_MULTIPLIER) == 0) {
-          GWT.log("submissions Refresh");
-          tabPanel.update();
-        }
-        break;
-      case EXPORT:
-      case PUBLISH:
-        GWT.log("export/publish Refresh");
-        tabPanel.update();
-        break;
-      case PREFERENCES:
-        if ((intervalsCount % PREFERENCES_REFRESH_MULTIPLIER) == 0) {
-          GWT.log("preferences Refresh");
-          tabPanel.update();
-        }
-        break;
-      case PERMISSIONS:
-        if (lastCompletionTime == 0L) {
-          GWT.log("permissions Refresh");
-          // update this ONLY if we are forcing a refreshNow().
-          // otherwise, let the entries be stale w.r.t. server.
-          tabPanel.update();
-        }
-        break;
-      case CURRENTTABLES:
-      case VIEWTABLE:
-      case MANAGE_INSTANCE_FILES:
-      case MANAGE_TABLE_ID_FILES:
-      case MANAGE_APP_LEVEL_FILES:
-        if ((intervalsCount % MISC_REFRESH_MULTIPLIER) == 0) {
-          GWT.log("manage files refresh");
-          tabPanel.update();
-        }
-        break;
-      default:
-        // should not happen
-        GWT.log("currentSubTab (" + currentSubTab.getHashString()
-            + ") has no defined action in RefreshTimer.run()");
+          break;
+        case PREFERENCES:
+          if ((intervalsCount % PREFERENCES_REFRESH_MULTIPLIER) == 0) {
+            GWT.log("preferences Refresh");
+            tabPanel.update();
+          }
+          break;
+        case PERMISSIONS:
+          if (lastCompletionTime == 0L) {
+            GWT.log("permissions Refresh");
+            // update this ONLY if we are forcing a refreshNow().
+            // otherwise, let the entries be stale w.r.t. server.
+            tabPanel.update();
+          }
+          break;
+        default:
+          // should not happen
+          GWT.log("currentSubTab (" + currentSubTab.getHashString()
+              + ") has no defined action in RefreshTimer.run()");
       }
     }
     // record last completion time...

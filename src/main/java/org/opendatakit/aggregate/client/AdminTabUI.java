@@ -16,61 +16,21 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.aggregate.constants.common.Tabs;
 
-import com.google.gwt.user.client.ui.Widget;
-
 public class AdminTabUI extends AggregateTabBase {
-
-  private PermissionsSubTab permissionsSubTab;
-  private OdkTablesAdminSubTab odkTablesAdminTab;
 
   public AdminTabUI(AggregateUI baseUI) {
     super();
 
     // build the UI
-    permissionsSubTab = new PermissionsSubTab();
+    PermissionsSubTab permissionsSubTab = new PermissionsSubTab();
     addSubTab(permissionsSubTab, SubTabs.PERMISSIONS);
     addSubTab(new PreferencesSubTab(), SubTabs.PREFERENCES);
 
-    odkTablesAdminTab = new OdkTablesAdminSubTab();
-    addSubTab(odkTablesAdminTab, SubTabs.TABLES);
-
-    // show panel by default, so need to hide it
-    if(!Preferences.getOdkTablesEnabled()) {
-      hideOdkTablesSubTab();
-    }
-
     // register handler to manage tab selection change (and selecting our tab)
     registerClickHandlers(Tabs.ADMIN, baseUI);
-  }
-
-  private void changeVisibilityOdkTablesSubTab(boolean outcome) {
-    SubTabInterface odkTablesAdmin = getSubTab(SubTabs.TABLES);
-    OdkTablesAdminSubTab subTab = ((OdkTablesAdminSubTab) odkTablesAdmin);
-    if ( subTab != null ) {
-      subTab.setVisible(outcome);
-    }
-    for (int i = 0; i < subTabPosition.size(); i++) {
-      if ( subTabPosition.get(i).equals(SubTabs.TABLES) ) {
-        Widget w = ((Widget) this.getTabBar().getTab(i));
-        if ( w != null ) {
-          w.setVisible(outcome);
-        }
-      }
-    }
-  }
-
-  public void displayOdkTablesSubTab() {
-    changeVisibilityOdkTablesSubTab(true);
-    permissionsSubTab.changeTablesPrivilegesVisibility(true);
-  }
-
-  public void hideOdkTablesSubTab() {
-    changeVisibilityOdkTablesSubTab(false);
-    permissionsSubTab.changeTablesPrivilegesVisibility(false);
   }
 
 }

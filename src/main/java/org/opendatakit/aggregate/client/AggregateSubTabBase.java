@@ -16,9 +16,8 @@
 
 package org.opendatakit.aggregate.client;
 
-import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
-
 import com.google.gwt.user.client.ui.FlowPanel;
+import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
 
 public abstract class AggregateSubTabBase extends FlowPanel implements SubTabInterface {
 

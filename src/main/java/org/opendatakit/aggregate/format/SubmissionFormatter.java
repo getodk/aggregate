@@ -16,30 +16,27 @@
 package org.opendatakit.aggregate.format;
 
 import java.util.List;
-
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public interface SubmissionFormatter {
   public void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException;
 
   /**
    * Implementation should call before..., ...Segment, after... .
-   * 
+   *
    * @param submissions
    * @param cc
    * @throws ODKDatastoreException
    */
   public void processSubmissions(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException;
-  
+
   public void processSubmissionSegment(List<Submission> submissions, CallingContext cc) throws ODKDatastoreException;
-  
+
   public void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException;
 }

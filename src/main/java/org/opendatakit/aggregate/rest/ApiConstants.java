@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 University of Washington
+ * Copyright (C) 2013 University of Washington
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,26 +14,21 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.odktables.exception;
+package org.opendatakit.aggregate.rest;
 
-public class AppNameMismatchException extends ODKTablesException {
+/**
+ * HTTP Header fields and values for those fields. Some of these are here so
+ * as to avoid needing to use Android-specific classes to reference them.
+ *
+ * @author mitchellsundt@gmail.com
+ */
+public final class ApiConstants {
 
-  private static final long serialVersionUID = 1L;
+  public static final String OPEN_DATA_KIT_VERSION_HEADER = "X-OpenDataKit-Version";
 
-  public AppNameMismatchException() {
-    super();
+  public static final String OPEN_DATA_KIT_VERSION = "2.0";
+  public static final String DATE_HEADER = "Date";
+
+  private ApiConstants() {
   }
-
-  public AppNameMismatchException(String message) {
-    super(message);
-  }
-
-  public AppNameMismatchException(Throwable cause) {
-    super(cause);
-  }
-
-  public AppNameMismatchException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
 }

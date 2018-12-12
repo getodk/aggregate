@@ -17,6 +17,14 @@
 
 package org.opendatakit.aggregate.submission;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.opendatakit.aggregate.datamodel.FormDataModel;
 import org.opendatakit.aggregate.datamodel.FormDataModel.DDRelationName;
 import org.opendatakit.aggregate.datamodel.FormDataModel.ElementType;
@@ -25,7 +33,18 @@ import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.submission.type.*;
+import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
+import org.opendatakit.aggregate.submission.type.BooleanMetadataType;
+import org.opendatakit.aggregate.submission.type.BooleanSubmissionType;
+import org.opendatakit.aggregate.submission.type.ChoiceSubmissionType;
+import org.opendatakit.aggregate.submission.type.DateTimeMetadataType;
+import org.opendatakit.aggregate.submission.type.DecimalSubmissionType;
+import org.opendatakit.aggregate.submission.type.GeoPointSubmissionType;
+import org.opendatakit.aggregate.submission.type.LongMetadataType;
+import org.opendatakit.aggregate.submission.type.LongSubmissionType;
+import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.aggregate.submission.type.StringMetadataType;
+import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
 import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
@@ -42,9 +61,6 @@ import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
-
-import java.io.PrintWriter;
-import java.util.*;
 
 /**
  * Groups a set of submission values together so they can be stored in a
@@ -63,6 +79,11 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    */
 
   /**
+   * Identifier for this submission set (all other entries in dbEntities are
+   * under this set)
+   */
+  protected final FormElementModel group;
+  /**
    * dbEntities holds the map of all backing objects used to store this
    * submission set record. It excludes the binary and choice tables, which are
    * independent elements. Everything is broken if we have two or more backing
@@ -70,29 +91,19 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    * this map, and that would be the same for all records held in a given table.
    */
   private final Map<DDRelationName, DynamicCommonFieldsBase> dbEntities = new HashMap<DDRelationName, DynamicCommonFieldsBase>();
-
   /**
    * set in which this set is contained.
    */
 
   private final SubmissionSet enclosingSet;
-
   /**
    * key that uniquely identifies the submission
    */
   private final EntityKey key;
-
   /**
    * The definition of this form (for access to lst).
    */
   private final IForm form;
-
-  /**
-   * Identifier for this submission set (all other entries in dbEntities are
-   * under this set)
-   */
-  protected final FormElementModel group;
-
   /**
    * Identifier for the parent for persistence co-location.
    * <p>
@@ -168,13 +179,52 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
   }
 
   /**
+   * Construct a submission set from the datastore.
+   *
+   * @param enclosingSet   - the enclosing submission set.
+   * @param row            - the base record for this submission set.
+   * @param group          - the form group mapped to the base record.
+   * @param formDefinition - the definition of the form.
+   * @param cc             - the CallingContext of this request.
+   * @throws ODKDatastoreException
+   */
+  public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
+                       FormElementModel group, IForm form, CallingContext cc) throws ODKDatastoreException {
+    this.form = form;
+    this.group = group;
+    this.enclosingSet = enclosingSet;
+    this.key = row.getEntityKey();
+    Datastore datastore = cc.getDatastore();
+    User user = cc.getCurrentUser();
+
+    if (!key.getRelation().sameTable(group.getFormDataModel().getBackingObjectPrototype())) {
+      throw new IllegalArgumentException("self-key and group backing object do not match");
+    }
+    if (row instanceof TopLevelDynamicBase) {
+      this.topLevelTableKey = key;
+    } else {
+      DynamicBase entity = (DynamicBase) row;
+      // we aren't the top level record so manufacture the
+      // entity key of the top level record from the relation
+      // for that record and the up-pointer in our record
+      // that holds the AURI for that top level record.
+      this.topLevelTableKey = new EntityKey(form.getTopLevelGroupElement().getFormDataModel()
+          .getBackingObjectPrototype(), entity.getTopLevelAuri());
+    }
+    dbEntities.put(group.getFormDataModel().getDDRelationName(), row);
+    recursivelyGetEntities(topLevelTableKey.getKey(), row.getUri(), group.getFormDataModel(),
+        datastore, user);
+    buildSubmissionFields(group, cc);
+  }
+
+  /**
    * Submission sets may be split over multiple database records by either
    * inserting a nested phantom table, moving a geopoint to a different table,
    * or moving an entire non-repeating group to a different table.
    *
    * @param m
    * @return true if this element may identify a new table or if its children
-   * may have a new table within them.
+   *     may have a new table within them.
    */
   private boolean isPhantomOfSubmissionSet(FormDataModel m) {
     return (m.getPersistAsColumn() == null)
@@ -214,45 +264,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
         recursivelyCreateEntities(m, datastore, user);
       }
     }
-  }
-
-  /**
-   * Construct a submission set from the datastore.
-   *
-   * @param enclosingSet   - the enclosing submission set.
-   * @param row            - the base record for this submission set.
-   * @param group          - the form group mapped to the base record.
-   * @param formDefinition - the definition of the form.
-   * @param cc             - the CallingContext of this request.
-   * @throws ODKDatastoreException
-   */
-  public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
-                       FormElementModel group, IForm form, CallingContext cc) throws ODKDatastoreException {
-    this.form = form;
-    this.group = group;
-    this.enclosingSet = enclosingSet;
-    this.key = row.getEntityKey();
-    Datastore datastore = cc.getDatastore();
-    User user = cc.getCurrentUser();
-
-    if (!key.getRelation().sameTable(group.getFormDataModel().getBackingObjectPrototype())) {
-      throw new IllegalArgumentException("self-key and group backing object do not match");
-    }
-    if (row instanceof TopLevelDynamicBase) {
-      this.topLevelTableKey = key;
-    } else {
-      DynamicBase entity = (DynamicBase) row;
-      // we aren't the top level record so manufacture the
-      // entity key of the top level record from the relation
-      // for that record and the up-pointer in our record
-      // that holds the AURI for that top level record.
-      this.topLevelTableKey = new EntityKey(form.getTopLevelGroupElement().getFormDataModel()
-          .getBackingObjectPrototype(), entity.getTopLevelAuri());
-    }
-    dbEntities.put(group.getFormDataModel().getDDRelationName(), row);
-    recursivelyGetEntities(topLevelTableKey.getKey(), row.getUri(), group.getFormDataModel(),
-        datastore, user);
-    buildSubmissionFields(group, cc);
   }
 
   private void recursivelyGetEntities(String uriTopLevel, String uriParent,
@@ -522,8 +533,8 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    *
    * @param element may be null; must be in this SubmissionSet
    * @return submissionKey specifying the key to the top-level submission, the
-   * key for this submissionSet, and the name of the element (if not
-   * null)
+   *     key for this submissionSet, and the name of the element (if not
+   *     null)
    */
   public SubmissionKey constructSubmissionKey(FormElementModel element) {
     return new SubmissionKey(getFullyQualifiedElementName(element));

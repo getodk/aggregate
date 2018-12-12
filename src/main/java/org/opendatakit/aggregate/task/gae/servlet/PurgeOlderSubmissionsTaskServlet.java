@@ -17,15 +17,10 @@
 package org.opendatakit.aggregate.task.gae.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -35,6 +30,8 @@ import org.opendatakit.aggregate.task.PurgeOlderSubmissionsWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple servlet for the GAE invokation of the task action that scans through
@@ -42,27 +39,24 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class PurgeOlderSubmissionsTaskServlet extends ServletUtilBase {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 8219849865201422548L;
-
-  private static final Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsTaskServlet.class);
 
   /**
    * URI from base
    */
   public static final String ADDR = "gae/purgeOlderSubmissionsTask";
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 8219849865201422548L;
+  private static final Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsTaskServlet.class);
 
   /**
    * Handler for HTTP Get request that shows the list of forms
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -128,25 +122,6 @@ public class PurgeOlderSubmissionsTaskServlet extends ServletUtilBase {
 
     PurgeOlderSubmissionsWorkerImpl formDelete = new PurgeOlderSubmissionsWorkerImpl(form,
         miscTasksKey, attemptCount, cc);
-    try {
-      formDelete.purgeOlderSubmissions();
-    } catch (ODKDatastoreException e) {
-      logger.error("Unable to purge older submissions formId: " + formId + " exception: "
-          + e.toString());
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    } catch (ODKFormNotFoundException e) {
-      logger.error("Unable to purge older submissions formId: " + formId + " exception: "
-          + e.toString());
-      odkIdNotFoundError(resp);
-      return;
-    } catch (ODKExternalServiceDependencyException e) {
-      logger.error("Unable to purge older submissions formId: " + formId + " exception: "
-          + e.toString());
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    }
+    formDelete.purgeOlderSubmissions();
   }
 }

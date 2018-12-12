@@ -1,39 +1,40 @@
 package org.opendatakit.aggregate.externalservice;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.opendatakit.common.utils.WebUtils;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import org.opendatakit.common.utils.WebUtils;
 
 /**
  * TODO: comment and deal with null/empty value args
  *
  * @author the.dylan.price@gmail.com
- *
  */
 public class OhmageJsonTypes {
 
   public static final class Survey implements JsonSerializer<Survey> {
     /**
      * a string in the ISO 8601 format to the detail of seconds:
-     *
+     * <p>
      * YYYY-MM-DD hh:mm:ss.
      */
     private String date;
 
-    /** an int specifying the number of milliseconds since the epoch. */
+    /**
+     * an int specifying the number of milliseconds since the epoch.
+     */
     private Long time;
 
-    /** a string representing a standard time zone. */
+    /**
+     * a string representing a standard time zone.
+     */
     private String timezone;
 
     /**
@@ -43,7 +44,9 @@ public class OhmageJsonTypes {
      */
     private String location_status;
 
-    /** an object for housing location data */
+    /**
+     * an object for housing location data
+     */
     private Location location;
 
     /**
@@ -59,7 +62,9 @@ public class OhmageJsonTypes {
      */
     private String survey_launch_context;
 
-    /** an array composed of prompt responses and/or repeatable sets. */
+    /**
+     * an array composed of prompt responses and/or repeatable sets.
+     */
     private List<Response> responses;
 
     /**
@@ -70,8 +75,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param date
-     *          the date to set
+     * @param date the date to set
      */
     public void setDate(String date) {
       this.date = date;
@@ -85,8 +89,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param time
-     *          the time to set
+     * @param time the time to set
      */
     public void setTime(Long time) {
       this.time = time;
@@ -100,8 +103,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param timezone
-     *          the timezone to set
+     * @param timezone the timezone to set
      */
     public void setTimezone(String timezone) {
       this.timezone = timezone;
@@ -115,8 +117,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param location_status
-     *          the location_status to set
+     * @param location_status the location_status to set
      */
     public void setLocation_status(String location_status) {
       this.location_status = location_status;
@@ -130,8 +131,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param location
-     *          the location to set
+     * @param location the location to set
      */
     public void setLocation(Location location) {
       this.location = location;
@@ -145,8 +145,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param survey_id
-     *          the survey_id to set
+     * @param survey_id the survey_id to set
      */
     public void setSurvey_id(String survey_id) {
       this.survey_id = survey_id;
@@ -160,8 +159,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param survey_lauch_context
-     *          the survey_lauch_context to set
+     * @param survey_lauch_context the survey_lauch_context to set
      */
     public void setSurvey_lauch_context(String survey_lauch_context) {
       this.survey_launch_context = survey_lauch_context;
@@ -175,8 +173,7 @@ public class OhmageJsonTypes {
     }
 
     /**
-     * @param responses
-     *          the responses to set
+     * @param responses the responses to set
      */
     public void setResponses(List<Response> responses) {
       this.responses = responses;
@@ -206,19 +203,29 @@ public class OhmageJsonTypes {
 
   @SuppressWarnings("unused")
   public static final class Location {
-    /** a double representing latitude. */
+    /**
+     * a double representing latitude.
+     */
     private Double latitude;
 
-    /** a double representing latitude. */
+    /**
+     * a double representing latitude.
+     */
     private Double longitude;
 
-    /** a non-empty string (e.g., GPS or network). */
+    /**
+     * a non-empty string (e.g., GPS or network).
+     */
     private String provider;
 
-    /** a float representing accuracy in meters from actual location. */
+    /**
+     * a float representing accuracy in meters from actual location.
+     */
     private Double accuracy;
 
-    /** the timestamp at which the location data was generated. */
+    /**
+     * the timestamp at which the location data was generated.
+     */
     private String timestamp;
   }
 
@@ -226,7 +233,9 @@ public class OhmageJsonTypes {
   }
 
   public static final class RepeatableSet extends Response implements JsonSerializer<RepeatableSet> {
-    /** the id/label for a repeatable set of prompts */
+    /**
+     * the id/label for a repeatable set of prompts
+     */
     private final String repeatable_set_id;
 
     /**
@@ -322,7 +331,9 @@ public class OhmageJsonTypes {
   }
 
   public abstract static class PromptResponse extends Response {
-    /** the prompt id */
+    /**
+     * the prompt id
+     */
     private final String prompt_id;
 
     protected PromptResponse(String prompt_id) {
@@ -370,7 +381,9 @@ public class OhmageJsonTypes {
   }
 
   public static final class text extends PromptResponse {
-    /** format depends on the response type for each prompt */
+    /**
+     * format depends on the response type for each prompt
+     */
     private final String value;
 
     // for gson

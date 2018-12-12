@@ -41,23 +41,20 @@ import org.opendatakit.common.security.client.UserSecurityInfo;
 
 public final class PublishPopup extends AbstractPopupBase {
 
+  public static final Consumer<String> NO_OP_CONSUMER = (String __) -> {
+  };
   private static final String EMPTY_STRING = "";
   private static final String HTTP_LOCALHOST = "http://localhost";
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
   private static final String TOOLTIP_TXT = "Publish the data";
   private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables, "
       + " Google Spreadsheets, a REDCap server, or a server accepting JSON content.";
-
   private static final String ES_SERVICEOPTIONS_TOOLTIP = "Method data should be published";
   private static final String ES_SERVICEOPTIONS_BALLOON = "Choose whether you would like only old data, only new data, or all data to be published.";
   private static final String ES_TYPE_TOOLTIP = "Type of External Service Connection";
   private static final String ES_TYPE_BALLOON = "Select the application where you want your data to be published.";
-
   private static final String BO_TYPE_TOOLTIP = "Sets how the binary data from Media should be published";
   private static final String BO_TYPE_BALLOON = "Selects how the binary dat from Media should be published. Aggregate will provide links in the publish OR will embed the data in the publish";
-  public static final Consumer<String> NO_OP_CONSUMER = (String __) -> {
-  };
-
   // this is the main flex table for the popup
   private final FlexTable layout;
   // this is the header

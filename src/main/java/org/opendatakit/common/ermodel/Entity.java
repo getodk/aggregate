@@ -17,7 +17,6 @@
 package org.opendatakit.common.ermodel;
 
 import java.util.Date;
-
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -29,7 +28,7 @@ public interface Entity {
 
   /**
    * @return the unique identifier of this Entity. You can later retrieve this
-   *         Entity using {@link Relation#getEntity(String)}.
+   *     Entity using {@link Relation#getEntity(String)}.
    */
   public abstract String getId();
 
@@ -45,13 +44,13 @@ public interface Entity {
 
   /**
    * @return the user who created this entity, of the form
-   *         "mailto:username@domain.com"
+   *     "mailto:username@domain.com"
    */
   public abstract String getCreationUser();
 
   /**
    * @return the user who last updated this entity, of the form
-   *         "mailto:username@domain.com"
+   *     "mailto:username@domain.com"
    */
   public abstract String getLastUpdateUser();
 
@@ -86,7 +85,7 @@ public interface Entity {
   public abstract Long getLong(String fieldName);
 
   public abstract String getString(String fieldName);
-  
+
   public abstract boolean isFromDatabase();
 
   public abstract void set(DataField field, Boolean value);
@@ -134,8 +133,7 @@ public interface Entity {
   /**
    * Saves this Entity to the datastore.
    *
-   * @throws ODKEntityPersistException
-   *           if there was a problem saving the Entity.
+   * @throws ODKEntityPersistException if there was a problem saving the Entity.
    * @throws ODKOverQuotaException
    */
   public abstract void put(CallingContext cc) throws ODKEntityPersistException,
@@ -144,8 +142,7 @@ public interface Entity {
   /**
    * Deletes this Entity from the datastore.
    *
-   * @throws ODKDatastoreException
-   *           if there was a problem deleting this Entity.
+   * @throws ODKDatastoreException if there was a problem deleting this Entity.
    */
   public abstract void delete(CallingContext cc) throws ODKDatastoreException;
 

@@ -47,28 +47,6 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <filter>
-        <filter-name>GaeAwareContentEncodingRequestFilter</filter-name>
-        <filter-class>org.opendatakit.aggregate.odktables.impl.api.wink.GaeAwareContentEncodingRequestFilter
-        </filter-class>
-    </filter>
-
-    <filter-mapping>
-        <filter-name>GaeAwareContentEncodingRequestFilter</filter-name>
-        <url-pattern>/odktables/*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>GaeAwareContentEncodingResponseFilter</filter-name>
-        <filter-class>org.opendatakit.aggregate.odktables.impl.api.wink.GaeAwareContentEncodingResponseFilter
-        </filter-class>
-    </filter>
-
-    <filter-mapping>
-        <filter-name>GaeAwareContentEncodingResponseFilter</filter-name>
-        <url-pattern>/odktables/*</url-pattern>
-    </filter-mapping>
-
     <!--CSRF PROTECTION-->
 
     <servlet>
@@ -130,58 +108,6 @@
         <servlet-name>preferenceServiceImpl</servlet-name>
         <url-pattern>/aggregateui/preferenceservice</url-pattern>
     </servlet-mapping>
-
-    <!--  odk tables servlets -->
-    <servlet>
-        <servlet-name>odkTablesAdminServiceImpl</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.server.OdkTablesAdminServiceImpl</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>odkTablesAdminServiceImpl</servlet-name>
-        <url-pattern>/aggregateui/odktablesadmin</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>serverDataServiceImpl</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.server.ServerDataServiceImpl</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>serverDataServiceImpl</servlet-name>
-        <url-pattern>/aggregateui/serverdataservice</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>serverDiffServiceImpl</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.server.ServerDiffServiceImpl</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>serverDiffServiceImpl</servlet-name>
-        <url-pattern>/aggregateui/serverdiffservice</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>serverTableACLServiceImpl</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.server.ServerTableACLServiceImpl</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>serverTableACLServiceImpl</servlet-name>
-        <url-pattern>/aggregateui/servertableaclservice</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>serverTableServiceImpl</servlet-name>
-        <servlet-class>org.opendatakit.aggregate.server.ServerTableServiceImpl</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>serverTableServiceImpl</servlet-name>
-        <url-pattern>/aggregateui/servertableservice</url-pattern>
-    </servlet-mapping>
-
 
     <servlet>
         <servlet-name>securityAdminServiceImpl</servlet-name>
@@ -515,34 +441,6 @@
     <servlet-mapping>
         <servlet-name>multimodeLoginPage</servlet-name>
         <url-pattern>/multimode_login.html</url-pattern>
-    </servlet-mapping>
-
-    <!-- servlet for odktables api -->
-    <servlet>
-        <servlet-name>ODKTables</servlet-name>
-        <servlet-class>org.apache.wink.server.internal.servlet.RestServlet</servlet-class>
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.opendatakit.aggregate.odktables.impl.api.ODKTablesAPIApplication</param-value>
-        </init-param>
-        <init-param>
-            <param-name>propertiesLocation</param-name>
-            <param-value>security.properties</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ODKTables</servlet-name>
-        <url-pattern>/odktables/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>odktablesRest</servlet-name>
-        <servlet-class>org.apache.wink.server.internal.servlet.AdminServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>odktablesRest</servlet-name>
-        <url-pattern>/view/odktablesRest</url-pattern>
     </servlet-mapping>
 
     <servlet>

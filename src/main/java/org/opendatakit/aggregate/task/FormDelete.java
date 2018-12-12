@@ -22,13 +22,11 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public interface FormDelete {
 
   public void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey,
-            long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
+                                   long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
 }

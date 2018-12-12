@@ -20,12 +20,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 
-public class AggregateButton extends Button implements ClickHandler{
-  
+public class AggregateButton extends Button implements ClickHandler {
+
   private final AggregateBaseHandlers handlers;
-  
+
   public AggregateButton(String buttonText, String tooltipText) {
-    this(buttonText, tooltipText, null);    
+    this(buttonText, tooltipText, null);
   }
 
   public AggregateButton(String buttonText, String tooltipText, String helpBalloonText) {
@@ -34,11 +34,11 @@ public class AggregateButton extends Button implements ClickHandler{
     addClickHandler(this);
 
     // setup help system
-    handlers = new AggregateBaseHandlers(this, tooltipText, helpBalloonText);  
+    handlers = new AggregateBaseHandlers(this, tooltipText, helpBalloonText);
     addMouseOverHandler(handlers);
-    addMouseOutHandler(handlers);  
+    addMouseOutHandler(handlers);
   }
-  
+
   @Override
   public void onClick(ClickEvent event) {
     handlers.userAction();

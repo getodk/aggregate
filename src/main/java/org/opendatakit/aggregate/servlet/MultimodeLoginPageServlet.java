@@ -20,35 +20,31 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple servlet to display the openId login page. Invalidates the user's
  * session before displaying the page.
  *
  * @author user
- *
  */
 public class MultimodeLoginPageServlet extends ServletUtilBase {
 
+  public static final String ADDR = "multimode_login.html";
   /**
-     *
-     */
+   *
+   */
   private static final long serialVersionUID = -1036419513113652548L;
   private static final Logger logger = LoggerFactory.getLogger(MultimodeLoginPageServlet.class);
-
-  public static final String ADDR = "multimode_login.html";
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
@@ -84,20 +80,20 @@ public class MultimodeLoginPageServlet extends ServletUtilBase {
     String redirectParamString = getRedirectUrl(req, AggregateHtmlServlet.ADDR);
     // we need to appropriately cleanse this string for the OpenID login
     // strip off the server pathname portion
-    if ( redirectParamString.startsWith(cc.getSecureServerURL()) ) {
+    if (redirectParamString.startsWith(cc.getSecureServerURL())) {
       redirectParamString = redirectParamString.substring(cc.getSecureServerURL().length());
-    } else if ( redirectParamString.startsWith(cc.getServerURL()) ) {
+    } else if (redirectParamString.startsWith(cc.getServerURL())) {
       redirectParamString = redirectParamString.substring(cc.getServerURL().length());
     }
-    while ( redirectParamString.startsWith("/") ) {
+    while (redirectParamString.startsWith("/")) {
       redirectParamString = redirectParamString.substring(1);
     }
-    
+
     // check for XSS attacks. The redirect string is emitted within single and double
     // quotes. It is a URL with :, /, ? and # characters. But it should not contain 
     // quotes, parentheses or semicolons.
     String cleanString = redirectParamString.replaceAll(BAD_PARAMETER_CHARACTERS, "");
-    if ( !cleanString.equals(redirectParamString) ) {
+    if (!cleanString.equals(redirectParamString)) {
       logger.warn("XSS cleanup -- redirectParamString has forbidden characters: " + redirectParamString);
       redirectParamString = cleanString;
     }

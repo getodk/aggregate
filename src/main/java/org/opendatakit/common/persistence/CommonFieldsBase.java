@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.opendatakit.common.persistence.DataField.DataType;
 import org.opendatakit.common.persistence.DataField.IndexType;
 import org.opendatakit.common.security.User;
@@ -65,20 +64,18 @@ public abstract class CommonFieldsBase {
   /** primary key for all tables */
   private static final DataField URI = new DataField(URI_COLUMN_NAME, DataField.DataType.URI,
       false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-
-  /** member variables */
-  protected final String schemaName;
-  protected final String tableName;
-  private boolean fromDatabase = false;
-  private Object opaquePersistenceData = null;
-  protected final List<DataField> fieldList = new ArrayList<DataField>();
-  protected final Map<DataField, Object> fieldValueMap = new HashMap<DataField, Object>();
-
   public final DataField primaryKey;
   public final DataField creatorUriUser;
   public final DataField creationDate;
   public final DataField lastUpdateUriUser;
   public final DataField lastUpdateDate;
+  /** member variables */
+  protected final String schemaName;
+  protected final String tableName;
+  protected final List<DataField> fieldList = new ArrayList<DataField>();
+  protected final Map<DataField, Object> fieldValueMap = new HashMap<DataField, Object>();
+  private boolean fromDatabase = false;
+  private Object opaquePersistenceData = null;
 
   /**
    * Construct a relation prototype.
@@ -124,6 +121,52 @@ public abstract class CommonFieldsBase {
     fieldValueMap.put(lastUpdateDate, now);
     fieldValueMap.put(creatorUriUser, user.getUriUser());
     fieldValueMap.put(primaryKey, CommonFieldsBase.newUri());
+  }
+
+  public final static String newUri() {
+    String s = "uuid:" + UUID.randomUUID().toString().toLowerCase();
+    return s;
+  }
+
+  public final static String newMD5HashUri(String value) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] asBytes;
+      try {
+        asBytes = value.getBytes("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+        throw new IllegalStateException("unexpected", e);
+      }
+      md.update(asBytes);
+
+      byte[] messageDigest = md.digest();
+
+      BigInteger number = new BigInteger(1, messageDigest);
+      String md5 = number.toString(16);
+      while (md5.length() < 32)
+        md5 = "0" + md5;
+      return "md5:" + md5;
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("Unexpected problem computing md5 hash", e);
+    }
+  }
+
+  public final static String newMD5HashUri(byte[] asBytes) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      md.update(asBytes);
+
+      byte[] messageDigest = md.digest();
+
+      BigInteger number = new BigInteger(1, messageDigest);
+      String md5 = number.toString(16);
+      while (md5.length() < 32)
+        md5 = "0" + md5;
+      return "md5:" + md5;
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("Unexpected problem computing md5 hash", e);
+    }
   }
 
   public final EntityKey getEntityKey() {
@@ -307,7 +350,7 @@ public abstract class CommonFieldsBase {
       fieldValueMap.remove(f);
       return;
     }
-    if ( !f.isDoublePrecision()  && !value.isSpecialValue() ) {
+    if (!f.isDoublePrecision() && !value.isSpecialValue()) {
       // enforce scaling here...
       fieldValueMap.put(f, value.setScale(f.getNumericScale(), BigDecimal.ROUND_HALF_UP));
     } else {
@@ -424,52 +467,6 @@ public abstract class CommonFieldsBase {
       return;
     }
     fieldValueMap.put(f, value);
-  }
-
-  public final static String newUri() {
-    String s = "uuid:" + UUID.randomUUID().toString().toLowerCase();
-    return s;
-  }
-
-  public final static String newMD5HashUri(String value) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      byte[] asBytes;
-      try {
-        asBytes = value.getBytes("UTF-8");
-      } catch (UnsupportedEncodingException e) {
-        e.printStackTrace();
-        throw new IllegalStateException("unexpected", e);
-      }
-      md.update(asBytes);
-
-      byte[] messageDigest = md.digest();
-
-      BigInteger number = new BigInteger(1, messageDigest);
-      String md5 = number.toString(16);
-      while (md5.length() < 32)
-        md5 = "0" + md5;
-      return "md5:" + md5;
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("Unexpected problem computing md5 hash", e);
-    }
-  }
-
-  public final static String newMD5HashUri(byte[] asBytes) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      md.update(asBytes);
-
-      byte[] messageDigest = md.digest();
-
-      BigInteger number = new BigInteger(1, messageDigest);
-      String md5 = number.toString(16);
-      while (md5.length() < 32)
-        md5 = "0" + md5;
-      return "md5:" + md5;
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("Unexpected problem computing md5 hash", e);
-    }
   }
 
   /**********************************************************************************

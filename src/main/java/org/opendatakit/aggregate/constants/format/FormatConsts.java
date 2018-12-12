@@ -25,7 +25,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class FormatConsts {
 

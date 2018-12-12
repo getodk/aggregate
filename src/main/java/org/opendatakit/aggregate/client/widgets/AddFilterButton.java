@@ -16,15 +16,14 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.FilterSubTab;
-import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.popups.FilterPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
+import org.opendatakit.aggregate.client.FilterSubTab;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.popups.FilterPopup;
 
 public final class AddFilterButton extends AggregateButton implements ClickHandler {
 
@@ -45,10 +44,10 @@ public final class AddFilterButton extends AggregateButton implements ClickHandl
 
     FilterGroup currentFilterGroup = basePanel.getDisplayedFilterGroup();
     // check if we should even pop up a filter if there is no form
-    if(currentFilterGroup.getFormId() == null) {
+    if (currentFilterGroup.getFormId() == null) {
       return;
     }
-    
+
     FilterPopup filterPopup = new FilterPopup(basePanel.getSubmissionTable(), currentFilterGroup);
     filterPopup.setPopupPositionAndShow(filterPopup.getPositionCallBack());
     filterPopup.addCloseHandler(new CloseHandler<PopupPanel>() {

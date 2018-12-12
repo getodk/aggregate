@@ -16,27 +16,24 @@
 package org.opendatakit.common.security.spring;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- * Wraps the Spring class and ensures that if an Authentication is already 
+ * Wraps the Spring class and ensures that if an Authentication is already
  * determined for this request, that it isn't overridden.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class DigestAuthenticationFilter extends org.springframework.security.web.authentication.www.DigestAuthenticationFilter {
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
-    if ( SecurityContextHolder.getContext().getAuthentication() == null ) {
+    if (SecurityContextHolder.getContext().getAuthentication() == null) {
       super.doFilter(request, response, chain);
     } else {
       chain.doFilter(request, response);

@@ -21,7 +21,7 @@ import org.opendatakit.common.web.CallingContext;
  * Watchdog is the coordinating object for the firing of a WatchdogWorkerImpl
  * action, which performs the actual supervisory tests and restarts stalled
  * tasks.
- *
+ * <p>
  * Watchdog has two radically divergent implementations.
  * <ul><li>On Tomcat, WatchdogWorkerImpl is executed using the spring task framework.
  * The Watchdog implementation manipulates the Executor from that framework.</li>
@@ -35,9 +35,22 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public interface Watchdog {
+
+  /**
+   * Get whether or not the watchdog is currently on a fast or slow cycle.
+   * This triggers a periodic interrogation of the datastore and will
+   * automatically transition the watchdog into the appropriate cycle
+   * should the datastore indicate that such a change is necessary.
+   * <p>
+   * The determination of the Watchdog state honors both:
+   * ServerPreferencesProperties.getFasterBackgroundActionsDisabled() and
+   * ServerPreferencesProperties.getFasterWatchdogCycleEnabled() settings.
+   *
+   * @return
+   */
+  public boolean getFasterWatchdogCycleEnabled();
 
   /**
    * Triggers the change in behavior between the slow and fast cycles.
@@ -48,20 +61,6 @@ public interface Watchdog {
    * @param value
    */
   public void setFasterWatchdogCycleEnabled(boolean value);
-
-  /**
-   * Get whether or not the watchdog is currently on a fast or slow cycle.
-   * This triggers a periodic interrogation of the datastore and will
-   * automatically transition the watchdog into the appropriate cycle
-   * should the datastore indicate that such a change is necessary.
-   *
-   * The determination of the Watchdog state honors both:
-   * ServerPreferencesProperties.getFasterBackgroundActionsDisabled() and
-   * ServerPreferencesProperties.getFasterWatchdogCycleEnabled() settings.
-   *
-   * @return
-   */
-  public boolean getFasterWatchdogCycleEnabled();
 
   /**
    * Invoked to schedule a Watchdog.  This is a no-op on Tomcat, but is

@@ -23,7 +23,6 @@ package org.opendatakit.aggregate.constants;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class ServletConsts {
 
@@ -63,13 +62,6 @@ public final class ServletConsts {
    * The name of the property that includes the form id
    */
   public static final String FORM_ID = "formId";
-
-  /**
-   * For OdkTables:
-   * The argument for a tableId.
-   */
-  public static final String TABLE_ID = "tableId";
-  public static final String ODK_TABLES_SERVLET_BASE_PATH = "odktables";
 
   /**
    * For PersistentResults and MiscTasks generator gae servlets.

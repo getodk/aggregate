@@ -16,15 +16,13 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmExportDeletePopup;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-
 /**
  * Delete an exported datafile that may or may not be in the process of being created.
- * 
  */
 public final class DeleteExportButton extends AggregateButton implements ClickHandler {
 
@@ -43,7 +41,7 @@ public final class DeleteExportButton extends AggregateButton implements ClickHa
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     ConfirmExportDeletePopup popup = new ConfirmExportDeletePopup(export);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

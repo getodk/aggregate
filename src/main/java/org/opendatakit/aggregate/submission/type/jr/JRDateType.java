@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -18,7 +18,6 @@
 package org.opendatakit.aggregate.submission.type.jr;
 
 import java.util.Date;
-
 import org.javarosa.core.model.utils.DateUtils;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
@@ -33,15 +32,13 @@ import org.opendatakit.common.web.CallingContext;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class JRDateType extends DateSubmissionType {
 
   /**
-   * Constructor 
-   * 
-   * @param propertyName
-   *    Name of submission element 
+   * Constructor
+   *
+   * @param propertyName Name of submission element
    */
   public JRDateType(DynamicCommonFieldsBase backingObject, FormElementModel element) {
     super(backingObject, element);
@@ -52,25 +49,24 @@ public class JRDateType extends DateSubmissionType {
    */
   @Override
   public void setValueFromString(String value) {
-      if ( value == null ) {
-          setValue(null);
-      } else {
-          Date newDate = DateUtils.parseDate(value);
-          setValue(newDate);
-      }
+    if (value == null) {
+      setValue(null);
+    } else {
+      Date newDate = DateUtils.parseDate(value);
+      setValue(newDate);
+    }
   }
 
-    /**
-     * Format value for output
-     * 
-     * @param elemFormatter
-     *            the element formatter that will convert the value to the
-     *            proper format for output
-     */
-    @Override
-    public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-            throws ODKDatastoreException {
-        elemFormatter.formatDate(getValue(), element, ordinalValue, row);
-    }
+  /**
+   * Format value for output
+   *
+   * @param elemFormatter the element formatter that will convert the value to the
+   *                      proper format for output
+   */
+  @Override
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
+      throws ODKDatastoreException {
+    elemFormatter.formatDate(getValue(), element, ordinalValue, row);
+  }
 
 }

@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,7 +20,6 @@ package org.opendatakit.aggregate.format.form;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -31,10 +30,9 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 /**
  * Generates an xml description of forms for the servlets
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class FormXmlTable {
 
@@ -52,7 +50,7 @@ public class FormXmlTable {
 
     // build XML table of form information
     for (IForm form : forms) {
-        if ( !form.getDownloadEnabled() ) continue;
+      if (!form.getDownloadEnabled()) continue;
 
       xml += generateFormXmlEntry(form.getFormId(), form.getViewableName()) + BasicConsts.NEW_LINE;
     }

@@ -16,14 +16,13 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SubTabInterface;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.aggregate.constants.common.SubTabs;
 import org.opendatakit.common.persistence.client.UIQueryResumePoint;
-
-import com.google.gwt.event.dom.client.ClickEvent;
 
 public final class CursorAdvancementButton extends AggregateButton {
 
@@ -43,7 +42,7 @@ public final class CursorAdvancementButton extends AggregateButton {
     super(forward ? NEXT_BUTTON_TXT : PREV_BUTTON_TXT, forward ? NEXT_TOOLTIP_TXT : PREV_TOOLTIP_TXT, forward ? NEXT_HELP_BALLOON_TXT : PREV_HELP_BALLOON_TXT);
     this.filterGroup = filterGroup;
 
-    if(forward) {
+    if (forward) {
       this.cursor = summary.getResumeCursor();
       setEnabled(summary.hasMoreResults());
     } else {
@@ -58,7 +57,7 @@ public final class CursorAdvancementButton extends AggregateButton {
     // set the request to move to the next cursor and update
     filterGroup.setCursor(cursor);
     SubTabInterface filterTab = AggregateUI.getUI().getSubTab(SubTabs.FILTER);
-    if(filterTab != null) {
+    if (filterTab != null) {
       filterTab.update();
     }
   }

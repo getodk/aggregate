@@ -22,26 +22,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EnketoApiHandlerServlet extends ServletUtilBase {
 
+  public static final String ADDR = UIConsts.ENKETO_API_HANDLER_ADDR;
   private static final long serialVersionUID = 5811797423869654357L;
   private static final Logger logger = LoggerFactory.getLogger(AggregateHtmlServlet.class);
-
-  public static final String ADDR = UIConsts.ENKETO_API_HANDLER_ADDR;
-  private final String USER_AGENT = "Mozilla/5.0";
   private static final String RESPONSE_ERROR = "Please verify the Enketo Webform Integration settings on the Preferences tab and try again.";
+  private final String USER_AGENT = "Mozilla/5.0";
 
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
       IOException {
@@ -110,7 +107,7 @@ public class EnketoApiHandlerServlet extends ServletUtilBase {
             logger.error("Enketo api token is compromised! Enketo URL should specify https");
             responseURL = inputLine;
           }
-          
+
           response.append(inputLine);
         }
         in.close();

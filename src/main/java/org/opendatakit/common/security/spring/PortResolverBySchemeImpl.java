@@ -16,48 +16,46 @@
 package org.opendatakit.common.security.spring;
 
 import javax.servlet.ServletRequest;
-
 import org.springframework.security.web.PortResolver;
 
 /**
  * PortResolver that makes its decisions solely based upon the scheme.
  * This is used by the channel security filter.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class PortResolverBySchemeImpl implements PortResolver {
 
-    int port = 80;
-    int securePort = 443;
-    
-    public PortResolverBySchemeImpl() {
-    }
-    
-    public int getPort() {
-        return port;
-    }
+  int port = 80;
+  int securePort = 443;
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+  public PortResolverBySchemeImpl() {
+  }
 
-    public int getSecurePort() {
-        return securePort;
-    }
+  public int getPort() {
+    return port;
+  }
 
-    public void setSecurePort(int securePort) {
-        this.securePort = securePort;
-    }
+  public void setPort(int port) {
+    this.port = port;
+  }
 
-    @Override
-    public int getServerPort(ServletRequest request) {
-        String scheme = request.getScheme();
-        if ( scheme.equals("https") ) {
-            return securePort;
-        } else {
-            return port;
-        }
+  public int getSecurePort() {
+    return securePort;
+  }
+
+  public void setSecurePort(int securePort) {
+    this.securePort = securePort;
+  }
+
+  @Override
+  public int getServerPort(ServletRequest request) {
+    String scheme = request.getScheme();
+    if (scheme.equals("https")) {
+      return securePort;
+    } else {
+      return port;
     }
+  }
 
 }

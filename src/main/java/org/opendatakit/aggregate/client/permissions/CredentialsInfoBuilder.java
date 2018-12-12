@@ -16,28 +16,25 @@
 
 package org.opendatakit.aggregate.client.permissions;
 
+import com.google.gwt.user.client.Random;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
-
-import com.google.gwt.user.client.Random;
 
 /**
  * Handles creating the CredentialsInfo object (encrypted passwords) for a user.
  * These are then passed in the open to the server, where they are used to
  * directly update the credentials there.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class CredentialsInfoBuilder {
 
   // must match that in Spring Security core.codec.Hex
-  private static char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
-      'c', 'd', 'e', 'f' };
+  private static char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
+      'c', 'd', 'e', 'f'};
 
   private static String genHash(MessageDigest md, String fullSourceString, int len)
       throws NoSuchAlgorithmException {
@@ -68,7 +65,7 @@ public class CredentialsInfoBuilder {
   }
 
   public static CredentialsInfo build(String username, RealmSecurityInfo realmInfo,
-      String rawPassword) throws NoSuchAlgorithmException {
+                                      String rawPassword) throws NoSuchAlgorithmException {
     // compute the digest auth...
     String fullDigestAuth = username + ":" + realmInfo.getRealmString() + ":" + rawPassword;
     MessageDigest md = MessageDigest.getInstance("MD5");
@@ -97,7 +94,7 @@ public class CredentialsInfoBuilder {
     // Must match SpringSecurity BasicPasswordEncoder for constructing salted
     // string.
     String fullBasicAuth = rawPassword + "{" + basicAuthSalt + "}";
-    
+
     basicAuthHash = SHA1.calcSHA1(fullBasicAuth);
     // hopefully this matches these actions:
     // MessageDigest sha1d = MessageDigest.getInstance("SHA-1");

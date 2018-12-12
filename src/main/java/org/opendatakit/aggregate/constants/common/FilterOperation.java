@@ -22,28 +22,28 @@ import java.io.Serializable;
  * This enum defines the different filter operations which the Query can have.
  */
 public enum FilterOperation implements Serializable {
-    EQUAL("equals"),
-    NOT_EQUAL("doesn't equal"),
-    GREATER_THAN(">"),
-    GREATER_THAN_OR_EQUAL(">="),
-    LESS_THAN("<"),
-    LESS_THAN_OR_EQUAL("<=");   
- 
- private String displayText;
- 
- private FilterOperation() {
-   // GWT
- }
- 
- private FilterOperation(String display) {
-   displayText = display;
- }
- 
- public String getDisplayText() {
-   return displayText;
- }
- 
- public String toString() {
-   return displayText;
- }
+  EQUAL("equals"),
+  NOT_EQUAL("doesn't equal"),
+  GREATER_THAN(">"),
+  GREATER_THAN_OR_EQUAL(">="),
+  LESS_THAN("<"),
+  LESS_THAN_OR_EQUAL("<=");
+
+  private String displayText;
+
+  private FilterOperation() {
+    // GWT
+  }
+
+  private FilterOperation(String display) {
+    displayText = display;
+  }
+
+  public String getDisplayText() {
+    return displayText;
+  }
+
+  public String toString() {
+    return displayText;
+  }
 };

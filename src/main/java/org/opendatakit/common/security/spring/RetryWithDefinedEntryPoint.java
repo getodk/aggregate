@@ -20,23 +20,22 @@ import org.springframework.security.web.access.channel.AbstractRetryEntryPoint;
 /**
  * Enforce the port assignment for a given scheme (i.e., http or https).
  * This is used by the channel security filter.
- * 
- * @author mitchellsundt@gmail.com
  *
+ * @author mitchellsundt@gmail.com
  */
 public class RetryWithDefinedEntryPoint extends AbstractRetryEntryPoint {
 
-    String scheme;
-    int port;
-    
-    public RetryWithDefinedEntryPoint(String scheme, int port) {
-        super(scheme, (scheme.contains("s") ? 443 : 80)); // standard port...
-        this.scheme = scheme;
-        this.port = port;
-    }
+  String scheme;
+  int port;
 
-    protected Integer getMappedPort(Integer mapFromPort) {
-        // don't care about the origin port -- we only have one port pair.
-        return port;
-    }
+  public RetryWithDefinedEntryPoint(String scheme, int port) {
+    super(scheme, (scheme.contains("s") ? 443 : 80)); // standard port...
+    this.scheme = scheme;
+    this.port = port;
+  }
+
+  protected Integer getMappedPort(Integer mapFromPort) {
+    // don't care about the origin port -- we only have one port pair.
+    return port;
+  }
 }

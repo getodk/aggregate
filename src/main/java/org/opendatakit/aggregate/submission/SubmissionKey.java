@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.submission;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.constants.ParserConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -27,7 +26,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class SubmissionKey {
 
@@ -110,9 +108,9 @@ public class SubmissionKey {
 
       int idx = remainder.indexOf(SubmissionKeyPart.K_CLOSE_BRACKET_SLASH);
       if (idx == -1) {
-        int endIndex = remainder.length()-1;
+        int endIndex = remainder.length() - 1;
         char lastChar = remainder.charAt(endIndex);
-        if(lastChar == ']') {
+        if (lastChar == ']') {
           firstPart = remainder.substring(0, endIndex + 1);
           remainder = remainder.substring(endIndex + 1);
         } else {
@@ -122,7 +120,7 @@ public class SubmissionKey {
         firstPart = remainder.substring(0, idx + 1);
         remainder = remainder.substring(idx + SubmissionKeyPart.K_CLOSE_BRACKET_SLASH.length());
       }
-        
+
       // firstPart is the elementname[@key=...] string
       stringParts.add(firstPart);
     }

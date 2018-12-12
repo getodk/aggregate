@@ -16,14 +16,12 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.filter.FilterSet;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
-
-import com.google.gwt.event.dom.client.ChangeHandler;
 
 public final class FilterListBox extends AggregateListBox {
   private static final String TOOLTIP_TEXT = "Filter to use";

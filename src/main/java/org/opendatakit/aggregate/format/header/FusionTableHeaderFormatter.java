@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.format.header;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.constants.format.FormatConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -27,10 +26,8 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implements HeaderFormatter {
 
@@ -39,24 +36,21 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
    * Iterates the forms and creates the headers and types based off the passed
    * in FormElementModel
    *
-   * @param formDefinition
-   *          the xform that is being used to create the header
-   * @param rootGroup
-   *          the group of the xform that contains several values that will be
-   *          used to generate the headers. The node should correspond to a
-   *          SubmissionSet, not a SubmissionValue.
-   * @param propertyNames
-   *          list of properties to include in headers, if null is passed will
-   *          return all properties for the SubmissionSet
+   * @param formDefinition the xform that is being used to create the header
+   * @param rootGroup      the group of the xform that contains several values that will be
+   *                       used to generate the headers. The node should correspond to a
+   *                       SubmissionSet, not a SubmissionValue.
+   * @param propertyNames  list of properties to include in headers, if null is passed will
+   *                       return all properties for the SubmissionSet
    */
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
-      List<FormElementModel> propertyNamesArg) {
+                                      List<FormElementModel> propertyNamesArg) {
 
     propertyNames = propertyNamesArg;
     headers = new ArrayList<String>();
     types = new ArrayList<ElementType>();
 
-    if(!form.getTopLevelGroupElement().equals(rootGroup)) {
+    if (!form.getTopLevelGroupElement().equals(rootGroup)) {
       headers.add(FormatConsts.HEADER_PARENT_UID);
       types.add(ElementType.METADATA);
     }
@@ -68,11 +62,11 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
      * that Google Spreadsheets does not like, the leading character is a
      * number, prefix an 'n' to the column name.
      */
-    for ( int i = 0 ; i < headers.size() ; ++i ) {
+    for (int i = 0; i < headers.size(); ++i) {
       String h = headers.get(i);
       String stripped = h.replaceAll(SpreadsheetConsts.UNSAFE_CHAR_CLASS, "");
 
-      if ( Character.isDigit(stripped.charAt(0)) ) {
+      if (Character.isDigit(stripped.charAt(0))) {
         h = "n" + h;
         headers.set(i, h);
       }

@@ -17,7 +17,6 @@
 package org.opendatakit.aggregate.client.filter;
 
 import java.io.Serializable;
-
 import org.opendatakit.aggregate.constants.common.RowOrCol;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.constants.common.Visibility;
@@ -29,7 +28,7 @@ public abstract class Filter implements Serializable {
   private RowOrCol rc;
   private Long ordinal; // order to display in filter group
   private Visibility visibility;
-  
+
   public Filter() {
 
   }
@@ -43,19 +42,19 @@ public abstract class Filter implements Serializable {
 
   /**
    * This constructor should only be used by the server
-   * 
+   *
    * @param uri
    */
   public Filter(String uri) {
     this.uri = uri;
   }
-  
+
   /**
    * Used to clear the URI in the elements so it can be Saved As properly in the
    * server, as the server creates a new entity when uri is set to URI_DEFAULT
    */
   public abstract void resetUriToDefault();
-  
+
   public String getUri() {
     return uri;
   }
@@ -75,7 +74,7 @@ public abstract class Filter implements Serializable {
   public void setOrdinal(Long ordinal) {
     this.ordinal = ordinal;
   }
-  
+
   public Visibility getVisibility() {
     return visibility;
   }
@@ -83,7 +82,7 @@ public abstract class Filter implements Serializable {
   public void setVisibility(Visibility kr) {
     this.visibility = kr;
   }
-  
+
   /**
    * @see java.lang.Object#equals(java.lang.Object)
    */
@@ -92,7 +91,7 @@ public abstract class Filter implements Serializable {
     if (!(obj instanceof Filter)) {
       return false;
     }
-    
+
     Filter other = (Filter) obj;
     return (visibility == null ? (other.visibility == null) : (visibility.equals(other.visibility)))
         && (rc == null ? (other.rc == null) : (rc == other.rc))
@@ -105,9 +104,9 @@ public abstract class Filter implements Serializable {
   @Override
   public int hashCode() {
     int hashCode = 131;
-    if(visibility != null)
+    if (visibility != null)
       hashCode += visibility.hashCode();
-    if(rc != null)
+    if (rc != null)
       hashCode += rc.hashCode();
     if (ordinal != null)
       hashCode += ordinal.hashCode();

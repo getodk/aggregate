@@ -18,11 +18,10 @@ package org.opendatakit.aggregate.client;
 
 import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
+import com.google.gwt.user.client.Window;
 import org.opendatakit.aggregate.client.permissions.AccessConfigurationSheet;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
-
-import com.google.gwt.user.client.Window;
 
 public class PermissionsSubTab extends AggregateSubTabBase {
 
@@ -36,37 +35,31 @@ public class PermissionsSubTab extends AggregateSubTabBase {
 
   @Override
   public boolean canLeave() {
-      if ( accessConfig != null ) {
-          if ( accessConfig.isUiOutOfSyncWithServer() ) {
-            boolean outcome = Window.confirm("Unsaved changes exist.\n"
-                    + "Changes will be lost if you move off of the Permissions tab.\n"
-                    + "\nDiscard unsaved changes?");
-            return outcome;
-          }
+    if (accessConfig != null) {
+      if (accessConfig.isUiOutOfSyncWithServer()) {
+        boolean outcome = Window.confirm("Unsaved changes exist.\n"
+            + "Changes will be lost if you move off of the Permissions tab.\n"
+            + "\nDiscard unsaved changes?");
+        return outcome;
       }
-      return true;
-  }
-
-  public void changeTablesPrivilegesVisibility(boolean visible) {
-    if ( accessConfig != null ) {
-      accessConfig.changeTablesPrivilegesVisibility(visible);
     }
+    return true;
   }
 
   @Override
   public void update() {
 
-    if ( AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN)) {
-        if ( accessConfig == null ) {
-            accessConfig = new AccessConfigurationSheet(this);
-            add(accessConfig);
-            add(buildVersionNote(this));
-        }
-        accessConfig.setVisible(true);
+    if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_SITE_ACCESS_ADMIN)) {
+      if (accessConfig == null) {
+        accessConfig = new AccessConfigurationSheet(this);
+        add(accessConfig);
+        add(buildVersionNote(this));
+      }
+      accessConfig.setVisible(true);
     } else {
-        if ( accessConfig != null ) {
-            accessConfig.setVisible(false);
-        }
+      if (accessConfig != null) {
+        accessConfig.setVisible(false);
+      }
     }
   }
 }

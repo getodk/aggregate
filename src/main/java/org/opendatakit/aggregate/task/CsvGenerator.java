@@ -22,13 +22,12 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * API for creating and restarting Csv generation tasks.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public interface CsvGenerator {
 
-    public void createCsvTask(IForm form, SubmissionKey persistentResultsKey,
-            long attemptCount, CallingContext cc) throws ODKDatastoreException;
+  public void createCsvTask(IForm form, SubmissionKey persistentResultsKey,
+                            long attemptCount, CallingContext cc) throws ODKDatastoreException;
 }

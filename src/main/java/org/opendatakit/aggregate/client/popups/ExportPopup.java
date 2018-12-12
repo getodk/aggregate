@@ -95,6 +95,22 @@ public final class ExportPopup extends AbstractPopupBase {
     setWidget(optionsBar);
   }
 
+  private static class ErrorDialog extends DialogBox {
+
+    public ErrorDialog() {
+      setText("Error Unknown Export Type!! Please file an Issue on ODK website!");
+      Button ok = new Button("OK");
+      ok.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          ErrorDialog.this.hide();
+        }
+      });
+      setWidget(ok);
+    }
+  }
+
+  ;
+
   private class FiltersCallback implements AsyncCallback<FilterSet> {
 
     private static final String PROBLEM_NULL_FILTER_SET = "PROBLEM: got a NULL for a filterSet from server";
@@ -116,8 +132,6 @@ public final class ExportPopup extends AbstractPopupBase {
       filtersBox.updateFilterDropDown(filterSet);
     }
   }
-
-  ;
 
   private class CreateExportHandler implements ClickHandler {
     @Override
@@ -167,20 +181,6 @@ public final class ExportPopup extends AbstractPopupBase {
       }
 
       hide();
-    }
-  }
-
-  private static class ErrorDialog extends DialogBox {
-
-    public ErrorDialog() {
-      setText("Error Unknown Export Type!! Please file an Issue on ODK website!");
-      Button ok = new Button("OK");
-      ok.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          ErrorDialog.this.hide();
-        }
-      });
-      setWidget(ok);
     }
   }
 }

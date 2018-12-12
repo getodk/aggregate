@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2013 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -38,6 +38,7 @@ public final class REDCapServerParameterTable extends CommonFieldsBase {
 
   private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL",
       DataField.DataType.STRING, true, 4096L);
+  private static REDCapServerParameterTable relation = null;
 
   /**
    * Construct a relation prototype. Only called via
@@ -61,6 +62,20 @@ public final class REDCapServerParameterTable extends CommonFieldsBase {
    */
   private REDCapServerParameterTable(REDCapServerParameterTable ref, User user) {
     super(ref, user);
+  }
+
+  public static synchronized final REDCapServerParameterTable assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      REDCapServerParameterTable relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      relationPrototype = new REDCapServerParameterTable(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
   }
 
   // Only called from within the persistence layer.
@@ -97,22 +112,6 @@ public final class REDCapServerParameterTable extends CommonFieldsBase {
     if (!setStringField(OWNER_EMAIL_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow ownerEmail");
     }
-  }
-
-  private static REDCapServerParameterTable relation = null;
-
-  public static synchronized final REDCapServerParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      REDCapServerParameterTable relationPrototype;
-      Datastore ds = cc.getDatastore();
-      User user = cc.getUserService().getDaemonAccountUser();
-      relationPrototype = new REDCapServerParameterTable(ds.getDefaultSchemaName());
-      ds.assertRelation(relationPrototype, user); // may throw exception...
-      // at this point, the prototype has become fully populated
-      relation = relationPrototype; // set static variable only upon success...
-    }
-    return relation;
   }
 
 }

@@ -28,32 +28,50 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 /**
  * Implements a button that can be made not visible, enabled or disabled.
- * 
- * @author mitchellsundt@gmail.com
- * 
+ *
  * @param <T>
+ * @author mitchellsundt@gmail.com
  */
 public class UIEnabledActionCell<T> extends AbstractCell<T> {
 
-  /**
-   * The delegate that will handle events from the cell.
-   * 
-   * @param <T>
-   *          the type that this delegate acts on
-   */
-  public static interface Delegate<C> {
-    /**
-     * Perform the desired action on the given object.
-     * 
-     * @param object
-     *          the object to be acted upon
-     */
-    void execute(C object);
+  private final Delegate<T> delegate;
+  private final SafeHtml htmlEnabled;
+  private final SafeHtml htmlDisabled;
+  private final UIEnabledPredicate<T> isEnabledPredicate;
+  private final UIVisiblePredicate<T> isVisiblePredicate;
+  public UIEnabledActionCell(String text, UIEnabledPredicate<T> isEnabledPredicate,
+                             UIEnabledActionCell.Delegate<T> delegate) {
+    this(SafeHtmlUtils.fromString(text), null, isEnabledPredicate, delegate);
+  }
+  public UIEnabledActionCell(String text, UIVisiblePredicate<T> isVisiblePredicate,
+                             UIEnabledActionCell.Delegate<T> delegate) {
+    this(SafeHtmlUtils.fromString(text), isVisiblePredicate, null, delegate);
+  }
+  public UIEnabledActionCell(String text, UIVisiblePredicate<T> isVisiblePredicate,
+                             UIEnabledPredicate<T> isEnabledPredicate,
+                             UIEnabledActionCell.Delegate<T> delegate) {
+    this(SafeHtmlUtils.fromString(text), isVisiblePredicate, isEnabledPredicate, delegate);
+  }
+  public UIEnabledActionCell(SafeHtml text, UIVisiblePredicate<T> isVisiblePredicate,
+                             UIEnabledPredicate<T> isEnabledPredicate,
+                             UIEnabledActionCell.Delegate<T> delegate) {
+    super("click", "keydown");
+    this.isEnabledPredicate = isEnabledPredicate;
+    this.isVisiblePredicate = isVisiblePredicate;
+    this.delegate = delegate;
+    htmlEnabled = new SafeHtmlBuilder()
+        .appendHtmlConstant(
+            "<button class=\"gwt-Button\" type=\"button\" tabindex=\"-1\">").append(text)
+        .appendHtmlConstant("</button>").toSafeHtml();
+    htmlDisabled = new SafeHtmlBuilder()
+        .appendHtmlConstant(
+            "<button class=\"gwt-Button\" type=\"button\" tabindex=\"-1\" disabled>").append(text)
+        .appendHtmlConstant("</button>").toSafeHtml();
   }
 
   @Override
   public void onBrowserEvent(Context context, Element parent, T value, NativeEvent event,
-      ValueUpdater<T> valueUpdater) {
+                             ValueUpdater<T> valueUpdater) {
     super.onBrowserEvent(context, parent, value, event, valueUpdater);
     if ("click".equals(event.getType())) {
       EventTarget eventTarget = event.getEventTarget();
@@ -69,7 +87,7 @@ public class UIEnabledActionCell<T> extends AbstractCell<T> {
 
   @Override
   protected void onEnterKeyDown(Context context, Element parent, T value, NativeEvent event,
-      ValueUpdater<T> valueUpdater) {
+                                ValueUpdater<T> valueUpdater) {
     if (isEnabledPredicate == null || isEnabledPredicate.isEnabled(value)) {
       delegate.execute(value);
     }
@@ -86,42 +104,17 @@ public class UIEnabledActionCell<T> extends AbstractCell<T> {
     }
   }
 
-  private final Delegate<T> delegate;
-  private final SafeHtml htmlEnabled;
-  private final SafeHtml htmlDisabled;
-  private final UIEnabledPredicate<T> isEnabledPredicate;
-  private final UIVisiblePredicate<T> isVisiblePredicate;
-
-  public UIEnabledActionCell(String text, UIEnabledPredicate<T> isEnabledPredicate,
-      UIEnabledActionCell.Delegate<T> delegate) {
-    this(SafeHtmlUtils.fromString(text), null, isEnabledPredicate, delegate);
-  }
-
-  public UIEnabledActionCell(String text, UIVisiblePredicate<T> isVisiblePredicate,
-      UIEnabledActionCell.Delegate<T> delegate) {
-    this(SafeHtmlUtils.fromString(text), isVisiblePredicate, null, delegate);
-  }
-
-  public UIEnabledActionCell(String text, UIVisiblePredicate<T> isVisiblePredicate,
-      UIEnabledPredicate<T> isEnabledPredicate,
-      UIEnabledActionCell.Delegate<T> delegate) {
-    this(SafeHtmlUtils.fromString(text), isVisiblePredicate, isEnabledPredicate, delegate);
-  }
-
-  public UIEnabledActionCell(SafeHtml text, UIVisiblePredicate<T> isVisiblePredicate,
-      UIEnabledPredicate<T> isEnabledPredicate,
-      UIEnabledActionCell.Delegate<T> delegate) {
-    super("click", "keydown");
-    this.isEnabledPredicate = isEnabledPredicate;
-    this.isVisiblePredicate = isVisiblePredicate;
-    this.delegate = delegate;
-    htmlEnabled = new SafeHtmlBuilder()
-        .appendHtmlConstant(
-            "<button class=\"gwt-Button\" type=\"button\" tabindex=\"-1\">").append(text)
-        .appendHtmlConstant("</button>").toSafeHtml();
-    htmlDisabled = new SafeHtmlBuilder()
-        .appendHtmlConstant(
-            "<button class=\"gwt-Button\" type=\"button\" tabindex=\"-1\" disabled>").append(text)
-        .appendHtmlConstant("</button>").toSafeHtml();
+  /**
+   * The delegate that will handle events from the cell.
+   *
+   * @param <T> the type that this delegate acts on
+   */
+  public static interface Delegate<C> {
+    /**
+     * Perform the desired action on the given object.
+     *
+     * @param object the object to be acted upon
+     */
+    void execute(C object);
   }
 }

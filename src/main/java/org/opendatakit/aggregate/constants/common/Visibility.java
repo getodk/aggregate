@@ -19,29 +19,19 @@ package org.opendatakit.aggregate.constants.common;
 import java.io.Serializable;
 
 
-
 public enum Visibility implements Serializable {
   DISPLAY("Display"), HIDE("Hide");
-  
+
   private String displayText;
-  
+
   private Visibility() {
     // GWT
   }
-  
+
   private Visibility(String display) {
     displayText = display;
   }
-  
-  public String getDisplayText() {
-    return displayText;
-  }
-  
-  @Override
-  public String toString() {
-    return displayText;
-  }
-  
+
   public static Visibility historicalConverter(String str) {
     // TODO: remove after a long time after the upgrade
     // this is to allow an upgrade when we change visibility constant names
@@ -52,5 +42,14 @@ public enum Visibility implements Serializable {
     } else {
       throw new IllegalArgumentException("Unable to Convert Historical Visibility Values");
     }
+  }
+
+  public String getDisplayText() {
+    return displayText;
+  }
+
+  @Override
+  public String toString() {
+    return displayText;
   }
 }

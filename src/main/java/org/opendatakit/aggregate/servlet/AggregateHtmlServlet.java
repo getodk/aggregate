@@ -19,13 +19,9 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
@@ -39,6 +35,8 @@ import org.opendatakit.common.security.spring.SecurityRevisionsTable;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stupid class to wrap the Aggregate.html page that GWT uses for all its UI
@@ -46,18 +44,10 @@ import org.opendatakit.common.web.constants.HtmlConsts;
  * Security.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class AggregateHtmlServlet extends ServletUtilBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(AggregateHtmlServlet.class);
-  /**
-     *
-     */
-  private static final long serialVersionUID = 5811797423869654357L;
-
   public static final String ADDR = UIConsts.HOST_PAGE_BASE_ADDR;
-
   public static final String PAGE_CONTENTS_FIRST = "<!doctype html>"
       + "<!-- The DOCTYPE declaration above will set the    -->"
       + "<!-- browser's rendering engine into               -->"
@@ -75,7 +65,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "   <script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"https://maps.googleapis.com/maps/api/js?";
-      public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
+  public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">"
@@ -91,6 +81,11 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "    </noscript>" + "   <div id=\"not_secure_content\"></div><br><div id=\"error_content\"></div><div id=\"dynamic_content\"></div>"
       + "  </body>"
       + "</html>";
+  private static final Logger logger = LoggerFactory.getLogger(AggregateHtmlServlet.class);
+  /**
+   *
+   */
+  private static final long serialVersionUID = 5811797423869654357L;
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
@@ -158,7 +153,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
     String simpleApiKey;
     try {
       simpleApiKey = ServerPreferencesProperties.getGoogleSimpleApiKey(cc);
-      if ( simpleApiKey != null && simpleApiKey.length() != 0 ) {
+      if (simpleApiKey != null && simpleApiKey.length() != 0) {
         out.print("key=" + encodeParameter(simpleApiKey) + "&amp;");
       }
     } catch (ODKEntityNotFoundException e) {

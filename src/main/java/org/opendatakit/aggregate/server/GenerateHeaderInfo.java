@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.opendatakit.aggregate.client.filter.ColumnFilter;
 import org.opendatakit.aggregate.client.filter.Filter;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
@@ -151,10 +150,9 @@ public class GenerateHeaderInfo {
   /**
    * Helper function to recursively go through the element tree and create the
    * column headings
-   *
    */
   private void processElementForColumnHead(FormElementModel node, FormElementModel root,
-      String parentName) {
+                                           String parentName) {
     if (node == null)
       return;
 
@@ -162,28 +160,28 @@ public class GenerateHeaderInfo {
     String revisedParentName = parentName;
 
     switch (node.getElementType()) {
-    case GROUP:
-      if (node != root) {
-        // else skip and goto children as we do not know how to display
-        // append parent name incase embedded tag
-        revisedParentName = revisedParentName + node.getElementName() + BasicConsts.COLON;
-      }
-      break;
-    case REPEAT:
-      if (node == root) {
-        // we are processing this as a group...
-        List<FormElementModel> childDataElements = node.getChildren();
-        for (FormElementModel child : childDataElements) {
-          processElementForColumnHead(child, root, revisedParentName);
+      case GROUP:
+        if (node != root) {
+          // else skip and goto children as we do not know how to display
+          // append parent name incase embedded tag
+          revisedParentName = revisedParentName + node.getElementName() + BasicConsts.COLON;
         }
-      } else {
-        // we are processing this as a table element
-        processFilter(nodeName, node);
+        break;
+      case REPEAT:
+        if (node == root) {
+          // we are processing this as a group...
+          List<FormElementModel> childDataElements = node.getChildren();
+          for (FormElementModel child : childDataElements) {
+            processElementForColumnHead(child, root, revisedParentName);
+          }
+        } else {
+          // we are processing this as a table element
+          processFilter(nodeName, node);
 
-      }
-      break;
-    default:
-      processFilter(nodeName, node);
+        }
+        break;
+      default:
+        processFilter(nodeName, node);
     }
 
     // only recurse into the elements that are not binary, geopoint,
@@ -324,20 +322,20 @@ public class GenerateHeaderInfo {
     public void removeColumn(Long columnConst) {
       int ordinal = columnConst.intValue();
       switch (ordinal) {
-      case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
-        removeLatFlag = true;
-        break;
-      case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
-        removeLongFlag = true;
-        break;
-      case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
-        removeAltFlag = true;
-        break;
-      case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
-        removeAccFlag = true;
-        break;
-      default:
-        break;
+        case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+          removeLatFlag = true;
+          break;
+        case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+          removeLongFlag = true;
+          break;
+        case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+          removeAltFlag = true;
+          break;
+        case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+          removeAccFlag = true;
+          break;
+        default:
+          break;
       }
     }
 
@@ -348,20 +346,20 @@ public class GenerateHeaderInfo {
     public void keepColumn(Long columnConst) {
       int ordinal = columnConst.intValue();
       switch (ordinal) {
-      case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
-        keepLatFlag = true;
-        break;
-      case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
-        keepLongFlag = true;
-        break;
-      case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
-        keepAltFlag = true;
-        break;
-      case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
-        keepAccFlag = true;
-        break;
-      default:
-        break;
+        case GeoPointConsts.GEOPOINT_LATITUDE_ORDINAL_NUMBER:
+          keepLatFlag = true;
+          break;
+        case GeoPointConsts.GEOPOINT_LONGITUDE_ORDINAL_NUMBER:
+          keepLongFlag = true;
+          break;
+        case GeoPointConsts.GEOPOINT_ALTITUDE_ORDINAL_NUMBER:
+          keepAltFlag = true;
+          break;
+        case GeoPointConsts.GEOPOINT_ACCURACY_ORDINAL_NUMBER:
+          keepAccFlag = true;
+          break;
+        default:
+          break;
       }
     }
 

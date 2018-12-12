@@ -26,19 +26,17 @@ import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class FusionTableElementFormatter extends LinkElementFormatter {
 
   private static final String FT_PLACEMARK_POINT_TEMPLATE = "<Point><coordinates>%s</coordinates></Point>";
-  
+
   public FusionTableElementFormatter(String webServerUrl) {
     super(webServerUrl, FormMultipleValueServlet.ADDR, true, true, true, true);
   }
-  
+
   @Override
   public void formatGeoPoint(GeoPoint gp, FormElementModel element, String ordinalValue, Row row) {
     if (gp != null) {
@@ -46,7 +44,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
       if (gp.getLatitude() == null && gp.getLongitude() == null && gp.getAltitude() == null) {
         basicStringConversion(null, row);
       } else {
-          WrappedBigDecimal latitude = WrappedBigDecimal.fromDouble(0.0);
+        WrappedBigDecimal latitude = WrappedBigDecimal.fromDouble(0.0);
         if (gp.getLatitude() != null) {
           latitude = gp.getLatitude();
         }
@@ -70,11 +68,11 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
       basicStringConversion(null, row);
     }
   }
-  
+
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
-  
+
 
 }

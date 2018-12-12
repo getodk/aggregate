@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.client;
 
 import static org.opendatakit.aggregate.client.LayoutUtils.buildVersionNote;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -88,27 +87,6 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
     return true;
   }
 
-  private class UpdateAction implements AsyncCallback<ArrayList<FormSummary>> {
-    public void onFailure(Throwable caught) {
-      AggregateUI.getUI().reportError(caught);
-    }
-
-    public void onSuccess(ArrayList<FormSummary> formsFromService) {
-      AggregateUI.getUI().clearError();
-
-      // setup the display with the latest updates
-      formsBox.updateFormDropDown(formsFromService);
-
-      // update the class state with the currently displayed form
-      selectedForm = formsBox.getSelectedForm();
-
-      // Make the call to get the published services
-      updateContent();
-    }
-  }
-
-  ;
-
   @Override
   public void update() {
     if (AggregateUI.getUI().getUserInfo().getGrantedAuthorities().contains(GrantedAuthorityName.ROLE_DATA_OWNER)) {
@@ -123,6 +101,8 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       submissions.setVisible(false);
     }
   }
+
+  ;
 
   private void updateContent() {
     purgeSubmission.setSelectedForm(selectedForm);
@@ -155,6 +135,30 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
 
   }
 
+  @Override
+  public HelpSliderConsts[] getHelpSliderContent() {
+    return null;
+  }
+
+  private class UpdateAction implements AsyncCallback<ArrayList<FormSummary>> {
+    public void onFailure(Throwable caught) {
+      AggregateUI.getUI().reportError(caught);
+    }
+
+    public void onSuccess(ArrayList<FormSummary> formsFromService) {
+      AggregateUI.getUI().clearError();
+
+      // setup the display with the latest updates
+      formsBox.updateFormDropDown(formsFromService);
+
+      // update the class state with the currently displayed form
+      selectedForm = formsBox.getSelectedForm();
+
+      // Make the call to get the published services
+      updateContent();
+    }
+  }
+
   /**
    * Handler to process the change in the form drop down
    */
@@ -167,11 +171,6 @@ public class SubmissionAdminSubTab extends AggregateSubTabBase {
       }
       updateContent();
     }
-  }
-
-  @Override
-  public HelpSliderConsts[] getHelpSliderContent() {
-    return null;
   }
 
 }

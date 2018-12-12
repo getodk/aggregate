@@ -27,34 +27,33 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean.  It cannot have any per-request state.
  * It uses a static inner class to encapsulate the per-request state
  * of a running background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class CsvGeneratorImpl implements CsvGenerator {
 
-    static class CsvRunner implements Runnable {
-        final CsvWorkerImpl impl;
-        
-        public CsvRunner( IForm form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
-            impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc );
-        }
-
-        @Override
-        public void run() {
-            impl.generateCsv();
-        }
-    }
-
   @Override
   public void createCsvTask(IForm form, SubmissionKey persistentResultsKey,
-        long attemptCount, CallingContext cc)
-        throws ODKDatastoreException {
+                            long attemptCount, CallingContext cc)
+      throws ODKDatastoreException {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
-    CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, wd.getCallingContext() );
+    CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, wd.getCallingContext());
     AggregrateThreadExecutor exec = AggregrateThreadExecutor.getAggregateThreadExecutor();
     exec.execute(runner);
+  }
+
+  static class CsvRunner implements Runnable {
+    final CsvWorkerImpl impl;
+
+    public CsvRunner(IForm form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
+      impl = new CsvWorkerImpl(form, persistentResultsKey, attemptCount, cc);
+    }
+
+    @Override
+    public void run() {
+      impl.generateCsv();
+    }
   }
 }

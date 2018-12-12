@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.table;
 
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Image;
+import java.util.ArrayList;
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -25,8 +26,6 @@ import org.opendatakit.aggregate.client.widgets.DeleteSubmissionButton;
 import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
-
-import java.util.ArrayList;
 
 public class SubmissionTable extends FlexTable {
 

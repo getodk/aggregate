@@ -16,14 +16,13 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.AggregateSubTabBase;
-import org.opendatakit.aggregate.client.popups.ViewServletPopup;
-import org.opendatakit.aggregate.constants.common.UIConsts;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
+import org.opendatakit.aggregate.client.AggregateSubTabBase;
+import org.opendatakit.aggregate.client.popups.ViewServletPopup;
+import org.opendatakit.aggregate.constants.common.UIConsts;
 
 public final class UploadUsersAndPermsServletPopupButton extends AggregateButton {
 
@@ -36,9 +35,9 @@ public final class UploadUsersAndPermsServletPopupButton extends AggregateButton
   public UploadUsersAndPermsServletPopupButton() {
     super(UPLOAD_USERS_AND_PERMS_CSV_BUTTON_TEXT, UPLOAD_USERS_AND_PERMS_CSV_TOOLTIP_TXT, UPLOAD_USERS_AND_PERMS_CSV_BALLOON_TXT);
   }
-  
+
   public void onClick(final AggregateSubTabBase basePanel, ClickEvent event) {
-    
+
     final ViewServletPopup servletPopup = new ViewServletPopup(UPLOAD_USERS_AND_PERMS_CSV_TXT, UIConsts.USERS_AND_PERMS_UPLOAD_SERVLET_ADDR);
     servletPopup.setPopupPositionAndShow(servletPopup.getPositionCallBack());
     servletPopup.addCloseHandler(new CloseHandler<PopupPanel>() {
@@ -46,11 +45,11 @@ public final class UploadUsersAndPermsServletPopupButton extends AggregateButton
       @Override
       public void onClose(CloseEvent<PopupPanel> event) {
         servletPopup.hide();
-        if(basePanel != null) {
+        if (basePanel != null) {
           basePanel.update();
         }
       }
 
     });
-  }  
+  }
 }

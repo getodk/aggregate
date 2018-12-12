@@ -20,7 +20,6 @@ import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequ
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.UIUtils;
@@ -34,23 +33,17 @@ public final class RestartButton extends AggregateButton implements ClickHandler
 
   public static final Runnable NO_OP_RUNNABLE = () -> {
   };
-
-  public enum Circumstance {CREDENTIALS, ABANDONED, PAUSED}
+  private static final String BUTTON_BAD_CREDENTIAL_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Credential was BAD";
 
   ;
-
-  private static final String BUTTON_BAD_CREDENTIAL_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Credential was BAD";
   private static final String TOOLTIP_BAD_CREDENTIAL_TEXT = "Publish failure because of bad credential - click to Restart the Publisher";
   private static final String HELP_BALLOON_BAD_CREDENTIAL_TXT = "The external service was failing or the credentials were bad. Click to restart the publisher.";
-
   private static final String BUTTON_FAILURE_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Failed";
   private static final String TOOLTIP_FAILURE_TEXT = "Publish failure because of repeated failure - click to Restart the Publisher";
   private static final String HELP_BALLOON_FAILURE_TXT = "The external service was failing. Click to restart the publisher.";
-
   private static final String BUTTON_PAUSED_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Paused";
   private static final String TOOLTIP_PAUSED_TEXT = "Publish paused due to error from service - click to Restart the Publisher";
   private static final String HELP_BALLOON_PAUSED_TXT = "The external service failed (will retry in several minutes). Click to restart the publisher.";
-
   private final ExternServSummary publisher;
 
   public RestartButton(ExternServSummary publisher, Circumstance credentialFailure) {
@@ -100,4 +93,6 @@ public final class RestartButton extends AggregateButton implements ClickHandler
   private void onFailure(Throwable cause) {
     AggregateUI.getUI().reportError(cause);
   }
+
+  public enum Circumstance {CREDENTIALS, ABANDONED, PAUSED}
 }

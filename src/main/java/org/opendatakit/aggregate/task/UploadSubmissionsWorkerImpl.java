@@ -81,6 +81,14 @@ public class UploadSubmissionsWorkerImpl {
   private IForm form;
   private long lastUpdateTimestamp = System.currentTimeMillis();
 
+  public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
+    this.formServiceCursor = fsc;
+    this.useLargerBatchSize = useLargerBatchSize;
+    this.cc = cc;
+    this.externalServicePublicationOption = fsc.getExternalServicePublicationOption();
+    this.lockId = UUID.randomUUID().toString();
+  }
+
   private int getQueryLimit() {
     if (useLargerBatchSize) {
       // we are running in the background...
@@ -88,14 +96,6 @@ public class UploadSubmissionsWorkerImpl {
     } else {
       return MAX_FOREGROUND_QUERY_LIMIT;
     }
-  }
-
-  public UploadSubmissionsWorkerImpl(FormServiceCursor fsc, boolean useLargerBatchSize, CallingContext cc) {
-    this.formServiceCursor = fsc;
-    this.useLargerBatchSize = useLargerBatchSize;
-    this.cc = cc;
-    this.externalServicePublicationOption = fsc.getExternalServicePublicationOption();
-    this.lockId = UUID.randomUUID().toString();
   }
 
   private String getUploadSubmissionsTaskLockName() {

@@ -18,13 +18,12 @@ package org.opendatakit.common.web.client;
 
 /**
  * Interface passed to ValidatingTextInputCell and other classes
- * to determine whether or not the input element should be 
+ * to determine whether or not the input element should be
  * disabled.  If the predicate returns false, element input is disabled.
- * 
- * @author mitchellsundt@gmail.com
  *
  * @param <T> type of the backing object for the row containing the cell.
+ * @author mitchellsundt@gmail.com
  */
 public interface UIEnabledPredicate<T> {
-    boolean isEnabled(T info);
+  boolean isEnabled(T info);
 }

@@ -20,11 +20,11 @@ import org.opendatakit.common.web.CallingContext;
 
 public class AggregateStartupImpl implements WebStartup {
 
-    public AggregateStartupImpl() {
-    }
-    
-    @Override
-    public void doStartupAction(CallingContext bootstrapCc) {
-    }
+  public AggregateStartupImpl() {
+  }
+
+  @Override
+  public void doStartupAction(CallingContext bootstrapCc) {
+  }
 
 }

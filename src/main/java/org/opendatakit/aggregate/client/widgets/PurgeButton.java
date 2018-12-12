@@ -16,16 +16,14 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Window;
 import java.util.Date;
-
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPurgePopup;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
-
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 
 public final class PurgeButton extends AggregateButton implements ClickHandler {
 
@@ -45,32 +43,32 @@ public final class PurgeButton extends AggregateButton implements ClickHandler {
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     Date earliest = null;
     switch (externServ.getPublicationOption()) {
-    case UPLOAD_ONLY:
-      if (externServ.getUploadCompleted()) {
-        earliest = externServ.getTimeEstablished();
-      } else {
-        earliest = externServ.getTimeLastUploadCursor();
-      }
-      break;
-    case UPLOAD_N_STREAM:
-      if (externServ.getUploadCompleted()) {
+      case UPLOAD_ONLY:
+        if (externServ.getUploadCompleted()) {
+          earliest = externServ.getTimeEstablished();
+        } else {
+          earliest = externServ.getTimeLastUploadCursor();
+        }
+        break;
+      case UPLOAD_N_STREAM:
+        if (externServ.getUploadCompleted()) {
+          earliest = externServ.getTimeLastStreamingCursor();
+          if (earliest == null) {
+            earliest = externServ.getTimeEstablished();
+          }
+        } else {
+          earliest = externServ.getTimeLastUploadCursor();
+        }
+        break;
+      case STREAM_ONLY:
         earliest = externServ.getTimeLastStreamingCursor();
         if (earliest == null) {
           earliest = externServ.getTimeEstablished();
         }
-      } else {
-        earliest = externServ.getTimeLastUploadCursor();
-      }
-      break;
-    case STREAM_ONLY:
-      earliest = externServ.getTimeLastStreamingCursor();
-      if (earliest == null) {
-        earliest = externServ.getTimeEstablished();
-      }
-      break;
+        break;
     }
 
     SafeHtmlBuilder b = new SafeHtmlBuilder();

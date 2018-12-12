@@ -24,57 +24,53 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- * 
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class FormInfoTable extends TopLevelDynamicBase {
-    static final String TABLE_NAME = "_form_info";
+  public static final DataField FORM_ID = new DataField("FORM_ID",
+      DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
+  static final String TABLE_NAME = "_form_info";
+  private static FormInfoTable relation = null;
 
-    public static final DataField FORM_ID = new DataField("FORM_ID",
-            DataField.DataType.STRING, true, IForm.MAX_FORM_ID_LENGTH);
+  /**
+   * Construct a relation prototype.
+   *
+   * @param databaseSchema
+   */
+  private FormInfoTable(String databaseSchema) {
+    super(databaseSchema, TABLE_NAME);
+    fieldList.add(FORM_ID);
 
-    /**
-     * Construct a relation prototype.
-     * 
-     * @param databaseSchema
-     */
-    private FormInfoTable(String databaseSchema) {
-        super(databaseSchema, TABLE_NAME);
-        fieldList.add(FORM_ID);
+    fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FormInfo.FORM_ID));
+    fieldValueMap.put(FORM_ID, FormInfo.FORM_ID);
+  }
 
-        fieldValueMap.put(primaryKey, CommonFieldsBase.newMD5HashUri(FormInfo.FORM_ID));
-        fieldValueMap.put(FORM_ID, FormInfo.FORM_ID);
+  /**
+   * Construct an empty entity.
+   *
+   * @param ref
+   * @param user
+   */
+  private FormInfoTable(FormInfoTable ref, User user) {
+    super(ref, user);
+  }
+
+  static synchronized final FormInfoTable assertRelation(CallingContext cc) throws ODKDatastoreException {
+    if (relation == null) {
+      FormInfoTable relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      relationPrototype = new FormInfoTable(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
     }
+    return relation;
+  }
 
-    /**
-     * Construct an empty entity.
-     * 
-     * @param ref
-     * @param user
-     */
-    private FormInfoTable(FormInfoTable ref, User user) {
-        super(ref, user);
-    }
-
-    @Override
-    public FormInfoTable getEmptyRow(User user) {
-        return new FormInfoTable(this, user);
-    }
-    
-    private static FormInfoTable relation = null;
-    
-    static synchronized final FormInfoTable assertRelation(CallingContext cc) throws ODKDatastoreException {
-        if ( relation == null ) {
-            FormInfoTable relationPrototype;
-            Datastore ds = cc.getDatastore();
-            User user = cc.getUserService().getDaemonAccountUser();
-            relationPrototype = new FormInfoTable(ds.getDefaultSchemaName());
-            ds.assertRelation(relationPrototype, user); // may throw exception...
-            // at this point, the prototype has become fully populated
-            relation = relationPrototype; // set static variable only upon success...
-        }
-        return relation;
-    }
+  @Override
+  public FormInfoTable getEmptyRow(User user) {
+    return new FormInfoTable(this, user);
+  }
 }

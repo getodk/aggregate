@@ -20,11 +20,11 @@ import java.io.Serializable;
 
 
 public enum UIDisplayType implements Serializable {
-    TEXT,
-    BINARY,
-    REPEAT;
-    
-    private UIDisplayType() {
-      // GWT
-    }
+  TEXT,
+  BINARY,
+  REPEAT;
+
+  private UIDisplayType() {
+    // GWT
+  }
 }

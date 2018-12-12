@@ -75,28 +75,21 @@ import org.slf4j.LoggerFactory;
  * @author mitchellsundt@gmail.com
  */
 public class SubmissionDownloadListServlet extends ServletUtilBase {
-  private static final Logger log = LoggerFactory.getLogger(SubmissionDownloadListServlet.class);
-
-  private static final String ID_FRAGMENT_TAG = "idChunk";
-
-  private static final String ID_LIST_TAG = "idList";
-
-  private static final String CURSOR_TAG = "resumptionCursor";
-
-  private static final String ID_TAG = "id";
-  private static int DEFAULT_NUM_ENTRIES = 180000;
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 13236849409070038L;
-
   /**
    * URI from base
    */
   public static final String ADDR = "view/submissionList";
-
+  private static final Logger log = LoggerFactory.getLogger(SubmissionDownloadListServlet.class);
+  private static final String ID_FRAGMENT_TAG = "idChunk";
+  private static final String ID_LIST_TAG = "idList";
+  private static final String CURSOR_TAG = "resumptionCursor";
+  private static final String ID_TAG = "id";
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 13236849409070038L;
   private static final String XML_TAG_NAMESPACE = "http://opendatakit.org/submissions";
+  private static int DEFAULT_NUM_ENTRIES = 180000;
 
   /**
    * Handler for HTTP Get request that responds with an XML list of instanceIDs

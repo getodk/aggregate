@@ -16,8 +16,10 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.user.client.ui.Image;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.submission.Column;
 import org.opendatakit.aggregate.client.submission.SubmissionUI;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
@@ -26,10 +28,6 @@ import org.opendatakit.aggregate.client.widgets.MarkSubmissionCompleteButton;
 import org.opendatakit.aggregate.client.widgets.RepeatViewButton;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.web.constants.BasicConsts;
-
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLTable;
-import com.google.gwt.user.client.ui.Image;
 
 public class SubmissionAdminTable extends FlexTable {
 
@@ -75,25 +73,25 @@ public class SubmissionAdminTable extends FlexTable {
       // generate row
       for (final String value : row.getValues()) {
         switch (tableHeaders.get(valueIndex++).getUiDisplayType()) {
-        case BINARY:
-          if (value == null) {
-            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
-          } else {
-            Image image = new Image(value + UIConsts.PREVIEW_SET);
-            image.addClickHandler(new BinaryPopupClickHandler(value, false));
-            setWidget(rowPosition, columnPosition, image);
-          }
-          break;
-        case REPEAT:
-          if (value == null) {
-            setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
-          } else {
-            RepeatViewButton repeat = new RepeatViewButton(value);
-            setWidget(rowPosition, columnPosition, repeat);
-          }
-          break;
-        default:
-          setText(rowPosition, columnPosition, value);
+          case BINARY:
+            if (value == null) {
+              setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
+            } else {
+              Image image = new Image(value + UIConsts.PREVIEW_SET);
+              image.addClickHandler(new BinaryPopupClickHandler(value, false));
+              setWidget(rowPosition, columnPosition, image);
+            }
+            break;
+          case REPEAT:
+            if (value == null) {
+              setText(rowPosition, columnPosition, BasicConsts.EMPTY_STRING);
+            } else {
+              RepeatViewButton repeat = new RepeatViewButton(value);
+              setWidget(rowPosition, columnPosition, repeat);
+            }
+            break;
+          default:
+            setText(rowPosition, columnPosition, value);
         }
         columnPosition++;
       }

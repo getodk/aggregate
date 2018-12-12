@@ -8,6 +8,6 @@ public class PersistenceUtils {
   }
 
   public final static String newMD5HashUri(byte[] asBytes) {
-   return CommonFieldsBase.newMD5HashUri(asBytes);
+    return CommonFieldsBase.newMD5HashUri(asBytes);
   }
 }

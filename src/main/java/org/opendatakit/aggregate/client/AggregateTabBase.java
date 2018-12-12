@@ -16,14 +16,12 @@
 
 package org.opendatakit.aggregate.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.opendatakit.aggregate.constants.common.SubTabs;
-import org.opendatakit.aggregate.constants.common.Tabs;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.TabPanel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.opendatakit.aggregate.constants.common.SubTabs;
+import org.opendatakit.aggregate.constants.common.Tabs;
 
 public class AggregateTabBase extends TabPanel {
 
@@ -36,7 +34,7 @@ public class AggregateTabBase extends TabPanel {
     super();
 
     subTabPosition = new ArrayList<SubTabs>();
-    subTabMap = new HashMap<SubTabs,SubTabInterface>();
+    subTabMap = new HashMap<SubTabs, SubTabInterface>();
 
     getElement().addClassName("second_level_menu");
     getElement().getFirstChildElement().getFirstChildElement().addClassName("tab_measure_2");
@@ -52,7 +50,7 @@ public class AggregateTabBase extends TabPanel {
     subTabMap.put(subTab, panel);
   }
 
-  protected void hideSubTab(AggregateSubTabBase panel){
+  protected void hideSubTab(AggregateSubTabBase panel) {
     remove(panel);
   }
 
@@ -77,32 +75,32 @@ public class AggregateTabBase extends TabPanel {
    * so that the initial page render should be fast.
    */
   public void warmUp() {
-     for ( int i = 0 ; i < subTabPosition.size() ; ++i ) {
-        boolean isVisible = this.isVisible();
-        boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
-        if ( !isVisible || !isSelectedTab ) {
-           GWT.log("background update " + subTabPosition.get(i).getHashString());
-           subTabMap.get(subTabPosition.get(i)).update();
-        }
-     }
+    for (int i = 0; i < subTabPosition.size(); ++i) {
+      boolean isVisible = this.isVisible();
+      boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
+      if (!isVisible || !isSelectedTab) {
+        GWT.log("background update " + subTabPosition.get(i).getHashString());
+        subTabMap.get(subTabPosition.get(i)).update();
+      }
+    }
   }
 
   public SubTabInterface getActiveSubTabInterface() {
-    for ( int i = 0 ; i < subTabPosition.size() ; ++i ) {
+    for (int i = 0; i < subTabPosition.size(); ++i) {
       boolean isVisible = this.isVisible();
       boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
-      if ( isVisible && isSelectedTab ) {
-         return subTabMap.get(subTabPosition.get(i));
+      if (isVisible && isSelectedTab) {
+        return subTabMap.get(subTabPosition.get(i));
       }
     }
     return null;
   }
-  
+
   public int findSubTabIndex(SubTabs subTab) {
     int index = subTabPosition.indexOf(subTab);
 
     // if object is not found java sets value to -1
-    if(index < 0) {
+    if (index < 0) {
       return 0;
     }
 

@@ -20,36 +20,35 @@ import java.io.Serializable;
 
 /**
  * Status of a MiscTasks action.
- * 
- * @author user
  *
+ * @author user
  */
 public enum FormActionStatus implements Serializable {
 
-    IN_PROGRESS("Active"), // created or task is running
-    RETRY_IN_PROGRESS("Retrying"), // task is running
-    FAILED("Scheduled"),    // task completed with failure; retry again later.
-    ABANDONED("Failed"), // task completed with failure; no more retries should occur.
-    SUCCESSFUL("Successful"); // task completed successfully.
+  IN_PROGRESS("Active"), // created or task is running
+  RETRY_IN_PROGRESS("Retrying"), // task is running
+  FAILED("Scheduled"),    // task completed with failure; retry again later.
+  ABANDONED("Failed"), // task completed with failure; no more retries should occur.
+  SUCCESSFUL("Successful"); // task completed successfully.
 
-    private String displayText;
-    
-    private FormActionStatus() {
-      // GWT
-    }
-    
-    private FormActionStatus(String display) {
-      displayText = display;
-    }
-    
-    public String getDisplayText() {
-      return displayText;
-    }
-    
-    /**
-     * @return true if this request is considered 'active'
-     */
-    public boolean isActiveRequest() {
-        return ( this != ABANDONED ) && ( this != SUCCESSFUL );
-    }
+  private String displayText;
+
+  private FormActionStatus() {
+    // GWT
+  }
+
+  private FormActionStatus(String display) {
+    displayText = display;
+  }
+
+  public String getDisplayText() {
+    return displayText;
+  }
+
+  /**
+   * @return true if this request is considered 'active'
+   */
+  public boolean isActiveRequest() {
+    return (this != ABANDONED) && (this != SUCCESSFUL);
+  }
 }

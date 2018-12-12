@@ -12,11 +12,6 @@ import java.util.function.Consumer;
 import org.opendatakit.aggregate.client.AggregateUI;
 
 public class SecurityUtils {
-  @FunctionalInterface
-  public interface SecureRpcRequest<T, U> {
-    void apply(T rpc, String sessionCookie, AsyncCallback<U> callback);
-  }
-
   /**
    * Executes a secure request (with CSRF protection) to make a RPC.
    * <p>
@@ -63,5 +58,10 @@ public class SecurityUtils {
         });
       }
     });
+  }
+
+  @FunctionalInterface
+  public interface SecureRpcRequest<T, U> {
+    void apply(T rpc, String sessionCookie, AsyncCallback<U> callback);
   }
 }

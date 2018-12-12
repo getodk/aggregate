@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -15,7 +15,6 @@ package org.opendatakit.common.ermodel;
 
 import java.util.Date;
 import java.util.List;
-
 import org.opendatakit.common.datamodel.BinaryContent;
 import org.opendatakit.common.datamodel.BinaryContentManipulator;
 import org.opendatakit.common.datamodel.BinaryContentManipulator.BlobSubmissionOutcome;
@@ -42,6 +41,11 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
   private static final String BLOB_SUFFIX = "_blb";
   private static final String VREF_SUFFIX = "_ref";
   private static final String CTNT_SUFFIX = "_bin";
+  private final TableNamespace namespace;
+  private final String backingBaseTableName;
+  private BinaryContent ctntRelation;
+  private BinaryContentRefBlob vrefRelation;
+  private RefBlob blobRelation;
 
   /**
    * Standard constructor. Use for tables your application knows about and
@@ -139,41 +143,41 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
     }
 
     switch (type) {
-    case SUBMISSIONS:
-      // submissions tables never start with a leading underscore.
-      if (tableName.charAt(0) == '_') {
-        throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
-      }
-      backingBaseTableName = tableName;
-      namespace = TableNamespace.SUBMISSIONS;
-      // don't proceed if the binary content table doesn't exist
-      if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName + CTNT_SUFFIX, user)) {
-        throw new IllegalArgumentException("Submissions table does not exist");
-      }
-      break;
-    case INTERNALS:
-      // internal tables to Aggregate start with an underscore
-      // followed by an alphanumeric character.
-      if (tableName.charAt(0) != '_' || tableName.charAt(1) == '_') {
-        throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
-      }
-      backingBaseTableName = tableName;
-      namespace = TableNamespace.INTERNALS;
-      // don't proceed if the binary content table doesn't exist
-      if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName + CTNT_SUFFIX, user)) {
-        throw new IllegalArgumentException("Submissions table does not exist");
-      }
-      break;
-    case EXTENSION:
-      // extensions start with at least two underscores...
-      if (tableName.charAt(0) != '_' || tableName.charAt(1) != '_') {
-        throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
-      }
-      backingBaseTableName = tableName;
-      namespace = TableNamespace.EXTENSION;
-      break;
-    default:
-      throw new IllegalStateException("Unexpected TableNamespace value");
+      case SUBMISSIONS:
+        // submissions tables never start with a leading underscore.
+        if (tableName.charAt(0) == '_') {
+          throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
+        }
+        backingBaseTableName = tableName;
+        namespace = TableNamespace.SUBMISSIONS;
+        // don't proceed if the binary content table doesn't exist
+        if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName + CTNT_SUFFIX, user)) {
+          throw new IllegalArgumentException("Submissions table does not exist");
+        }
+        break;
+      case INTERNALS:
+        // internal tables to Aggregate start with an underscore
+        // followed by an alphanumeric character.
+        if (tableName.charAt(0) != '_' || tableName.charAt(1) == '_') {
+          throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
+        }
+        backingBaseTableName = tableName;
+        namespace = TableNamespace.INTERNALS;
+        // don't proceed if the binary content table doesn't exist
+        if (!ds.hasRelation(ds.getDefaultSchemaName(), tableName + CTNT_SUFFIX, user)) {
+          throw new IllegalArgumentException("Submissions table does not exist");
+        }
+        break;
+      case EXTENSION:
+        // extensions start with at least two underscores...
+        if (tableName.charAt(0) != '_' || tableName.charAt(1) != '_') {
+          throw new IllegalArgumentException("Invalid Table namespace for tableName: " + tableName);
+        }
+        backingBaseTableName = tableName;
+        namespace = TableNamespace.EXTENSION;
+        break;
+      default:
+        throw new IllegalStateException("Unexpected TableNamespace value");
     }
     initialize(cc);
   }
@@ -303,7 +307,97 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
     ds.dropRelation(ctntRelation, user);
   }
 
+  public List<BinaryContent> getAllBinaryContents(CallingContext cc) throws ODKDatastoreException {
+    Query q = cc.getDatastore().createQuery(ctntRelation, "getAllContents", cc.getCurrentUser());
+    @SuppressWarnings("unchecked")
+    List<BinaryContent> bc = (List<BinaryContent>) q.executeQuery();
+    return bc;
+  }
+
+  private void initialize(CallingContext cc) throws ODKDatastoreException {
+    Datastore ds = cc.getDatastore();
+    User user = cc.getCurrentUser();
+    String schemaName = ds.getDefaultSchemaName();
+
+    synchronized (AbstractBlobRelationSet.class) {
+      // create the 3 relation prototypes...
+      BinaryContent protoCtntRelation = null;
+      BinaryContentRefBlob protoVRefRelation = null;
+      RefBlob protoRefBlobRelation = null;
+
+      String ctntName = backingBaseTableName.toLowerCase() + CTNT_SUFFIX;
+      String vrefName = backingBaseTableName.toLowerCase() + VREF_SUFFIX;
+      String blobName = backingBaseTableName.toLowerCase() + BLOB_SUFFIX;
+
+      // track which ones already exist.
+      // if they don't yet exist, if we get a failure,
+      // we'll attempt to drop them.
+      boolean ctntExists = ds.hasRelation(schemaName, ctntName, user);
+      boolean vrefExists = ds.hasRelation(schemaName, vrefName, user);
+      boolean blobExists = ds.hasRelation(schemaName, blobName, user);
+
+      protoCtntRelation = new BinaryContent(schemaName, ctntName);
+      protoVRefRelation = new BinaryContentRefBlob(schemaName, vrefName);
+      protoRefBlobRelation = new RefBlob(schemaName, blobName);
+
+      // create them in the persistence layer
+      try {
+        ds.assertRelation(protoCtntRelation, user);
+        try {
+          ds.assertRelation(protoVRefRelation, user);
+
+          try {
+            ds.assertRelation(protoRefBlobRelation, user);
+          } catch (ODKDatastoreException e) {
+            if (!blobExists) {
+              try {
+                ds.dropRelation(protoRefBlobRelation, user);
+              } catch (Exception e1) {
+                // ignore
+              }
+            }
+            throw e;
+          }
+        } catch (ODKDatastoreException e) {
+          if (!vrefExists) {
+            try {
+              ds.dropRelation(protoVRefRelation, user);
+            } catch (Exception e1) {
+              // ignore
+            }
+          }
+          throw e;
+        }
+      } catch (ODKDatastoreException e) {
+        if (!ctntExists) {
+          try {
+            ds.dropRelation(protoCtntRelation, user);
+          } catch (Exception e1) {
+            // ignore
+          }
+        }
+        throw e;
+      }
+
+      // OK we have them persisted -- remember the prototypes...
+      ctntRelation = protoCtntRelation;
+      vrefRelation = protoVRefRelation;
+      blobRelation = protoRefBlobRelation;
+    }
+  }
+
   public static class BlobEntitySetImpl implements BlobEntitySet {
+
+    private final String uri;
+    private final String topLevelUri;
+    private final BinaryContentManipulator m;
+
+    protected BlobEntitySetImpl(String uri, String topLevelUri, BinaryContentManipulator m,
+                                CallingContext cc) throws ODKDatastoreException {
+      this.uri = uri;
+      this.topLevelUri = topLevelUri;
+      this.m = m;
+    }
 
     @Override
     public String getUri() {
@@ -375,108 +469,11 @@ public class AbstractBlobRelationSet implements BlobRelationSet {
       m.deleteAll(cc);
     }
 
-    private final String uri;
-    private final String topLevelUri;
-    private final BinaryContentManipulator m;
-
-    protected BlobEntitySetImpl(String uri, String topLevelUri, BinaryContentManipulator m,
-        CallingContext cc) throws ODKDatastoreException {
-      this.uri = uri;
-      this.topLevelUri = topLevelUri;
-      this.m = m;
-    }
-
     @Override
     public BlobSubmissionOutcome addBlob(byte[] byteArray, String contentType,
-        String unrootedFilePath, boolean overwriteOK, CallingContext cc)
+                                         String unrootedFilePath, boolean overwriteOK, CallingContext cc)
         throws ODKDatastoreException {
       return m.setValueFromByteArray(byteArray, contentType, unrootedFilePath, overwriteOK, cc);
-    }
-  }
-
-  public List<BinaryContent> getAllBinaryContents(CallingContext cc) throws ODKDatastoreException {
-    Query q = cc.getDatastore().createQuery(ctntRelation, "getAllContents", cc.getCurrentUser());
-    @SuppressWarnings("unchecked")
-    List<BinaryContent> bc = (List<BinaryContent>) q.executeQuery();
-    return bc;
-  }
-
-  @SuppressWarnings("unused")
-  private final TableNamespace namespace;
-  private final String backingBaseTableName;
-  private BinaryContent ctntRelation;
-  private BinaryContentRefBlob vrefRelation;
-  private RefBlob blobRelation;
-
-  private void initialize(CallingContext cc) throws ODKDatastoreException {
-    Datastore ds = cc.getDatastore();
-    User user = cc.getCurrentUser();
-    String schemaName = ds.getDefaultSchemaName();
-
-    synchronized (AbstractBlobRelationSet.class) {
-      // create the 3 relation prototypes...
-      BinaryContent protoCtntRelation = null;
-      BinaryContentRefBlob protoVRefRelation = null;
-      RefBlob protoRefBlobRelation = null;
-
-      String ctntName = backingBaseTableName.toLowerCase() + CTNT_SUFFIX;
-      String vrefName = backingBaseTableName.toLowerCase() + VREF_SUFFIX;
-      String blobName = backingBaseTableName.toLowerCase() + BLOB_SUFFIX;
-
-      // track which ones already exist.
-      // if they don't yet exist, if we get a failure,
-      // we'll attempt to drop them.
-      boolean ctntExists = ds.hasRelation(schemaName, ctntName, user);
-      boolean vrefExists = ds.hasRelation(schemaName, vrefName, user);
-      boolean blobExists = ds.hasRelation(schemaName, blobName, user);
-
-      protoCtntRelation = new BinaryContent(schemaName, ctntName);
-      protoVRefRelation = new BinaryContentRefBlob(schemaName, vrefName);
-      protoRefBlobRelation = new RefBlob(schemaName, blobName);
-
-      // create them in the persistence layer
-      try {
-        ds.assertRelation(protoCtntRelation, user);
-        try {
-          ds.assertRelation(protoVRefRelation, user);
-
-          try {
-            ds.assertRelation(protoRefBlobRelation, user);
-          } catch (ODKDatastoreException e) {
-            if (!blobExists) {
-              try {
-                ds.dropRelation(protoRefBlobRelation, user);
-              } catch (Exception e1) {
-                // ignore
-              }
-            }
-            throw e;
-          }
-        } catch (ODKDatastoreException e) {
-          if (!vrefExists) {
-            try {
-              ds.dropRelation(protoVRefRelation, user);
-            } catch (Exception e1) {
-              // ignore
-            }
-          }
-          throw e;
-        }
-      } catch (ODKDatastoreException e) {
-        if (!ctntExists) {
-          try {
-            ds.dropRelation(protoCtntRelation, user);
-          } catch (Exception e1) {
-            // ignore
-          }
-        }
-        throw e;
-      }
-
-      // OK we have them persisted -- remember the prototypes...
-      ctntRelation = protoCtntRelation;
-      vrefRelation = protoVRefRelation;
-      blobRelation = protoRefBlobRelation;
     }
   }
 }

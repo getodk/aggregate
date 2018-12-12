@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -20,13 +20,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * When a form is uploaded, the names for the columns and tables representing
@@ -47,15 +46,12 @@ import org.opendatakit.common.web.CallingContext;
 final class NamingSet {
   private static final String DROP_CHARS = "AEIOUY";
   private static final Logger logger = LoggerFactory.getLogger(NamingSet.class);
-
-  private StringBuilder dbg = null;
-  private int idxResolveNames = 0;
   private final Map<String, Name> tablePlaceholders = new TreeMap<String, Name>();
   private final Map<String, Map<String, Name>> columnPlaceholders = new TreeMap<String, Map<String, Name>>();
   private final Set<String> uniqueTables = new TreeSet<String>();
-
   private final Map<String, Integer> tableIndexCounters = new TreeMap<String, Integer>();
-
+  private StringBuilder dbg = null;
+  private int idxResolveNames = 0;
   private int baseCounter = 0;
 
   public NamingSet() {
@@ -455,13 +451,13 @@ final class NamingSet {
             // truncate the item name, since it is all we have...
             nm.mungedQualifier = nm.qualifier;
             nm.mungedItemName = trimName(nm.itemName, maxLenColumnName);
-          } else if ( qualifier.length() <= remainder ) {
+          } else if (qualifier.length() <= remainder) {
             // (qualifier + max item name) is short enough to avoid truncation
             nm.mungedQualifier = nm.qualifier;
             nm.mungedItemName = nm.itemName;
           } else if ((remainder >= 3) &&
-                     (qualifier.length() <= 11 ||
-                      remainder >= Integer.toString(qualifier.length() - 2).length() + 2)) {
+              (qualifier.length() <= 11 ||
+                  remainder >= Integer.toString(qualifier.length() - 2).length() + 2)) {
             // truncate qualifier to remainder...
             // In the worst case, we have enough room
             // to encode the qualifier with an I18N style encoding.
@@ -593,7 +589,7 @@ final class NamingSet {
         int digits = (numCharToDrop >= 98) ? 3 : (numCharToDrop >= 9) ? 2 : 1;
         numCharToDrop += digits;
 
-        if ( numCharToDrop + 2 <= originalName.length() ) {
+        if (numCharToDrop + 2 <= originalName.length()) {
           int oddCorrector = 1 - (originalName.length() % 2);
           int elideFirst = (originalName.length() + oddCorrector - numCharToDrop) / 2;
           int elideLast = (originalName.length() + oddCorrector + numCharToDrop) / 2;

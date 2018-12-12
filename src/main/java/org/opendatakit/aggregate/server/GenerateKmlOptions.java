@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.server;
 
 import java.util.LinkedList;
 import java.util.Queue;
-
 import org.opendatakit.aggregate.client.form.KmlGeoTraceNShapeOption;
 import org.opendatakit.aggregate.client.form.KmlGeopointOption;
 import org.opendatakit.aggregate.client.form.KmlOptionsSummary;
@@ -57,12 +56,12 @@ public class GenerateKmlOptions {
   }
 
   private void recursiveElementSearchToEliminateRepeats(Queue<FormElementModel> elementLevelsToExamine, KmlOptionsSummary options, FormElementModel element,
-      FormElementModel root) {
-    
-    if(element.getChildren() == null) {
+                                                        FormElementModel root) {
+
+    if (element.getChildren() == null) {
       return;
     }
-    
+
     for (FormElementModel groupElementChild : element.getChildren()) {
       if (groupElementChild.getElementType() == FormElementModel.ElementType.REPEAT) {
         elementLevelsToExamine.add(groupElementChild);
@@ -73,9 +72,9 @@ public class GenerateKmlOptions {
       }
     }
   }
-  
+
   private void createKmlOption(KmlOptionsSummary options, FormElementModel element,
-      FormElementModel root) {
+                               FormElementModel root) {
     if (element.getElementType() == FormElementModel.ElementType.GEOPOINT) {
       // create a kml geopoint option
       FormElementKey gpsElementKey = element.constructFormElementKey(form);
@@ -112,21 +111,21 @@ public class GenerateKmlOptions {
       FormElementKey key = node.constructFormElementKey(form);
       String nodeName = key.userFriendlyString(form);
       switch (node.getElementType()) {
-      case BINARY:
-        kmlGpsOption.addBinaryNode(nodeName, key.toString());
-        break;
-      case GEOPOINT:
-      case GEOSHAPE:
-      case GEOTRACE:
-      case REPEAT:
-        break; // should not be in any list
-      case GROUP:
-        generateGeopointOptions(kmlGpsOption, node);
-        break;
-      default:
-        if (!node.isMetadata()) {
-          kmlGpsOption.addTitleNode(nodeName, key.toString());
-        }
+        case BINARY:
+          kmlGpsOption.addBinaryNode(nodeName, key.toString());
+          break;
+        case GEOPOINT:
+        case GEOSHAPE:
+        case GEOTRACE:
+        case REPEAT:
+          break; // should not be in any list
+        case GROUP:
+          generateGeopointOptions(kmlGpsOption, node);
+          break;
+        default:
+          if (!node.isMetadata()) {
+            kmlGpsOption.addTitleNode(nodeName, key.toString());
+          }
       }
     }
   }
@@ -134,21 +133,21 @@ public class GenerateKmlOptions {
   private void generateGeoTraceNShapeOptions(KmlGeoTraceNShapeOption kmlGpsOption, FormElementModel root) {
     for (FormElementModel node : root.getChildren()) {
       switch (node.getElementType()) {
-      case BINARY:
-      case GEOPOINT:
-      case GEOSHAPE:
-      case GEOTRACE:
-      case REPEAT:
-        break; // should not be in any list
-      case GROUP:
-        generateGeoTraceNShapeOptions(kmlGpsOption, node);
-        break;
-      default:
-        FormElementKey key = node.constructFormElementKey(form);
-        String nodeName = key.userFriendlyString(form);
-        if (!node.isMetadata()) {
-          kmlGpsOption.addNameNode(nodeName, key.toString());
-        }
+        case BINARY:
+        case GEOPOINT:
+        case GEOSHAPE:
+        case GEOTRACE:
+        case REPEAT:
+          break; // should not be in any list
+        case GROUP:
+          generateGeoTraceNShapeOptions(kmlGpsOption, node);
+          break;
+        default:
+          FormElementKey key = node.constructFormElementKey(form);
+          String nodeName = key.userFriendlyString(form);
+          if (!node.isMetadata()) {
+            kmlGpsOption.addNameNode(nodeName, key.toString());
+          }
       }
     }
   }

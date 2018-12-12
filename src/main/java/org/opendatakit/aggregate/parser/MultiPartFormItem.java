@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -21,10 +21,9 @@ import java.io.ByteArrayOutputStream;
 
 /**
  * Object representation of multi part form data
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public final class MultiPartFormItem {
 
@@ -32,33 +31,26 @@ public final class MultiPartFormItem {
    * form data field name
    */
   private final String name;
-
-  /**
-   * form data file name
-   */
-  private String filename;
-  
   /**
    * form data content type
    */
   private final String contentType;
-
   /**
    * form data's stream
    */
   private final ByteArrayOutputStream stream;
-  
   /**
-   * Constructor of a multi part of data 
-   * 
-   * @param fieldName
-   *    form data field name   
-   * @param fileName
-   *    form data file name
-   * @param contentType
-   *    form data content type
-   * @param byteStream
-   *    form data's stream
+   * form data file name
+   */
+  private String filename;
+
+  /**
+   * Constructor of a multi part of data
+   *
+   * @param fieldName   form data field name
+   * @param fileName    form data file name
+   * @param contentType form data content type
+   * @param byteStream  form data's stream
    */
   public MultiPartFormItem(String fieldName, String fileName, String contentType, ByteArrayOutputStream byteStream) {
     this.name = fieldName;
@@ -66,12 +58,11 @@ public final class MultiPartFormItem {
     this.contentType = contentType;
     this.stream = byteStream;
   }
-  
+
   /**
    * Get form data field name
-   * 
-   * @return
-   *    field name
+   *
+   * @return field name
    */
   public String getName() {
     return name;
@@ -79,9 +70,8 @@ public final class MultiPartFormItem {
 
   /**
    * Get form data file name
-   * 
-   * @return
-   *    file name
+   *
+   * @return file name
    */
   public String getFilename() {
     return filename;
@@ -89,20 +79,19 @@ public final class MultiPartFormItem {
 
   /**
    * Only used during construction of the MultiPartFormData
-   * to strip the common leading directory elements off the 
+   * to strip the common leading directory elements off the
    * file path.  Needed for uploading of data from a PC directory.
-   * 
+   *
    * @param fileName
    */
   public void setFilename(String fileName) {
     this.filename = fileName;
-  }  
+  }
 
   /**
    * Get form data content type
-   * 
-   * @return
-   *    content type
+   *
+   * @return content type
    */
   public String getContentType() {
     return contentType;
@@ -110,9 +99,8 @@ public final class MultiPartFormItem {
 
   /**
    * Get form data's stream
-   * 
-   * @return
-   *    stream
+   *
+   * @return stream
    */
   public ByteArrayOutputStream getStream() {
     return stream;

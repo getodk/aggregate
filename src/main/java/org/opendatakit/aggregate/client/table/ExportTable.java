@@ -17,14 +17,12 @@
 package org.opendatakit.aggregate.client.table;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import java.util.ArrayList;
-
 import org.opendatakit.aggregate.client.form.ExportSummary;
 import org.opendatakit.aggregate.client.widgets.DeleteExportButton;
 import org.opendatakit.aggregate.constants.common.ExportStatus;
-
-import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTML;
 
 /**
  * List all the requests for downloadable documents and their status.
@@ -42,7 +40,7 @@ public class ExportTable extends FlexTable {
 
   public ExportTable() {
     super();
-    this.setHTML(0, 1, "<h2 id=\"form_name\">Exported Files</h2>"); 
+    this.setHTML(0, 1, "<h2 id=\"form_name\">Exported Files</h2>");
     this.setText(HEADER_ROW, FILE_TYPE, "File Type");
     this.setText(HEADER_ROW, STATUS, "Status");
     this.setText(HEADER_ROW, TIME_COMPLETED, "Time Completed");
@@ -65,7 +63,7 @@ public class ExportTable extends FlexTable {
       if (e.getTimeCompleted() != null) {
         this.setText(i + STARTING_ROW, TIME_COMPLETED, e.getTimeCompleted().toString());
       }
-      
+
       if (e.getStatus() != null) {
         this.setText(i + STARTING_ROW, STATUS, e.getStatus().toString());
         if (e.getResultFile() != null && e.getStatus() == ExportStatus.AVAILABLE) {
@@ -76,5 +74,5 @@ public class ExportTable extends FlexTable {
     }
   }
 
-  
+
 }

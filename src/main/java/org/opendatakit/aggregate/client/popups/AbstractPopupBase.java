@@ -35,9 +35,9 @@ public class AbstractPopupBase extends PopupPanel {
     return new PopupPanel.PositionCallback() {
       @Override
       public void setPosition(int offsetWidth, int offsetHeight) {
-          int left = Window.getScrollLeft() + ((Window.getClientWidth() - offsetWidth) / 2);
-          int top = Window.getScrollTop() + ((Window.getClientHeight() - offsetHeight) / 2);
-          setPopupPosition(left, top);
+        int left = Window.getScrollLeft() + ((Window.getClientWidth() - offsetWidth) / 2);
+        int top = Window.getScrollTop() + ((Window.getClientHeight() - offsetHeight) / 2);
+        setPopupPosition(left, top);
       }
     };
   }

@@ -16,11 +16,10 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.filter.FilterGroup;
-import org.opendatakit.aggregate.client.popups.ExportPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.filter.FilterGroup;
+import org.opendatakit.aggregate.client.popups.ExportPopup;
 
 public final class ExportButton extends AggregateButton implements ClickHandler {
 
@@ -34,17 +33,17 @@ public final class ExportButton extends AggregateButton implements ClickHandler 
   public ExportButton(String formId) {
     this(formId, null);
   }
-  
+
   public ExportButton(String formId, FilterGroup selectedFilterGroup) {
     super(BUTTON_TXT, TOOLTIP_TEXT, HELP_BALLOON_TXT);
     this.formId = formId;
     this.selectedFilterGroup = selectedFilterGroup;
   }
-  
+
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     ExportPopup popup = new ExportPopup(formId, selectedFilterGroup);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

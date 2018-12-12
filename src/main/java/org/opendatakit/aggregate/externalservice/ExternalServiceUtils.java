@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.externalservice;
 
 import java.util.Date;
-
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.submission.Submission;
 
@@ -25,7 +24,6 @@ import org.opendatakit.aggregate.submission.Submission;
  * publishers.
  *
  * @author wbrunette@gmail.com
- *
  */
 public class ExternalServiceUtils {
 
@@ -57,7 +55,7 @@ public class ExternalServiceUtils {
    * @param streaming
    */
   public static void updateFscToSuccessfulSubmissionDate(FormServiceCursor fsc,
-      Submission submission, boolean streaming) {
+                                                         Submission submission, boolean streaming) {
     // See QueryByDateRange
     // -- we are querying by the markedAsCompleteDate
     Date lastDateSent = submission.getMarkedAsCompleteDate();

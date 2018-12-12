@@ -15,39 +15,6 @@
  */
 package org.opendatakit.aggregate.externalservice;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.apache.http.NameValuePair;
-import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.constants.common.OperationalStatus;
-import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
-import org.opendatakit.aggregate.exception.ODKExternalServiceException;
-import org.opendatakit.aggregate.form.IForm;
-import org.opendatakit.aggregate.format.element.ElementFormatter;
-import org.opendatakit.aggregate.format.header.HeaderFormatter;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
-import org.opendatakit.common.persistence.Datastore;
-import org.opendatakit.common.security.SecurityUtils;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.utils.WebUtils;
-import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.HtmlConsts;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.ByteArrayContent;
@@ -63,6 +30,36 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Permission;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.NameValuePair;
+import org.opendatakit.aggregate.constants.ServletConsts;
+import org.opendatakit.aggregate.constants.common.OperationalStatus;
+import org.opendatakit.aggregate.exception.ODKExternalServiceCredentialsException;
+import org.opendatakit.aggregate.exception.ODKExternalServiceException;
+import org.opendatakit.aggregate.form.IForm;
+import org.opendatakit.aggregate.format.element.ElementFormatter;
+import org.opendatakit.aggregate.format.header.HeaderFormatter;
+import org.opendatakit.aggregate.server.ServerPreferencesProperties;
+import org.opendatakit.common.persistence.Datastore;
+import org.opendatakit.common.security.SecurityUtils;
+import org.opendatakit.common.security.User;
+import org.opendatakit.common.utils.WebUtils;
+import org.opendatakit.common.web.CallingContext;
+import org.opendatakit.common.web.constants.HtmlConsts;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -70,7 +67,6 @@ import org.slf4j.LoggerFactory;
  * Google Spreadsheet, Fusion Table and Map Engine.
  *
  * @author wbrunette@gmail.com
- *
  */
 public abstract class GoogleOauth2ExternalService extends AbstractExternalService {
   private static final Logger oauth2logger = LoggerFactory.getLogger(GoogleOauth2ExternalService.class);
@@ -86,8 +82,8 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
   protected HttpRequestFactory requestFactory;
 
   protected GoogleOauth2ExternalService(String credentialScope, IForm form,
-      FormServiceCursor formServiceCursor, ElementFormatter formatter,
-      HeaderFormatter headerFormatter, CallingContext cc)
+                                        FormServiceCursor formServiceCursor, ElementFormatter formatter,
+                                        HeaderFormatter headerFormatter, CallingContext cc)
       throws ODKExternalServiceCredentialsException, ODKExternalServiceException {
     super(form, formServiceCursor, formatter, headerFormatter, cc);
 
@@ -214,7 +210,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
   }
 
   protected String executeStmt(String method, String urlString, String statement,
-      List<NameValuePair> qparams, boolean isFTQuery, CallingContext cc) throws 
+                               List<NameValuePair> qparams, boolean isFTQuery, CallingContext cc) throws
       IOException, ODKExternalServiceException, GeneralSecurityException {
 
     if (statement == null && (POST.equals(method) || PATCH.equals(method) || PUT.equals(method))) {

@@ -18,12 +18,8 @@ package org.opendatakit.aggregate.task.gae.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.ServletConsts;
@@ -37,31 +33,29 @@ import org.opendatakit.aggregate.task.KmlWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class KmlGeneratorTaskServlet extends ServletUtilBase {
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 8647919526257827291L;
-
-  private static final Logger logger = LoggerFactory.getLogger(KmlGeneratorTaskServlet.class);
-
   /**
    * URI from base
    */
   public static final String ADDR = "gae/kmlGeneratorTask";
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 8647919526257827291L;
+  private static final Logger logger = LoggerFactory.getLogger(KmlGeneratorTaskServlet.class);
 
   /**
    * Handler for HTTP Get request to create xform upload page
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -109,7 +103,7 @@ public class KmlGeneratorTaskServlet extends ServletUtilBase {
         return; // ill-formed definition
       }
 
-      String encodedString =  getParameter(req, KmlGenerator.KML_SELECTIONS_KEY);
+      String encodedString = getParameter(req, KmlGenerator.KML_SELECTIONS_KEY);
       if (encodedString != null) {
         String[] kmlSelectionsEncodedStrings = encodedString
             .split(KmlGenerator.KML_SELECTIONS_DELIMITER);

@@ -18,95 +18,94 @@ package org.opendatakit.aggregate.client.externalserv;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 
 public final class ExternServSummary implements Serializable {
 
-    /**
-     * Serialization identifier
-     */
-    private static final long serialVersionUID = 29897237349781615L;
+  /**
+   * Serialization identifier
+   */
+  private static final long serialVersionUID = 29897237349781615L;
 
-    private String uri; // NOTE: Do not display to the user, for internal
-                        // service only
-    private String user;
-    private OperationalStatus operationalStatus;
-    private Date timeEstablished;
-    private ExternalServicePublicationOption externalServicePublicationOption;
-    private Boolean uploadCompleted;
-    private Date timeLastUploadCursor;
-    private Date timeLastStreamingCursor;
-    private ExternalServiceType externalServiceType;
-    private String ownership;
-    private String name;
+  private String uri; // NOTE: Do not display to the user, for internal
+  // service only
+  private String user;
+  private OperationalStatus operationalStatus;
+  private Date timeEstablished;
+  private ExternalServicePublicationOption externalServicePublicationOption;
+  private Boolean uploadCompleted;
+  private Date timeLastUploadCursor;
+  private Date timeLastStreamingCursor;
+  private ExternalServiceType externalServiceType;
+  private String ownership;
+  private String name;
 
-    public ExternServSummary() {
+  public ExternServSummary() {
 
-    }
+  }
 
-    public ExternServSummary(String uri, String user, OperationalStatus status,
-            Date established,
-            ExternalServicePublicationOption externalServicePublicationOption,
-            Boolean uploadCompleted,
-            Date timeLastUploadCursor, Date timeLastStreamingCursor,
-            ExternalServiceType externalServiceTypeName, String ownership, String name) {
-        this.uri = uri;
-        this.user = user;
-        this.operationalStatus = status;
-        this.timeEstablished = established;
-        this.externalServicePublicationOption = externalServicePublicationOption;
-        this.uploadCompleted = uploadCompleted;
-        this.timeLastUploadCursor = timeLastUploadCursor;
-        this.timeLastStreamingCursor = timeLastStreamingCursor;
-        this.externalServiceType = externalServiceTypeName;
-        this.ownership = ownership;
-        this.name = name;
-    }
+  public ExternServSummary(String uri, String user, OperationalStatus status,
+                           Date established,
+                           ExternalServicePublicationOption externalServicePublicationOption,
+                           Boolean uploadCompleted,
+                           Date timeLastUploadCursor, Date timeLastStreamingCursor,
+                           ExternalServiceType externalServiceTypeName, String ownership, String name) {
+    this.uri = uri;
+    this.user = user;
+    this.operationalStatus = status;
+    this.timeEstablished = established;
+    this.externalServicePublicationOption = externalServicePublicationOption;
+    this.uploadCompleted = uploadCompleted;
+    this.timeLastUploadCursor = timeLastUploadCursor;
+    this.timeLastStreamingCursor = timeLastStreamingCursor;
+    this.externalServiceType = externalServiceTypeName;
+    this.ownership = ownership;
+    this.name = name;
+  }
 
-    public String getUser() {
-        return user;
-    }
+  public String getUser() {
+    return user;
+  }
 
-    public OperationalStatus getStatus() {
-        return operationalStatus;
-    }
+  public OperationalStatus getStatus() {
+    return operationalStatus;
+  }
 
-    public Date getTimeEstablished() {
-        return timeEstablished;
-    }
+  public Date getTimeEstablished() {
+    return timeEstablished;
+  }
 
-    public ExternalServicePublicationOption getPublicationOption() {
-        return externalServicePublicationOption;
-    }
+  public ExternalServicePublicationOption getPublicationOption() {
+    return externalServicePublicationOption;
+  }
 
-    public Boolean getUploadCompleted() {
-        return uploadCompleted;
-    }
+  public Boolean getUploadCompleted() {
+    return uploadCompleted;
+  }
 
-    public Date getTimeLastUploadCursor() {
-        return timeLastUploadCursor;
-    }
+  public Date getTimeLastUploadCursor() {
+    return timeLastUploadCursor;
+  }
 
-    public Date getTimeLastStreamingCursor() {
-        return timeLastStreamingCursor;
-    }
+  public Date getTimeLastStreamingCursor() {
+    return timeLastStreamingCursor;
+  }
 
-    public ExternalServiceType getExternalServiceType() {
-        return externalServiceType;
-    }
+  public ExternalServiceType getExternalServiceType() {
+    return externalServiceType;
+  }
 
-    public String getOwnership() {
-     return ownership;
-   }
+  public String getOwnership() {
+    return ownership;
+  }
 
-   public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getUri() {
-        return uri;
-    }
+  public String getUri() {
+    return uri;
+  }
 }

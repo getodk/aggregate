@@ -17,15 +17,10 @@
 package org.opendatakit.aggregate.task.gae.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.constants.ServletConsts;
-import org.opendatakit.aggregate.exception.ODKExternalServiceDependencyException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -35,32 +30,30 @@ import org.opendatakit.aggregate.task.FormDeleteWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class FormDeleteTaskServlet extends ServletUtilBase {
-
-  /**
-   * Serial number for serialization
-   */
-  private static final long serialVersionUID = 8219849865201422548L;
-
-  private static final Logger logger = LoggerFactory.getLogger(FormDeleteTaskServlet.class);
 
   /**
    * URI from base
    */
   public static final String ADDR = "gae/formDeleteTask";
+  /**
+   * Serial number for serialization
+   */
+  private static final long serialVersionUID = 8219849865201422548L;
+  private static final Logger logger = LoggerFactory.getLogger(FormDeleteTaskServlet.class);
 
   /**
    * Handler for HTTP Get request that shows the list of forms
    *
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *      javax.servlet.http.HttpServletResponse)
+   *     javax.servlet.http.HttpServletResponse)
    */
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -127,21 +120,10 @@ public class FormDeleteTaskServlet extends ServletUtilBase {
       FormDeleteWorkerImpl formDelete = new FormDeleteWorkerImpl(form, miscTasksKey, attemptCount,
           cc);
       formDelete.deleteForm();
-    } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      logger.error("delete form failed: " + e.toString());
-      return;
-    } catch (ODKExternalServiceDependencyException e) {
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      logger.error("delete form failed: " + e.toString());
-      return;
     } catch (Exception e) {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
       logger.error("delete form failed: " + e.toString());
-      return;
     }
   }
 }

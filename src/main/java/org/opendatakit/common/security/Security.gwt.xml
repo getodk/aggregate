@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN"
-  "https://raw.githubusercontent.com/gwtproject/gwt/2.7.0/distro-source/core/src/gwt-module.dtd">
+    "https://raw.githubusercontent.com/gwtproject/gwt/2.7.0/distro-source/core/src/gwt-module.dtd">
 <module>
-	<inherits name="com.google.gwt.user.User" />
+  <inherits name="com.google.gwt.user.User"/>
 
-	<!-- Persistence layer exception class -->
-  	<inherits name='org.opendatakit.common.persistence.Persistence'/>
-	
-	<source path="client"/>
-	<source path="client/security"/>
-	<source path="client/security/admin"/>
-	<source path="client/exception"/>
-	<source path="common"/>
+  <!-- Persistence layer exception class -->
+  <inherits name='org.opendatakit.common.persistence.Persistence'/>
+
+  <source path="client"/>
+  <source path="client/security"/>
+  <source path="client/security/admin"/>
+  <source path="client/exception"/>
+  <source path="common"/>
 </module>

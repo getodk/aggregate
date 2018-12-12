@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.task.gae;
 
 import java.util.Map;
-
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
@@ -31,18 +30,17 @@ import org.opendatakit.common.web.CallingContext;
  * This is a singleton bean. It cannot have any per-request state. It uses a
  * static inner class to encapsulate the per-request state of a running
  * background task.
- * 
+ *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- * 
  */
 public class KmlGeneratorImpl implements KmlGenerator {
 
   @Override
   public void createKmlTask(IForm form, PersistentResults persistentResults, long attemptCount,
-      CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                            CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
     Map<String, String> params = persistentResults.getRequestParameters();
-    
+
     TaskOptionsBuilder b = new TaskOptionsBuilder(KmlGeneratorTaskServlet.ADDR);
     b.countdownMillis(PersistConsts.MAX_SETTLE_MILLISECONDS);
     b.param(ServletConsts.FORM_ID, form.getFormId());

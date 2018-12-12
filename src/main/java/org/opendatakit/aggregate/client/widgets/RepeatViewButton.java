@@ -16,17 +16,16 @@
 
 package org.opendatakit.aggregate.client.widgets;
 
-import org.opendatakit.aggregate.client.popups.RepeatPopup;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import org.opendatakit.aggregate.client.popups.RepeatPopup;
 
 public final class RepeatViewButton extends AggregateButton implements ClickHandler {
 
   private static final String BUTTON_TXT = "View";
   private static final String TOOLTIP_TXT = "View the items";
   private static final String HELP_BALLOON_TXT = "This will open up a smaller popup table with the items" +
-        "you are requesting to view.";
+      "you are requesting to view.";
 
   private final String url;
 
@@ -38,7 +37,7 @@ public final class RepeatViewButton extends AggregateButton implements ClickHand
   @Override
   public void onClick(ClickEvent event) {
     super.onClick(event);
-    
+
     RepeatPopup popup = new RepeatPopup(url);
     popup.setPopupPositionAndShow(popup.getPositionCallBack());
   }

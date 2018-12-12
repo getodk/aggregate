@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc. 
+ * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -24,40 +24,35 @@ import org.opendatakit.common.web.CallingContext;
 
 /**
  * Interface for submission field that can be used to store
- * a submission field in the datastore 
+ * a submission field in the datastore
  *
+ * @param <T> a GAE datastore type
  * @author wbrunette@gmail.com
- * 
- * @param <T>
- *  a GAE datastore type
  * @author mitchellsundt@gmail.com
- * 
  */
-public interface SubmissionField<T> extends SubmissionValue{
-  
-    /**
+public interface SubmissionField<T> extends SubmissionValue {
+
+  /**
    * Returns whether submission type is constructed from a binary object
-   * 
-   * @return
-   *    true if should be constructed with byte array, false otherwise
+   *
+   * @return true if should be constructed with byte array, false otherwise
    */
   public boolean isBinary();
-  
+
   /**
    * Get the value of submission field
-   * 
-   * @return
-   *    value
+   *
+   * @return value
    */
   public T getValue();
 
   /**
    * Parse the value from string format and convert to proper type for
    * submission field
-   * 
+   *
    * @param value string form of the value
    * @throws ODKConversionException
- * @throws ODKDatastoreException 
+   * @throws ODKDatastoreException
    */
   public void setValueFromString(String value) throws ODKConversionException, ODKDatastoreException;
 
@@ -67,24 +62,18 @@ public interface SubmissionField<T> extends SubmissionValue{
    * only be one un-named file. If a value for the unrootedFilePath already exists,
    * and if it is different than the supplied byte array, the existing value will
    * not be changed unless overwiteOK is true.
-   * 
-   * @param byteArray
-   *          byte form of the value
-   * @param contentType
-   *          type of binary data (NOTE: only used for binary data)
-   * @param unrootedFilePath
-   *          the filename for this byte array
-   * @param overwriteOK
-   *          true if overwriting an existing value is OK.
-   * @param cc
-   *          calling context
+   *
+   * @param byteArray        byte form of the value
+   * @param contentType      type of binary data (NOTE: only used for binary data)
+   * @param unrootedFilePath the filename for this byte array
+   * @param overwriteOK      true if overwriting an existing value is OK.
+   * @param cc               calling context
    * @return the outcome of the storage attempt. md5 hashes are used to
-   *         determine file equivalence.
+   *     determine file equivalence.
    * @throws ODKDatastoreException
-   * 
    */
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
-      String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
+                                                                              String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
       throws ODKDatastoreException;
-  
+
 }

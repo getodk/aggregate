@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2011 University of Washington
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -13,14 +13,14 @@
  */
 package org.opendatakit.common.persistence.engine.gae;
 
+import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendatakit.common.persistence.CommonFieldsBase;
 
 /**
  * Utility class that tracks the time it takes to execute a query in AppEngine.
  * Logs that time if the execution exceeds the cost logging threshold.
- * 
+ *
  * @author mitchellsundt@gmail.com
  *
  */
@@ -31,8 +31,8 @@ final class ExecutionTimeLogger {
   private final long startApiTime;
   private final Logger logger;
   private final Logger queryStringLogger;
-  private long istartApiTime;
   String queryString = null;
+  private long istartApiTime;
 
   ExecutionTimeLogger(DatastoreImpl datastore, String loggingContextTag, CommonFieldsBase relation) {
     this.loggingContextTag = loggingContextTag;

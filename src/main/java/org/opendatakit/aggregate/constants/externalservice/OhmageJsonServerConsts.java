@@ -20,5 +20,5 @@ public class OhmageJsonServerConsts {
 
   public static final long BACKOFF_DELAY_MILLISECONDS = 90000L;
 
-    public static final String OHMAGE_SURVEY_UPLOAD_PATH = "/app/survey/upload";
+  public static final String OHMAGE_SURVEY_UPLOAD_PATH = "/app/survey/upload";
 }

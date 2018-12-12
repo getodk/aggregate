@@ -17,9 +17,10 @@
 package org.opendatakit.aggregate.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
-
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
@@ -38,7 +39,11 @@ import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.aggregate.format.element.UiElementFormatter;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup;
 import org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag;
-import org.opendatakit.aggregate.submission.*;
+import org.opendatakit.aggregate.submission.Submission;
+import org.opendatakit.aggregate.submission.SubmissionElement;
+import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.SubmissionKeyPart;
+import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
@@ -46,9 +51,6 @@ import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 public class SubmissionServiceImpl extends RemoteServiceServlet implements
     org.opendatakit.aggregate.client.submission.SubmissionService {
@@ -70,7 +72,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed
-                                                                                // definition
+        // definition
       }
       QueryByUIFilterGroup query = new QueryByUIFilterGroup(form, filterGroup,
           CompletionFlag.ONLY_COMPLETE_SUBMISSIONS, cc);
@@ -116,7 +118,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
       IForm form = FormFactory.retrieveFormByFormId(parts.get(0).getElementName(), cc);
       if (!form.hasValidFormDefinition()) {
         throw new RequestFailureException(ErrorConsts.FORM_DEFINITION_INVALID); // ill-formed
-                                                                                // definition
+        // definition
       }
       Submission sub = Submission.fetchSubmission(parts, cc);
 
@@ -159,7 +161,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException{
+  public String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

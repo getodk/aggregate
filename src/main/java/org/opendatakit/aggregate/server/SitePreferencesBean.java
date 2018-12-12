@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.server;
 
 import javax.servlet.ServletContext;
-
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
@@ -29,7 +28,6 @@ import org.opendatakit.common.web.CallingContext;
  * start-up.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class SitePreferencesBean {
 

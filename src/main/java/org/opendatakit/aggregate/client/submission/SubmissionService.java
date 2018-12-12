@@ -16,20 +16,19 @@
 
 package org.opendatakit.aggregate.client.submission;
 
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
 @RemoteServiceRelativePath("submissionservice")
 public interface SubmissionService extends RemoteService {
-  
+
   SubmissionUISummary getSubmissions(FilterGroup filter) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
-  
+
   SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
   String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;

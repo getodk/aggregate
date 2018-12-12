@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2010-2013 University of Washington
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -43,6 +43,7 @@ public final class OhmageJsonServer2ParameterTable extends CommonFieldsBase {
 
   private static final DataField SERVER_URL_PROPERTY = new DataField("SERVER_URL",
       DataField.DataType.STRING, true, 4096L);
+  private static OhmageJsonServer2ParameterTable relation = null;
 
   /**
    * Construct a relation prototype. Only called via
@@ -69,6 +70,20 @@ public final class OhmageJsonServer2ParameterTable extends CommonFieldsBase {
    */
   private OhmageJsonServer2ParameterTable(OhmageJsonServer2ParameterTable ref, User user) {
     super(ref, user);
+  }
+
+  public static synchronized final OhmageJsonServer2ParameterTable assertRelation(CallingContext cc)
+      throws ODKDatastoreException {
+    if (relation == null) {
+      OhmageJsonServer2ParameterTable relationPrototype;
+      Datastore ds = cc.getDatastore();
+      User user = cc.getUserService().getDaemonAccountUser();
+      relationPrototype = new OhmageJsonServer2ParameterTable(ds.getDefaultSchemaName());
+      ds.assertRelation(relationPrototype, user); // may throw exception...
+      // at this point, the prototype has become fully populated
+      relation = relationPrototype; // set static variable only upon success...
+    }
+    return relation;
   }
 
   // Only called from within the persistence layer.
@@ -135,22 +150,6 @@ public final class OhmageJsonServer2ParameterTable extends CommonFieldsBase {
     if (!setStringField(SERVER_URL_PROPERTY, value)) {
       throw new IllegalArgumentException("overflow of serverUrl");
     }
-  }
-
-  private static OhmageJsonServer2ParameterTable relation = null;
-
-  public static synchronized final OhmageJsonServer2ParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
-    if (relation == null) {
-      OhmageJsonServer2ParameterTable relationPrototype;
-      Datastore ds = cc.getDatastore();
-      User user = cc.getUserService().getDaemonAccountUser();
-      relationPrototype = new OhmageJsonServer2ParameterTable(ds.getDefaultSchemaName());
-      ds.assertRelation(relationPrototype, user); // may throw exception...
-      // at this point, the prototype has become fully populated
-      relation = relationPrototype; // set static variable only upon success...
-    }
-    return relation;
   }
 
 }
