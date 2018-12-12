@@ -15,18 +15,21 @@
  */
 package org.opendatakit.aggregate.format.element;
 
-import java.util.Calendar;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+import static org.opendatakit.common.utils.WebUtils.*;
+
+import java.time.OffsetTime;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
-import org.opendatakit.aggregate.constants.format.FormatConsts;
+import java.util.Optional;
+import java.util.function.Function;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
@@ -55,11 +58,6 @@ public class BasicElementFormatter implements ElementFormatter {
   private boolean includeAccuracy;
 
   /**
-   * Format dates appropriately for googleDocs
-   */
-  private boolean googleDocsDate;
-
-  /**
    * Construct a Basic Element Formatter
    *
    * @param separateGpsCoordinates separate the GPS coordinates of latitude and longitude into
@@ -68,11 +66,10 @@ public class BasicElementFormatter implements ElementFormatter {
    * @param includeGpsAccuracy     include GPS accuracy data
    */
   public BasicElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-                               boolean includeGpsAccuracy, boolean googleDocsDate) {
+                               boolean includeGpsAccuracy) {
     separateCoordinates = separateGpsCoordinates;
     includeAltitude = includeGpsAltitude;
     includeAccuracy = includeGpsAccuracy;
-    this.googleDocsDate = googleDocsDate;
   }
 
   public void formatUid(String uri, String propertyName, Row row) {
@@ -103,36 +100,31 @@ public class BasicElementFormatter implements ElementFormatter {
   }
 
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (googleDocsDate) {
-      basicStringConversion(WebUtils.googleDocsDateOnly(date), row);
-    } else {
-      basicStringConversion(date, row);
-    }
+    rfc1123Conversion(date, JRTemporal::date, row);
   }
 
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (googleDocsDate) {
-      basicStringConversion(WebUtils.googleDocsDateTime(date), row);
-    } else {
-      basicStringConversion(date, row);
-    }
+    rfc1123Conversion(date, JRTemporal::dateTime, row);
   }
 
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (date != null) {
-      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-      g.setTime(date);
-      row.addFormattedValue(String.format(FormatConsts.TIME_FORMAT_STRING,
-          g.get(Calendar.HOUR_OF_DAY),
-          g.get(Calendar.MINUTE),
-          g.get(Calendar.SECOND)));
-    } else {
-      row.addFormattedValue(null);
-    }
+    isoLocalTimeConversion(date, row);
   }
 
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     formatBigDecimalToString(dub, row);
+  }
+
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    rfc1123Conversion(value, row);
+  }
+
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    isoLocalTimeConversion(Optional.ofNullable(value), row);
+  }
+
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    rfc1123Conversion(value, row);
   }
 
   public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
@@ -178,7 +170,31 @@ public class BasicElementFormatter implements ElementFormatter {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
 
-  protected void basicStringConversion(Object value, Row row) {
+  private void isoLocalTimeConversion(Date value, Row row) {
+    isoLocalTimeConversion(Optional.ofNullable(value).map(JRTemporal::time), row);
+  }
+
+  private void isoLocalTimeConversion(Optional<JRTemporal> value, Row row) {
+    basicStringConversion(value
+        .map(v -> OffsetTime.parse(v.getRaw()).format(ISO_LOCAL_TIME))
+        .orElse(null), row);
+  }
+
+  private void rfc1123Conversion(Date value, Function<Date, JRTemporal> mapper, Row row) {
+    rfc1123Conversion(Optional.ofNullable(value).map(mapper), row);
+  }
+
+  private void rfc1123Conversion(JRTemporal value, Row row) {
+    rfc1123Conversion(Optional.ofNullable(value), row);
+  }
+
+  private void rfc1123Conversion(Optional<JRTemporal> value, Row row) {
+    basicStringConversion(value
+        .map(v -> rfc1123Date(v.getParsed()))
+        .orElse(null), row);
+  }
+
+  void basicStringConversion(Object value, Row row) {
     if (value != null) {
       row.addFormattedValue(value.toString());
     } else {
@@ -186,7 +202,7 @@ public class BasicElementFormatter implements ElementFormatter {
     }
   }
 
-  protected void formatBigDecimalToString(WrappedBigDecimal dub, Row row) {
+  void formatBigDecimalToString(WrappedBigDecimal dub, Row row) {
     basicStringConversion(dub, row);
   }
 }

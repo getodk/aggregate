@@ -15,13 +15,13 @@
  */
 package org.opendatakit.aggregate.format.element;
 
-import java.util.Calendar;
+
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
+import java.util.Optional;
+import java.util.function.Function;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -35,6 +35,7 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -110,31 +111,37 @@ public class KmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(date, element.getGroupQualifiedElementName() + ordinalValue, row);
+    generateTemporalElement(date, JRTemporal::date, element, ordinalValue, row);
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(date, element.getGroupQualifiedElementName() + ordinalValue, row);
+    generateTemporalElement(date, JRTemporal::dateTime, element, ordinalValue, row);
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    if (date != null) {
-      GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-      g.setTime(date);
-      generateDataElement(String.format(FormatConsts.TIME_FORMAT_STRING,
-          g.get(Calendar.HOUR_OF_DAY),
-          g.get(Calendar.MINUTE),
-          g.get(Calendar.SECOND)), element.getGroupQualifiedElementName() + ordinalValue, row);
-    } else {
-      generateDataElement(null, element.getGroupQualifiedElementName() + ordinalValue, row);
-    }
+    generateTemporalElement(date, JRTemporal::time, element, ordinalValue, row);
   }
 
   @Override
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     generateDataElement(dub, element.getGroupQualifiedElementName() + ordinalValue, row);
+  }
+
+  @Override
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    generateTemporalElement(value, element, ordinalValue, row);
+  }
+
+  @Override
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    generateTemporalElement(value, element, ordinalValue, row);
+  }
+
+  @Override
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    generateTemporalElement(value, element, ordinalValue, row);
   }
 
   @Override
@@ -163,6 +170,22 @@ public class KmlElementFormatter implements ElementFormatter {
   @Override
   public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
     generateDataElement(string, element.getGroupQualifiedElementName() + ordinalValue, row);
+  }
+
+  private void generateTemporalElement(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    generateTemporalElement(Optional.ofNullable(value), element, ordinalValue, row);
+  }
+
+  private void generateTemporalElement(Date value, Function<Date, JRTemporal> mapper, FormElementModel element, String ordinalValue, Row row) {
+    generateTemporalElement(Optional.ofNullable(value).map(mapper), element, ordinalValue, row);
+  }
+
+  private void generateTemporalElement(Optional<JRTemporal> value, FormElementModel element, String ordinalValue, Row row) {
+    generateDataElement(
+        value.map(JRTemporal::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   private void generateDataElement(Object value, String name, Row row) {

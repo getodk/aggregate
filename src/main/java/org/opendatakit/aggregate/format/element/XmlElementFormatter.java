@@ -15,8 +15,11 @@
  */
 package org.opendatakit.aggregate.format.element;
 
+
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -25,9 +28,9 @@ import org.opendatakit.aggregate.format.structure.XmlFormatter;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -100,23 +103,37 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(WebUtils.asSubmissionDateOnlyString(date), element.getElementName(), row);
+    addToXmlTemporal(date, JRTemporal::date, element, row);
   }
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(WebUtils.asSubmissionDateTimeString(date), element.getElementName(), row);
+    addToXmlTemporal(date, JRTemporal::dateTime, element, row);
   }
 
   @Override
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlValueToRow(WebUtils.asSubmissionTimeOnlyString(date), element.getElementName(), row);
+    addToXmlTemporal(date, JRTemporal::time, element, row);
   }
 
   @Override
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
     addToXmlValueToRow(dub, element.getElementName(), row);
+  }
 
+  @Override
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    addToXmlTemporal(value, element, row);
+  }
+
+  @Override
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    addToXmlTemporal(value, element, row);
+  }
+
+  @Override
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    addToXmlTemporal(value, element, row);
   }
 
   @Override
@@ -148,6 +165,19 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
+  }
+
+  private void addToXmlTemporal(Date value, Function<Date, JRTemporal> mapper, FormElementModel element, Row row) {
+    Optional<JRTemporal> jrTemporal = Optional.ofNullable(value).map(mapper);
+    addToXmlMapper(jrTemporal, element, row);
+  }
+
+  private void addToXmlTemporal(JRTemporal value, FormElementModel element, Row row) {
+    addToXmlMapper(Optional.ofNullable(value), element, row);
+  }
+
+  private void addToXmlMapper(Optional<JRTemporal> value, FormElementModel element, Row row) {
+    addToXmlValueToRow(value.map(JRTemporal::getRaw).orElse(null), element.getElementName(), row);
   }
 
   @Override

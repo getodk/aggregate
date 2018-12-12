@@ -22,6 +22,7 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -46,6 +47,12 @@ public interface ElementFormatter {
   public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row);
 
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row);
+
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row);
+
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row);
+
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row);
 
   public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row);
 

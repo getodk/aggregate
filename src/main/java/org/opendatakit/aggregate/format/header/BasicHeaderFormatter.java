@@ -100,5 +100,26 @@ public class BasicHeaderFormatter extends AbstractHeaderFormatter implements Hea
     }
   }
 
+  @Override
+  protected void processJRDate(FormElementModel node, String nodeName) {
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    headers.add(nodeName);
+    types.add(ElementType.STRING);
+  }
+
+  @Override
+  protected void processJRTime(FormElementModel node, String nodeName) {
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    headers.add(nodeName);
+    types.add(ElementType.STRING);
+  }
+
+  @Override
+  protected void processJRDateTime(FormElementModel node, String nodeName) {
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    headers.add(nodeName);
+    types.add(ElementType.STRING);
+  }
+
 
 }

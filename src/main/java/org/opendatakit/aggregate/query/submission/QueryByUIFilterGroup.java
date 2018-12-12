@@ -143,13 +143,16 @@ public class QueryByUIFilterGroup extends QueryBase {
             break;
           case JRDATETIME:
             compareValue = WebUtils.parseDate(value);
-            break;
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            continue;
           case JRDATE:
             compareValue = WebUtils.parseDate(value);
-            break;
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            continue;
           case JRTIME:
             compareValue = WebUtils.parseDate(value);
-            break;
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            continue;
           case INTEGER:
             compareValue = Long.valueOf(value);
             break;
@@ -162,7 +165,7 @@ public class QueryByUIFilterGroup extends QueryBase {
             break;
           case GEOPOINT:
             compareValue = new BigDecimal(value);
-            super.addFilterGeoPoint(fem, column.getGeopointColumnCode(), op, compareValue);
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
             continue;
           default:
             // e.g., SELECTN

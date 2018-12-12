@@ -67,7 +67,7 @@ public class OhmageJsonServer extends AbstractExternalService implements Externa
   private final OhmageJsonServer2ParameterTable objectEntity;
 
   private OhmageJsonServer(OhmageJsonServer2ParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) {
-    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
+    super(form, formServiceCursor, new BasicElementFormatter(true, true, true),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }

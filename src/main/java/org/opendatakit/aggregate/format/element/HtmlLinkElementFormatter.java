@@ -58,7 +58,7 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter {
 
   public HtmlLinkElementFormatter(String webServerUrl, boolean separateGpsCoordinates,
                                   boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean binariesAsDownloadLink) {
-    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, false);
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
     baseWebServerUrl = webServerUrl;
     this.binariesAsDownloadLink = binariesAsDownloadLink;
   }

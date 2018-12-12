@@ -46,7 +46,7 @@ public final class ColumnListBox extends AggregateListBox {
         for (Column column : headers) {
           if (colname.equals(column.getDisplayHeader())
               && colencode.equals(column.getColumnEncoding())) {
-            colgpsIndex = column.getGeopointColumnCode();
+            colgpsIndex = column.getChildColumnCode();
             break;
           }
         }

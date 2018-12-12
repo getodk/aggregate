@@ -345,7 +345,7 @@ public final class VisualizationPopup extends AbstractPopupBase {
     Long columnNum = columnCode.longValue();
     for (Column col : headers) {
       if (col.getColumnEncoding().equals(columnElementKey)
-          && col.getGeopointColumnCode().equals(columnNum)) {
+          && col.getChildColumnCode().equals(columnNum)) {
         return index;
       }
       index++;

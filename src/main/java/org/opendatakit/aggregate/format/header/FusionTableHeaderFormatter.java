@@ -79,5 +79,25 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
     types.add(ElementType.DECIMAL);
   }
 
+  @Override
+  protected void processJRDate(FormElementModel node, String nodeName) {
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    headers.add(nodeName);
+    types.add(ElementType.STRING);
+  }
+
+  @Override
+  protected void processJRTime(FormElementModel node, String nodeName) {
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    headers.add(nodeName);
+    types.add(ElementType.STRING);
+  }
+
+  @Override
+  protected void processJRDateTime(FormElementModel node, String nodeName) {
+    if ((propertyNames != null) && !propertyNames.contains(node)) return;
+    headers.add(nodeName);
+    types.add(ElementType.STRING);
+  }
 
 }

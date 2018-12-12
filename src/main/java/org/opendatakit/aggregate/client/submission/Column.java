@@ -32,7 +32,7 @@ public class Column implements Serializable {
 
   private String displayHeader;
   private String columnEncoding;
-  private Long geopointColumnCode;
+  private Long childColumnCode;
   private UIDisplayType uiDisplayType;
 
   public Column() {
@@ -51,16 +51,16 @@ public class Column implements Serializable {
     this(UIConsts.URI_DEFAULT, displayHeader, columnName, displayType);
   }
 
-  public Column(String uri, String displayHeader, String columnName, Long geopointColumnCode) {
+  public Column(String uri, String displayHeader, String columnName, Long childColumnCode) {
     this.uri = uri;
     this.displayHeader = displayHeader;
     this.columnEncoding = columnName;
-    this.geopointColumnCode = geopointColumnCode;
+    this.childColumnCode = childColumnCode;
     this.uiDisplayType = UIDisplayType.TEXT;
   }
 
-  public Column(String displayHeader, String columnName, Long geopointColumnCode) {
-    this(UIConsts.URI_DEFAULT, displayHeader, columnName, geopointColumnCode);
+  public Column(String displayHeader, String columnName, Long childColumnCode) {
+    this(UIConsts.URI_DEFAULT, displayHeader, columnName, childColumnCode);
   }
 
   /**
@@ -83,8 +83,8 @@ public class Column implements Serializable {
     return columnEncoding;
   }
 
-  public Long getGeopointColumnCode() {
-    return geopointColumnCode;
+  public Long getChildColumnCode() {
+    return childColumnCode;
   }
 
   public UIDisplayType getUiDisplayType() {
@@ -106,8 +106,8 @@ public class Column implements Serializable {
         .equals(other.displayHeader)))
         && (columnEncoding == null ? (other.columnEncoding == null) : (columnEncoding
         .equals(other.columnEncoding)))
-        && (geopointColumnCode == null ? (other.geopointColumnCode == null) : (geopointColumnCode
-        .equals(other.geopointColumnCode)))
+        && (childColumnCode == null ? (other.childColumnCode == null) : (childColumnCode
+        .equals(other.childColumnCode)))
         && (uiDisplayType == null ? (other.uiDisplayType == null) : (uiDisplayType
         .equals(other.uiDisplayType)));
   }
@@ -124,8 +124,8 @@ public class Column implements Serializable {
       hashCode += displayHeader.hashCode();
     if (columnEncoding != null)
       hashCode += columnEncoding.hashCode();
-    if (geopointColumnCode != null)
-      hashCode += geopointColumnCode.hashCode();
+    if (childColumnCode != null)
+      hashCode += childColumnCode.hashCode();
     if (uiDisplayType != null)
       hashCode += uiDisplayType.hashCode();
     return hashCode;

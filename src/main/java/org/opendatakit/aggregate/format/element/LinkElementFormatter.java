@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +16,12 @@
  */
 package org.opendatakit.aggregate.format.element;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -27,32 +31,17 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-/**
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class LinkElementFormatter extends BasicElementFormatter {
   private final String baseWebServerUrl;
   private final String repeatServlet;
 
-
-  /**
-   * Construct a Html Link Element Formatter
-   *
-   * @param baseWebServerUrl       base url for the web app (e.g., http://localhost:8080/ODKAggregatePlatform)
-   * @param repeatServlet          name of the repeat servlet for repeat data.
-   * @param separateGpsCoordinates separate the GPS coordinates of latitude and longitude into
-   *                               columns
-   * @param includeGpsAltitude     include GPS altitude data
-   * @param includeGpsAccuracy     include GPS accuracy data
-   */
-  public LinkElementFormatter(String baseWebServerUrl, String repeatServlet,
-                              boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean googleDocsDate) {
-    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy, googleDocsDate);
+  public LinkElementFormatter(String baseWebServerUrl, String repeatServlet, boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy, boolean googleDocsDate) {
+    super(separateGpsCoordinates, includeGpsAltitude, includeGpsAccuracy);
     this.baseWebServerUrl = baseWebServerUrl;
     this.repeatServlet = repeatServlet;
   }
@@ -79,6 +68,36 @@ public class LinkElementFormatter extends BasicElementFormatter {
   }
 
   @Override
+  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
+    temporalConversion(date, JRTemporal::time, row);
+  }
+
+  @Override
+  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
+    temporalConversion(date, JRTemporal::date, row);
+  }
+
+  @Override
+  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
+    temporalConversion(date, JRTemporal::dateTime, row);
+  }
+
+  @Override
+  public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    temporalConversion(value, row);
+  }
+
+  @Override
+  public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    temporalConversion(value, row);
+  }
+
+  @Override
+  public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
+    temporalConversion(value, row);
+  }
+
+  @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
     if (repeat == null) {
       row.addFormattedValue(null);
@@ -93,5 +112,17 @@ public class LinkElementFormatter extends BasicElementFormatter {
 
     addFormattedLink(repeat.constructSubmissionKey(), repeatServlet,
         ServletConsts.FORM_ID, row);
+  }
+
+  private void temporalConversion(Date value, Function<Date, JRTemporal> mapper, Row row) {
+    temporalConversion(Optional.ofNullable(value).map(mapper), row);
+  }
+
+  private void temporalConversion(JRTemporal value, Row row) {
+    temporalConversion(Optional.ofNullable(value), row);
+  }
+
+  private void temporalConversion(Optional<JRTemporal> value, Row row) {
+    basicStringConversion(value.map(JRTemporal::getRaw).orElse(null), row);
   }
 }

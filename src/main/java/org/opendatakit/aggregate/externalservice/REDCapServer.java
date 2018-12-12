@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +60,7 @@ import org.opendatakit.aggregate.submission.type.LongSubmissionType;
 import org.opendatakit.aggregate.submission.type.StringSubmissionType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateTimeType;
 import org.opendatakit.aggregate.submission.type.jr.JRDateType;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.aggregate.submission.type.jr.JRTimeType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -87,7 +87,7 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
 
   private REDCapServer(REDCapServerParameterTable entity, FormServiceCursor formServiceCursor,
                        IForm form, CallingContext cc) {
-    super(form, formServiceCursor, new BasicElementFormatter(true, true, true, false),
+    super(form, formServiceCursor, new BasicElementFormatter(true, true, true),
         new BasicHeaderFormatter(true, true, true), cc);
     objectEntity = entity;
   }
@@ -279,12 +279,13 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             break;
 
             case JRDATETIME: {
+              // TODO review this use of the JRTemporal subclass
               JRDateTimeType dt = (JRDateTimeType) value;
-              Date dtValue = dt.getValue();
+              JRTemporal dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-                g.setTime(dtValue);
+                g.setTime(dtValue.getParsed());
 
                 String strValue = String.format(FormatConsts.REDCAP_DATE_TIME_FORMAT_STRING,
                     g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH),
@@ -299,12 +300,13 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             break;
 
             case JRDATE: {
+              // TODO review this use of the JRTemporal subclass
               JRDateType dt = (JRDateType) value;
-              Date dtValue = dt.getValue();
+              JRTemporal dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-                g.setTime(dtValue);
+                g.setTime(dtValue.getParsed());
 
                 String strValue = String.format(FormatConsts.REDCAP_DATE_ONLY_FORMAT_STRING,
                     g.get(Calendar.YEAR), g.get(Calendar.MONTH) + 1, g.get(Calendar.DAY_OF_MONTH));
@@ -317,12 +319,13 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
             break;
 
             case JRTIME: {
+              // TODO review this use of the JRTemporal subclass
               JRTimeType dt = (JRTimeType) value;
-              Date dtValue = dt.getValue();
+              JRTemporal dtValue = dt.getValue();
 
               if (dtValue != null) {
                 GregorianCalendar g = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-                g.setTime(dtValue);
+                g.setTime(dtValue.getParsed());
 
                 String strValue = String.format(FormatConsts.REDCAP_TIME_FORMAT_STRING,
                     g.get(Calendar.HOUR_OF_DAY), g.get(Calendar.MINUTE));
